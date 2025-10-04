@@ -1,0 +1,179 @@
+version: '3.8'
+
+services:
+  # Backend API
+  backend:
+    image: samplemind/backend:latest
+    container_name: samplemind-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URL=${MONGODB_URL}
+      - REDIS_URL=${REDIS_URL}
+      - SECRET_KEY=${SECRET_KEY}
+      - GOOGLE_AI_API_KEY=${GOOGLE_AI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - CELERY_BROKER_URL=${REDIS_URL}
+      - CELERY_RESULT_BACKEND=${REDIS_URL}
+      - ENVIRONMENT=production
+    volumes:
+      - backend-data:/app/data
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - samplemind-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Celery Worker
+  celery-worker:
+    image: samplemind/backend:latest
+    container_name: samplemind-worker
+    restart: unless-stopped
+    command: celery -A src.samplemind.core.tasks.celery_app worker -l info -c 4
+    environment:
+      - MONGODB_URL=${MONGODB_URL}
+      - REDIS_URL=${REDIS_URL}
+      - CELERY_BROKER_URL=${REDIS_URL}
+      - CELERY_RESULT_BACKEND=${REDIS_URL}
+      - GOOGLE_AI_API_KEY=${GOOGLE_AI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - backend-data:/app/data
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - samplemind-network
+
+  # Celery Beat (Scheduler)
+  celery-beat:
+    image: samplemind/backend:latest
+    container_name: samplemind-beat
+    restart: unless-stopped
+    command: celery -A src.samplemind.core.tasks.celery_app beat -l info
+    environment:
+      - REDIS_URL=${REDIS_URL}
+      - CELERY_BROKER_URL=${REDIS_URL}
+    depends_on:
+      - redis
+    networks:
+      - samplemind-network
+
+  # Flower (Celery Monitoring)
+  flower:
+    image: samplemind/backend:latest
+    container_name: samplemind-flower
+    restart: unless-stopped
+    command: celery -A src.samplemind.core.tasks.celery_app flower --port=5555
+    ports:
+      - "5555:5555"
+    environment:
+      - CELERY_BROKER_URL=${REDIS_URL}
+      - CELERY_RESULT_BACKEND=${REDIS_URL}
+    depends_on:
+      - redis
+    networks:
+      - samplemind-network
+
+  # Frontend
+  frontend:
+    image: samplemind/frontend:latest
+    container_name: samplemind-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=${API_URL}
+      - NODE_ENV=production
+    depends_on:
+      - backend
+    networks:
+      - samplemind-network
+
+  # MongoDB
+  mongodb:
+    image: mongo:7.0
+    container_name: samplemind-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-config:/data/configdb
+    networks:
+      - samplemind-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand({ping: 1})"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis
+  redis:
+    image: redis:7.2-alpine
+    container_name: samplemind-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    networks:
+      - samplemind-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ChromaDB
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: samplemind-chromadb
+    restart: unless-stopped
+    ports:
+      - "8002:8000"
+    volumes:
+      - chroma-data:/chroma/chroma
+    environment:
+      - CHROMA_SERVER_AUTH_CREDENTIALS=${CHROMA_AUTH_TOKEN}
+    networks:
+      - samplemind-network
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: samplemind-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - samplemind-network
+
+volumes:
+  backend-data:
+  mongodb-data:
+  mongodb-config:
+  redis-data:
+  chroma-data:
+
+networks:
+  samplemind-network:
+    driver: bridge

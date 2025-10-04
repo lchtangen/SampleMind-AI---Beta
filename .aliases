@@ -1,0 +1,365 @@
+#!/bin/zsh
+# SampleMind AI v6 - Project Aliases
+# Source this file: source ~/.aliases or add to ~/.zshrc
+# Updated: Phase 5 - File Management Control Center Integration
+
+# ============================================
+# CONTROL CENTER (NEW)
+# ============================================
+
+# Main control panel - Visual dashboard for everything!
+alias smc='/home/lchta/Projects/samplemind-ai-v6/sm-control.sh'
+alias sm-control='/home/lchta/Projects/samplemind-ai-v6/sm-control.sh'
+alias control='/home/lchta/Projects/samplemind-ai-v6/sm-control.sh'
+
+# ============================================
+# PROJECT NAVIGATION
+# ============================================
+
+# Quick navigation to project directories
+alias sm='cd /home/lchta/Projects/samplemind-ai-v6'
+alias smb='cd /home/lchta/Projects/samplemind-ai-v6/src/samplemind'
+alias smf='cd /home/lchta/Projects/samplemind-ai-v6/frontend/web'
+alias smapi='cd /home/lchta/Projects/samplemind-ai-v6/src/samplemind/interfaces/api'
+alias smcore='cd /home/lchta/Projects/samplemind-ai-v6/src/samplemind/core'
+alias smdocs='cd /home/lchta/Projects/samplemind-ai-v6 && ls *.md'
+alias sm-root='cd /home/lchta/Projects/samplemind-ai-v6'
+alias sm-tests='cd /home/lchta/Projects/samplemind-ai-v6/tests'
+alias sm-scripts='cd /home/lchta/Projects/samplemind-ai-v6/scripts'
+
+# ============================================
+# BACKEND MANAGEMENT
+# ============================================
+
+# Backend services
+alias sm-api='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && python -m uvicorn src.samplemind.interfaces.api.main:app --reload'
+alias sm-api-prod='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && python -m uvicorn src.samplemind.interfaces.api.main:app --host 0.0.0.0 --port 8000'
+alias sm-worker='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && celery -A src.samplemind.core.tasks worker --loglevel=info'
+alias sm-beat='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && celery -A src.samplemind.core.tasks beat --loglevel=info'
+alias sm-flower='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && celery -A src.samplemind.core.tasks flower'
+
+# Backend shortcuts
+alias sm-backend='cd /home/lchta/Projects/samplemind-ai-v6 && docker-compose up -d && sm-api &'
+alias sm-stop='cd /home/lchta/Projects/samplemind-ai-v6 && pkill -f uvicorn && pkill -f celery'
+
+# Python environment
+alias sm-venv='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate'
+alias sm-python='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && python'
+alias sm-pip='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && pip'
+
+# ============================================
+# FRONTEND MANAGEMENT
+# ============================================
+
+# Frontend commands
+alias sm-web='cd /home/lchta/Projects/samplemind-ai-v6/frontend/web && npm run dev'
+alias sm-build='cd /home/lchta/Projects/samplemind-ai-v6/frontend/web && npm run build'
+alias sm-lint='cd /home/lchta/Projects/samplemind-ai-v6/frontend/web && npm run lint'
+
+# Frontend shortcuts
+alias sm-npm='cd /home/lchta/Projects/samplemind-ai-v6/frontend/web && npm'
+alias sm-install='cd /home/lchta/Projects/samplemind-ai-v6/frontend/web && npm install'
+
+# ============================================
+# DATABASE MANAGEMENT
+# ============================================
+
+# Docker services (Enhanced)
+alias sm-db-up='cd /home/lchta/Projects/samplemind-ai-v6 && docker-compose up -d'
+alias sm-db-down='cd /home/lchta/Projects/samplemind-ai-v6 && docker-compose down'
+alias sm-db-restart='cd /home/lchta/Projects/samplemind-ai-v6 && docker-compose restart'
+alias sm-db-status='cd /home/lchta/Projects/samplemind-ai-v6 && docker-compose ps'
+alias sm-db-logs='cd /home/lchta/Projects/samplemind-ai-v6 && docker-compose logs -f'
+alias sm-services='cd /home/lchta/Projects/samplemind-ai-v6 && docker-compose ps'
+alias sm-start-all='cd /home/lchta/Projects/samplemind-ai-v6 && docker-compose up -d'
+alias sm-stop-all='cd /home/lchta/Projects/samplemind-ai-v6 && docker-compose down'
+alias sm-restart-all='cd /home/lchta/Projects/samplemind-ai-v6 && docker-compose restart'
+
+# Individual database services
+alias sm-mongo='docker exec -it samplemind-mongodb mongosh samplemind'
+alias sm-mongo-shell='docker exec -it samplemind-mongodb mongosh samplemind'
+alias sm-redis='docker exec -it samplemind-redis redis-cli'
+alias sm-redis-cli='docker exec -it samplemind-redis redis-cli'
+alias sm-mongo-logs='docker logs -f samplemind-mongodb'
+alias sm-redis-logs='docker logs -f samplemind-redis'
+alias sm-chromadb-logs='docker logs -f samplemind-chromadb'
+
+# Database backups (NEW)
+alias sm-backup-mongo='docker exec samplemind-mongodb mongodump --db=samplemind --out=/tmp/backup_$(date +%Y%m%d_%H%M%S)'
+alias sm-backup-redis='docker exec samplemind-redis redis-cli SAVE && docker cp samplemind-redis:/data/dump.rdb /home/lchta/Projects/samplemind-ai-v6/backups/redis_$(date +%Y%m%d_%H%M%S).rdb'
+
+# ============================================
+# TESTING & QUALITY
+# ============================================
+
+# Testing (Enhanced)
+alias sm-test='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && pytest tests/ -v'
+alias sm-test-unit='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && pytest tests/unit/ -v'
+alias sm-test-integration='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && pytest tests/integration/ -v'
+alias sm-test-e2e='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && pytest tests/e2e/ -v'
+alias sm-test-quick='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && pytest tests/unit/ -x -q'
+alias sm-test-cov='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && pytest tests/ --cov=src'
+alias sm-coverage='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && pytest --cov=src --cov-report=html tests/'
+alias sm-coverage-report='cd /home/lchta/Projects/samplemind-ai-v6 && xdg-open htmlcov/index.html 2>/dev/null || open htmlcov/index.html 2>/dev/null'
+
+# Code quality (Enhanced)
+alias sm-format='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && black src/ tests/ && isort src/ tests/'
+alias sm-lint='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && ruff check src/ tests/'
+alias sm-lint-fix='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && ruff check --fix src/ tests/'
+alias sm-types='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && mypy src/'
+alias sm-check='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && mypy src/'
+alias sm-security='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && bandit -r src/'
+alias sm-safety='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && safety check'
+
+# ============================================
+# MONITORING & LOGS
+# ============================================
+
+# View logs
+alias sm-logs='cd /home/lchta/Projects/samplemind-ai-v6 && tail -f logs/*.log 2>/dev/null || echo "No logs found"'
+alias sm-api-logs='cd /home/lchta/Projects/samplemind-ai-v6 && tail -f logs/api.log 2>/dev/null || echo "API not running"'
+alias sm-worker-logs='cd /home/lchta/Projects/samplemind-ai-v6 && tail -f logs/celery.log 2>/dev/null || echo "Worker not running"'
+
+# Process monitoring
+alias sm-ps='ps aux | grep -E "(uvicorn|celery|flower)" | grep -v grep'
+alias sm-ports='lsof -i :3000,8000,5555,27017,6379,8002 2>/dev/null'
+
+# ============================================
+# DOCUMENTATION & INFO
+# ============================================
+
+# View docs (Enhanced)
+alias sm-readme='cd /home/lchta/Projects/samplemind-ai-v6 && less README.md'
+alias sm-status='cd /home/lchta/Projects/samplemind-ai-v6 && cat CURRENT_STATUS.md | head -50'
+alias sm-docs-list='cd /home/lchta/Projects/samplemind-ai-v6 && ls -lh *.md'
+alias sm-doc-quick='less /home/lchta/Projects/samplemind-ai-v6/QUICK_REFERENCE.md'
+alias sm-doc-arch='less /home/lchta/Projects/samplemind-ai-v6/ARCHITECTURE.md'
+alias sm-doc-db='less /home/lchta/Projects/samplemind-ai-v6/DATABASE_SCHEMA.md'
+alias sm-doc-dev='less /home/lchta/Projects/samplemind-ai-v6/DEVELOPMENT.md'
+alias sm-doc-security='less /home/lchta/Projects/samplemind-ai-v6/SECURITY.md'
+alias sm-doc-perf='less /home/lchta/Projects/samplemind-ai-v6/PERFORMANCE.md'
+alias sm-doc-visual='less /home/lchta/Projects/samplemind-ai-v6/VISUAL_PROJECT_OVERVIEW.md'
+
+# Project info
+alias sm-info='cd /home/lchta/Projects/samplemind-ai-v6 && echo "=== SampleMind AI v6 ===" && echo "Backend: http://localhost:8000" && echo "Frontend: http://localhost:3000" && echo "API Docs: http://localhost:8000/api/docs" && echo "Flower: http://localhost:5555" && echo "" && sm-ps'
+
+# ============================================
+# DEVELOPMENT WORKFLOWS
+# ============================================
+
+# Start everything (Enhanced)
+alias sm-start='echo "Starting SampleMind AI..." && sm-db-up && sleep 3 && sm-api & sleep 2 && sm-worker & sleep 2 && sm-web'
+alias sm-dev='cd /home/lchta/Projects/samplemind-ai-v6 && docker-compose up -d && sleep 3 && source .venv/bin/activate && python -m uvicorn src.samplemind.interfaces.api.main:app --reload &'
+alias sm-dev-stop='cd /home/lchta/Projects/samplemind-ai-v6 && docker-compose down && pkill -f uvicorn'
+
+# Full restart
+alias sm-restart='sm-stop && sleep 2 && sm-db-restart && sleep 3 && sm-start'
+
+# Cleanup (Enhanced)
+alias sm-clean='cd /home/lchta/Projects/samplemind-ai-v6 && find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null; find . -type f -name "*.pyc" -delete 2>/dev/null; find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null; rm -rf data/cache/* frontend/web/.next; echo "✓ Cleaned cache and build files"'
+alias sm-clean-all='cd /home/lchta/Projects/samplemind-ai-v6 && rm -rf build/ dist/ *.egg-info .pytest_cache .coverage htmlcov/ .mypy_cache .ruff_cache && find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null; echo "✓ Cleaned all build artifacts"'
+alias sm-clean-logs='rm -rf /home/lchta/Projects/samplemind-ai-v6/logs/*.log && echo "✓ Cleaned logs"'
+
+# Environment check (NEW)
+alias sm-check-env='cd /home/lchta/Projects/samplemind-ai-v6 && source .venv/bin/activate && python scripts/verify_setup.py'
+alias sm-health='curl -s http://localhost:8000/health | python -m json.tool'
+
+# ============================================
+# API TESTING
+# ============================================
+
+# Health checks (Enhanced)
+alias sm-health-api='curl -s http://localhost:8000/health | python -m json.tool'
+alias sm-api-check='curl -s http://localhost:8000/health && echo ""'
+alias sm-resources='docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}"'
+alias sm-disk='du -sh /home/lchta/Projects/samplemind-ai-v6/data/* /home/lchta/Projects/samplemind-ai-v6/logs/* 2>/dev/null'
+
+# API endpoints
+alias sm-api-docs='open http://localhost:8000/api/docs 2>/dev/null || xdg-open http://localhost:8000/api/docs 2>/dev/null || echo "Open http://localhost:8000/api/docs in browser"'
+alias sm-flower-ui='open http://localhost:5555 2>/dev/null || xdg-open http://localhost:5555 2>/dev/null || echo "Open http://localhost:5555 in browser"'
+alias sm-frontend-ui='open http://localhost:3000 2>/dev/null || xdg-open http://localhost:3000 2>/dev/null || echo "Open http://localhost:3000 in browser"'
+
+# ============================================
+# GIT HELPERS
+# ============================================
+
+# Git shortcuts for this project
+alias sm-git='cd /home/lchta/Projects/samplemind-ai-v6 && git'
+alias sm-status-git='cd /home/lchta/Projects/samplemind-ai-v6 && git status'
+alias sm-diff='cd /home/lchta/Projects/samplemind-ai-v6 && git diff'
+alias sm-log='cd /home/lchta/Projects/samplemind-ai-v6 && git log --oneline -10'
+alias sm-commit='cd /home/lchta/Projects/samplemind-ai-v6 && git add . && git commit -m'
+alias sm-push='cd /home/lchta/Projects/samplemind-ai-v6 && git push'
+
+# ============================================
+# FILE MANAGEMENT
+# ============================================
+
+# List important files
+alias sm-ls='cd /home/lchta/Projects/samplemind-ai-v6 && ls -lah'
+alias sm-tree='cd /home/lchta/Projects/samplemind-ai-v6 && tree -L 2 -I "node_modules|.venv|__pycache__|.next"'
+alias sm-size='cd /home/lchta/Projects/samplemind-ai-v6 && du -sh * | sort -h'
+
+# Edit common files
+alias sm-env='cd /home/lchta/Projects/samplemind-ai-v6 && ${EDITOR:-nano} .env'
+alias sm-docker='cd /home/lchta/Projects/samplemind-ai-v6 && ${EDITOR:-nano} docker-compose.yml'
+alias sm-config='cd /home/lchta/Projects/samplemind-ai-v6/src/samplemind/interfaces/api && ${EDITOR:-nano} config.py'
+
+# ============================================
+# TMUX SESSIONS (Advanced)
+# ============================================
+
+# Tmux session management
+alias sm-tmux='tmux new-session -s samplemind -d "cd /home/lchta/Projects/samplemind-ai-v6 && ./start_api.sh" \; split-window -h "cd /home/lchta/Projects/samplemind-ai-v6 && ./start_celery_worker.sh" \; split-window -v "cd /home/lchta/Projects/samplemind-ai-v6/frontend/web && npm run dev" \; attach'
+alias sm-tmux-kill='tmux kill-session -t samplemind 2>/dev/null || echo "No tmux session found"'
+
+# ============================================
+# UTILITY FUNCTIONS
+# ============================================
+
+# Create backup
+sm-backup() {
+    local backup_dir="$HOME/backups/samplemind-$(date +%Y%m%d-%H%M%S)"
+    mkdir -p "$backup_dir"
+    cd /home/lchta/Projects/samplemind-ai-v6
+    tar -czf "$backup_dir/samplemind-backup.tar.gz" \
+        --exclude='.venv' \
+        --exclude='node_modules' \
+        --exclude='.next' \
+        --exclude='__pycache__' \
+        --exclude='data' \
+        .
+    echo "Backup created: $backup_dir/samplemind-backup.tar.gz"
+}
+
+# Search in project
+sm-search() {
+    if [ -z "$1" ]; then
+        echo "Usage: sm-search <search-term>"
+        return 1
+    fi
+    cd /home/lchta/Projects/samplemind-ai-v6
+    grep -r "$1" --exclude-dir={.venv,node_modules,.next,__pycache__,.git} .
+}
+
+# Show all aliases (Enhanced)
+sm-help() {
+    echo "╔════════════════════════════════════════════════════════════╗"
+    echo "║        SampleMind AI v6 - Command Reference               ║"
+    echo "╚════════════════════════════════════════════════════════════╝"
+    echo ""
+    echo "🎛️  CONTROL CENTER:"
+    echo "  smc / sm-control  - Open visual dashboard (RECOMMENDED!)"
+    echo "  control           - Same as above"
+    echo ""
+    echo "📂 NAVIGATION:"
+    echo "  sm          - Go to project root"
+    echo "  smb         - Go to backend source"
+    echo "  smf         - Go to frontend"
+    echo "  smapi       - Go to API code"
+    echo "  smcore      - Go to core backend"
+    echo "  sm-tests    - Go to tests directory"
+    echo "  sm-docs     - Go to docs and list"
+    echo ""
+    echo "🚀 SERVICES:"
+    echo "  sm-api           - Start API server (dev mode)"
+    echo "  sm-api-prod      - Start API server (production)"
+    echo "  sm-worker        - Start Celery worker"
+    echo "  sm-web           - Start frontend"
+    echo "  sm-flower        - Start Flower monitoring"
+    echo "  sm-start-all     - Start all Docker services"
+    echo "  sm-stop-all      - Stop all Docker services"
+    echo "  sm-dev           - Quick dev environment start"
+    echo "  sm-dev-stop      - Quick dev environment stop"
+    echo ""
+    echo "💾 DATABASE:"
+    echo "  sm-mongo         - MongoDB shell"
+    echo "  sm-redis         - Redis CLI"
+    echo "  sm-db-up         - Start databases"
+    echo "  sm-db-down       - Stop databases"
+    echo "  sm-backup-mongo  - Backup MongoDB"
+    echo "  sm-backup-redis  - Backup Redis"
+    echo ""
+    echo "🧪 TESTING:"
+    echo "  sm-test          - Run all tests"
+    echo "  sm-test-unit     - Run unit tests only"
+    echo "  sm-test-quick    - Quick unit test run"
+    echo "  sm-coverage      - Run tests with coverage"
+    echo ""
+    echo "🔍 CODE QUALITY:"
+    echo "  sm-format        - Format code (Black + isort)"
+    echo "  sm-lint          - Lint code (Ruff)"
+    echo "  sm-types         - Type check (mypy)"
+    echo "  sm-security      - Security scan (Bandit)"
+    echo ""
+    echo "🔍 MONITORING:"
+    echo "  sm-info          - Show service info"
+    echo "  sm-ps            - Show running processes"
+    echo "  sm-logs          - View all logs"
+    echo "  sm-health-api    - API health check"
+    echo "  sm-resources     - Docker resource usage"
+    echo ""
+    echo "🌐 OPEN IN BROWSER:"
+    echo "  sm-api-docs      - API documentation"
+    echo "  sm-flower-ui     - Flower monitoring"
+    echo "  sm-frontend-ui   - Frontend app"
+    echo ""
+    echo "📚 DOCUMENTATION:"
+    echo "  sm-doc-quick     - Quick reference guide"
+    echo "  sm-doc-arch      - Architecture docs"
+    echo "  sm-doc-visual    - Visual project overview"
+    echo "  sm-readme        - Project README"
+    echo ""
+    echo "🧹 CLEANUP:"
+    echo "  sm-clean         - Clean cache & temp files"
+    echo "  sm-clean-all     - Clean all build artifacts"
+    echo "  sm-clean-logs    - Clean log files"
+    echo ""
+    echo "💡 TIP: Use 'smc' to open the visual Control Center!"
+    echo "    Type 'alias | grep sm-' to see ALL aliases"
+}
+
+# Show quick status on terminal start
+sm-quick-status() {
+    echo "🎵 SampleMind AI v6 - Quick Status"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "📂 Project: /home/lchta/Projects/samplemind-ai-v6"
+    echo ""
+    
+    # Check if services are running
+    if pgrep -f uvicorn > /dev/null; then
+        echo "✅ API running on http://localhost:8000"
+    else
+        echo "⭕ API not running (use: sm-api)"
+    fi
+    
+    if pgrep -f "celery.*worker" > /dev/null; then
+        echo "✅ Celery worker running"
+    else
+        echo "⭕ Celery not running (use: sm-worker)"
+    fi
+    
+    if pgrep -f "next-server" > /dev/null || pgrep -f "next dev" > /dev/null; then
+        echo "✅ Frontend running on http://localhost:3000"
+    else
+        echo "⭕ Frontend not running (use: sm-web)"
+    fi
+    
+    echo ""
+    echo "Type 'sm-help' for available commands"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+}
+
+# Export the quick status function to run on shell start (optional)
+# Uncomment the next line if you want status shown on every terminal open
+# sm-quick-status
+
+echo ""
+echo "╔════════════════════════════════════════════════════════════╗"
+echo "║   ✅ SampleMind AI v6 Aliases Loaded!                     ║"
+echo "╚════════════════════════════════════════════════════════════╝"
+echo ""
+echo "  🎛️  Control Center:  smc"
+echo "  📖  Command Help:     sm-help"
+echo "  ℹ️  Project Info:     sm-info"
+echo ""
