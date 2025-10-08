@@ -217,3 +217,4 @@ celerybeat.pid
 # macOS
 .AppleDouble
 .LSOverride
+docs-site/
