@@ -19,24 +19,28 @@ You now have a fully configured VS Code environment with three AI providers usin
 ### 1. VS Code Settings (`~/.config/Code/User/settings.json`)
 
 ✅ **General Settings**
+
 - Editor formatting and code actions
 - File auto-save and cleanup
 - Python and TypeScript configurations
 - Git integration
 
 ✅ **GitHub Copilot Integration**
+
 - Multi-model support for all three providers
 - Intelligent routing based on task type
 - Tool commands and MCP servers
 - Security restrictions and safeguards
 
 ✅ **KiloCoder Configuration**
+
 - Multi-model selection with fallback chains
 - Custom instructions for SampleMind AI context
 - Capability-based routing rules
 - Command permissions and security
 
 ✅ **AI Provider Configurations**
+
 - API endpoints and authentication
 - Rate limiting and timeout settings
 - Model-specific parameters
@@ -45,15 +49,18 @@ You now have a fully configured VS Code environment with three AI providers usin
 ### 2. MCP Servers (`scripts/mcp-servers/`)
 
 ✅ **Google AI Server** (`google-ai-server.js`)
+
 - Text generation
 - Audio analysis with production insights
 
 ✅ **Anthropic Server** (`anthropic-server.js`)
+
 - Production coaching
 - Music theory analysis
 - Creative suggestions
 
 ✅ **OpenAI Server** (`openai-server.js`)
+
 - Code generation
 - Debugging assistance
 - General queries
@@ -68,6 +75,7 @@ npm install
 ```
 
 This installs:
+
 - `@google/generative-ai` v0.17.0
 - `@anthropic-ai/sdk` v0.27.0
 - `openai` v4.56.0
@@ -97,6 +105,7 @@ OPENAI_API_KEY=your_openai_api_key_here
 ### Step 4: Verify Configuration
 
 Check that MCP servers are running:
+
 1. Open VS Code Output panel (`Ctrl+Shift+U`)
 2. Select "GitHub Copilot" from dropdown
 3. Look for MCP server connection messages
@@ -108,44 +117,56 @@ Check that MCP servers are running:
 The system automatically routes your requests to the best AI provider:
 
 #### Audio Analysis → Gemini
+
 ```
 Analyze the genre and BPM of this audio file
 ```
+
 **Why Gemini?** Fastest inference, optimized for audio analysis
 
 #### Production Coaching → Claude
+
 ```
 Give me mixing tips for my EDM track
 ```
+
 **Why Claude?** Expert music production knowledge, FL Studio specialist
 
 #### Code Help → GPT-4
+
 ```
 Generate a Python function to process audio files
 ```
+
 **Why GPT-4?** Strong coding abilities, general-purpose fallback
 
 ### Using GitHub Copilot Chat
 
 #### Example 1: Audio Analysis
+
 ```
 @workspace I have an audio file at /path/to/audio.wav.
 Can you analyze the genre, BPM, and key?
 ```
+
 → Routed to **Gemini** for fast audio analysis
 
 #### Example 2: Production Advice
+
 ```
 @workspace My kick and bass are clashing.
 How can I fix the low-end in my mix?
 ```
+
 → Routed to **Claude** for expert production coaching
 
 #### Example 3: Code Generation
+
 ```
 @workspace Create a FastAPI endpoint that processes
 uploaded audio files and returns analysis results
 ```
+
 → Routed to **GPT-4** for code generation
 
 ### Using KiloCoder
@@ -164,7 +185,7 @@ You can also specify which model to use:
 ```json
 // In your request, add model preference
 {
-  "model": "gemini-2.5-pro",  // or "claude-sonnet-4.5" or "gpt-5"
+  "model": "gemini-2.5-pro", // or "claude-sonnet-4.5" or "gpt-5"
   "prompt": "Your request here"
 }
 ```
@@ -173,17 +194,17 @@ You can also specify which model to use:
 
 ### Model Capabilities
 
-| Feature | Gemini | Claude | GPT-4 |
-|---------|--------|--------|-------|
-| Audio Analysis | ⭐⭐⭐ | ⭐⭐ | ⭐ |
-| Genre Classification | ⭐⭐⭐ | ⭐⭐ | ⭐⭐ |
-| Production Coaching | ⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
-| Music Theory | ⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
-| Creative Ideas | ⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
-| Code Generation | ⭐⭐ | ⭐⭐ | ⭐⭐⭐ |
-| Debugging | ⭐⭐ | ⭐⭐ | ⭐⭐⭐ |
-| Speed | ⭐⭐⭐ | ⭐⭐ | ⭐⭐ |
-| Context Window | 2M tokens | 200K | 256K |
+| Feature              | Gemini    | Claude | GPT-4  |
+| -------------------- | --------- | ------ | ------ |
+| Audio Analysis       | ⭐⭐⭐    | ⭐⭐   | ⭐     |
+| Genre Classification | ⭐⭐⭐    | ⭐⭐   | ⭐⭐   |
+| Production Coaching  | ⭐⭐      | ⭐⭐⭐ | ⭐⭐   |
+| Music Theory         | ⭐⭐      | ⭐⭐⭐ | ⭐⭐   |
+| Creative Ideas       | ⭐⭐      | ⭐⭐⭐ | ⭐⭐   |
+| Code Generation      | ⭐⭐      | ⭐⭐   | ⭐⭐⭐ |
+| Debugging            | ⭐⭐      | ⭐⭐   | ⭐⭐⭐ |
+| Speed                | ⭐⭐⭐    | ⭐⭐   | ⭐⭐   |
+| Context Window       | 2M tokens | 200K   | 256K   |
 
 ### Routing Rules
 
@@ -206,16 +227,19 @@ Configured in `settings.json`:
 ### Security Features
 
 ✅ **Command Restrictions**
+
 - Dangerous commands blocked (rm -rf, sudo, etc.)
 - Shell injection prevention
 - Command chaining restrictions
 
 ✅ **File Access Controls**
+
 - Workspace-only file access
 - System directories protected
 - Configurable deny lists
 
 ✅ **API Key Security**
+
 - Environment variables (not in config files)
 - Never committed to version control
 - Loaded from .env at runtime
@@ -278,6 +302,7 @@ Enabled by default with 168-hour TTL:
 ### Cost Optimization
 
 Features enabled:
+
 - ✅ Response caching (reduces API calls)
 - ✅ Intelligent routing (uses cheapest suitable model)
 - ✅ Batch processing (groups similar requests)
@@ -285,17 +310,18 @@ Features enabled:
 
 ### Expected Costs
 
-| Provider | Cost/1K Tokens | Best For |
-|----------|----------------|----------|
+| Provider | Cost/1K Tokens | Best For                   |
+| -------- | -------------- | -------------------------- |
 | Gemini   | $0.001-0.002   | High-volume audio analysis |
-| Claude   | $0.003-0.015   | Quality production advice |
-| GPT-4    | $0.01-0.03     | Complex code tasks |
+| Claude   | $0.003-0.015   | Quality production advice  |
+| GPT-4    | $0.01-0.03     | Complex code tasks         |
 
 ## 🐛 Troubleshooting
 
 ### Issue: "MCP Server Not Found"
 
 **Solution:**
+
 ```bash
 cd scripts/mcp-servers
 npm install
@@ -305,6 +331,7 @@ chmod +x *.js
 ### Issue: "API Key Invalid"
 
 **Solution:**
+
 1. Verify keys in `.env` file
 2. Check for extra spaces or newlines
 3. Regenerate keys if expired
@@ -312,6 +339,7 @@ chmod +x *.js
 ### Issue: "Model Not Responding"
 
 **Solution:**
+
 1. Check network connectivity
 2. Verify API quotas not exceeded
 3. Try fallback model explicitly
@@ -319,6 +347,7 @@ chmod +x *.js
 ### Issue: "Slow Response Times"
 
 **Solution:**
+
 1. Increase timeout values
 2. Enable caching if disabled
 3. Use faster model (Gemini) for simple tasks
@@ -333,21 +362,25 @@ chmod +x *.js
 ## 🎓 Best Practices
 
 ### 1. Task-Appropriate Model Selection
+
 - Use Gemini for quick audio classification
 - Use Claude for in-depth production analysis
 - Use GPT-4 for code-heavy tasks
 
 ### 2. Prompt Engineering
+
 - Be specific about what you need
 - Provide context about your project
 - Include relevant file paths when needed
 
 ### 3. Cost Management
+
 - Cache common queries
 - Batch similar requests
 - Monitor API usage regularly
 
 ### 4. Security
+
 - Never commit API keys
 - Review command auto-approvals
 - Limit file access when possible
@@ -363,6 +396,7 @@ chmod +x *.js
 ## 💬 Support
 
 If you encounter issues:
+
 1. Check the [Troubleshooting](#-troubleshooting) section
 2. Review VS Code Output panel for errors
 3. Consult the [MCP Server README](../scripts/mcp-servers/README.md)

@@ -1,9 +1,10 @@
 # 🤖 Devin AI IDE - Setup Guide for SampleMind AI
+
 ## Complete Integration & Synchronization Instructions
 
-**Repository:** samplemind-ai-v2-phoenix  
-**Owner:** lchtangen  
-**Branch:** performance-upgrade-v7  
+**Repository:** samplemind-ai-v2-phoenix
+**Owner:** lchtangen
+**Branch:** performance-upgrade-v7
 **Date:** October 9, 2025
 
 ---
@@ -13,6 +14,7 @@
 ### Step 1: Open Repository in Devin AI
 
 **Option A: Via GitHub URL**
+
 ```
 1. Open Devin AI IDE (https://devin.ai)
 2. Click "New Project" or "Import from GitHub"
@@ -23,6 +25,7 @@
 ```
 
 **Option B: Via Git Clone in Devin**
+
 ```bash
 # In Devin's terminal:
 git clone https://github.com/lchtangen/samplemind-ai-v2-phoenix.git
@@ -160,6 +163,7 @@ docker-compose down
 ```
 
 ### Services Started:
+
 - **Backend API:** http://localhost:8000
 - **MongoDB:** localhost:27017
 - **Redis:** localhost:6379
@@ -307,14 +311,16 @@ Key Files:
 Use these prompts when asking Devin for help:
 
 **For Bug Fixes:**
+
 ```
-"Devin, I'm getting an error in the audio processing module. 
+"Devin, I'm getting an error in the audio processing module.
 File: src/samplemind/core/audio/processor.py
 Error: [paste error here]
 Please analyze and fix while maintaining async/await patterns and type hints."
 ```
 
 **For New Features:**
+
 ```
 "Devin, add a new feature to analyze audio tempo using madmom library.
 Requirements:
@@ -329,6 +335,7 @@ Follow existing code patterns in the codebase."
 ```
 
 **For Refactoring:**
+
 ```
 "Devin, refactor the AI provider integration to use the strategy pattern.
 Current: src/samplemind/ai/providers/
@@ -404,27 +411,32 @@ breakpoint()
 ## 🌟 Best Practices for Working with Devin
 
 ### 1. Clear Communication
+
 - Be specific about file paths
 - Mention exact line numbers if possible
 - Provide error messages in full
 
 ### 2. Incremental Changes
+
 - Ask Devin to make one feature at a time
 - Review changes before asking for more
 - Test after each major change
 
 ### 3. Code Quality
+
 - Ask Devin to follow existing patterns
 - Request type hints for all functions
 - Ensure async/await is used correctly
 - Ask for docstrings and comments
 
 ### 4. Testing
+
 - Always request tests with new features
 - Ask Devin to run tests after changes
 - Review test coverage reports
 
 ### 5. Documentation
+
 - Update docstrings when code changes
 - Keep README.md current
 - Document new API endpoints
@@ -434,12 +446,14 @@ breakpoint()
 ## 🚨 Common Issues & Solutions
 
 ### Issue 1: Import Errors
+
 ```bash
 # Solution: Set PYTHONPATH
 export PYTHONPATH=/workspace/samplemind-ai-v2-phoenix/src:$PYTHONPATH
 ```
 
 ### Issue 2: MongoDB Connection Failed
+
 ```bash
 # Solution: Start MongoDB
 docker-compose up -d mongodb
@@ -448,6 +462,7 @@ sudo systemctl start mongodb
 ```
 
 ### Issue 3: Redis Connection Failed
+
 ```bash
 # Solution: Start Redis
 docker-compose up -d redis
@@ -456,6 +471,7 @@ sudo systemctl start redis
 ```
 
 ### Issue 4: Audio Library Missing
+
 ```bash
 # Solution: Install system dependencies (Ubuntu/Debian)
 sudo apt-get update
@@ -466,6 +482,7 @@ pip install --force-reinstall soundfile librosa
 ```
 
 ### Issue 5: Frontend Port Conflict
+
 ```bash
 # Solution: Change Vite port
 cd web-app/
@@ -477,6 +494,7 @@ npm run dev -- --port 5174
 ## 🎓 Learning Resources
 
 ### For Devin to Reference:
+
 - **FastAPI Docs:** https://fastapi.tiangolo.com
 - **Beanie ODM:** https://beanie-odm.dev
 - **Librosa:** https://librosa.org/doc/latest/
@@ -484,6 +502,7 @@ npm run dev -- --port 5174
 - **Vite:** https://vitejs.dev
 
 ### Project-Specific Docs:
+
 - `docs/ARCHITECTURE.md` - System architecture
 - `docs/DEVELOPMENT.md` - Development guidelines
 - `web-app/SAMPLEMIND_AI_COMPREHENSIVE_RESEARCH.md` - Technology research
@@ -496,6 +515,7 @@ npm run dev -- --port 5174
 After setup in Devin AI, verify:
 
 ### Backend
+
 - [ ] Python 3.11+ installed
 - [ ] Virtual environment created
 - [ ] All dependencies installed
@@ -507,6 +527,7 @@ After setup in Devin AI, verify:
 - [ ] API docs accessible: http://localhost:8000/docs
 
 ### Frontend
+
 - [ ] Node.js 18+ installed
 - [ ] Dependencies installed (`npm install`)
 - [ ] Dev server starts: `npm run dev`
@@ -514,6 +535,7 @@ After setup in Devin AI, verify:
 - [ ] Can access UI: http://localhost:5173
 
 ### Integration
+
 - [ ] Frontend can call backend API
 - [ ] WebSocket connections work
 - [ ] File uploads work
@@ -525,6 +547,7 @@ After setup in Devin AI, verify:
 ## 🚀 Ready to Code!
 
 **You're all set!** Devin AI now has full access to:
+
 - ✅ Complete SampleMind AI codebase
 - ✅ All documentation and guides
 - ✅ Development environment
@@ -532,11 +555,13 @@ After setup in Devin AI, verify:
 - ✅ Deployment configurations
 
 **Next Steps:**
+
 1. Ask Devin to familiarize itself with the codebase
 2. Run the test suite to ensure everything works
 3. Start building features or fixing bugs!
 
 **Example First Task for Devin:**
+
 ```
 "Devin, please:
 1. Review the codebase structure
@@ -550,12 +575,12 @@ After setup in Devin AI, verify:
 
 ## 📞 Support & Resources
 
-**Documentation:** `/docs` directory  
-**Issues:** https://github.com/lchtangen/samplemind-ai-v2-phoenix/issues  
+**Documentation:** `/docs` directory
+**Issues:** https://github.com/lchtangen/samplemind-ai-v2-phoenix/issues
 **Wiki:** https://github.com/lchtangen/samplemind-ai-v2-phoenix/wiki
 
 ---
 
-**Setup Guide Version:** 1.0.0  
-**Last Updated:** October 9, 2025  
+**Setup Guide Version:** 1.0.0
+**Last Updated:** October 9, 2025
 **Maintained by:** SampleMind AI Development Team
