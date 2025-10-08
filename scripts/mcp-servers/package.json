@@ -1,0 +1,35 @@
+{
+  "name": "samplemind-mcp-servers",
+  "version": "1.0.0",
+  "description": "Model Context Protocol servers for SampleMind AI integration with VS Code",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test-servers.js",
+    "start:google": "node google-ai-server.js",
+    "start:anthropic": "node anthropic-server.js",
+    "start:openai": "node openai-server.js",
+    "verify": "node verify-setup.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "vscode",
+    "samplemind"
+  ],
+  "author": "SampleMind AI",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.27.0",
+    "@google/generative-ai": "^0.17.0",
+    "@modelcontextprotocol/sdk": "1.19.1",
+    "openai": "^4.56.0"
+  },
+  "devDependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

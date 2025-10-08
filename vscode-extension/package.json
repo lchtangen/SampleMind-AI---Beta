@@ -1,0 +1,200 @@
+{
+  "name": "samplemind-vscode",
+  "displayName": "SampleMind AI v1.0.0 Phoenix Beta",
+  "description": "AI-powered audio analysis and sample management for VSCode",
+  "version": "1.0.0-phoenix-beta",
+  "publisher": "samplemind-ai",
+  "icon": "media/icon.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Visualization"
+  ],
+  "keywords": [
+    "audio",
+    "music",
+    "samples",
+    "ai",
+    "analysis"
+  ],
+  "activationEvents": [
+    "onView:samplemindExplorer",
+    "onCommand:samplemind.analyzeAudio",
+    "onLanguage:json"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "samplemind.analyzeAudio",
+        "title": "Analyze Audio File",
+        "category": "SampleMind",
+        "icon": "$(waveform)"
+      },
+      {
+        "command": "samplemind.openSampleBrowser",
+        "title": "Open Sample Browser",
+        "category": "SampleMind",
+        "icon": "$(library)"
+      },
+      {
+        "command": "samplemind.generateMusic",
+        "title": "Generate AI Music",
+        "category": "SampleMind",
+        "icon": "$(sparkle)"
+      },
+      {
+        "command": "samplemind.refreshSamples",
+        "title": "Refresh Sample Library",
+        "category": "SampleMind",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "samplemind.openSettings",
+        "title": "Open Settings",
+        "category": "SampleMind",
+        "icon": "$(settings-gear)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "samplemind",
+          "title": "SampleMind AI",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "samplemind": [
+        {
+          "id": "samplemindExplorer",
+          "name": "Sample Library",
+          "icon": "media/icon.svg"
+        },
+        {
+          "id": "samplemindAnalysis",
+          "name": "Analysis Results",
+          "icon": "media/analysis.svg"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "samplemindExplorer",
+        "contents": "No audio samples found.\n[Add Sample Folder](command:samplemind.addSampleFolder)\n[Open Settings](command:samplemind.openSettings)"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "when": "resourceExtname =~ /\\.(mp3|wav|flac|m4a|aac|ogg)$/",
+          "command": "samplemind.analyzeAudio",
+          "group": "samplemind@1"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "samplemind.refreshSamples",
+          "when": "view == samplemindExplorer",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "samplemind.analyzeAudio",
+          "when": "resourceExtname =~ /\\.(mp3|wav|flac|m4a|aac|ogg)$/"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "SampleMind AI",
+      "properties": {
+        "samplemind.apiUrl": {
+          "type": "string",
+          "default": "http://localhost:8000",
+          "description": "SampleMind AI API server URL"
+        },
+        "samplemind.sampleFolders": {
+          "type": "array",
+          "default": [],
+          "description": "Folders containing audio samples",
+          "items": {
+            "type": "string"
+          }
+        },
+        "samplemind.autoAnalyze": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically analyze audio files when opened"
+        },
+        "samplemind.analysisLevel": {
+          "type": "string",
+          "enum": [
+            "BASIC",
+            "STANDARD",
+            "DETAILED",
+            "PROFESSIONAL"
+          ],
+          "default": "STANDARD",
+          "description": "Audio analysis detail level"
+        },
+        "samplemind.enableNotifications": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show notifications for analysis completion"
+        },
+        "samplemind.cacheResults": {
+          "type": "boolean",
+          "default": true,
+          "description": "Cache analysis results to speed up repeated operations"
+        }
+      }
+    },
+    "webviews": [
+      {
+        "viewType": "samplemind.analysisView",
+        "displayName": "Audio Analysis",
+        "priority": "option"
+      },
+      {
+        "viewType": "samplemind.waveformView",
+        "displayName": "Waveform Viewer",
+        "priority": "option"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "@vscode/vsce": "^2.22.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "form-data": "4.0.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/samplemind-ai/vscode-extension"
+  },
+  "bugs": {
+    "url": "https://github.com/samplemind-ai/vscode-extension/issues"
+  },
+  "homepage": "https://github.com/samplemind-ai/vscode-extension#readme",
+  "license": "MIT"
+}

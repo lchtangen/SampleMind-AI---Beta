@@ -1,0 +1,287 @@
+# =============================================================================
+# Docker Compose - Local Development
+# Complete stack for local development with hot-reload support
+# =============================================================================
+
+version: '3.8'
+
+services:
+  # =============================================================================
+  # Backend API Service
+  # =============================================================================
+  backend:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile.backend
+    container_name: samplemind-backend-dev
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - MONGODB_URL=mongodb://admin:password@mongodb:27017/samplemind?authSource=admin
+      - REDIS_URL=redis://:devpassword@redis:6379/0
+      - CELERY_BROKER_URL=redis://:devpassword@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:devpassword@redis:6379/0
+      - SECRET_KEY=dev-secret-key-change-in-production
+      - GOOGLE_AI_API_KEY=${GOOGLE_AI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LOG_LEVEL=debug
+    volumes:
+      - ../../src:/app/src:ro
+      - ../../config:/app/config:ro
+      - backend-data:/app/data
+      - backend-logs:/app/logs
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - samplemind-dev
+    command: uvicorn src.samplemind.interfaces.api.main:app --host 0.0.0.0 --port 8000 --reload --log-level debug
+
+  # =============================================================================
+  # Celery Worker Service
+  # =============================================================================
+  celery-worker:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile.celery
+    container_name: samplemind-worker-dev
+    restart: unless-stopped
+    environment:
+      - ENVIRONMENT=development
+      - MONGODB_URL=mongodb://admin:password@mongodb:27017/samplemind?authSource=admin
+      - REDIS_URL=redis://:devpassword@redis:6379/0
+      - CELERY_BROKER_URL=redis://:devpassword@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:devpassword@redis:6379/0
+      - GOOGLE_AI_API_KEY=${GOOGLE_AI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - CELERY_LOG_LEVEL=debug
+      - CELERY_WORKER_CONCURRENCY=2
+    volumes:
+      - ../../src:/app/src:ro
+      - ../../config:/app/config:ro
+      - backend-data:/app/data
+      - backend-logs:/app/logs
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - samplemind-dev
+    command: ["worker"]
+
+  # =============================================================================
+  # Celery Beat (Scheduler) Service
+  # =============================================================================
+  celery-beat:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile.celery
+    container_name: samplemind-beat-dev
+    restart: unless-stopped
+    environment:
+      - REDIS_URL=redis://:devpassword@redis:6379/0
+      - CELERY_BROKER_URL=redis://:devpassword@redis:6379/0
+      - CELERY_LOG_LEVEL=debug
+    volumes:
+      - ../../src:/app/src:ro
+      - celerybeat-schedule:/app/celerybeat-schedule
+    depends_on:
+      - redis
+    networks:
+      - samplemind-dev
+    command: ["beat"]
+
+  # =============================================================================
+  # Flower (Celery Monitoring) Service
+  # =============================================================================
+  flower:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile.celery
+    container_name: samplemind-flower-dev
+    restart: unless-stopped
+    ports:
+      - "5555:5555"
+    environment:
+      - CELERY_BROKER_URL=redis://:devpassword@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:devpassword@redis:6379/0
+      - FLOWER_PORT=5555
+      - FLOWER_BASIC_AUTH=admin:admin
+    depends_on:
+      - redis
+      - celery-worker
+    networks:
+      - samplemind-dev
+    command: ["flower"]
+
+  # =============================================================================
+  # Frontend Service
+  # =============================================================================
+  frontend:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile.frontend
+      args:
+        VITE_API_URL=http://localhost:8000
+    container_name: samplemind-frontend-dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    networks:
+      - samplemind-dev
+
+  # =============================================================================
+  # MongoDB Database
+  # =============================================================================
+  mongodb:
+    image: mongo:7.0
+    container_name: samplemind-mongodb-dev
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=samplemind
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-config:/data/configdb
+      - ../../config/mongodb-indexes.js:/docker-entrypoint-initdb.d/init-indexes.js:ro
+    networks:
+      - samplemind-dev
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # =============================================================================
+  # Redis Cache & Message Broker
+  # =============================================================================
+  redis:
+    image: redis:7.2-alpine
+    container_name: samplemind-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: >
+      redis-server
+      --requirepass devpassword
+      --appendonly yes
+      --appendfilename "appendonly.aof"
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - samplemind-dev
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # =============================================================================
+  # ChromaDB Vector Database
+  # =============================================================================
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: samplemind-chromadb-dev
+    restart: unless-stopped
+    ports:
+      - "8002:8000"
+    volumes:
+      - chroma-data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    networks:
+      - samplemind-dev
+
+  # =============================================================================
+  # Prometheus (Metrics)
+  # =============================================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: samplemind-prometheus-dev
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - samplemind-dev
+
+  # =============================================================================
+  # Grafana (Dashboards)
+  # =============================================================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: samplemind-grafana-dev
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ../../monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ../../monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+    networks:
+      - samplemind-dev
+
+# =============================================================================
+# Named Volumes
+# =============================================================================
+volumes:
+  backend-data:
+    driver: local
+  backend-logs:
+    driver: local
+  mongodb-data:
+    driver: local
+  mongodb-config:
+    driver: local
+  redis-data:
+    driver: local
+  chroma-data:
+    driver: local
+  celerybeat-schedule:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  samplemind-dev:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16

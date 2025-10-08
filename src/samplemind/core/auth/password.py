@@ -8,8 +8,13 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Bcrypt context for password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Bcrypt context for password hashing with 72-byte truncation
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto",
+    bcrypt__ident="2b",
+    bcrypt__truncate_error=False
+)
 
 
 def hash_password(password: str) -> str:
@@ -22,7 +27,9 @@ def hash_password(password: str) -> str:
     Returns:
         Hashed password string
     """
-    hashed = pwd_context.hash(password)
+    # Bcrypt has a 72-byte password limit, truncate if necessary
+    password_bytes = password.encode('utf-8')[:72]
+    hashed = pwd_context.hash(password_bytes)
     logger.debug("Password hashed successfully")
     return hashed
 
@@ -39,7 +46,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         True if password matches, False otherwise
     """
     try:
-        is_valid = pwd_context.verify(plain_password, hashed_password)
+        # Bcrypt has a 72-byte password limit, truncate if necessary
+        password_bytes = plain_password.encode('utf-8')[:72]
+        is_valid = pwd_context.verify(password_bytes, hashed_password)
         if is_valid:
             logger.debug("Password verification successful")
         else:

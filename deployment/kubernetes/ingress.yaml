@@ -1,0 +1,306 @@
+# =============================================================================
+# SampleMind AI - Ingress Configuration
+# External traffic routing with TLS termination
+# =============================================================================
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: samplemind-ingress
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: ingress
+  annotations:
+    # Ingress class
+    kubernetes.io/ingress.class: "nginx"
+    
+    # TLS/SSL Configuration
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    cert-manager.io/acme-challenge-type: "http01"
+    
+    # SSL Redirect
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    
+    # CORS Configuration
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://samplemind.ai,https://app.samplemind.ai"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-max-age: "3600"
+    
+    # Rate Limiting
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    nginx.ingress.kubernetes.io/limit-rpm: "1000"
+    nginx.ingress.kubernetes.io/limit-connections: "100"
+    
+    # Request Size Limits
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/client-body-buffer-size: "100m"
+    
+    # Timeouts
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    
+    # Security Headers
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Frame-Options: SAMEORIGIN";
+      more_set_headers "X-Content-Type-Options: nosniff";
+      more_set_headers "X-XSS-Protection: 1; mode=block";
+      more_set_headers "Referrer-Policy: strict-origin-when-cross-origin";
+      more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload";
+      more_set_headers "Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';";
+    
+    # Backend Protocol
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    
+    # Upstream Configuration
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$binary_remote_addr"
+    
+    # Monitoring
+    nginx.ingress.kubernetes.io/enable-modsecurity: "true"
+    nginx.ingress.kubernetes.io/enable-owasp-core-rules: "true"
+    
+    # Logging
+    nginx.ingress.kubernetes.io/enable-access-log: "true"
+    
+spec:
+  # TLS Configuration
+  tls:
+  - hosts:
+    - samplemind.ai
+    - api.samplemind.ai
+    - app.samplemind.ai
+    secretName: samplemind-tls
+  
+  # Routing Rules
+  rules:
+  # =============================================================================
+  # Main Domain - Frontend
+  # =============================================================================
+  - host: samplemind.ai
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 3000
+  
+  # =============================================================================
+  # App Subdomain - Frontend
+  # =============================================================================
+  - host: app.samplemind.ai
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 3000
+  
+  # =============================================================================
+  # API Subdomain - Backend
+  # =============================================================================
+  - host: api.samplemind.ai
+    http:
+      paths:
+      # API v1 routes
+      - path: /api/v1
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 8000
+      
+      # Health check endpoints
+      - path: /health
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 8000
+      
+      # Metrics endpoint (should be protected)
+      - path: /metrics
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 9090
+
+---
+# =============================================================================
+# Ingress for Flower Monitoring (Internal/Admin Access)
+# =============================================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: samplemind-flower-ingress
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: flower
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    
+    # SSL
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    
+    # Basic Auth for Flower
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: flower-basic-auth
+    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required - Flower Monitoring"
+    
+    # Whitelist IPs (optional - restrict to office IPs)
+    # nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+    
+    # Rate limiting (more restrictive for admin interface)
+    nginx.ingress.kubernetes.io/limit-rps: "10"
+    nginx.ingress.kubernetes.io/limit-rpm: "100"
+    
+spec:
+  tls:
+  - hosts:
+    - flower.samplemind.ai
+    secretName: samplemind-tls
+  
+  rules:
+  - host: flower.samplemind.ai
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: flower-service
+            port:
+              number: 5555
+
+---
+# =============================================================================
+# Rate Limit Configuration for Different Endpoints
+# =============================================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: samplemind-api-upload-ingress
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: api-upload
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    
+    # More restrictive rate limiting for upload endpoint
+    nginx.ingress.kubernetes.io/limit-rps: "5"
+    nginx.ingress.kubernetes.io/limit-rpm: "50"
+    
+    # Larger body size for uploads
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/client-body-buffer-size: "100m"
+    
+    # Longer timeouts for uploads
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    
+    # SSL
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    
+spec:
+  tls:
+  - hosts:
+    - api.samplemind.ai
+    secretName: samplemind-tls
+  
+  rules:
+  - host: api.samplemind.ai
+    http:
+      paths:
+      # Upload endpoint with special rate limiting
+      - path: /api/v1/upload
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 8000
+
+---
+# =============================================================================
+# Certificate Issuer (Let's Encrypt)
+# =============================================================================
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    # Production Let's Encrypt server
+    server: https://acme-v02.api.letsencrypt.org/directory
+    
+    # Email for certificate expiration notifications
+    email: devops@samplemind.ai
+    
+    # Private key secret
+    privateKeySecretRef:
+      name: letsencrypt-prod-key
+    
+    # HTTP-01 challenge
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+
+---
+# =============================================================================
+# Certificate Issuer (Let's Encrypt Staging - for testing)
+# =============================================================================
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+spec:
+  acme:
+    # Staging Let's Encrypt server (for testing)
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    
+    email: devops@samplemind.ai
+    
+    privateKeySecretRef:
+      name: letsencrypt-staging-key
+    
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+
+---
+# =============================================================================
+# Basic Auth Secret for Flower (create with htpasswd)
+# =============================================================================
+# Create with:
+# htpasswd -c auth admin
+# kubectl create secret generic flower-basic-auth --from-file=auth -n samplemind-production
+#
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: flower-basic-auth
+#   namespace: samplemind-production
+# type: Opaque
+# data:
+#   auth: <base64-encoded-htpasswd-file>

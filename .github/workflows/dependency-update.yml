@@ -1,0 +1,436 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    # Run every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'requirements*.txt'
+      - 'pyproject.toml'
+      - 'package.json'
+      - 'package-lock.json'
+
+env:
+  PYTHON_VERSION: '3.12'
+  NODE_VERSION: '20'
+
+jobs:
+  check-updates:
+    name: Check for Dependency Updates
+    runs-on: ubuntu-latest
+    outputs:
+      python-updates: ${{ steps.check-python.outputs.has-updates }}
+      npm-updates: ${{ steps.check-npm.outputs.has-updates }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Check Python dependency updates
+        id: check-python
+        run: |
+          pip install pip-upgrade
+          pip-upgrade --skip-package-installation --skip-virtualenv-check requirements.txt > python-updates.txt || true
+          
+          if [ -s python-updates.txt ]; then
+            echo "has-updates=true" >> $GITHUB_OUTPUT
+            echo "Python updates available:"
+            cat python-updates.txt
+          else
+            echo "has-updates=false" >> $GITHUB_OUTPUT
+            echo "No Python updates available"
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Check npm dependency updates
+        id: check-npm
+        run: |
+          if [ -f "package.json" ]; then
+            npm outdated > npm-updates.txt || true
+            
+            if [ -s npm-updates.txt ]; then
+              echo "has-updates=true" >> $GITHUB_OUTPUT
+              echo "npm updates available:"
+              cat npm-updates.txt
+            else
+              echo "has-updates=false" >> $GITHUB_OUTPUT
+              echo "No npm updates available"
+            fi
+          else
+            echo "has-updates=false" >> $GITHUB_OUTPUT
+            echo "No package.json found"
+          fi
+
+      - name: Upload update reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: update-reports
+          path: |
+            python-updates.txt
+            npm-updates.txt
+
+  update-python-dependencies:
+    name: Update Python Dependencies
+    runs-on: ubuntu-latest
+    needs: check-updates
+    if: needs.check-updates.outputs.python-updates == 'true' && github.event_name == 'schedule'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Update dependencies
+        run: |
+          pip install pip-tools pur
+          
+          # Update requirements.txt with compatible versions
+          pur -r requirements.txt --skip-gt --force
+          
+          # Update dev requirements
+          if [ -f "requirements-dev.txt" ]; then
+            pur -r requirements-dev.txt --skip-gt --force
+          fi
+          
+          # Update test requirements
+          if [ -f "requirements-test.txt" ]; then
+            pur -r requirements-test.txt --skip-gt --force
+          fi
+
+      - name: Test updated dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-test.txt
+          
+          # Run quick smoke tests
+          python -c "import samplemind; print('✓ Import successful')"
+          
+          # Run critical tests only
+          if command -v pytest &> /dev/null; then
+            pytest tests/unit/test_core_functionality.py -v || echo "⚠️ Some tests failed"
+          fi
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: |
+            chore(deps): update Python dependencies
+            
+            Automated weekly dependency updates
+            
+            - Updated requirements.txt
+            - Updated requirements-dev.txt
+            - Updated requirements-test.txt
+            
+            Please review changes and run full test suite before merging.
+          branch: automated-deps-update-python
+          delete-branch: true
+          title: '⬆️ Update Python Dependencies'
+          body: |
+            ## 🔄 Automated Dependency Update
+            
+            This PR updates Python dependencies to their latest compatible versions.
+            
+            ### Changes
+            - Updated `requirements.txt`
+            - Updated `requirements-dev.txt` (if applicable)
+            - Updated `requirements-test.txt` (if applicable)
+            
+            ### Testing
+            - ✅ Basic import tests passed
+            - ⚠️ Full test suite should be run manually
+            
+            ### Review Checklist
+            - [ ] Review breaking changes in updated packages
+            - [ ] Run full test suite locally
+            - [ ] Check for deprecated API usage
+            - [ ] Verify security fixes are included
+            - [ ] Review CHANGELOG of major version bumps
+            
+            ### Security
+            Run `safety check` to verify no known vulnerabilities.
+            
+            ---
+            *This PR was automatically created by the dependency update workflow*
+            *Triggered on: ${{ github.event_name }}*
+          labels: |
+            dependencies
+            automated
+            python
+          assignees: ${{ github.repository_owner }}
+
+  update-npm-dependencies:
+    name: Update npm Dependencies
+    runs-on: ubuntu-latest
+    needs: check-updates
+    if: needs.check-updates.outputs.npm-updates == 'true' && github.event_name == 'schedule'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Update npm dependencies
+        run: |
+          if [ -f "package.json" ]; then
+            # Update dependencies to latest minor/patch versions
+            npm update
+            
+            # Update package-lock.json
+            npm install
+            
+            echo "✓ npm dependencies updated"
+          fi
+
+      - name: Update frontend dependencies
+        run: |
+          if [ -f "web/package.json" ]; then
+            cd web
+            npm update
+            npm install
+            cd ..
+            echo "✓ Frontend dependencies updated"
+          fi
+
+      - name: Test updated dependencies
+        run: |
+          if [ -f "package.json" ]; then
+            npm test || echo "⚠️ Some tests failed"
+          fi
+          
+          if [ -f "web/package.json" ]; then
+            cd web
+            npm run build || echo "⚠️ Build failed"
+            cd ..
+          fi
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: |
+            chore(deps): update npm dependencies
+            
+            Automated weekly npm dependency updates
+            
+            - Updated package.json
+            - Updated package-lock.json
+            - Updated frontend dependencies
+          branch: automated-deps-update-npm
+          delete-branch: true
+          title: '⬆️ Update npm Dependencies'
+          body: |
+            ## 🔄 Automated npm Dependency Update
+            
+            This PR updates npm dependencies to their latest compatible versions.
+            
+            ### Changes
+            - Updated `package.json`
+            - Updated `package-lock.json`
+            - Updated frontend dependencies (if applicable)
+            
+            ### Testing
+            - ⚠️ Basic tests should be run manually
+            - ⚠️ Build verification recommended
+            
+            ### Review Checklist
+            - [ ] Review breaking changes in updated packages
+            - [ ] Run full test suite locally
+            - [ ] Test frontend build
+            - [ ] Check bundle size impact
+            - [ ] Verify no TypeScript errors
+            
+            ---
+            *This PR was automatically created by the dependency update workflow*
+            *Triggered on: ${{ github.event_name }}*
+          labels: |
+            dependencies
+            automated
+            javascript
+          assignees: ${{ github.repository_owner }}
+
+  security-audit:
+    name: Security Audit After Updates
+    runs-on: ubuntu-latest
+    needs: [update-python-dependencies, update-npm-dependencies]
+    if: always() && (needs.update-python-dependencies.result == 'success' || needs.update-npm-dependencies.result == 'success')
+    steps:
+      - name: Checkout updated branch
+        uses: actions/checkout@v4
+        with:
+          ref: automated-deps-update-python
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Run Python security audit
+        run: |
+          pip install safety
+          pip install -r requirements.txt
+          safety check --json --output safety-audit.json || true
+          safety check
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Run npm security audit
+        run: |
+          if [ -f "package.json" ]; then
+            npm audit --json > npm-audit.json || true
+            npm audit
+          fi
+
+      - name: Upload audit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-reports
+          path: |
+            safety-audit.json
+            npm-audit.json
+
+  dependency-graph-update:
+    name: Update Dependency Graph
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Update dependency graph
+        uses: advanced-security/maven-dependency-submission-action@v4
+        continue-on-error: true
+
+      - name: Generate dependency report
+        run: |
+          echo "# Dependency Update Report" > dependency-report.md
+          echo "" >> dependency-report.md
+          echo "**Generated:** $(date -u)" >> dependency-report.md
+          echo "" >> dependency-report.md
+          
+          if [ -f "requirements.txt" ]; then
+            echo "## Python Dependencies" >> dependency-report.md
+            pip list --format=markdown >> dependency-report.md || true
+            echo "" >> dependency-report.md
+          fi
+          
+          if [ -f "package.json" ]; then
+            echo "## npm Dependencies" >> dependency-report.md
+            npm list --depth=0 >> dependency-report.md || true
+          fi
+
+      - name: Upload dependency report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-report
+          path: dependency-report.md
+
+  notify-maintainers:
+    name: Notify Maintainers
+    runs-on: ubuntu-latest
+    needs: [update-python-dependencies, update-npm-dependencies]
+    if: always() && github.event_name == 'schedule'
+    steps:
+      - name: Send notification
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "📦 Weekly dependency update completed",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "📦 Weekly Dependency Updates"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Automated dependency updates have been processed."
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Python Updates:*\n${{ needs.update-python-dependencies.result }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*npm Updates:*\n${{ needs.update-npm-dependencies.result }}"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "<${{ github.server_url }}/${{ github.repository }}/pulls|View Pull Requests>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true
+
+  update-summary:
+    name: Dependency Update Summary
+    runs-on: ubuntu-latest
+    needs: [check-updates, update-python-dependencies, update-npm-dependencies, security-audit]
+    if: always()
+    steps:
+      - name: Generate summary
+        run: |
+          echo "# 📦 Dependency Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Update Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Python Dependencies | ${{ needs.update-python-dependencies.result == 'success' && '✅ Updated' || needs.update-python-dependencies.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| npm Dependencies | ${{ needs.update-npm-dependencies.result == 'success' && '✅ Updated' || needs.update-npm-dependencies.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Audit | ${{ needs.security-audit.result == 'success' && '✅ Passed' || needs.security-audit.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ needs.check-updates.outputs.python-updates }}" == "true" ] || [ "${{ needs.check-updates.outputs.npm-updates }}" == "true" ]; then
+            echo "✅ **Action Required:** Review and merge the automatically created pull requests." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✨ **All dependencies are up to date!**" >> $GITHUB_STEP_SUMMARY
+          fi

@@ -90,8 +90,8 @@ class TestOpenAIMusicAnalysis:
 class TestOpenAIMusicProducer:
     """Test OpenAIMusicProducer main functionality"""
 
-    @patch('openai.OpenAI')
-    @patch('openai.AsyncOpenAI')
+    @patch('samplemind.integrations.openai_integration.OpenAI')
+    @patch('samplemind.integrations.openai_integration.AsyncOpenAI')
     def test_initialization_with_api_key(self, mock_async_openai, mock_openai):
         """Test producer initializes with API key"""
         producer = OpenAIMusicProducer(api_key="test_api_key_123")
@@ -105,8 +105,8 @@ class TestOpenAIMusicProducer:
         mock_openai.assert_called_once_with(api_key="test_api_key_123")
         mock_async_openai.assert_called_once_with(api_key="test_api_key_123")
 
-    @patch('openai.OpenAI')
-    @patch('openai.AsyncOpenAI')
+    @patch('samplemind.integrations.openai_integration.OpenAI')
+    @patch('samplemind.integrations.openai_integration.AsyncOpenAI')
     def test_initialization_with_custom_model(self, mock_async_openai, mock_openai):
         """Test producer with custom model"""
         producer = OpenAIMusicProducer(
@@ -117,25 +117,39 @@ class TestOpenAIMusicProducer:
         assert producer.default_model == OpenAIModel.GPT_4O_MINI
 
     @pytest.mark.asyncio
-    @patch('openai.AsyncOpenAI')
+    @patch('samplemind.integrations.openai_integration.AsyncOpenAI')
     async def test_analyze_music_comprehensive_success(self, mock_async_openai):
         """Test successful comprehensive music analysis"""
-        # Mock the OpenAI response
+        # Mock the OpenAI response with proper JSON format
         mock_response = Mock()
         mock_message = Mock()
-        mock_message.content = """
-        Summary: Energetic electronic dance track with strong production
-
-        Production Tips:
-        - Increase sidechain compression on bass
-        - Add more reverb to lead synth
-        - Consider adding a breakdown at 2:00
-
-        Creative Ideas:
-        - Layer vocals with harmony
-        - Add white noise riser before drop
-        - Experiment with filter automation
-        """
+        mock_message.content = '''{
+            "summary": "Energetic electronic dance track with strong production",
+            "detailed_analysis": {
+                "tempo_analysis": "128 BPM, steady four-on-the-floor rhythm",
+                "harmonic_content": "Key of C major, strong tonic emphasis",
+                "spectral_characteristics": "Rich frequency spectrum with prominent highs",
+                "dynamics": "High energy throughout with dynamic drops"
+            },
+            "production_tips": [
+                "Increase sidechain compression on bass",
+                "Add more reverb to lead synth",
+                "Consider adding a breakdown at 2:00"
+            ],
+            "fl_studio_recommendations": ["Use Gross Beat for rhythmic effects"],
+            "effect_suggestions": [{"effect": "Reverb", "parameters": {}, "reason": "Add depth"}],
+            "creative_ideas": [
+                "Layer vocals with harmony",
+                "Add white noise riser before drop"
+            ],
+            "arrangement_suggestions": ["Add variation in drop section"],
+            "scores": {
+                "creativity": 0.85,
+                "production_quality": 0.90,
+                "commercial_potential": 0.88
+            },
+            "confidence": 0.95
+        }'''
         mock_response.choices = [Mock(message=mock_message)]
         mock_response.usage = Mock(total_tokens=500)
 
@@ -145,7 +159,7 @@ class TestOpenAIMusicProducer:
         mock_client.chat.completions.create = AsyncMock(return_value=mock_response)
         mock_async_openai.return_value = mock_client
 
-        with patch('openai.OpenAI'):
+        with patch('samplemind.integrations.openai_integration.OpenAI'):
             producer = OpenAIMusicProducer(api_key="test_key")
 
         test_features = {
@@ -164,31 +178,33 @@ class TestOpenAIMusicProducer:
         assert isinstance(result, OpenAIMusicAnalysis)
         assert result.model_used != ""
         assert result.timestamp > 0
+        assert result.summary == "Energetic electronic dance track with strong production"
 
     @pytest.mark.asyncio
-    @patch('openai.AsyncOpenAI')
+    @patch('samplemind.integrations.openai_integration.AsyncOpenAI')
     async def test_analyze_music_production_coaching(self, mock_async_openai):
         """Test production coaching analysis"""
         mock_response = Mock()
         mock_message = Mock()
-        mock_message.content = """
-        Production Coaching:
-
-        Your track shows good understanding of:
-        1. Dynamic range control
-        2. Frequency balance
-        3. Stereo imaging
-
-        Areas to improve:
-        - Mix clarity in mid-range frequencies
-        - Drum punch and presence
-        - Automation and movement
-
-        FL Studio Tips:
-        - Use Fruity Parametric EQ 2 on master
-        - Add Maximus for multiband compression
-        - Try Gross Beat for glitch effects
-        """
+        mock_message.content = '''{
+            "summary": "Production coaching analysis complete",
+            "detailed_analysis": {},
+            "production_tips": [
+                "Mix clarity in mid-range frequencies",
+                "Drum punch and presence",
+                "Automation and movement"
+            ],
+            "fl_studio_recommendations": [
+                "Use Fruity Parametric EQ 2 on master",
+                "Add Maximus for multiband compression",
+                "Try Gross Beat for glitch effects"
+            ],
+            "effect_suggestions": [],
+            "creative_ideas": [],
+            "arrangement_suggestions": [],
+            "scores": {"creativity": 0.8, "production_quality": 0.75, "commercial_potential": 0.7},
+            "confidence": 0.9
+        }'''
         mock_response.choices = [Mock(message=mock_message)]
         mock_response.usage = Mock(total_tokens=400)
 
@@ -198,7 +214,7 @@ class TestOpenAIMusicProducer:
         mock_client.chat.completions.create = AsyncMock(return_value=mock_response)
         mock_async_openai.return_value = mock_client
 
-        with patch('openai.OpenAI'):
+        with patch('samplemind.integrations.openai_integration.OpenAI'):
             producer = OpenAIMusicProducer(api_key="test_key")
 
         result = await producer.analyze_music_comprehensive(
@@ -210,7 +226,7 @@ class TestOpenAIMusicProducer:
         assert result.analysis_type == MusicAnalysisType.PRODUCTION_COACHING
 
     @pytest.mark.asyncio
-    @patch('openai.AsyncOpenAI')
+    @patch('samplemind.integrations.openai_integration.AsyncOpenAI')
     async def test_analyze_music_handles_api_error(self, mock_async_openai):
         """Test error handling when OpenAI API fails"""
         mock_client = Mock()
@@ -221,7 +237,7 @@ class TestOpenAIMusicProducer:
         )
         mock_async_openai.return_value = mock_client
 
-        with patch('openai.OpenAI'):
+        with patch('samplemind.integrations.openai_integration.OpenAI'):
             producer = OpenAIMusicProducer(api_key="test_key")
 
         with pytest.raises(Exception) as exc_info:
@@ -233,12 +249,22 @@ class TestOpenAIMusicProducer:
         assert "API Error" in str(exc_info.value)
 
     @pytest.mark.asyncio
-    @patch('openai.AsyncOpenAI')
+    @patch('samplemind.integrations.openai_integration.AsyncOpenAI')
     async def test_caching_works(self, mock_async_openai):
         """Test that response caching works"""
         mock_response = Mock()
         mock_message = Mock()
-        mock_message.content = "Analysis result"
+        mock_message.content = '''{
+            "summary": "Cached analysis",
+            "detailed_analysis": {},
+            "production_tips": [],
+            "fl_studio_recommendations": [],
+            "effect_suggestions": [],
+            "creative_ideas": [],
+            "arrangement_suggestions": [],
+            "scores": {"creativity": 0.5, "production_quality": 0.5, "commercial_potential": 0.5},
+            "confidence": 0.8
+        }'''
         mock_response.choices = [Mock(message=mock_message)]
         mock_response.usage = Mock(total_tokens=100)
 
@@ -248,7 +274,7 @@ class TestOpenAIMusicProducer:
         mock_client.chat.completions.create = AsyncMock(return_value=mock_response)
         mock_async_openai.return_value = mock_client
 
-        with patch('openai.OpenAI'):
+        with patch('samplemind.integrations.openai_integration.OpenAI'):
             producer = OpenAIMusicProducer(api_key="test_key")
 
         features = {'duration': 180.0, 'tempo': 120.0}
@@ -271,28 +297,32 @@ class TestOpenAIMusicProducer:
         assert result1 is not None
         assert result2 is not None
 
-        # Stats should show cache hit
-        stats = producer.get_stats()
+        # Stats should show cache hit - use get_usage_stats() for cache_size and cache_hit_rate
+        stats = producer.get_usage_stats()
         assert stats['cache_hits'] >= 0
+        assert 'cache_size' in stats
+        assert 'cache_hit_rate' in stats
 
-    @patch('openai.OpenAI')
-    @patch('openai.AsyncOpenAI')
+    @patch('samplemind.integrations.openai_integration.OpenAI')
+    @patch('samplemind.integrations.openai_integration.AsyncOpenAI')
     def test_get_stats(self, mock_async_openai, mock_openai):
         """Test statistics retrieval"""
         producer = OpenAIMusicProducer(api_key="test_key")
 
         stats = producer.get_stats()
 
-        assert 'total_requests' in stats
+        # get_stats() returns: requests, total_tokens, cache_hits, avg_response_time, last_request
+        assert 'requests' in stats
         assert 'total_tokens' in stats
         assert 'avg_response_time' in stats
         assert 'cache_hits' in stats
+        assert 'last_request' in stats
 
-        assert stats['total_requests'] == 0
+        assert stats['requests'] == 0
         assert stats['total_tokens'] == 0
 
-    @patch('openai.OpenAI')
-    @patch('openai.AsyncOpenAI')
+    @patch('samplemind.integrations.openai_integration.OpenAI')
+    @patch('samplemind.integrations.openai_integration.AsyncOpenAI')
     def test_clear_cache(self, mock_async_openai, mock_openai):
         """Test cache clearing"""
         producer = OpenAIMusicProducer(api_key="test_key")
@@ -308,12 +338,22 @@ class TestOpenAIMusicProducer:
         assert len(producer.analysis_cache) == 0
 
     @pytest.mark.asyncio
-    @patch('openai.AsyncOpenAI')
+    @patch('samplemind.integrations.openai_integration.AsyncOpenAI')
     async def test_different_analysis_types(self, mock_async_openai):
         """Test different analysis types produce different prompts"""
         mock_response = Mock()
         mock_message = Mock()
-        mock_message.content = "Analysis"
+        mock_message.content = '''{
+            "summary": "Test analysis",
+            "detailed_analysis": {},
+            "production_tips": [],
+            "fl_studio_recommendations": [],
+            "effect_suggestions": [],
+            "creative_ideas": [],
+            "arrangement_suggestions": [],
+            "scores": {"creativity": 0.5, "production_quality": 0.5, "commercial_potential": 0.5},
+            "confidence": 0.8
+        }'''
         mock_response.choices = [Mock(message=mock_message)]
         mock_response.usage = Mock(total_tokens=100)
 
@@ -323,7 +363,7 @@ class TestOpenAIMusicProducer:
         mock_client.chat.completions.create = AsyncMock(return_value=mock_response)
         mock_async_openai.return_value = mock_client
 
-        with patch('openai.OpenAI'):
+        with patch('samplemind.integrations.openai_integration.OpenAI'):
             producer = OpenAIMusicProducer(api_key="test_key")
 
         features = {'duration': 180.0}
@@ -350,8 +390,8 @@ class TestOpenAIMusicProducer:
 class TestErrorHandling:
     """Test error handling scenarios"""
 
-    @patch('openai.OpenAI')
-    @patch('openai.AsyncOpenAI')
+    @patch('samplemind.integrations.openai_integration.OpenAI')
+    @patch('samplemind.integrations.openai_integration.AsyncOpenAI')
     def test_initialization_requires_api_key(self, mock_async_openai, mock_openai):
         """Test that API key is required"""
         # Should work with api_key
@@ -359,12 +399,22 @@ class TestErrorHandling:
         assert producer is not None
 
     @pytest.mark.asyncio
-    @patch('openai.AsyncOpenAI')
+    @patch('samplemind.integrations.openai_integration.AsyncOpenAI')
     async def test_empty_features_handled(self, mock_async_openai):
         """Test handling of empty feature dictionary"""
         mock_response = Mock()
         mock_message = Mock()
-        mock_message.content = "Analysis of minimal features"
+        mock_message.content = '''{
+            "summary": "Analysis of minimal features",
+            "detailed_analysis": {},
+            "production_tips": [],
+            "fl_studio_recommendations": [],
+            "effect_suggestions": [],
+            "creative_ideas": [],
+            "arrangement_suggestions": [],
+            "scores": {"creativity": 0.3, "production_quality": 0.3, "commercial_potential": 0.3},
+            "confidence": 0.5
+        }'''
         mock_response.choices = [Mock(message=mock_message)]
         mock_response.usage = Mock(total_tokens=50)
 
@@ -374,7 +424,7 @@ class TestErrorHandling:
         mock_client.chat.completions.create = AsyncMock(return_value=mock_response)
         mock_async_openai.return_value = mock_client
 
-        with patch('openai.OpenAI'):
+        with patch('samplemind.integrations.openai_integration.OpenAI'):
             producer = OpenAIMusicProducer(api_key="test_key")
 
         # Should handle empty features gracefully
@@ -386,7 +436,7 @@ class TestErrorHandling:
         assert isinstance(result, OpenAIMusicAnalysis)
 
     @pytest.mark.asyncio
-    @patch('openai.AsyncOpenAI')
+    @patch('samplemind.integrations.openai_integration.AsyncOpenAI')
     async def test_retry_logic(self, mock_async_openai):
         """Test retry logic on temporary failures"""
         # First two calls fail, third succeeds
@@ -410,7 +460,7 @@ class TestErrorHandling:
         )
         mock_async_openai.return_value = mock_client
 
-        with patch('openai.OpenAI'):
+        with patch('samplemind.integrations.openai_integration.OpenAI'):
             producer = OpenAIMusicProducer(api_key="test_key", max_retries=3)
 
         # Should eventually succeed after retries
@@ -430,12 +480,22 @@ class TestPromptGeneration:
     """Test prompt generation for different scenarios"""
 
     @pytest.mark.asyncio
-    @patch('openai.AsyncOpenAI')
+    @patch('samplemind.integrations.openai_integration.AsyncOpenAI')
     async def test_comprehensive_features_in_prompt(self, mock_async_openai):
         """Test that all features are included in prompt"""
         mock_response = Mock()
         mock_message = Mock()
-        mock_message.content = "Analysis"
+        mock_message.content = '''{
+            "summary": "Comprehensive analysis",
+            "detailed_analysis": {"tempo_analysis": "120 BPM"},
+            "production_tips": [],
+            "fl_studio_recommendations": [],
+            "effect_suggestions": [],
+            "creative_ideas": [],
+            "arrangement_suggestions": [],
+            "scores": {"creativity": 0.7, "production_quality": 0.8, "commercial_potential": 0.75},
+            "confidence": 0.9
+        }'''
         mock_response.choices = [Mock(message=mock_message)]
         mock_response.usage = Mock(total_tokens=100)
 
@@ -445,7 +505,7 @@ class TestPromptGeneration:
         mock_client.chat.completions.create = AsyncMock(return_value=mock_response)
         mock_async_openai.return_value = mock_client
 
-        with patch('openai.OpenAI'):
+        with patch('samplemind.integrations.openai_integration.OpenAI'):
             producer = OpenAIMusicProducer(api_key="test_key")
 
         features = {

@@ -63,6 +63,15 @@ class AnalysisRepository:
         return await Analysis.find_one(Analysis.file_id == file_id)
     
     @staticmethod
+    async def find_one(filter_dict: dict) -> Optional[Analysis]:
+        """Find single analysis matching filter criteria"""
+        if 'file_id' in filter_dict:
+            return await Analysis.find_one(Analysis.file_id == filter_dict['file_id'])
+        elif 'analysis_id' in filter_dict:
+            return await Analysis.find_one(Analysis.analysis_id == filter_dict['analysis_id'])
+        return None
+    
+    @staticmethod
     async def get_by_user(user_id: str, skip: int = 0, limit: int = 50) -> List[Analysis]:
         """Get all analyses for a user"""
         return await Analysis.find(Analysis.user_id == user_id).skip(skip).limit(limit).to_list()

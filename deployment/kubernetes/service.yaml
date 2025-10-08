@@ -1,0 +1,277 @@
+# =============================================================================
+# SampleMind AI - Kubernetes Services
+# Internal ClusterIP services for inter-pod communication
+# =============================================================================
+
+# =============================================================================
+# Backend API Service
+# =============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: backend
+    tier: api
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8000"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800  # 3 hours
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8000
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  selector:
+    app: samplemind
+    component: backend
+    tier: api
+
+---
+# =============================================================================
+# Frontend Web Service
+# =============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: frontend
+    tier: web
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 3000
+    targetPort: 3000
+    protocol: TCP
+  selector:
+    app: samplemind
+    component: frontend
+    tier: web
+
+---
+# =============================================================================
+# MongoDB Database Service
+# =============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: mongodb
+    tier: database
+spec:
+  type: ClusterIP
+  clusterIP: None  # Headless service for StatefulSet
+  ports:
+  - name: mongodb
+    port: 27017
+    targetPort: 27017
+    protocol: TCP
+  selector:
+    app: samplemind
+    component: mongodb
+    tier: database
+
+---
+# =============================================================================
+# Redis Cache & Broker Service
+# =============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: redis
+    tier: cache
+spec:
+  type: ClusterIP
+  ports:
+  - name: redis
+    port: 6379
+    targetPort: 6379
+    protocol: TCP
+  selector:
+    app: samplemind
+    component: redis
+    tier: cache
+
+---
+# =============================================================================
+# ChromaDB Vector Database Service
+# =============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: chromadb-service
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: chromadb
+    tier: database
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8000
+    protocol: TCP
+  selector:
+    app: samplemind
+    component: chromadb
+    tier: database
+
+---
+# =============================================================================
+# Flower Monitoring Service
+# =============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: flower-service
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: flower
+    tier: monitoring
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 5555
+    targetPort: 5555
+    protocol: TCP
+  selector:
+    app: samplemind
+    component: flower
+    tier: monitoring
+
+---
+# =============================================================================
+# Headless Service for Backend StatefulSet (if needed)
+# =============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-headless
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: backend
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8000
+    protocol: TCP
+  selector:
+    app: samplemind
+    component: backend
+
+---
+# =============================================================================
+# Monitoring & Metrics Services
+# =============================================================================
+
+# Prometheus Metrics Endpoint
+apiVersion: v1
+kind: Service
+metadata:
+  name: metrics-service
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: metrics
+spec:
+  type: ClusterIP
+  ports:
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  selector:
+    app: samplemind
+
+---
+# =============================================================================
+# External Services (for exposing specific endpoints)
+# =============================================================================
+
+# NodePort service for development/testing
+# Uncomment if needed for direct access
+#
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: backend-nodeport
+#   namespace: samplemind-production
+#   labels:
+#     app: samplemind
+#     component: backend
+# spec:
+#   type: NodePort
+#   ports:
+#   - name: http
+#     port: 8000
+#     targetPort: 8000
+#     nodePort: 30800  # Access via <NodeIP>:30800
+#     protocol: TCP
+#   selector:
+#     app: samplemind
+#     component: backend
+
+---
+# LoadBalancer service for cloud providers
+# Uncomment if not using Ingress
+#
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: backend-loadbalancer
+#   namespace: samplemind-production
+#   labels:
+#     app: samplemind
+#     component: backend
+#   annotations:
+#     # AWS specific annotations
+#     service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+#     service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+#     # GCP specific annotations
+#     cloud.google.com/load-balancer-type: "Internal"
+#     # Azure specific annotations
+#     service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+# spec:
+#   type: LoadBalancer
+#   ports:
+#   - name: http
+#     port: 80
+#     targetPort: 8000
+#     protocol: TCP
+#   - name: https
+#     port: 443
+#     targetPort: 8000
+#     protocol: TCP
+#   selector:
+#     app: samplemind
+#     component: backend

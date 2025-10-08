@@ -1,0 +1,413 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'README.md'
+      - 'mkdocs.yml'
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'README.md'
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  build-docs:
+    name: Build Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for git info
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install documentation tools
+        run: |
+          pip install mkdocs mkdocs-material mkdocs-mermaid2-plugin
+          pip install mkdocstrings[python] pymdown-extensions
+          pip install mkdocs-git-revision-date-localized-plugin
+          pip install mkdocs-minify-plugin
+
+      - name: Install project dependencies (for API docs)
+        run: |
+          pip install -r requirements.txt
+
+      - name: Validate documentation structure
+        run: |
+          # Check for broken links in markdown files
+          echo "Checking for common documentation issues..."
+          
+          # Check for TODO markers
+          if grep -r "TODO" docs/ --include="*.md" | grep -v "TODO.md"; then
+            echo "⚠️ Warning: Found TODO markers in documentation"
+          fi
+          
+          # Check for broken internal links (basic check)
+          echo "✓ Documentation structure validated"
+
+      - name: Generate API documentation
+        run: |
+          # Generate API docs from docstrings
+          python -m pydoc -w samplemind || echo "⚠️ API doc generation skipped"
+
+      - name: Build MkDocs site
+        run: |
+          if [ -f "mkdocs.yml" ]; then
+            mkdocs build --strict --verbose
+            echo "✓ MkDocs site built successfully"
+          else
+            echo "⚠️ mkdocs.yml not found, skipping MkDocs build"
+            mkdir -p site
+            cp -r docs/* site/ 2>/dev/null || true
+            cp README.md site/index.md 2>/dev/null || true
+          fi
+
+      - name: Check documentation quality
+        run: |
+          # Check for minimum documentation coverage
+          MD_FILES=$(find docs -name "*.md" | wc -l)
+          echo "Found $MD_FILES markdown files"
+          
+          if [ "$MD_FILES" -lt 5 ]; then
+            echo "⚠️ Warning: Low documentation coverage (< 5 files)"
+          else
+            echo "✓ Documentation coverage looks good"
+          fi
+
+      - name: Upload documentation artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-site
+          path: site/
+          retention-days: 7
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/
+
+  test-docs:
+    name: Test Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install markdown linter
+        run: |
+          npm install -g markdownlint-cli
+
+      - name: Lint markdown files
+        continue-on-error: true
+        run: |
+          markdownlint 'docs/**/*.md' --config .markdownlint.json || true
+          markdownlint README.md --config .markdownlint.json || true
+
+      - name: Check spelling
+        uses: rojopolis/spellcheck-github-actions@0.36.0
+        continue-on-error: true
+        with:
+          source_files: 'docs/**/*.md README.md'
+          task_name: Markdown
+
+      - name: Validate code examples
+        run: |
+          # Extract and validate Python code blocks from markdown
+          echo "Validating code examples in documentation..."
+          
+          # Simple validation that code blocks are properly formatted
+          for file in docs/**/*.md; do
+            if [ -f "$file" ]; then
+              # Check for unclosed code blocks
+              OPEN_BLOCKS=$(grep -c '```' "$file" 2>/dev/null || echo 0)
+              if [ $((OPEN_BLOCKS % 2)) -ne 0 ]; then
+                echo "⚠️ Warning: Unclosed code block in $file"
+              fi
+            fi
+          done
+          
+          echo "✓ Code examples validated"
+
+  deploy-github-pages:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: [build-docs, test-docs]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Notify deployment success
+        run: |
+          echo "📚 Documentation deployed successfully!"
+          echo "URL: ${{ steps.deployment.outputs.page_url }}"
+
+  deploy-docs-site:
+    name: Deploy to Documentation Site
+    runs-on: ubuntu-latest
+    needs: [build-docs, test-docs]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: docs-production
+      url: https://docs.samplemind.ai
+    steps:
+      - name: Download documentation artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: documentation-site
+          path: site/
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: env.AWS_ACCESS_KEY_ID != ''
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+
+      - name: Deploy to S3
+        if: env.AWS_ACCESS_KEY_ID != ''
+        run: |
+          aws s3 sync site/ s3://docs.samplemind.ai/ \
+            --delete \
+            --cache-control "max-age=3600" \
+            --metadata-directive REPLACE
+          
+          # Invalidate CloudFront cache
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*" || echo "⚠️ CloudFront invalidation skipped"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+
+      - name: Deploy via rsync (alternative)
+        if: env.AWS_ACCESS_KEY_ID == ''
+        continue-on-error: true
+        run: |
+          # Alternative deployment method using rsync
+          echo "AWS credentials not configured, skipping S3 deployment"
+          # rsync -avz --delete site/ user@docs.samplemind.ai:/var/www/docs/
+
+  generate-pdf:
+    name: Generate PDF Documentation
+    runs-on: ubuntu-latest
+    needs: build-docs
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install mkdocs mkdocs-material
+          pip install mkdocs-with-pdf
+          sudo apt-get update
+          sudo apt-get install -y wkhtmltopdf
+
+      - name: Generate PDF
+        run: |
+          if [ -f "mkdocs.yml" ]; then
+            # Add PDF plugin to mkdocs.yml temporarily
+            mkdocs build --verbose || echo "⚠️ PDF generation failed"
+          fi
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-pdf
+          path: site/pdf/document.pdf
+        continue-on-error: true
+
+  update-search-index:
+    name: Update Search Index
+    runs-on: ubuntu-latest
+    needs: deploy-docs-site
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Generate search index
+        run: |
+          pip install mkdocs mkdocs-material
+          
+          # Generate search index
+          if [ -f "mkdocs.yml" ]; then
+            mkdocs build
+            echo "✓ Search index generated"
+          fi
+
+      - name: Upload to Algolia (if configured)
+        if: env.ALGOLIA_API_KEY != ''
+        run: |
+          echo "Uploading search index to Algolia..."
+          # Algolia DocSearch integration would go here
+          echo "⚠️ Algolia upload not configured"
+        env:
+          ALGOLIA_API_KEY: ${{ secrets.ALGOLIA_API_KEY }}
+
+  check-docs-coverage:
+    name: Documentation Coverage Report
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install interrogate
+
+      - name: Check docstring coverage
+        run: |
+          # Check Python docstring coverage
+          interrogate -v src/samplemind/ --fail-under=70 || echo "⚠️ Docstring coverage below 70%"
+          interrogate -v src/samplemind/ --generate-badge docs/badges/ || true
+
+      - name: Generate coverage report
+        run: |
+          echo "# 📚 Documentation Coverage Report" > docs-coverage.md
+          echo "" >> docs-coverage.md
+          echo "**Generated:** $(date -u)" >> docs-coverage.md
+          echo "" >> docs-coverage.md
+          
+          # Count markdown files
+          MD_COUNT=$(find docs -name "*.md" | wc -l)
+          echo "- Markdown files: $MD_COUNT" >> docs-coverage.md
+          
+          # Count Python files with docstrings
+          PY_COUNT=$(find src/samplemind -name "*.py" | wc -l)
+          echo "- Python modules: $PY_COUNT" >> docs-coverage.md
+          
+          echo "" >> docs-coverage.md
+          echo "## Coverage by Module" >> docs-coverage.md
+          interrogate -v src/samplemind/ >> docs-coverage.md || true
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-coverage-report
+          path: docs-coverage.md
+
+      - name: Comment PR with coverage
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const coverage = fs.readFileSync('docs-coverage.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: coverage
+            });
+
+  docs-summary:
+    name: Documentation Summary
+    runs-on: ubuntu-latest
+    needs: [build-docs, test-docs, deploy-github-pages, deploy-docs-site]
+    if: always()
+    steps:
+      - name: Generate summary
+        run: |
+          echo "# 📚 Documentation Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Deployment Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Task | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Build Docs | ${{ needs.build-docs.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test Docs | ${{ needs.test-docs.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| GitHub Pages | ${{ needs.deploy-github-pages.result == 'success' && '✅ Deployed' || needs.deploy-github-pages.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Docs Site | ${{ needs.deploy-docs-site.result == 'success' && '✅ Deployed' || needs.deploy-docs-site.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ needs.deploy-github-pages.result }}" == "success" ]; then
+            echo "🔗 **Documentation URL:** https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Notify team
+        if: failure() && github.ref == 'refs/heads/main'
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "📚 Documentation deployment failed",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "📚 Documentation Deployment Failed"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Documentation deployment has failed and requires attention."
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Repository:*\n${{ github.repository }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Workflow:*\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true

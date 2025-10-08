@@ -3,7 +3,8 @@
     "allow": [
       "Bash(source:*)",
       "Bash(python:*)",
-      "Bash(pytest:*)"
+      "Bash(pytest:*)",
+      "Bash(python3 -m pytest --collect-only --quiet)"
     ],
     "deny": [],
     "ask": []

@@ -11,6 +11,7 @@ Supports:
 from .google_ai_integration import GoogleAIMusicProducer
 from .openai_integration import OpenAIMusicProducer
 from .ai_manager import SampleMindAIManager, AIProviderConfig, AIProvider, AnalysisType
+from .acoustid_client import AcoustIDClient, quick_identify, quick_duplicates
 
 try:
     from .anthropic_integration import AnthropicMusicProducer
@@ -28,4 +29,7 @@ __all__ = [
     'AIProvider',
     'AnalysisType',
     'ANTHROPIC_AVAILABLE',
+    'AcoustIDClient',
+    'quick_identify',
+    'quick_duplicates',
 ]

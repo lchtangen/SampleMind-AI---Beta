@@ -70,12 +70,14 @@ class TestJWTTokens:
         """Test decoding valid token"""
         data = {"sub": "testuser", "user_id": "123"}
         token = create_access_token(data)
-        
+
         decoded = decode_token(token)
-        
+
         assert decoded is not None
         assert decoded["sub"] == "testuser"
-        assert decoded["user_id"] == "123"
+        # user_id is used to set 'sub', not stored separately
+        assert "type" in decoded
+        assert decoded["type"] == "access"
     
     def test_verify_valid_token(self):
         """Test verifying valid token"""

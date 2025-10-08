@@ -1,0 +1,264 @@
+# Critical Alert Rules for SampleMind AI
+# These alerts require immediate attention and trigger PagerDuty
+
+groups:
+  - name: critical_api
+    interval: 30s
+    rules:
+      # API Error Rate > 1%
+      - alert: HighAPIErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{job="samplemind-api",status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{job="samplemind-api"}[5m]))
+          ) * 100 > 1
+        for: 2m
+        labels:
+          severity: critical
+          component: api
+          team: backend
+        annotations:
+          summary: "High API error rate detected"
+          description: "API error rate is {{ $value | humanizePercentage }} (threshold: 1%)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-system-overview"
+          runbook: "https://wiki.samplemind.ai/runbooks/high-error-rate"
+          impact: "Users experiencing service degradation"
+          action: "Check API logs and investigate failing endpoints immediately"
+
+      # Response Time p95 > 1s
+      - alert: HighAPIResponseTime
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket{job="samplemind-api"}[5m])) by (le)
+          ) > 1
+        for: 3m
+        labels:
+          severity: critical
+          component: api
+          team: backend
+        annotations:
+          summary: "API response time exceeds threshold"
+          description: "API p95 response time is {{ $value | humanizeDuration }} (threshold: 1s)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-system-overview"
+          runbook: "https://wiki.samplemind.ai/runbooks/slow-response-time"
+          impact: "Severe user experience degradation"
+          action: "Investigate slow queries, check database performance, review recent deployments"
+
+  - name: critical_service
+    interval: 30s
+    rules:
+      # Service Down
+      - alert: ServiceDown
+        expr: up{job=~"samplemind-api|celery-workers|mongodb|redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: infrastructure
+          team: devops
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.job }} on {{ $labels.instance }} has been down for more than 1 minute"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-system-overview"
+          runbook: "https://wiki.samplemind.ai/runbooks/service-down"
+          impact: "Critical service unavailable - complete outage possible"
+          action: "Check service health immediately, review logs, restart if necessary"
+
+      # API Service Completely Down
+      - alert: APICompleteOutage
+        expr: |
+          absent(up{job="samplemind-api"}) or
+          count(up{job="samplemind-api"} == 1) == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: api
+          team: backend
+        annotations:
+          summary: "API service complete outage"
+          description: "No API instances are responding"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-system-overview"
+          runbook: "https://wiki.samplemind.ai/runbooks/complete-outage"
+          impact: "COMPLETE SERVICE OUTAGE - All users affected"
+          action: "Emergency response required - escalate to on-call engineer immediately"
+
+  - name: critical_database
+    interval: 30s
+    rules:
+      # Database Connections Exhausted
+      - alert: DatabaseConnectionsExhausted
+        expr: |
+          (
+            mongodb_connection_pool_current_connections
+            /
+            mongodb_connection_pool_max_connections
+          ) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+          component: database
+          team: backend
+        annotations:
+          summary: "Database connection pool nearly exhausted"
+          description: "MongoDB connection pool utilization is {{ $value | humanizePercentage }} (threshold: 95%)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-database-performance"
+          runbook: "https://wiki.samplemind.ai/runbooks/connection-pool-exhaustion"
+          impact: "New requests will fail - service degradation imminent"
+          action: "Scale up connection pool, investigate connection leaks, check for slow queries"
+
+      # MongoDB Down
+      - alert: MongoDBDown
+        expr: up{job="mongodb"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: database
+          team: backend
+        annotations:
+          summary: "MongoDB is down"
+          description: "MongoDB has been unreachable for more than 1 minute"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-database-performance"
+          runbook: "https://wiki.samplemind.ai/runbooks/mongodb-down"
+          impact: "Critical database outage - all data operations failing"
+          action: "Check MongoDB service status, review logs, attempt restart with data integrity checks"
+
+      # Redis Down
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: cache
+          team: backend
+        annotations:
+          summary: "Redis is down"
+          description: "Redis has been unreachable for more than 1 minute"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-database-performance"
+          runbook: "https://wiki.samplemind.ai/runbooks/redis-down"
+          impact: "Cache unavailable - severe performance degradation expected"
+          action: "Check Redis service status, review logs, restart if necessary"
+
+  - name: critical_resources
+    interval: 30s
+    rules:
+      # Disk Space < 10%
+      - alert: DiskSpaceCritical
+        expr: |
+          (
+            node_filesystem_avail_bytes{mountpoint="/",fstype!="tmpfs"}
+            /
+            node_filesystem_size_bytes{mountpoint="/",fstype!="tmpfs"}
+          ) * 100 < 10
+        for: 5m
+        labels:
+          severity: critical
+          component: infrastructure
+          team: devops
+        annotations:
+          summary: "Critical disk space remaining"
+          description: "Disk space on {{ $labels.instance }} is {{ $value | humanizePercentage }} (threshold: 10%)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-system-overview"
+          runbook: "https://wiki.samplemind.ai/runbooks/disk-space-critical"
+          impact: "System may become unstable or crash"
+          action: "Clean up logs, remove old data, expand disk immediately"
+
+      # Memory Usage Critical
+      - alert: MemoryUsageCritical
+        expr: |
+          (
+            1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)
+          ) * 100 > 95
+        for: 5m
+        labels:
+          severity: critical
+          component: infrastructure
+          team: devops
+        annotations:
+          summary: "Critical memory usage"
+          description: "Memory usage on {{ $labels.instance }} is {{ $value | humanizePercentage }} (threshold: 95%)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-system-overview"
+          runbook: "https://wiki.samplemind.ai/runbooks/memory-critical"
+          impact: "Risk of OOM kills and service crashes"
+          action: "Identify memory-hungry processes, scale horizontally, restart services if necessary"
+
+  - name: critical_celery
+    interval: 30s
+    rules:
+      # Celery Workers All Down
+      - alert: CeleryWorkersDown
+        expr: |
+          absent(celery_worker_count) or
+          celery_worker_count == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: workers
+          team: backend
+        annotations:
+          summary: "All Celery workers are down"
+          description: "No Celery workers are active"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-audio-processing"
+          runbook: "https://wiki.samplemind.ai/runbooks/celery-workers-down"
+          impact: "Background job processing completely stopped"
+          action: "Check Celery worker processes, review broker connectivity, restart workers"
+
+      # Queue Depth Critical
+      - alert: QueueDepthCritical
+        expr: celery_queue_length{queue="audio_processing"} > 5000
+        for: 10m
+        labels:
+          severity: critical
+          component: workers
+          team: backend
+        annotations:
+          summary: "Critical queue depth in Celery"
+          description: "Queue depth is {{ $value }} tasks (threshold: 5000)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-audio-processing"
+          runbook: "https://wiki.samplemind.ai/runbooks/queue-depth-critical"
+          impact: "Severe processing delays - new requests backing up"
+          action: "Scale up workers immediately, investigate worker failures, check task processing time"
+
+  - name: critical_ml
+    interval: 30s
+    rules:
+      # GPU Memory Exhausted
+      - alert: GPUMemoryExhausted
+        expr: |
+          (
+            nvidia_gpu_memory_used_bytes
+            /
+            nvidia_gpu_memory_total_bytes
+          ) * 100 > 95
+        for: 5m
+        labels:
+          severity: critical
+          component: ml
+          team: ml-ops
+        annotations:
+          summary: "GPU memory nearly exhausted"
+          description: "GPU memory usage is {{ $value | humanizePercentage }} (threshold: 95%)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-ml-models"
+          runbook: "https://wiki.samplemind.ai/runbooks/gpu-memory-exhausted"
+          impact: "ML inference failures likely"
+          action: "Reduce batch sizes, clear GPU cache, investigate memory leaks"
+
+      # Model Inference Failures
+      - alert: ModelInferenceFailureRate
+        expr: |
+          (
+            sum(rate(model_inference_total{status="failure"}[5m]))
+            /
+            sum(rate(model_inference_total[5m]))
+          ) * 100 > 5
+        for: 5m
+        labels:
+          severity: critical
+          component: ml
+          team: ml-ops
+        annotations:
+          summary: "High model inference failure rate"
+          description: "Model inference failure rate is {{ $value | humanizePercentage }} (threshold: 5%)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-ml-models"
+          runbook: "https://wiki.samplemind.ai/runbooks/inference-failures"
+          impact: "Audio processing features failing"
+          action: "Check model health, review error logs, verify model files integrity"

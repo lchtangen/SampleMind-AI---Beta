@@ -1,0 +1,86 @@
+# =============================================================================
+# SampleMind AI - Kubernetes Namespace
+# Production namespace with resource quotas and limits
+# =============================================================================
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: samplemind-production
+  labels:
+    name: samplemind-production
+    app: samplemind
+    environment: production
+    managed-by: kustomize
+    version: "1.0"
+  annotations:
+    description: "SampleMind AI production environment"
+    contact: "devops@samplemind.ai"
+
+---
+# Resource Quotas for the namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: samplemind-quota
+  namespace: samplemind-production
+spec:
+  hard:
+    # Compute resources
+    requests.cpu: "20"
+    requests.memory: 40Gi
+    limits.cpu: "40"
+    limits.memory: 80Gi
+    
+    # Storage
+    requests.storage: 200Gi
+    persistentvolumeclaims: "10"
+    
+    # Object counts
+    pods: "50"
+    services: "20"
+    configmaps: "20"
+    secrets: "20"
+    
+---
+# Limit Ranges for the namespace
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: samplemind-limits
+  namespace: samplemind-production
+spec:
+  limits:
+  # Container limits
+  - type: Container
+    max:
+      cpu: "4"
+      memory: 8Gi
+    min:
+      cpu: "100m"
+      memory: 128Mi
+    default:
+      cpu: "500m"
+      memory: 512Mi
+    defaultRequest:
+      cpu: "250m"
+      memory: 256Mi
+    maxLimitRequestRatio:
+      cpu: "4"
+      memory: "4"
+      
+  # Pod limits
+  - type: Pod
+    max:
+      cpu: "8"
+      memory: 16Gi
+    min:
+      cpu: "100m"
+      memory: 128Mi
+      
+  # PVC limits
+  - type: PersistentVolumeClaim
+    max:
+      storage: 100Gi
+    min:
+      storage: 1Gi

@@ -1,0 +1,13 @@
+{
+  "timestamp": 1759583365.2772212,
+  "benchmarks": {
+    "numba": {
+      "numba_chroma_correlation_10k": "0.1902s",
+      "operations_per_second": 52585
+    },
+    "batch": {
+      "optimal_workers": 8,
+      "expected_speedup": "8x"
+    }
+  }
+}

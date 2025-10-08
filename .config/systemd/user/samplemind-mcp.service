@@ -1,0 +1,12 @@
+[Unit]
+Description=SampleMind AI MCP Servers Auto-Start
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/lchta/Projects/Samplemind-AI/scripts/mcp-auto-start.sh
+WorkingDirectory=/home/lchta/Projects/Samplemind-AI
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target

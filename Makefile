@@ -74,3 +74,51 @@ clean: ## Clean temporary files
 
 doctor: ## Check system health
 	$(PYTHON) -m src.core.utils.doctor
+
+# ============================================================================
+# Performance Testing (NEW in v7)
+# ============================================================================
+
+benchmark: ## Run API performance benchmark
+	@echo "🚀 Running performance benchmarks..."
+	locust -f scripts/performance/benchmark.py --host=http://localhost:8000 \
+		--users 100 --spawn-rate 10 --run-time 5m --headless
+
+benchmark-quick: ## Quick benchmark (10 users, 2 min)
+	@echo "⚡ Running quick benchmark..."
+	locust -f scripts/performance/benchmark.py --host=http://localhost:8000 \
+		--users 10 --spawn-rate 2 --run-time 2m --headless
+
+benchmark-stress: ## Stress test (500 users, 15 min)
+	@echo "💪 Running stress test..."
+	locust -f scripts/performance/benchmark.py --host=http://localhost:8000 \
+		--users 500 --spawn-rate 50 --run-time 15m --headless
+
+benchmark-ui: ## Run benchmark with web UI
+	@echo "🌐 Starting Locust Web UI at http://localhost:8089"
+	locust -f scripts/performance/benchmark.py --host=http://localhost:8000
+
+profile: ## Profile memory usage with memray
+	@echo "🔍 Profiling memory usage..."
+	memray run -o memray-output.bin scripts/performance/profile_memory.py
+	@echo "📊 Generating flamegraph..."
+	memray flamegraph memray-output.bin -o memray-flamegraph.html
+	@echo "✅ View results: memray-flamegraph.html"
+
+profile-cpu: ## Profile CPU usage with py-spy
+	@echo "⚡ Profiling CPU usage (sampling for 60s)..."
+	py-spy record -o profile-cpu.svg --duration 60 -- python main.py
+	@echo "✅ View results: profile-cpu.svg"
+
+perf-test: benchmark profile ## Run all performance tests
+	@echo "✅ All performance tests complete!"
+
+# Database performance
+setup-db-indexes: ## Create MongoDB performance indexes
+	@echo "📊 Creating MongoDB indexes..."
+	mongosh --file config/mongodb-indexes.js
+	@echo "✅ Database indexes created!"
+
+test-parallel: ## Run tests in parallel (faster)
+	@echo "🧪 Running tests in parallel..."
+	$(PYTHON) -m pytest tests/ -n auto -v --dist loadfile

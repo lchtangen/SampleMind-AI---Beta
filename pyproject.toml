@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "samplemind-ai"
-version = "2.0.0-beta"
+version = "1.0.0-phoenix-beta"  # 1.0.0 Phoenix Beta
 description = "AI-powered music production platform with intelligent sample analysis and organization"
 authors = ["SampleMind Team <team@samplemind.ai>"]
 readme = "README.md"
@@ -13,6 +13,7 @@ homepage = "https://samplemind.ai"
 repository = "https://github.com/samplemind/samplemind-ai-v6"
 documentation = "https://docs.samplemind.ai"
 keywords = ["music", "ai", "audio", "samples", "production", "ml", "daw"]
+packages = [{include = "samplemind", from = "src"}]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -28,44 +29,63 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.11"
-# Core dependencies
-fastapi = "^0.104.1"
-uvicorn = {extras = ["standard"], version = "^0.24.0"}
-pydantic = "^2.5.0"
-pydantic-settings = "^2.1.0"
+# Core dependencies - UPGRADED for v7 Performance & Security
+fastapi = "^0.118.0"  # Updated for security patch
+uvicorn = {extras = ["standard"], version = "^0.32.1"}
+pydantic = "^2.9.2"
+pydantic-settings = "^2.5.0"
 
-# Audio processing
-librosa = "^0.10.1"
-soundfile = "^0.12.1"
+# High-performance additions
+orjson = "^3.10.11"  # Ultra-fast JSON serialization (2-3x faster)
+msgpack = "^1.1.0"  # Binary serialization
+uvloop = "^0.21.0"  # High-performance event loop (2-4x faster)
+hiredis = "^3.0.0"  # Fast Redis protocol parser
+
+# Audio processing - UPGRADED
+librosa = "^0.10.2.post1"
+soundfile = "^0.13.0"
 audioread = "^3.0.1"
-resampy = "^0.4.2"
-scipy = "^1.11.4"
-numpy = "^1.25.2"
+resampy = "^0.4.3"
+scipy = "^1.14.1"
+numpy = "^2.1.3"
+numba = "^0.60.0"  # JIT compilation for 100-1000x speedup
+joblib = "^1.4.2"  # Parallel processing for multi-core utilization
 
-# AI and ML
-torch = "^2.1.0"
-transformers = "^4.35.0"
-sentence-transformers = "^2.2.2"
-openai = "^1.3.0"
-anthropic = "^0.7.0"
-ollama = "^0.1.7"
-google-generativeai = "^0.3.0"
+# AI and ML - UPGRADED to latest versions
+torch = "^2.5.1"  # torch.compile() for 2x inference speed
+transformers = "^4.46.3"  # FlashAttention-2, better performance
+sentence-transformers = "^3.3.1"  # Faster embeddings
+openai = "^1.54.5"  # Latest SDK with streaming improvements
+anthropic = "^0.39.0"  # Latest Claude API with better streaming
+ollama = "^0.4.4"  # Updated local model support
+google-generativeai = "^0.8.3"  # Latest Gemini SDK
 
 # Audio Analysis & Processing Extensions
-spleeter = "^2.4.0"
-basic-pitch = "^0.2.5"
+# Note: spleeter is not compatible with Python 3.12 yet
+# spleeter = "^2.4.0"  # Commented out for Python 3.12 compatibility
+# Note: basic-pitch requires numpy<1.24, conflicts with our numpy>=1.25.2 requirement
+# basic-pitch = "^0.2.5"  # Commented out for numpy version compatibility
 mido = "^1.3.0"  # MIDI file I/O
+# madmom = "^0.16.1"  # Advanced rhythm analysis - TEMP DISABLED: Python 3.11 compatibility issues
+pyacoustid = "^1.3.0"  # AcoustID fingerprinting
+musicbrainzngs = "^0.7.1"  # MusicBrainz metadata
+# Phase 2: AI/ML Advanced Features
+# demucs = "^4.0.1"  # Multi-stem audio separation - TEMP DISABLED: Heavy dependency
+# torchaudio = "^2.8.0"  # PyTorch audio processing - TEMP DISABLED: Not critical for beta
+# torchvision = "^0.23.0"  # CNN models and vision transforms - TEMP DISABLED: Not critical for beta
+# essentia = "^2.1b6"  # Advanced audio feature extraction - TEMP DISABLED: Version not available
 
-# Database
-motor = "^3.3.1"  # MongoDB async driver
-redis = "^5.0.1"
-chromadb = "^0.4.17"
+# Database - UPGRADED
+motor = "^3.6.0"  # MongoDB async driver with connection pooling improvements
+redis = "^5.2.0"  # Latest Redis client
+chromadb = "^0.5.23"  # Improved vector search performance
+aiocache = "^0.12.3"  # Async caching decorator support
 
-# Web framework
-starlette = "^0.27.0"
-jinja2 = "^3.1.2"
-python-multipart = "^0.0.6"
-websockets = "^12.0"
+# Web framework - UPGRADED with Security Patches
+starlette = "^0.48.0"  # Security fix: GHSA-2c2j-9gv5-cj73, GHSA-f96h-pmfr-66vw
+jinja2 = "^3.1.6"  # Security fix: GHSA-q2x7-8rv6-6q7h, GHSA-gmj6-6f8f-6699, GHSA-cpwx-vrp4-4pq7
+python-multipart = "^0.0.20"  # Security fix: GHSA-2jv5-9r88-3w3p, GHSA-59g5-xgcq-4qw3
+websockets = "^14.1"  # Latest with performance improvements
 
 # Authentication
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
@@ -74,41 +94,46 @@ passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 # CLI & TUI
 click = "^8.1.7"
 rich = "^13.7.0"
-typer = "^0.9.0"
+typer = ">=0.9.0"
 questionary = "^2.0.1"
 textual = "^0.44.0"  # Modern TUI framework
 textual-plotext = "^0.2.0"  # Plotting for TUI
 
-# Utilities
-python-dotenv = "^1.0.0"
-loguru = "^0.7.2"
-httpx = "^0.25.2"
-aiofiles = "^23.2.1"
-structlog = "^23.2.0"
+# Utilities - UPGRADED
+python-dotenv = "^1.0.1"
+loguru = "^0.7.3"
+httpx = {extras = ["http2"], version = "^0.27.2"}  # HTTP/2 support for better performance
+aiofiles = "^24.1.0"
+structlog = "^24.4.0"
 
 [tool.poetry.group.dev.dependencies]
-# Testing
-pytest = "^7.4.3"
-pytest-asyncio = "^0.21.1"
-pytest-cov = "^4.1.0"
-pytest-mock = "^3.12.0"
-pytest-xdist = "^3.4.0"
+# Testing - UPGRADED
+pytest = "^8.3.3"
+pytest-asyncio = "^0.24.0"
+pytest-cov = "^6.0.0"
+pytest-mock = "^3.14.0"
+pytest-xdist = "^3.6.1"  # Parallel test execution
+pytest-benchmark = "^5.1.0"  # Performance regression testing
 
-# Code quality
-ruff = "^0.1.6"
-black = "^23.11.0"
-isort = "^5.12.0"
-mypy = "^1.7.1"
-bandit = {extras = ["toml"], version = "^1.7.5"}
-safety = "^2.3.5"
+# Code quality - UPGRADED
+ruff = "^0.8.2"  # Ultra-fast linter (10-100x faster than pylint)
+black = "^24.10.0"
+isort = "^5.13.2"
+mypy = "^1.13.0"
+bandit = {extras = ["toml"], version = "^1.8.0"}
+safety = "^3.2.11"
 
-# Development tools
-pre-commit = "^3.5.0"
-commitizen = "^3.12.0"
+# Development tools - UPGRADED
+pre-commit = "^4.0.1"
+commitizen = "^3.29.1"
+
+# Profiling tools (NEW)
+py-spy = "^0.3.14"  # Sampling profiler
+memray = "^1.14.0"  # Memory profiler
+locust = "^2.32.2"  # Load testing
 
 [tool.poetry.scripts]
-samplemind = "src.interfaces.cli.main:app"
-smai = "src.interfaces.cli.main:app"
+samplemind = "samplemind.interfaces.cli.main:app"
 
 [tool.black]
 line-length = 88

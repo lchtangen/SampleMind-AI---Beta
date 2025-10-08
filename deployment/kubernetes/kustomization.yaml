@@ -1,0 +1,220 @@
+# =============================================================================
+# SampleMind AI - Kustomize Configuration
+# Simplified deployment management with kustomize
+# =============================================================================
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Metadata
+metadata:
+  name: samplemind-production
+  annotations:
+    description: "SampleMind AI Production Deployment"
+
+# Target namespace for all resources
+namespace: samplemind-production
+
+# Common labels applied to all resources
+commonLabels:
+  app: samplemind
+  environment: production
+  managed-by: kustomize
+  version: "1.0"
+
+# Common annotations applied to all resources
+commonAnnotations:
+  contact: "devops@samplemind.ai"
+  documentation: "https://docs.samplemind.ai"
+
+# Resources to include in deployment
+resources:
+  # Core Configuration
+  - namespace.yaml
+  - configmap.yaml
+  - secrets.yaml
+  
+  # Service Accounts & RBAC
+  - serviceaccount.yaml
+  
+  # Storage
+  - pvc.yaml
+  
+  # Deployments
+  - backend-deployment.yaml
+  - celery-deployment.yaml
+  - frontend-deployment.yaml
+  
+  # Services
+  - service.yaml
+  
+  # Ingress
+  - ingress.yaml
+  
+  # Auto-Scaling
+  - hpa.yaml
+  
+  # Security
+  - networkpolicy.yaml
+  
+  # Monitoring
+  - monitoring.yaml
+
+# Images to use (can be overridden per environment)
+images:
+  - name: samplemind/backend
+    newName: samplemind/backend
+    newTag: latest
+  - name: samplemind/frontend
+    newName: samplemind/frontend
+    newTag: latest
+  - name: samplemind/celery
+    newName: samplemind/celery
+    newTag: latest
+
+# ConfigMap generator (alternative to configmap.yaml)
+# configMapGenerator:
+#   - name: samplemind-config
+#     literals:
+#       - ENVIRONMENT=production
+#       - LOG_LEVEL=info
+
+# Secret generator (use with caution - prefer external secret management)
+# secretGenerator:
+#   - name: samplemind-secrets
+#     envs:
+#       - .env.production
+
+# Namespace creation
+# namespace: samplemind-production
+
+# Replicas (can override deployment replicas)
+replicas:
+  - name: backend
+    count: 3
+  - name: frontend
+    count: 2
+  - name: celery-worker
+    count: 2
+
+# Patches - Strategic merge patches for customization
+patches:
+  # Example: Override backend image
+  - target:
+      kind: Deployment
+      name: backend
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: samplemind/backend:latest
+
+# Name prefix for all resources (optional)
+# namePrefix: prod-
+
+# Name suffix for all resources (optional)
+# nameSuffix: -v1
+
+# Labels to add to all resources (in addition to commonLabels)
+labels:
+  - pairs:
+      deployment-tool: kustomize
+      team: platform
+
+# Configurations
+configurations:
+  - kustomizeconfig.yaml
+
+# =============================================================================
+# USAGE INSTRUCTIONS
+# =============================================================================
+#
+# BASIC DEPLOYMENT:
+# kubectl apply -k .
+#
+# DRY RUN (see what would be applied):
+# kubectl apply -k . --dry-run=client -o yaml
+#
+# BUILD MANIFESTS (without applying):
+# kubectl kustomize .
+#
+# DELETE RESOURCES:
+# kubectl delete -k .
+#
+# =============================================================================
+# ENVIRONMENT-SPECIFIC OVERLAYS
+# =============================================================================
+#
+# Create overlays for different environments:
+#
+# deployment/kubernetes/
+# ├── base/                    # Base configuration
+# │   ├── kustomization.yaml
+# │   └── *.yaml
+# ├── overlays/
+# │   ├── development/         # Dev environment
+# │   │   ├── kustomization.yaml
+# │   │   └── patches/
+# │   ├── staging/             # Staging environment
+# │   │   ├── kustomization.yaml
+# │   │   └── patches/
+# │   └── production/          # Production environment
+# │       ├── kustomization.yaml
+# │       └── patches/
+#
+# Development overlay example:
+# ---
+# apiVersion: kustomize.config.k8s.io/v1beta1
+# kind: Kustomization
+# 
+# namespace: samplemind-dev
+# 
+# bases:
+#   - ../../base
+# 
+# replicas:
+#   - name: backend
+#     count: 1
+#   - name: frontend
+#     count: 1
+# 
+# images:
+#   - name: samplemind/backend
+#     newTag: dev
+# ---
+#
+# Deploy to development:
+# kubectl apply -k overlays/development
+#
+# =============================================================================
+# ADVANCED FEATURES
+# =============================================================================
+#
+# 1. STRATEGIC MERGE PATCHES:
+#    Merge changes into existing resources
+#
+# 2. JSON PATCHES:
+#    Precise modifications using JSON Patch format
+#
+# 3. GENERATORS:
+#    Generate ConfigMaps and Secrets from files
+#
+# 4. TRANSFORMERS:
+#    Apply transformations across resources
+#
+# 5. COMPONENTS:
+#    Reusable configuration snippets
+#
+# =============================================================================
+# BEST PRACTICES
+# =============================================================================
+#
+# 1. Use overlays for environment-specific configuration
+# 2. Keep base configuration generic
+# 3. Use patches for small modifications
+# 4. Never commit secrets to git
+# 5. Pin image tags in production
+# 6. Test with dry-run before applying
+# 7. Use version control for kustomization files
+# 8. Document all customizations
+#
+# =============================================================================

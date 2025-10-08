@@ -1,10 +1,19 @@
-version: '3.8'
+# SampleMind AI v7 - Optimized Docker Compose Configuration
+# Enable BuildKit for faster builds
+x-build-config: &build-config
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
 
 services:
   samplemind-api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.optimized
+      cache_from:
+        - samplemind-api:latest
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+    image: samplemind-api:latest
     container_name: samplemind-api
     ports:
       - "8000:8000"
@@ -13,16 +22,36 @@ services:
       - MONGODB_URL=mongodb://mongodb:27017/samplemind
       - REDIS_URL=redis://redis:6379/0
       - OLLAMA_HOST=http://ollama:11434
+      - UVLOOP_ENABLED=1
+      - PYTHONUNBUFFERED=1
     volumes:
       - ./src:/app/src:cached
-      - ./data:/data
+      - ./data:/app/data:delegated
+      - ./cache:/app/cache:delegated
+      - ./logs:/app/logs:delegated
     depends_on:
-      - mongodb
-      - redis
-      - ollama
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+      chromadb:
+        condition: service_healthy
     networks:
       - samplemind-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
 
   ollama:
     image: ollama/ollama:latest
@@ -36,6 +65,12 @@ services:
     networks:
       - samplemind-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
 
   mongodb:
     image: mongo:7.0
@@ -44,34 +79,79 @@ services:
       - "27017:27017"
     environment:
       - MONGO_INITDB_DATABASE=samplemind
+    command: >
+      mongod
+      --wiredTigerCacheSizeGB 1.5
+      --wiredTigerMaxCacheOverflowFileSizeGB 0.5
+      --wiredTigerCollectionBlockCompressor snappy
     volumes:
       - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+      - ./config/mongodb-indexes.js:/docker-entrypoint-initdb.d/mongodb-indexes.js:ro
     networks:
       - samplemind-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
   redis:
-    image: redis:7.2-alpine
+    image: redis:7.4-alpine
     container_name: samplemind-redis
     ports:
       - "6379:6379"
-    command: redis-server --appendonly yes --maxmemory 1gb
+    command: redis-server /usr/local/etc/redis/redis.conf
     volumes:
       - redis_data:/data
+      - ./config/redis-performance.conf:/usr/local/etc/redis/redis.conf:ro
     networks:
       - samplemind-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 2.5G
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
 
   chromadb:
-    image: chromadb/chroma:latest
+    image: chromadb/chroma:0.5.23
     container_name: samplemind-chromadb
     ports:
       - "8002:8000"
+    environment:
+      - CHROMA_SERVER_HOST=0.0.0.0
+      - CHROMA_SERVER_HTTP_PORT=8000
+      - ANONYMIZED_TELEMETRY=False
     volumes:
       - chromadb_data:/chroma/chroma
     networks:
       - samplemind-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
 
 networks:
   samplemind-network:
@@ -79,6 +159,12 @@ networks:
 
 volumes:
   mongodb_data:
+    driver: local
+  mongodb_config:
+    driver: local
   redis_data:
+    driver: local
   chromadb_data:
+    driver: local
   ollama_models:
+    driver: local

@@ -2,9 +2,17 @@
 """Simple Gemini API Test for Music Analysis"""
 import google.generativeai as genai
 import json
+import os
+from dotenv import load_dotenv
 
-# Configure API
-api_key = 'AIzaSyDz7cVY4_urIGYBIIqxwY3zvYyXbMAIl64'
+# Load environment variables from .env file
+load_dotenv()
+
+# Configure API - get key from environment
+api_key = os.getenv('GOOGLE_AI_API_KEY')
+if not api_key:
+    raise ValueError("GOOGLE_AI_API_KEY not found in environment variables. Please set it in .env file")
+
 genai.configure(api_key=api_key)
 
 print('🎵 Testing Gemini API for Music Production Analysis\n')

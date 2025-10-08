@@ -1,0 +1,17 @@
+# SampleMind AI v6 - Core Dependencies Only
+# Minimal requirements for basic functionality
+
+fastapi==0.118.0
+uvicorn==0.37.0
+anthropic==0.69.0
+openai==2.1.0
+google-generativeai==0.8.5
+librosa==0.11.0
+numpy==2.3.3
+chromadb==1.1.0
+redis==6.4.0
+pymongo==4.15.2
+python-dotenv==1.1.1
+pydantic==2.11.10
+loguru==0.7.3
+psutil==7.1.0

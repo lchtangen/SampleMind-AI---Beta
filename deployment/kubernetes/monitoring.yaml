@@ -1,0 +1,440 @@
+# =============================================================================
+# SampleMind AI - Prometheus Monitoring Configuration
+# ServiceMonitor for automatic metrics discovery
+# =============================================================================
+
+# =============================================================================
+# Backend ServiceMonitor
+# =============================================================================
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: samplemind-backend-monitor
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: backend
+    prometheus: kube-prometheus
+spec:
+  selector:
+    matchLabels:
+      component: backend
+  
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics
+    scheme: http
+    
+  namespaceSelector:
+    matchNames:
+    - samplemind-production
+
+---
+# =============================================================================
+# Celery Worker ServiceMonitor
+# =============================================================================
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: samplemind-celery-monitor
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: celery-worker
+    prometheus: kube-prometheus
+spec:
+  selector:
+    matchLabels:
+      component: celery-worker
+  
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics
+    scheme: http
+  
+  namespaceSelector:
+    matchNames:
+    - samplemind-production
+
+---
+# =============================================================================
+# Prometheus Rules - Alerts & Recording Rules
+# =============================================================================
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: samplemind-alerts
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    prometheus: kube-prometheus
+spec:
+  groups:
+  # Application Performance Alerts
+  - name: samplemind.application
+    interval: 30s
+    rules:
+    # High error rate
+    - alert: HighErrorRate
+      expr: |
+        rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+      for: 5m
+      labels:
+        severity: critical
+        component: backend
+      annotations:
+        summary: "High error rate detected"
+        description: "Error rate is {{ $value | humanizePercentage }} for {{ $labels.instance }}"
+    
+    # High response time
+    - alert: HighResponseTime
+      expr: |
+        histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1.0
+      for: 5m
+      labels:
+        severity: warning
+        component: backend
+      annotations:
+        summary: "High response time detected"
+        description: "95th percentile response time is {{ $value }}s for {{ $labels.instance }}"
+    
+    # Low success rate
+    - alert: LowSuccessRate
+      expr: |
+        rate(http_requests_total{status=~"2.."}[5m]) / rate(http_requests_total[5m]) < 0.95
+      for: 5m
+      labels:
+        severity: warning
+        component: backend
+      annotations:
+        summary: "Low success rate detected"
+        description: "Success rate is {{ $value | humanizePercentage }} for {{ $labels.instance }}"
+  
+  # Resource Utilization Alerts
+  - name: samplemind.resources
+    interval: 30s
+    rules:
+    # High CPU usage
+    - alert: HighCPUUsage
+      expr: |
+        rate(container_cpu_usage_seconds_total{namespace="samplemind-production"}[5m]) > 0.8
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High CPU usage detected"
+        description: "CPU usage is {{ $value | humanizePercentage }} for {{ $labels.pod }}"
+    
+    # High memory usage
+    - alert: HighMemoryUsage
+      expr: |
+        container_memory_usage_bytes{namespace="samplemind-production"} / container_spec_memory_limit_bytes{namespace="samplemind-production"} > 0.9
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High memory usage detected"
+        description: "Memory usage is {{ $value | humanizePercentage }} for {{ $labels.pod }}"
+    
+    # Pod restart rate
+    - alert: PodRestartingOften
+      expr: |
+        rate(kube_pod_container_status_restarts_total{namespace="samplemind-production"}[15m]) > 0.1
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Pod restarting frequently"
+        description: "Pod {{ $labels.pod }} has restarted {{ $value }} times in 15 minutes"
+  
+  # Database Alerts
+  - name: samplemind.database
+    interval: 30s
+    rules:
+    # MongoDB connection issues
+    - alert: MongoDBConnectionIssues
+      expr: |
+        mongodb_connections_current{namespace="samplemind-production"} > mongodb_connections_available{namespace="samplemind-production"} * 0.8
+      for: 5m
+      labels:
+        severity: warning
+        component: mongodb
+      annotations:
+        summary: "MongoDB connection pool near capacity"
+        description: "MongoDB connections at {{ $value | humanizePercentage }} capacity"
+    
+    # Redis memory usage
+    - alert: RedisHighMemory
+      expr: |
+        redis_memory_used_bytes{namespace="samplemind-production"} / redis_memory_max_bytes{namespace="samplemind-production"} > 0.9
+      for: 5m
+      labels:
+        severity: warning
+        component: redis
+      annotations:
+        summary: "Redis memory usage high"
+        description: "Redis memory at {{ $value | humanizePercentage }} capacity"
+  
+  # Celery Queue Alerts
+  - name: samplemind.celery
+    interval: 30s
+    rules:
+    # Queue backup
+    - alert: CeleryQueueBackup
+      expr: |
+        celery_queue_length{namespace="samplemind-production"} > 1000
+      for: 10m
+      labels:
+        severity: warning
+        component: celery
+      annotations:
+        summary: "Celery queue backing up"
+        description: "Queue {{ $labels.queue }} has {{ $value }} pending tasks"
+    
+    # Worker failures
+    - alert: CeleryWorkerFailures
+      expr: |
+        rate(celery_task_failed_total{namespace="samplemind-production"}[5m]) > 0.1
+      for: 5m
+      labels:
+        severity: critical
+        component: celery
+      annotations:
+        summary: "High Celery task failure rate"
+        description: "Task failure rate is {{ $value }} for {{ $labels.worker }}"
+  
+  # Recording Rules (pre-compute expensive queries)
+  - name: samplemind.recording
+    interval: 30s
+    rules:
+    # Request rate by service
+    - record: job:http_requests:rate5m
+      expr: |
+        sum(rate(http_requests_total[5m])) by (job, instance)
+    
+    # Error rate by service
+    - record: job:http_errors:rate5m
+      expr: |
+        sum(rate(http_requests_total{status=~"5.."}[5m])) by (job, instance)
+    
+    # P95 latency
+    - record: job:http_request_duration_seconds:p95
+      expr: |
+        histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (job, le))
+    
+    # Resource usage
+    - record: pod:cpu_usage:rate5m
+      expr: |
+        sum(rate(container_cpu_usage_seconds_total{namespace="samplemind-production"}[5m])) by (pod)
+    
+    - record: pod:memory_usage:bytes
+      expr: |
+        sum(container_memory_usage_bytes{namespace="samplemind-production"}) by (pod)
+
+---
+# =============================================================================
+# Grafana Dashboard ConfigMap
+# =============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: samplemind-dashboard
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    grafana_dashboard: "1"
+data:
+  samplemind-overview.json: |
+    {
+      "dashboard": {
+        "title": "SampleMind AI Overview",
+        "tags": ["samplemind", "production"],
+        "timezone": "browser",
+        "panels": [
+          {
+            "title": "Request Rate",
+            "targets": [
+              {
+                "expr": "sum(rate(http_requests_total{namespace=\"samplemind-production\"}[5m]))"
+              }
+            ]
+          },
+          {
+            "title": "Error Rate",
+            "targets": [
+              {
+                "expr": "sum(rate(http_requests_total{namespace=\"samplemind-production\",status=~\"5..\"}[5m]))"
+              }
+            ]
+          },
+          {
+            "title": "Response Time (P95)",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{namespace=\"samplemind-production\"}[5m]))"
+              }
+            ]
+          },
+          {
+            "title": "Pod Count",
+            "targets": [
+              {
+                "expr": "count(kube_pod_info{namespace=\"samplemind-production\"})"
+              }
+            ]
+          }
+        ]
+      }
+    }
+
+---
+# =============================================================================
+# PodMonitor (alternative to ServiceMonitor for pods without services)
+# =============================================================================
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: samplemind-pod-monitor
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    prometheus: kube-prometheus
+spec:
+  selector:
+    matchLabels:
+      app: samplemind
+  
+  podMetricsEndpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics
+  
+  namespaceSelector:
+    matchNames:
+    - samplemind-production
+
+---
+# =============================================================================
+# NOTES ON PROMETHEUS MONITORING
+# =============================================================================
+#
+# PREREQUISITES:
+# - Prometheus Operator must be installed
+# - Install with:
+#   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+#   helm install kube-prometheus prometheus-community/kube-prometheus-stack -n monitoring --create-namespace
+#
+# SERVICEMONITOR:
+# - Automatically discovers services with matching labels
+# - Prometheus scrapes metrics from discovered endpoints
+# - No manual Prometheus configuration needed
+#
+# METRICS ENDPOINTS:
+# Backend exposes metrics at:
+# - http://<pod-ip>:9090/metrics
+#
+# Common metrics to monitor:
+# - http_requests_total - Request count
+# - http_request_duration_seconds - Request latency
+# - process_cpu_seconds_total - CPU usage
+# - process_resident_memory_bytes - Memory usage
+# - celery_task_total - Celery tasks
+# - mongodb_connections_current - DB connections
+#
+# ALERT CONFIGURATION:
+# PrometheusRule defines:
+# - Alerts: Conditions that trigger notifications
+# - Recording Rules: Pre-computed metrics for efficiency
+#
+# ALERT ROUTING:
+# Configure Alertmanager to send alerts to:
+# - Slack
+# - PagerDuty
+# - Email
+# - Webhook
+#
+# Example Alertmanager config:
+# receivers:
+# - name: 'slack'
+#   slack_configs:
+#   - api_url: 'https://hooks.slack.com/services/...'
+#     channel: '#alerts'
+#
+# GRAFANA DASHBOARDS:
+# - Auto-discovered if labeled with grafana_dashboard: "1"
+# - Access Grafana UI to view dashboards
+# - Import additional dashboards from grafana.com
+#
+# TESTING:
+# 1. Check ServiceMonitor:
+#    kubectl get servicemonitor -n samplemind-production
+#
+# 2. Verify Prometheus targets:
+#    kubectl port-forward -n monitoring svc/prometheus-kube-prometheus-prometheus 9090:9090
+#    Open: http://localhost:9090/targets
+#
+# 3. Query metrics:
+#    kubectl port-forward -n monitoring svc/prometheus-kube-prometheus-prometheus 9090:9090
+#    Open: http://localhost:9090/graph
+#    Query: rate(http_requests_total[5m])
+#
+# 4. Check alerts:
+#    kubectl get prometheusrules -n samplemind-production
+#
+# CUSTOM METRICS:
+# Add custom metrics to your application:
+#
+# Python (using prometheus_client):
+# from prometheus_client import Counter, Histogram
+# 
+# request_count = Counter('http_requests_total', 'Total requests', ['method', 'endpoint'])
+# request_duration = Histogram('http_request_duration_seconds', 'Request duration')
+#
+# QUERY EXAMPLES:
+#
+# Request rate:
+# rate(http_requests_total[5m])
+#
+# Error rate:
+# rate(http_requests_total{status=~"5.."}[5m])
+#
+# P95 latency:
+# histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
+#
+# CPU usage:
+# rate(container_cpu_usage_seconds_total{namespace="samplemind-production"}[5m])
+#
+# Memory usage:
+# container_memory_usage_bytes{namespace="samplemind-production"}
+#
+# GRAFANA SETUP:
+# 1. Access Grafana:
+#    kubectl port-forward -n monitoring svc/prometheus-grafana 3000:80
+#    Open: http://localhost:3000
+#    Login: admin / prom-operator
+#
+# 2. Add data source:
+#    - Type: Prometheus
+#    - URL: http://prometheus-kube-prometheus-prometheus:9090
+#
+# 3. Import dashboards:
+#    - Kubernetes cluster monitoring: 7249
+#    - Node exporter full: 1860
+#    - Prometheus 2.0 overview: 3662
+#
+# ALERTMANAGER SETUP:
+# 1. Configure receivers in AlertmanagerConfig
+# 2. Set up routing rules
+# 3. Test alerts:
+#    curl -XPOST http://alertmanager:9093/api/v1/alerts -d '[{...}]'
+#
+# PERFORMANCE TUNING:
+# 1. Adjust scrape intervals (increase for less load)
+# 2. Use recording rules for expensive queries
+# 3. Set retention periods appropriately
+# 4. Filter unnecessary metrics
+# 5. Use metric relabeling to reduce cardinality
+#
+# =============================================================================

@@ -1,148 +1,277 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: samplemind
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: backend-config
-  namespace: samplemind
-data:
-  ENVIRONMENT: "production"
-  LOG_LEVEL: "info"
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: backend-secrets
-  namespace: samplemind
-type: Opaque
-stringData:
-  MONGODB_URL: "mongodb://username:password@mongodb:27017/samplemind"
-  REDIS_URL: "redis://:password@redis:6379/0"
-  SECRET_KEY: "your-secret-key-here"
-  GOOGLE_AI_API_KEY: "your-google-api-key"
-  OPENAI_API_KEY: "your-openai-api-key"
----
+# =============================================================================
+# SampleMind AI - Backend API Deployment
+# Production-ready deployment with auto-scaling support
+# =============================================================================
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend
-  namespace: samplemind
+  namespace: samplemind-production
   labels:
-    app: backend
+    app: samplemind
+    component: backend
     tier: api
+    version: "1.0"
+  annotations:
+    description: "SampleMind AI Backend API Service"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8000"
+    prometheus.io/path: "/metrics"
 spec:
+  # Initial replicas (HPA will manage this)
   replicas: 3
+  
+  # Selector to match pods
   selector:
     matchLabels:
-      app: backend
+      app: samplemind
+      component: backend
+      tier: api
+  
+  # Rolling update strategy for zero-downtime deployments
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1              # Allow 1 extra pod during updates
+      maxUnavailable: 0        # Ensure zero downtime
+  
+  # Minimum time a pod should be ready before considered available
+  minReadySeconds: 10
+  
+  # Number of old ReplicaSets to retain for rollback
+  revisionHistoryLimit: 10
+  
+  # Template for pod creation
   template:
     metadata:
       labels:
-        app: backend
+        app: samplemind
+        component: backend
         tier: api
+        version: "1.0"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
     spec:
+      # Service account for RBAC
+      serviceAccountName: samplemind-backend
+      
+      # Security context for the pod
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      
+      # Init containers for pre-flight checks
+      initContainers:
+      - name: wait-for-mongodb
+        image: busybox:1.36
+        command: ['sh', '-c']
+        args:
+          - |
+            until nc -z mongodb-service 27017; do
+              echo "Waiting for MongoDB..."
+              sleep 2
+            done
+            echo "MongoDB is ready!"
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+              - ALL
+      
+      - name: wait-for-redis
+        image: busybox:1.36
+        command: ['sh', '-c']
+        args:
+          - |
+            until nc -z redis-service 6379; do
+              echo "Waiting for Redis..."
+              sleep 2
+            done
+            echo "Redis is ready!"
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+              - ALL
+      
+      # Main application containers
       containers:
       - name: backend
         image: samplemind/backend:latest
         imagePullPolicy: Always
+        
+        # Container ports
         ports:
-        - containerPort: 8000
-          name: http
-        env:
-        - name: ENVIRONMENT
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: ENVIRONMENT
+        - name: http
+          containerPort: 8000
+          protocol: TCP
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+        
+        # Environment variables from ConfigMap
         envFrom:
+        - configMapRef:
+            name: samplemind-config
+        - configMapRef:
+            name: backend-config
         - secretRef:
-            name: backend-secrets
+            name: samplemind-secrets
+        
+        # Additional environment variables
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        
+        # Resource requests and limits
         resources:
           requests:
             memory: "512Mi"
-            cpu: "250m"
+            cpu: "500m"
+            ephemeral-storage: "1Gi"
           limits:
-            memory: "1Gi"
-            cpu: "1000m"
+            memory: "2Gi"
+            cpu: "2000m"
+            ephemeral-storage: "5Gi"
+        
+        # Liveness probe - checks if container is alive
         livenessProbe:
           httpGet:
             path: /api/v1/health/live
             port: 8000
+            scheme: HTTP
           initialDelaySeconds: 30
           periodSeconds: 10
           timeoutSeconds: 5
+          successThreshold: 1
           failureThreshold: 3
+        
+        # Readiness probe - checks if container is ready to serve traffic
         readinessProbe:
           httpGet:
             path: /api/v1/health/ready
             port: 8000
+            scheme: HTTP
           initialDelaySeconds: 15
           periodSeconds: 5
           timeoutSeconds: 3
+          successThreshold: 1
           failureThreshold: 3
+        
+        # Startup probe - gives app time to start up
+        startupProbe:
+          httpGet:
+            path: /api/v1/health/live
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 0
+          periodSeconds: 5
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 30  # 30 * 5 = 150 seconds max startup time
+        
+        # Volume mounts
         volumeMounts:
         - name: data
           mountPath: /app/data
+        - name: logs
+          mountPath: /app/logs
+        - name: tmp
+          mountPath: /tmp
+        - name: cache
+          mountPath: /app/.cache
+        
+        # Security context for container
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+              - ALL
+      
+      # Volumes
       volumes:
       - name: data
         persistentVolumeClaim:
-          claimName: backend-pvc
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: backend
-  namespace: samplemind
-  labels:
-    app: backend
-spec:
-  type: ClusterIP
-  ports:
-  - port: 8000
-    targetPort: 8000
-    protocol: TCP
-    name: http
-  selector:
-    app: backend
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: backend-pvc
-  namespace: samplemind
-spec:
-  accessModes:
-    - ReadWriteMany
-  resources:
-    requests:
-      storage: 10Gi
-  storageClassName: standard
----
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: backend-hpa
-  namespace: samplemind
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: backend
-  minReplicas: 2
-  maxReplicas: 10
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-  - type: Resource
-    resource:
-      name: memory
-      target:
-        type: Utilization
-        averageUtilization: 80
+          claimName: backend-data-pvc
+      - name: logs
+        persistentVolumeClaim:
+          claimName: backend-logs-pvc
+      - name: tmp
+        emptyDir: {}
+      - name: cache
+        emptyDir: {}
+      
+      # Image pull secrets (if using private registry)
+      imagePullSecrets:
+      - name: samplemind-registry
+      
+      # Affinity and anti-affinity rules
+      affinity:
+        # Prefer to spread pods across nodes
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: component
+                  operator: In
+                  values:
+                  - backend
+              topologyKey: kubernetes.io/hostname
+        
+        # Prefer nodes with SSD storage
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 50
+            preference:
+              matchExpressions:
+              - key: disk-type
+                operator: In
+                values:
+                - ssd
+      
+      # Topology spread constraints for better distribution
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            component: backend
+      
+      # Termination grace period
+      terminationGracePeriodSeconds: 30
+      
+      # DNS policy
+      dnsPolicy: ClusterFirst
+      
+      # Restart policy
+      restartPolicy: Always

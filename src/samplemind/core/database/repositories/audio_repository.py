@@ -50,6 +50,14 @@ class AudioRepository:
         return await AudioFile.find(AudioFile.user_id == user_id).skip(skip).limit(limit).to_list()
     
     @staticmethod
+    async def find_many(filter_dict: dict, skip: int = 0, limit: int = 50) -> List[AudioFile]:
+        """Find multiple audio files matching filter criteria"""
+        # For now, use get_by_user if user_id is in filter
+        if 'user_id' in filter_dict:
+            return await AudioFile.find(AudioFile.user_id == filter_dict['user_id']).skip(skip).limit(limit).to_list()
+        return await AudioFile.find_all().skip(skip).limit(limit).to_list()
+    
+    @staticmethod
     async def list_all(skip: int = 0, limit: int = 50) -> List[AudioFile]:
         """List all audio files with pagination"""
         return await AudioFile.find_all().skip(skip).limit(limit).to_list()

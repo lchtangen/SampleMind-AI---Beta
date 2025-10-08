@@ -1,0 +1,397 @@
+name: Daily Security Scan
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'requirements*.txt'
+      - 'pyproject.toml'
+      - 'Dockerfile*'
+
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  dependency-scan:
+    name: Dependency Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install safety pip-audit
+
+      - name: Run Safety check
+        id: safety
+        continue-on-error: true
+        run: |
+          safety check --json --output safety-report.json
+          safety check --output safety-report.txt
+
+      - name: Run pip-audit
+        id: pip-audit
+        continue-on-error: true
+        run: |
+          pip-audit --desc --format json --output pip-audit-report.json
+          pip-audit --desc
+
+      - name: Check for high-severity vulnerabilities
+        run: |
+          # Parse safety report for critical/high severity issues
+          CRITICAL_COUNT=$(cat safety-report.json | jq '[.vulnerabilities[] | select(.severity == "critical" or .severity == "high")] | length')
+          echo "Found $CRITICAL_COUNT critical/high severity vulnerabilities"
+          
+          if [ "$CRITICAL_COUNT" -gt 0 ]; then
+            echo "⚠️ WARNING: Critical or high severity vulnerabilities found!"
+            echo "Review the safety-report.txt file for details."
+            # Don't fail on scheduled runs, but create an issue
+            if [ "${{ github.event_name }}" = "schedule" ]; then
+              exit 0
+            else
+              exit 1
+            fi
+          fi
+          
+          echo "✓ No critical/high severity vulnerabilities found"
+
+      - name: Upload dependency scan reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-scan-reports
+          path: |
+            safety-report.json
+            safety-report.txt
+            pip-audit-report.json
+
+      - name: Create issue for vulnerabilities
+        if: failure() && github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const safetyReport = fs.readFileSync('safety-report.txt', 'utf8');
+            
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🔒 Security Alert: Vulnerable Dependencies Detected',
+              body: `## Security Scan Alert\n\nThe daily security scan has detected vulnerable dependencies.\n\n### Safety Report\n\`\`\`\n${safetyReport}\n\`\`\`\n\n**Action Required:** Review and update vulnerable dependencies.\n\n**Scan Date:** ${new Date().toISOString()}`,
+              labels: ['security', 'dependencies', 'urgent']
+            });
+
+  code-security-scan:
+    name: Code Security Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Bandit
+        run: |
+          pip install bandit[toml]
+
+      - name: Run Bandit security scanner
+        id: bandit
+        continue-on-error: true
+        run: |
+          bandit -r src/ -f json -o bandit-report.json
+          bandit -r src/ -f txt -o bandit-report.txt
+          bandit -r src/ -ll  # Only show high and medium confidence issues
+
+      - name: Check for high-severity issues
+        run: |
+          # Parse bandit report for high severity issues
+          HIGH_SEVERITY=$(cat bandit-report.json | jq '[.results[] | select(.issue_severity == "HIGH")] | length')
+          MEDIUM_SEVERITY=$(cat bandit-report.json | jq '[.results[] | select(.issue_severity == "MEDIUM")] | length')
+          
+          echo "Found $HIGH_SEVERITY high severity issues"
+          echo "Found $MEDIUM_SEVERITY medium severity issues"
+          
+          if [ "$HIGH_SEVERITY" -gt 0 ]; then
+            echo "⚠️ WARNING: High severity security issues found!"
+            cat bandit-report.txt
+            if [ "${{ github.event_name }}" != "schedule" ]; then
+              exit 1
+            fi
+          fi
+          
+          echo "✓ No high severity security issues found"
+
+      - name: Upload Bandit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-reports
+          path: |
+            bandit-report.json
+            bandit-report.txt
+
+      - name: Create issue for security issues
+        if: failure() && github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const banditReport = fs.readFileSync('bandit-report.txt', 'utf8');
+            
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🔒 Security Alert: Code Security Issues Detected',
+              body: `## Code Security Scan Alert\n\nBandit has detected security issues in the codebase.\n\n### Bandit Report\n\`\`\`\n${banditReport}\n\`\`\`\n\n**Action Required:** Review and fix security issues.\n\n**Scan Date:** ${new Date().toISOString()}`,
+              labels: ['security', 'code-quality', 'urgent']
+            });
+
+  container-security-scan:
+    name: Container Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image for scanning
+        run: |
+          docker build -f deployment/docker/Dockerfile.backend -t samplemind:scan .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'samplemind:scan'
+          format: 'json'
+          output: 'trivy-container-report.json'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          exit-code: '0'  # Don't fail on scheduled runs
+
+      - name: Run Trivy for SARIF output
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'samplemind:scan'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Check for critical vulnerabilities
+        run: |
+          CRITICAL_COUNT=$(cat trivy-container-report.json | jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length')
+          HIGH_COUNT=$(cat trivy-container-report.json | jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "HIGH")] | length')
+          
+          echo "Found $CRITICAL_COUNT critical vulnerabilities"
+          echo "Found $HIGH_COUNT high vulnerabilities"
+          
+          if [ "$CRITICAL_COUNT" -gt 0 ]; then
+            echo "⚠️ WARNING: Critical vulnerabilities found in container!"
+            if [ "${{ github.event_name }}" != "schedule" ]; then
+              exit 1
+            fi
+          fi
+          
+          echo "✓ Container scan completed"
+
+      - name: Upload Trivy reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-reports
+          path: |
+            trivy-container-report.json
+            trivy-results.sarif
+
+      - name: Create issue for container vulnerabilities
+        if: failure() && github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const trivyReport = JSON.parse(fs.readFileSync('trivy-container-report.json', 'utf8'));
+            
+            const criticalVulns = trivyReport.Results?.flatMap(r => 
+              r.Vulnerabilities?.filter(v => v.Severity === 'CRITICAL') || []
+            ) || [];
+            
+            const vulnList = criticalVulns.map(v => 
+              `- **${v.VulnerabilityID}**: ${v.Title || v.Description} (${v.PkgName})`
+            ).join('\n');
+            
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🔒 Security Alert: Critical Container Vulnerabilities',
+              body: `## Container Security Scan Alert\n\nTrivy has detected critical vulnerabilities in the Docker container.\n\n### Critical Vulnerabilities\n${vulnList || 'See artifacts for details'}\n\n**Action Required:** Update base image and vulnerable packages.\n\n**Scan Date:** ${new Date().toISOString()}`,
+              labels: ['security', 'container', 'critical']
+            });
+
+  secrets-scan:
+    name: Secret Detection Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for secret scanning
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+      - name: Run TruffleHog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          deny-licenses: GPL-2.0, GPL-3.0
+
+  license-scan:
+    name: License Compliance Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install pip-licenses
+
+      - name: Generate license report
+        run: |
+          pip install -r requirements.txt
+          pip-licenses --format=json --output-file=licenses.json
+          pip-licenses --format=markdown --output-file=licenses.md
+
+      - name: Check for problematic licenses
+        run: |
+          # Check for GPL licenses
+          GPL_COUNT=$(cat licenses.json | jq '[.[] | select(.License | contains("GPL"))] | length')
+          
+          if [ "$GPL_COUNT" -gt 0 ]; then
+            echo "⚠️ WARNING: Found $GPL_COUNT packages with GPL licenses"
+            cat licenses.json | jq '.[] | select(.License | contains("GPL"))'
+            
+            if [ "${{ github.event_name }}" != "schedule" ]; then
+              echo "GPL licenses detected. Please review for compatibility."
+              exit 1
+            fi
+          fi
+          
+          echo "✓ License check passed"
+
+      - name: Upload license reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-reports
+          path: |
+            licenses.json
+            licenses.md
+
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [dependency-scan, code-security-scan, container-security-scan, secrets-scan, license-scan]
+    if: always()
+    steps:
+      - name: Generate security summary
+        run: |
+          echo "# 🔒 Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Scan Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Scan Type | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Dependency Scan | ${{ needs.dependency-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Code Security | ${{ needs.code-security-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Container Security | ${{ needs.container-security-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Secrets Scan | ${{ needs.secrets-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| License Check | ${{ needs.license-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*Detailed reports available in workflow artifacts*" >> $GITHUB_STEP_SUMMARY
+
+      - name: Send Slack notification
+        if: failure() && github.event_name == 'schedule'
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "🔒 Security Alert: Daily security scan detected issues",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🔒 Security Scan Alert"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Daily security scan has detected security issues that require attention."
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Repository:*\n${{ github.repository }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Workflow:*\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

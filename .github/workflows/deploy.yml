@@ -1,0 +1,589 @@
+name: Deploy SampleMind AI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  PYTHON_VERSION: '3.12'
+  NODE_VERSION: '20'
+  DOCKER_BUILDKIT: 1
+
+jobs:
+  lint:
+    name: Code Quality & Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff black isort
+
+      - name: Run Ruff linter
+        run: ruff check src/ tests/ --output-format=github
+
+      - name: Check Black formatting
+        run: black --check src/ tests/
+
+      - name: Check isort formatting
+        run: isort --check-only src/ tests/
+
+      - name: Check for common issues
+        run: |
+          # Check for print statements in production code
+          ! grep -r "print(" src/ --include="*.py" || (echo "Found print statements in src/" && exit 1)
+          # Check for debug statements
+          ! grep -r "breakpoint()" src/ tests/ --include="*.py" || (echo "Found breakpoint() calls" && exit 1)
+
+  type-check:
+    name: Type Checking
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install mypy types-requests types-redis
+
+      - name: Run MyPy type checker
+        run: mypy src/ --config-file=pyproject.toml --junit-xml=mypy-report.xml
+
+      - name: Upload MyPy results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mypy-results
+          path: mypy-report.xml
+
+  test:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+        env:
+          MONGO_INITDB_ROOT_USERNAME: admin
+          MONGO_INITDB_ROOT_PASSWORD: testpass
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsndfile1 ffmpeg
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-test.txt
+          pip install pytest-cov pytest-xdist
+
+      - name: Create test environment file
+        run: |
+          cat > .env.test <<EOF
+          MONGODB_URI=mongodb://admin:testpass@localhost:27017/samplemind_test?authSource=admin
+          REDIS_URL=redis://localhost:6379/0
+          JWT_SECRET_KEY=test-secret-key-for-ci
+          ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
+          EOF
+
+      - name: Run pytest with coverage
+        env:
+          PYTHONPATH: ${{ github.workspace }}/src
+          ENV_FILE: .env.test
+        run: |
+          pytest tests/ \
+            --cov=src/samplemind \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-report=term \
+            --cov-fail-under=80 \
+            -n auto \
+            --maxfail=5 \
+            --tb=short \
+            --junit-xml=pytest-report.xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            pytest-report.xml
+            htmlcov/
+
+  security:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    needs: [lint, type-check]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit[toml] safety
+
+      - name: Run Bandit security scanner
+        run: |
+          bandit -r src/ -f json -o bandit-report.json || true
+          bandit -r src/ -f txt
+
+      - name: Check dependencies with Safety
+        run: |
+          pip install -r requirements.txt
+          safety check --json --output safety-report.json || true
+          safety check
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Upload security reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            bandit-report.json
+            safety-report.json
+            trivy-results.sarif
+
+  build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./deployment/docker/Dockerfile.backend
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+            VERSION=${{ steps.meta.outputs.version }}
+
+      - name: Run Trivy container scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.meta.outputs.tags }}
+          format: 'sarif'
+          output: 'trivy-container-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy container results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-container-results.sarif'
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: staging
+      url: https://staging.samplemind.ai
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Set up kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG_STAGING }}" | base64 -d > $HOME/.kube/config
+
+      - name: Deploy to Kubernetes (Blue-Green)
+        run: |
+          # Deploy new version (green)
+          kubectl set image deployment/samplemind-backend \
+            backend=ghcr.io/${{ github.repository }}:${{ github.sha }} \
+            -n staging
+          
+          # Wait for rollout
+          kubectl rollout status deployment/samplemind-backend -n staging --timeout=5m
+          
+          # Run health checks
+          kubectl wait --for=condition=ready pod \
+            -l app=samplemind-backend,version=green \
+            -n staging --timeout=2m
+
+      - name: Health check staging deployment
+        run: |
+          STAGING_URL="https://staging.samplemind.ai"
+          MAX_RETRIES=10
+          RETRY_DELAY=10
+          
+          for i in $(seq 1 $MAX_RETRIES); do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" $STAGING_URL/health)
+            if [ $HTTP_CODE -eq 200 ]; then
+              echo "✓ Health check passed"
+              exit 0
+            fi
+            echo "Attempt $i/$MAX_RETRIES failed (HTTP $HTTP_CODE), retrying in ${RETRY_DELAY}s..."
+            sleep $RETRY_DELAY
+          done
+          
+          echo "✗ Health check failed after $MAX_RETRIES attempts"
+          exit 1
+
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "Deployment failed, rolling back..."
+          kubectl rollout undo deployment/samplemind-backend -n staging
+          kubectl rollout status deployment/samplemind-backend -n staging
+
+      - name: Switch traffic (Complete Blue-Green)
+        run: |
+          # Update service to point to new version
+          kubectl patch service samplemind-backend \
+            -n staging \
+            -p '{"spec":{"selector":{"version":"green"}}}'
+          
+          # Wait briefly to ensure traffic is switched
+          sleep 10
+          
+          # Clean up old blue deployment if exists
+          kubectl delete deployment samplemind-backend-blue -n staging --ignore-not-found
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "🚀 Successfully deployed to staging environment"
+          echo "URL: https://staging.samplemind.ai"
+          echo "Version: ${{ github.sha }}"
+
+  load-test-staging:
+    name: Load Test Staging
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Locust
+        run: |
+          pip install locust
+
+      - name: Run load tests
+        run: |
+          cd tests/load
+          locust -f locustfile.py \
+            --host=https://staging.samplemind.ai \
+            --users=100 \
+            --spawn-rate=10 \
+            --run-time=5m \
+            --headless \
+            --html=load-test-report.html \
+            --csv=load-test-results
+
+      - name: Check load test results
+        run: |
+          # Parse CSV results and check metrics
+          ERROR_RATE=$(awk -F',' 'NR>1 {sum+=$9; count++} END {print sum/count}' tests/load/load-test-results_stats.csv)
+          P95_RESPONSE=$(awk -F',' 'NR>1 {print $7}' tests/load/load-test-results_stats.csv | sort -n | tail -1)
+          
+          echo "Error rate: $ERROR_RATE%"
+          echo "P95 response time: ${P95_RESPONSE}ms"
+          
+          # Fail if error rate > 0.1% or P95 > 500ms
+          if (( $(echo "$ERROR_RATE > 0.1" | bc -l) )); then
+            echo "✗ Load test failed: Error rate too high"
+            exit 1
+          fi
+          
+          if (( $(echo "$P95_RESPONSE > 500" | bc -l) )); then
+            echo "✗ Load test failed: P95 response time too high"
+            exit 1
+          fi
+          
+          echo "✓ Load test passed"
+
+      - name: Upload load test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-test-results
+          path: |
+            tests/load/load-test-report.html
+            tests/load/load-test-results*.csv
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [load-test-staging]
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://samplemind.ai
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Wait for manual approval
+        run: |
+          echo "⏳ Waiting for manual approval to deploy to production..."
+          echo "This step requires approval from 2 reviewers and a 5-minute wait timer."
+
+      - name: Configure kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Set up kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG_PRODUCTION }}" | base64 -d > $HOME/.kube/config
+
+      - name: Canary deployment - 10% traffic
+        run: |
+          # Deploy canary version
+          kubectl apply -f deployment/kubernetes/canary-deployment.yaml
+          kubectl set image deployment/samplemind-backend-canary \
+            backend=ghcr.io/${{ github.repository }}:${{ github.sha }} \
+            -n production
+          
+          # Wait for canary rollout
+          kubectl rollout status deployment/samplemind-backend-canary -n production --timeout=5m
+          
+          # Route 10% traffic to canary
+          kubectl patch virtualservice samplemind-backend \
+            -n production \
+            --type merge \
+            -p '{"spec":{"http":[{"route":[{"destination":{"host":"samplemind-backend","subset":"stable"},"weight":90},{"destination":{"host":"samplemind-backend-canary","subset":"canary"},"weight":10}]}]}}'
+
+      - name: Monitor canary - 10% (5 min)
+        run: |
+          echo "Monitoring canary deployment with 10% traffic for 5 minutes..."
+          sleep 300
+          
+          # Check error rates and metrics
+          ERROR_RATE=$(kubectl logs -l app=samplemind-backend-canary -n production --tail=1000 | grep -c "ERROR" || echo 0)
+          if [ $ERROR_RATE -gt 5 ]; then
+            echo "✗ Canary has too many errors, rolling back"
+            exit 1
+          fi
+          echo "✓ Canary 10% health check passed"
+
+      - name: Canary deployment - 50% traffic
+        run: |
+          # Increase canary traffic to 50%
+          kubectl patch virtualservice samplemind-backend \
+            -n production \
+            --type merge \
+            -p '{"spec":{"http":[{"route":[{"destination":{"host":"samplemind-backend","subset":"stable"},"weight":50},{"destination":{"host":"samplemind-backend-canary","subset":"canary"},"weight":50}]}]}}'
+
+      - name: Monitor canary - 50% (5 min)
+        run: |
+          echo "Monitoring canary deployment with 50% traffic for 5 minutes..."
+          sleep 300
+          
+          # Check error rates and metrics
+          ERROR_RATE=$(kubectl logs -l app=samplemind-backend-canary -n production --tail=1000 | grep -c "ERROR" || echo 0)
+          if [ $ERROR_RATE -gt 5 ]; then
+            echo "✗ Canary has too many errors, rolling back"
+            exit 1
+          fi
+          echo "✓ Canary 50% health check passed"
+
+      - name: Complete canary deployment - 100% traffic
+        run: |
+          # Full deployment
+          kubectl set image deployment/samplemind-backend \
+            backend=ghcr.io/${{ github.repository }}:${{ github.sha }} \
+            -n production
+          
+          kubectl rollout status deployment/samplemind-backend -n production --timeout=5m
+          
+          # Route 100% traffic to new version
+          kubectl patch virtualservice samplemind-backend \
+            -n production \
+            --type merge \
+            -p '{"spec":{"http":[{"route":[{"destination":{"host":"samplemind-backend","subset":"stable"},"weight":100}]}]}}'
+          
+          # Clean up canary deployment
+          kubectl delete deployment samplemind-backend-canary -n production
+
+      - name: Final health check
+        run: |
+          PROD_URL="https://samplemind.ai"
+          MAX_RETRIES=10
+          RETRY_DELAY=10
+          
+          for i in $(seq 1 $MAX_RETRIES); do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" $PROD_URL/health)
+            if [ $HTTP_CODE -eq 200 ]; then
+              echo "✓ Production health check passed"
+              exit 0
+            fi
+            echo "Attempt $i/$MAX_RETRIES failed (HTTP $HTTP_CODE), retrying in ${RETRY_DELAY}s..."
+            sleep $RETRY_DELAY
+          done
+          
+          echo "✗ Production health check failed"
+          exit 1
+
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "Production deployment failed, rolling back..."
+          kubectl rollout undo deployment/samplemind-backend -n production
+          kubectl rollout status deployment/samplemind-backend -n production
+          
+          # Remove canary if exists
+          kubectl delete deployment samplemind-backend-canary -n production --ignore-not-found
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "🎉 Successfully deployed to production!"
+          echo "URL: https://samplemind.ai"
+          echo "Version: ${{ github.sha }}"
+
+      - name: Create GitHub release
+        if: success()
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: release-${{ github.sha }}
+          release_name: Production Release ${{ github.sha }}
+          body: |
+            ## Production Deployment
+            
+            **Version:** ${{ github.sha }}
+            **Deployed:** ${{ github.event.head_commit.timestamp }}
+            **Deployed by:** ${{ github.actor }}
+            
+            ### Changes
+            ${{ github.event.head_commit.message }}
+            
+            ### Metrics
+            - Load test passed ✓
+            - Security scans passed ✓
+            - All tests passed ✓
+            - Zero-downtime deployment ✓
+          draft: false
+          prerelease: false

@@ -1,0 +1,390 @@
+# =============================================================================
+# SampleMind AI - Persistent Volume Claims
+# Storage for databases, logs, and application data
+# =============================================================================
+
+# =============================================================================
+# MongoDB Data PVC (100Gi)
+# =============================================================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-data-pvc
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: mongodb
+    tier: database
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "fast-ssd"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: fast-ssd
+  resources:
+    requests:
+      storage: 100Gi
+  # Volume mode
+  volumeMode: Filesystem
+  
+  # Selector (optional - if using pre-provisioned PVs)
+  # selector:
+  #   matchLabels:
+  #     type: mongodb-storage
+
+---
+# =============================================================================
+# MongoDB Config PVC
+# =============================================================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-config-pvc
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: mongodb
+    tier: database
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 1Gi
+  volumeMode: Filesystem
+
+---
+# =============================================================================
+# Redis Data PVC (20Gi)
+# =============================================================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-data-pvc
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: redis
+    tier: cache
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "fast-ssd"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: fast-ssd
+  resources:
+    requests:
+      storage: 20Gi
+  volumeMode: Filesystem
+
+---
+# =============================================================================
+# ChromaDB Data PVC
+# =============================================================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: chromadb-data-pvc
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: chromadb
+    tier: database
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: fast-ssd
+  resources:
+    requests:
+      storage: 50Gi
+  volumeMode: Filesystem
+
+---
+# =============================================================================
+# Backend Data PVC
+# =============================================================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backend-data-pvc
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: backend
+    tier: api
+spec:
+  accessModes:
+    - ReadWriteMany  # Multiple pods can mount this volume
+  storageClassName: standard-rwx
+  resources:
+    requests:
+      storage: 50Gi
+  volumeMode: Filesystem
+
+---
+# =============================================================================
+# Backend Logs PVC (50Gi)
+# =============================================================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backend-logs-pvc
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: backend
+    tier: api
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: standard-rwx
+  resources:
+    requests:
+      storage: 50Gi
+  volumeMode: Filesystem
+
+---
+# =============================================================================
+# Celery Logs PVC
+# =============================================================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: celery-logs-pvc
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: celery
+    tier: worker
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: standard-rwx
+  resources:
+    requests:
+      storage: 20Gi
+  volumeMode: Filesystem
+
+---
+# =============================================================================
+# Celerybeat Schedule PVC
+# =============================================================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: celerybeat-schedule-pvc
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: celery-beat
+    tier: scheduler
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 1Gi
+  volumeMode: Filesystem
+
+---
+# =============================================================================
+# Prometheus Data PVC (for metrics storage)
+# =============================================================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prometheus-data-pvc
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: prometheus
+    tier: monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: fast-ssd
+  resources:
+    requests:
+      storage: 50Gi
+  volumeMode: Filesystem
+
+---
+# =============================================================================
+# Grafana Data PVC (for dashboards and configuration)
+# =============================================================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-data-pvc
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: grafana
+    tier: monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 10Gi
+  volumeMode: Filesystem
+
+---
+# =============================================================================
+# Storage Classes (create if not exists)
+# =============================================================================
+
+# Fast SSD Storage Class (for databases)
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: fast-ssd
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: kubernetes.io/aws-ebs  # Change based on cloud provider
+parameters:
+  type: gp3  # AWS EBS gp3 (adjust for your provider)
+  iops: "3000"
+  throughput: "125"
+  encrypted: "true"
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Retain
+
+---
+# Standard Storage Class (for logs and general data)
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: standard
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: kubernetes.io/aws-ebs  # Change based on cloud provider
+parameters:
+  type: gp2  # AWS EBS gp2 (adjust for your provider)
+  encrypted: "true"
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+
+---
+# ReadWriteMany Storage Class (for shared volumes)
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: standard-rwx
+provisioner: efs.csi.aws.com  # AWS EFS for RWX (or use NFS, GlusterFS, etc.)
+parameters:
+  provisioningMode: efs-ap
+  fileSystemId: fs-XXXXXXXX  # Replace with your EFS ID
+  directoryPerms: "700"
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Retain
+
+---
+# =============================================================================
+# Backup Configuration (using Velero or similar)
+# =============================================================================
+
+# VolumeSnapshotClass for backups
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotClass
+metadata:
+  name: samplemind-snapshot-class
+  labels:
+    app: samplemind
+driver: ebs.csi.aws.com  # Change based on cloud provider
+deletionPolicy: Retain
+parameters:
+  tagSpecification_1: "Name=samplemind-snapshot"
+  tagSpecification_2: "Environment=production"
+
+---
+# =============================================================================
+# NOTES ON STORAGE CONFIGURATION
+# =============================================================================
+#
+# STORAGE CLASSES:
+# - fast-ssd: For databases (MongoDB, Redis) requiring high IOPS
+# - standard: For logs and general application data
+# - standard-rwx: For shared volumes (ReadWriteMany) using EFS/NFS
+#
+# CLOUD PROVIDER SPECIFIC:
+#
+# AWS:
+# - EBS for ReadWriteOnce (gp2, gp3, io1, io2)
+# - EFS for ReadWriteMany
+# - Provisioner: ebs.csi.aws.com, efs.csi.aws.com
+#
+# GCP:
+# - Persistent Disk for RWO (pd-standard, pd-ssd, pd-balanced)
+# - Filestore for RWX
+# - Provisioner: pd.csi.storage.gke.io, filestore.csi.storage.gke.io
+#
+# Azure:
+# - Azure Disk for RWO (Standard_LRS, Premium_LRS, StandardSSD_LRS)
+# - Azure Files for RWX
+# - Provisioner: disk.csi.azure.com, file.csi.azure.com
+#
+# On-Premise:
+# - Local volumes, NFS, Ceph, GlusterFS, etc.
+# - Configure based on available storage infrastructure
+#
+# VOLUME EXPANSION:
+# To expand a PVC:
+# 1. Ensure allowVolumeExpansion: true in StorageClass
+# 2. Edit PVC and increase storage size
+# 3. Delete and recreate pod to apply changes
+#
+# Example:
+# kubectl edit pvc mongodb-data-pvc -n samplemind-production
+# # Change storage: 100Gi to storage: 200Gi
+# kubectl delete pod <mongodb-pod> -n samplemind-production
+#
+# BACKUP STRATEGY:
+# 1. Use VolumeSnapshots for point-in-time backups
+# 2. Use Velero for full cluster backups
+# 3. Implement application-level backups (mongodump, redis SAVE)
+# 4. Store backups in separate region/zone
+# 5. Test restore procedures regularly
+#
+# MONITORING:
+# - Monitor PVC usage:
+#   kubectl get pvc -n samplemind-production
+#
+# - Check PV status:
+#   kubectl get pv
+#
+# - Describe PVC for details:
+#   kubectl describe pvc mongodb-data-pvc -n samplemind-production
+#
+# TROUBLESHOOTING:
+# - PVC stuck in Pending:
+#   * Check if StorageClass exists
+#   * Verify provisioner is running
+#   * Check resource quotas
+#   * Review PV/PVC events
+#
+# - Volume mount errors:
+#   * Verify access modes match between PVC and Pod
+#   * Check node has available capacity
+#   * Verify file permissions
+#
+# COST OPTIMIZATION:
+# 1. Use lifecycle policies to archive old data
+# 2. Use lower-tier storage for logs
+# 3. Enable compression where possible
+# 4. Delete unused PVCs
+# 5. Use snapshot policies for backups vs. continuous replication
+#
+# PERFORMANCE TUNING:
+# 1. Use SSD for databases (fast-ssd class)
+# 2. Increase IOPS for high-throughput workloads
+# 3. Use local volumes for temporary data
+# 4. Consider volume type based on workload (throughput vs. IOPS)
+#
+# =============================================================================

@@ -1,23 +1,32 @@
-# SampleMind AI v6 - Development Dependencies
+# SampleMind AI v7 - Development Dependencies (Performance Edition)
+# Updated: October 2025
 
 # Include all core dependencies
 -r requirements.txt
 
-# Testing
-pytest>=7.4.3
-pytest-asyncio>=0.21.1
-pytest-cov>=4.1.0
-pytest-mock>=3.12.0
-pytest-xdist>=3.4.0
+# Testing - UPGRADED
+pytest>=8.3.3
+pytest-asyncio>=0.24.0
+pytest-cov>=6.0.0
+pytest-mock>=3.14.0
+pytest-xdist>=3.6.1  # Parallel test execution for faster testing
+pytest-benchmark>=5.1.0  # Performance regression testing
+fakeredis[aioredis]>=2.10.0  # Fake Redis for testing
+respx>=0.20.0  # HTTP mocking for HTTPX/AsyncClient
 
-# Code quality
-ruff>=0.1.6
-black>=23.11.0
-isort>=5.12.0
-mypy>=1.7.1
-bandit[toml]>=1.7.5
-safety>=2.3.5
+# Code quality - UPGRADED
+ruff>=0.8.2  # 10-100x faster than pylint
+black>=24.10.0
+isort>=5.13.2
+mypy>=1.13.0
+bandit[toml]>=1.8.0
+safety>=3.2.11
 
-# Development tools
-pre-commit>=3.5.0
-commitizen>=3.12.0
+# Development tools - UPGRADED
+pre-commit>=4.0.1
+commitizen>=3.29.1
+
+# Profiling & Performance Analysis (NEW)
+py-spy>=0.3.14  # Sampling profiler for production
+memray>=1.14.0  # Memory usage profiler
+locust>=2.32.2  # Load testing framework

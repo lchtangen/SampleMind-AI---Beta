@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-SampleMind AI v6 - Professional Music Production Suite
+SampleMind AI v1.0.0 Phoenix Beta - Professional Music Production Suite
+
 The ultimate AI-powered music analysis and production platform
 
 This package provides comprehensive audio analysis, AI-powered insights,
@@ -18,6 +19,9 @@ Usage:
     from samplemind.interfaces.cli.menu import SampleMindCLI
 """
 
+__version__ = "1.0.0-phoenix-beta"
+__status__ = "Phoenix Beta"
+
 """
 SampleMind AI Beta v2.0 Phoenix
 ================================
@@ -27,7 +31,7 @@ Version: Beta 2.0 (Phoenix)
 Codename: Phoenix - Rising from the ashes of v6
 """
 
-__version__ = "2.0.0-beta"
+__version__ = "0.6.0-beta"  # Beta v0.6.0 - Core Features Stable
 __codename__ = "Phoenix"
 __status__ = "Beta"
 __release_date__ = "2025-10-04"

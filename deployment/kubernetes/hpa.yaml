@@ -1,0 +1,364 @@
+# =============================================================================
+# SampleMind AI - Horizontal Pod Autoscalers
+# Auto-scaling configuration for all services
+# =============================================================================
+
+# =============================================================================
+# Backend API HPA
+# Scales: 3-10 pods based on CPU (70%) and Memory (80%)
+# =============================================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: backend-hpa
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: backend
+    tier: api
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: backend
+  
+  # Scaling boundaries
+  minReplicas: 3
+  maxReplicas: 10
+  
+  # Metrics for scaling decisions
+  metrics:
+  # CPU utilization target
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  
+  # Memory utilization target
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  
+  # Scaling behavior
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300  # Wait 5 minutes before scaling down
+      policies:
+      - type: Percent
+        value: 50                      # Scale down max 50% of pods at a time
+        periodSeconds: 60
+      - type: Pods
+        value: 2                       # Scale down max 2 pods at a time
+        periodSeconds: 60
+      selectPolicy: Min                # Use the policy that scales down the least
+    
+    scaleUp:
+      stabilizationWindowSeconds: 0    # Scale up immediately
+      policies:
+      - type: Percent
+        value: 100                     # Scale up max 100% of pods at a time
+        periodSeconds: 30
+      - type: Pods
+        value: 2                       # Scale up max 2 pods at a time
+        periodSeconds: 30
+      selectPolicy: Max                # Use the policy that scales up the most
+
+---
+# =============================================================================
+# Frontend HPA
+# Scales: 2-5 pods based on CPU (60%) and Memory (70%)
+# =============================================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: frontend-hpa
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: frontend
+    tier: web
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: frontend
+  
+  minReplicas: 2
+  maxReplicas: 5
+  
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60
+  
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 70
+  
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+      - type: Pods
+        value: 1
+        periodSeconds: 60
+      selectPolicy: Min
+    
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 30
+      - type: Pods
+        value: 2
+        periodSeconds: 30
+      selectPolicy: Max
+
+---
+# =============================================================================
+# Celery Worker HPA
+# Scales: 2-5 pods based on CPU (80%) and Memory (85%)
+# =============================================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: celery-worker-hpa
+  namespace: samplemind-production
+  labels:
+    app: samplemind
+    component: celery-worker
+    tier: worker
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: celery-worker
+  
+  minReplicas: 2
+  maxReplicas: 5
+  
+  metrics:
+  # CPU utilization (higher threshold for workers)
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 80
+  
+  # Memory utilization
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 85
+  
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 600  # Wait 10 minutes for workers
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 120
+      - type: Pods
+        value: 1
+        periodSeconds: 120
+      selectPolicy: Min
+    
+    scaleUp:
+      stabilizationWindowSeconds: 30   # Quick scale up for worker backlog
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 30
+      - type: Pods
+        value: 2
+        periodSeconds: 30
+      selectPolicy: Max
+
+---
+# =============================================================================
+# Advanced HPA with Custom Metrics (requires Metrics Server & Custom Metrics API)
+# =============================================================================
+
+# Backend HPA with Custom Metrics (uncomment when metrics adapter is installed)
+#
+# apiVersion: autoscaling/v2
+# kind: HorizontalPodAutoscaler
+# metadata:
+#   name: backend-hpa-advanced
+#   namespace: samplemind-production
+# spec:
+#   scaleTargetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: backend
+#   
+#   minReplicas: 3
+#   maxReplicas: 10
+#   
+#   metrics:
+#   # CPU utilization
+#   - type: Resource
+#     resource:
+#       name: cpu
+#       target:
+#         type: Utilization
+#         averageUtilization: 70
+#   
+#   # Memory utilization
+#   - type: Resource
+#     resource:
+#       name: memory
+#       target:
+#         type: Utilization
+#         averageUtilization: 80
+#   
+#   # Custom metric: Request rate
+#   - type: Pods
+#     pods:
+#       metric:
+#         name: http_requests_per_second
+#       target:
+#         type: AverageValue
+#         averageValue: "100"
+#   
+#   # Custom metric: Response time
+#   - type: Pods
+#     pods:
+#       metric:
+#         name: http_request_duration_seconds
+#       target:
+#         type: AverageValue
+#         averageValue: "500m"  # 500ms
+#   
+#   # External metric: Queue depth (from Prometheus/CloudWatch)
+#   - type: External
+#     external:
+#       metric:
+#         name: celery_queue_length
+#         selector:
+#           matchLabels:
+#             queue: "default"
+#       target:
+#         type: AverageValue
+#         averageValue: "30"
+
+---
+# =============================================================================
+# Celery Worker HPA with Queue-Based Scaling (requires custom metrics)
+# =============================================================================
+#
+# apiVersion: autoscaling/v2
+# kind: HorizontalPodAutoscaler
+# metadata:
+#   name: celery-worker-hpa-queue
+#   namespace: samplemind-production
+# spec:
+#   scaleTargetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: celery-worker
+#   
+#   minReplicas: 2
+#   maxReplicas: 20
+#   
+#   metrics:
+#   # CPU utilization
+#   - type: Resource
+#     resource:
+#       name: cpu
+#       target:
+#         type: Utilization
+#         averageUtilization: 80
+#   
+#   # Queue length (external metric from Redis)
+#   - type: External
+#     external:
+#       metric:
+#         name: redis_queue_length
+#         selector:
+#           matchLabels:
+#             queue: "audio_processing"
+#       target:
+#         type: AverageValue
+#         averageValue: "10"  # Scale up when >10 tasks per worker
+#   
+#   behavior:
+#     scaleDown:
+#       stabilizationWindowSeconds: 300
+#       policies:
+#       - type: Pods
+#         value: 2
+#         periodSeconds: 60
+#     scaleUp:
+#       stabilizationWindowSeconds: 0
+#       policies:
+#       - type: Pods
+#         value: 4
+#         periodSeconds: 30
+
+---
+# =============================================================================
+# Notes on HPA Configuration
+# =============================================================================
+#
+# PREREQUISITES:
+# 1. Metrics Server must be installed:
+#    kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+#
+# 2. For custom metrics, install Prometheus Adapter:
+#    helm install prometheus-adapter prometheus-community/prometheus-adapter
+#
+# 3. Resource requests/limits must be defined in Deployments
+#
+# MONITORING:
+# - View HPA status:
+#   kubectl get hpa -n samplemind-production
+#
+# - Describe HPA:
+#   kubectl describe hpa backend-hpa -n samplemind-production
+#
+# - Watch scaling events:
+#   kubectl get hpa -n samplemind-production --watch
+#
+# TESTING:
+# 1. Generate load:
+#    kubectl run -it --rm load-generator --image=busybox -- /bin/sh
+#    while true; do wget -q -O- http://backend-service:8000/health; done
+#
+# 2. Monitor scaling:
+#    watch kubectl get hpa -n samplemind-production
+#
+# TROUBLESHOOTING:
+# - Check metrics availability:
+#   kubectl top pods -n samplemind-production
+#
+# - Check HPA events:
+#   kubectl get events -n samplemind-production --field-selector involvedObject.name=backend-hpa
+#
+# BEST PRACTICES:
+# 1. Set appropriate stabilization windows to prevent flapping
+# 2. Use multiple metrics (CPU + memory + custom) for better decisions
+# 3. Set conservative scale-down policies to prevent premature scale-down
+# 4. Monitor HPA decisions and adjust thresholds based on observed behavior
+# 5. Use queue-based metrics for worker scaling when available
+# 6. Test scaling behavior under load before production deployment
+#
+# =============================================================================

@@ -1,0 +1,363 @@
+# Warning Alert Rules for SampleMind AI
+# These alerts indicate potential issues that need attention but are not critical
+
+groups:
+  - name: warning_api
+    interval: 1m
+    rules:
+      # API Error Rate > 0.5%
+      - alert: ElevatedAPIErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{job="samplemind-api",status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{job="samplemind-api"}[5m]))
+          ) * 100 > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+          team: backend
+        annotations:
+          summary: "Elevated API error rate"
+          description: "API error rate is {{ $value | humanizePercentage }} (threshold: 0.5%)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-system-overview"
+          runbook: "https://wiki.samplemind.ai/runbooks/elevated-error-rate"
+          impact: "Degraded user experience for some requests"
+          action: "Monitor closely, investigate if continues to rise"
+
+      # Response Time p95 > 500ms
+      - alert: ElevatedAPIResponseTime
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket{job="samplemind-api"}[5m])) by (le)
+          ) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+          team: backend
+        annotations:
+          summary: "Elevated API response time"
+          description: "API p95 response time is {{ $value | humanizeDuration }} (threshold: 500ms)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-system-overview"
+          runbook: "https://wiki.samplemind.ai/runbooks/elevated-response-time"
+          impact: "Slower than normal response times"
+          action: "Review slow queries, check database performance"
+
+      # High Request Rate
+      - alert: HighRequestRate
+        expr: |
+          sum(rate(http_requests_total{job="samplemind-api"}[5m])) > 1000
+        for: 10m
+        labels:
+          severity: warning
+          component: api
+          team: backend
+        annotations:
+          summary: "High request rate detected"
+          description: "Request rate is {{ $value }} req/s (threshold: 1000 req/s)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-system-overview"
+          runbook: "https://wiki.samplemind.ai/runbooks/high-request-rate"
+          impact: "Potential capacity issues"
+          action: "Monitor for scaling needs, check for unusual traffic patterns"
+
+  - name: warning_database
+    interval: 1m
+    rules:
+      # Cache Hit Rate < 60%
+      - alert: LowCacheHitRate
+        expr: |
+          (
+            sum(rate(redis_cache_hits_total[5m]))
+            /
+            (sum(rate(redis_cache_hits_total[5m])) + sum(rate(redis_cache_misses_total[5m])))
+          ) * 100 < 60
+        for: 10m
+        labels:
+          severity: warning
+          component: cache
+          team: backend
+        annotations:
+          summary: "Low cache hit rate"
+          description: "Cache hit rate is {{ $value | humanizePercentage }} (threshold: 60%)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-database-performance"
+          runbook: "https://wiki.samplemind.ai/runbooks/low-cache-hit-rate"
+          impact: "Increased database load, slower response times"
+          action: "Review cache configuration, adjust TTLs, investigate cache warming"
+
+      # Slow Queries
+      - alert: SlowMongoDBQueries
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(mongodb_query_duration_seconds_bucket[5m])) by (le, collection)
+          ) > 0.2
+        for: 10m
+        labels:
+          severity: warning
+          component: database
+          team: backend
+        annotations:
+          summary: "Slow MongoDB queries detected"
+          description: "Query p95 latency on {{ $labels.collection }} is {{ $value | humanizeDuration }} (threshold: 200ms)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-database-performance"
+          runbook: "https://wiki.samplemind.ai/runbooks/slow-queries"
+          impact: "Degraded query performance"
+          action: "Review query patterns, check indexes, consider query optimization"
+
+      # High Connection Pool Usage
+      - alert: HighDatabaseConnectionUsage
+        expr: |
+          (
+            mongodb_connection_pool_current_connections
+            /
+            mongodb_connection_pool_max_connections
+          ) * 100 > 75
+        for: 10m
+        labels:
+          severity: warning
+          component: database
+          team: backend
+        annotations:
+          summary: "High database connection pool usage"
+          description: "Connection pool utilization is {{ $value | humanizePercentage }} (threshold: 75%)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-database-performance"
+          runbook: "https://wiki.samplemind.ai/runbooks/high-connection-usage"
+          impact: "Approaching connection pool limits"
+          action: "Monitor for exhaustion, consider increasing pool size, check for connection leaks"
+
+      # Redis Memory Usage High
+      - alert: HighRedisMemoryUsage
+        expr: |
+          (
+            redis_memory_used_bytes
+            /
+            redis_memory_max_bytes
+          ) * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+          component: cache
+          team: backend
+        annotations:
+          summary: "High Redis memory usage"
+          description: "Redis memory usage is {{ $value | humanizePercentage }} (threshold: 80%)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-database-performance"
+          runbook: "https://wiki.samplemind.ai/runbooks/high-redis-memory"
+          impact: "Risk of cache evictions"
+          action: "Review cache data, adjust maxmemory, consider scaling"
+
+  - name: warning_resources
+    interval: 1m
+    rules:
+      # Memory Usage > 80%
+      - alert: HighMemoryUsage
+        expr: |
+          (
+            1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)
+          ) * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+          component: infrastructure
+          team: devops
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage on {{ $labels.instance }} is {{ $value | humanizePercentage }} (threshold: 80%)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-system-overview"
+          runbook: "https://wiki.samplemind.ai/runbooks/high-memory-usage"
+          impact: "Risk of performance degradation"
+          action: "Monitor memory-intensive processes, consider scaling"
+
+      # CPU Usage > 80%
+      - alert: HighCPUUsage
+        expr: |
+          100 * (1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))) > 80
+        for: 15m
+        labels:
+          severity: warning
+          component: infrastructure
+          team: devops
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage on {{ $labels.instance }} is {{ $value | humanizePercentage }} (threshold: 80%)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-system-overview"
+          runbook: "https://wiki.samplemind.ai/runbooks/high-cpu-usage"
+          impact: "Degraded system performance"
+          action: "Identify CPU-intensive processes, consider horizontal scaling"
+
+      # Disk Space < 20%
+      - alert: LowDiskSpace
+        expr: |
+          (
+            node_filesystem_avail_bytes{mountpoint="/",fstype!="tmpfs"}
+            /
+            node_filesystem_size_bytes{mountpoint="/",fstype!="tmpfs"}
+          ) * 100 < 20
+        for: 10m
+        labels:
+          severity: warning
+          component: infrastructure
+          team: devops
+        annotations:
+          summary: "Low disk space"
+          description: "Disk space on {{ $labels.instance }} is {{ $value | humanizePercentage }} (threshold: 20%)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-system-overview"
+          runbook: "https://wiki.samplemind.ai/runbooks/low-disk-space"
+          impact: "Risk of running out of space"
+          action: "Clean up old logs and temp files, plan for disk expansion"
+
+  - name: warning_celery
+    interval: 1m
+    rules:
+      # Queue Depth High
+      - alert: HighQueueDepth
+        expr: celery_queue_length{queue="audio_processing"} > 1000
+        for: 15m
+        labels:
+          severity: warning
+          component: workers
+          team: backend
+        annotations:
+          summary: "High queue depth"
+          description: "Queue depth is {{ $value }} tasks (threshold: 1000)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-audio-processing"
+          runbook: "https://wiki.samplemind.ai/runbooks/high-queue-depth"
+          impact: "Processing delays for new tasks"
+          action: "Consider scaling workers, investigate task processing time"
+
+      # Task Failure Rate
+      - alert: HighTaskFailureRate
+        expr: |
+          (
+            sum(rate(audio_processing_total{status="failure"}[5m]))
+            /
+            sum(rate(audio_processing_total[5m]))
+          ) * 100 > 5
+        for: 10m
+        labels:
+          severity: warning
+          component: workers
+          team: backend
+        annotations:
+          summary: "High task failure rate"
+          description: "Task failure rate is {{ $value | humanizePercentage }} (threshold: 5%)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-audio-processing"
+          runbook: "https://wiki.samplemind.ai/runbooks/high-task-failure-rate"
+          impact: "Elevated task failures"
+          action: "Review error logs, check task inputs, investigate common failure patterns"
+
+      # Worker Count Low
+      - alert: LowWorkerCount
+        expr: celery_worker_count < 3
+        for: 5m
+        labels:
+          severity: warning
+          component: workers
+          team: backend
+        annotations:
+          summary: "Low Celery worker count"
+          description: "Only {{ $value }} workers are active (minimum: 3)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-audio-processing"
+          runbook: "https://wiki.samplemind.ai/runbooks/low-worker-count"
+          impact: "Reduced processing capacity"
+          action: "Check worker health, restart failed workers"
+
+  - name: warning_ml
+    interval: 1m
+    rules:
+      # GPU Memory High
+      - alert: HighGPUMemoryUsage
+        expr: |
+          (
+            nvidia_gpu_memory_used_bytes
+            /
+            nvidia_gpu_memory_total_bytes
+          ) * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+          component: ml
+          team: ml-ops
+        annotations:
+          summary: "High GPU memory usage"
+          description: "GPU memory usage is {{ $value | humanizePercentage }} (threshold: 80%)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-ml-models"
+          runbook: "https://wiki.samplemind.ai/runbooks/high-gpu-memory"
+          impact: "Risk of GPU OOM errors"
+          action: "Monitor closely, reduce batch sizes if needed"
+
+      # Slow Model Inference
+      - alert: SlowModelInference
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(model_inference_duration_seconds_bucket[5m])) by (le, model_name)
+          ) > 5
+        for: 10m
+        labels:
+          severity: warning
+          component: ml
+          team: ml-ops
+        annotations:
+          summary: "Slow model inference detected"
+          description: "Model {{ $labels.model_name }} p95 inference time is {{ $value | humanizeDuration }} (threshold: 5s)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-ml-models"
+          runbook: "https://wiki.samplemind.ai/runbooks/slow-inference"
+          impact: "Degraded audio processing performance"
+          action: "Check GPU utilization, review batch sizes, investigate model performance"
+
+      # Model Loading Time High
+      - alert: SlowModelLoading
+        expr: model_loading_duration_seconds > 30
+        for: 5m
+        labels:
+          severity: warning
+          component: ml
+          team: ml-ops
+        annotations:
+          summary: "Slow model loading"
+          description: "Model {{ $labels.model_name }} loading time is {{ $value | humanizeDuration }} (threshold: 30s)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-ml-models"
+          runbook: "https://wiki.samplemind.ai/runbooks/slow-model-loading"
+          impact: "Delayed worker startup"
+          action: "Check disk I/O, review model file locations, consider model caching"
+
+  - name: warning_security
+    interval: 1m
+    rules:
+      # Unusual 4xx Rate
+      - alert: HighClientErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{job="samplemind-api",status=~"4.."}[5m]))
+            /
+            sum(rate(http_requests_total{job="samplemind-api"}[5m]))
+          ) * 100 > 20
+        for: 10m
+        labels:
+          severity: warning
+          component: api
+          team: security
+        annotations:
+          summary: "High client error rate"
+          description: "Client error (4xx) rate is {{ $value | humanizePercentage }} (threshold: 20%)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-system-overview"
+          runbook: "https://wiki.samplemind.ai/runbooks/high-4xx-rate"
+          impact: "Potential security issue or API misuse"
+          action: "Review client errors, check for authentication issues, investigate potential attacks"
+
+      # Rate Limit Hits
+      - alert: HighRateLimitHits
+        expr: rate(rate_limit_exceeded_total[5m]) > 10
+        for: 10m
+        labels:
+          severity: warning
+          component: api
+          team: security
+        annotations:
+          summary: "High rate of rate limit hits"
+          description: "Rate limit exceeded {{ $value }} times/s (threshold: 10/s)"
+          dashboard: "https://grafana.samplemind.ai/d/samplemind-system-overview"
+          runbook: "https://wiki.samplemind.ai/runbooks/rate-limit-hits"
+          impact: "Potential abuse or DoS attempt"
+          action: "Identify offending IPs, review rate limit configuration"

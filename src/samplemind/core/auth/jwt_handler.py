@@ -29,8 +29,8 @@ def configure_jwt(secret_key: str, algorithm: str = "HS256",
 
 
 def create_access_token(
-    user_id: str,
-    email: str,
+    user_id: Optional[str] = None,
+    email: Optional[str] = None,
     additional_claims: Optional[Dict[str, Any]] = None,
     expires_delta: Optional[timedelta] = None
 ) -> str:
@@ -38,7 +38,7 @@ def create_access_token(
     Create a new JWT access token
     
     Args:
-        user_id: Unique user identifier
+        user_id: Unique user identifier (or dict for backwards compatibility)
         email: User email address
         additional_claims: Extra claims to include in token
         expires_delta: Custom expiration time
@@ -46,6 +46,16 @@ def create_access_token(
     Returns:
         Encoded JWT token string
     """
+    # Backwards compatibility: support dict as first arg
+    if isinstance(user_id, dict):
+        data = user_id
+        user_id = data.get('sub') or data.get('user_id')
+        email = data.get('email')
+        additional_claims = {k: v for k, v in data.items() if k not in ['sub', 'user_id', 'email']}
+    
+    if not user_id:
+        raise ValueError("user_id is required")
+    
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
@@ -55,11 +65,13 @@ def create_access_token(
     
     to_encode = {
         "sub": user_id,
-        "email": email,
         "exp": expire,
         "type": "access",
         "iat": datetime.utcnow(),
     }
+    
+    if email:
+        to_encode["email"] = email
     
     if additional_claims:
         to_encode.update(additional_claims)
@@ -74,17 +86,25 @@ def create_access_token(
     return encoded_jwt
 
 
-def create_refresh_token(user_id: str, expires_delta: Optional[timedelta] = None) -> str:
+def create_refresh_token(user_id: Optional[str] = None, expires_delta: Optional[timedelta] = None) -> str:
     """
     Create a new JWT refresh token
     
     Args:
-        user_id: Unique user identifier
+        user_id: Unique user identifier (or dict for backwards compatibility)
         expires_delta: Custom expiration time
         
     Returns:
         Encoded JWT refresh token string
     """
+    # Backwards compatibility: support dict as first arg
+    if isinstance(user_id, dict):
+        data = user_id
+        user_id = data.get('sub') or data.get('user_id')
+    
+    if not user_id:
+        raise ValueError("user_id is required")
+    
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
@@ -132,16 +152,16 @@ def decode_token(token: str) -> Optional[Dict[str, Any]]:
         return None
 
 
-def verify_token(token: str, token_type: str = "access") -> Optional[str]:
+def verify_token(token: str, token_type: str = "access") -> bool:
     """
-    Verify JWT token and return user_id if valid
+    Verify JWT token
     
     Args:
         token: JWT token string
         token_type: Expected token type ("access" or "refresh")
         
     Returns:
-        User ID if token is valid, None otherwise
+        True if token is valid, False otherwise
     """
     try:
         payload = jwt.decode(
@@ -156,30 +176,30 @@ def verify_token(token: str, token_type: str = "access") -> Optional[str]:
         
         if not user_id:
             logger.warning("Token missing user_id (sub)")
-            return None
+            return False
             
         if not exp:
             logger.warning("Token missing expiration")
-            return None
+            return False
             
-        if token_type_claim != token_type:
+        if token_type_claim and token_type_claim != token_type:
             logger.warning(f"Token type mismatch: expected {token_type}, got {token_type_claim}")
-            return None
+            return False
         
         # Check expiration
         if datetime.utcnow() > datetime.fromtimestamp(exp):
             logger.warning("Token has expired")
-            return None
+            return False
         
         logger.debug(f"Token verified for user {user_id}")
-        return user_id
+        return True
         
     except JWTError as e:
         logger.warning(f"Token verification failed: {e}")
-        return None
+        return False
     except Exception as e:
         logger.error(f"Unexpected error verifying token: {e}")
-        return None
+        return False
 
 
 def get_token_expiration(token: str) -> Optional[datetime]:

@@ -35,6 +35,14 @@ except ImportError:
     logger = logging.getLogger(__name__)
     logger.warning("Anthropic integration not available - some features will be limited")
 
+# Import caching
+try:
+    from ..core.cache import AICache, CacheConfig, CacheBackend
+    CACHE_AVAILABLE = True
+except ImportError:
+    CACHE_AVAILABLE = False
+    logger.warning("Cache module not available - caching disabled")
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -206,11 +214,20 @@ class SampleMindAIManager:
     cost optimization, and performance monitoring.
     """
     
-    def __init__(self, config_path: Optional[Path] = None):
+    def __init__(self, config_path: Optional[Path] = None, enable_cache: bool = True):
         self.config_path = config_path or Path.home() / ".samplemind" / "config" / "ai_config.json"
         self.providers: Dict[AIProvider, Any] = {}  # Will hold actual provider instances
         self.provider_configs: Dict[AIProvider, AIProviderConfig] = {}
         self.load_balancer: Optional[AILoadBalancer] = None
+        
+        # Initialize caching
+        self.cache: Optional[AICache] = None
+        if enable_cache and CACHE_AVAILABLE:
+            cache_config = self._load_cache_config()
+            self.cache = AICache(cache_config)
+            logger.info("💰 AI response caching enabled for cost reduction")
+        else:
+            logger.info("⚠️  AI response caching disabled")
         
         # Performance tracking
         self.global_stats = {
@@ -219,7 +236,9 @@ class SampleMindAIManager:
             'total_cost': 0.0,
             'avg_response_time': 0.0,
             'provider_usage': {},
-            'error_count': 0
+            'error_count': 0,
+            'cache_hits': 0,
+            'cache_misses': 0,
         }
         
         # Initialize from config or environment
@@ -375,9 +394,46 @@ class SampleMindAIManager:
         """Get list of available AI providers"""
         return list(self.providers.keys())
     
+    def _load_cache_config(self) -> CacheConfig:
+        """Load cache configuration from environment"""
+        from dotenv import load_dotenv
+        load_dotenv()
+        
+        cache_enabled = os.getenv('AI_CACHE_ENABLED', 'true').lower() == 'true'
+        cache_backend = os.getenv('AI_CACHE_BACKEND', 'redis').lower()
+        cache_ttl = int(os.getenv('AI_CACHE_TTL_HOURS', '168')) * 3600  # Default: 1 week
+        redis_url = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+        
+        backend_map = {
+            'redis': CacheBackend.REDIS,
+            'file': CacheBackend.FILE,
+            'memory': CacheBackend.MEMORY,
+        }
+        
+        return CacheConfig(
+            enabled=cache_enabled,
+            backend=backend_map.get(cache_backend, CacheBackend.FILE),
+            ttl_seconds=cache_ttl,
+            redis_url=redis_url,
+        )
+    
     def get_global_stats(self) -> Dict[str, Any]:
-        """Get global statistics"""
-        return self.global_stats.copy()
+        """Get global statistics including cache stats"""
+        stats = self.global_stats.copy()
+        
+        # Add cache statistics
+        if self.cache:
+            cache_stats = self.cache.get_stats()
+            stats.update({
+                'cache_enabled': cache_stats['enabled'],
+                'cache_backend': cache_stats['backend'],
+                'cache_hits': cache_stats['hits'],
+                'cache_misses': cache_stats['misses'],
+                'cache_hit_rate': cache_stats['hit_rate'],
+                'cache_cost_saved': cache_stats['cost_saved'],
+            })
+        
+        return stats
     
     async def close(self):
         """Close all provider connections"""
@@ -390,10 +446,11 @@ class SampleMindAIManager:
         analysis_type: AnalysisType = AnalysisType.COMPREHENSIVE_ANALYSIS,
         preferred_provider: Optional[AIProvider] = None,
         user_context: Optional[Dict[str, Any]] = None,
-        enable_fallback: bool = True
+        enable_fallback: bool = True,
+        bypass_cache: bool = False
     ) -> UnifiedAnalysisResult:
         """
-        Perform music analysis with intelligent provider selection
+        Perform music analysis with intelligent provider selection and caching
         
         Args:
             audio_features: Audio features from audio engine
@@ -413,11 +470,74 @@ class SampleMindAIManager:
         # Select provider
         selected_provider = self.load_balancer.select_provider(analysis_type, preferred_provider)
         
+        # Check cache first (unless bypassed)
+        if not bypass_cache and self.cache:
+            cached_result = self.cache.get(
+                audio_features,
+                analysis_type.value,
+                selected_provider.value,
+                model=""  # Could be extracted from config if needed
+            )
+            
+            if cached_result:
+                # Cache hit! Return cached result
+                self.global_stats['cache_hits'] += 1
+                
+                # Reconstruct UnifiedAnalysisResult from cached data
+                result_data = cached_result['result']
+                result = UnifiedAnalysisResult(
+                    provider=selected_provider,
+                    analysis_type=analysis_type,
+                    **result_data
+                )
+                
+                logger.info(f"💰 Using cached result - saved API call!")
+                return result
+            else:
+                self.global_stats['cache_misses'] += 1
+        
         try:
             # Perform analysis with selected provider
             result = await self._analyze_with_provider(
                 selected_provider, audio_features, analysis_type, user_context
             )
+            
+            # Cache the result for future use
+            if self.cache and not bypass_cache:
+                # Calculate cost estimate
+                cost_estimate = result.tokens_used * self.provider_configs[selected_provider].cost_per_token
+                
+                # Convert result to dictionary for caching
+                result_dict = {
+                    'model_used': result.model_used,
+                    'timestamp': result.timestamp,
+                    'summary': result.summary,
+                    'detailed_analysis': result.detailed_analysis,
+                    'production_tips': result.production_tips,
+                    'fl_studio_recommendations': result.fl_studio_recommendations,
+                    'effect_suggestions': result.effect_suggestions,
+                    'creative_ideas': result.creative_ideas,
+                    'arrangement_suggestions': result.arrangement_suggestions,
+                    'harmonic_analysis': result.harmonic_analysis,
+                    'rhythmic_analysis': result.rhythmic_analysis,
+                    'spectral_analysis': result.spectral_analysis,
+                    'creativity_score': result.creativity_score,
+                    'production_quality_score': result.production_quality_score,
+                    'commercial_potential_score': result.commercial_potential_score,
+                    'tokens_used': result.tokens_used,
+                    'processing_time': result.processing_time,
+                    'confidence_score': result.confidence_score,
+                    'cost_estimate': result.cost_estimate,
+                }
+                
+                self.cache.set(
+                    audio_features,
+                    analysis_type.value,
+                    selected_provider.value,
+                    result_dict,
+                    model=result.model_used,
+                    cost_saved=cost_estimate
+                )
             
             # Update success metrics
             self._update_provider_stats(selected_provider, result.tokens_used, 

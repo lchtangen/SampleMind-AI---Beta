@@ -188,7 +188,13 @@ def mock_openai_producer():
     mock_analysis.confidence_score = 0.9
     
     producer.analyze_music_comprehensive = AsyncMock(return_value=mock_analysis)
-    producer.analyze_music_sync = MagicMock(return_value=mock_analysis)
+    producer.get_stats = MagicMock(return_value={
+        'requests': 10,
+        'total_tokens': 5000,
+        'avg_response_time': 2.0,
+        'cache_hits': 5,
+        'last_request': None
+    })
     producer.get_usage_stats = MagicMock(return_value={
         'total_requests': 10,
         'total_tokens': 5000,
@@ -197,7 +203,7 @@ def mock_openai_producer():
         'cache_size': 3,
         'cache_hit_rate': 0.5
     })
-    
+
     return producer
 
 
@@ -221,7 +227,7 @@ def real_openai_producer():
 # ============================================================================
 
 @pytest.fixture
-async def test_mongodb():
+def test_mongodb():
     """Provide test MongoDB connection"""
     # This would connect to test database
     # For now, return mock
@@ -229,19 +235,19 @@ async def test_mongodb():
     mock_collection = MagicMock()
     mock_db.audio_features = mock_collection
     mock_db.analysis_results = mock_collection
-    
+
     # Mock common operations
     mock_collection.insert_one = AsyncMock(return_value=MagicMock(inserted_id="test_id"))
     mock_collection.find_one = AsyncMock(return_value=None)
     mock_collection.find = MagicMock(return_value=[])
     mock_collection.update_one = AsyncMock(return_value=MagicMock(modified_count=1))
     mock_collection.delete_one = AsyncMock(return_value=MagicMock(deleted_count=1))
-    
+
     return mock_db
 
 
 @pytest.fixture
-async def test_redis():
+def test_redis():
     """Provide test Redis connection"""
     mock_redis = MagicMock()
     mock_redis.get = AsyncMock(return_value=None)
@@ -249,16 +255,16 @@ async def test_redis():
     mock_redis.delete = AsyncMock(return_value=1)
     mock_redis.exists = AsyncMock(return_value=False)
     mock_redis.flushdb = AsyncMock(return_value=True)
-    
+
     return mock_redis
 
 
 @pytest.fixture
-async def test_chromadb():
+def test_chromadb():
     """Provide test ChromaDB connection"""
     mock_chroma = MagicMock()
     mock_collection = MagicMock()
-    
+
     mock_chroma.get_or_create_collection = MagicMock(return_value=mock_collection)
     mock_collection.add = MagicMock()
     mock_collection.query = MagicMock(return_value={
@@ -271,7 +277,7 @@ async def test_chromadb():
         'metadatas': [],
         'ids': []
     })
-    
+
     return mock_chroma
 
 
@@ -382,6 +388,138 @@ def performance_timer():
             }
     
     return Timer()
+
+
+# ============================================================================
+# AI Mocking Fixtures (for new performance modules)
+# ============================================================================
+
+@pytest.fixture
+def mock_ai_response() -> Dict[str, Any]:
+    """Standard mock AI response for testing"""
+    return {
+        "choices": [
+            {
+                "message": {
+                    "role": "assistant",
+                    "content": "This is a mock AI response for testing purposes."
+                },
+                "finish_reason": "stop",
+                "index": 0
+            }
+        ],
+        "usage": {
+            "prompt_tokens": 10,
+            "completion_tokens": 20,
+            "total_tokens": 30
+        },
+        "model": "mock-model",
+        "id": "chatcmpl-mock123",
+        "created": 1234567890
+    }
+
+
+@pytest.fixture
+def mock_ai_http_requests():
+    """
+    Mock all AI provider HTTP requests using respx
+    Prevents network calls during tests
+    """
+    try:
+        import respx
+        
+        with respx.mock(assert_all_called=False) as respx_mock:
+            # Mock OpenAI API
+            respx_mock.post("https://api.openai.com/v1/chat/completions").mock(
+                return_value=respx.MockResponse(
+                    status_code=200,
+                    json={
+                        "choices": [
+                            {
+                                "message": {
+                                    "role": "assistant",
+                                    "content": "Mock OpenAI response"
+                                },
+                                "finish_reason": "stop",
+                                "index": 0
+                            }
+                        ],
+                        "usage": {"prompt_tokens": 10, "completion_tokens": 10, "total_tokens": 20},
+                        "model": "gpt-4o-mini"
+                    }
+                )
+            )
+            
+            # Mock Anthropic API
+            respx_mock.post("https://api.anthropic.com/v1/messages").mock(
+                return_value=respx.MockResponse(
+                    status_code=200,
+                    json={
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "Mock Anthropic response"
+                            }
+                        ],
+                        "model": "claude-3-5-sonnet-20241022",
+                        "usage": {"input_tokens": 10, "output_tokens": 10}
+                    }
+                )
+            )
+            
+            # Mock Gemini API
+            respx_mock.post(
+                url__regex=r"https://generativelanguage\.googleapis\.com/.*"
+            ).mock(
+                return_value=respx.MockResponse(
+                    status_code=200,
+                    json={
+                        "candidates": [
+                            {
+                                "content": {
+                                    "parts": [{"text": "Mock Gemini response"}],
+                                    "role": "model"
+                                },
+                                "finishReason": "STOP"
+                            }
+                        ],
+                        "usageMetadata": {
+                            "promptTokenCount": 10,
+                            "candidatesTokenCount": 10,
+                            "totalTokenCount": 20
+                        }
+                    }
+                )
+            )
+            
+            # Mock Ollama API
+            respx_mock.post("http://ollama:11434/api/chat").mock(
+                return_value=respx.MockResponse(
+                    status_code=200,
+                    json={
+                        "message": {
+                            "role": "assistant",
+                            "content": "Mock Ollama response"
+                        },
+                        "model": "llama3.2:3b-instruct-q8_0",
+                        "done": True
+                    }
+                )
+            )
+            
+            yield respx_mock
+    except ImportError:
+        pytest.skip("respx not installed - required for AI HTTP mocking")
+
+
+@pytest.fixture
+def mock_redis_for_cache():
+    """Mock Redis client for cache testing (uses fakeredis)"""
+    try:
+        from fakeredis import aioredis as fake_aioredis
+        return fake_aioredis.FakeRedis(decode_responses=False)
+    except ImportError:
+        pytest.skip("fakeredis not installed")
 
 
 # ============================================================================

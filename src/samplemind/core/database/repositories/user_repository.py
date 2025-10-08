@@ -41,6 +41,28 @@ class UserRepository:
         return await User.find_one(User.username == username)
     
     @staticmethod
+    async def find_one(filter_dict: dict) -> Optional[User]:
+        """Find single user matching filter criteria"""
+        if 'username' in filter_dict:
+            return await User.find_one(User.username == filter_dict['username'])
+        elif 'email' in filter_dict:
+            return await User.find_one(User.email == filter_dict['email'])
+        elif 'user_id' in filter_dict:
+            return await User.find_one(User.user_id == filter_dict['user_id'])
+        return None
+    
+    @staticmethod
+    async def update(user_id: str, **kwargs) -> Optional[User]:
+        """Update user fields"""
+        user = await User.find_one(User.user_id == user_id)
+        if user:
+            for key, value in kwargs.items():
+                if hasattr(user, key):
+                    setattr(user, key, value)
+            await user.save()
+        return user
+    
+    @staticmethod
     async def update_last_login(user_id: str) -> Optional[User]:
         """Update user last login timestamp"""
         user = await User.find_one(User.user_id == user_id)

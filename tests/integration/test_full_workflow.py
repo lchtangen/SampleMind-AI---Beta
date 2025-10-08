@@ -27,8 +27,8 @@ class TestFullWorkflow:
         """Audio engine fixture"""
         engine = AudioEngine()
         yield engine
-        # Cleanup
-        asyncio.run(engine.shutdown())
+        # Cleanup - shutdown is synchronous
+        engine.shutdown()
 
     @pytest.fixture(scope="class")
     def test_audio_file(self, test_audio_samples):
@@ -51,8 +51,9 @@ class TestFullWorkflow:
         assert result is not None
         assert result.tempo > 0
         assert result.key is not None
-        assert 0 <= result.energy <= 1
-        assert result.mood is not None
+        # Check rms_energy exists and has valid values
+        assert result.rms_energy is not None
+        assert len(result.rms_energy) > 0
 
         # Step 3: Verify caching
         result2 = await audio_engine.analyze_audio_async(
@@ -69,15 +70,15 @@ class TestFullWorkflow:
             test_audio_samples["140_a_minor"]
         ]
 
-        # Batch analyze
-        results = await audio_engine.batch_analyze(
+        # Batch analyze - synchronous method that returns List[AudioFeatures]
+        results = audio_engine.batch_analyze(
             files,
             level=AnalysisLevel.BASIC
         )
 
         assert len(results) == len(files)
 
-        for file_path, result in results.items():
+        for result in results:
             assert result is not None
             assert result.tempo > 0
 
@@ -98,8 +99,9 @@ class TestFullWorkflow:
         features = {
             'tempo': result.tempo,
             'key': result.key,
-            'energy': result.energy,
-            'mood': result.mood
+            'mode': result.mode,
+            'rms_energy': result.rms_energy,
+            'duration': result.duration
         }
 
         # Step 3: AI analysis
