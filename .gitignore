@@ -44,6 +44,7 @@ htmlcov/
 .env
 .env.local
 .env.*.local
+.envrc
 *.log
 
 # Node (Frontend)
