@@ -13,10 +13,7 @@ from .jwt_handler import decode_token, verify_token
 logger = logging.getLogger(__name__)
 
 # OAuth2 password bearer for token extraction
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="/api/v1/auth/login",
-    scheme_name="JWT"
-)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", scheme_name="JWT")
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
@@ -67,7 +64,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
 
 
-async def get_current_active_user(user = Depends(get_current_user)):
+async def get_current_active_user(user=Depends(get_current_user)):
     """
     Get current active user (must be active and verified)
 
@@ -82,8 +79,7 @@ async def get_current_active_user(user = Depends(get_current_user)):
     """
     if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Inactive user account"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user account"
         )
 
     # Optional: require email verification

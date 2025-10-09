@@ -14,14 +14,19 @@ logger = logging.getLogger(__name__)
 
 class JWTConfig:
     """JWT Configuration - should be set from API config"""
+
     SECRET_KEY: str = "your-secret-key-change-this-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
 
-def configure_jwt(secret_key: str, algorithm: str = "HS256",
-                  access_expire: int = 30, refresh_expire: int = 7):
+def configure_jwt(
+    secret_key: str,
+    algorithm: str = "HS256",
+    access_expire: int = 30,
+    refresh_expire: int = 7,
+):
     """Configure JWT settings from application config"""
     JWTConfig.SECRET_KEY = secret_key
     JWTConfig.ALGORITHM = algorithm
@@ -33,7 +38,7 @@ def create_access_token(
     data: dict[str, Any] | str,
     email: str | None = None,
     additional_claims: dict[str, Any] | None = None,
-    expires_delta: timedelta | None = None
+    expires_delta: timedelta | None = None,
 ) -> str:
     """
     Create a new JWT access token
@@ -56,11 +61,13 @@ def create_access_token(
 
     if isinstance(data, dict):
         to_encode = data.copy()
-        to_encode.update({
-            "exp": expire,
-            "type": "access",
-            "iat": datetime.utcnow(),
-        })
+        to_encode.update(
+            {
+                "exp": expire,
+                "type": "access",
+                "iat": datetime.utcnow(),
+            }
+        )
         user_id = data.get("sub", data.get("user_id", "unknown"))
     else:
         user_id = data
@@ -76,9 +83,7 @@ def create_access_token(
         to_encode.update(additional_claims)
 
     encoded_jwt = jwt.encode(
-        to_encode,
-        JWTConfig.SECRET_KEY,
-        algorithm=JWTConfig.ALGORITHM
+        to_encode, JWTConfig.SECRET_KEY, algorithm=JWTConfig.ALGORITHM
     )
 
     logger.debug(f"Created access token for user {user_id}")
@@ -86,8 +91,7 @@ def create_access_token(
 
 
 def create_refresh_token(
-    data: dict[str, Any] | str,
-    expires_delta: timedelta | None = None
+    data: dict[str, Any] | str, expires_delta: timedelta | None = None
 ) -> str:
     """
     Create a new JWT refresh token
@@ -102,17 +106,17 @@ def create_refresh_token(
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(
-            days=JWTConfig.REFRESH_TOKEN_EXPIRE_DAYS
-        )
+        expire = datetime.utcnow() + timedelta(days=JWTConfig.REFRESH_TOKEN_EXPIRE_DAYS)
 
     if isinstance(data, dict):
         to_encode = data.copy()
-        to_encode.update({
-            "exp": expire,
-            "type": "refresh",
-            "iat": datetime.utcnow(),
-        })
+        to_encode.update(
+            {
+                "exp": expire,
+                "type": "refresh",
+                "iat": datetime.utcnow(),
+            }
+        )
         user_id = data.get("sub", data.get("user_id", "unknown"))
     else:
         user_id = data
@@ -124,9 +128,7 @@ def create_refresh_token(
         }
 
     encoded_jwt = jwt.encode(
-        to_encode,
-        JWTConfig.SECRET_KEY,
-        algorithm=JWTConfig.ALGORITHM
+        to_encode, JWTConfig.SECRET_KEY, algorithm=JWTConfig.ALGORITHM
     )
 
     logger.debug(f"Created refresh token for user {user_id}")
@@ -148,7 +150,7 @@ def decode_token(token: str) -> dict[str, Any] | None:
             token,
             JWTConfig.SECRET_KEY,
             algorithms=[JWTConfig.ALGORITHM],
-            options={"verify_signature": True}
+            options={"verify_signature": True},
         )
         return payload
     except JWTError as e:
@@ -169,9 +171,7 @@ def verify_token(token: str, token_type: str = "access") -> bool:
     """
     try:
         payload = jwt.decode(
-            token,
-            JWTConfig.SECRET_KEY,
-            algorithms=[JWTConfig.ALGORITHM]
+            token, JWTConfig.SECRET_KEY, algorithms=[JWTConfig.ALGORITHM]
         )
 
         user_id: str = payload.get("sub")
@@ -187,7 +187,9 @@ def verify_token(token: str, token_type: str = "access") -> bool:
             return False
 
         if token_type_claim != token_type:
-            logger.warning(f"Token type mismatch: expected {token_type}, got {token_type_claim}")
+            logger.warning(
+                f"Token type mismatch: expected {token_type}, got {token_type_claim}"
+            )
             return False
 
         if datetime.utcnow() > datetime.fromtimestamp(exp):

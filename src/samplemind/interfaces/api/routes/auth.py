@@ -35,7 +35,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED
+)
 async def register_user(request: UserRegisterRequest):
     """
     Register a new user
@@ -50,17 +52,17 @@ async def register_user(request: UserRegisterRequest):
     if existing_user:
         logger.warning(f"Registration failed: Email already exists - {request.email}")
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered"
         )
 
     # Check if username already exists
     existing_username = await UserRepository.get_by_username(request.username)
     if existing_username:
-        logger.warning(f"Registration failed: Username already taken - {request.username}")
+        logger.warning(
+            f"Registration failed: Username already taken - {request.username}"
+        )
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already taken"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Username already taken"
         )
 
     # Hash password
@@ -74,10 +76,12 @@ async def register_user(request: UserRegisterRequest):
         hashed_password=hashed_password,
         is_active=True,
         is_verified=False,
-        created_at=datetime.utcnow()
+        created_at=datetime.utcnow(),
     )
 
-    logger.info(f"✅ New user registered successfully: {user.email} (username: {user.username})")
+    logger.info(
+        f"✅ New user registered successfully: {user.email} (username: {user.username})"
+    )
     return UserResponse.from_orm(user)
 
 
@@ -116,18 +120,14 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
     if not user.is_active:
         logger.warning(f"Login failed: Account inactive - {user.email}")
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Account is inactive"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Account is inactive"
         )
 
     # Update last login
     await UserRepository.update(user.user_id, last_login=datetime.utcnow())
 
     # Create tokens
-    access_token = create_access_token(
-        user_id=user.user_id,
-        email=user.email
-    )
+    access_token = create_access_token(user_id=user.user_id, email=user.email)
     refresh_token = create_refresh_token(user_id=user.user_id)
 
     logger.info(f"✅ User logged in successfully: {user.email}")
@@ -136,7 +136,7 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
         access_token=access_token,
         refresh_token=refresh_token,
         token_type="bearer",
-        expires_in=30 * 60  # 30 minutes in seconds
+        expires_in=30 * 60,  # 30 minutes in seconds
     )
 
 
@@ -179,15 +179,11 @@ async def refresh_access_token(request: RefreshTokenRequest):
 
     if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Account is inactive"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Account is inactive"
         )
 
     # Create new tokens
-    access_token = create_access_token(
-        user_id=user.user_id,
-        email=user.email
-    )
+    access_token = create_access_token(user_id=user.user_id, email=user.email)
     refresh_token = create_refresh_token(user_id=user.user_id)
 
     logger.info(f"✅ Token refreshed successfully for user: {user.email}")
@@ -196,12 +192,12 @@ async def refresh_access_token(request: RefreshTokenRequest):
         access_token=access_token,
         refresh_token=refresh_token,
         token_type="bearer",
-        expires_in=30 * 60
+        expires_in=30 * 60,
     )
 
 
 @router.post("/logout", response_model=MessageResponse)
-async def logout_user(current_user = Depends(get_current_active_user)):
+async def logout_user(current_user=Depends(get_current_active_user)):
     """
     Logout current user
 
@@ -214,7 +210,7 @@ async def logout_user(current_user = Depends(get_current_active_user)):
 
 
 @router.get("/me", response_model=UserResponse)
-async def get_current_user_info(current_user = Depends(get_current_active_user)):
+async def get_current_user_info(current_user=Depends(get_current_active_user)):
     """
     Get current user information
 
@@ -225,8 +221,7 @@ async def get_current_user_info(current_user = Depends(get_current_active_user))
 
 @router.put("/me", response_model=UserResponse)
 async def update_user_profile(
-    profile: UserProfileUpdate,
-    current_user = Depends(get_current_active_user)
+    profile: UserProfileUpdate, current_user=Depends(get_current_active_user)
 ):
     """
     Update current user profile
@@ -240,10 +235,11 @@ async def update_user_profile(
         logger.info(f"Profile update attempt for user: {current_user.email}")
         existing_user = await UserRepository.get_by_username(profile.username)
         if existing_user and existing_user.user_id != current_user.user_id:
-            logger.warning(f"Profile update failed: Username taken - {profile.username}")
+            logger.warning(
+                f"Profile update failed: Username taken - {profile.username}"
+            )
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Username already taken"
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Username already taken"
             )
         update_data["username"] = profile.username
 
@@ -257,8 +253,7 @@ async def update_user_profile(
 
 @router.post("/change-password", response_model=MessageResponse)
 async def change_password(
-    request: ChangePasswordRequest,
-    current_user = Depends(get_current_active_user)
+    request: ChangePasswordRequest, current_user=Depends(get_current_active_user)
 ):
     """
     Change user password
@@ -269,10 +264,11 @@ async def change_password(
     # Verify current password
     logger.info(f"Password change attempt for user: {current_user.email}")
     if not verify_password(request.current_password, current_user.hashed_password):
-        logger.warning(f"Password change failed: Incorrect current password - {current_user.email}")
+        logger.warning(
+            f"Password change failed: Incorrect current password - {current_user.email}"
+        )
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect current password"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect current password"
         )
 
     # Hash new password
@@ -280,8 +276,7 @@ async def change_password(
 
     # Update password
     await UserRepository.update(
-        current_user.user_id,
-        hashed_password=new_hashed_password
+        current_user.user_id, hashed_password=new_hashed_password
     )
 
     logger.info(f"✅ Password changed successfully for user: {current_user.email}")

@@ -20,11 +20,11 @@ def hash_password(password: str) -> str:
     Returns:
         Hashed password string
     """
-    password_bytes = password.encode('utf-8')
+    password_bytes = password.encode("utf-8")
     salt = bcrypt.gensalt()
     hashed = bcrypt.hashpw(password_bytes, salt)
     logger.debug("Password hashed successfully")
-    return hashed.decode('utf-8')
+    return hashed.decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -39,8 +39,8 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         True if password matches, False otherwise
     """
     try:
-        password_bytes = plain_password.encode('utf-8')
-        hashed_bytes = hashed_password.encode('utf-8')
+        password_bytes = plain_password.encode("utf-8")
+        hashed_bytes = hashed_password.encode("utf-8")
         is_valid = bcrypt.checkpw(password_bytes, hashed_bytes)
         if is_valid:
             logger.debug("Password verification successful")
@@ -65,8 +65,8 @@ def needs_rehash(hashed_password: str) -> bool:
     """
     try:
         current_cost = bcrypt.gensalt()
-        hash_cost = int(hashed_password.split('$')[2])
-        default_cost = int(current_cost.decode('utf-8').split('$')[2])
+        hash_cost = int(hashed_password.split("$")[2])
+        default_cost = int(current_cost.decode("utf-8").split("$")[2])
         return hash_cost < default_cost
     except Exception:
         return False
