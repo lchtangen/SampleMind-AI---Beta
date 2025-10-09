@@ -11,8 +11,8 @@ Built a complete JWT-based authentication and authorization system with secure p
 - **JWT token generation and validation**
 - `create_access_token()` - Creates JWT access tokens (30 min expiry)
 - `create_refresh_token()` - Creates refresh tokens (7 day expiry)
-- `verify_token()` - Validates tokens and extracts user_id
-- `decode_token()` - Decodes token payload
+- `verify_token()` - Validates tokens and returns boolean (True if valid)
+- `decode_token()` - Decodes token payload and extracts user_id
 - `get_token_expiration()` - Gets token expiration datetime
 - `is_token_expired()` - Checks if token is expired
 - `configure_jwt()` - Configure JWT settings from app config
