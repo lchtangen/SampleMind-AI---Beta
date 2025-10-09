@@ -425,7 +425,7 @@ Documentation verified:
    - Add table of contents where missing
 
 2. **Create Release Notes** (15 min)
-   - RELEASE_NOTES.md for v6.0.0-beta
+   - RELEASE_NOTES.md for v2.0.0-beta
    - Highlight key features
    - Acknowledge known limitations
    - Include upgrade instructions
