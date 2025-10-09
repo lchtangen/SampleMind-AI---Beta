@@ -1,9 +1,8 @@
-import { motion } from 'framer-motion';
-import { designTokens } from '@/design-system/tokens';
+import { motion } from "framer-motion";
 
 /**
  * Hero Component - Landing Page Main Section
- * 
+ *
  * Design: Modern Tech Cyberpunk with Glassmorphism
  * Features:
  * - Animated gradient background
@@ -11,7 +10,7 @@ import { designTokens } from '@/design-system/tokens';
  * - Gradient text effects
  * - Animated CTA buttons
  * - Audio waveform visualization (placeholder)
- * 
+ *
  * Responsive: Mobile-first, adapts to tablet/desktop
  */
 export function Hero() {
@@ -27,7 +26,7 @@ export function Hero() {
           transition={{
             duration: 8,
             repeat: Infinity,
-            ease: 'easeInOut',
+            ease: "easeInOut",
           }}
         />
       </div>
@@ -61,7 +60,7 @@ export function Hero() {
           className="glass-card rounded-2xl p-8 sm:p-12 lg:p-16 max-w-5xl mx-auto shadow-glow-purple"
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         >
           {/* Badge */}
           <motion.div
@@ -87,9 +86,7 @@ export function Hero() {
               Intelligent Music
             </span>
             <br />
-            <span className="text-text-primary">
-              Production Platform
-            </span>
+            <span className="text-text-primary">Production Platform</span>
           </motion.h1>
 
           {/* Subheadline */}
@@ -100,11 +97,54 @@ export function Hero() {
             transition={{ delay: 0.7, duration: 0.8 }}
           >
             Analyze, organize, and create music with cutting-edge AI.
-            Multi-model intelligence powered by{' '}
-            <span className="text-primary font-semibold">Gemini 2.5 Pro</span>,{' '}
-            <span className="text-accent-cyan font-semibold">Claude Sonnet 4.5</span>, and{' '}
-            <span className="text-accent-pink font-semibold">GPT-5</span>.
+            Multi-model intelligence powered by{" "}
+            <span className="text-primary font-semibold">Gemini 2.5 Pro</span>,{" "}
+            <span className="text-accent-cyan font-semibold">
+              Claude Sonnet 4.5
+            </span>
+            , and <span className="text-accent-pink font-semibold">GPT-5</span>.
           </motion.p>
+
+          {/* Audio Waveform Visualization */}
+          <motion.div
+            className="mb-10 max-w-3xl"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.8 }}
+          >
+            <div className="h-24 sm:h-32 flex items-end justify-center gap-1 sm:gap-1.5 px-4 sm:px-8">
+              {[...Array(50)].map((_, i) => {
+                const height = Math.sin(i * 0.3) * 40 + 50 + Math.random() * 20;
+                const delay = i * 0.02;
+                
+                return (
+                  <motion.div
+                    key={i}
+                    className="flex-1 min-w-[2px] max-w-[8px] rounded-full bg-gradient-to-t from-primary via-accent-cyan to-accent-pink"
+                    initial={{ height: 0 }}
+                    animate={{
+                      height: [`${height * 0.3}%`, `${height}%`, `${height * 0.5}%`, `${height}%`],
+                    }}
+                    transition={{
+                      duration: 2 + Math.random(),
+                      repeat: Infinity,
+                      delay: delay,
+                      ease: 'easeInOut',
+                    }}
+                    style={{
+                      boxShadow: '0 0 10px rgba(139, 92, 246, 0.5)',
+                    }}
+                  />
+                );
+              })}
+            </div>
+            <p className="text-center text-sm text-text-muted mt-3">
+              <span className="inline-flex items-center gap-2">
+                <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                Real-time AI Audio Analysis
+              </span>
+            </p>
+          </motion.div>
 
           {/* Feature Highlights */}
           <motion.div
@@ -115,36 +155,74 @@ export function Hero() {
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-gradient-purple flex items-center justify-center shadow-glow-purple">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                <svg
+                  className="w-6 h-6 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                  />
                 </svg>
               </div>
               <div>
-                <p className="font-semibold text-text-primary">Audio Analysis</p>
-                <p className="text-sm text-text-muted">30+ features extracted</p>
+                <p className="font-semibold text-text-primary">
+                  Audio Analysis
+                </p>
+                <p className="text-sm text-text-muted">
+                  30+ features extracted
+                </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent-cyan to-accent-cyan/50 flex items-center justify-center shadow-glow-cyan">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <svg
+                  className="w-6 h-6 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
                 </svg>
               </div>
               <div>
                 <p className="font-semibold text-text-primary">AI-Powered</p>
-                <p className="text-sm text-text-muted">Multi-model intelligence</p>
+                <p className="text-sm text-text-muted">
+                  Multi-model intelligence
+                </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent-pink to-accent-pink/50 flex items-center justify-center shadow-glow-pink">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                <svg
+                  className="w-6 h-6 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+                  />
                 </svg>
               </div>
               <div>
-                <p className="font-semibold text-text-primary">Multi-Platform</p>
+                <p className="font-semibold text-text-primary">
+                  Multi-Platform
+                </p>
                 <p className="text-sm text-text-muted">Web, Mobile, DAW</p>
               </div>
             </div>
@@ -177,9 +255,24 @@ export function Hero() {
               whileTap={{ scale: 0.95 }}
             >
               <span className="text-text-primary flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 Watch Demo
               </span>
@@ -194,8 +287,16 @@ export function Hero() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <svg className="w-5 h-5 text-text-secondary" fill="currentColor" viewBox="0 0 24 24">
-                <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
+              <svg
+                className="w-5 h-5 text-text-secondary"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                  clipRule="evenodd"
+                />
               </svg>
               <span className="text-text-secondary">Star on GitHub</span>
             </motion.a>
@@ -209,15 +310,21 @@ export function Hero() {
             transition={{ delay: 1.3, duration: 0.8 }}
           >
             <div className="text-center">
-              <p className="text-3xl font-bold bg-gradient-purple bg-clip-text text-transparent">115+</p>
+              <p className="text-3xl font-bold bg-gradient-purple bg-clip-text text-transparent">
+                115+
+              </p>
               <p className="text-sm text-text-muted mt-1">AI Technologies</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold bg-gradient-to-r from-accent-cyan to-primary bg-clip-text text-transparent">30+</p>
+              <p className="text-3xl font-bold bg-gradient-to-r from-accent-cyan to-primary bg-clip-text text-transparent">
+                30+
+              </p>
               <p className="text-sm text-text-muted mt-1">Audio Features</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold bg-gradient-to-r from-accent-pink to-accent-cyan bg-clip-text text-transparent">5</p>
+              <p className="text-3xl font-bold bg-gradient-to-r from-accent-pink to-accent-cyan bg-clip-text text-transparent">
+                5
+              </p>
               <p className="text-sm text-text-muted mt-1">AI Models</p>
             </div>
             <div className="text-center">
@@ -237,7 +344,7 @@ export function Hero() {
         transition={{
           duration: 1.5,
           repeat: Infinity,
-          ease: 'easeInOut',
+          ease: "easeInOut",
         }}
       >
         <div className="w-6 h-10 border-2 border-primary/50 rounded-full flex items-start justify-center p-2">
@@ -249,7 +356,7 @@ export function Hero() {
             transition={{
               duration: 1.5,
               repeat: Infinity,
-              ease: 'easeInOut',
+              ease: "easeInOut",
             }}
           />
         </div>

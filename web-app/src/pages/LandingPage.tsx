@@ -1,16 +1,20 @@
-import { Hero } from '@/components/landing/Hero';
+import { Hero } from "@/components/landing/Hero";
+import { Navbar } from "@/components/landing/Navbar";
+import { Stats } from "@/components/landing/Stats";
 
 /**
  * Landing Page - SampleMind AI Homepage
- * 
+ *
  * Design: Modern Tech Cyberpunk with Glassmorphism
- * Components: Hero, Features, Stats, CTA
+ * Components: Navbar, Hero, Stats, Features (coming soon)
  */
 export function LandingPage() {
   return (
     <div className="min-h-screen bg-bg-primary">
+      <Navbar />
       <Hero />
-      {/* Add more sections here: Navbar, Features, Stats, etc. */}
+      <Stats />
+      {/* Coming soon: Features, Pricing, Testimonials, Footer */}
     </div>
   );
 }
