@@ -1,6 +1,6 @@
 # 🎉 SampleMind AI v6 - Beta Release Summary
 
-**Version:** 0.6.0 Beta
+**Version:** 2.0.0-beta
 **Date:** October 4, 2025
 **Status:** ✅ READY TO SHIP
 
@@ -262,7 +262,7 @@ docker-compose down          # Stop all
 - [x] Troubleshooting guide
 
 ### Release
-- [x] Version tagged (0.6.0)
+- [x] Version tagged (2.0.0-beta)
 - [x] Release notes ready
 - [x] Known issues documented
 - [x] Support materials ready
@@ -290,11 +290,11 @@ docker-compose down          # Stop all
 ## 🚀 Next Steps
 
 ### For Project Team
-1. Tag release (v0.6.0-beta)
+1. Tag release (v2.0.0-beta)
 2. Share with beta testers
 3. Monitor feedback
 4. Address critical issues
-5. Plan v0.7.0
+5. Plan v2.1.0
 
 ### For Beta Testers
 1. Read `QUICKSTART_BETA.md`
