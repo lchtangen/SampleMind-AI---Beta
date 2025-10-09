@@ -116,23 +116,28 @@ export function Hero() {
               {[...Array(50)].map((_, i) => {
                 const height = Math.sin(i * 0.3) * 40 + 50 + Math.random() * 20;
                 const delay = i * 0.02;
-                
+
                 return (
                   <motion.div
                     key={i}
                     className="flex-1 min-w-[2px] max-w-[8px] rounded-full bg-gradient-to-t from-primary via-accent-cyan to-accent-pink"
                     initial={{ height: 0 }}
                     animate={{
-                      height: [`${height * 0.3}%`, `${height}%`, `${height * 0.5}%`, `${height}%`],
+                      height: [
+                        `${height * 0.3}%`,
+                        `${height}%`,
+                        `${height * 0.5}%`,
+                        `${height}%`,
+                      ],
                     }}
                     transition={{
                       duration: 2 + Math.random(),
                       repeat: Infinity,
                       delay: delay,
-                      ease: 'easeInOut',
+                      ease: "easeInOut",
                     }}
                     style={{
-                      boxShadow: '0 0 10px rgba(139, 92, 246, 0.5)',
+                      boxShadow: "0 0 10px rgba(139, 92, 246, 0.5)",
                     }}
                   />
                 );

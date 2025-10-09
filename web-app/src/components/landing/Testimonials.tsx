@@ -1,9 +1,9 @@
-import { motion, useInView } from 'framer-motion';
-import { useRef, useState } from 'react';
+import { motion, useInView } from "framer-motion";
+import { useRef, useState } from "react";
 
 /**
  * Testimonials Section Component
- * 
+ *
  * Design: Modern Tech Cyberpunk with Glassmorphism
  * Features:
  * - Manual carousel with testimonial cards
@@ -11,7 +11,7 @@ import { useRef, useState } from 'react';
  * - 5-star ratings
  * - Navigation arrows
  * - Auto-rotation (optional)
- * 
+ *
  * Testimonials from real users and industry professionals
  */
 
@@ -27,36 +27,36 @@ interface Testimonial {
 
 export function Testimonials() {
   const ref = useRef<HTMLElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const testimonials: Testimonial[] = [
     {
-      name: 'Alex Chen',
-      role: 'Music Producer',
-      company: 'Soundwave Studios',
-      avatar: '🎧',
+      name: "Alex Chen",
+      role: "Music Producer",
+      company: "Soundwave Studios",
+      avatar: "🎧",
       rating: 5,
-      text: 'SampleMind AI has completely transformed my workflow. The AI analysis is incredibly accurate, and the batch processing saves me hours every week. Best investment I\'ve made this year!',
-      gradient: 'bg-gradient-purple',
+      text: "SampleMind AI has completely transformed my workflow. The AI analysis is incredibly accurate, and the batch processing saves me hours every week. Best investment I've made this year!",
+      gradient: "bg-gradient-purple",
     },
     {
-      name: 'Sarah Martinez',
-      role: 'Sound Designer',
-      company: 'Epic Games',
-      avatar: '🎮',
+      name: "Sarah Martinez",
+      role: "Sound Designer",
+      company: "Epic Games",
+      avatar: "🎮",
       rating: 5,
-      text: 'The multi-platform support is a game-changer. I can analyze samples on my phone during commute and continue working seamlessly on my desktop. The API integration is fantastic too!',
-      gradient: 'bg-gradient-to-r from-accent-cyan to-primary',
+      text: "The multi-platform support is a game-changer. I can analyze samples on my phone during commute and continue working seamlessly on my desktop. The API integration is fantastic too!",
+      gradient: "bg-gradient-to-r from-accent-cyan to-primary",
     },
     {
-      name: 'Michael Johnson',
-      role: 'DJ & Remixer',
-      company: 'Independent Artist',
-      avatar: '🎵',
+      name: "Michael Johnson",
+      role: "DJ & Remixer",
+      company: "Independent Artist",
+      avatar: "🎵",
       rating: 5,
-      text: 'I\'ve tried every sample management tool out there, and nothing comes close to SampleMind AI. The smart tagging feature alone is worth the price. Highly recommended!',
-      gradient: 'bg-gradient-to-r from-accent-pink to-accent-cyan',
+      text: "I've tried every sample management tool out there, and nothing comes close to SampleMind AI. The smart tagging feature alone is worth the price. Highly recommended!",
+      gradient: "bg-gradient-to-r from-accent-pink to-accent-cyan",
     },
   ];
 
@@ -65,13 +65,19 @@ export function Testimonials() {
   };
 
   const prevTestimonial = () => {
-    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+    setCurrentIndex(
+      (prev) => (prev - 1 + testimonials.length) % testimonials.length
+    );
   };
 
   const current = testimonials[currentIndex];
 
   return (
-    <section id="testimonials" ref={ref} className="py-20 sm:py-32 bg-bg-primary relative overflow-hidden">
+    <section
+      id="testimonials"
+      ref={ref}
+      className="py-20 sm:py-32 bg-bg-primary relative overflow-hidden"
+    >
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -84,7 +90,7 @@ export function Testimonials() {
           transition={{
             duration: 20,
             repeat: Infinity,
-            ease: 'easeInOut',
+            ease: "easeInOut",
           }}
         />
       </div>
@@ -100,7 +106,9 @@ export function Testimonials() {
           <motion.div
             className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-4 py-2 mb-6"
             initial={{ opacity: 0, scale: 0.8 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+            animate={
+              isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }
+            }
             transition={{ delay: 0.2, duration: 0.5 }}
           >
             <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
@@ -175,7 +183,9 @@ export function Testimonials() {
               transition={{ delay: 0.3, duration: 0.5 }}
             >
               {/* Avatar */}
-              <div className={`w-20 h-20 rounded-full ${current.gradient} flex items-center justify-center text-4xl mb-4 shadow-glow-purple`}>
+              <div
+                className={`w-20 h-20 rounded-full ${current.gradient} flex items-center justify-center text-4xl mb-4 shadow-glow-purple`}
+              >
                 {current.avatar}
               </div>
 
@@ -198,8 +208,18 @@ export function Testimonials() {
               whileTap={{ scale: 0.9 }}
               aria-label="Previous testimonial"
             >
-              <svg className="w-6 h-6 text-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg
+                className="w-6 h-6 text-text-primary"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </motion.button>
 
@@ -210,7 +230,9 @@ export function Testimonials() {
                   key={index}
                   onClick={() => setCurrentIndex(index)}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    index === currentIndex ? 'bg-primary w-8' : 'bg-text-muted/30'
+                    index === currentIndex
+                      ? "bg-primary w-8"
+                      : "bg-text-muted/30"
                   }`}
                   aria-label={`Go to testimonial ${index + 1}`}
                 />
@@ -224,8 +246,18 @@ export function Testimonials() {
               whileTap={{ scale: 0.9 }}
               aria-label="Next testimonial"
             >
-              <svg className="w-6 h-6 text-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <svg
+                className="w-6 h-6 text-text-primary"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
             </motion.button>
           </div>

@@ -1,16 +1,16 @@
-import { motion, useInView } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
+import { motion, useInView } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Stats Section Component
- * 
+ *
  * Design: Modern Tech Cyberpunk with Glassmorphism
  * Features:
  * - Animated counters with gradient text
  * - Glassmorphic cards with neon glow
  * - Key metrics showcase
  * - Scroll-triggered animations
- * 
+ *
  * Metrics:
  * - 50,000+ Samples Analyzed
  * - 10,000+ Active Users
@@ -26,10 +26,16 @@ interface StatCardProps {
   delay: number;
 }
 
-function StatCard({ value, suffix = '', label, gradient, delay }: StatCardProps) {
+function StatCard({
+  value,
+  suffix = "",
+  label,
+  gradient,
+  delay,
+}: StatCardProps) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   useEffect(() => {
     if (!isInView) return;
@@ -58,7 +64,7 @@ function StatCard({ value, suffix = '', label, gradient, delay }: StatCardProps)
       className="glass-card rounded-2xl p-8 text-center shadow-glow-purple hover:shadow-glow-cyan transition-all duration-500 group"
       initial={{ opacity: 0, y: 50 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-      transition={{ delay, duration: 0.6, ease: 'easeOut' }}
+      transition={{ delay, duration: 0.6, ease: "easeOut" }}
       whileHover={{ scale: 1.05, y: -5 }}
     >
       {/* Counter */}
@@ -66,9 +72,10 @@ function StatCard({ value, suffix = '', label, gradient, delay }: StatCardProps)
         className={`text-5xl sm:text-6xl font-bold mb-4 ${gradient} bg-clip-text text-transparent`}
         initial={{ scale: 0.5 }}
         animate={isInView ? { scale: 1 } : { scale: 0.5 }}
-        transition={{ delay: delay + 0.2, duration: 0.5, ease: 'backOut' }}
+        transition={{ delay: delay + 0.2, duration: 0.5, ease: "backOut" }}
       >
-        {count.toLocaleString()}{suffix}
+        {count.toLocaleString()}
+        {suffix}
       </motion.div>
 
       {/* Label */}
@@ -84,41 +91,44 @@ function StatCard({ value, suffix = '', label, gradient, delay }: StatCardProps)
 
 export function Stats() {
   const ref = useRef<HTMLElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   const stats = [
     {
       value: 50000,
-      suffix: '+',
-      label: 'Samples Analyzed',
-      gradient: 'bg-gradient-purple',
+      suffix: "+",
+      label: "Samples Analyzed",
+      gradient: "bg-gradient-purple",
       delay: 0,
     },
     {
       value: 10000,
-      suffix: '+',
-      label: 'Active Users',
-      gradient: 'bg-gradient-to-r from-accent-cyan to-primary',
+      suffix: "+",
+      label: "Active Users",
+      gradient: "bg-gradient-to-r from-accent-cyan to-primary",
       delay: 0.15,
     },
     {
       value: 99.9,
-      suffix: '%',
-      label: 'Accuracy Rate',
-      gradient: 'bg-gradient-to-r from-accent-pink to-accent-cyan',
+      suffix: "%",
+      label: "Accuracy Rate",
+      gradient: "bg-gradient-to-r from-accent-pink to-accent-cyan",
       delay: 0.3,
     },
     {
       value: 115,
-      suffix: '+',
-      label: 'AI Technologies',
-      gradient: 'bg-gradient-to-r from-primary to-accent-pink',
+      suffix: "+",
+      label: "AI Technologies",
+      gradient: "bg-gradient-to-r from-primary to-accent-pink",
       delay: 0.45,
     },
   ];
 
   return (
-    <section ref={ref} className="py-20 sm:py-32 bg-bg-primary relative overflow-hidden">
+    <section
+      ref={ref}
+      className="py-20 sm:py-32 bg-bg-primary relative overflow-hidden"
+    >
       {/* Background Glow Effect */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -130,7 +140,7 @@ export function Stats() {
           transition={{
             duration: 8,
             repeat: Infinity,
-            ease: 'easeInOut',
+            ease: "easeInOut",
           }}
         />
       </div>
@@ -159,7 +169,8 @@ export function Stats() {
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ delay: 0.3, duration: 0.6 }}
           >
-            Join the growing community of music producers leveraging AI-powered tools
+            Join the growing community of music producers leveraging AI-powered
+            tools
           </motion.p>
         </motion.div>
 
@@ -178,9 +189,9 @@ export function Stats() {
           transition={{ delay: 1, duration: 0.8 }}
         >
           <p className="text-text-muted">
-            Processing over{' '}
-            <span className="text-primary font-semibold">1M+ audio files</span>{' '}
-            monthly with{' '}
+            Processing over{" "}
+            <span className="text-primary font-semibold">1M+ audio files</span>{" "}
+            monthly with{" "}
             <span className="text-accent-cyan font-semibold">5 AI models</span>
           </p>
         </motion.div>

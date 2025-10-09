@@ -1,9 +1,9 @@
-import { motion, useInView } from 'framer-motion';
-import { useRef, useState } from 'react';
+import { motion, useInView } from "framer-motion";
+import { useRef, useState } from "react";
 
 /**
  * Pricing Section Component
- * 
+ *
  * Design: Modern Tech Cyberpunk with Glassmorphism
  * Features:
  * - 3-tier pricing (Free, Pro, Enterprise)
@@ -12,7 +12,7 @@ import { useRef, useState } from 'react';
  * - "Most Popular" badge on Pro tier
  * - Glassmorphic cards with hover effects
  * - Gradient pricing text
- * 
+ *
  * Pricing Tiers:
  * - Free: $0/month - Perfect for getting started
  * - Pro: $29/month - For professional producers
@@ -43,17 +43,19 @@ function PricingTier({
   delay,
 }: PricingTierProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-50px' });
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
 
   return (
     <motion.div
       ref={ref}
       className={`relative glass-card rounded-2xl p-8 ${
-        popular ? 'border-2 border-primary shadow-glow-purple' : 'border border-primary/20'
+        popular
+          ? "border-2 border-primary shadow-glow-purple"
+          : "border border-primary/20"
       } hover:shadow-glow-cyan transition-all duration-500 group`}
       initial={{ opacity: 0, y: 50 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-      transition={{ delay, duration: 0.6, ease: 'easeOut' }}
+      transition={{ delay, duration: 0.6, ease: "easeOut" }}
       whileHover={{ scale: 1.03, y: -10 }}
     >
       {/* Popular Badge */}
@@ -61,7 +63,11 @@ function PricingTier({
         <motion.div
           className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-purple px-6 py-2 rounded-full shadow-glow-purple"
           initial={{ opacity: 0, scale: 0.8, y: -10 }}
-          animate={isInView ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.8, y: -10 }}
+          animate={
+            isInView
+              ? { opacity: 1, scale: 1, y: 0 }
+              : { opacity: 0, scale: 0.8, y: -10 }
+          }
           transition={{ delay: delay + 0.2, duration: 0.4 }}
         >
           <span className="text-white font-bold text-sm">Most Popular</span>
@@ -74,21 +80,17 @@ function PricingTier({
       </h3>
 
       {/* Description */}
-      <p className="text-text-secondary mb-6">
-        {description}
-      </p>
+      <p className="text-text-secondary mb-6">{description}</p>
 
       {/* Price */}
       <div className="mb-8">
         <div className="flex items-baseline gap-2">
-          <span className={`text-5xl font-bold ${gradient} bg-clip-text text-transparent`}>
+          <span
+            className={`text-5xl font-bold ${gradient} bg-clip-text text-transparent`}
+          >
             {price}
           </span>
-          {period && (
-            <span className="text-text-muted">
-              / {period}
-            </span>
-          )}
+          {period && <span className="text-text-muted">/ {period}</span>}
         </div>
       </div>
 
@@ -96,8 +98,8 @@ function PricingTier({
       <motion.button
         className={`w-full py-4 rounded-lg font-semibold text-lg mb-8 transition-all duration-300 ${
           popular
-            ? 'bg-gradient-purple text-white shadow-glow-purple hover:shadow-glow-cyan'
-            : 'bg-bg-tertiary text-text-primary hover:bg-primary/20 border-2 border-primary/30'
+            ? "bg-gradient-purple text-white shadow-glow-purple hover:shadow-glow-cyan"
+            : "bg-bg-tertiary text-text-primary hover:bg-primary/20 border-2 border-primary/30"
         }`}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
@@ -143,79 +145,83 @@ function PricingTier({
 
 export function Pricing() {
   const ref = useRef<HTMLElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [isAnnual, setIsAnnual] = useState(false);
 
   const pricingTiers = [
     {
-      name: 'Free',
-      price: '$0',
-      period: 'month',
-      description: 'Perfect for getting started and exploring features',
+      name: "Free",
+      price: "$0",
+      period: "month",
+      description: "Perfect for getting started and exploring features",
       features: [
-        '100 samples per month',
-        'Basic audio analysis',
-        'Standard support',
-        'Web access only',
-        'Public projects',
-        '1 GB storage',
-        'Community features',
+        "100 samples per month",
+        "Basic audio analysis",
+        "Standard support",
+        "Web access only",
+        "Public projects",
+        "1 GB storage",
+        "Community features",
       ],
-      cta: 'Get Started Free',
+      cta: "Get Started Free",
       popular: false,
-      gradient: 'bg-gradient-to-r from-text-primary to-text-secondary',
+      gradient: "bg-gradient-to-r from-text-primary to-text-secondary",
       delay: 0,
     },
     {
-      name: 'Pro',
-      price: isAnnual ? '$290' : '$29',
-      period: isAnnual ? 'year' : 'month',
-      description: 'For professional producers and serious creators',
+      name: "Pro",
+      price: isAnnual ? "$290" : "$29",
+      period: isAnnual ? "year" : "month",
+      description: "For professional producers and serious creators",
       features: [
-        'Unlimited samples',
-        'Advanced AI analysis',
-        'Priority support',
-        'All platforms (Web, Mobile, DAW)',
-        'Private projects',
-        '100 GB storage',
-        'Batch processing',
-        'API access',
-        'Custom tags',
-        'Export to all formats',
-        'Real-time collaboration',
+        "Unlimited samples",
+        "Advanced AI analysis",
+        "Priority support",
+        "All platforms (Web, Mobile, DAW)",
+        "Private projects",
+        "100 GB storage",
+        "Batch processing",
+        "API access",
+        "Custom tags",
+        "Export to all formats",
+        "Real-time collaboration",
       ],
-      cta: 'Start Pro Trial',
+      cta: "Start Pro Trial",
       popular: true,
-      gradient: 'bg-gradient-purple',
+      gradient: "bg-gradient-purple",
       delay: 0.15,
     },
     {
-      name: 'Enterprise',
-      price: 'Custom',
-      period: '',
-      description: 'For teams, studios, and large organizations',
+      name: "Enterprise",
+      price: "Custom",
+      period: "",
+      description: "For teams, studios, and large organizations",
       features: [
-        'Everything in Pro',
-        'Dedicated support',
-        'Custom integrations',
-        'Unlimited storage',
-        'Team management',
-        'SSO authentication',
-        'Advanced analytics',
-        'SLA guarantee',
-        'On-premise deployment',
-        'Custom AI models',
-        'White-label options',
+        "Everything in Pro",
+        "Dedicated support",
+        "Custom integrations",
+        "Unlimited storage",
+        "Team management",
+        "SSO authentication",
+        "Advanced analytics",
+        "SLA guarantee",
+        "On-premise deployment",
+        "Custom AI models",
+        "White-label options",
       ],
-      cta: 'Contact Sales',
+      cta: "Contact Sales",
       popular: false,
-      gradient: 'bg-gradient-to-r from-accent-cyan to-accent-pink',
+      gradient: "bg-gradient-to-r from-accent-cyan to-accent-pink",
       delay: 0.3,
     },
   ];
 
   return (
-    <section id="pricing" ref={ref} className="py-20 sm:py-32 bg-bg-primary relative overflow-hidden">
+    <section
+      id="pricing"
+      ref={ref}
+      className="py-20 sm:py-32 bg-bg-primary relative overflow-hidden"
+    >
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -227,7 +233,7 @@ export function Pricing() {
           transition={{
             duration: 15,
             repeat: Infinity,
-            ease: 'easeInOut',
+            ease: "easeInOut",
           }}
         />
       </div>
@@ -243,7 +249,9 @@ export function Pricing() {
           <motion.div
             className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-4 py-2 mb-6"
             initial={{ opacity: 0, scale: 0.8 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+            animate={
+              isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }
+            }
             transition={{ delay: 0.2, duration: 0.5 }}
           >
             <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
@@ -269,7 +277,8 @@ export function Pricing() {
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ delay: 0.4, duration: 0.6 }}
           >
-            Start free and upgrade as you grow. All plans include a 14-day free trial.
+            Start free and upgrade as you grow. All plans include a 14-day free
+            trial.
           </motion.p>
 
           {/* Billing Toggle */}
@@ -279,25 +288,33 @@ export function Pricing() {
             animate={isInView ? { opacity: 1 } : { opacity: 0 }}
             transition={{ delay: 0.5, duration: 0.6 }}
           >
-            <span className={`font-semibold ${!isAnnual ? 'text-primary' : 'text-text-muted'}`}>
+            <span
+              className={`font-semibold ${
+                !isAnnual ? "text-primary" : "text-text-muted"
+              }`}
+            >
               Monthly
             </span>
             <button
               onClick={() => setIsAnnual(!isAnnual)}
               className={`relative w-16 h-8 rounded-full transition-colors duration-300 ${
-                isAnnual ? 'bg-gradient-purple' : 'bg-bg-tertiary'
+                isAnnual ? "bg-gradient-purple" : "bg-bg-tertiary"
               }`}
               aria-label="Toggle billing period"
             >
               <motion.div
                 className="absolute top-1 w-6 h-6 bg-white rounded-full shadow-lg"
                 animate={{
-                  left: isAnnual ? 'calc(100% - 28px)' : '4px',
+                  left: isAnnual ? "calc(100% - 28px)" : "4px",
                 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
               />
             </button>
-            <span className={`font-semibold ${isAnnual ? 'text-primary' : 'text-text-muted'}`}>
+            <span
+              className={`font-semibold ${
+                isAnnual ? "text-primary" : "text-text-muted"
+              }`}
+            >
               Annual
               <span className="ml-2 text-xs bg-accent-cyan/20 text-accent-cyan px-2 py-1 rounded">
                 Save 17%
@@ -321,15 +338,22 @@ export function Pricing() {
           transition={{ delay: 1, duration: 0.8 }}
         >
           <p className="text-text-muted mb-4">
-            All plans include 14-day free trial • No credit card required • Cancel anytime
+            All plans include 14-day free trial • No credit card required •
+            Cancel anytime
           </p>
           <p className="text-sm text-text-muted">
-            Questions? Check our{' '}
-            <a href="#" className="text-primary hover:text-accent-cyan transition-colors">
+            Questions? Check our{" "}
+            <a
+              href="#"
+              className="text-primary hover:text-accent-cyan transition-colors"
+            >
               FAQ
-            </a>
-            {' '}or{' '}
-            <a href="#" className="text-accent-cyan hover:text-accent-pink transition-colors">
+            </a>{" "}
+            or{" "}
+            <a
+              href="#"
+              className="text-accent-cyan hover:text-accent-pink transition-colors"
+            >
               contact us
             </a>
           </p>

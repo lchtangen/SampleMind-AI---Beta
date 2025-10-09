@@ -1,35 +1,89 @@
-import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 
 /**
- * Navbar Component - Landing Page Header
- * 
+ * Navbar Component - Landing Page Header with Smooth Scroll
+ *
  * Design: Modern Tech Cyberpunk with Glassmorphism
  * Features:
  * - Logo with neon glow effect
- * - Desktop navigation links (Features, Pricing, Docs, Blog)
+ * - Smooth scroll navigation with active section highlighting
+ * - Desktop navigation links (Features, How It Works, Pricing, Testimonials)
  * - CTA buttons (Sign In, Get Started)
  * - Mobile hamburger menu
  * - Sticky positioning with glassmorphic background
- * 
+ *
  * Responsive: Mobile hamburger menu → Desktop inline navigation
  */
 export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
 
   const navLinks = [
-    { name: 'Features', href: '#features' },
-    { name: 'Pricing', href: '#pricing' },
-    { name: 'Docs', href: '#docs' },
-    { name: 'Blog', href: '#blog' },
+    { name: "Features", href: "#features" },
+    { name: "How It Works", href: "#how-it-works" },
+    { name: "Pricing", href: "#pricing" },
+    { name: "Testimonials", href: "#testimonials" },
   ];
+
+  // Smooth scroll handler
+  const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    
+    const targetId = href.replace("#", "");
+    const targetElement = document.getElementById(targetId);
+    
+    if (targetElement) {
+      const navbarHeight = 80; // Navbar height offset
+      const targetPosition = targetElement.offsetTop - navbarHeight;
+      
+      window.scrollTo({
+        top: targetPosition,
+        behavior: "smooth",
+      });
+      
+      // Update URL without page jump
+      window.history.pushState(null, "", href);
+      
+      // Close mobile menu after navigation
+      setIsMobileMenuOpen(false);
+    }
+  };
+
+  // Track active section on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = navLinks.map((link) => link.href.replace("#", ""));
+      const scrollPosition = window.scrollY + 100; // Offset for navbar
+
+      for (const sectionId of sections) {
+        const section = document.getElementById(sectionId);
+        if (section) {
+          const sectionTop = section.offsetTop;
+          const sectionBottom = sectionTop + section.offsetHeight;
+
+          if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+            setActiveSection(`#${sectionId}`);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll(); // Initial check
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const isLinkActive = (href: string) => activeSection === href;
 
   return (
     <motion.nav
       className="fixed top-0 left-0 right-0 z-50 glass-card border-b border-primary/20"
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
@@ -68,9 +122,7 @@ export function Navbar() {
                 </span>
                 <span className="text-text-primary"> AI</span>
               </h1>
-              <p className="text-xs text-text-muted -mt-1">
-                Phoenix Beta
-              </p>
+              <p className="text-xs text-text-muted -mt-1">Phoenix Beta</p>
             </div>
           </motion.a>
 
@@ -80,13 +132,22 @@ export function Navbar() {
               <motion.a
                 key={link.name}
                 href={link.href}
-                className="text-text-secondary hover:text-primary font-medium transition-colors duration-200 relative group"
+                onClick={(e) => handleSmoothScroll(e, link.href)}
+                className={`font-medium transition-colors duration-200 relative group ${
+                  isLinkActive(link.href)
+                    ? "text-primary"
+                    : "text-text-secondary hover:text-primary"
+                }`}
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * index, duration: 0.4 }}
               >
                 {link.name}
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-purple group-hover:w-full transition-all duration-300" />
+                <span
+                  className={`absolute bottom-0 left-0 h-0.5 bg-gradient-purple transition-all duration-300 ${
+                    isLinkActive(link.href) ? "w-full" : "w-0 group-hover:w-full"
+                  }`}
+                />
               </motion.a>
             ))}
           </div>
@@ -155,10 +216,10 @@ export function Navbar() {
           className="md:hidden overflow-hidden"
           initial={false}
           animate={{
-            height: isMobileMenuOpen ? 'auto' : 0,
+            height: isMobileMenuOpen ? "auto" : 0,
             opacity: isMobileMenuOpen ? 1 : 0,
           }}
-          transition={{ duration: 0.3, ease: 'easeInOut' }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
         >
           <div className="py-4 space-y-4">
             {/* Mobile Navigation Links */}
@@ -166,8 +227,12 @@ export function Navbar() {
               <a
                 key={link.name}
                 href={link.href}
-                className="block px-4 py-2 text-text-secondary hover:text-primary hover:bg-bg-tertiary rounded-lg transition-colors duration-200"
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={(e) => handleSmoothScroll(e, link.href)}
+                className={`block px-4 py-2 rounded-lg transition-colors duration-200 ${
+                  isLinkActive(link.href)
+                    ? "text-primary bg-primary/10"
+                    : "text-text-secondary hover:text-primary hover:bg-bg-tertiary"
+                }`}
               >
                 {link.name}
               </a>
