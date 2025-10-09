@@ -1,6 +1,6 @@
 # SampleMind AI v6 - Beta Release Readiness
 
-**Version:** 0.6.0 Beta
+**Version:** 2.0.0-beta
 **Release Date:** 2025-10-04
 **Status:** ✅ READY FOR BETA RELEASE
 
@@ -267,7 +267,7 @@ SampleMind AI v6 has been fully tested and is ready for beta release. All core f
 
 ## 📝 Beta Release Notes
 
-### Version 0.6.0 Beta
+### Version 2.0.0-beta
 
 **Release Date:** October 4, 2025
 
@@ -383,7 +383,7 @@ SampleMind AI v6 has been fully tested and is ready for beta release. All core f
 - Deployment: ✅ Beta Ready
 
 **Release Date:** 2025-10-04
-**Version:** 0.6.0 Beta
+**Version:** 2.0.0-beta
 
 ---
 

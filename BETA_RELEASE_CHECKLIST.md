@@ -3,11 +3,11 @@
 ```
 ╔════════════════════════════════════════════════════════════════════════════╗
 ║                    BETA RELEASE READINESS CHECKLIST                        ║
-║                        SampleMind AI v6.0.0-beta                          ║
+║                        SampleMind AI v2.0.0-beta                          ║
 ╚════════════════════════════════════════════════════════════════════════════╝
 ```
 
-**Version:** 6.0.0-beta  
+**Version:** 2.0.0-beta  
 **Target Release Date:** [TBD - 1 week from completion]  
 **Last Updated:** December 2024  
 **Status:** 🟡 IN PROGRESS (85% Ready)
@@ -783,7 +783,7 @@ Status: 🟢 7/10 FULLY MITIGATED, 🟡 3/10 PARTIALLY MITIGATED
 │  [ ] 2. Code Preparation                                                  │
 │      [x] Latest code on main branch                                       │
 │      [x] All tests passing (manual verification done)                     │
-│      [x] Version tagged (v6.0.0-beta)                                     │
+│      [x] Version tagged (v2.0.0-beta)                                     │
 │      [x] CHANGELOG updated                                                │
 │      [x] Dependencies up to date                                          │
 │                                                                            │
@@ -827,8 +827,8 @@ Status: 🟢 7/10 FULLY MITIGATED, 🟡 3/10 PARTIALLY MITIGATED
 ║     └─▶ Verify no debug code or TODOs                                  ║
 ║                                                                         ║
 ║  Step 2: Version Tagging                                              ║
-║     └─▶ git tag -a v6.0.0-beta -m "Beta release"                      ║
-║     └─▶ git push origin v6.0.0-beta                                    ║
+║     └─▶ git tag -a v2.0.0-beta -m "Beta release"                      ║
+║     └─▶ git push origin v2.0.0-beta                                    ║
 ║                                                                         ║
 ║  Step 3: Environment Verification                                     ║
 ║     └─▶ python scripts/verify_setup.py --env=production               ║
@@ -850,7 +850,7 @@ Status: 🟢 7/10 FULLY MITIGATED, 🟡 3/10 PARTIALLY MITIGATED
 ║     └─▶ ssh user@production-server                                     ║
 ║     └─▶ cd /opt/samplemind-ai-v6                                       ║
 ║     └─▶ git fetch --all --tags                                         ║
-║     └─▶ git checkout v6.0.0-beta                                       ║
+║     └─▶ git checkout v2.0.0-beta                                       ║
 ║                                                                         ║
 ║  Step 7: Update Configuration                                         ║
 ║     └─▶ cp .env.production .env                                        ║
