@@ -356,6 +356,6 @@ For documentation issues or suggestions:
 
 ---
 
-**Last Updated**: 2025-10-04  
-**Version**: 1.0.0  
+**Last Updated**: 2025-10-09  
+**Version**: v2.0.0-beta  
 **Status**: ✅ Complete
