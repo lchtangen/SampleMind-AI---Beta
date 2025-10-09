@@ -444,16 +444,16 @@ class TestAuthentication:
         )
         
         # Act
-        user_id = verify_token(token, token_type="access")
+        is_valid = verify_token(token, token_type="access")
         
         # Assert
-        assert user_id == user_data["user_id"]
+        assert is_valid is True
     
     def test_verify_token_expired(self):
         """Test expired token rejection."""
         expired_token = "expired.jwt.token"
-        user_id = verify_token(expired_token)
-        assert user_id is None
+        is_valid = verify_token(expired_token)
+        assert is_valid is False
     
     @pytest.mark.asyncio
     async def test_async_database_operation(self):
