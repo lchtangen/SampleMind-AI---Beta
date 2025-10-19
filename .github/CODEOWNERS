@@ -1,0 +1,24 @@
+# Default owners for everything in the repo
+*       @lchtangen
+
+# Core application code
+/apps/ @lchtangen
+/packages/ @lchtangen
+/src/ @lchtangen
+
+# Documentation
+/DOCUMENTS/ @lchtangen
+/README.md @lchtangen
+
+# Configuration files
+/package.json @lchtangen
+/tsconfig.json @lchtangen
+/turbo.json @lchtangen
+
+# GitHub Actions
+/.github/workflows/ @lchtangen
+
+# You can add more specific paths and owners as needed
+# For example:
+# /packages/audio-engine/ @audio-team
+# /apps/web/ @frontend-team

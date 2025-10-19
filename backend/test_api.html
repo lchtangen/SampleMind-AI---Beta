@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SampleMind AI - API Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .success {
+            border-left: 4px solid #10b981;
+        }
+        
+        .error {
+            border-left: 4px solid #ef4444;
+        }
+        
+        .token {
+            background: #fef3c7;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            word-break: break-all;
+            font-size: 11px;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .status.online {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status.offline {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 SampleMind AI - API Tester</h1>
+        <p class="subtitle">Test your backend API endpoints</p>
+        
+        <div class="section">
+            <h2>Server Status</h2>
+            <div id="serverStatus" class="status offline">Checking...</div>
+            <button onclick="checkHealth()">Check Health</button>
+            <div id="healthResult" class="result" style="display:none;"></div>
+        </div>
+        
+        <div class="section">
+            <h2>1️⃣ Register New User</h2>
+            <input type="email" id="regEmail" placeholder="Email" value="test@samplemind.ai">
+            <input type="password" id="regPassword" placeholder="Password" value="test123456">
+            <input type="text" id="regName" placeholder="Full Name" value="Test User">
+            <button onclick="register()">Register</button>
+            <div id="registerResult" class="result" style="display:none;"></div>
+        </div>
+        
+        <div class="section">
+            <h2>2️⃣ Login</h2>
+            <input type="email" id="loginEmail" placeholder="Email" value="test@samplemind.ai">
+            <input type="password" id="loginPassword" placeholder="Password" value="test123456">
+            <button onclick="login()">Login</button>
+            <div id="loginResult" class="result" style="display:none;"></div>
+            <div id="tokenDisplay" style="display:none;">
+                <div class="token">
+                    <strong>🔑 Access Token:</strong><br>
+                    <span id="tokenValue"></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>3️⃣ Get User Info (Protected)</h2>
+            <button onclick="getMe()" id="meButton" disabled>Get My Info</button>
+            <div id="meResult" class="result" style="display:none;"></div>
+        </div>
+        
+        <div class="section">
+            <h2>4️⃣ List Audio Files (Protected)</h2>
+            <button onclick="listAudio()" id="audioButton" disabled>List Audio</button>
+            <div id="audioResult" class="result" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+        let accessToken = null;
+
+        // Check server health on load
+        window.onload = () => {
+            checkHealth();
+        };
+
+        function showResult(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = isError ? 'result error' : 'result success';
+            element.textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function checkHealth() {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                
+                const statusEl = document.getElementById('serverStatus');
+                statusEl.className = 'status online';
+                statusEl.textContent = '✅ Server Online';
+                
+                showResult('healthResult', data);
+            } catch (error) {
+                const statusEl = document.getElementById('serverStatus');
+                statusEl.className = 'status offline';
+                statusEl.textContent = '❌ Server Offline';
+                showResult('healthResult', {error: error.message}, true);
+            }
+        }
+
+        async function register() {
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const full_name = document.getElementById('regName').value;
+
+            try {
+                const response = await fetch(`${API_URL}/api/v1/auth/register`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, password, full_name})
+                });
+                
+                const data = await response.json();
+                showResult('registerResult', data, !response.ok);
+                
+                if (response.ok) {
+                    alert('✅ Registration successful! Now login.');
+                }
+            } catch (error) {
+                showResult('registerResult', {error: error.message}, true);
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/api/v1/auth/login`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, password})
+                });
+                
+                const data = await response.json();
+                showResult('loginResult', data, !response.ok);
+                
+                if (response.ok && data.access_token) {
+                    accessToken = data.access_token;
+                    document.getElementById('tokenDisplay').style.display = 'block';
+                    document.getElementById('tokenValue').textContent = accessToken;
+                    document.getElementById('meButton').disabled = false;
+                    document.getElementById('audioButton').disabled = false;
+                    alert('✅ Login successful! Token saved.');
+                }
+            } catch (error) {
+                showResult('loginResult', {error: error.message}, true);
+            }
+        }
+
+        async function getMe() {
+            if (!accessToken) {
+                alert('❌ Please login first!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/v1/auth/me`, {
+                    headers: {'Authorization': `Bearer ${accessToken}`}
+                });
+                
+                const data = await response.json();
+                showResult('meResult', data, !response.ok);
+            } catch (error) {
+                showResult('meResult', {error: error.message}, true);
+            }
+        }
+
+        async function listAudio() {
+            if (!accessToken) {
+                alert('❌ Please login first!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/v1/audio`, {
+                    headers: {'Authorization': `Bearer ${accessToken}`}
+                });
+                
+                const data = await response.json();
+                showResult('audioResult', data, !response.ok);
+            } catch (error) {
+                showResult('audioResult', {error: error.message}, true);
+            }
+        }
+    </script>
+</body>
+</html>

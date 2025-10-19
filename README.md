@@ -46,7 +46,17 @@ See [docs/guides/GETTING_STARTED.md](docs/guides/GETTING_STARTED.md) for detaile
 
 ## 🎯 What is SampleMind AI?
 
-SampleMind AI is a hybrid AI-powered music production platform that provides:
+SampleMind AI is a hybrid AI-powered music production platform that provides advanced audio processing and analysis capabilities:
+
+### 🎵 Advanced Audio Analysis
+- **Tempo Detection**: Accurate BPM estimation for any audio file
+- **Key Detection**: Identify musical key and mode (major/minor)
+- **Spectral Analysis**: Extract detailed spectral features including centroid, bandwidth, and rolloff
+- **MFCC Extraction**: Mel-frequency cepstral coefficients for audio classification and analysis
+- **Harmonic/Percussive Separation**: Split audio into harmonic and percussive components
+- **Robust Edge Case Handling**: Reliable performance with various audio types including silence, impulses, and short clips
+
+### 🤖 AI-Powered Features
 
 - **🎹 Advanced Audio Analysis** - Deep audio feature extraction (tempo, key, mood, genre, energy)
 - **🤖 AI-Powered Insights** - Music analysis using Google Gemini 2.5 Pro & OpenAI GPT-4o

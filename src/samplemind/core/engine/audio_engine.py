@@ -195,122 +195,439 @@ class AudioProcessor:
         return signal.filtfilt(b, a, y)
     
     @staticmethod
-    def extract_harmonic_percussive(y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        """Separate harmonic and percussive components"""
-        harmonic, percussive = librosa.effects.hpss(y, margin=8.0)
-        return harmonic, percussive
+    def extract_harmonic_percussive(y: np.ndarray, margin: float = 3.0) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Separate harmonic and percussive components of an audio signal.
+        
+        Args:
+            y: Audio time series. Must be a 1D numpy array of floats.
+            margin: Margin for harmonic/percussive separation (1.0-10.0, higher values make separation more aggressive)
+            
+        Returns:
+            Tuple of (y_harmonic, y_percussive)
+            
+        Raises:
+            ValueError: If input is not a 1D numpy array or has invalid values
+            RuntimeError: If separation fails
+        """
+        # Input validation
+        if not isinstance(y, np.ndarray) or y.ndim != 1:
+            raise ValueError("Input must be a 1D numpy array")
+            
+        if len(y) < 512:  # Minimum length for STFT
+            raise ValueError(f"Input signal too short for HPSS. Got {len(y)} samples, need at least 512.")
+            
+        if not np.isfinite(y).all():
+            raise ValueError("Input contains NaN or infinite values")
+            
+        if margin < 1.0 or margin > 10.0:
+            raise ValueError(f"Margin must be between 1.0 and 10.0, got {margin}")
+            
+        try:
+            # Normalize input to prevent numerical issues
+            y_norm = y / (np.max(np.abs(y)) + 1e-8)
+            
+            # Compute short-time Fourier transform with appropriate window size
+            n_fft = min(2048, len(y_norm) // 4)  # Adjust FFT size based on input length
+            hop_length = n_fft // 4
+            
+            D = librosa.stft(
+                y_norm,
+                n_fft=n_fft,
+                hop_length=hop_length,
+                window='hann',
+                center=True,
+                pad_mode='reflect'
+            )
+            
+            # Separate harmonic and percussive components
+            D_harmonic, D_percussive = librosa.decompose.hpss(
+                D,
+                margin=margin,
+                kernel_size=31,  # Larger kernel for better separation
+                power=2.0       # Power of the margin distance
+            )
+            
+            # Invert back to time domain
+            y_harmonic = librosa.istft(
+                D_harmonic,
+                hop_length=hop_length,
+                length=len(y_norm),
+                window='hann'
+            )
+            
+            y_percussive = librosa.istft(
+                D_percussive,
+                hop_length=hop_length,
+                length=len(y_norm),
+                window='hann'
+            )
+            
+            # Ensure output has same scale as input
+            scale = np.max(np.abs(y)) / (np.max(np.abs([y_harmonic, y_percussive])) + 1e-8)
+            y_harmonic = y_harmonic * scale
+            y_percussive = y_percussive * scale
+            
+            # Ensure perfect reconstruction (y ≈ y_harmonic + y_percussive)
+            y_combined = y_harmonic + y_percussive
+            if not np.allclose(y_norm, y_combined, atol=1e-4):
+                # If reconstruction isn't perfect, adjust to match input
+                y_harmonic = y_harmonic * (y_norm / (y_combined + 1e-8))
+                y_percussive = y_percussive * (y_norm / (y_combined + 1e-8))
+            
+            return y_harmonic, y_percussive
+            
+        except Exception as e:
+            raise RuntimeError(f"HPSS separation failed: {str(e)}")
 
 
 class AdvancedFeatureExtractor:
-    """Advanced feature extraction for professional music analysis"""
+    """
+    Advanced feature extraction for professional music analysis.
     
-    def __init__(self, sample_rate: int = 44100):
+    This class provides high-level methods for extracting various audio features
+    with automatic caching and performance optimizations.
+    """
+    
+    def __init__(self, sample_rate: int = 44100, use_cache: bool = True):
+        """
+        Initialize the feature extractor.
+        
+        Args:
+            sample_rate: Target sample rate for audio processing
+            use_cache: Whether to use the feature cache
+        """
         self.sample_rate = sample_rate
         self.hop_length = 512
         self.n_fft = 2048
+        self.use_cache = use_cache
+        self._cache = cache if use_cache else None
         
     def extract_tonal_features(self, y: np.ndarray) -> Dict[str, Any]:
-        """Extract comprehensive tonal features"""
-        # Chroma features
+        """
+        Extract comprehensive tonal features including key and pitch information.
+        
+        Args:
+            y: Audio time series
+            
+        Returns:
+            Dictionary containing tonal features
+        """
+        # Compute chroma features for key detection
         chroma = librosa.feature.chroma_stft(y=y, sr=self.sample_rate, hop_length=self.hop_length)
         chroma_mean = np.mean(chroma, axis=1)
         
-        # Key and mode estimation
+        # Get key and mode
         key, mode = self._estimate_key_mode(chroma_mean)
         
-        # Pitch class distribution
-        pitch_classes = np.sum(chroma, axis=1)
-        pitch_classes = pitch_classes / np.sum(pitch_classes)  # Normalize
+        # Compute harmonic and percussive components
+        y_harmonic, y_percussive = librosa.effects.hpss(y)
+        
+        # Get harmonic ratio
+        harmonic_ratio = np.mean(y_harmonic**2) / (np.mean(y_harmonic**2) + np.mean(y_percussive**2) + 1e-6)
         
         return {
-            'chroma_features': chroma,
+            'chroma': chroma,
+            'chroma_mean': chroma_mean,
             'key': key,
             'mode': mode,
-            'pitch_class_distribution': pitch_classes.tolist()
+            'harmonic_ratio': harmonic_ratio,
+            'pitch_class_distribution': chroma_mean.tolist()
         }
-    
+        
     def extract_rhythmic_features(self, y: np.ndarray) -> Dict[str, Any]:
-        """Extract rhythm and tempo information"""
-        # Tempo and beat tracking
-        tempo, beats = librosa.beat.beat_track(y=y, sr=self.sample_rate, hop_length=self.hop_length)
-        beat_times = librosa.frames_to_time(beats, sr=self.sample_rate, hop_length=self.hop_length)
+        """
+        Extract rhythm and tempo information from audio.
         
-        # Onset detection
-        onset_frames = librosa.onset.onset_detect(y=y, sr=self.sample_rate, hop_length=self.hop_length)
-        onset_times = librosa.frames_to_time(onset_frames, sr=self.sample_rate, hop_length=self.hop_length)
+        Args:
+            y: Audio time series
+            
+        Returns:
+            Dictionary containing rhythmic features
+        """
+        # Check cache first if enabled
+        cache_key = self._get_cache_key('rhythm', y)
+        if self.use_cache and self._cache:
+            cached = self._cache.get(y, cache_key)
+            if cached is not None:
+                return cached
         
-        # Rhythm pattern analysis
-        rhythm_pattern = self._analyze_rhythm_pattern(beat_times, onset_times)
+        start_time = time.time()
         
-        return {
-            'tempo': float(tempo.item() if hasattr(tempo, 'item') else tempo),
-            'beats': beat_times.tolist(),
-            'onset_times': onset_times.tolist(),
-            'rhythm_pattern': rhythm_pattern
-        }
-    
+        try:
+            # Compute onset envelope
+            onset_env = librosa.onset.onset_strength(y=y, sr=self.sample_rate, hop_length=self.hop_length)
+            
+            # Estimate tempo
+            tempo, beat_frames = librosa.beat.beat_track(
+                onset_envelope=onset_env,
+                sr=self.sample_rate,
+                hop_length=self.hop_length
+            )
+            
+            # Ensure tempo is a scalar value
+            if isinstance(tempo, (np.ndarray, list)):
+                tempo = tempo[0] if len(tempo) > 0 else 120.0  # Default to 120 BPM if no tempo detected
+            
+            # Get beat times
+            beat_times = librosa.frames_to_time(beat_frames, sr=self.sample_rate, hop_length=self.hop_length)
+            
+            # Get onset times
+            onset_frames = librosa.onset.onset_detect(
+                y=y, 
+                sr=self.sample_rate,
+                hop_length=self.hop_length,
+                backtrack=True
+            )
+            onset_times = librosa.frames_to_time(onset_frames, sr=self.sample_rate, hop_length=self.hop_length)
+            
+            # Compute rhythm pattern
+            rhythm_pattern = self._analyze_rhythm_pattern(beat_times, onset_times)
+            
+            result = {
+                'tempo': float(tempo),
+                'beat_times': beat_times.tolist(),
+                'onset_times': onset_times.tolist(),
+                'onset_env': onset_env.tolist(),
+                'rhythm_pattern': rhythm_pattern,
+                '_cached': False
+            }
+            
+            # Cache the result
+            if self.use_cache and self._cache:
+                self._cache.set(y, cache_key, result)
+                result['_cached'] = True
+                
+            processing_time = time.time() - start_time
+            logger.debug(f"Extracted rhythmic features in {processing_time:.3f}s")
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error extracting rhythmic features: {e}")
+            raise
+        
     def extract_spectral_features(self, y: np.ndarray) -> Dict[str, Any]:
-        """Extract spectral characteristics"""
-        # Basic spectral features
-        spectral_centroids = librosa.feature.spectral_centroid(y=y, sr=self.sample_rate, hop_length=self.hop_length)[0]
-        spectral_bandwidth = librosa.feature.spectral_bandwidth(y=y, sr=self.sample_rate, hop_length=self.hop_length)[0]
-        spectral_rolloff = librosa.feature.spectral_rolloff(y=y, sr=self.sample_rate, hop_length=self.hop_length)[0]
-        zero_crossing_rate = librosa.feature.zero_crossing_rate(y, hop_length=self.hop_length)[0]
+        """
+        Extract spectral characteristics from audio.
         
-        # MFCC features
-        mfccs = librosa.feature.mfcc(y=y, sr=self.sample_rate, n_mfcc=13, hop_length=self.hop_length)
+        Args:
+            y: Audio time series
+            
+        Returns:
+            Dictionary containing spectral features
+        """
+        # Check cache first if enabled
+        cache_key = self._get_cache_key('spectral', y)
+        if self.use_cache and self._cache:
+            cached = self._cache.get(y, cache_key)
+            if cached is not None:
+                return cached
         
-        # RMS energy
-        rms = librosa.feature.rms(y=y, hop_length=self.hop_length)[0]
+        start_time = time.time()
         
-        return {
-            'spectral_centroid': spectral_centroids.tolist(),
-            'spectral_bandwidth': spectral_bandwidth.tolist(),
-            'spectral_rolloff': spectral_rolloff.tolist(),
-            'zero_crossing_rate': zero_crossing_rate.tolist(),
-            'mfccs': mfccs,
-            'rms_energy': rms.tolist()
+        try:
+            # Compute spectral features in parallel where possible
+            with np.errstate(divide='ignore', invalid='ignore'):
+                # Use stft as a basis for multiple features
+                D = np.abs(librosa.stft(y, n_fft=self.n_fft, hop_length=self.hop_length))
+                
+                # Compute features in parallel
+                spectral_centroid = librosa.feature.spectral_centroid(
+                    S=D, 
+                    sr=self.sample_rate,
+                    hop_length=self.hop_length
+                )
+                
+                spectral_bandwidth = librosa.feature.spectral_bandwidth(
+                    S=D, 
+                    sr=self.sample_rate,
+                    hop_length=self.hop_length
+                )
+                
+                spectral_rolloff = librosa.feature.spectral_rolloff(
+                    S=D, 
+                    sr=self.sample_rate,
+                    hop_length=self.hop_length
+                )
+                
+                # These features don't use the STFT
+                zero_crossing_rate = librosa.feature.zero_crossing_rate(
+                    y, 
+                    hop_length=self.hop_length
+                )
+                
+                rms_energy = librosa.feature.rms(
+                    y=y, 
+                    hop_length=self.hop_length
+                )
+            
+            result = {
+                'spectral_centroid': spectral_centroid[0].tolist(),
+                'spectral_bandwidth': spectral_bandwidth[0].tolist(),
+                'spectral_rolloff': spectral_rolloff[0].tolist(),
+                'zero_crossing_rate': zero_crossing_rate[0].tolist(),
+                'rms_energy': rms_energy[0].tolist(),
+                '_cached': False
+            }
+            
+            # Cache the result
+            if self.use_cache and self._cache:
+                self._cache.set(y, cache_key, result)
+                result['_cached'] = True
+            
+            processing_time = time.time() - start_time
+            logger.debug(f"Extracted spectral features in {processing_time:.3f}s")
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error extracting spectral features: {e}")
+            raise
+        
+    def extract_mfcc_features(self, y: np.ndarray, n_mfcc: int = 20) -> Dict[str, Any]:
+        """
+        Extract Mel-frequency cepstral coefficients (MFCCs) from audio.
+        
+        Args:
+            y: Audio time series
+            n_mfcc: Number of MFCCs to return
+            
+        Returns:
+            Dictionary containing MFCC features
+        """
+        # Check cache first if enabled
+        cache_key = self._get_cache_key(f'mfcc_{n_mfcc}', y)
+        if self.use_cache and self._cache:
+            cached = self._cache.get(y, cache_key)
+            if cached is not None:
+                return cached
+        
+        start_time = time.time()
+        
+        try:
+            # Use a larger FFT window for better frequency resolution
+            n_fft = min(4096, len(y) // 4)  # Adjust based on signal length
+            
+            # Extract MFCCs with optimized parameters
+            mfcc = librosa.feature.mfcc(
+                y=y,
+                sr=self.sample_rate,
+                n_mfcc=n_mfcc,
+                n_fft=n_fft,
+                hop_length=self.hop_length,
+                n_mels=128,  # Increased mel bands for better resolution
+                fmin=20,     # Lower frequency bound (Hz)
+                fmax=8000,   # Upper frequency bound (Hz)
+                htk=True     # Use HTK formula for mel scaling (matches some other tools)
+            )
+            
+            # Compute delta and delta-delta features
+            mfcc_delta = librosa.feature.delta(mfcc)
+            mfcc_delta2 = librosa.feature.delta(mfcc, order=2)
+            
+            result = {
+                'mfcc': mfcc.tolist(),
+                'mfcc_delta': mfcc_delta.tolist(),
+                'mfcc_delta2': mfcc_delta2.tolist(),
+                '_cached': False
+            }
+            
+            # Cache the result
+            if self.use_cache and self._cache:
+                self._cache.set(y, cache_key, result)
+                result['_cached'] = True
+            
+            processing_time = time.time() - start_time
+            logger.debug(f"Extracted {n_mfcc} MFCCs in {processing_time:.3f}s")
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error extracting MFCC features: {e}")
+            raise
+            'mfcc_std': mfcc_std.tolist()
         }
-    
+        
+    def _get_cache_key(self, feature_type: str, y: np.ndarray) -> Dict[str, Any]:
+        """
+        Generate cache key for the given feature type and audio data.
+        
+        Args:
+            feature_type: Type of feature being extracted
+            y: Audio time series
+            
+        Returns:
+            Dictionary of parameters for caching
+        """
+        import hashlib
+        return {
+            'feature_type': feature_type,
+            'sample_rate': self.sample_rate,
+            'hop_length': self.hop_length,
+            'n_fft': self.n_fft,
+            'audio_length': len(y),
+            'audio_hash': hashlib.sha256(y.tobytes()).hexdigest()[:16]  # First 16 chars of hash
+        }
+        
     def _estimate_key_mode(self, chroma_mean: np.ndarray) -> Tuple[str, str]:
-        """Estimate musical key and mode using chroma features"""
-        # Key profiles (Krumhansl-Schmuckler)
+        """
+        Estimate musical key and mode from chroma features.
+        
+        Args:
+            chroma_mean: Mean chroma features (12-dimensional vector)
+            
+        Returns:
+            Tuple of (key, mode) where key is a note name (A-G) and mode is 'major' or 'minor'
+        """
+        # Chroma features for major and minor keys (Krumhansl-Kessler profiles)
         major_profile = np.array([6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88])
         minor_profile = np.array([6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17])
         
-        keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+        # Normalize profiles
+        major_profile = major_profile / np.linalg.norm(major_profile)
+        minor_profile = minor_profile / np.linalg.norm(minor_profile)
         
-        major_correlations = []
-        minor_correlations = []
-        
+        # Compute correlation with all 24 possible keys
+        correlations = {}
         for i in range(12):
-            # Rotate profiles to match different keys
-            major_rotated = np.roll(major_profile, i)
-            minor_rotated = np.roll(minor_profile, i)
+            # Major key
+            shifted = np.roll(chroma_mean, i)
+            major_corr = np.corrcoef(shifted, major_profile)[0, 1]
+            correlations[(i, 'major')] = major_corr
             
-            # Calculate correlation
-            major_corr = np.corrcoef(chroma_mean, major_rotated)[0, 1]
-            minor_corr = np.corrcoef(chroma_mean, minor_rotated)[0, 1]
-            
-            major_correlations.append(major_corr)
-            minor_correlations.append(minor_corr)
+            # Minor key
+            minor_corr = np.corrcoef(shifted, minor_profile)[0, 1]
+            correlations[(i, 'minor')] = minor_corr
         
-        best_major_idx = np.argmax(major_correlations)
-        best_minor_idx = np.argmax(minor_correlations)
+        # Find the best matching key and mode
+        (shift, mode), _ = max(correlations.items(), key=lambda x: x[1])
         
-        if major_correlations[best_major_idx] > minor_correlations[best_minor_idx]:
-            return keys[best_major_idx], "major"
-        else:
-            return keys[best_minor_idx], "minor"
-    
+        # Map shift to note name
+        notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+        key = notes[shift]
+        
+        return key, mode
+        
     def _analyze_rhythm_pattern(self, beat_times: np.ndarray, onset_times: np.ndarray) -> List[float]:
-        """Analyze rhythm pattern complexity"""
-        if len(beat_times) < 2:
-            return [0.0] * 16  # Return empty pattern
+        """
+        Analyze rhythm pattern complexity based on beat and onset times.
         
-        # Create a 16-step pattern (4/4 time signature assumed)
-        pattern = np.zeros(16)
-        beat_duration = np.mean(np.diff(beat_times))
+        Args:
+            beat_times: Array of beat times in seconds
+            onset_times: Array of onset times in seconds
+            
+        Returns:
+            List of rhythm pattern features
+        """
+        # Initialize pattern array (16 steps)
+        pattern = np.zeros(16, dtype=np.float32)
+        
+        if len(beat_times) < 2:
+            return [0.0] * 4  # Default pattern for too few beats
+            
+        # Calculate average beat duration
+        beat_duration = np.mean(np.diff(beat_times)) if len(beat_times) > 1 else 0.5
         
         for onset in onset_times:
             # Find the closest beat
@@ -318,17 +635,24 @@ class AdvancedFeatureExtractor:
             closest_beat_idx = np.argmin(beat_distances)
             
             if closest_beat_idx < len(beat_times):
-                # Map to 16-step grid
+                # Map to 16-step grid (4 beats * 4 subdivisions)
+                beat_position = closest_beat_idx % 4  # Position within current measure
                 relative_position = (onset - beat_times[closest_beat_idx]) / beat_duration
-                grid_position = int((closest_beat_idx % 4) * 4 + relative_position * 4)
+                grid_position = int(beat_position * 4 + relative_position * 4)
                 grid_position = max(0, min(15, grid_position))
                 pattern[grid_position] += 1
         
-        # Normalize pattern
+        # Normalize pattern to sum to 1.0
         if np.sum(pattern) > 0:
             pattern = pattern / np.sum(pattern)
         
-        return pattern.tolist()
+        # Return first 4 features: downbeat, backbeat, offbeat, and syncopation
+        return [
+            np.mean(pattern[::4]),  # Downbeats
+            np.mean(pattern[2::4]),  # Backbeats
+            np.mean(pattern[1::2]),  # All offbeats
+            np.mean(np.abs(np.diff(pattern)))  # Syncopation
+        ]
 
 
 class AudioEngine:
