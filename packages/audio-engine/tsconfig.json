@@ -1,0 +1,59 @@
+{
+  "compilerOptions": {
+    /* Base Options */
+    "target": "es2018",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowJs": true,
+    "noEmit": false,
+    
+    /* JSX */
+    "jsx": "preserve",
+    "jsxImportSource": "react",
+    
+    /* Paths and Base URL */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    
+    /* Type Definitions */
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "types": ["node", "jest", "@types/node", "@types/react", "@types/react-dom"],
+    
+    /* Source Maps */
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+    "inlineSources": true,
+    
+    /* Incremental Builds */
+    "incremental": true,
+    "composite": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.d.ts",
+    "src/**/*"
+  ],
+  "exclude": ["node_modules", ".next", "out"]
+}

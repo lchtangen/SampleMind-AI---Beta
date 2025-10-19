@@ -1,0 +1,106 @@
+{
+  "name": "samplemind-ai",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "prepare": "husky install",
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "pre-commit": "lint-staged",
+    "postinstall": "prisma generate",
+    
+    "web:dev": "turbo run dev --filter=@samplemind-ai/web",
+    "web:build": "turbo run build --filter=@samplemind-ai/web",
+    "web:start": "turbo run start --filter=@samplemind-ai/web",
+    "web:lint": "turbo run lint --filter=@samplemind-ai/web",
+    
+    "audio:dev": "turbo run dev --filter=@samplemind-ai/audio-engine",
+    "audio:build": "turbo run build --filter=@samplemind-ai/audio-engine",
+    "audio:test": "turbo run test --filter=@samplemind-ai/audio-engine",
+    
+    "api:dev": "cd backend && uvicorn main:app --reload",
+    "api:start": "cd backend && uvicorn main:app --host 0.0.0.0 --port 8000",
+    "api:test": "cd backend && pytest",
+    
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^18.4.3",
+    "@commitlint/config-conventional": "^18.4.3",
+    "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-next": "14.1.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-react": "^7.0.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^15.0.0",
+    "prettier": "^3.0.0",
+    "prisma": "^5.7.0",
+    "turbo": "^1.10.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.7.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.546.0",
+    "next-themes": "^0.4.6",
+    "tailwind-merge": "^3.3.1",
+    "zod": "^3.22.0"
+  },
+  "packageManager": "pnpm@8.0.0",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "description": "AI-Powered Music Production Platform - Advanced audio analysis, creative assistance, and intelligent sample organization powered by Google Gemini, OpenAI GPT-4, and local AI models.",
+  "main": "next.config.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lchtangen/SampleMind-AI---Beta.git"
+  },
+  "keywords": [
+    "ai",
+    "music-production",
+    "audio-processing",
+    "machine-learning",
+    "nextjs",
+    "typescript"
+  ],
+  "author": "Lars Christian Tangen",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/lchtangen/SampleMind-AI---Beta/issues"
+  },
+  "homepage": "https://github.com/lchtangen/SampleMind-AI---Beta#readme",
+  "prisma": {
+    "schema": "./prisma/schema.prisma"
+  }
+}

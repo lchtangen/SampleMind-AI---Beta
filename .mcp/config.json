@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json.schemastore.org/mcp-config.json",
+  "version": 1,
+  "git": {
+    "enabled": true,
+    "branchProtection": {
+      "main": {
+        "requirePullRequest": true,
+        "requiredApprovals": 1,
+        "requireStatusChecks": true,
+        "enforceAdmins": true
+      }
+    },
+    "commitMessage": {
+      "conventionalCommits": true,
+      "maxLineLength": 100,
+      "requireScope": true
+    },
+    "hooks": {
+      "pre-commit": ["lint-staged"],
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "codeQuality": {
+    "enabled": true,
+    "linters": ["eslint", "prettier"],
+    "testCoverage": {
+      "enabled": true,
+      "threshold": 80
+    }
+  },
+  "dependencies": {
+    "autoUpdate": true,
+    "vulnerabilityScan": true
+  },
+  "notifications": {
+    "pullRequests": true,
+    "buildStatus": true,
+    "securityAlerts": true
+  },
+  "collaboration": {
+    "codeOwners": true,
+    "reviewRequired": true
+  }
+}

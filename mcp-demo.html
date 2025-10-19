@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Server Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .panel {
+            flex: 1;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .file-list {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            padding: 10px;
+            margin-top: 10px;
+            font-family: monospace;
+        }
+        button {
+            padding: 8px 15px;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>MCP Server Demo</h1>
+    
+    <div class="container">
+        <div class="panel">
+            <h2>File Operations</h2>
+            <div>
+                <button id="listRoot">List Root Directory</button>
+                <button id="listCurrent">List Current Directory</button>
+            </div>
+            <div>
+                <h3>Current Directory: <span id="currentPath">/</span></h3>
+                <div id="fileList" class="file-list"></div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>File Contents</h2>
+            <div>
+                <button id="readFile">View File</button>
+                <button id="viewFileInfo">File Info</button>
+            </div>
+            <div id="fileContent" class="file-list">
+                <p>Select a file to view its contents or information</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // MCP Server connection
+        let currentPath = '/';
+        let selectedFile = null;
+        
+        // DOM Elements
+        const currentPathEl = document.getElementById('currentPath');
+        const fileListEl = document.getElementById('fileList');
+        const fileContentEl = document.getElementById('fileContent');
+        
+        // Event Listeners
+        document.getElementById('listRoot').addEventListener('click', () => {
+            currentPath = '/';
+            currentPathEl.textContent = currentPath;
+            listDirectory(currentPath);
+        });
+        
+        document.getElementById('listCurrent').addEventListener('click', () => {
+            listDirectory(currentPath);
+        });
+        
+        document.getElementById('readFile').addEventListener('click', async () => {
+            if (!selectedFile) {
+                showMessage('Please select a file first');
+                return;
+            }
+            
+            const filePath = `${currentPath}${currentPath.endsWith('/') ? '' : '/'}${selectedFile}`;
+            const content = await readFile(filePath);
+            fileContentEl.innerHTML = `<pre>${escapeHtml(content)}</pre>`;
+        });
+        
+        document.getElementById('viewFileInfo').addEventListener('click', async () => {
+            if (!selectedFile) {
+                showMessage('Please select a file first');
+                return;
+            }
+            
+            const filePath = `${currentPath}${currentPath.endsWith('/') ? '' : '/'}${selectedFile}`;
+            const info = await getFileInfo(filePath);
+            fileContentEl.innerHTML = `<pre>${JSON.stringify(info, null, 2)}</pre>`;
+        });
+        
+        // Helper functions
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+        
+        function showMessage(message) {
+            fileContentEl.innerHTML = `<p>${message}</p>`;
+        }
+        
+        // MCP Server API
+        async function listDirectory(path) {
+            try {
+                const response = await fetch('/mcp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        method: 'list_directory',
+                        params: { path }
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                displayFiles(data.result);
+            } catch (error) {
+                showMessage(`Error: ${error.message}`);
+            }
+        }
+        
+        async function readFile(path) {
+            const response = await fetch('/mcp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    method: 'read_text_file',
+                    params: { path }
+                })
+            });
+            
+            const data = await response.json();
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            return data.result;
+        }
+        
+        async function getFileInfo(path) {
+            const response = await fetch('/mcp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    method: 'get_file_info',
+                    params: { path }
+                })
+            });
+            
+            const data = await response.json();
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            return data.result;
+        }
+        
+        function displayFiles(files) {
+            fileListEl.innerHTML = '';
+            
+            files.forEach(file => {
+                const div = document.createElement('div');
+                div.textContent = file;
+                div.style.cursor = 'pointer';
+                div.style.padding = '5px';
+                div.style.borderBottom = '1px solid #eee';
+                
+                if (file.endsWith('/')) {
+                    div.style.fontWeight = 'bold';
+                    div.addEventListener('click', () => {
+                        currentPath = `${currentPath}${currentPath.endsWith('/') ? '' : '/'}${file}`;
+                        currentPathEl.textContent = currentPath;
+                        listDirectory(currentPath);
+                    });
+                } else {
+                    div.addEventListener('click', () => {
+                        // Remove selection from other files
+                        document.querySelectorAll('#fileList div').forEach(el => {
+                            el.style.backgroundColor = '';
+                        });
+                        // Select this file
+                        div.style.backgroundColor = '#e0f7fa';
+                        selectedFile = file;
+                    });
+                }
+                
+                fileListEl.appendChild(div);
+            });
+        }
+        
+        // Initial load
+        listDirectory(currentPath);
+    </script>
+</body>
+</html>
