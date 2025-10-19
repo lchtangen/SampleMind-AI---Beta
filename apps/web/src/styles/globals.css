@@ -1,0 +1,506 @@
+/**
+ * SAMPLEMIND AI - GLOBAL STYLES
+ * Cyberpunk Glassmorphism Theme
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   CUSTOM PROPERTIES (CSS Variables)
+   ============================================================================ */
+@layer base {
+  :root {
+    /* Cyberpunk Color System */
+    --color-cyber-blue: hsl(220, 90%, 60%);
+    --color-cyber-purple: hsl(270, 85%, 65%);
+    --color-cyber-cyan: hsl(180, 95%, 55%);
+    --color-cyber-magenta: hsl(320, 90%, 60%);
+    
+    /* Dark Theme */
+    --color-bg-primary: hsl(220, 15%, 8%);
+    --color-bg-secondary: hsl(220, 15%, 12%);
+    --color-bg-tertiary: hsl(220, 15%, 15%);
+    
+    /* Text Colors */
+    --color-text-primary: hsl(0, 0%, 98%);
+    --color-text-secondary: hsl(220, 10%, 65%);
+    --color-text-tertiary: hsl(220, 10%, 45%);
+    
+    /* Glass Effects */
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-blur: 10px;
+    
+    /* Animation Timings */
+    --timing-instant: 0.1s;
+    --timing-fast: 0.2s;
+    --timing-normal: 0.3s;
+    --timing-slow: 0.5s;
+    
+    /* Z-Index Scale */
+    --z-base: 0;
+    --z-dropdown: 1000;
+    --z-sticky: 1100;
+    --z-fixed: 1200;
+    --z-modal-backdrop: 1300;
+    --z-modal: 1400;
+    --z-popover: 1500;
+    --z-tooltip: 1600;
+  }
+  
+  /* Force dark mode */
+  html {
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-feature-settings: 'liga' 1, 'calt' 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  
+  body {
+    @apply bg-dark-500 text-text-primary font-sans;
+    overflow-x: hidden;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: hsl(220, 15%, 12%);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, hsl(220, 90%, 60%), hsl(270, 85%, 65%));
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, hsl(220, 90%, 70%), hsl(270, 85%, 75%));
+  }
+  
+  /* Selection */
+  ::selection {
+    background: hsl(220, 90%, 60%, 0.3);
+    color: hsl(0, 0%, 100%);
+  }
+  
+  ::-moz-selection {
+    background: hsl(220, 90%, 60%, 0.3);
+    color: hsl(0, 0%, 100%);
+  }
+}
+
+/* ============================================================================
+   TYPOGRAPHY
+   ============================================================================ */
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-semibold text-text-primary;
+    letter-spacing: -0.02em;
+  }
+  
+  h1 {
+    @apply text-5xl leading-tight;
+  }
+  
+  h2 {
+    @apply text-4xl leading-tight;
+  }
+  
+  h3 {
+    @apply text-3xl leading-snug;
+  }
+  
+  h4 {
+    @apply text-2xl leading-snug;
+  }
+  
+  h5 {
+    @apply text-xl leading-normal;
+  }
+  
+  h6 {
+    @apply text-lg leading-normal;
+  }
+  
+  p {
+    @apply text-base text-text-secondary leading-relaxed;
+  }
+  
+  a {
+    @apply text-cyber-blue transition-colors duration-fast;
+  }
+  
+  a:hover {
+    @apply text-cyber-cyan;
+  }
+  
+  code {
+    @apply font-mono text-sm bg-dark-300 px-2 py-1 rounded text-cyber-cyan;
+  }
+  
+  pre {
+    @apply font-mono text-sm bg-dark-300 p-4 rounded-glass overflow-x-auto;
+  }
+}
+
+/* ============================================================================
+   COMPONENT PATTERNS
+   ============================================================================ */
+@layer components {
+  /* Glass Container Base */
+  .container-glass {
+    @apply glass rounded-glass p-6;
+  }
+  
+  /* Glass Effect (for backward compatibility) */
+  .glass-effect {
+    @apply glass;
+  }
+  
+  /* Neon Colors */
+  .neon-cyan {
+    color: hsl(180, 95%, 55%);
+  }
+  
+  .neon-pink {
+    color: hsl(320, 90%, 60%);
+  }
+  
+  .neon-purple {
+    color: hsl(270, 85%, 65%);
+  }
+  
+  .neon-blue {
+    color: hsl(220, 90%, 60%);
+  }
+  
+  .bg-neon-cyan {
+    background-color: hsl(180, 95%, 55%);
+  }
+  
+  .bg-neon-pink {
+    background-color: hsl(320, 90%, 60%);
+  }
+  
+  .bg-neon-purple {
+    background-color: hsl(270, 85%, 65%);
+  }
+  
+  .bg-neon-blue {
+    background-color: hsl(220, 90%, 60%);
+  }
+  
+  .border-neon-cyan {
+    border-color: hsl(180, 95%, 55%);
+  }
+  
+  .border-neon-pink {
+    border-color: hsl(320, 90%, 60%);
+  }
+  
+  .border-neon-purple {
+    border-color: hsl(270, 85%, 65%);
+  }
+  
+  .text-neon-cyan {
+    color: hsl(180, 95%, 55%);
+  }
+  
+  .text-neon-pink {
+    color: hsl(320, 90%, 60%);
+  }
+  
+  .text-neon-purple {
+    color: hsl(270, 85%, 65%);
+  }
+  
+  .from-neon-cyan {
+    --tw-gradient-from: hsl(180, 95%, 55%);
+  }
+  
+  .via-neon-pink {
+    --tw-gradient-via: hsl(320, 90%, 60%);
+  }
+  
+  .to-neon-purple {
+    --tw-gradient-to: hsl(270, 85%, 65%);
+  }
+  
+  .from-neon-pink {
+    --tw-gradient-from: hsl(320, 90%, 60%);
+  }
+  
+  .to-neon-cyan {
+    --tw-gradient-to: hsl(180, 95%, 55%);
+  }
+  
+  /* Animated Background */
+  .bg-animated-mesh {
+    position: relative;
+    background: linear-gradient(135deg, hsl(220, 15%, 8%) 0%, hsl(270, 20%, 10%) 100%);
+  }
+  
+  .bg-animated-mesh::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(at 0% 0%, hsl(220, 90%, 20%, 0.2) 0%, transparent 50%),
+      radial-gradient(at 100% 100%, hsl(270, 85%, 20%, 0.2) 0%, transparent 50%);
+    animation: meshMove 10s ease infinite;
+  }
+  
+  @keyframes meshMove {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(20px, 20px);
+    }
+  }
+  
+  /* Neon Border */
+  .border-neon {
+    position: relative;
+  }
+  
+  .border-neon::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, hsl(220, 90%, 60%), hsl(270, 85%, 65%), hsl(320, 90%, 60%));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+  
+  /* Glowing Text */
+  .text-glow {
+    text-shadow: 
+      0 0 10px currentColor,
+      0 0 20px currentColor,
+      0 0 30px currentColor;
+  }
+  
+  /* Floating Animation */
+  .float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  /* Pulse Glow */
+  .pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+  
+  @keyframes pulseGlow {
+    0%, 100% {
+      filter: brightness(1) drop-shadow(0 0 10px currentColor);
+    }
+    50% {
+      filter: brightness(1.2) drop-shadow(0 0 20px currentColor);
+    }
+  }
+  
+  /* Gradient Text */
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(220, 90%, 60%), hsl(270, 85%, 65%), hsl(320, 90%, 60%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Interactive States */
+  .interactive {
+    @apply transition-all duration-fast cursor-pointer;
+    @apply hover:scale-[1.02] active:scale-[0.98];
+  }
+  
+  /* Focus Styles */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-cyber-blue focus:ring-offset-2 focus:ring-offset-dark-500;
+  }
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+@layer utilities {
+  /* Text Shadow Utilities */
+  .text-shadow-sm {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+  
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+  
+  .text-shadow-lg {
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Backdrop Blur Utilities */
+  .backdrop-blur-glass {
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+  }
+  
+  /* Hide Scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* GPU Acceleration */
+  .gpu-accelerate {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+  
+  /* Clip Path Utilities */
+  .clip-diagonal {
+    clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+  }
+  
+  /* Grid Patterns */
+  .grid-pattern {
+    background-image: 
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  
+  /* Gradient Borders */
+  .border-gradient {
+    border-width: 1px;
+    border-style: solid;
+    border-image: linear-gradient(135deg, hsl(220, 90%, 60%), hsl(270, 85%, 65%)) 1;
+  }
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+@keyframes sparkFlow {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.8;
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================================================ */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+  
+  .glass {
+    backdrop-filter: blur(8px) saturate(150%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================================
+   PERFORMANCE OPTIMIZATIONS
+   ============================================================================ */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* Force GPU acceleration for better performance */
+.gpu-layer {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}

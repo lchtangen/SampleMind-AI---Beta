@@ -43,8 +43,15 @@ htmlcov/
 # Environment
 .env
 .env.local
+.env.production
 .env.*.local
 *.log
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+backend/samplemind.db
 
 # Node.js
 node_modules/
