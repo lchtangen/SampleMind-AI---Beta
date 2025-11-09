@@ -91,8 +91,8 @@ export class NeuroplasticLearning extends EventEmitter {
 
     try {
       // Prepare training data
-      const xs = [];
-      const ys = [];
+      const xs: number[][] = [];
+      const ys: number[][] = [];
 
       for (const pattern of this.memory) {
         // Extract features (simplified example)

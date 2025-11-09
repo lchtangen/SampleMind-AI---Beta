@@ -5,6 +5,23 @@
 import { useState, useEffect, useCallback } from 'react';
 import { AuthAPI, TokenManager } from '@/lib/api-client';
 
+function withTimeout<T>(promise: Promise<T>, timeout = 5000): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('timeout')), timeout);
+
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      }
+    );
+  });
+}
+
 interface User {
   id: number;
   email: string;
@@ -23,7 +40,7 @@ interface AuthState {
 export function useAuth() {
   const [state, setState] = useState<AuthState>({
     user: null,
-    loading: true,
+    loading: false,
     error: null,
     isAuthenticated: false,
   });
@@ -31,6 +48,14 @@ export function useAuth() {
   // Check if user is authenticated on mount
   useEffect(() => {
     checkAuth();
+  }, []);
+
+  useEffect(() => {
+    const failSafe = setTimeout(() => {
+      setState(prev => prev.loading ? { ...prev, loading: false } : prev);
+    }, 6000);
+
+    return () => clearTimeout(failSafe);
   }, []);
 
   const checkAuth = async () => {
@@ -46,8 +71,10 @@ export function useAuth() {
       return;
     }
 
+    setState(prev => ({ ...prev, loading: true }));
+
     try {
-      const user = await AuthAPI.getCurrentUser();
+      const user = await withTimeout(AuthAPI.getCurrentUser());
       setState({
         user,
         loading: false,
@@ -55,10 +82,9 @@ export function useAuth() {
         isAuthenticated: true,
       });
     } catch (error) {
-      // Token might be expired, try refresh
       try {
-        await AuthAPI.refreshToken();
-        const user = await AuthAPI.getCurrentUser();
+        await withTimeout(AuthAPI.refreshToken());
+        const user = await withTimeout(AuthAPI.getCurrentUser());
         setState({
           user,
           loading: false,
@@ -66,12 +92,11 @@ export function useAuth() {
           isAuthenticated: true,
         });
       } catch (refreshError) {
-        // Refresh failed, clear tokens
         TokenManager.clearTokens();
         setState({
           user: null,
           loading: false,
-          error: null,
+          error: (refreshError as Error)?.message ?? (error as Error)?.message ?? null,
           isAuthenticated: false,
         });
       }
