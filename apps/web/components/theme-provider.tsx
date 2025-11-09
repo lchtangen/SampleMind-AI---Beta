@@ -1,23 +1,27 @@
-'use client';
+"use client"
 
-import * as React from 'react';
-import { ThemeProvider as NextThemesProvider } from 'next-themes';
-import { type ThemeProviderProps } from 'next-themes/dist/types';
+import * as React from "react"
+import { ThemeProvider as NextThemesProvider } from "next-themes"
+import { type ThemeProviderProps } from "next-themes/dist/types"
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
-  const [mounted, setMounted] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false)
 
-  // Prevent hydration mismatch by only rendering after mount
   React.useEffect(() => {
-    setMounted(true);
-  }, []);
+    setMounted(true)
+  }, [])
 
   if (!mounted) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-pulse">Loading...</div>
-      </div>
-    );
+      <NextThemesProvider
+        disableTransitionOnChange
+        enableSystem
+        defaultTheme="system"
+        {...props}
+      >
+        {children}
+      </NextThemesProvider>
+    )
   }
 
   return (
@@ -29,5 +33,5 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
     >
       {children}
     </NextThemesProvider>
-  );
+  )
 }

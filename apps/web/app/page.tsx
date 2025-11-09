@@ -3,10 +3,14 @@
 import { useState, useEffect } from 'react';
 import { Mic, Upload, Moon, Sun, Laptop } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { useAuthContext } from '@/contexts/AuthContext';
+import LoginForm from '@/components/LoginForm';
+import { useRouter } from 'next/navigation';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 // Dynamically import the AIChatWindow component with no SSR
 const AIChatWindow = dynamic(
-  () => import('@/app/components/AIChatWindow'),
+  () => import('@/components/AIChatWindow'),
   { ssr: false }
 );
 
@@ -79,14 +83,40 @@ function ThemeToggle() {
 export default function Home() {
   const [showChat, setShowChat] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [allowContentRender, setAllowContentRender] = useState(false);
+  const { isAuthenticated, loading: authLoading, user } = useAuthContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!authLoading) {
+      setAllowContentRender(true);
+      return;
+    }
+
+    if (allowContentRender) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setAllowContentRender(true);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [authLoading, allowContentRender]);
+
+  const showPreparingState = authLoading && !allowContentRender;
 
   return (
     <div className="min-h-screen flex flex-col">
+      {showPreparingState && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
+          <LoadingSpinner size="lg" text="Preparing experience..." />
+        </div>
+      )}
       {showChat ? (
         <AIChatWindow />
       ) : (
         <main className="flex-1 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
-          <div className="w-full max-w-4xl mx-auto">
+          <div className="w-full max-w-6xl mx-auto">
             {/* Header */}
             <header className="flex items-center justify-between mb-12">
               <div className="flex items-center space-x-3">
@@ -102,15 +132,16 @@ export default function Home() {
 
             {/* Hero Section */}
             <div className="glass p-8 rounded-2xl shadow-xl mb-12">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
+              <div className="grid lg:grid-cols-2 gap-10 items-start">
+                <div>
+                  <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
                 AI-Powered Music Production
               </h2>
-              <p className="text-lg text-center text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-                Create, edit, and master your music with the power of artificial intelligence.
-                Experience the future of music production today.
+                  <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-xl">
+                    Create, edit, and master your music with the power of artificial intelligence. Experience the future of music production today with real-time insights, audio analysis, and creative assistance.
               </p>
               
-              <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
+                  <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={() => setShowChat(true)}
                   className="btn btn-primary flex items-center justify-center space-x-2"
@@ -121,6 +152,15 @@ export default function Home() {
                   </svg>
                 </button>
                 
+                    {isAuthenticated ? (
+                      <button
+                        onClick={() => router.push('/dashboard')}
+                        className="btn btn-secondary flex items-center justify-center space-x-2"
+                      >
+                        <Upload className="h-5 w-5" />
+                        <span>Open Dashboard</span>
+                      </button>
+                    ) : (
                 <button
                   onClick={() => setIsLoading(!isLoading)}
                   className="btn btn-secondary flex items-center justify-center space-x-2"
@@ -141,6 +181,36 @@ export default function Home() {
                     </>
                   )}
                 </button>
+                    )}
+                  </div>
+
+                  {isAuthenticated && (
+                    <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+                      Signed in as <span className="font-medium text-gray-700 dark:text-gray-200">{user?.full_name || user?.email}</span>. Jump into the dashboard to manage your projects.
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex justify-center">
+                  {isAuthenticated ? (
+                    <div className="w-full max-w-md backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+                      <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                        You&apos;re all set!
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300 mb-6">
+                        Access the dashboard to upload new tracks, monitor analysis, and view insights in real time.
+                      </p>
+                      <button
+                        onClick={() => router.push('/dashboard')}
+                        className="btn btn-primary w-full"
+                      >
+                        Go to Dashboard
+                      </button>
+                    </div>
+                  ) : (
+                    <LoginForm />
+                  )}
+                </div>
               </div>
             </div>
 

@@ -7,7 +7,7 @@ export const useAudioLearning = () => {
   const [isLearning, setIsLearning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const audioEngineRef = useRef<NeurologicAudioEngine | null>(null);
+  const audioEngineRef = useRef<any>(null);
   const learningEngineRef = useRef<NeuroplasticLearning | null>(null);
   const analysisIntervalRef = useRef<number | null>(null);
 
@@ -48,14 +48,14 @@ export const useAudioLearning = () => {
         window.clearInterval(analysisIntervalRef.current);
       }
       
-      if (audioEngineRef.current) {
-        audioEngineRef.current.cleanup();
+      if (audioEngineRef.current && typeof audioEngineRef.current.dispose === 'function') {
+        audioEngineRef.current.dispose();
       }
     };
   }, []);
 
   // Start analyzing audio and learning patterns
-  const startAnalysis = (audioEngine: NeurologicAudioEngine, learningEngine: NeuroplasticLearning) => {
+  const startAnalysis = (audioEngine: any, learningEngine: NeuroplasticLearning) => {
     if (analysisIntervalRef.current) {
       window.clearInterval(analysisIntervalRef.current);
     }
@@ -63,10 +63,16 @@ export const useAudioLearning = () => {
     // Analyze audio every 2 seconds
     analysisIntervalRef.current = window.setInterval(async () => {
       try {
-        if (!audioEngine.isPlaying) return;
+        if (!audioEngine || !audioEngine.isPlaying) return;
         
         // Get current audio analysis
-        const analysis = audioEngine.getCurrentAnalysis();
+        const analysis = typeof audioEngine.getCurrentAnalysis === 'function'
+          ? audioEngine.getCurrentAnalysis()
+          : {
+              bpm: 0,
+              spectralCentroid: 0,
+              beatHistogram: [0, 0, 0, 0],
+            };
         
         // Add pattern to learning engine
         learningEngine.addPattern({
@@ -87,10 +93,17 @@ export const useAudioLearning = () => {
     if (!audioEngineRef.current) return;
     
     try {
-      if (audioEngineRef.current.isPlaying) {
-        await audioEngineRef.current.stop();
-      } else {
-        await audioEngineRef.current.start();
+      const engine = audioEngineRef.current;
+      if (!engine) {
+        return;
+      }
+
+      if (engine.isPlaying && typeof engine.stop === 'function') {
+        await engine.stop();
+      } else if (typeof engine.start === 'function') {
+        await engine.start();
+      } else if (typeof engine.play === 'function') {
+        await engine.play();
       }
     } catch (err) {
       console.error('Audio control error:', err);
@@ -108,13 +121,21 @@ export const useAudioLearning = () => {
   const predictNextPattern = async () => {
     if (!learningEngineRef.current || !audioEngineRef.current) return null;
     
-    const currentAnalysis = audioEngineRef.current.getCurrentAnalysis();
+    const analysisSource = audioEngineRef.current.getCurrentAnalysis &&
+      typeof audioEngineRef.current.getCurrentAnalysis === 'function'
+        ? audioEngineRef.current.getCurrentAnalysis()
+        : {
+            bpm: 120,
+            spectralCentroid: 0,
+            beatHistogram: [0, 0, 0, 0],
+          };
+    
     return await learningEngineRef.current.predictNextPattern({
-      bpm: currentAnalysis.bpm || 120,
+      bpm: analysisSource.bpm || 120,
       key: 'C',
       scale: 'minor',
-      timbreProfile: currentAnalysis.spectralCentroid ? [currentAnalysis.spectralCentroid] : [0],
-      rhythmPattern: currentAnalysis.beatHistogram || [0, 0, 0, 0]
+      timbreProfile: analysisSource.spectralCentroid ? [analysisSource.spectralCentroid] : [0],
+      rhythmPattern: analysisSource.beatHistogram || [0, 0, 0, 0]
     });
   };
 
