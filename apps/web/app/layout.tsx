@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { NotificationProvider } from '@/contexts/NotificationContext';
 
 // Optimize font loading with display: 'swap' and preload
 const inter = Inter({ 
@@ -69,7 +71,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <NotificationProvider>
+            <AuthProvider>
           {children}
+            </AuthProvider>
+          </NotificationProvider>
         </ThemeProvider>
       </body>
     </html>

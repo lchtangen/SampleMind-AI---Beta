@@ -2,7 +2,7 @@
 Audio database models
 """
 
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, JSON, Enum as SQLEnum
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, JSON, Enum as SQLEnum, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
@@ -21,12 +21,16 @@ class Audio(Base):
     """Audio file model"""
     
     __tablename__ = "audio_files"
+    __table_args__ = (
+        UniqueConstraint('user_id', 'fingerprint', name='uq_audio_user_fingerprint'),
+    )
     
     # Primary Key
     id = Column(Integer, primary_key=True, index=True)
     
     # User relationship
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    import_job_id = Column(Integer, ForeignKey("audio_import_jobs.id"), nullable=True, index=True)
     
     # File information
     filename = Column(String, nullable=False)
@@ -34,6 +38,7 @@ class Audio(Base):
     file_path = Column(String, nullable=False)
     file_format = Column(String, nullable=False)
     file_size = Column(Integer, nullable=False)  # bytes
+    fingerprint = Column(String, nullable=True, index=True)
     
     # Audio properties
     duration = Column(Float, nullable=True)  # seconds
@@ -51,7 +56,9 @@ class Audio(Base):
     
     # Relationships
     user = relationship("User", back_populates="audio_files")
+    import_job = relationship("AudioImportJob", back_populates="audio_files")
     analysis = relationship("AudioAnalysis", back_populates="audio", uselist=False, cascade="all, delete-orphan")
+    embedding = relationship("AudioEmbedding", back_populates="audio", uselist=False, cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<Audio(id={self.id}, filename='{self.filename}', status='{self.status}')>"
@@ -67,10 +74,12 @@ class Audio(Base):
             "duration": self.duration,
             "sample_rate": self.sample_rate,
             "channels": self.channels,
+            "fingerprint": self.fingerprint,
             "status": self.status.value if isinstance(self.status, AudioStatus) else self.status,
             "uploaded_at": self.uploaded_at.isoformat() if self.uploaded_at else None,
             "processed_at": self.processed_at.isoformat() if self.processed_at else None,
             "error_message": self.error_message,
+            "import_job_id": self.import_job_id,
         }
 
 

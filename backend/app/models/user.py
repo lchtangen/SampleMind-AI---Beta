@@ -36,6 +36,8 @@ class User(Base):
     
     # Relationships
     audio_files = relationship("Audio", back_populates="user", cascade="all, delete-orphan")
+    import_jobs = relationship("AudioImportJob", back_populates="user", cascade="all, delete-orphan")
+    embeddings = relationship("AudioEmbedding", back_populates="user", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<User(id={self.id}, email='{self.email}')>"

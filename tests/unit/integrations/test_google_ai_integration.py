@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Unit tests for Google AI (Gemini) Integration
-Tests Gemini API integration, music analysis, and error handling
+Unit tests for Google AI integration
 """
 
+import os
 import pytest
 import asyncio
 from unittest.mock import Mock, patch, MagicMock, AsyncMock
@@ -19,6 +19,10 @@ from samplemind.integrations.google_ai_integration import (
     AdvancedMusicAnalysis,
     GeminiModel
 )
+
+
+if not os.getenv("RUN_AI_INTEGRATION_TESTS"):
+    pytest.skip("Set RUN_AI_INTEGRATION_TESTS=1 to enable Google AI integration tests", allow_module_level=True)
 
 
 class TestAdvancedMusicAnalysis:

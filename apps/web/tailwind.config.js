@@ -42,6 +42,12 @@ module.exports = {
             glow: 'hsl(320, 90%, 60%, 0.5)',
           },
         },
+        neon: {
+          pink: '#ff2a6d',
+          blue: '#05d9e8',
+          purple: '#d300c5',
+          cyan: '#00f1ff',
+        },
         
         // Neutral Dark Theme
         dark: {
@@ -158,6 +164,7 @@ module.exports = {
         sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
         mono: ['JetBrains Mono', 'Monaco', 'Cascadia Code', 'Courier New', 'monospace'],
         display: ['Inter', '-apple-system', 'sans-serif'],
+        orbitron: ['"Orbitron"', 'Inter', '-apple-system', 'sans-serif'],
       },
       fontSize: {
         'xs': ['0.75rem', { lineHeight: '1rem' }],

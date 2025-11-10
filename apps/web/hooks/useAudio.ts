@@ -20,7 +20,7 @@ export function useAudio() {
   const [error, setError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  const uploadAudio = useCallback(async (file: File) => {
+  const uploadAudio = useCallback(async (file: File, onProgress?: (progress: number) => void) => {
     setLoading(true);
     setError(null);
     setUploadProgress(0);
@@ -28,6 +28,9 @@ export function useAudio() {
     try {
       const result = await AudioAPI.upload(file, (progress) => {
         setUploadProgress(progress);
+        if (onProgress) {
+          onProgress(progress);
+        }
       });
 
       setLoading(false);

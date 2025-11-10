@@ -24,6 +24,7 @@ from app.core.security import decode_token, verify_token_type
 from app.core.config import settings
 from app.core.database import get_db
 from app.models.audio import Audio, AudioAnalysis
+from app.services import EmbeddingService
 
 router = APIRouter(prefix="/audio", tags=["audio"])
 security = HTTPBearer()
@@ -221,6 +222,9 @@ async def analyze_audio(
     
     db.commit()
     db.refresh(analysis)
+    db.refresh(audio)
+
+    EmbeddingService(db).ensure_embedding(audio)
     
     return AudioAnalysisResponse(
         audio_id=request.audio_id,

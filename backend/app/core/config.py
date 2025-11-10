@@ -73,6 +73,12 @@ class Settings(BaseSettings):
     GOOGLE_API_KEY: Optional[str] = None
     ANTHROPIC_API_KEY: Optional[str] = None
     OPENAI_API_KEY: Optional[str] = None
+
+    # Recommendations / Embeddings
+    RECS_USE_CLAP: bool = False
+    RECS_EMBEDDING_DIM: int = 512
+    RECS_EMBEDDING_FALLBACK: str = "fingerprint"
+    RECS_RECOMMENDATION_MODE: str = "fusion"  # fusion or rules
     
     # File Upload
     UPLOAD_DIR: str = "uploads/audio"

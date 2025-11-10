@@ -201,7 +201,7 @@ export const AudioAnalysisVisualizer: React.FC<AudioAnalysisVisualizerProps> = (
     keyScaleGroup.append('text')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'middle')
-      .attr('font-size', '24px'
+      .attr('font-size', '24px')
       .attr('font-weight', 'bold')
       .attr('fill', '#00f0ff')
       .text(keyName);

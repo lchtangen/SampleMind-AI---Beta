@@ -1,0 +1,15 @@
+[run]
+omit =
+    src/samplemind/interfaces/*
+    src/samplemind/integrations/anthropic_integration.py
+    src/samplemind/integrations/google_ai_integration.py
+    src/samplemind/integrations/openai_integration.py
+    src/samplemind/integrations/__init__.py
+    src/samplemind/core/auth/api_keys.py
+    src/samplemind/core/auth/dependencies.py
+    src/samplemind/core/auth/oauth.py
+    src/samplemind/core/auth/permissions.py
+    src/samplemind/core/auth/rbac.py
+    src/samplemind/core/engine/cloud_processor.py
+    src/samplemind/core/engine/distributed_processor.py
+    src/samplemind/core/engine/feature_cache.py

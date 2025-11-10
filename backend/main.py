@@ -6,7 +6,7 @@ Revolutionary AI-powered music production platform
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from app.api.v1 import auth, audio, websocket
+from app.api.v1 import auth, audio, websocket, bulk_import, recommendations, telemetry
 
 # Lifespan context manager for startup/shutdown events
 @asynccontextmanager
@@ -44,6 +44,9 @@ app.add_middleware(
 # Include API routers
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(audio.router, prefix="/api/v1")
+app.include_router(bulk_import.router, prefix="/api/v1")
+app.include_router(recommendations.router, prefix="/api/v1")
+app.include_router(telemetry.router, prefix="/api/v1")
 app.include_router(websocket.router, prefix="/api/v1")
 
 @app.get("/")

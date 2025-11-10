@@ -3,7 +3,7 @@ import { useDropzone } from 'react-dropzone';
 import { useAudioAnalysis } from '../../contexts/AudioAnalysisContext';
 import { AudioAnalysisVisualizer } from '../../components/audio/AudioAnalysisVisualizer';
 import { Button } from '../../components/ui/button';
-import { Loader2, Upload, X } from 'lucide-react';
+import { Loader2, Upload, X, Music, RotateCw } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export const AudioAnalysisPanel: React.FC = () => {

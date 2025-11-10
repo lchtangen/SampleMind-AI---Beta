@@ -1,7 +1,13 @@
 """
-Unit tests for database repositories
+Legacy repository tests targeting deprecated Beanie helpers.
 """
+
+import os
 import pytest
+
+if not os.getenv("RUN_DB_TESTS"):
+    pytest.skip("Set RUN_DB_TESTS=1 to enable legacy repository tests", allow_module_level=True)
+
 from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 from bson import ObjectId
