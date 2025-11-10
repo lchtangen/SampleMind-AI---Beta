@@ -15,6 +15,7 @@ from datetime import datetime
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Query, BackgroundTasks, status
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
+import aiofiles  # For async file I/O
 
 from samplemind.interfaces.api.schemas.audio import (
     AudioUploadResponse,
@@ -84,10 +85,10 @@ async def upload_audio(
             f"File too large. Max size: {max_size_mb}MB"
         )
     
-    # Save file
+    # Save file asynchronously
     file_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(file_path, "wb") as f:
-        f.write(contents)
+    async with aiofiles.open(file_path, "wb") as f:
+        await f.write(contents)
     
     # Process file in background if needed
     if background_tasks:
@@ -383,9 +384,10 @@ async def analyze_audio_file(
             analysis_dir.mkdir(parents=True, exist_ok=True)
             
             analysis_file = analysis_dir / f"analysis_{analysis_id}.json"
-            with open(analysis_file, "w") as f:
-                import json
-                json.dump({
+            import json
+            # Use async file I/O for better performance
+            async with aiofiles.open(analysis_file, "w") as f:
+                await f.write(json.dumps({
                     "analysis_id": analysis_id,
                     "file_id": file_id,
                     "filename": file_path.name,
@@ -394,7 +396,7 @@ async def analyze_audio_file(
                     "analysis_level": analysis_level,
                     "features": features,
                     "ai_analysis": ai_analysis
-                }, f, indent=2)
+                }, indent=2))
             
             logger.info(f"Analysis results saved to {analysis_file}")
         
@@ -474,9 +476,6 @@ async def list_audio_files(
         except Exception as e:
             logger.warning(f"Error processing file {file_path}: {str(e)}")
             continue
-            format=file_path.suffix[1:],
-            uploaded_at=datetime.fromtimestamp(file_path.stat().st_mtime)
-        ))
     
     logger.info(f"Retrieved {len(result)} audio files for page {page}")
     return result
