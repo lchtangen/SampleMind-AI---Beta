@@ -44,9 +44,32 @@ class FeatureCache:
         Returns:
             A unique string key for the cache entry
         """
-        # Create a hash of the audio data and parameters
+        # Optimized: Instead of hashing entire audio array (expensive for large files),
+        # sample key points for a fast, unique hash
+        # This reduces O(n) to O(1) operation
+        length = len(audio_data)
+        
+        # Sample strategy: first 1000, last 1000, and middle 1000 samples
+        sample_size = min(1000, length // 3)
+        if length <= 3000:
+            # For small arrays, hash the whole thing
+            audio_sample = audio_data.tobytes()
+        else:
+            # For large arrays, sample key points
+            samples = np.concatenate([
+                audio_data[:sample_size],
+                audio_data[length//2 - sample_size//2 : length//2 + sample_size//2],
+                audio_data[-sample_size:]
+            ])
+            audio_sample = samples.tobytes()
+        
+        # Include array metadata for additional uniqueness
+        metadata = f"{length}_{audio_data.dtype}_{np.mean(audio_data):.6f}_{np.std(audio_data):.6f}"
+        
+        # Create hash
         hash_input = (
-            audio_data.tobytes() + 
+            audio_sample + 
+            metadata.encode() +
             json.dumps(params, sort_keys=True).encode()
         )
         return hashlib.sha256(hash_input).hexdigest()

@@ -289,26 +289,28 @@ class AdvancedFeatureExtractor:
     with automatic caching and performance optimizations.
     """
     
-    def __init__(self, sample_rate: int = 44100, use_cache: bool = True):
+    def __init__(self, sample_rate: int = 44100, use_cache: bool = True, cache: Optional[Any] = None):
         """
         Initialize the feature extractor.
         
         Args:
             sample_rate: Target sample rate for audio processing
             use_cache: Whether to use the feature cache
+            cache: Optional FeatureCache instance for persistent caching
         """
         self.sample_rate = sample_rate
         self.hop_length = 512
         self.n_fft = 2048
         self.use_cache = use_cache
-        self._cache = None
+        self._cache = cache  # Use provided cache instance
         
-    def extract_tonal_features(self, y: np.ndarray) -> Dict[str, Any]:
+    def extract_tonal_features(self, y: np.ndarray, hpss_result: Optional[Tuple[np.ndarray, np.ndarray]] = None) -> Dict[str, Any]:
         """
         Extract comprehensive tonal features including key and pitch information.
         
         Args:
             y: Audio time series
+            hpss_result: Optional pre-computed (harmonic, percussive) tuple to avoid redundant computation
             
         Returns:
             Dictionary containing tonal features
@@ -320,11 +322,16 @@ class AdvancedFeatureExtractor:
         # Get key and mode
         key, mode = self._estimate_key_mode(chroma_mean)
         
-        # Compute harmonic and percussive components
-        y_harmonic, y_percussive = librosa.effects.hpss(y)
+        # Compute or reuse harmonic and percussive components
+        if hpss_result is not None:
+            y_harmonic, y_percussive = hpss_result
+        else:
+            y_harmonic, y_percussive = librosa.effects.hpss(y)
         
-        # Get harmonic ratio
-        harmonic_ratio = np.mean(y_harmonic**2) / (np.mean(y_harmonic**2) + np.mean(y_percussive**2) + 1e-6)
+        # Get harmonic ratio (cache intermediate results)
+        harmonic_power = np.mean(y_harmonic**2)
+        percussive_power = np.mean(y_percussive**2)
+        harmonic_ratio = harmonic_power / (harmonic_power + percussive_power + 1e-6)
         
         return {
             'chroma': chroma,
@@ -333,7 +340,8 @@ class AdvancedFeatureExtractor:
             'key': key,
             'mode': mode,
             'harmonic_ratio': harmonic_ratio,
-            'pitch_class_distribution': chroma_mean.tolist()
+            'pitch_class_distribution': chroma_mean.tolist(),
+            'hpss_result': (y_harmonic, y_percussive)  # Cache for reuse
         }
         
     def extract_rhythmic_features(self, y: np.ndarray) -> Dict[str, Any]:
@@ -568,14 +576,29 @@ class AdvancedFeatureExtractor:
         Returns:
             Dictionary of parameters for caching
         """
-        import hashlib
+        # Optimized: Sample-based hashing instead of full array hashing
+        # This is much faster for large audio files
+        length = len(y)
+        sample_size = min(1000, length // 3)
+        
+        if length <= 3000:
+            audio_hash = hashlib.sha256(y.tobytes()).hexdigest()[:16]
+        else:
+            # Sample key points for fast hashing
+            samples = np.concatenate([
+                y[:sample_size],
+                y[length//2 - sample_size//2 : length//2 + sample_size//2],
+                y[-sample_size:]
+            ])
+            audio_hash = hashlib.sha256(samples.tobytes()).hexdigest()[:16]
+        
         return {
             'feature_type': feature_type,
             'sample_rate': self.sample_rate,
             'hop_length': self.hop_length,
             'n_fft': self.n_fft,
             'audio_length': len(y),
-            'audio_hash': hashlib.sha256(y.tobytes()).hexdigest()[:16]  # First 16 chars of hash
+            'audio_hash': audio_hash
         }
         
     def _estimate_key_mode(self, chroma_mean: np.ndarray) -> Tuple[str, str]:
@@ -676,7 +699,13 @@ class AudioEngine:
         self.cache_size = cache_size
         self.feature_cache = {}
         self.processor = AudioProcessor()
-        self.feature_extractor = AdvancedFeatureExtractor()
+        
+        # Initialize feature cache for disk-based caching
+        from .feature_cache import FeatureCache
+        self.disk_cache = FeatureCache()
+        
+        # Pass cache to feature extractor
+        self.feature_extractor = AdvancedFeatureExtractor(cache=self.disk_cache)
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
         
         # Performance monitoring
@@ -685,6 +714,7 @@ class AudioEngine:
         self.cache_misses = 0
         
         logger.info(f"🎵 SampleMind Audio Engine initialized with {max_workers} workers")
+        logger.info(f"📦 Feature caching enabled with disk persistence")
     
     def load_audio(self, file_path: Union[str, Path], target_sr: Optional[int] = None) -> Tuple[np.ndarray, int]:
         """
@@ -797,8 +827,15 @@ class AudioEngine:
             features.rms_energy = spectral_features['rms_energy']
             
             # Advanced analysis for higher levels
+            # Optimization: Reuse HPSS computed in tonal_features to avoid redundant computation
             if level in [AnalysisLevel.DETAILED, AnalysisLevel.PROFESSIONAL]:
-                harmonic, percussive = self.processor.extract_harmonic_percussive(y)
+                # Check if HPSS was already computed
+                if 'hpss_result' in tonal_features:
+                    harmonic, percussive = tonal_features['hpss_result']
+                else:
+                    # Fallback: compute if not cached
+                    harmonic, percussive = self.processor.extract_harmonic_percussive(y)
+                
                 features.harmonic_content = harmonic
                 features.percussive_content = percussive
             
