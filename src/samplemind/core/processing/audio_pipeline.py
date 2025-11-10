@@ -200,12 +200,12 @@ class AudioPipeline:
         if high_cut < self.sr / 2 and high_cut > 0:
             nyquist = 0.5 * self.sr
             normalized_cutoff = high_cut / nyquist
-            b, a = signal.butter(4, normalized_cutoff, btype='low')
+            numerator_coeffs, denominator_coeffs = signal.butter(4, normalized_cutoff, btype='low')
             
             if len(self.y.shape) > 1:
-                self.y = np.array([signal.filtfilt(b, a, channel) for channel in self.y])
+                self.y = np.array([signal.filtfilt(numerator_coeffs, denominator_coeffs, channel) for channel in self.y])
             else:
-                self.y = signal.filtfilt(b, a, self.y)
+                self.y = signal.filtfilt(numerator_coeffs, denominator_coeffs, self.y)
                 
             self.history.append(f"Applied low-pass filter at {high_cut}Hz")
             
