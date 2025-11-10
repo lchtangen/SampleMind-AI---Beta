@@ -191,8 +191,8 @@ class AudioProcessor:
         """Apply high-pass filter to remove low-frequency noise"""
         nyquist = sr // 2
         normalized_cutoff = cutoff / nyquist
-        b, a = signal.butter(4, normalized_cutoff, btype='high')
-        return signal.filtfilt(b, a, y)
+        numerator_coeffs, denominator_coeffs = signal.butter(4, normalized_cutoff, btype='high')
+        return signal.filtfilt(numerator_coeffs, denominator_coeffs, y)
     
     @staticmethod
     def extract_harmonic_percussive(y: np.ndarray, margin: float = 3.0) -> Tuple[np.ndarray, np.ndarray]:

@@ -149,8 +149,8 @@ class AudioProcessingMetrics:
                 label_str = label_str.rstrip('}')
                 labels = {}
                 for pair in label_str.split(','):
-                    k, v = pair.split('=')
-                    labels[k.strip()] = v.strip('"\'')
+                    label_key, label_value = pair.split('=')
+                    labels[label_key.strip()] = label_value.strip('"\'')
             else:
                 name = key
                 labels = {}

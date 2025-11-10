@@ -141,8 +141,8 @@ class NeurologicAudioEngine:
         high = high / nyquist
         
         # Simple FIR filter (replace with proper filter design)
-        b = np.firwin(101, [low, high], pass_zero=False)
-        return np.convolve(signal, b, mode='same')
+        filter_coefficients = np.firwin(101, [low, high], pass_zero=False)
+        return np.convolve(signal, filter_coefficients, mode='same')
     
     def update_weights(self, features: Dict[str, np.ndarray], learning_signal: float):
         """
