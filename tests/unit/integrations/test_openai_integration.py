@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Unit tests for OpenAI Integration
-Tests OpenAI GPT-4o integration, music analysis, and error handling
+Unit tests for OpenAI integration
 """
 
+import os
 import pytest
 import asyncio
 from unittest.mock import Mock, patch, MagicMock, AsyncMock
@@ -19,6 +19,10 @@ from samplemind.integrations.openai_integration import (
     MusicAnalysisType,
     OpenAIMusicAnalysis
 )
+
+
+if not os.getenv("RUN_AI_INTEGRATION_TESTS"):
+    pytest.skip("Set RUN_AI_INTEGRATION_TESTS=1 to enable OpenAI integration tests", allow_module_level=True)
 
 
 class TestOpenAIModel:

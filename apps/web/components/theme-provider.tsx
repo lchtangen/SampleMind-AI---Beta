@@ -13,14 +13,9 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
 
   if (!mounted) {
     return (
-      <NextThemesProvider
-        disableTransitionOnChange
-        enableSystem
-        defaultTheme="system"
-        {...props}
-      >
-        {children}
-      </NextThemesProvider>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-pulse text-cyan-300">Preparing theme…</div>
+      </div>
     )
   }
 

@@ -18,7 +18,9 @@ from pathlib import Path
 from typing import Dict, Any, List
 from unittest.mock import AsyncMock, MagicMock
 
-# Add src to Python path for testing
+# Add project root to Python path so `src` package resolves
+sys.path.insert(0, str(Path(__file__).parent.parent))
+# Also add the modern src directory to prefer latest modules for `samplemind` imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from samplemind.core.engine.audio_engine import AudioEngine, AnalysisLevel, AudioFeatures

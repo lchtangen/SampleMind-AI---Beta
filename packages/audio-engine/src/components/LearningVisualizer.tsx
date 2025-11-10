@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as tf from '@tensorflow/tfjs';
 import { NeuroplasticLearning } from '../core/NeuroplasticLearning';
 
-interface LearningVisualizerProps {
+export interface LearningVisualizerProps {
   neuroplasticLearning: NeuroplasticLearning;
   width?: number;
   height?: number;

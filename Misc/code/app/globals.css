@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Cyberpunk/Neon Color Scheme */
+    --background: 240 20% 4%; /* #0A0A0F - Deep dark background */
+    --foreground: 180 100% 95%; /* Bright cyan/white text */
+
+    --muted: 240 15% 10%; /* #1A1A2E - Dark muted background */
+    --muted-foreground: 180 50% 70%; /* Cyan muted text */
+    --muted-foreground-light: 180 50% 70% / 0.5;
+    --muted-foreground-dark: 180 50% 70% / 0.6;
+
+    --card: 240 20% 8% / 0.8; /* Dark card with transparency for glassmorphism */
+    --card-foreground: 180 100% 95%;
+
+    --popover: 240 20% 8%;
+    --popover-foreground: 180 100% 95%;
+
+    /* Neon Purple Primary */
+    --primary: 258 90% 66%; /* #8B5CF6 - Neon Purple */
+    --primary-foreground: 180 100% 95%;
+    --primary-dark: 258 100% 60%; /* Deeper purple */
+    --primary-light: 258 80% 75%; /* Lighter purple for accents */
+
+    /* Electric Blue Secondary */
+    --secondary: 217 91% 60%; /* #3B82F6 - Electric Blue */
+    --secondary-foreground: 180 100% 95%;
+
+    /* Neon Green Accent */
+    --accent: 158 64% 52%; /* #10B981 - Neon Green */
+    --accent-foreground: 240 20% 4%;
+
+    --border: 258 90% 66% / 0.3; /* Neon purple border with glow */
+    --border-light: 258 90% 66% / 0.2;
+    --border-dark: 258 90% 66% / 0.1;
+
+    --ring: 258 90% 66%; /* Neon purple ring */
+
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    /* Add subtle scan line effect for cyberpunk feel */
+    background-image: repeating-linear-gradient(
+      0deg,
+      rgba(139, 92, 246, 0.03) 0px,
+      transparent 1px,
+      transparent 2px,
+      rgba(139, 92, 246, 0.03) 3px
+    );
+  }
+}
+
+/* Cyberpunk neon glow effects */
+@layer utilities {
+  .neon-glow {
+    box-shadow: 0 0 5px rgba(139, 92, 246, 0.5), 0 0 10px rgba(139, 92, 246, 0.3), 0 0 20px rgba(139, 92, 246, 0.2);
+  }
+
+  .neon-glow-blue {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5), 0 0 10px rgba(59, 130, 246, 0.3), 0 0 20px rgba(59, 130, 246, 0.2);
+  }
+
+  .neon-glow-green {
+    box-shadow: 0 0 5px rgba(16, 185, 129, 0.5), 0 0 10px rgba(16, 185, 129, 0.3), 0 0 20px rgba(16, 185, 129, 0.2);
+  }
+
+  .neon-text {
+    text-shadow: 0 0 10px rgba(139, 92, 246, 0.8), 0 0 20px rgba(139, 92, 246, 0.5), 0 0 30px rgba(139, 92, 246, 0.3);
+  }
+
+  .neon-border {
+    border: 1px solid rgba(139, 92, 246, 0.5);
+    box-shadow: inset 0 0 10px rgba(139, 92, 246, 0.2), 0 0 10px rgba(139, 92, 246, 0.3);
+  }
+
+  .glassmorphism {
+    background: rgba(26, 26, 46, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+  }
+
+  .cyber-grid {
+    background-image: linear-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+}

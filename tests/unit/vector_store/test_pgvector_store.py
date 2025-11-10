@@ -7,7 +7,12 @@ import numpy as np
 from datetime import datetime
 from unittest.mock import patch, MagicMock
 
-from samplemind.core.vector_store.pgvector_store import PgVectorStore, AudioFeatureRecord
+vector_module = pytest.importorskip(
+    "samplemind.core.vector_store.pgvector_store",
+    reason="PgVectorStore module is no longer part of the active codebase"
+)
+PgVectorStore = vector_module.PgVectorStore
+AudioFeatureRecord = vector_module.AudioFeatureRecord
 
 # Test data
 TEST_RECORD = AudioFeatureRecord(

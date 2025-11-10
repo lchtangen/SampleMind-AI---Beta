@@ -1,7 +1,9 @@
-"""
-Unit tests for AudioEngine
-"""
+"""Legacy audio engine tests (superseded by tests/unit/core/test_audio_engine.py)"""
+
 import pytest
+
+pytest.skip("Legacy audio engine tests replaced by tests/unit/core/test_audio_engine.py", allow_module_level=True)
+
 import numpy as np
 from pathlib import Path
 

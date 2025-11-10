@@ -24,7 +24,14 @@
     "strictNullChecks": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/components/*": ["./components/*", "./src/components/*"],
+      "@/contexts/*": ["./contexts/*", "./src/contexts/*"],
+      "@/hooks/*": ["./hooks/*", "./src/hooks/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/features/*": ["./src/features/*"],
+      "@/design-system/*": ["./src/design-system/*"],
+      "@/*": ["./src/*"],
+      "@samplemind-ai/*": ["../../packages/*/src"]
     }
   },
   "include": [
@@ -34,6 +41,12 @@
     "**/*.tsx"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "src/App.tsx",
+    "src/app/**",
+    "src/components/**",
+    "src/design-system/**",
+    "src/features/**",
+    "vite.config.ts"
   ]
 }

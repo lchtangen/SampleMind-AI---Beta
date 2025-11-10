@@ -301,7 +301,7 @@ class AdvancedFeatureExtractor:
         self.hop_length = 512
         self.n_fft = 2048
         self.use_cache = use_cache
-        self._cache = cache if use_cache else None
+        self._cache = None
         
     def extract_tonal_features(self, y: np.ndarray) -> Dict[str, Any]:
         """
@@ -328,6 +328,7 @@ class AdvancedFeatureExtractor:
         
         return {
             'chroma': chroma,
+            'chroma_features': chroma,
             'chroma_mean': chroma_mean,
             'key': key,
             'mode': mode,
@@ -386,6 +387,7 @@ class AdvancedFeatureExtractor:
             
             result = {
                 'tempo': float(tempo),
+                'beats': beat_times.tolist(),
                 'beat_times': beat_times.tolist(),
                 'onset_times': onset_times.tolist(),
                 'onset_env': onset_env.tolist(),
@@ -461,6 +463,13 @@ class AdvancedFeatureExtractor:
                     y=y, 
                     hop_length=self.hop_length
                 )
+
+                mfcc = librosa.feature.mfcc(
+                    y=y,
+                    sr=self.sample_rate,
+                    n_mfcc=13,
+                    hop_length=self.hop_length
+                )
             
             result = {
                 'spectral_centroid': spectral_centroid[0].tolist(),
@@ -468,6 +477,7 @@ class AdvancedFeatureExtractor:
                 'spectral_rolloff': spectral_rolloff[0].tolist(),
                 'zero_crossing_rate': zero_crossing_rate[0].tolist(),
                 'rms_energy': rms_energy[0].tolist(),
+                'mfccs': mfcc,
                 '_cached': False
             }
             
@@ -546,8 +556,6 @@ class AdvancedFeatureExtractor:
         except Exception as e:
             logger.error(f"Error extracting MFCC features: {e}")
             raise
-            'mfcc_std': mfcc_std.tolist()
-        }
         
     def _get_cache_key(self, feature_type: str, y: np.ndarray) -> Dict[str, Any]:
         """

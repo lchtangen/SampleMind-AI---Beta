@@ -1,7 +1,9 @@
-"""
-Unit tests for audio feature extraction
-"""
+"""Legacy audio feature tests (superseded by tests/unit/core/test_audio_engine.py)."""
+
 import pytest
+
+pytest.skip("Legacy audio feature tests replaced by core audio engine suite", allow_module_level=True)
+
 import numpy as np
 import librosa
 from pathlib import Path

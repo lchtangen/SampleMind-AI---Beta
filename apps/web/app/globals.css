@@ -35,7 +35,8 @@
 
   /* Cyberpunk typography */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-orbitron font-bold tracking-wider text-transparent bg-clip-text;
+    font-family: 'Orbitron', 'Inter', '-apple-system', 'sans-serif';
+    @apply font-bold tracking-wider text-transparent bg-clip-text;
     background-image: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
     text-shadow: 0 0 10px rgba(5, 217, 232, 0.5);
   }
@@ -47,9 +48,15 @@
   
   /* Cyberpunk links */
   a {
-    @apply text-neon-cyan hover:text-neon-pink transition-all duration-300 font-medium;
+    color: var(--neon-cyan);
+    transition: all 0.3s ease;
+    font-weight: 500;
     text-shadow: 0 0 8px rgba(5, 217, 232, 0.3);
     position: relative;
+  }
+  
+  a:hover {
+    color: var(--neon-pink);
   }
   
   a:after {
@@ -83,14 +90,33 @@
   input[type='search']:focus,
   textarea,
   select {
-    @apply bg-black/30 border border-neon-cyan/30 rounded-md px-4 py-2 text-white/90 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-neon-cyan/50 focus:border-transparent transition-all duration-200;
+    @apply bg-black/30 border rounded-md px-4 py-2 text-white/90 placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200;
+    border-color: rgba(0, 241, 255, 0.3);
     backdrop-filter: blur(10px);
     box-shadow: 0 0 15px rgba(5, 217, 232, 0.1);
   }
   
+  input[type='text']:focus,
+  input[type='email']:focus,
+  input[type='password']:focus,
+  input[type='number']:focus,
+  input[type='tel']:focus,
+  input[type='url']:focus,
+  input[type='date']:focus,
+  input[type='time']:focus,
+  input[type='datetime-local']:focus,
+  input[type='month']:focus,
+  input[type='week']:focus,
+  input[type='search']:focus,
+  textarea:focus,
+  select:focus {
+    box-shadow: 0 0 0 4px rgba(0, 241, 255, 0.2);
+  }
+  
   /* Buttons */
   button, .btn {
-    @apply relative overflow-hidden font-orbitron font-bold tracking-wider px-6 py-3 rounded-lg transition-all duration-300 ease-out;
+    font-family: 'Orbitron', 'Inter', '-apple-system', 'sans-serif';
+    @apply relative overflow-hidden font-bold tracking-wider px-6 py-3 rounded-lg transition-all duration-300 ease-out;
     background: linear-gradient(45deg, var(--neon-pink), var(--neon-purple));
     color: white;
     border: none;
@@ -118,14 +144,6 @@
   button:active, .btn:active {
     transform: translateY(2px);
   }
-  button, [type='button'], [type='reset'], [type='submit'] {
-    @apply btn btn-secondary;
-  }
-  
-  button.primary, [type='submit'] {
-    @apply btn-primary;
-  }
-  
   /* Custom scrollbar for WebKit browsers */
   @media (max-width: 1023px) {
     /* Hide scrollbar for Chrome, Safari and Opera */

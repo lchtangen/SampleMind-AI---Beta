@@ -6,6 +6,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 from typing import Dict, Set
 import json
 import asyncio
+from datetime import datetime
 
 router = APIRouter(prefix="/ws", tags=["websocket"])
 
@@ -199,5 +200,14 @@ async def send_notification(user_id: int, title: str, message: str, level: str =
             "message": message,
             "level": level
         },
-        "timestamp": "2025-10-19T20:00:00Z"
+        "timestamp": datetime.utcnow().isoformat()
+    }, user_id)
+
+
+async def send_recommendations_update(user_id: int, payload: dict):
+    """Push recommendation payload over WebSocket to the given user."""
+    await manager.send_personal_message({
+        "type": "recommendations_update",
+        "data": payload,
+        "timestamp": datetime.utcnow().isoformat()
     }, user_id)

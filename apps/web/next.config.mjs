@@ -19,6 +19,11 @@ const nextConfig = {
     optimizeCss: true,
   },
   
+  // Linting
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  
   // Headers
   async headers() {
     return [

@@ -3,9 +3,13 @@
 import { useState } from 'react';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { Mail, Lock, User, AlertCircle } from 'lucide-react';
+import { useNotification } from '@/contexts/NotificationContext';
+import { useRouter } from 'next/navigation';
 
 export default function LoginForm() {
   const { login, register, loading, error } = useAuthContext();
+  const { addNotification } = useNotification();
+  const router = useRouter();
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,7 +36,18 @@ export default function LoginForm() {
 
     if (!result.success) {
       setLocalError(result.error || 'Authentication failed');
+      return;
     }
+
+    addNotification(
+      'success',
+      isRegisterMode ? 'Account created! Redirecting to dashboard...' : 'Welcome back! Redirecting...'
+    );
+    setEmail('');
+    setPassword('');
+    setFullName('');
+    setIsRegisterMode(false);
+    router.push('/dashboard');
   };
 
   const displayError = error || localError;

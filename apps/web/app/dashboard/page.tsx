@@ -10,6 +10,7 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import { useNotification } from '@/contexts/NotificationContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { RecommendationsPanel } from '@/components/RecommendationsPanel';
 
 function DashboardContent() {
   const router = useRouter();
@@ -127,7 +128,7 @@ function DashboardContent() {
             Welcome Back, {user?.full_name || user?.email?.split('@')[0] || 'User'}
           </h2>
           <p className="text-[hsl(220,10%,65%)]">
-            Here's what's happening with your music production
+            Here&apos;s what&apos;s happening with your music production
           </p>
         </div>
 
@@ -214,6 +215,8 @@ function DashboardContent() {
             </div>
           </Link>
         </div>
+
+        <RecommendationsPanel className="mb-8" />
 
         {/* Recent Activity */}
         <div className="relative">
