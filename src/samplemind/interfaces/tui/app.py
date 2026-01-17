@@ -25,6 +25,11 @@ from .screens import (
     TaggingScreen,
 )
 
+# Import new systems
+from .integrations import get_fl_studio_integration
+from .history import get_history_manager
+from .playback import get_audio_player
+
 
 class SampleMindTUI(App):
     """Main SampleMind TUI Application"""
