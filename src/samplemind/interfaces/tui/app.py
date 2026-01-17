@@ -23,12 +23,17 @@ from .screens import (
     ComparisonScreen,
     SearchScreen,
     TaggingScreen,
+    PerformanceScreen,
+    LibraryScreen,
 )
 
 # Import new systems
 from .integrations import get_fl_studio_integration
 from .history import get_history_manager
 from .playback import get_audio_player
+from .ai import get_ai_coach
+from .monitoring import get_performance_monitor
+from .library import get_library_browser
 
 
 class SampleMindTUI(App):

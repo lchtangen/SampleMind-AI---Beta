@@ -9,6 +9,8 @@ from .settings_screen import SettingsScreen
 from .comparison_screen import ComparisonScreen
 from .search_screen import SearchScreen
 from .tagging_screen import TaggingScreen
+from .performance_screen import PerformanceScreen
+from .library_screen import LibraryScreen
 
 __all__ = [
     "MainScreen",
@@ -20,4 +22,6 @@ __all__ = [
     "ComparisonScreen",
     "SearchScreen",
     "TaggingScreen",
+    "PerformanceScreen",
+    "LibraryScreen",
 ]
