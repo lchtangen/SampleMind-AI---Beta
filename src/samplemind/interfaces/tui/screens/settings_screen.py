@@ -14,6 +14,7 @@ from rich.text import Text
 from rich.table import Table
 
 from samplemind.interfaces.tui.settings import get_settings_manager
+from samplemind.interfaces.tui.themes import get_theme_manager
 from samplemind.interfaces.tui.widgets.dialogs import (
     ErrorDialog,
     InfoDialog,
@@ -150,18 +151,28 @@ class SettingsScreen(Screen):
         theme = settings.get("theme", "dark")
         show_advanced = settings.get("show_advanced_stats", False)
 
+        # Get theme manager for theme info
+        theme_manager = get_theme_manager()
+        available_themes = theme_manager.get_all_themes()
+
         content = f"""
 ╔════════════════════════════════════════╗
 ║         GENERAL SETTINGS               ║
 ╠════════════════════════════════════════╣
 ║
 ║  Theme: {theme:.<30}
+║  Available: {', '.join(available_themes[:3])}...
 ║
 ║  Show Advanced Stats: {'✅ Yes' if show_advanced else '❌ No':<22}
 ║
 ║  Analysis Level: STANDARD
 ║
 ║  Export Format: JSON
+║
+║  Available Themes (8 total):
+║  🌙 dark, ☀️ light, 🤖 cyberpunk
+║  🌅 synthwave, 🌲 gruvbox, 🧛 dracula
+║  ❄️ nord, 🎨 monokai
 ║
 ╚════════════════════════════════════════╝
 """

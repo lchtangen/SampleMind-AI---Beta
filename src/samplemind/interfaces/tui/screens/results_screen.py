@@ -7,6 +7,7 @@ with export, comparison, and favorites capabilities.
 
 import os
 from datetime import datetime
+from typing import Optional, List
 
 from textual.screen import Screen
 from textual.widgets import Header, Footer, Button, Static, Tabs, TabPane
@@ -18,6 +19,7 @@ from rich.text import Text
 from rich.table import Table
 
 from samplemind.core.engine.audio_engine import AudioFeatures
+from samplemind.interfaces.tui.widgets import WaveformWidget, SpectralViz, SpectralType
 
 
 class ResultsScreen(Screen):
@@ -68,12 +70,30 @@ class ResultsScreen(Screen):
 
     current_tab: reactive[str] = reactive("overview")
 
-    def __init__(self, features: AudioFeatures, file_path: str = ""):
-        """Initialize results screen with audio features."""
+    def __init__(
+        self,
+        features: AudioFeatures,
+        file_path: str = "",
+        audio_data: Optional[List[float]] = None,
+        chromagram: Optional[List[List[float]]] = None,
+        spectrogram: Optional[List[List[float]]] = None,
+        mel_spectrogram: Optional[List[List[float]]] = None,
+    ):
+        """Initialize results screen with audio features and optional visualization data."""
         super().__init__()
         self.features = features
         self.file_path = file_path or getattr(features, "file_path", "Unknown")
         self.is_favorite = False
+
+        # Visualization data
+        self.audio_data = audio_data or []
+        self.chromagram = chromagram
+        self.spectrogram = spectrogram
+        self.mel_spectrogram = mel_spectrogram
+
+        # Visualization widgets (created on demand)
+        self.waveform_widget: Optional[WaveformWidget] = None
+        self.spectral_widget: Optional[SpectralViz] = None
 
     def compose(self):
         """Compose the results display layout"""
@@ -89,6 +109,8 @@ class ResultsScreen(Screen):
             # Tab navigation
             with Tabs(id="tabs"):
                 yield TabPane("📊 Overview", self._render_overview(), id="overview_tab")
+                yield TabPane("🌊 Waveform", self._render_waveform_tab(), id="waveform_tab")
+                yield TabPane("🌈 Spectral Viz", self._render_spectral_viz_tab(), id="spectral_viz_tab")
                 yield TabPane("📈 Spectral", self._render_spectral(), id="spectral_tab")
                 yield TabPane("⏱️ Temporal", self._render_temporal(), id="temporal_tab")
                 yield TabPane("🎼 MFCC", self._render_mfcc(), id="mfcc_tab")
@@ -118,6 +140,49 @@ class ResultsScreen(Screen):
 
         content = Text(f"{title_text}\n{subtitle}", style="bold cyan")
         return Panel(content, border_style="green", padding=(0, 1))
+
+    def _render_waveform_tab(self) -> Container:
+        """Render waveform visualization tab"""
+        if not self.audio_data:
+            return Static(Panel(
+                Text("No audio data available for waveform visualization", style="dim yellow"),
+                border_style="yellow"
+            ))
+
+        # Create waveform widget
+        self.waveform_widget = WaveformWidget(
+            audio_data=self.audio_data,
+            sample_rate=getattr(self.features, "sample_rate", 44100),
+            height=10,
+        )
+
+        return self.waveform_widget
+
+    def _render_spectral_viz_tab(self) -> Container:
+        """Render spectral visualization tab"""
+        if not any([self.chromagram, self.spectrogram, self.mel_spectrogram]):
+            return Static(Panel(
+                Text("No spectral data available for visualization", style="dim yellow"),
+                border_style="yellow"
+            ))
+
+        # Create spectral widget
+        self.spectral_widget = SpectralViz(height=15)
+
+        if self.chromagram:
+            self.spectral_widget.update_chromagram(self.chromagram)
+
+        if self.spectrogram:
+            self.spectral_widget.update_spectrogram(self.spectrogram)
+
+        if self.mel_spectrogram:
+            self.spectral_widget.update_mel_spectrogram(self.mel_spectrogram)
+
+        # Default to chromagram if available
+        if self.chromagram:
+            self.spectral_widget.set_visualization_type(SpectralType.CHROMAGRAM)
+
+        return self.spectral_widget
 
     def _render_overview(self) -> Container:
         """Render overview tab content"""
