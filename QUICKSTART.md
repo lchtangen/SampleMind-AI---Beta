@@ -1,157 +1,192 @@
-# ⚡ SampleMind AI — Quick Start Guide
+# ⚡ SampleMind AI - Quick Start Guide
 
-**Revolutionary AI-powered music production platform**
+**CLI-First AI-Powered Music Production Platform**
+
+Welcome to SampleMind AI! This guide will get you up and running in minutes. We're focusing on the CLI as our primary interface with offline-first capabilities.
 
 ---
 
-## 🚀 Start Backend (Ready Now!)
+## 🚀 Installation (5 minutes)
+
+### Prerequisites
+- Python 3.11+
+- Git
+- Optional: Ollama for offline AI (see below)
+
+### Quick Setup
 
 ```bash
-# 1. Navigate to backend
-cd backend
+# 1. Clone and enter directory
+git clone <repo-url>
+cd SampleMind-AI---Beta
 
-# 2. Install dependencies
-pip install -r requirements.txt
+# 2. Complete setup
+make setup
 
-# 3. Start API server
+# 3. (Optional) Install offline AI models
+make install-models
+```
+
+**That's it!** Your development environment is ready.
+
+---
+
+## 🎯 First Run - CLI Application
+
+```bash
+# Activate virtual environment
+source .venv/bin/activate
+
+# Run the CLI
 python main.py
 ```
 
-**API Running at:**
-- Main: http://localhost:8000
-- Docs: http://localhost:8000/api/docs
-- Health: http://localhost:8000/health
+You should see the interactive CLI interface with available commands.
 
----
-
-## 🧪 Test Authentication
+### Common First Commands
 
 ```bash
-# Register a user
-curl -X POST http://localhost:8000/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"demo@samplemind.ai","password":"SecurePass123"}'
+# Show help and available commands
+python main.py --help
 
-# Login and get tokens
-curl -X POST http://localhost:8000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"demo@samplemind.ai","password":"SecurePass123"}'
+# Analyze an audio file
+python main.py analyze --file /path/to/audio.wav
+
+# List available commands
+python main.py commands
 ```
 
 ---
 
-## 🎨 Start Frontend (After Install Fix)
+## 🔧 Configuration (Optional)
+
+### Enable Cloud AI (Gemini 3 Flash)
+
+Create a `.env` file in the project root:
 
 ```bash
-# Fix: Switch to Node 20 LTS
-nvm install 20
-nvm use 20
+# Google Gemini (Primary AI)
+GOOGLE_AI_API_KEY=your_google_api_key
 
-# Install dependencies
-pnpm install
-
-# Start dev server
-pnpm web:dev
+# Optional: Other AI providers
+OPENAI_API_KEY=your_openai_key
+ANTHROPIC_API_KEY=your_anthropic_key
 ```
 
-**Gallery Preview:** http://localhost:3000/gallery
+Get your Gemini API key at: https://ai.google.dev/
+
+### Offline-First Development
+
+For development without internet, use Ollama:
+
+```bash
+# Install Ollama models (downloads ~5GB)
+make install-models
+
+# Launch Ollama API server
+scripts/launch-ollama-api.sh
+```
+
+The CLI will automatically use Ollama models when available.
 
 ---
 
-## 📚 Key Documents
+## 🧪 Development Workflow
 
-**Essential Reading:**
-- `DOCUMENTS/READY_FOR_NEXT_SESSION.md` — **Start here**
-- `DOCUMENTS/COMPLETE_10_PHASE_100_TASK_PLAN.md` — Strategic roadmap
-- `backend/TEST_AUTH.md` — Authentication testing
+### Running Tests
+```bash
+make test
+```
 
-**Implementation:**
-- `backend/README.md` — Backend setup guide
-- `DOCUMENTS/INSTALL_TROUBLESHOOTING.md` — Frontend install fix
-- `DOCUMENTS/BACKEND_PHASE7_PROGRESS.md` — Backend status
+### Code Quality
+```bash
+make quality      # Run all checks
+make lint         # Linting only
+make format       # Format code
+```
 
-**Research:**
-- `DOCUMENTS/DESIGN_INSPIRATION_SOURCES.md` — 80 references
-- `DOCUMENTS/DESIGN_INSPIRATION_SOURCES_BATCH2.md` — 145 references
-
----
-
-## 🎯 What's Available Now
-
-### Backend (Functional) ✅
-- FastAPI application with CORS
-- JWT authentication (5 endpoints)
-- Health and status monitoring
-- Auto-generated API docs
-
-### Frontend (Code Ready) ✅
-- 12 production components
-- Gallery preview page
-- Cyberpunk glassmorphism theme
-- Animated visualizations
-- **Note:** Install blocked (Node v24 issue)
-
-### Documentation (Complete) ✅
-- 10 strategic documents
-- 100-task roadmap
-- 225 design references
-- Testing guides
+### Database Services (Optional)
+```bash
+make setup-db     # Start MongoDB, Redis, ChromaDB
+make dev-full     # Full development stack
+```
 
 ---
 
-## 🔧 Current Status
+## 📚 Next Steps
 
-**Working:**
-- ✅ Backend authentication API
-- ✅ Component library (12 components)
-- ✅ Theme system (cyberpunk glass)
-- ✅ Strategic plan (100 tasks)
-
-**Pending:**
-- ⏳ Frontend install (Node 20 LTS needed)
-- ⏳ Audio endpoints
-- ⏳ Database integration
-- ⏳ WebSocket real-time
+1. **Read GETTING_STARTED.md** - Detailed setup for your platform
+2. **Check CLAUDE.md** - Complete development reference
+3. **Explore docs/PROJECT_ROADMAP.md** - Development priorities
+4. **Review docs/CURRENT_STATUS.md** - Current feature status
 
 ---
 
-## 📊 Project Progress
+## 🆘 Troubleshooting
 
-**Overall:** 38% (76/200 tasks)
+### Virtual Environment Issues
+```bash
+# Recreate virtual environment
+rm -rf .venv
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+```
 
-**Phase Status:**
-- Phase 1 (Theme): 50% ✅
-- Phase 2 (Components): 80% ✅
-- Phase 3 (Pages): 10%
-- Phase 4 (Visualizations): 30%
-- Phase 7 (Backend): 30% ✅
+### Python Version
+Ensure Python 3.11+:
+```bash
+python3 --version
+```
 
----
+### Missing Dependencies
+```bash
+pip install -r requirements.txt
+```
 
-## 🎯 Next Steps
+### Offline Mode Not Working
+```bash
+# Verify Ollama is installed
+ollama list
 
-1. **Test Backend** — Try auth endpoints
-2. **Fix Frontend Install** — Node 20 LTS
-3. **Preview Gallery** — View components
-4. **Read Strategic Plan** — Understand roadmap
-
----
-
-## 💡 Quick Tips
-
-- **Backend:** Independent, can develop now
-- **Frontend:** Waiting on install fix only
-- **Components:** Production-ready code
-- **Docs:** Comprehensive testing guides
-
----
-
-**Total Files Created Tonight:** 37  
-**Lines of Code/Docs:** ~7,500  
-**Session Duration:** 126 minutes
-
-**Status:** ✅ Ready to continue development
+# Launch Ollama server
+ollama serve
+```
 
 ---
 
-*Built with ❤️ for music producers and audio engineers*
+## 🎨 CLI Features
+
+- **Audio Analysis**: Analyze tempo, key, spectral features
+- **AI-Powered Recommendations**: Get intelligent sample suggestions
+- **Batch Processing**: Process multiple audio files
+- **Offline-First**: Works without internet using Ollama models
+- **Interactive Mode**: User-friendly terminal interface with animations
+
+---
+
+## 💡 Tips
+
+- **CLI First**: The CLI is the primary product - use it for development and testing
+- **Offline Development**: Use Ollama models for fast iteration without API costs
+- **Performance**: Target <1 second response time for common operations
+- **Cross-Platform**: Works on Linux, macOS, and Windows
+
+---
+
+## 📖 Documentation
+
+- **CLAUDE.md** - Complete development reference for AI assistants
+- **GETTING_STARTED.md** - Detailed setup guide
+- **README.md** - Project overview
+- **docs/PROJECT_ROADMAP.md** - Development priorities
+
+---
+
+## 🤝 Contributing
+
+See CONTRIBUTING.md for guidelines on contributing to SampleMind AI.
+
+---
+
+**Ready?** Run `python main.py` and start exploring! 🎵

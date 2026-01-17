@@ -1,492 +1,400 @@
 # 🚀 Getting Started with SampleMind AI
 
-**Revolutionary AI-powered music production platform**
+**CLI-First AI-Powered Music Production Platform**
+
+This guide walks you through everything you need to get SampleMind AI up and running. It covers setup for Linux, macOS, and Windows.
 
 ---
 
-## ⚡ Quick Start (5 Minutes)
+## 📋 Quick Navigation
 
-### 1. Start the Backend
+1. [System Requirements](#system-requirements)
+2. [Installation](#installation)
+3. [First Run](#first-run)
+4. [Understanding the Project](#understanding-the-project)
+5. [Common Commands](#common-commands)
+6. [Offline Development](#offline-development)
+7. [Troubleshooting](#troubleshooting)
+8. [Next Steps](#next-steps)
+
+---
+
+## System Requirements
+
+### Required
+- **Python 3.11+** - Download from [python.org](https://www.python.org)
+- **Git** - For cloning the repository
+- **Terminal/Command Prompt** - Any standard terminal works
+
+### Optional but Recommended
+- **Ollama** - For offline AI models (see Offline Development section)
+- **Make** - For convenient commands (usually pre-installed on Linux/macOS)
+- **Docker** - Only if running full development stack
+
+### Check Your System
+
 ```bash
-cd backend
-source venv/bin/activate  # or: venv/bin/activate on Windows
+python3 --version          # Should show 3.11+
+python3 -m venv --help     # Verify venv support
+git --version              # Should show 2.0+
+```
+
+---
+
+## Installation
+
+### Step 1: Clone Repository
+
+```bash
+# Clone the repo
+git clone https://github.com/your-org/SampleMind-AI---Beta.git
+cd SampleMind-AI---Beta
+```
+
+### Step 2: Complete Setup
+
+```bash
+# One-line setup (recommended)
+make setup
+
+# OR manual setup
+python3 -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -e .
+```
+
+### Step 3: Verify Installation
+
+```bash
+# Activate environment (if not already)
+source .venv/bin/activate
+
+# Run help
+python main.py --help
+
+# You should see the CLI help output
+```
+
+**✅ Installation complete!**
+
+---
+
+## First Run
+
+### Start the CLI
+
+```bash
+# Make sure you're in the project directory
+cd SampleMind-AI---Beta
+
+# Activate virtual environment
+source .venv/bin/activate
+
+# Run the CLI
 python main.py
 ```
 
-**✅ Backend running at:** http://localhost:8000
+### Try These Commands
 
----
-
-### 2. Test the API
-Open in browser: **http://localhost:8000/api/docs**
-
-Try it:
 ```bash
-# Health check
-curl http://localhost:8000/health
+# List available commands
+python main.py --help
 
-# Register user
-curl -X POST http://localhost:8000/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"demo@samplemind.ai","password":"Demo123456"}'
+# Analyze an audio file
+python main.py analyze --file path/to/audio.wav
+
+# Get AI recommendations
+python main.py recommend --file path/to/audio.wav
+
+# Check system status
+python main.py status
 ```
 
 ---
 
-### 3. Start the Frontend (After Install Fix)
+## Understanding the Project
+
+### Project Structure
+
+```
+SampleMind-AI---Beta/
+├── main.py                     # CLI entry point
+├── src/samplemind/
+│   ├── interfaces/             # CLI interface (primary)
+│   ├── core/
+│   │   └── engine/            # Audio processing engine
+│   ├── ai/                    # AI integrations (Gemini, Ollama)
+│   └── utils/                 # Utilities
+├── tests/                     # Test suite
+├── docs/                      # Documentation
+├── .env                       # Configuration (create this)
+└── Makefile                   # Development commands
+```
+
+### Core Components
+
+1. **CLI Interface** - Modern terminal UI with animations
+2. **Audio Engine** - Librosa-based audio analysis
+3. **AI Integration** - Gemini 3 Flash (cloud) + Ollama (offline)
+4. **Database Layer** - MongoDB, Redis, ChromaDB
+
+---
+
+## Common Commands
+
+### Development
+
 ```bash
-# Fix Node version
-nvm use 20
-
-# Install dependencies
-pnpm install
-
-# Start dev server
-pnpm web:dev
-```
-
-**✅ Frontend running at:** http://localhost:3000
-
----
-
-## 📦 What You Have
-
-### Backend API ✅
-- **13 REST endpoints** (auth + audio + system)
-- **1 WebSocket endpoint** (real-time updates)
-- **JWT authentication** with token refresh
-- **File upload** with progress tracking
-- **AI analysis** (mock data, ready for real engine)
-
-### Frontend ✅
-- **6 complete pages** (landing, dashboard, upload, library, analysis, gallery)
-- **12 UI components** (cyberpunk glassmorphism theme)
-- **API client library** (TypeScript, fully typed)
-- **Responsive design** (mobile to desktop)
-
-### Documentation ✅
-- Complete testing guides
-- API integration examples
-- Strategic roadmap (100 tasks)
-- Design research (225 sources)
-
----
-
-## 🎯 Complete User Flow
-
-### Flow 1: Register & Login
-```bash
-# 1. Register
-curl -X POST http://localhost:8000/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"SecurePass123"}'
-
-# 2. Login
-curl -X POST http://localhost:8000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"SecurePass123"}'
-
-# Save the access_token from response
-```
-
-### Flow 2: Upload & Analyze
-```bash
-# 3. Upload audio (replace YOUR_TOKEN)
-curl -X POST http://localhost:8000/api/v1/audio/upload \
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -F "file=@your-audio.mp3"
-
-# Save the id from response
-
-# 4. Analyze
-curl -X POST http://localhost:8000/api/v1/audio/analyze \
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"audio_id":1,"analysis_type":"full","extract_features":true,"ai_analysis":true}'
-```
-
-### Flow 3: View Results
-```bash
-# 5. Get audio details
-curl -X GET http://localhost:8000/api/v1/audio/1 \
-  -H "Authorization: Bearer YOUR_TOKEN"
-
-# 6. List all audio
-curl -X GET http://localhost:8000/api/v1/audio \
-  -H "Authorization: Bearer YOUR_TOKEN"
-```
-
----
-
-## 🔌 Frontend Integration
-
-### Connect API to Upload Page
-
-**File:** `apps/web/app/upload/page.tsx`
-
-```typescript
-import { AudioAPI } from '@/lib/api-client';
-
-const handleUpload = async (file: File) => {
-  try {
-    // Upload with progress
-    const response = await AudioAPI.upload(file, (progress) => {
-      console.log(`Upload progress: ${progress}%`);
-      setUploadProgress(progress);
-    });
-    
-    console.log('Uploaded:', response);
-    
-    // Start analysis
-    const analysis = await AudioAPI.analyze(response.id);
-    console.log('Analysis:', analysis);
-    
-  } catch (error) {
-    console.error('Upload failed:', error);
-  }
-};
-```
-
-### Connect API to Library Page
-
-**File:** `apps/web/app/library/page.tsx`
-
-```typescript
-import { AudioAPI } from '@/lib/api-client';
-
-useEffect(() => {
-  async function fetchAudio() {
-    try {
-      const response = await AudioAPI.list(1, 20);
-      setTracks(response.items);
-    } catch (error) {
-      console.error('Fetch failed:', error);
-    }
-  }
-  fetchAudio();
-}, []);
-```
-
-### Connect WebSocket
-
-**File:** `apps/web/hooks/useWebSocket.ts`
-
-```typescript
-import { WebSocketManager } from '@/lib/api-client';
-
-export function useWebSocket(userId: number, token: string) {
-  useEffect(() => {
-    const ws = new WebSocketManager();
-    
-    ws.connect(userId, token, (data) => {
-      switch(data.type) {
-        case 'upload_progress':
-          // Update UI
-          break;
-        case 'analysis_status':
-          // Show results
-          break;
-      }
-    });
-    
-    return () => ws.disconnect();
-  }, [userId, token]);
-}
-```
-
----
-
-## 🎨 Pages Available
-
-| Page | Route | Description |
-|------|-------|-------------|
-| Landing | `/` | Hero, features, CTA |
-| Dashboard | `/dashboard` | Stats, recent activity |
-| Upload | `/upload` | Drag-drop file upload |
-| Library | `/library` | Browse all tracks |
-| Analysis | `/analysis/[id]` | Detailed results |
-| Gallery | `/gallery` | Component showcase |
-
----
-
-## 🔑 API Endpoints
-
-### Authentication
-- `POST /api/v1/auth/register` — Register
-- `POST /api/v1/auth/login` — Login
-- `POST /api/v1/auth/refresh` — Refresh token
-- `POST /api/v1/auth/logout` — Logout
-- `GET /api/v1/auth/me` — Current user
-
-### Audio
-- `POST /api/v1/audio/upload` — Upload file
-- `POST /api/v1/audio/analyze` — Analyze
-- `GET /api/v1/audio` — List all
-- `GET /api/v1/audio/{id}` — Get one
-- `DELETE /api/v1/audio/{id}` — Delete
-
-### WebSocket
-- `WS /api/v1/ws/{user_id}` — Real-time updates
-
-### System
-- `GET /` — API info
-- `GET /health` — Health check
-- `GET /api/v1/status` — Status
-
----
-
-## 🛠️ Development Setup
-
-### Prerequisites
-- Python 3.11+ (for backend)
-- Node.js 20 LTS (for frontend)
-- pnpm 8+ (for frontend)
-
-### Backend Setup
-```bash
-cd backend
-
-# Create virtual environment
-python3.11 -m venv venv
-
-# Activate
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements-minimal.txt
-
-# Run
+# Run the CLI application
 python main.py
+
+# Run tests
+make test
+
+# Check code quality
+make quality
+
+# Format code
+make format
+
+# Lint code
+make lint
+
+# Run security checks
+make security
 ```
 
-### Frontend Setup (After Node 20)
+### Database & Services
+
 ```bash
-# Switch Node version
-nvm use 20
+# Start development databases
+make setup-db
 
-# Install dependencies
-pnpm install
+# Start full development stack
+make dev-full
 
-# Run dev server
-pnpm web:dev
+# Start API server
+make dev
+```
 
-# Build for production
-pnpm build
+### Project Maintenance
+
+```bash
+# Clean temporary files
+make clean
+
+# Install dependencies from scratch
+pip install -e .
 ```
 
 ---
 
-## 🔧 Configuration
+## Offline Development
 
-### Backend Environment
-Create `backend/.env`:
-```env
-SECRET_KEY=your-secret-key-here-change-in-production
-DATABASE_URL=postgresql://user:pass@localhost:5432/samplemind
+SampleMind AI uses **Ollama** for offline-first AI capabilities. This means you can work without internet!
+
+### Install Ollama
+
+1. Download from [ollama.ai](https://ollama.ai)
+2. Install for your platform
+3. Verify installation:
+   ```bash
+   ollama --version
+   ```
+
+### Download Models
+
+```bash
+# Download all required models (~5GB)
+make install-models
+
+# Or manually:
+ollama pull phi3:mini
+ollama pull qwen2.5:7b-instruct
+ollama pull gemma2:2b
+```
+
+### Use Offline Models
+
+```bash
+# Launch Ollama API server
+scripts/launch-ollama-api.sh
+
+# In another terminal, run CLI
+python main.py
+
+# The CLI automatically uses Ollama when available
+```
+
+---
+
+## Configuration
+
+### Enable Cloud AI (Optional)
+
+Create a `.env` file in project root:
+
+```bash
+# Google Gemini (Primary cloud AI)
+GOOGLE_AI_API_KEY=your_google_api_key
+
+# Optional: Other AI providers
+OPENAI_API_KEY=your_openai_key
+ANTHROPIC_API_KEY=your_anthropic_key
+
+# Database URLs (if using services)
+MONGODB_URL=mongodb://localhost:27017/samplemind
 REDIS_URL=redis://localhost:6379/0
-GOOGLE_API_KEY=your_google_api_key
-ANTHROPIC_API_KEY=your_anthropic_api_key
-OPENAI_API_KEY=your_openai_api_key
 ```
 
-### Frontend Environment
-Create `apps/web/.env.local`:
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
+Get Gemini API key: https://ai.google.dev/
 
----
+### Database Services
 
-## 📊 Current Status
+To use full database features:
 
-### Working ✅
-- Backend API functional
-- All endpoints tested
-- JWT authentication working
-- File upload validated
-- WebSocket connections
-- Frontend pages designed
-- API client library ready
-
-### Mock Data ⏳
-- Analysis results (simulated)
-- User storage (in-memory)
-- File storage (in-memory)
-
-### Pending 🔄
-- Database integration
-- Real audio engine
-- File storage (S3/local)
-- Frontend install (Node 20)
-
----
-
-## 🚀 Next Steps
-
-### Immediate (Today)
-1. ✅ Backend running
-2. ✅ Test all endpoints
-3. Fix frontend install
-4. Preview gallery
-
-### Short-term (This Week)
-1. Wire real API data
-2. Database integration
-3. Real audio engine
-4. Test full stack
-
-### Medium-term (Next Week)
-1. Deploy staging
-2. Production setup
-3. Performance optimization
-4. Security hardening
-
----
-
-## 📚 Documentation
-
-### For Developers
-- `backend/TEST_AUTH.md` — Auth testing
-- `backend/TEST_AUDIO.md` — Audio testing
-- `backend/TEST_WEBSOCKET.md` — WebSocket testing
-- `DOCUMENTS/API_INTEGRATION_COMPLETE.md` — Integration guide
-
-### For Planning
-- `DOCUMENTS/COMPLETE_10_PHASE_100_TASK_PLAN.md` — Strategic roadmap
-- `DOCUMENTS/NEXT_ACTIONS.md` — Step-by-step next steps
-- `TONIGHT_COMPLETE_OCT19.md` — Session summary
-
-### For Design
-- `DOCUMENTS/DESIGN_INSPIRATION_SOURCES.md` — 80 references
-- `DOCUMENTS/DESIGN_INSPIRATION_SOURCES_BATCH2.md` — 145 references
-- `apps/web/app/gallery/page.tsx` — Component showcase
-
----
-
-## 🐛 Troubleshooting
-
-### Backend Won't Start
 ```bash
-# Check Python version
-python3 --version  # Should be 3.11+
-
-# Check dependencies
-pip list | grep fastapi
-
-# Reinstall
-pip install -r requirements-minimal.txt
+# Start services with Docker Compose
+docker-compose up -d mongodb redis chromadb
 ```
 
-### Frontend Install Fails
+Or use the convenient command:
 ```bash
-# Use Node 20
-nvm use 20
-node --version  # Should be v20.x.x
+make setup-db
+```
 
-# Clean and reinstall
-rm -rf node_modules .next
-pnpm install
+---
+
+## Troubleshooting
+
+### Virtual Environment Issues
+
+```bash
+# Error: python3 command not found
+# Solution: Use python instead
+python main.py
+
+# Error: venv not found
+# Solution: Python 3.11+ includes venv
+python3 -m venv .venv
+```
+
+### Missing Dependencies
+
+```bash
+# Error: ModuleNotFoundError
+# Solution: Reinstall in development mode
+pip install -e .
+```
+
+### Audio File Issues
+
+```bash
+# Ensure file is in supported format (WAV, MP3, etc.)
+# Supported: WAV, MP3, FLAC, OGG, M4A
+
+# Check file exists
+ls -la path/to/audio.wav
+```
+
+### Offline Mode Not Working
+
+```bash
+# Error: Ollama not available
+# Solution: Install and launch Ollama
+
+# 1. Install from ollama.ai
+# 2. Start Ollama server
+ollama serve
+
+# 3. In another terminal
+scripts/launch-ollama-api.sh
 ```
 
 ### Port Already in Use
-```bash
-# Kill process on port 8000
-lsof -ti:8000 | xargs kill -9
 
-# Or change port in main.py:
-# uvicorn.run(app, host="0.0.0.0", port=8001)
+```bash
+# Error: Port 8000 already in use (for API server)
+# Solution: Kill the process or use different port
+
+# On Linux/macOS
+lsof -i :8000
+kill -9 <PID>
+
+# On Windows
+netstat -ano | findstr :8000
+taskkill /PID <PID> /F
+```
+
+### Platform-Specific Issues
+
+**macOS with M1/M2 chips:**
+```bash
+# Use ARM-native Python
+brew install python@3.11
+python3 main.py
+```
+
+**Windows:**
+```bash
+# Use correct activation script
+.venv\Scripts\activate
+python main.py
 ```
 
 ---
 
-## 💡 Tips & Best Practices
+## Platform-Specific Guides
 
-### Development
-- Run backend and frontend simultaneously
-- Use Swagger UI for API testing
-- Check browser console for errors
-- Use React DevTools for debugging
+For detailed platform setup instructions, see:
 
-### Testing
-- Test endpoints with Swagger UI first
-- Verify JWT tokens in jwt.io
-- Check WebSocket in browser console
-- Validate with mock data before real data
-
-### Code Quality
-- TypeScript for type safety
-- ESLint for code quality
-- Prettier for formatting
-- Git commits frequently
+- **Linux Setup** - docs/guides/installation/linux.md
+- **macOS Setup** - docs/guides/installation/macos.md
+- **Windows Setup** - docs/guides/installation/windows.md
 
 ---
 
-## 🎯 Success Metrics
+## Next Steps
 
-✅ Backend API running  
-✅ All 14 endpoints working  
-✅ Authentication functional  
-✅ File upload validated  
-✅ Pages render correctly  
-✅ Components styled properly  
+### Learning Path
 
----
+1. **Basics** (You are here)
+   - Installation ✓
+   - First run ✓
+   - Basic commands
 
-## 🌟 What Makes This Special
+2. **Core Features** (15 min)
+   - Audio file analysis
+   - AI recommendations
+   - Batch processing
 
-### Technology
-- Modern stack (FastAPI, Next.js 14)
-- Real-time updates (WebSocket)
-- AI-powered analysis
-- Beautiful UI (cyberpunk theme)
+3. **Offline Development** (20 min)
+   - Install Ollama models
+   - Configure offline mode
+   - Test offline functionality
 
-### Architecture
-- Modular design
-- Type-safe
-- Well documented
-- Production-ready
+4. **Development** (varies)
+   - Read CLAUDE.md for AI-specific guidance
+   - Check docs/PROJECT_ROADMAP.md for priorities
+   - Review docs/CURRENT_STATUS.md for current features
 
-### User Experience
-- Intuitive interface
-- Responsive design
-- Real-time feedback
-- Smooth animations
+### Documentation References
 
----
-
-## 🎊 Ready to Build!
-
-You have everything you need:
-- ✅ Working backend API
-- ✅ Beautiful frontend
-- ✅ Complete documentation
-- ✅ Clear next steps
-
-**Start developing now or continue with the roadmap!**
+- **CLAUDE.md** - Complete technical reference (for AI assistants)
+- **QUICKSTART.md** - 5-minute quick setup
+- **docs/PROJECT_ROADMAP.md** - Development priorities
+- **docs/CURRENT_STATUS.md** - What's working now
+- **docs/PROJECT_SUMMARY.md** - Project overview
 
 ---
 
-## 📞 Quick Commands
+## Support
 
-```bash
-# Backend
-cd backend && python main.py
-
-# Frontend
-pnpm web:dev
-
-# Test API
-curl http://localhost:8000/health
-
-# View docs
-open http://localhost:8000/api/docs
-
-# View frontend
-open http://localhost:3000
-```
+- **Issues?** Check Troubleshooting section above
+- **Questions?** Review relevant documentation
+- **Contributing?** See CONTRIBUTING.md
 
 ---
 
-**🚀 Happy coding! Build something amazing!**
+**Ready to go?** Run `python main.py` and explore! 🎵
 
-*For help, see the complete documentation in the DOCUMENTS/ folder.*
