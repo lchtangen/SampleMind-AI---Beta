@@ -6,6 +6,9 @@ from .batch_screen import BatchScreen
 from .results_screen import ResultsScreen
 from .favorites_screen import FavoritesScreen
 from .settings_screen import SettingsScreen
+from .comparison_screen import ComparisonScreen
+from .search_screen import SearchScreen
+from .tagging_screen import TaggingScreen
 
 __all__ = [
     "MainScreen",
@@ -14,4 +17,7 @@ __all__ = [
     "ResultsScreen",
     "FavoritesScreen",
     "SettingsScreen",
+    "ComparisonScreen",
+    "SearchScreen",
+    "TaggingScreen",
 ]

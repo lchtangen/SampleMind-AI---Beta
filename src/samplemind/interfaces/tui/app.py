@@ -20,6 +20,9 @@ from .screens import (
     ResultsScreen,
     FavoritesScreen,
     SettingsScreen,
+    ComparisonScreen,
+    SearchScreen,
+    TaggingScreen,
 )
 
 
