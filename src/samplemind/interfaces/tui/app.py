@@ -13,7 +13,14 @@ from textual.containers import Container
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from .screens import MainScreen, AnalyzeScreen, BatchScreen
+from .screens import (
+    MainScreen,
+    AnalyzeScreen,
+    BatchScreen,
+    ResultsScreen,
+    FavoritesScreen,
+    SettingsScreen,
+)
 
 
 class SampleMindTUI(App):

@@ -57,7 +57,7 @@ class MainMenu(Static):
         self.menu_items = [
             ("analyze", "🎯 Analyze Single File"),
             ("batch", "📁 Batch Process Folder"),
-            ("scan", "🔍 Scan & Preview"),
+            ("favorites", "⭐ Favorites"),
             ("settings", "⚙️  Settings"),
             ("analytics", "📊 Session Analytics"),
         ]

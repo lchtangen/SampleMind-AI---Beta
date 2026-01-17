@@ -3,11 +3,14 @@ Main Screen for SampleMind TUI
 Entry point with menu and navigation
 """
 
+import asyncio
 from textual.screen import Screen
 from textual.widgets import Header, Footer
 from textual.containers import Container, Vertical
 from textual.message import Message
 from ..widgets import MainMenu, StatusBar
+from .favorites_screen import FavoritesScreen
+from .settings_screen import SettingsScreen
 
 
 class MainScreen(Screen):
@@ -41,6 +44,8 @@ class MainScreen(Screen):
         ("q", "quit_app", "Quit"),
         ("a", "analyze", "Analyze"),
         ("b", "batch", "Batch"),
+        ("f", "favorites", "Favorites"),
+        ("s", "settings", "Settings"),
         ("h", "help", "Help"),
     ]
 
@@ -76,6 +81,14 @@ class MainScreen(Screen):
         # This will be handled by the app when screen is implemented
         self.notify("Batch processing coming soon!")
 
+    def action_favorites(self) -> None:
+        """Navigate to favorites screen"""
+        self.app.push_screen(FavoritesScreen())
+
+    def action_settings(self) -> None:
+        """Navigate to settings screen"""
+        self.app.push_screen(SettingsScreen())
+
     def action_help(self) -> None:
         """Show help information"""
         self.notify(
@@ -84,6 +97,8 @@ class MainScreen(Screen):
             "  Q - Quit application\n"
             "  A - Analyze single file\n"
             "  B - Batch process folder\n"
+            "  F - View favorites\n"
+            "  S - Settings\n"
             "  H - Show this help\n\n"
             "Menu Navigation:\n"
             "  ↑/↓ - Move up/down\n"
