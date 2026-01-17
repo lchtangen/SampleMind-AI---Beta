@@ -34,6 +34,9 @@ from .playback import get_audio_player
 from .ai import get_ai_coach
 from .monitoring import get_performance_monitor
 from .library import get_library_browser
+from .plugins import get_plugin_manager, get_hook_system
+from .keyboard import get_shortcut_manager
+from .session import get_session_manager
 
 
 class SampleMindTUI(App):
