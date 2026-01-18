@@ -91,7 +91,7 @@ class BatchJob(Document):
     results: Dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
-    
+
     class Settings:
         name = "batch_jobs"
         indexes = [
@@ -99,6 +99,64 @@ class BatchJob(Document):
             "user_id",
             "status",
             "created_at",
+        ]
+
+
+class Favorite(Document):
+    """User favorite analysis model"""
+    favorite_id: str = Field(..., unique=True, index=True)
+    user_id: Optional[str] = None
+    analysis_id: str = Field(..., index=True)
+    file_name: str
+    added_at: datetime = Field(default_factory=datetime.utcnow)
+    notes: Optional[str] = None
+    rating: int = Field(default=0, ge=0, le=5)
+
+    class Settings:
+        name = "favorites"
+        indexes = [
+            "favorite_id",
+            "user_id",
+            "analysis_id",
+            "added_at",
+        ]
+
+
+class UserSettings(Document):
+    """User settings and preferences model"""
+    settings_id: str = Field(..., unique=True, index=True)
+    user_id: Optional[str] = None
+
+    # Feature preferences
+    default_analysis_level: str = "STANDARD"
+    auto_save_results: bool = False
+    cache_enabled: bool = True
+
+    # Export preferences
+    export_format: str = "JSON"  # JSON, CSV, YAML, Markdown
+    export_path: Optional[str] = None
+
+    # Display preferences
+    theme: str = "dark"  # dark, light, cyberpunk, etc.
+    show_advanced_stats: bool = False
+
+    # Performance
+    max_cache_size: int = 100
+    batch_parallel_workers: int = 4
+
+    # UI preferences
+    show_waveform: bool = True
+    waveform_height: int = 10
+    auto_preview: bool = False
+
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+    class Settings:
+        name = "user_settings"
+        indexes = [
+            "settings_id",
+            "user_id",
+            "updated_at",
         ]
 
 
@@ -148,7 +206,7 @@ async def init_mongodb(mongodb_url: str, database_name: str = "samplemind"):
         # Initialize Beanie with document models
         await init_beanie(
             database=_database,
-            document_models=[AudioFile, Analysis, BatchJob, User]
+            document_models=[AudioFile, Analysis, BatchJob, User, Favorite, UserSettings]
         )
         
         logger.info("✅ MongoDB connected and Beanie initialized")

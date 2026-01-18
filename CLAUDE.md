@@ -4,11 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
-### Core Development
+### CLI Development (Primary Focus)
+- `source .venv/bin/activate && python main.py` - Run CLI application (main product)
 - `make setup` - Complete development environment setup (creates .venv, installs dependencies)
+- `make install-models` - Download offline AI models (phi3:mini, qwen2.5:7b-instruct, gemma2:2b for Ollama)
+- `scripts/launch-ollama-api.sh` - Launch Ollama API server for offline-first inference
+- `scripts/setup/quick_start.sh` - Quick project startup with all CLI dependencies
+
+### API and Services
 - `make dev` - Start development server (uvicorn on localhost:8000)
 - `make dev-full` - Start full development stack with Docker services
-- `source .venv/bin/activate && python main.py` - Run CLI application
+- `make setup-db` - Start development databases (MongoDB, Redis, ChromaDB via Docker)
 
 ### Testing and Quality
 - `make test` - Run all tests with coverage (`pytest tests/ -v --cov=src --cov-report=term-missing`)
@@ -16,12 +22,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `make format` - Format code (`black .` and `isort .`)
 - `make security` - Run security checks (`bandit -r src/` and `safety check`)
 - `make quality` - Run all quality checks (lint + security)
-
-### AI Models and Services
-- `make install-models` - Download Ollama AI models (phi3:mini, qwen2.5:7b-instruct, gemma2:2b)
-- `make setup-db` - Start development databases (MongoDB, Redis, ChromaDB via Docker)
-- `scripts/launch-ollama-api.sh` - Launch Ollama API server
-- `scripts/setup/quick_start.sh` - Quick project startup with all dependencies
 
 ### Docker and Deployment
 - `make build` - Build Docker image
@@ -31,23 +31,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Architecture Overview
 
 ### Core System Design
-SampleMind AI is a hybrid AI-powered music production platform with three main architectural layers:
+SampleMind AI is a CLI-first, offline-capable AI-powered music production platform with three main architectural layers:
 
-1. **Audio Processing Engine** (`src/samplemind/core/engine/`)
-   - Real-time audio analysis using librosa, soundfile, scipy
-   - Feature extraction: tempo, key, chroma, MFCC, spectral features
-   - Harmonic/percussive separation and rhythm pattern analysis
-   - Caching system for performance optimization
+1. **Primary Interface: CLI** (`src/samplemind/interfaces/`)
+   - **CLI**: Typer-based command line interface (main product with modern terminal UI)
+   - Modern terminal animations and effects for interactive experience
+   - Cross-platform support (Linux, macOS, Windows, all terminals)
+   - Real-time performance optimization and minimal latency
+   - Future secondary interfaces: FastAPI async web service, Web/Electron applications
 
 2. **Hybrid AI Architecture** (`src/samplemind/ai/`)
-   - **Local AI**: Ultra-fast models via Ollama (Phi3, Gemma2, Qwen2.5) for <100ms responses
-   - **Cloud AI**: OpenAI GPT-4o, Anthropic Claude for complex analysis
-   - **Smart Routing**: Automatic model selection based on task complexity
+   - **Primary AI**: Google Gemini 3 Flash for fast, intelligent analysis
+   - **Offline-First**: Ultra-fast local models via Ollama (Phi3, Gemma2, Qwen2.5) for <100ms responses without internet
+   - **Cloud Fallback**: Gemini for complex analysis, OpenAI/Anthropic Claude as alternatives
+   - **Smart Routing**: Automatic model selection based on task complexity and connectivity
 
-3. **Multi-Interface System** (`src/samplemind/interfaces/`)
-   - **CLI**: Typer-based command line interface
-   - **API**: FastAPI async web service
-   - **GUI**: Web and Electron applications
+3. **Audio Processing Engine** (`src/samplemind/core/engine/`)
+   - Real-time audio analysis using librosa, soundfile, scipy
+   - Advanced audio classification with basic-pitch, demucs, spleeter tools
+   - Feature extraction: tempo, key, chroma, MFCC, spectral features
+   - Harmonic/percussive separation and rhythm pattern analysis
+   - Multi-level caching system for performance optimization
 
 ### Data Layer
 - **Vector Database**: ChromaDB for similarity search and embeddings
@@ -83,13 +87,58 @@ SampleMind AI is a hybrid AI-powered music production platform with three main a
 - Environment-based configuration for different deployment targets
 - Pre-commit hooks for code quality enforcement
 
-## Development Workflow
+## Development Workflow (CLI-First)
 
+### CLI Development Process
 1. **Setup**: Run `make setup` for complete environment preparation
-2. **Services**: Use `make setup-db` to start required databases
-3. **Development**: Use `make dev` for live-reload development server
-4. **Quality**: Always run `make quality` before commits
-5. **Testing**: Use `make test` to verify changes with coverage reporting
+2. **Offline Models**: Run `make install-models` and `scripts/launch-ollama-api.sh` for offline-first development
+3. **CLI Development**: Run CLI directly with `source .venv/bin/activate && python main.py` for interactive testing
+4. **Real-time Testing**: Test CLI features immediately with actual user workflows
+5. **Quality**: Always run `make quality` before commits
+6. **Testing**: Use `make test` to verify changes with coverage reporting
+
+### Performance Optimization Guidelines
+- Prioritize CLI response time (target: <1 second for common operations)
+- Use offline Ollama models for development to avoid API latency
+- Test on lower-performance systems to ensure wide compatibility
+- Profile CPU and memory usage regularly with CLI operations
+- Cache audio analysis results aggressively to minimize reprocessing
+
+### Cross-Platform Testing
+- Test on Linux, macOS, and Windows before major releases
+- Test with various terminal emulators (terminals with/without true color support)
+- Verify modern terminal UI animations work across all platforms
+- Ensure ASCII-only fallback mode for limited terminals
+
+## Development Phases
+
+The project follows a strategic phased approach focused on quality and completeness:
+
+### Phase 1: CLI Development (Current Priority)
+- **Goal**: Complete, fully-featured CLI with modern terminal UI
+- **Requirements**: 100% feature completeness before proceeding to Phase 2
+- **Focus Areas**: Performance optimization, offline-first architecture, cross-platform compatibility
+- **AI Integration**: Gemini 3 Flash as primary with offline Ollama fallback
+- **Audio Features**: All advanced classification tools (basic-pitch, demucs, spleeter) fully working
+- **Quality Gate**: All tests passing, comprehensive coverage, no known bugs
+
+### Phase 2: Preview Video Production
+- **Goal**: Professional video showcase of CLI capabilities
+- **Content**: Demonstrate core workflows, feature highlights, modern terminal UI
+- **Requirements**: Feature completeness from Phase 1 is prerequisite
+- **Audience**: Potential beta testers and early adopters
+
+### Phase 3: Beta Testing Program
+- **Goal**: Gather real-world feedback from 10-100 early users
+- **Process**: Structured testing with feedback collection
+- **Improvements**: Refine based on user feedback and usage patterns
+- **Duration**: 4-8 weeks of active testing
+
+### Phase 4: Web UI (Post-CLI Release)
+- **Goal**: Secondary interface layer for web-based access
+- **Requirements**: CLI must be stable and feature-complete
+- **Focus**: Supplement CLI, not replace it as primary interface
+- **Technologies**: Next.js/React frontend, FastAPI backend integration
 
 ## Project File Structure
 
@@ -143,10 +192,32 @@ Sample audio files, databases, and data storage
 
 ## Important Notes
 
+### CLI-First Development Philosophy
+- **CLI is the primary product** - focus features and optimizations on the CLI interface
+- All UI/UX decisions should prioritize CLI usability and performance
+- Modern terminal UI with animations and effects is a core feature, not an afterthought
+- API and web UI are secondary interfaces for future phases
+
+### Offline-First Architecture
+- **Ollama local AI models are mandatory for development** - ensure `make install-models` runs successfully
+- Prioritize offline functionality: the CLI should work without internet connectivity
+- Google Gemini is the primary cloud AI, but offline models must not degrade gracefully
+- Performance targets assume offline-first operation (<1 second response time)
+
+### Performance and Optimization
 - The project uses Python venv for dependency management - always use `source .venv/bin/activate` or the make commands
 - Audio files should be tested with the `AudioEngine` class in `src/samplemind/core/engine/audio_engine.py`
+- Profile and optimize CLI response times regularly - <1 second targets for user-facing operations
+- Aggressive caching of audio analysis results is essential for performance
+- Test on lower-performance systems to identify bottlenecks early
+
+### Integration and Testing
 - All async operations should use the established patterns in the FastAPI application
 - Vector embeddings and similarity search are core features - consider ChromaDB integration for new features
 - FL Studio integration is a primary use case - test changes against DAW workflow requirements
+- Cross-platform CLI functionality must work on Linux, macOS, Windows, and various terminal emulators
+
+### Documentation and Organization
 - **All documentation is in `docs/`** - guides, references, and archives are organized there
 - **All scripts are in `scripts/`** - setup scripts in `scripts/setup/`, start scripts at root level of scripts/
+- Update docs/ for new features before shipping, especially platform-specific guides

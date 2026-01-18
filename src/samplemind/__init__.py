@@ -34,26 +34,53 @@ __release_date__ = "2025-10-04"
 __author__ = "SampleMind AI Team"
 __description__ = "Professional AI-powered music production suite"
 
-# Core imports
-from .core.engine.audio_engine import AudioEngine, AudioFeatures, AnalysisLevel
-from .core.loader import AdvancedAudioLoader, LoadingStrategy, AudioFormat
-from .integrations.ai_manager import SampleMindAIManager, AnalysisType, AIProvider
+# Lazy imports - import on demand to avoid loading heavy dependencies at startup
+def __getattr__(name):
+    """Lazy load modules on demand"""
+    if name == "AudioEngine":
+        from .core.engine.audio_engine import AudioEngine
+        return AudioEngine
+    elif name == "AudioFeatures":
+        from .core.engine.audio_engine import AudioFeatures
+        return AudioFeatures
+    elif name == "AnalysisLevel":
+        from .core.engine.audio_engine import AnalysisLevel
+        return AnalysisLevel
+    elif name == "AdvancedAudioLoader":
+        from .core.loader import AdvancedAudioLoader
+        return AdvancedAudioLoader
+    elif name == "LoadingStrategy":
+        from .core.loader import LoadingStrategy
+        return LoadingStrategy
+    elif name == "AudioFormat":
+        from .core.loader import AudioFormat
+        return AudioFormat
+    elif name == "SampleMindAIManager":
+        from .integrations.ai_manager import SampleMindAIManager
+        return SampleMindAIManager
+    elif name == "AnalysisType":
+        from .integrations.ai_manager import AnalysisType
+        return AnalysisType
+    elif name == "AIProvider":
+        from .integrations.ai_manager import AIProvider
+        return AIProvider
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 # Make key classes available at package level
 __all__ = [
     # Core classes
     "AudioEngine",
-    "AudioFeatures", 
+    "AudioFeatures",
     "AnalysisLevel",
     "AdvancedAudioLoader",
     "LoadingStrategy",
     "AudioFormat",
-    
+
     # AI classes
     "SampleMindAIManager",
     "AnalysisType",
     "AIProvider",
-    
+
     # Package info
     "__version__",
     "__author__",
