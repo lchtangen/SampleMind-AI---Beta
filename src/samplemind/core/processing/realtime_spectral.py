@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from enum import Enum
 import librosa
 from scipy import signal
+from scipy.signal.windows import hann
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +75,7 @@ class RealtimeSpectral:
         self.frequencies = librosa.fft_frequencies(sr=sample_rate, n_fft=fft_size)
 
         # Window function for better spectral analysis
-        self.window = signal.hann(fft_size)
+        self.window = hann(fft_size)
 
         # State
         self.frame_count = 0
@@ -246,6 +247,11 @@ class PitchDetector:
         # Autocorrelation method
         autocorr = np.correlate(filtered, filtered, mode="full")
         autocorr = autocorr[len(autocorr) // 2 :]
+
+        # Guard against division by zero
+        if autocorr[0] == 0:
+            return None, 0.0
+
         autocorr = autocorr / autocorr[0]
 
         # Find minimum lag (corresponding to pitch)

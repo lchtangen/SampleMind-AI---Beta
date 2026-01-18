@@ -168,11 +168,14 @@ class AdvancedFeatureExtractor:
 
         Shows how tempo changes throughout the track.
         """
-        # Compute onset strength
-        onset_env = librosa.onset.onset_strength(y=audio, sr=self.sample_rate)
-
-        # Compute tempogram
-        tempogram = librosa.feature.tempogram(onset_env=onset_env, sr=self.sample_rate)
+        # Compute tempogram directly from audio
+        # Note: librosa.feature.tempogram accepts y parameter directly
+        try:
+            tempogram = librosa.feature.tempogram(y=audio, sr=self.sample_rate)
+        except Exception:
+            # Fallback: compute onset strength first, then use alternative method
+            onset_env = librosa.onset.onset_strength(y=audio, sr=self.sample_rate)
+            tempogram = librosa.feature.tempogram(onset_env=onset_env, sr=self.sample_rate)
 
         return tempogram
 
@@ -213,7 +216,7 @@ class AdvancedFeatureExtractor:
         spectral_mean = np.mean(S_db, axis=1)
         spectral_std = np.std(S_db, axis=1)
         sharpness = float(np.mean(spectral_std) / (np.mean(spectral_mean) + 1e-10))
-        sharpness = min(1.0, sharpness)  # Normalize
+        sharpness = max(0.0, min(1.0, sharpness))  # Normalize to [0, 1]
 
         return float(brightness), float(warmth), float(sharpness)
 
