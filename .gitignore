@@ -104,8 +104,12 @@ pnpm-lock.yaml
 out
 dist
 
-# Ignore local development files
+# AI Assistant Configurations (keep private)
+.amazonq/
+.claude/
 .mcp/
+
+# Ignore local development files
 frontend/web/.next/
 frontend/web/out/
 frontend/web/dist/

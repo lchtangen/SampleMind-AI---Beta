@@ -154,29 +154,63 @@ class RateLimitExceeded(HTTPException):
 
 async def check_upload_limit(current_user = Depends(get_current_user)):
     """Check if user can upload more files today"""
+    from datetime import datetime, timedelta
+    from samplemind.core.database import get_db
+
     user_role = UserRole(current_user.get("role", "free"))
-    
-    # TODO: Get actual usage from database
-    current_uploads_today = 0  # Placeholder
-    
+
+    # Get actual usage from database
+    try:
+        db = await get_db()
+        user_id = current_user.get("user_id")
+        today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+
+        # Count uploads from database for today
+        current_uploads_today = await db.samples.count_documents({
+            "user_id": user_id,
+            "uploaded_at": {"$gte": today_start}
+        })
+    except Exception as e:
+        # Fallback to 0 if database query fails
+        current_uploads_today = 0
+
     if not check_rate_limit(user_role, "uploads_per_day", current_uploads_today):
         from .rbac import get_role_limits
         limit = get_role_limits(user_role)["max_uploads_per_day"]
         raise RateLimitExceeded("uploads per day", limit)
-    
+
     return current_user
 
 
 async def check_storage_limit(current_user = Depends(get_current_user)):
     """Check if user has storage space available"""
+    from samplemind.core.database import get_db
+
     user_role = UserRole(current_user.get("role", "free"))
-    
-    # TODO: Get actual storage usage from database
-    current_storage_mb = 0  # Placeholder
-    
+
+    # Get actual storage usage from database
+    try:
+        db = await get_db()
+        user_id = current_user.get("user_id")
+
+        # Aggregate total file size for user
+        pipeline = [
+            {"$match": {"user_id": user_id}},
+            {"$group": {
+                "_id": "$user_id",
+                "total_size": {"$sum": "$file_size"}
+            }}
+        ]
+
+        result = await db.samples.aggregate(pipeline).to_list(1)
+        current_storage_mb = (result[0]["total_size"] / (1024 * 1024)) if result else 0
+    except Exception as e:
+        # Fallback to 0 if database query fails
+        current_storage_mb = 0
+
     if not check_rate_limit(user_role, "storage_mb", current_storage_mb):
         from .rbac import get_role_limits
         limit = get_role_limits(user_role)["max_storage_mb"]
         raise RateLimitExceeded("storage (MB)", limit)
-    
+
     return current_user

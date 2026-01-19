@@ -170,17 +170,51 @@ class User(Document):
     is_verified: bool = False
     created_at: datetime = Field(default_factory=datetime.utcnow)
     last_login: Optional[datetime] = None
-    
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+    # User profile
+    avatar_url: Optional[str] = None
+    bio: Optional[str] = None
+
     # Usage tracking
     total_analyses: int = 0
     total_uploads: int = 0
-    
+    storage_used_mb: float = 0.0
+    storage_quota_mb: float = 1000.0
+    last_cleanup: Optional[datetime] = None
+
+    # User preferences
+    preferences: Dict[str, Any] = Field(default_factory=dict)
+
     class Settings:
         name = "users"
         indexes = [
             "user_id",
             "email",
             "username",
+        ]
+
+
+class APIKey(Document):
+    """API key model for external access"""
+    key_id: str = Field(..., unique=True, index=True)
+    user_id: str = Field(..., index=True)
+    name: str
+    provider: str
+    key_hash: str = Field(..., unique=True)
+    permissions: List[str] = Field(default_factory=lambda: ["read"])
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    last_used: Optional[datetime] = None
+
+    class Settings:
+        name = "api_keys"
+        indexes = [
+            "key_id",
+            "user_id",
+            "is_active",
+            "created_at",
         ]
 
 
@@ -206,7 +240,7 @@ async def init_mongodb(mongodb_url: str, database_name: str = "samplemind"):
         # Initialize Beanie with document models
         await init_beanie(
             database=_database,
-            document_models=[AudioFile, Analysis, BatchJob, User, Favorite, UserSettings]
+            document_models=[AudioFile, Analysis, BatchJob, User, APIKey, Favorite, UserSettings]
         )
         
         logger.info("✅ MongoDB connected and Beanie initialized")

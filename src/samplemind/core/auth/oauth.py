@@ -200,21 +200,48 @@ class OAuthLinkService:
     ) -> bool:
         """
         Link an OAuth account to an existing user
-        
+
         Args:
             user_id: Existing user ID
             oauth_user: OAuth user information
-            
+
         Returns:
             True if successful
         """
-        # TODO: Store in database
-        # - user_id
-        # - provider
-        # - provider_user_id
-        # - linked_at timestamp
-        
-        return True
+        from datetime import datetime
+        from samplemind.core.database import get_db
+        import logging
+
+        try:
+            db = await get_db()
+
+            # Store in database
+            oauth_link = {
+                "user_id": user_id,
+                "provider": oauth_user.provider.value,
+                "provider_user_id": oauth_user.provider_user_id,
+                "email": oauth_user.email,
+                "linked_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow(),
+            }
+
+            # Upsert the OAuth link
+            result = await db.oauth_links.update_one(
+                {
+                    "provider": oauth_user.provider.value,
+                    "provider_user_id": oauth_user.provider_user_id
+                },
+                {
+                    "$set": oauth_link
+                },
+                upsert=True
+            )
+
+            return result.acknowledged
+
+        except Exception as e:
+            logging.error(f"Error linking OAuth account: {e}")
+            return False
     
     @staticmethod
     async def get_user_by_oauth(
@@ -223,12 +250,29 @@ class OAuthLinkService:
     ) -> Optional[str]:
         """
         Find user ID by OAuth provider account
-        
+
         Returns:
             User ID if found, None otherwise
         """
-        # TODO: Query database for linked account
-        return None
+        from samplemind.core.database import get_db
+        import logging
+
+        try:
+            db = await get_db()
+
+            # Query database for linked account
+            oauth_link = await db.oauth_links.find_one({
+                "provider": provider.value,
+                "provider_user_id": provider_user_id
+            })
+
+            if oauth_link:
+                return oauth_link["user_id"]
+            return None
+
+        except Exception as e:
+            logging.error(f"Error getting user by OAuth: {e}")
+            return None
     
     @staticmethod
     async def unlink_oauth_account(
@@ -236,8 +280,23 @@ class OAuthLinkService:
         provider: OAuthProvider
     ) -> bool:
         """Unlink an OAuth provider from user account"""
-        # TODO: Remove from database
-        return True
+        from samplemind.core.database import get_db
+        import logging
+
+        try:
+            db = await get_db()
+
+            # Remove from database
+            result = await db.oauth_links.delete_one({
+                "user_id": user_id,
+                "provider": provider.value
+            })
+
+            return result.deleted_count > 0
+
+        except Exception as e:
+            logging.error(f"Error unlinking OAuth account: {e}")
+            return False
 
 
 # Example usage

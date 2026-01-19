@@ -411,6 +411,58 @@ def sample_user_data():
 
 
 # ============================================================================
+# CLI Testing Fixtures
+# ============================================================================
+
+@pytest.fixture
+def typer_runner():
+    """Provide Typer test runner for CLI commands"""
+    from typer.testing import CliRunner
+    return CliRunner()
+
+
+@pytest.fixture
+def cli_app():
+    """Provide the CLI app instance for testing"""
+    from samplemind.interfaces.cli.typer_app import app
+    return app
+
+
+@pytest.fixture
+def mock_cli_context(temp_directory):
+    """Provide mock CLI context with temp directories"""
+    return {
+        "work_dir": temp_directory,
+        "cache_dir": temp_directory / ".samplemind" / "cache",
+        "config_dir": temp_directory / ".samplemind" / "config",
+        "logs_dir": temp_directory / ".samplemind" / "logs"
+    }
+
+
+@pytest.fixture
+def sample_cli_config(temp_directory):
+    """Provide sample CLI configuration"""
+    return {
+        "version": "2.1.0-beta",
+        "audio_engine": {
+            "max_workers": 2,
+            "cache_enabled": True,
+            "cache_size_mb": 100
+        },
+        "ai_providers": {
+            "primary": "gemini",
+            "fallback": "ollama",
+            "offline_only": False
+        },
+        "output": {
+            "format": "table",
+            "colorize": True,
+            "verbose": False
+        }
+    }
+
+
+# ============================================================================
 # Markers and Parametrization
 # ============================================================================
 
