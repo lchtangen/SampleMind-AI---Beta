@@ -36,30 +36,44 @@ pip install -e .
 export GOOGLE_API_KEY="your_gemini_key_here"
 export OPENAI_API_KEY="your_openai_key_here"
 
-# 4. Start the CLI
+# 4. Start the Modern CLI (Primary Interface)
 python main.py
 
-# Or run the modern Textual TUI (Recommended ✨)
-python -m samplemind.interfaces.tui.main
+# Interactive menu with 60+ commands and 12 themes
+# For power users: Advanced TUI interface (optional premium feature)
+# python -m samplemind.interfaces.tui.main
 ```
 
-See [docs/guides/GETTING_STARTED.md](docs/guides/GETTING_STARTED.md) for detailed instructions.
+See [docs/guides/GETTING_STARTED.md](docs/04-TECHNICAL-IMPLEMENTATION/guides/GETTING_STARTED.md) for detailed instructions.
 
-### 🎨 Modern Terminal UI (Textual Framework)
+### 📚 Documentation
 
-SampleMind v6 now includes a modern Textual-based terminal UI with:
+**All documentation is now systematically organized!**
+
+- **[📖 Documentation Reorganization Guide](./DOCUMENTATION_REORGANIZATION_GUIDE.md)** - Start here to understand the new structure
+- **[🗺️ Master Index](./docs/00-INDEX/README.md)** - Central navigation hub for all documentation
+- **[📊 Phase Status Dashboard](./docs/00-INDEX/PHASE_STATUS_DASHBOARD.md)** - Real-time project status (85% complete)
+- **[🎯 Quick Reference](./docs/00-INDEX/QUICK_REFERENCE.md)** - Fast access by keyword or topic
+- **[📋 Phase 10 Planning](./docs/01-PHASES/10-PHASE-10-PLANNED/) (NEW)** - Next generation features roadmap
+- **[🚀 Strategic Roadmap](./docs/02-ROADMAPS/)** - Phases 10-15 planning (2026-2030)
+- **[💼 Business Strategy](./docs/03-BUSINESS-STRATEGY/)** - Business plans and strategic documents
+- **[⚙️ Technical Implementation](./docs/04-TECHNICAL-IMPLEMENTATION/)** - API docs, developer guides, technical references
+
+### 🎨 Optional Premium Interface: Modern Terminal UI (Textual Framework)
+
+For power users, SampleMind includes an optional modern Textual-based terminal UI with:
 - ✨ **Smooth 60 FPS animations** with GPU acceleration
 - 🖱️ **Full mouse support** and intuitive keyboard shortcuts
 - 🎯 **Real-time status updates** and progress tracking
 - 🎨 **Beautiful styling** with CSS-like declarative design
 - ⚡ **Ultra-fast startup** (<150ms) and minimal memory footprint
 
-**Start the Textual TUI:**
+**Start the Optional TUI (Advanced Users):**
 ```bash
 python -m samplemind.interfaces.tui.main
 ```
 
-For more details, see [docs/TEXTUAL_MIGRATION.md](docs/TEXTUAL_MIGRATION.md).
+For more details, see [docs/04-TECHNICAL-IMPLEMENTATION/guides/TEXTUAL_MIGRATION.md](docs/04-TECHNICAL-IMPLEMENTATION/guides/TEXTUAL_MIGRATION.md).
 
 ---
 
@@ -102,10 +116,14 @@ SampleMind AI is a hybrid AI-powered music production platform that provides adv
 | **Anthropic Claude** | Claude 3.5 Sonnet | 2 (Specialist) | Production coaching, creative suggestions | ~3-5s |
 | **OpenAI GPT** | GPT-4o | 3 (Fallback) | Emergency backup | ~2-5s |
 
-### Interfaces
-- **CLI** - Interactive terminal interface with rich formatting
-- **REST API** - FastAPI-powered async web service
-- **Web UI** - React/Next.js frontend (coming soon)
+### 🖥️ Choose Your Interface
+
+| Interface | Status | Best For | Features |
+|-----------|--------|----------|----------|
+| **CLI (Primary)** | ✅ **Recommended** | All users | 200+ commands, modern menu, 12 themes, fast startup |
+| **TUI (Optional)** | ✅ Available | Power users | Advanced visualizations, mouse support, premium UX |
+| **REST API** | ✅ Available | Integrations | FastAPI-powered async web service |
+| **Web UI** | 🚧 Coming | Future | React/Next.js frontend (Phase 2) |
 
 ---
 

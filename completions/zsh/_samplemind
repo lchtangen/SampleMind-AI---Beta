@@ -1,0 +1,288 @@
+#compdef samplemind smai
+
+# SampleMind AI - Zsh Completion Script
+#
+# Installation:
+#   1. Add to ~/.zshrc:
+#      fpath=(~/.zsh/completions $fpath)
+#      autoload -Uz compinit && compinit
+#   2. Copy this file to ~/.zsh/completions/_samplemind
+#      mkdir -p ~/.zsh/completions
+#      cp _samplemind ~/.zsh/completions/
+#   3. Restart zsh or run: exec zsh
+#
+# Usage:
+#   samplemind [TAB]         - Show all commands
+#   samplemind analyze:[TAB]  - Show analyze subcommands
+#   samplemind -[TAB]        - Show global options
+
+local ret=1
+
+# Define commands
+local -a analyze_cmds
+analyze_cmds=(
+    'full:Run comprehensive DETAILED analysis'
+    'standard:Run standard analysis (recommended)'
+    'basic:Run quick basic analysis'
+    'professional:Run professional-grade analysis'
+    'quick:Run ultra-fast analysis'
+    'bpm:BPM detection only'
+    'key:Key detection only'
+    'mood:Mood analysis'
+    'genre:Genre classification'
+    'instrument:Instrument recognition'
+    'vocal:Vocal detection'
+    'quality:Quality scoring'
+    'energy:Energy level detection'
+    'spectral:Spectral analysis'
+    'harmonic:Harmonic/percussive separation'
+    'percussive:Percussive analysis'
+    'mfcc:MFCC extraction'
+    'chroma:Chroma features'
+    'onset:Onset detection'
+    'beats:Beat detection'
+    'segments:Segment detection'
+)
+
+local -a library_cmds
+library_cmds=(
+    'scan:Scan and index directory'
+    'organize:Auto-organize by metadata'
+    'import:Import with metadata'
+    'export:Export with metadata'
+    'sync:Cloud sync'
+    'search:Full-text search'
+    'filter\:bpm:Filter by BPM range'
+    'filter\:key:Filter by key'
+    'filter\:genre:Filter by genre'
+    'filter\:tag:Filter by tag'
+    'find-similar:Find similar samples'
+    'dedupe:Find duplicates'
+    'cleanup:Remove broken files'
+    'verify:Verify file integrity'
+    'rebuild-index:Rebuild library index'
+)
+
+local -a ai_cmds
+ai_cmds=(
+    'analyze:AI-powered analysis'
+    'classify:AI classification'
+    'tag:AI auto-tagging'
+    'suggest:Similar sample suggestions'
+    'coach:Production coaching'
+    'presets:Generate EQ/compressor presets'
+    'provider:Set AI provider'
+    'key:Configure API key'
+    'model:Set AI model'
+    'test:Test AI connection'
+    'offline:Offline-first mode'
+)
+
+local -a batch_cmds
+batch_cmds=(
+    'analyze:Batch analysis'
+    'classify:Batch classification'
+    'tag:Batch tagging'
+    'export:Batch export'
+)
+
+local -a collection_cmds
+collection_cmds=(
+    'create:Create collection'
+    'add:Add to collection'
+    'list:List collections'
+    'export:Export collection'
+    'remove:Remove from collection'
+)
+
+local -a meta_cmds
+meta_cmds=(
+    'show:Display metadata'
+    'edit:Edit metadata'
+    'copy:Copy metadata'
+    'clear:Clear metadata'
+    'export:Export to JSON/YAML'
+    'import:Import from JSON/YAML'
+    'batch\:tag:Batch tag update'
+    'batch\:fix:Batch fix metadata'
+    'batch\:sync:Batch sync metadata'
+    'recover:Recover lost metadata'
+    'snapshot:Create metadata snapshot'
+    'restore:Restore from snapshot'
+)
+
+local -a audio_cmds
+audio_cmds=(
+    'convert\:wav:Convert to WAV'
+    'convert\:mp3:Convert to MP3'
+    'convert\:flac:Convert to FLAC'
+    'convert\:ogg:Convert to OGG'
+    'normalize:Normalize audio'
+    'trim:Trim silence'
+    'fade:Add fade in/out'
+    'split:Split audio'
+    'join:Join audio files'
+)
+
+local -a stems_cmds
+stems_cmds=(
+    'separate:Separate stems (Spleeter)'
+    'vocals:Extract vocals only'
+    'drums:Extract drums only'
+    'bass:Extract bass only'
+    'other:Extract other instruments'
+)
+
+local -a viz_cmds
+viz_cmds=(
+    'waveform:Generate waveform image'
+    'spectrogram:Generate spectrogram'
+    'chromagram:Generate chromagram'
+    'mfcc:MFCC visualization'
+    'export:Export visualization'
+)
+
+local -a report_cmds
+report_cmds=(
+    'library:Library statistics'
+    'analysis:Analysis report'
+    'batch:Batch report'
+    'export:Export report'
+)
+
+local -a health_cmds
+health_cmds=(
+    'check:Comprehensive health check'
+    'status:Current system status'
+    'logs:Display recent logs'
+    'cache:Cache statistics'
+    'disk:Disk space information'
+)
+
+local -a debug_cmds
+debug_cmds=(
+    'info:Environment information'
+    'diagnose:Diagnose audio file'
+    'config:Show configuration'
+    'test:Run diagnostic tests'
+    'trace:Enable debug tracing'
+)
+
+local -a config_cmds
+config_cmds=(
+    'set:Set configuration'
+    'get:Get configuration'
+    'reset:Reset configuration'
+    'show:Show all configuration'
+)
+
+local -a cache_cmds
+cache_cmds=(
+    'clear:Clear cache'
+    'stats:Cache statistics'
+    'optimize:Optimize cache'
+)
+
+# Global options
+local -a global_opts
+global_opts=(
+    '--help:Show help message'
+    '--version:Show version'
+    '--verbose:Verbose output'
+    '--quiet:Quiet output'
+    '--config:Configuration file'
+    '--log-level:Log level (DEBUG,INFO,WARNING,ERROR,CRITICAL)'
+)
+
+# Main completion
+_arguments -s -S \
+    "1: :->commands" \
+    "*::args:->args" \
+    "${global_opts[@]}"
+
+case "$state" in
+    commands)
+        _describe "command" \
+            '(
+                analyze:Audio\ analysis\ and\ feature\ extraction
+                batch:Batch\ processing
+                library:Library\ management
+                collection:Collection\ management
+                ai:AI-powered\ features
+                audio:Audio\ processing
+                meta:Metadata\ operations
+                stems:Stem\ separation
+                viz:Visualization
+                report:Reporting
+                health:Health\ checks
+                debug:Debug\ tools
+                config:Configuration
+                cache:Cache\ management
+                help:Show\ help
+                version:Show\ version
+            )'
+        ;;
+    args)
+        case "$words[2]" in
+            analyze)
+                _describe "analyze command" analyze_cmds
+                _files
+                ;;
+            analyze:*)
+                _files
+                ;;
+            library)
+                _describe "library command" library_cmds
+                _files -/
+                ;;
+            library:*)
+                _files -/
+                ;;
+            ai)
+                _describe "ai command" ai_cmds
+                ;;
+            batch)
+                _describe "batch command" batch_cmds
+                _files -/
+                ;;
+            collection)
+                _describe "collection command" collection_cmds
+                _files
+                ;;
+            meta)
+                _describe "meta command" meta_cmds
+                _files
+                ;;
+            audio)
+                _describe "audio command" audio_cmds
+                _files
+                ;;
+            stems)
+                _describe "stems command" stems_cmds
+                _files
+                ;;
+            viz)
+                _describe "viz command" viz_cmds
+                _files
+                ;;
+            report)
+                _describe "report command" report_cmds
+                ;;
+            health)
+                _describe "health command" health_cmds
+                ;;
+            debug)
+                _describe "debug command" debug_cmds
+                _files
+                ;;
+            config)
+                _describe "config command" config_cmds
+                ;;
+            cache)
+                _describe "cache command" cache_cmds
+                ;;
+        esac
+        ;;
+esac
+
+return ret

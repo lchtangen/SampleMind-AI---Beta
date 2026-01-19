@@ -1,309 +1,447 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useMemo } from 'react';
 import {
-  Music,
   Search,
   Filter,
+  Grid3x3,
+  List,
+  Download,
   Trash2,
-  LogOut,
-  User,
-  RefreshCcw,
-  PlayCircle,
+  Play,
+  Loader2,
+  ChevronDown,
 } from 'lucide-react';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import LoadingSpinner from '@/components/LoadingSpinner';
-import { useAuthContext } from '@/contexts/AuthContext';
 import { useAudio } from '@/hooks/useAudio';
-import { useNotification } from '@/contexts/NotificationContext';
-import { useWebSocket } from '@/hooks/useWebSocket';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
-interface LibraryTrack {
-  id: number;
+interface AudioFile {
+  file_id: string;
   filename: string;
-  duration?: number | null;
+  duration: number;
   format: string;
-  uploaded_at: string;
-  has_analysis?: boolean;
+  file_size: number;
+  upload_time: string;
+  status?: string;
 }
 
-function LibraryContent() {
-  const router = useRouter();
-  const { user, logout } = useAuthContext();
-  const { listAudio, deleteAudio, loading } = useAudio();
-  const { addNotification } = useNotification();
+interface FilterState {
+  search: string;
+  status: 'all' | 'analyzed' | 'processing' | 'error';
+  sortBy: 'recent' | 'name' | 'duration' | 'size';
+  viewMode: 'grid' | 'list';
+}
 
-  const [tracks, setTracks] = useState<LibraryTrack[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'analyzed' | 'processing'>('all');
-  const [isRefreshing, setIsRefreshing] = useState(false);
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+};
 
-  const fetchTracks = useCallback(async () => {
-    setIsRefreshing(true);
-    const result = await listAudio(1, 100);
-    if (result.success && result.data) {
-      setTracks(result.data.items ?? []);
-    } else {
-      addNotification('error', result.error || 'Unable to load library');
-    }
-    setIsRefreshing(false);
-  }, [listAudio, addNotification]);
+const formatDuration = (seconds: number): string => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
 
-  useEffect(() => {
-    fetchTracks();
-  }, [fetchTracks]);
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+  return `${minutes}:${secs.toString().padStart(2, '0')}`;
+};
 
-  useWebSocket({
-    userId: user?.id ?? 0,
-    onMessage: (message) => {
-      if (['upload_progress', 'analysis_status'].includes(message.type)) {
-        fetchTracks();
-      }
-    },
+export default function LibraryPage() {
+  const { listAudio, deleteAudio } = useAudio();
+  const [audioFiles, setAudioFiles] = useState<AudioFile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(50);
+  const [filters, setFilters] = useState<FilterState>({
+    search: '',
+    status: 'all',
+    sortBy: 'recent',
+    viewMode: 'grid',
   });
+  const [showFilters, setShowFilters] = useState(false);
 
-  const formatDuration = (seconds?: number | null) => {
-    if (!seconds || Number.isNaN(seconds)) return '—';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+  // Load audio files
+  useEffect(() => {
+    const loadFiles = async () => {
+      try {
+        setLoading(true);
+        const files = await listAudio(page, pageSize);
+        setAudioFiles(files);
+      } catch (error) {
+        console.error('Failed to load audio files:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const formatDate = (iso: string) => {
-    const date = new Date(iso);
-    return date.toLocaleString();
-  };
+    loadFiles();
+  }, [page, pageSize, listAudio]);
 
-  const getStatus = (track: LibraryTrack) => (track.has_analysis ? 'analyzed' : 'processing');
+  // Filter and sort files
+  const filteredFiles = useMemo(() => {
+    let result = [...audioFiles];
 
-  const filteredTracks = useMemo(() => {
-    return tracks.filter((track) => {
-      const matchesSearch = track.filename.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesFilter = filterStatus === 'all' || getStatus(track) === filterStatus;
-      return matchesSearch && matchesFilter;
-    });
-  }, [tracks, searchQuery, filterStatus]);
+    // Search filter
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      result = result.filter(file =>
+        file.filename.toLowerCase().includes(searchLower)
+      );
+    }
 
-  const handleDelete = async (track: LibraryTrack) => {
-    const result = await deleteAudio(track.id);
-    if (result.success) {
-      addNotification('success', `${track.filename} removed from your library`);
-      fetchTracks();
-    } else {
-      addNotification('error', result.error || 'Failed to remove track');
+    // Status filter
+    if (filters.status !== 'all') {
+      result = result.filter(file => file.status === filters.status);
+    }
+
+    // Sort
+    switch (filters.sortBy) {
+      case 'name':
+        result.sort((a, b) => a.filename.localeCompare(b.filename));
+        break;
+      case 'duration':
+        result.sort((a, b) => b.duration - a.duration);
+        break;
+      case 'size':
+        result.sort((a, b) => b.file_size - a.file_size);
+        break;
+      case 'recent':
+      default:
+        result.sort((a, b) =>
+          new Date(b.upload_time).getTime() - new Date(a.upload_time).getTime()
+        );
+    }
+
+    return result;
+  }, [audioFiles, filters]);
+
+  const handleDelete = async (fileId: string) => {
+    if (!confirm('Are you sure you want to delete this file?')) return;
+
+    setDeleting(fileId);
+    try {
+      await deleteAudio(fileId);
+      setAudioFiles(audioFiles.filter(f => f.file_id !== fileId));
+    } catch (error) {
+      console.error('Failed to delete file:', error);
+    } finally {
+      setDeleting(null);
     }
   };
 
-  const handleLogout = async () => {
-    await logout();
-    addNotification('success', 'Logged out successfully');
-    router.push('/');
-  };
-
-  const isLoadingState = (loading && tracks.length === 0) || (isRefreshing && tracks.length === 0);
-
-  if (isLoadingState) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[hsl(220,15%,8%)] to-[hsl(220,12%,12%)] flex items-center justify-center">
-        <LoadingSpinner size="lg" text="Loading your library..." />
-      </div>
-    );
+  if (loading && audioFiles.length === 0) {
+    return <LoadingSpinner />;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[hsl(220,15%,8%)] to-[hsl(220,12%,12%)]">
-      <header className="border-b border-white/10 backdrop-blur-md bg-black/20">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-3">
-              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-[hsl(220,90%,60%)] to-[hsl(270,85%,65%)] flex items-center justify-center">
-                <span className="text-white font-bold text-xl">SM</span>
-              </div>
-              <h1 className="text-2xl font-bold text-[hsl(0,0%,98%)]">
-                SampleMind AI
-              </h1>
-            </Link>
-            
-            <nav className="flex items-center space-x-6">
-              <Link href="/dashboard" className="text-[hsl(220,10%,65%)] hover:text-[hsl(0,0%,98%)] transition">
-                Dashboard
-              </Link>
-              <Link href="/upload" className="text-[hsl(220,10%,65%)] hover:text-[hsl(0,0%,98%)] transition">
-                Upload
-              </Link>
-              <Link href="/library" className="text-[hsl(220,90%,60%)] font-medium">
-                Library
-              </Link>
-              <Link href="/gallery" className="text-[hsl(220,10%,65%)] hover:text-[hsl(0,0%,98%)] transition">
-                Gallery
-              </Link>
-
-              <div className="flex items-center space-x-3 ml-6 pl-6 border-l border-white/10">
-                <div className="flex items-center space-x-2">
-                  <User className="h-4 w-4 text-[hsl(220,10%,65%)]" />
-                  <span className="text-[hsl(220,10%,65%)] text-sm">{user?.email}</span>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 transition text-sm"
-                >
-                  <LogOut className="h-4 w-4 text-[hsl(220,10%,65%)]" />
-                  <span className="text-[hsl(220,10%,65%)]">Logout</span>
-                </button>
-              </div>
-            </nav>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2">Library</h1>
+          <p className="text-slate-400">
+            {filteredFiles.length} sample{filteredFiles.length !== 1 ? 's' : ''}
+          </p>
         </div>
-      </header>
 
-      <main className="container mx-auto px-6 py-8">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
-          <div>
-            <h2 className="text-4xl font-bold text-[hsl(0,0%,98%)] mb-2">
-              Music Library
-            </h2>
-            <p className="text-[hsl(220,10%,65%)]">
-              {filteredTracks.length} track{filteredTracks.length === 1 ? '' : 's'} available
-            </p>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4">
-          <Link
-            href="/upload"
-              className="px-6 py-3 rounded-lg bg-gradient-to-r from-[hsl(220,90%,60%)] to-[hsl(270,85%,65%)] text-white font-medium hover:shadow-lg hover:shadow-[hsl(220,90%,60%)]/50 transition text-center"
-          >
-            Upload New
-          </Link>
+        {/* Controls */}
+        <div className="mb-8 space-y-4">
+          {/* Top Bar */}
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            {/* Search */}
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search samples..."
+                value={filters.search}
+                onChange={(e) => {
+                  setFilters({ ...filters, search: e.target.value });
+                  setPage(1);
+                }}
+                className="w-full pl-10 pr-4 py-2 rounded-lg bg-slate-700/50 border border-slate-600 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 transition-colors"
+              />
+            </div>
+
+            {/* View Toggle */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setFilters({ ...filters, viewMode: 'grid' })}
+                className={`p-2 rounded-lg transition-colors ${
+                  filters.viewMode === 'grid'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-slate-700/50 text-slate-400 hover:text-white'
+                }`}
+              >
+                <Grid3x3 className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setFilters({ ...filters, viewMode: 'list' })}
+                className={`p-2 rounded-lg transition-colors ${
+                  filters.viewMode === 'list'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-slate-700/50 text-slate-400 hover:text-white'
+                }`}
+              >
+                <List className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Filter Button */}
             <button
-              onClick={fetchTracks}
-              className="flex items-center justify-center space-x-2 px-6 py-3 rounded-lg bg-white/5 border border-white/10 hover:border-[hsl(220,90%,60%)]/40 transition"
-              disabled={isRefreshing}
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-700/50 border border-slate-600 text-slate-300 hover:text-white hover:border-slate-500 transition-colors"
             >
-              <RefreshCcw className={`h-4 w-4 text-[hsl(220,10%,65%)] ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span className="text-[hsl(220,10%,65%)]">Refresh</span>
+              <Filter className="w-4 h-4" />
+              Filters
+              <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
             </button>
           </div>
+
+          {/* Filter Panel */}
+          {showFilters && (
+            <div className="p-4 rounded-lg bg-slate-800/50 backdrop-blur border border-slate-700/50 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Status Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Status
+                  </label>
+                  <select
+                    value={filters.status}
+                    onChange={(e) => {
+                      setFilters({ ...filters, status: e.target.value as any });
+                      setPage(1);
+                    }}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-700/50 border border-slate-600 text-white focus:outline-none focus:border-blue-500/50"
+                  >
+                    <option value="all">All Files</option>
+                    <option value="analyzed">Analyzed</option>
+                    <option value="processing">Processing</option>
+                    <option value="error">Error</option>
+                  </select>
+                </div>
+
+                {/* Sort By */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Sort By
+                  </label>
+                  <select
+                    value={filters.sortBy}
+                    onChange={(e) => {
+                      setFilters({ ...filters, sortBy: e.target.value as any });
+                    }}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-700/50 border border-slate-600 text-white focus:outline-none focus:border-blue-500/50"
+                  >
+                    <option value="recent">Most Recent</option>
+                    <option value="name">Name (A-Z)</option>
+                    <option value="duration">Duration</option>
+                    <option value="size">File Size</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4 mb-6">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[hsl(220,10%,65%)]" />
-            <input
-              type="text"
-              placeholder="Search tracks..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-lg backdrop-blur-md bg-white/5 border border-white/10 text-[hsl(0,0%,98%)] placeholder-[hsl(220,10%,65%)] focus:outline-none focus:border-[hsl(220,90%,60%)]/50 transition"
-            />
+        {/* Empty State */}
+        {filteredFiles.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-slate-400 mb-4">
+              {audioFiles.length === 0
+                ? 'No samples yet. Upload one to get started!'
+                : 'No samples match your filters.'}
+            </p>
           </div>
+        ) : (
+          <>
+            {/* Grid View */}
+            {filters.viewMode === 'grid' ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredFiles.map((file) => (
+                  <div
+                    key={file.file_id}
+                    className="group relative rounded-lg bg-slate-800/50 backdrop-blur border border-slate-700/50 hover:border-slate-600 transition-all duration-300 overflow-hidden hover:shadow-lg hover:shadow-blue-500/10"
+                  >
+                    {/* Background gradient on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-          <div className="relative">
-            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[hsl(220,10%,65%)]" />
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as typeof filterStatus)}
-              className="w-full pl-12 pr-4 py-3 rounded-lg backdrop-blur-md bg-white/5 border border-white/10 text-[hsl(0,0%,98%)] focus:outline-none focus:border-[hsl(220,90%,60%)]/50 transition appearance-none cursor-pointer"
-            >
-              <option value="all">All Status</option>
-              <option value="analyzed">Analyzed</option>
-              <option value="processing">Processing</option>
-            </select>
-          </div>
-        </div>
+                    <div className="relative p-4 h-full flex flex-col">
+                      {/* File Icon & Status */}
+                      <div className="mb-4">
+                        <div className="w-12 h-12 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 group-hover:bg-blue-500/20 transition-colors mb-3">
+                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 3h6v6h6v12H3V3h6zm0-2H3a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V9l-8-8z" />
+                          </svg>
+                        </div>
 
-        <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-[hsl(220,90%,60%)]/5 to-[hsl(270,85%,65%)]/5 rounded-xl blur-2xl"></div>
-          
-          <div className="relative backdrop-blur-md bg-white/5 border border-white/10 rounded-xl overflow-hidden">
-            {filteredTracks.length === 0 ? (
-              <div className="py-16 text-center">
-                <Music className="h-16 w-16 mx-auto mb-4 text-[hsl(220,10%,65%)] opacity-60" />
-                <p className="text-[hsl(220,10%,65%)] mb-4">No audio files match your filters yet.</p>
-                <Link
-                  href="/upload"
-                  className="inline-flex items-center space-x-2 px-6 py-3 rounded-lg bg-gradient-to-r from-[hsl(220,90%,60%)] to-[hsl(270,85%,65%)] text-white font-medium hover:shadow-lg transition"
-                >
-                  <PlayCircle className="h-5 w-5" />
-                  <span>Upload your first track</span>
-                </Link>
+                        {file.status && (
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
+                            file.status === 'analyzed'
+                              ? 'bg-green-500/10 text-green-300'
+                              : file.status === 'processing'
+                              ? 'bg-blue-500/10 text-blue-300'
+                              : 'bg-red-500/10 text-red-300'
+                          }`}>
+                            {file.status === 'processing' && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}
+                            {file.status.charAt(0).toUpperCase() + file.status.slice(1)}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* File Info */}
+                      <h3 className="text-sm font-semibold text-white mb-2 line-clamp-2 group-hover:text-blue-400 transition-colors">
+                        {file.filename}
+                      </h3>
+
+                      <p className="text-xs text-slate-500 mb-4 flex-1">
+                        <div>{formatFileSize(file.file_size)}</div>
+                        <div>{formatDuration(file.duration)}</div>
+                      </p>
+
+                      {/* Actions */}
+                      <div className="flex gap-2 pt-4 border-t border-slate-700">
+                        <button className="flex-1 flex items-center justify-center gap-1 px-2 py-2 rounded text-xs text-blue-400 hover:bg-blue-500/10 transition-colors">
+                          <Play className="w-3 h-3" />
+                          Play
+                        </button>
+                        <button className="flex-1 flex items-center justify-center gap-1 px-2 py-2 rounded text-xs text-slate-400 hover:bg-slate-700 transition-colors">
+                          <Download className="w-3 h-3" />
+                          Download
+                        </button>
+                        <button
+                          onClick={() => handleDelete(file.file_id)}
+                          disabled={deleting === file.file_id}
+                          className="flex-1 flex items-center justify-center gap-1 px-2 py-2 rounded text-xs text-red-400 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+                        >
+                          {deleting === file.file_id ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-3 h-3" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-white/10">
-                      <th className="text-left p-4 text-[hsl(220,10%,65%)] font-medium text-sm">Track</th>
-                      <th className="text-left p-4 text-[hsl(220,10%,65%)] font-medium text-sm">Duration</th>
-                      <th className="text-left p-4 text-[hsl(220,10%,65%)] font-medium text-sm">Format</th>
-                      <th className="text-left p-4 text-[hsl(220,10%,65%)] font-medium text-sm">Uploaded</th>
-                      <th className="text-left p-4 text-[hsl(220,10%,65%)] font-medium text-sm">Status</th>
-                      <th className="text-left p-4 text-[hsl(220,10%,65%)] font-medium text-sm">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredTracks.map((track) => (
-                      <tr key={track.id} className="border-b border-white/5 last:border-b-0">
-                      <td className="p-4">
-                        <div className="flex items-center space-x-3">
-                            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-[hsl(220,90%,60%)] to-[hsl(270,85%,65%)] flex items-center justify-center">
-                              <Music className="h-5 w-5 text-white" />
+              /* List View */
+              <div className="rounded-lg bg-slate-800/50 backdrop-blur border border-slate-700/50 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="border-b border-slate-700 bg-slate-900/50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
+                          Filename
+                        </th>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
+                          Size
+                        </th>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
+                          Duration
+                        </th>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
+                          Uploaded
+                        </th>
+                        <th className="px-6 py-3 text-right text-sm font-semibold text-slate-300">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-700">
+                      {filteredFiles.map((file) => (
+                        <tr key={file.file_id} className="hover:bg-slate-700/20 transition-colors">
+                          <td className="px-6 py-4 text-sm text-white font-medium truncate">
+                            {file.filename}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-slate-400">
+                            {formatFileSize(file.file_size)}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-slate-400">
+                            {formatDuration(file.duration)}
+                          </td>
+                          <td className="px-6 py-4 text-sm">
+                            {file.status && (
+                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
+                                file.status === 'analyzed'
+                                  ? 'bg-green-500/10 text-green-300'
+                                  : file.status === 'processing'
+                                  ? 'bg-blue-500/10 text-blue-300'
+                                  : 'bg-red-500/10 text-red-300'
+                              }`}>
+                                {file.status.charAt(0).toUpperCase() + file.status.slice(1)}
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-slate-400">
+                            {new Date(file.upload_time).toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-4 text-right text-sm">
+                            <div className="flex gap-2 justify-end">
+                              <button className="p-1 text-slate-400 hover:text-blue-400 transition-colors">
+                                <Play className="w-4 h-4" />
+                              </button>
+                              <button className="p-1 text-slate-400 hover:text-blue-400 transition-colors">
+                                <Download className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(file.file_id)}
+                                disabled={deleting === file.file_id}
+                                className="p-1 text-slate-400 hover:text-red-400 disabled:opacity-50 transition-colors"
+                              >
+                                {deleting === file.file_id ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="w-4 h-4" />
+                                )}
+                              </button>
                             </div>
-                            <div>
-                              <p className="font-medium text-[hsl(0,0%,98%)]">{track.filename}</p>
-                              <p className="text-xs text-[hsl(220,10%,65%)]">ID: {track.id}</p>
-                          </div>
-                        </div>
-                      </td>
-                        <td className="p-4 text-[hsl(0,0%,98%)]">{formatDuration(track.duration ?? undefined)}</td>
-                        <td className="p-4 text-[hsl(0,0%,98%)] uppercase">{track.format}</td>
-                        <td className="p-4 text-[hsl(220,10%,65%)]">{formatDate(track.uploaded_at)}</td>
-                      <td className="p-4">
-                          <span
-                            className={`px-3 py-1 rounded-full text-sm font-medium ${
-                              getStatus(track) === 'analyzed'
-                            ? 'bg-[hsl(180,95%,55%)]/20 text-[hsl(180,95%,55%)]'
-                                : 'bg-[hsl(320,90%,60%)]/20 text-[hsl(320,90%,60%)]'
-                            }`}
-                          >
-                            {getStatus(track)}
-                        </span>
-                      </td>
-                      <td className="p-4">
-                          <div className="flex items-center space-x-3">
-                            <Link
-                              href={`/analysis/${track.id}`}
-                              className="text-[hsl(220,90%,60%)] hover:text-[hsl(270,85%,65%)] transition text-sm"
-                            >
-                              View
-                            </Link>
-                            <button
-                              onClick={() => handleDelete(track)}
-                              className="text-red-400 hover:text-red-300 transition"
-                              title="Remove from library"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             )}
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-}
+          </>
+        )}
 
-export default function LibraryPage() {
-  return (
-    <ProtectedRoute>
-      <LibraryContent />
-    </ProtectedRoute>
+        {/* Pagination */}
+        {audioFiles.length > 0 && (
+          <div className="mt-8 flex justify-between items-center">
+            <p className="text-sm text-slate-400">
+              Page {page} • Showing {filteredFiles.length} of {audioFiles.length}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPage(Math.max(1, page - 1))}
+                disabled={page === 1}
+                className="px-4 py-2 rounded-lg border border-slate-600 text-slate-300 hover:text-white disabled:opacity-50 transition-colors"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => setPage(page + 1)}
+                className="px-4 py-2 rounded-lg border border-slate-600 text-slate-300 hover:text-white transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

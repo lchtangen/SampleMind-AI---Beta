@@ -18,7 +18,7 @@ import uvicorn
 from . import __version__
 from .config import get_settings
 from .exceptions import SampleMindException
-from .routes import audio, ai, batch, health, websocket, auth, tasks
+from .routes import audio, ai, batch, health, websocket, auth, tasks, settings, sync
 
 # Configure logging
 logging.basicConfig(
@@ -212,6 +212,8 @@ def create_application() -> FastAPI:
     # Register routers
     app.include_router(health.router, prefix="/api/v1", tags=["health"])
     app.include_router(auth.router, prefix="/api/v1", tags=["Authentication"])
+    app.include_router(settings.router, prefix="/api/v1", tags=["Settings"])
+    app.include_router(sync.router, prefix="/api/v1", tags=["Cloud Sync"])
     app.include_router(tasks.router, prefix="/api/v1", tags=["Tasks"])
     app.include_router(audio.router, prefix="/api/v1/audio", tags=["audio"])
     app.include_router(ai.router, prefix="/api/v1/ai", tags=["ai"])
