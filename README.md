@@ -44,18 +44,17 @@ python main.py
 # python -m samplemind.interfaces.tui.main
 ```
 
-See [docs/guides/GETTING_STARTED.md](docs/04-TECHNICAL-IMPLEMENTATION/guides/GETTING_STARTED.md) for detailed instructions.
+See [docs/04-TECHNICAL-IMPLEMENTATION/guides/START_HERE.md](docs/04-TECHNICAL-IMPLEMENTATION/guides/START_HERE.md) for detailed instructions.
 
 ### 📚 Documentation
 
-**All documentation is now systematically organized!**
+All documentation is systematically organized:
 
-- **[📖 Documentation Reorganization Guide](./DOCUMENTATION_REORGANIZATION_GUIDE.md)** - Start here to understand the new structure
-- **[🗺️ Master Index](./docs/00-INDEX/README.md)** - Central navigation hub for all documentation
-- **[📊 Phase Status Dashboard](./docs/00-INDEX/PHASE_STATUS_DASHBOARD.md)** - Real-time project status (85% complete)
+- **[📋 Index](./docs/00-INDEX/README.md)** - Central navigation hub for all documentation
+- **[📊 Phase Status](./docs/00-INDEX/PHASE_STATUS_DASHBOARD.md)** - Real-time project status
 - **[🎯 Quick Reference](./docs/00-INDEX/QUICK_REFERENCE.md)** - Fast access by keyword or topic
-- **[📋 Phase 10 Planning](./docs/01-PHASES/10-PHASE-10-PLANNED/) (NEW)** - Next generation features roadmap
-- **[🚀 Strategic Roadmap](./docs/02-ROADMAPS/)** - Phases 10-15 planning (2026-2030)
+- **[📖 Phases](./docs/01-PHASES/)** - Phases 1-10 documentation (all complete)
+- **[🚀 Roadmaps](./docs/02-ROADMAPS/)** - Strategic roadmap and planning
 - **[💼 Business Strategy](./docs/03-BUSINESS-STRATEGY/)** - Business plans and strategic documents
 - **[⚙️ Technical Implementation](./docs/04-TECHNICAL-IMPLEMENTATION/)** - API docs, developer guides, technical references
 
@@ -127,53 +126,28 @@ SampleMind AI is a hybrid AI-powered music production platform that provides adv
 
 ---
 
-## 📚 Documentation
+## 📚 Full Documentation
 
-**Full Documentation Index:** [docs/README.md](docs/README.md) - Central navigation hub for all documentation
+Comprehensive documentation is organized in the `docs/` directory:
 
-### Quick Start (5 minutes)
-- [**QUICKSTART.md**](QUICKSTART.md) - Get started in 5 minutes
-- [**GETTING_STARTED.md**](GETTING_STARTED.md) - Detailed setup instructions
-- [**CLI_DEVELOPMENT_CHECKLIST.md**](CLI_DEVELOPMENT_CHECKLIST.md) - Phase 1 feature tracking
+**Start Here:**
+- [**Docs Index**](docs/00-INDEX/README.md) - Complete navigation hub
+- [**Getting Started**](docs/04-TECHNICAL-IMPLEMENTATION/guides/START_HERE.md) - Setup instructions (5 minutes)
 
-### User Guides
-Full guides available at [docs/guides/](docs/guides/):
-- [**USER_GUIDE.md**](docs/guides/USER_GUIDE.md) - Complete CLI user guide
-- [**INSTALLATION_GUIDE.md**](docs/guides/INSTALLATION_GUIDE.md) - Installation instructions
-- [**Linux Guide**](docs/guides/LINUX_GUIDE.md) - Ubuntu, Fedora, Arch setup
-- [**macOS Guide**](docs/guides/MACOS_GUIDE.md) - Apple Silicon & Intel support
-- [**Windows Guide**](docs/guides/WINDOWS_GUIDE.md) - PowerShell automation
-- [**GEMINI_CLI_GUIDE.md**](docs/guides/GEMINI_CLI_GUIDE.md) - Using Google Gemini API
-- [**DATABASE_INIT_GUIDE.md**](docs/guides/DATABASE_INIT_GUIDE.md) - Database setup
+**By Category:**
+- [**Guides**](docs/04-TECHNICAL-IMPLEMENTATION/guides/) - Installation, Linux, macOS, Windows, Gemini API setup
+- [**Technical Reference**](docs/04-TECHNICAL-IMPLEMENTATION/reference/) - API reference, performance, CLI checklist
+- [**Technical Docs**](docs/04-TECHNICAL-IMPLEMENTATION/technical/) - Architecture, optimization, cross-platform details
+- [**Phase Documentation**](docs/01-PHASES/) - All phases 1-10 (complete)
+- [**Strategic Roadmap**](docs/02-ROADMAPS/) - Development roadmap
+- [**Business Strategy**](docs/03-BUSINESS-STRATEGY/) - Business plans and strategic documents
 
-### Technical Documentation
-Advanced references at [docs/technical/](docs/technical/):
-- [**OPTIMIZATION_GUIDE.md**](docs/technical/OPTIMIZATION_GUIDE.md) - Performance optimization
-- [**PERFORMANCE.md**](docs/technical/PERFORMANCE.md) - Performance metrics
-- [**CROSS_PLATFORM_FILE_PICKER.md**](docs/technical/CROSS_PLATFORM_FILE_PICKER.md) - File picker details
-
-### Reference
-Quick lookups at [docs/reference/](docs/reference/):
-- [**QUICK_REFERENCE.md**](docs/reference/QUICK_REFERENCE.md) - Command reference
-
-### Core Documentation
-Essential root-level files:
-- [**ARCHITECTURE.md**](ARCHITECTURE.md) - System architecture
-- [**API_REFERENCE.md**](API_REFERENCE.md) - API endpoints
-- [**DATABASE_SCHEMA.md**](DATABASE_SCHEMA.md) - Database design
-- [**DEVELOPMENT.md**](DEVELOPMENT.md) - Development setup
-- [**DEPLOY.md**](DEPLOY.md) - Deployment guide
-- [**TROUBLESHOOTING.md**](TROUBLESHOOTING.md) - Troubleshooting guide
-- [**SECURITY.md**](SECURITY.md) - Security policies
-- [**CHANGELOG.md**](CHANGELOG.md) - Version history
-- [**RELEASE_NOTES.md**](RELEASE_NOTES.md) - v2.0 release notes
-
-### Contributing & Community
+**Root Level Files:**
 - [**Contributing**](CONTRIBUTING.md) - How to contribute
 - [**Code of Conduct**](CODE_OF_CONDUCT.md) - Community guidelines
 - [**CLAUDE.md**](CLAUDE.md) - AI assistant instructions
-- [**Project Roadmap**](docs/PROJECT_ROADMAP.md) - Development roadmap
-- [**Project Summary**](docs/PROJECT_SUMMARY.md) - Comprehensive overview
+- [**CHANGELOG.md**](CHANGELOG.md) - Version history
+- [**RELEASE_NOTES_v2.1.0-beta.md**](RELEASE_NOTES_v2.1.0-beta.md) - Current release notes
 
 ---
 
