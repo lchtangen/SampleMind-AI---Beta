@@ -2,12 +2,12 @@
 
 **Generated:** 1770105079.2611232
 
-**Total Issues:** 413
+**Total Issues:** 410
 
 ## Issues by Severity
 
 - **Critical:** 0
-- **High:** 24
+- **High:** 21
 - **Medium:** 389
 - **Low:** 0
 
@@ -1999,29 +1999,23 @@
 - **Message:** Function 'similar_index' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### similarity.py:186
+### similarity.py:187
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'similar_compare' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### similarity.py:250
+### similarity.py:251
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'similar_stats' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### similarity.py:274
+### similarity.py:275
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'similar_clear' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
-
-### similarity.py:160
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'progress_callback' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
 
 ### similarity.py:160
 - **Severity:** medium
@@ -2234,12 +2228,6 @@
 - **Suggestion:** Add type hints for all parameters and return values
 
 ### plugin_manager.py:232
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'plugin_hook_callback' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### plugin_manager.py:232
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'plugin_hook_callback' missing type hints for: return type
@@ -2293,13 +2281,7 @@
 - **Message:** Function 'on_key' missing type hints for: parameter 'event'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### batch_screen.py:605
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'on_back_confirm' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### batch_screen.py:613
+### batch_screen.py:614
 - **Severity:** high
 - **Category:** docstring
 - **Message:** Function 'pop_with_handler' missing docstring
