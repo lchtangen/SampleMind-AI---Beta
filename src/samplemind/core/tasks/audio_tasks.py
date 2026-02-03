@@ -273,8 +273,8 @@ def batch_process_audio_files(
                     error=str(e)
                 )
             )
-        except:
-            pass
+        except Exception as update_error:
+            logger.error(f"Failed to update batch status: {update_error}")
         
         return {
             "batch_id": batch_id,

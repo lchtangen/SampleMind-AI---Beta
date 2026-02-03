@@ -87,11 +87,11 @@ __all__ = [
     "__description__"
 ]
 
-def get_version():
+def get_version() -> str:
     """Get SampleMind AI version"""
     return __version__
 
-def get_info():
+def get_info() -> dict:
     """Get package information"""
     return {
         "name": "SampleMind AI",
