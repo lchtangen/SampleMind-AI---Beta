@@ -112,7 +112,7 @@ def get_version() -> str:
     try:
         from samplemind import __version__
         return __version__
-    except:
+    except ImportError:
         return "v2.2.0-beta"
 
 
