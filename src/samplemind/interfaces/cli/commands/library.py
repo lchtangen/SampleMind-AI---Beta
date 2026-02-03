@@ -62,7 +62,7 @@ def library_organize(
         folder = selected_folder
         console.print(f"[green]✅ Selected: {folder}[/green]")
 
-    async def _process():
+    async def _process() -> None:
         files = utils.get_audio_files(folder)
         console.print(f"[cyan]Found {len(files)} audio files[/cyan]")
         console.print(f"[cyan]Organization pattern: {by}[/cyan]")
@@ -227,7 +227,7 @@ def library_sync(
     from samplemind.services.storage import LocalStorageProvider, MockS3StorageProvider
     from samplemind.services.sync import SyncManager
 
-    async def _run_sync():
+    async def _run_sync() -> None:
         console.print(f"[cyan]Syncing {folder} with {service} ({direction})[/cyan]")
 
         # Select provider
@@ -529,7 +529,7 @@ def library_find(
 
 @app.command("filter")
 @utils.with_error_handling
-def library_filter_base():
+def library_filter_base() -> None:
     """Filter library by various criteria (use subcommands)"""
     pass
 
@@ -767,7 +767,7 @@ def collection_add(
 
 @app.command("collection:list")
 @utils.with_error_handling
-def collection_list():
+def collection_list() -> None:
     """List all collections"""
     try:
         table = Table(title="Collections", show_header=True, header_style="bold cyan")
