@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * THREE.JS 3D AUDIO VISUALIZER
@@ -6,21 +6,21 @@
  * Features: Particle system, post-processing, audio reactivity, multiple presets
  */
 
-import React, { useEffect, useRef, Suspense, useState } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Bloom, EffectComposer, Chromatic } from '@react-three/postprocessing';
-import * as THREE from 'three';
-import { useAudioReactive } from '@/hooks/useAudioReactive';
-import LoadingSpinner from '../ui/LoadingSpinner';
+import { useAudioReactive } from "@/hooks/useAudioReactive";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Bloom, Chromatic, EffectComposer } from "@react-three/postprocessing";
+import React, { Suspense, useEffect, useRef, useState } from "react";
+import * as THREE from "three";
+import LoadingSpinner from "../ui/LoadingSpinner";
 
-export type VisualizerPreset = 'particles' | 'sphere' | 'waves' | 'ribbons';
+export type VisualizerPreset = "particles" | "sphere" | "waves" | "ribbons";
 
 interface ThreeJSAudioVisualizerProps {
   className?: string;
   preset?: VisualizerPreset;
   audioElement?: HTMLAudioElement;
   enabled?: boolean;
-  qualityLevel?: 'low' | 'medium' | 'high';
+  qualityLevel?: "low" | "medium" | "high";
 }
 
 /**
@@ -74,25 +74,25 @@ const ParticleSystem: React.FC<{
       const p = particles[i];
 
       // Audio-reactive movement
-      if (preset === 'particles') {
+      if (preset === "particles") {
         // Particles expand on beat
         const speed = 0.05 + amplitude * 0.1;
         p.x += p.vx * speed;
         p.y += p.vy * speed;
         p.z += p.vz * speed;
-      } else if (preset === 'sphere') {
+      } else if (preset === "sphere") {
         // Particles orbit in sphere
         const angle = (i / count) * Math.PI * 2 + frequency * 2;
         const radius = 2 + amplitude * 1;
         p.x = Math.cos(angle) * radius;
         p.y = Math.sin(angle) * radius * 0.7;
         p.z = Math.sin(angle * 0.5) * radius;
-      } else if (preset === 'waves') {
+      } else if (preset === "waves") {
         // Particles form wave pattern
-        p.x = (i % Math.sqrt(count)) / Math.sqrt(count) - 0.5) * 4;
+        p.x = ((i % Math.sqrt(count)) / Math.sqrt(count) - 0.5) * 4;
         p.z = (Math.floor(i / Math.sqrt(count)) / Math.sqrt(count) - 0.5) * 4;
         p.y = Math.sin((p.x + frequency * 4) * 5) * amplitude * 2;
-      } else if (preset === 'ribbons') {
+      } else if (preset === "ribbons") {
         // Particles form ribbon trails
         const ribbon = i % 50;
         const index = Math.floor(i / 50);
@@ -122,9 +122,7 @@ const ParticleSystem: React.FC<{
         const matrix = new THREE.Matrix4();
         const scale = 1 + audioData.amplitude * 0.5;
         matrix.setPosition(p.x, p.y, p.z);
-        matrix.scale(
-          new THREE.Vector3(scale * 0.1, scale * 0.1, scale * 0.1)
-        );
+        matrix.scale(new THREE.Vector3(scale * 0.1, scale * 0.1, scale * 0.1));
         meshRef.current.setMatrixAt(i, matrix);
       }
     }
@@ -140,7 +138,7 @@ const ParticleSystem: React.FC<{
     emissive: new THREE.Color().setHSL(
       0.05 + audioData.frequency * 0.2,
       1,
-      0.3 + audioData.amplitude * 0.2
+      0.3 + audioData.amplitude * 0.2,
     ),
     wireframe: false,
   });
@@ -214,7 +212,7 @@ const Lighting: React.FC<{ audioData: any }> = ({ audioData }) => {
 const VisualizerCanvas: React.FC<{
   audioData: any;
   preset: VisualizerPreset;
-  qualityLevel: 'low' | 'medium' | 'high';
+  qualityLevel: "low" | "medium" | "high";
 }> = ({ audioData, preset, qualityLevel }) => {
   const particleCount = {
     low: 1000,
@@ -232,13 +230,14 @@ const VisualizerCanvas: React.FC<{
     <Canvas
       camera={{ position: [0, 2, 5], fov: 75 }}
       gl={{
-        antialias: qualityLevel === 'high',
-        powerPreference: qualityLevel === 'low' ? 'low-power' : 'high-performance',
+        antialias: qualityLevel === "high",
+        powerPreference:
+          qualityLevel === "low" ? "low-power" : "high-performance",
       }}
-      dpr={qualityLevel === 'low' ? 1 : window.devicePixelRatio}
+      dpr={qualityLevel === "low" ? 1 : window.devicePixelRatio}
     >
       {/* Background color */}
-      <color attach="background" args={['#0a0e27']} />
+      <color attach="background" args={["#0a0e27"]} />
 
       {/* Lighting */}
       <Lighting audioData={audioData} />
@@ -270,14 +269,12 @@ const VisualizerCanvas: React.FC<{
 /**
  * Main ThreeJS Audio Visualizer Component
  */
-export const ThreeJSAudioVisualizer: React.FC<
-  ThreeJSAudioVisualizerProps
-> = ({
-  className = '',
-  preset = 'particles',
+export const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({
+  className = "",
+  preset = "particles",
   audioElement,
   enabled = true,
-  qualityLevel = 'high',
+  qualityLevel = "high",
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [audioData, setAudioData] = useState({
@@ -312,8 +309,9 @@ export const ThreeJSAudioVisualizer: React.FC<
       ref={containerRef}
       className={`relative w-full h-full rounded-2xl overflow-hidden bg-gradient-to-b from-slate-900 via-slate-950 to-black ${className}`}
       style={{
-        minHeight: '400px',
-        background: 'linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%)',
+        minHeight: "400px",
+        background:
+          "linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%)",
       }}
     >
       {/* Canvas */}
@@ -339,9 +337,9 @@ export const ThreeJSAudioVisualizer: React.FC<
 
       {/* Quality indicator */}
       <div className="absolute bottom-4 right-4 text-xs text-purple-400/60 font-mono">
-        {qualityLevel === 'low' && '📉 Low Quality'}
-        {qualityLevel === 'medium' && '📊 Medium Quality'}
-        {qualityLevel === 'high' && '📈 High Quality'}
+        {qualityLevel === "low" && "📉 Low Quality"}
+        {qualityLevel === "medium" && "📊 Medium Quality"}
+        {qualityLevel === "high" && "📈 High Quality"}
       </div>
     </div>
   );

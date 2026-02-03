@@ -39,6 +39,7 @@ from samplemind.core.library.pack_creator import PackTemplate, SamplePackCreator
 from samplemind.core.loader import AdvancedAudioLoader, LoadingStrategy
 from samplemind.core.processing.audio_effects import AudioEffectsProcessor, EffectType
 from samplemind.core.processing.midi_generator import MIDIGenerator
+from samplemind.core.search.vector_engine import VectorSearchEngine
 from samplemind.integrations.ai_manager import (
     AIProvider,
     AnalysisType,
@@ -69,6 +70,7 @@ class SampleMindCLI:
         self.midi_generator: MIDIGenerator | None = None
         self.pack_creator: SamplePackCreator | None = None
         self.chain_recommender: ChainRecommender | None = None
+        self.vector_engine: VectorSearchEngine | None = None
         self.initialized = False
         self.current_directory = Path.cwd()
 
@@ -129,6 +131,9 @@ class SampleMindCLI:
                 self.effects_processor = AudioEffectsProcessor()
                 self.midi_generator = MIDIGenerator()
                 self.pack_creator = SamplePackCreator()
+                self.chain_recommender = ChainRecommender(self.audio_loader)
+                self.vector_engine = VectorSearchEngine()
+                self.vector_engine.initialize_db()
                 progress.remove_task(task_proc)
 
                 # Verify AI providers
@@ -211,6 +216,7 @@ class SampleMindCLI:
         menu_table.add_row("C", "🎹 Audio to MIDI", "Convert audio to MIDI")
         menu_table.add_row("D", "📦 Create Sample Pack", "Create organized sample packs")
         menu_table.add_row("E", "🔗 Chain Recommender", "Build kits from seed sample")
+        menu_table.add_row("F", "🔎 Semantic Search", "Search samples by description")
         menu_table.add_row("0", "🚪 Exit", "Quit SampleMind AI")
 
         panel = Panel(
@@ -2073,6 +2079,79 @@ class SampleMindCLI:
         if Confirm.ask("💾 Export this kit to a folder?"):
             kit_name = Prompt.ask("Kit Name", default=f"Kit_from_{seed_path.stem}")
             output_dir = Path.cwd() / "kits" / kit_name
+            try:
+                # Logic to copy files would go here... (using pack creator essentially)
+                # For now just printing
+                output_dir.mkdir(parents=True, exist_ok=True)
+                console.print(f"[green]Kit folder created at {output_dir}[/green]")
+                console.print("(Copying implementation pending integration with PackCreator)")
+            except Exception as e:
+                console.print(f"[red]Error exporting kit: {e}[/red]")
+
+    def run_semantic_search(self):
+        """Run Semantic Audio Search (Phase 15)"""
+        console.print("\n[bold blue]🔎 Semantic Audio Search[/bold blue]")
+
+        if not self.vector_engine:
+            console.print("[red]❌ Vector Engine not initialized.[/red]")
+            return
+
+        while True:
+            console.print("\n[bold]Search Menu:[/bold]")
+            console.print("1. [cyan]🔍 Search Samples[/cyan]")
+            console.print("2. [cyan]📂 Index a Folder[/cyan]")
+            console.print("0. [yellow]🔙 Back to Main Menu[/yellow]")
+
+            sub_choice = Prompt.ask("Select option", choices=["1", "2", "0"])
+
+            if sub_choice == "0":
+                break
+
+            elif sub_choice == "2":
+                console.print("[cyan]Select folder to index...[/cyan]")
+                folder = select_directory("Choose folder to index")
+                if folder and folder.exists():
+                    # Walk and index
+                    files = list(folder.rglob("*.wav")) + list(folder.rglob("*.mp3")) + list(folder.rglob("*.flac"))
+                    if not files:
+                        console.print("[yellow]No audio files found.[/yellow]")
+                        continue
+
+                    console.print(f"Found {len(files)} files. Indexing...")
+                    with Progress(SpinnerColumn(), *Progress.get_default_columns(), console=console) as progress:
+                        task = progress.add_task("Indexing...", total=len(files))
+                        for f in files:
+                            self.vector_engine.index_file(f)
+                            progress.advance(task)
+                    console.print("[green]Indexing complete![/green]")
+
+            elif sub_choice == "1":
+                query = Prompt.ask("💬 Describe the sound you want")
+                if not query.strip():
+                    continue
+
+                with Progress(SpinnerColumn(), TextColumn("[cyan]Searching...[/cyan]"), console=console) as progress:
+                    task = progress.add_task("search", total=None)
+                    results = self.vector_engine.search(query, n_results=10)
+                    progress.remove_task(task)
+
+                if not results:
+                    console.print("[yellow]No results found.[/yellow]")
+                else:
+                    table = Table(title=f"Results for '{query}'")
+                    table.add_column("Rank", style="dim")
+                    table.add_column("File", style="green")
+                    table.add_column("Score", style="blue")
+                    table.add_column("Path", style="dim")
+
+                    for i, res in enumerate(results):
+                        # Score is distance, lower is better. Convert to similarity?
+                        # Chroma returns distance. 0 is exact match.
+                        score_display = f"{res['score']:.4f}"
+                        table.add_row(str(i+1), res['filename'], score_display, res['path'])
+
+                    console.print(table)
+
             output_dir.mkdir(parents=True, exist_ok=True)
 
             import shutil
@@ -2126,7 +2205,7 @@ class SampleMindCLI:
                 console.print("\n")
                 self.display_main_menu()
 
-                choice = Prompt.ask("\n🎵 Select option", choices=["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "a", "B", "b", "C", "c", "D", "d", "E", "e"])
+                choice = Prompt.ask("\n🎵 Select option", choices=["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "a", "B", "b", "C", "c", "D", "d", "E", "e", "F", "f"])
 
                 if choice == "0":
                     console.print("\n[bold blue]👋 Thank you for using SampleMind AI v6![/bold blue]")
@@ -2159,6 +2238,8 @@ class SampleMindCLI:
                     self.run_pack_creation()
                 elif choice.upper() == "E":
                     self.run_chain_recommender()
+                elif choice.upper() == "F":
+                    self.run_semantic_search()
 
                 # Pause before showing menu again
                 if choice != "0":

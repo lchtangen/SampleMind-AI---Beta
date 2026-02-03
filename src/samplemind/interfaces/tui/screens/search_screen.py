@@ -4,19 +4,18 @@ Advanced search with filters, fuzzy matching, and saved searches
 """
 
 import asyncio
-from typing import List, Dict, Optional, Any
-
-from textual.screen import Screen
-from textual.widgets import Header, Footer, Button, Static, Input, DataTable
-from textual.containers import Vertical, Horizontal
-from textual.reactive import reactive
+from typing import Any
 
 from rich.panel import Panel
 from rich.text import Text
-from rich.table import Table
+from textual.containers import Horizontal, Vertical
+from textual.reactive import reactive
+from textual.screen import Screen
+from textual.widgets import Button, DataTable, Footer, Header, Input, Static
 
-from samplemind.interfaces.tui.search import get_search_engine, QueryBuilder
-from samplemind.interfaces.tui.widgets.dialogs import ErrorDialog, InfoDialog
+from samplemind.core.search.vector_engine import VectorSearchEngine
+from samplemind.interfaces.tui.search import get_search_engine
+from samplemind.interfaces.tui.widgets.dialogs import ErrorDialog
 
 
 class SearchScreen(Screen):
@@ -74,7 +73,7 @@ class SearchScreen(Screen):
     current_query: reactive[str] = reactive("")
     is_searching: reactive[bool] = reactive(False)
 
-    def __init__(self, initial_query: str = "", sample_data: Optional[List[Dict]] = None) -> None:
+    def __init__(self, initial_query: str = "", sample_data: list[dict] | None = None) -> None:
         """
         Initialize search screen
 
@@ -85,8 +84,9 @@ class SearchScreen(Screen):
         super().__init__()
         self.current_query = initial_query
         self.search_engine = get_search_engine()
+        self.vector_engine = VectorSearchEngine() # Initialize Vector Engine
         self.sample_data = sample_data or []
-        self.search_results: List[Dict[str, Any]] = []
+        self.search_results: list[dict[str, Any]] = []
 
     def compose(self):
         """Compose the search screen layout"""
@@ -98,15 +98,17 @@ class SearchScreen(Screen):
             # Search input
             with Vertical(id="search_input_area"):
                 yield Input(
-                    placeholder="Search query (e.g., tempo:120-130 key:C mood:dark)",
+                    placeholder="Search query (e.g., 'heavy kick' (Semantic) OR tempo:120... (Standard))",
                     value=self.current_query,
                     id="search_input"
                 )
 
-                yield Static(
-                    "💡 Tips: Use tempo:120-130, key:C, duration:<5, or text search",
-                    id="search_tips"
-                )
+                with Horizontal():
+                    yield Button("Semantic: Off", id="semantic_toggle", variant="primary")
+                    yield Static(
+                        "  💡 'heavy kick' (Semantic) vs 'tempo:120' (Standard)",
+                        id="search_tips"
+                    )
 
             # Filter suggestions
             yield Static(self._render_filter_suggestions(), id="filter_suggestions")
@@ -166,6 +168,24 @@ Examples:
             asyncio.create_task(self._perform_search())
         elif button_id == "save_btn":
             asyncio.create_task(self._save_search())
+        elif button_id == "semantic_toggle":
+            self.toggle_semantic_mode()
+
+    IS_SEMANTIC = False
+
+    def toggle_semantic_mode(self):
+        self.IS_SEMANTIC = not self.IS_SEMANTIC
+        btn = self.query_one("#semantic_toggle", Button)
+        input_widget = self.query_one("#search_input", Input)
+
+        if self.IS_SEMANTIC:
+            btn.label = "Semantic: On"
+            btn.variant = "success"
+            input_widget.placeholder = "Describe audio (e.g. 'dark cinematic pad')"
+        else:
+            btn.label = "Semantic: Off"
+            btn.variant = "primary"
+            input_widget.placeholder = "Search query (e.g., tempo:120-130 key:C mood:dark)"
 
     async def _perform_search(self) -> None:
         """Perform search with current query"""
@@ -181,33 +201,43 @@ Examples:
                 return
 
             self.current_query = query
-
-            # Perform search
-            results = self.search_engine.search(
-                self.sample_data,
-                query,
-                fuzzy=False,
-                threshold=0.8
-            )
-
-            # Update results table
             table = self.query_one("#results_table", DataTable)
             table.clear()
 
-            for result in results[:50]:  # Limit to 50 results
-                file_name = result.get("file_name", "Unknown")
-                tempo = f"{result.get('tempo', 0):.0f}"
-                key = result.get("key", "?")
-                duration = f"{result.get('duration', 0):.1f}s"
-                match_score = "100%"
+            if self.IS_SEMANTIC:
+                # Semantic Vector Search
+                self.vector_engine.initialize_db()
+                results = self.vector_engine.search(query, n_results=50)
 
-                table.add_row(file_name, tempo, key, duration, match_score)
+                for res in results:
+                     score = f"{res['score']:.4f}"
+                     table.add_row(res['filename'], "-", "-", "-", score, key=res['path'])
 
-            count = len(results)
-            self.notify(
-                f"✅ Found {count} results",
-                severity="information"
-            )
+                self.notify(f"✅ Found {len(results)} matches (Semantic)", severity="information")
+
+            else:
+                # Standard Search
+                results = self.search_engine.search(
+                    self.sample_data,
+                    query,
+                    fuzzy=False,
+                    threshold=0.8
+                )
+
+                for result in results[:50]:  # Limit to 50 results
+                    file_name = result.get("file_name", "Unknown")
+                    tempo = f"{result.get('tempo', 0):.0f}"
+                    key = result.get("key", "?")
+                    duration = f"{result.get('duration', 0):.1f}s"
+                    match_score = "100%"
+
+                    table.add_row(file_name, tempo, key, duration, match_score)
+
+                count = len(results)
+                self.notify(
+                    f"✅ Found {count} results",
+                    severity="information"
+                )
 
         except Exception as e:
             self.app.push_screen(
