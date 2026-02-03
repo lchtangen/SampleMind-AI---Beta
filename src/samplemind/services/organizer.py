@@ -7,7 +7,9 @@ from typing import Dict, List, Optional, Union
 logger = logging.getLogger(__name__)
 
 @dataclass
+@dataclass
 class OrganizationResult:
+    """Result of a file organization operation"""
     source: Path
     destination: Path
     success: bool

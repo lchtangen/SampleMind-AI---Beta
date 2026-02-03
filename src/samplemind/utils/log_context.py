@@ -332,11 +332,13 @@ def with_logging(
     """
 
     def decorator(func):
+        """Decorator wrapper for log_operation"""
         import functools
         import inspect
 
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
+            """Inner wrapper for function execution"""
             name = operation_name or func.__name__
             log_context = {"operation": name}
 
