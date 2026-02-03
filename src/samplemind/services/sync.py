@@ -175,7 +175,60 @@ class SyncManager:
                 success = await self.storage.download_file(remote_path, local_dest)
                 if success:
                     count += 1
+                    # Hydrate Analysis if JSON
+                    if local_dest.suffix == ".json" and local_dest.name.count('.') >= 2:
+                        # e.g. .wav.json
+                         await self._hydrate_analysis(local_dest)
+
             except Exception as e:
                 logger.error(f"Failed to download {remote_path}: {e}")
 
         return count
+
+    async def _hydrate_analysis(self, json_path: Path):
+        """
+        Populate DB/Chroma from downloaded analysis sidecar.
+        """
+        try:
+            import json
+
+            from samplemind.core.database.chroma import add_embedding
+
+            # We assume app state gives us access or we import locally
+            # Ideally we'd use dependency injection, but for now specific imports
+            from samplemind.core.engine.audio_engine import AudioFeatures
+
+            with open(json_path, 'r') as f:
+                data = json.load(f)
+
+            if "neural_embedding" in data and data["neural_embedding"]:
+                 # Extract original filename
+                 # loop.wav.json -> loop.wav
+                 original_filename = json_path.stem
+
+                 # Prepare metadata
+                 # file_id usually is filename or hash. Let's use filename as simple ID for now
+                 # In real app, we might need more robust ID system
+                 file_id = original_filename
+
+                 features = AudioFeatures.from_dict(data)
+
+                 meta = {
+                    "filename": original_filename,
+                    "analysis_id": f"sync_{int(features.analysis_timestamp)}",
+                    "tempo": float(features.tempo) if features.tempo else 0.0,
+                    "key": str(features.key),
+                    "mode": str(features.mode),
+                    "duration": float(features.duration)
+                 }
+
+                 await add_embedding(
+                    file_id=file_id,
+                    embedding=features.neural_embedding,
+                    metadata=meta
+                 )
+                 logger.info(f"✨ Hydrated analysis for {original_filename} from sync")
+
+        except Exception as e:
+            logger.warning(f"Failed to hydrate analysis from {json_path}: {e}")
+

@@ -455,10 +455,51 @@ class SampleMindAIManager:
         provider: AIProvider,
         audio_features: Dict[str, Any],
         analysis_type: AnalysisType,
+        user_context: Optional[Dict[str, Any]],
+        max_retries: int = 3,
+        base_delay: float = 1.0
+    ) -> UnifiedAnalysisResult:
+        """
+        Perform analysis with specific provider, with exponential backoff retry.
+
+        Args:
+            provider: AI provider to use
+            audio_features: Audio features dict
+            analysis_type: Type of analysis
+            user_context: Optional context
+            max_retries: Maximum retry attempts (default 3)
+            base_delay: Base delay in seconds for exponential backoff
+        """
+        last_error = None
+        for attempt in range(max_retries):
+            try:
+                return await self._execute_provider_analysis(
+                    provider, audio_features, analysis_type, user_context
+                )
+            except Exception as e:
+                last_error = e
+                if attempt < max_retries - 1:
+                    delay = base_delay * (2 ** attempt)
+                    logger.warning(
+                        f"⚠️ Provider {provider.value} attempt {attempt + 1}/{max_retries} "
+                        f"failed: {e}. Retrying in {delay:.1f}s..."
+                    )
+                    await asyncio.sleep(delay)
+                else:
+                    logger.error(
+                        f"❌ Provider {provider.value} failed after {max_retries} attempts: {e}"
+                    )
+        raise last_error
+
+    async def _execute_provider_analysis(
+        self,
+        provider: AIProvider,
+        audio_features: Dict[str, Any],
+        analysis_type: AnalysisType,
         user_context: Optional[Dict[str, Any]]
     ) -> UnifiedAnalysisResult:
-        """Perform analysis with specific provider"""
-        
+        """Execute analysis with a specific provider (single attempt)"""
+
         if provider == AIProvider.OPENAI:
             # Convert to OpenAI analysis type
             openai_type = self._convert_to_openai_type(analysis_type)
