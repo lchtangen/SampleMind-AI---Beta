@@ -2,12 +2,12 @@
 
 **Generated:** 1770105079.2611232
 
-**Total Issues:** 414
+**Total Issues:** 408
 
 ## Issues by Severity
 
 - **Critical:** 0
-- **High:** 29
+- **High:** 23
 - **Medium:** 385
 - **Low:** 0
 
@@ -613,19 +613,7 @@
 - **Message:** Function 'sanitize_url' missing type hints for: return type, parameter 'v'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### layering_analyzer.py:39
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'is_severe' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### layering_analyzer.py:265
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'get_onsets' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### layering_analyzer.py:265
+### layering_analyzer.py:266
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'get_onsets' missing type hints for: return type, parameter 'audio'
@@ -710,30 +698,18 @@
 - **Suggestion:** Add type hints for all parameters and return values
 
 ### vst3_plugin.py:277
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'do_GET' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### vst3_plugin.py:277
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'do_GET' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### vst3_plugin.py:312
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'log_message' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### vst3_plugin.py:312
+### vst3_plugin.py:313
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'log_message' missing type hints for: return type, parameter 'format'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### vst3_plugin.py:315
+### vst3_plugin.py:317
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function '_get_html' missing type hints for: return type
@@ -810,18 +786,6 @@
 - **Category:** type_hints
 - **Message:** Function '_generate_tags' missing type hints for: parameter 'instrument', parameter 'genre', parameter 'mood', parameter 'quality', parameter 'tempo'
 - **Suggestion:** Add type hints for all parameters and return values
-
-### classifier.py:322
-- **Severity:** high
-- **Category:** error_handling
-- **Message:** Bare except clause in '_get_feature_mean'
-- **Suggestion:** Catch specific exceptions instead of bare except
-
-### classifier.py:317
-- **Severity:** high
-- **Category:** error_handling
-- **Message:** Bare except clause in '_get_feature_mean'
-- **Suggestion:** Catch specific exceptions instead of bare except
 
 ### classifier.py:333
 - **Severity:** medium

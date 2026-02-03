@@ -88,6 +88,7 @@ class Settings(BaseSettings):
     AI_TIMEOUT: int = 120  # 2 minutes
 
     class Config:
+        """Pydantic configuration"""
         env_file = ".env"
         case_sensitive = True
         extra = "ignore"

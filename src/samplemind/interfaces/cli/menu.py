@@ -1753,6 +1753,7 @@ class SampleMindCLI:
         scores_table.add_column("Rating", style="yellow")
         
         def get_rating(score):
+            """Convert score to rating text"""
             if score >= 0.8: return "🌟 Excellent"
             elif score >= 0.6: return "⭐ Good"
             elif score >= 0.4: return "✨ Average"

@@ -221,6 +221,7 @@ def async_command(func: Callable[..., T]) -> Callable[..., T]:
     """Decorator to handle async commands"""
     @wraps(func)
     def wrapper(*args, **kwargs):
+        """Wrapper for async command execution"""
         if asyncio.iscoroutinefunction(func):
             return asyncio.run(func(*args, **kwargs))
         return func(*args, **kwargs)
@@ -231,6 +232,7 @@ def with_error_handling(func: Callable[..., T]) -> Callable[..., T]:
     """Decorator to add error handling to commands"""
     @wraps(func)
     def wrapper(*args, **kwargs):
+        """Wrapper with error handling"""
         try:
             return func(*args, **kwargs)
         except CLIError as e:
@@ -245,8 +247,10 @@ def with_error_handling(func: Callable[..., T]) -> Callable[..., T]:
 def with_progress(description: str = "Processing"):
     """Decorator to show progress spinner"""
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
+        """Decorator wrapper"""
         @wraps(func)
         def wrapper(*args, **kwargs):
+            """Wrapper with progress tracking"""
             with ProgressTracker(description):
                 return func(*args, **kwargs)
         return wrapper
