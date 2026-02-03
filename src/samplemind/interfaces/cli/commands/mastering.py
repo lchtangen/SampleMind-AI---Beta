@@ -47,7 +47,7 @@ async def analyze_mastering(
     interactive: bool = typer.Option(False, "--interactive", "-i", help="Launch file picker"),
     show_spectral: bool = typer.Option(True, "--spectral", help="Show spectral analysis"),
     show_stereo: bool = typer.Option(True, "--stereo", help="Show stereo analysis"),
-):
+) -> None:
     """Analyze audio for mastering readiness"""
     try:
         # Handle file selection
@@ -345,7 +345,7 @@ def show_targets():
 async def compare_files(
     file1: Path = typer.Argument(..., help="First audio file"),
     file2: Path = typer.Argument(..., help="Second audio file for comparison"),
-):
+) -> None:
     """Compare loudness of two files (coming soon)"""
     console.print()
     console.print("[yellow]⏳ Loudness comparison coming soon![/yellow]")

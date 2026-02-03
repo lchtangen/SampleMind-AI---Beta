@@ -103,7 +103,7 @@ def output_result(
     title: str = "Result",
     output_file: Optional[Path] = None,
     quiet: bool = False,
-):
+) -> None:
     """Handle output in specified format"""
     if quiet:
         return
@@ -166,7 +166,7 @@ class ProgressTracker:
 def create_progress_bar(
     total: int,
     description: str = "Processing",
-):
+) -> None:
     """Create a progress bar for iterations"""
     return Progress(
         TextColumn("[progress.description]{task.description}"),

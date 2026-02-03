@@ -49,7 +49,7 @@ console = Console()
 def list_recent(
     limit: int = typer.Option(20, "--limit", "-l", help="Number of files to show"),
     show_stats: bool = typer.Option(False, "--stats", "-s", help="Show statistics"),
-):
+) -> None:
     """List recently analyzed audio files"""
     files = get_recent_files()
 
@@ -118,7 +118,7 @@ def list_recent(
 @utils.with_error_handling
 def search_command(
     query: str = typer.Argument(..., help="Search query (filename, path, or tags)"),
-):
+) -> None:
     """Search recent files by name, path, or tags"""
     results = search_recent_files(query)
 
@@ -160,7 +160,7 @@ def export_command(
         "-o",
         help="Output file (default: recent_files.json in current directory)"
     ),
-):
+) -> None:
     """Export recent files as JSON"""
     output_path = output or Path("recent_files.json")
 
@@ -183,7 +183,7 @@ def clear_command(
         "-y",
         help="Skip confirmation"
     ),
-):
+) -> None:
     """Clear all recent file history"""
     if not confirm:
         console.print("[yellow]⚠️  This will clear all recent file history[/yellow]")
@@ -204,7 +204,7 @@ def clear_command(
 @utils.with_error_handling
 def view_command(
     index: int = typer.Argument(1, help="File index (1 = most recent)"),
-):
+) -> None:
     """View details for a specific recent file"""
     file = get_recent_file_by_index(index)
 

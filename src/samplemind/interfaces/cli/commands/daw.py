@@ -35,7 +35,7 @@ console = utils.console
 def daw_server(
     port: int = typer.Option(8000, "--port", "-p", help="Port to run on"),
     host: str = typer.Option("127.0.0.1", "--host", help="Host address"),
-):
+) -> None:
     """Start the DAW Bridge WebSocket Server"""
     try:
         from samplemind.server.bridge import run_server
@@ -121,7 +121,7 @@ def daw_export_flp(
     template: Optional[Path] = typer.Option(None, "--template", "-t", help="Template project"),
     bpm: Optional[float] = typer.Option(None, "--bpm", help="Project BPM"),
     key: Optional[str] = typer.Option(None, "--key", "-k", help="Project key"),
-):
+) -> None:
     """Export samples as FL Studio project (.flp format)"""
     try:
         if not files:
@@ -247,7 +247,7 @@ def daw_analyze(
     file: Path = typer.Argument(..., help="Audio file to analyze"),
     target_bpm: Optional[float] = typer.Option(None, "--target-bpm", help="Target BPM for time-stretching"),
     target_key: Optional[str] = typer.Option(None, "--target-key", help="Target key for pitch-shifting"),
-):
+) -> None:
     """Analyze a sample for DAW compatibility"""
     try:
         file = Path(file).expanduser().resolve()
@@ -344,7 +344,7 @@ def daw_sync(
     folder: Path = typer.Argument(..., help="Sample library folder to sync"),
     daw: str = typer.Option("flstudio", "--daw", "-d", help="Target DAW (flstudio, ableton, logic)"),
     export_metadata: bool = typer.Option(True, "--metadata/--no-metadata", help="Export metadata files"),
-):
+) -> None:
     """Sync sample library with DAW browser"""
     try:
         folder = Path(folder).expanduser().resolve()

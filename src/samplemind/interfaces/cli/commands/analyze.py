@@ -45,7 +45,7 @@ async def analyze_full(
     format: str = typer.Option("table", "--format", "-f", help="Output format (json|csv|yaml|table)"),
     show_profile: bool = typer.Option(False, "--profile", help="Show profiling info"),
     interactive: bool = typer.Option(False, "--interactive", "-i", help="Launch file picker"),
-):
+) -> None:
     """Run comprehensive (DETAILED level) analysis with all features"""
     try:
         # Handle file selection
@@ -82,7 +82,7 @@ async def analyze_standard(
     file: Path = typer.Argument(..., help="Audio file to analyze"),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
     format: str = typer.Option("table", "--format", "-f"),
-):
+) -> None:
     """Run standard analysis with core features (recommended)"""
     try:
         with utils.ProgressTracker("🔍 Analyzing (STANDARD level)"):
@@ -101,7 +101,7 @@ async def analyze_standard(
 async def analyze_basic(
     file: Path = typer.Argument(..., help="Audio file to analyze"),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Run quick basic analysis (fast, minimal features)"""
     try:
         with utils.ProgressTracker("🔍 Analyzing (BASIC level)"):
@@ -127,7 +127,7 @@ async def analyze_professional(
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
     format: str = typer.Option("json", "--format", "-f"),
     export_features: bool = typer.Option(False, "--export-features", help="Export raw feature vectors"),
-):
+) -> None:
     """Run professional analysis (PROFESSIONAL level - ML-optimized)"""
     try:
         with utils.ProgressTracker("🔍 Analyzing (PROFESSIONAL level with ML optimization)"):
@@ -153,7 +153,7 @@ async def analyze_professional(
 async def analyze_quick(
     file: Optional[Path] = typer.Argument(None, help="Audio file to analyze"),
     interactive: bool = typer.Option(False, "--interactive", "-i", help="Launch file picker"),
-):
+) -> None:
     """Ultra-fast analysis (< 1 second)"""
     try:
         # Handle file selection
@@ -187,7 +187,7 @@ async def analyze_quick(
 @utils.async_command
 async def analyze_bpm(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Extract tempo/BPM only"""
     try:
         with utils.ProgressTracker("🎵 Detecting BPM"):
@@ -208,7 +208,7 @@ async def analyze_bpm(
 async def analyze_key(
     file: Path = typer.Argument(..., help="Audio file"),
     confidence: bool = typer.Option(False, "--confidence", help="Show confidence score"),
-):
+) -> None:
     """Extract key detection only"""
     try:
         with utils.ProgressTracker("🎹 Detecting key"):
@@ -231,7 +231,7 @@ async def analyze_key(
 @utils.async_command
 async def analyze_mode(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Extract major/minor mode only"""
     try:
         with utils.ProgressTracker("🎼 Detecting mode"):
@@ -253,7 +253,7 @@ async def analyze_compare(
     file1: Path = typer.Argument(..., help="First audio file"),
     file2: Path = typer.Argument(..., help="Second audio file"),
     metric: str = typer.Option("overall", "--metric", "-m", help="Metric to compare"),
-):
+) -> None:
     """Compare two audio files"""
     try:
         console.print(f"[bold]Comparing audio files[/bold]")
@@ -293,7 +293,7 @@ async def analyze_compare(
 async def analyze_genre(
     file: Path = typer.Argument(..., help="Audio file"),
     top_n: int = typer.Option(3, "--top", help="Show top N genres"),
-):
+) -> None:
     """Genre classification"""
     try:
         with utils.ProgressTracker("🎵 Classifying genre"):
@@ -311,7 +311,7 @@ async def analyze_genre(
 @utils.async_command
 async def analyze_mood(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Mood/emotion detection"""
     try:
         with utils.ProgressTracker("😊 Detecting mood"):
@@ -327,7 +327,7 @@ async def analyze_mood(
 @utils.async_command
 async def analyze_instrument(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Instrument recognition"""
     try:
         with utils.ProgressTracker("🎸 Detecting instruments"):
@@ -343,7 +343,7 @@ async def analyze_instrument(
 @utils.async_command
 async def analyze_vocal(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Vocal detection and characteristics"""
     try:
         with utils.ProgressTracker("🎤 Detecting vocals"):
@@ -359,7 +359,7 @@ async def analyze_vocal(
 @utils.async_command
 async def analyze_quality(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Quality and production score"""
     try:
         with utils.ProgressTracker("⭐ Analyzing quality"):
@@ -375,7 +375,7 @@ async def analyze_quality(
 @utils.async_command
 async def analyze_energy(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Energy level detection"""
     try:
         with utils.ProgressTracker("⚡ Analyzing energy"):
@@ -391,7 +391,7 @@ async def analyze_energy(
 @utils.async_command
 async def analyze_dynamics(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Dynamic range analysis"""
     try:
         with utils.ProgressTracker("📊 Analyzing dynamics"):
@@ -407,7 +407,7 @@ async def analyze_dynamics(
 @utils.async_command
 async def analyze_loudness(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Loudness measurement (LUFS)"""
     try:
         with utils.ProgressTracker("📢 Measuring loudness"):
@@ -423,7 +423,7 @@ async def analyze_loudness(
 @utils.async_command
 async def analyze_compression(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Compression detection and analysis"""
     try:
         with utils.ProgressTracker("🔍 Detecting compression"):
@@ -443,7 +443,7 @@ async def analyze_compression(
 @utils.async_command
 async def analyze_spectral(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Spectral analysis and features"""
     try:
         with utils.ProgressTracker("🌈 Analyzing spectral properties"):
@@ -461,7 +461,7 @@ async def analyze_spectral(
 @utils.async_command
 async def analyze_harmonic(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Harmonic content analysis"""
     try:
         with utils.ProgressTracker("🎼 Analyzing harmonic content"):
@@ -479,7 +479,7 @@ async def analyze_harmonic(
 @utils.async_command
 async def analyze_percussive(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Percussive content analysis"""
     try:
         with utils.ProgressTracker("🥁 Analyzing percussive content"):
@@ -498,7 +498,7 @@ async def analyze_percussive(
 async def analyze_mfcc(
     file: Path = typer.Argument(..., help="Audio file"),
     n_mfcc: int = typer.Option(13, "--n-mfcc", help="Number of MFCC coefficients"),
-):
+) -> None:
     """Extract MFCC features"""
     try:
         with utils.ProgressTracker(f"📊 Extracting {n_mfcc} MFCC coefficients"):
@@ -516,7 +516,7 @@ async def analyze_mfcc(
 @utils.async_command
 async def analyze_chroma(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Extract chroma features"""
     try:
         with utils.ProgressTracker("🎹 Extracting chroma features"):
@@ -534,7 +534,7 @@ async def analyze_chroma(
 @utils.async_command
 async def analyze_onset(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Onset (note start) detection"""
     try:
         with utils.ProgressTracker("📍 Detecting onsets"):
@@ -552,7 +552,7 @@ async def analyze_onset(
 @utils.async_command
 async def analyze_beats(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Beat tracking"""
     try:
         with utils.ProgressTracker("🎼 Tracking beats"):
@@ -570,7 +570,7 @@ async def analyze_beats(
 @utils.async_command
 async def analyze_segments(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Segment detection (intro, verse, chorus, etc.)"""
     try:
         with utils.ProgressTracker("📋 Detecting segments"):
@@ -588,7 +588,7 @@ async def analyze_segments(
 @utils.async_command
 async def analyze_tempogram(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Tempogram (tempo over time)"""
     try:
         with utils.ProgressTracker("📈 Computing tempogram"):
@@ -604,7 +604,7 @@ async def analyze_tempogram(
 @utils.async_command
 async def analyze_chromagram(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Chromagram (chroma over time)"""
     try:
         with utils.ProgressTracker("🎹 Computing chromagram"):
@@ -620,7 +620,7 @@ async def analyze_chromagram(
 @utils.async_command
 async def analyze_spectral_flux(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Spectral flux (change over time)"""
     try:
         with utils.ProgressTracker("📊 Computing spectral flux"):
@@ -636,7 +636,7 @@ async def analyze_spectral_flux(
 @utils.async_command
 async def analyze_zero_crossing(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Zero-crossing rate (timbral brightness)"""
     try:
         with utils.ProgressTracker("✨ Computing zero-crossing rate"):
@@ -661,7 +661,7 @@ async def batch_analyze(
     output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file"),
     format: str = typer.Option("json", "--format", "-f"),
     level: str = typer.Option("STANDARD", "--level", "-l", help="Analysis level"),
-):
+) -> None:
     """Batch analyze all audio files in folder"""
     try:
         files = utils.get_audio_files(folder)

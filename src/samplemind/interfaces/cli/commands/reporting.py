@@ -33,7 +33,7 @@ console = utils.console
 def report_library(
     folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Generate library statistics report"""
     try:
         files = utils.get_audio_files(folder)
@@ -68,7 +68,7 @@ def report_analysis(
     file: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
     format: str = typer.Option("table", "--format", "-f"),
-):
+) -> None:
     """Generate detailed analysis report"""
     try:
         with utils.ProgressTracker("Generating analysis report"):
@@ -105,7 +105,7 @@ def report_analysis(
 def report_batch(
     folder: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Generate batch processing report"""
     try:
         files = utils.get_audio_files(folder)
@@ -141,7 +141,7 @@ def report_batch(
 def report_quality(
     folder: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Generate quality assessment report"""
     try:
         files = utils.get_audio_files(folder)
@@ -173,7 +173,7 @@ def report_quality(
 def report_export_all(
     folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
     output: Path = typer.Option(Path.cwd() / "reports", "--output", "-o"),
-):
+) -> None:
     """Export all reports at once"""
     try:
         files = utils.get_audio_files(folder)
@@ -202,7 +202,7 @@ def export_json(
     file: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
     pretty: bool = typer.Option(True, "--pretty/--compact"),
-):
+) -> None:
     """Export analysis to JSON"""
     try:
         output_file = output or file.with_suffix(".json").with_stem(file.stem + "_analysis")
@@ -222,7 +222,7 @@ def export_json(
 def export_csv(
     file: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Export analysis to CSV"""
     try:
         output_file = output or file.with_suffix(".csv").with_stem(file.stem + "_analysis")
@@ -242,7 +242,7 @@ def export_csv(
 def export_yaml(
     file: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Export analysis to YAML"""
     try:
         output_file = output or file.with_suffix(".yaml").with_stem(file.stem + "_analysis")
@@ -263,7 +263,7 @@ def export_pdf(
     file: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
     include_visualizations: bool = typer.Option(True, "--with-viz/--no-viz"),
-):
+) -> None:
     """Export analysis report to PDF"""
     try:
         output_file = output or file.with_suffix(".pdf").with_stem(file.stem + "_report")
@@ -285,7 +285,7 @@ def export_batch(
     folder: Path = typer.Argument(...),
     format: str = typer.Option("json", "--format", "-f", help="Export format"),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Batch export all files to format"""
     try:
         files = utils.get_audio_files(folder)

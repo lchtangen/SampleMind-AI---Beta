@@ -48,7 +48,7 @@ def library_organize(
     dry_run: bool = typer.Option(False, "--dry-run", help="Show changes without applying"),
     strategy: str = typer.Option("move", "--strategy", "-s", help="move or copy"),
     interactive: bool = typer.Option(False, "--interactive", "-i", help="Launch folder picker"),
-):
+) -> None:
     """Auto-organize library by metadata (BPM, key, genre)"""
     import asyncio
 
@@ -139,7 +139,7 @@ def library_scan(
     folder: Path = typer.Argument(..., help="Folder to scan"),
     index: bool = typer.Option(True, "--index/--no-index", help="Create index"),
     recursive: bool = typer.Option(True, "--recursive/--flat", help="Scan recursively"),
-):
+) -> None:
     """Scan and index all audio files in folder"""
     try:
         files = utils.get_audio_files(folder) if recursive else [
@@ -175,7 +175,7 @@ def library_import(
     folder: Path = typer.Argument(..., help="Folder with audio files"),
     destination: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--destination", "-d"),
     preserve_structure: bool = typer.Option(True, "--preserve/--flatten"),
-):
+) -> None:
     """Import audio files with metadata preservation"""
     try:
         files = utils.get_audio_files(folder)
@@ -198,7 +198,7 @@ def library_export(
     folder: Path = typer.Argument(..., help="Library folder"),
     output: Path = typer.Option(Path.cwd() / "library_export", "--output", "-o"),
     format: str = typer.Option("json", "--format", "-f", help="Export format (json|csv|yaml)"),
-):
+) -> None:
     """Export library metadata with files"""
     try:
         files = utils.get_audio_files(folder)
@@ -220,7 +220,7 @@ def library_sync(
     folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder to sync"),
     direction: str = typer.Option("both", "--direction", help="Sync direction (up|down|both)"),
     service: str = typer.Option("cloud", "--service", help="Cloud service (cloud|dropbox|gdrive|s3)"),
-):
+) -> None:
     """Sync library with cloud storage"""
     import asyncio
 
@@ -274,7 +274,7 @@ def library_sync(
 @utils.with_error_handling
 def library_stats(
     folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
-):
+) -> None:
     """Show library statistics"""
     try:
         files = utils.get_audio_files(folder)
@@ -300,7 +300,7 @@ def library_stats(
 @utils.with_error_handling
 def library_size(
     folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
-):
+) -> None:
     """Calculate total library size"""
     try:
         files = utils.get_audio_files(folder)
@@ -322,7 +322,7 @@ def library_list(
     folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
     limit: int = typer.Option(20, "--limit", "-l", help="Max files to show"),
     format: str = typer.Option("table", "--format", "-f"),
-):
+) -> None:
     """List all samples in library"""
     try:
         files = utils.get_audio_files(folder)
@@ -351,7 +351,7 @@ def library_list(
 @utils.with_error_handling
 def library_info(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """Show detailed file info"""
     try:
         if not file.exists():
@@ -376,7 +376,7 @@ def library_info(
 @utils.with_error_handling
 def library_rebuild(
     folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
-):
+) -> None:
     """Rebuild library index"""
     try:
         with utils.ProgressTracker("Rebuilding index"):
@@ -393,7 +393,7 @@ def library_rebuild(
 @utils.with_error_handling
 def library_verify(
     folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
-):
+) -> None:
     """Verify library integrity"""
     try:
         files = utils.get_audio_files(folder)
@@ -413,7 +413,7 @@ def library_verify(
 def library_backup(
     destination: Path = typer.Argument(..., help="Backup destination"),
     folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--source", "-s"),
-):
+) -> None:
     """Backup library to destination"""
     try:
         files = utils.get_audio_files(folder)
@@ -433,7 +433,7 @@ def library_backup(
 def library_restore(
     backup_file: Path = typer.Argument(..., help="Backup file/folder"),
     destination: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--destination", "-d"),
-):
+) -> None:
     """Restore library from backup"""
     try:
         with utils.ProgressTracker("Restoring backup"):
@@ -450,7 +450,7 @@ def library_restore(
 @utils.with_error_handling
 def library_update_metadata(
     folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
-):
+) -> None:
     """Update all metadata from audio files"""
     try:
         files = utils.get_audio_files(folder)
@@ -469,7 +469,7 @@ def library_update_metadata(
 @utils.with_error_handling
 def library_refresh(
     folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
-):
+) -> None:
     """Refresh library view and caches"""
     try:
         with utils.ProgressTracker("Refreshing library"):
@@ -492,7 +492,7 @@ def library_search(
     query: str = typer.Argument(..., help="Search query"),
     folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
     limit: int = typer.Option(20, "--limit", "-l"),
-):
+) -> None:
     """Full-text search in library"""
     try:
         console.print(f"[cyan]Searching for: {query}[/cyan]")
@@ -512,7 +512,7 @@ def library_search(
 def library_find(
     pattern: str = typer.Argument(..., help="Regex pattern"),
     folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
-):
+) -> None:
     """Regex file search in library"""
     try:
         console.print(f"[cyan]Pattern: {pattern}[/cyan]")
@@ -540,7 +540,7 @@ def library_filter_bpm(
     min_bpm: float = typer.Argument(..., help="Minimum BPM"),
     max_bpm: float = typer.Argument(None, help="Maximum BPM (optional)"),
     folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
-):
+) -> None:
     """Filter library by BPM range"""
     try:
         max_bpm = max_bpm or min_bpm + 10
@@ -561,7 +561,7 @@ def library_filter_bpm(
 def library_filter_key(
     key: str = typer.Argument(..., help="Musical key (C, Dm, F#, etc.)"),
     folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
-):
+) -> None:
     """Filter library by musical key"""
     try:
         console.print(f"[cyan]Filter key: {key}[/cyan]")
@@ -581,7 +581,7 @@ def library_filter_key(
 def library_filter_genre(
     genre: str = typer.Argument(..., help="Genre (techno, house, hiphop, ambient, etc.)"),
     folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
-):
+) -> None:
     """Filter library by genre"""
     try:
         console.print(f"[cyan]Filter genre: {genre}[/cyan]")
@@ -601,7 +601,7 @@ def library_filter_genre(
 def library_filter_mood(
     mood: str = typer.Argument(..., help="Mood (dark, bright, aggressive, mellow, etc.)"),
     folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
-):
+) -> None:
     """Filter library by mood"""
     try:
         console.print(f"[cyan]Filter mood: {mood}[/cyan]")
@@ -621,7 +621,7 @@ def library_filter_mood(
 def library_filter_tag(
     tag: str = typer.Argument(..., help="Tag name"),
     folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
-):
+) -> None:
     """Filter library by tag"""
     try:
         console.print(f"[cyan]Filter tag: {tag}[/cyan]")
@@ -642,7 +642,7 @@ def library_filter_duration(
     min_duration: str = typer.Argument(..., help="Min duration (MM:SS)"),
     max_duration: str = typer.Argument(None, help="Max duration (MM:SS)"),
     folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
-):
+) -> None:
     """Filter library by duration"""
     try:
         console.print(f"[cyan]Filter duration: {min_duration}-{max_duration}[/cyan]")
@@ -662,7 +662,7 @@ def library_filter_duration(
 def library_filter_quality(
     min_quality: float = typer.Argument(..., help="Min quality score (0-100)"),
     folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
-):
+) -> None:
     """Filter library by quality score"""
     try:
         console.print(f"[cyan]Filter quality >= {min_quality}[/cyan]")
@@ -683,7 +683,7 @@ def library_sort(
     by: str = typer.Argument(..., help="Sort by (bpm|key|name|date|quality)"),
     folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
     reverse: bool = typer.Option(False, "--reverse", help="Reverse order"),
-):
+) -> None:
     """Sort library by criteria"""
     try:
         console.print(f"[cyan]Sorting by: {by}[/cyan]")
@@ -703,7 +703,7 @@ def library_sort(
 def library_browse_random(
     folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
     count: int = typer.Option(10, "--count", "-c"),
-):
+) -> None:
     """Browse random samples from library"""
     try:
         files = utils.get_audio_files(folder)
@@ -730,7 +730,7 @@ def library_browse_random(
 @utils.with_error_handling
 def collection_create(
     name: str = typer.Argument(..., help="Collection name"),
-):
+) -> None:
     """Create new collection"""
     try:
         console.print(f"[cyan]Creating collection: {name}[/cyan]")
@@ -750,7 +750,7 @@ def collection_create(
 def collection_add(
     file_id: str = typer.Argument(..., help="File ID or path"),
     collection: str = typer.Argument(..., help="Collection name"),
-):
+) -> None:
     """Add sample to collection"""
     try:
         console.print(f"[cyan]Adding to collection: {collection}[/cyan]")
@@ -789,7 +789,7 @@ def collection_list() -> None:
 @utils.with_error_handling
 def collection_show(
     name: str = typer.Argument(..., help="Collection name"),
-):
+) -> None:
     """Show collection contents"""
     try:
         console.print(f"[bold cyan]Collection: {name}[/bold cyan]\n")
@@ -811,7 +811,7 @@ def collection_show(
 def collection_delete(
     name: str = typer.Argument(..., help="Collection name"),
     confirm: bool = typer.Option(False, "--confirm", "-y"),
-):
+) -> None:
     """Delete collection"""
     try:
         if not confirm:
@@ -838,7 +838,7 @@ def collection_export(
     name: str = typer.Argument(..., help="Collection name"),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
     format: str = typer.Option("json", "--format", "-f"),
-):
+) -> None:
     """Export collection to file"""
     if output is None:
         output = Path.cwd() / f"{name}.json"
@@ -859,7 +859,7 @@ def collection_export(
 def collection_import(
     file: Path = typer.Argument(..., help="Collection file"),
     name: str = typer.Option(None, "--name", "-n", help="Custom collection name"),
-):
+) -> None:
     """Import collection from file"""
     try:
         collection_name = name or file.stem
@@ -880,7 +880,7 @@ def collection_merge(
     collection1: str = typer.Argument(..., help="First collection"),
     collection2: str = typer.Argument(..., help="Second collection"),
     output: str = typer.Option(None, "--output", "-o", help="Output collection name"),
-):
+) -> None:
     """Merge two collections"""
     try:
         output_name = output or f"{collection1}_merged"
@@ -901,7 +901,7 @@ def collection_merge(
 def collection_rename(
     old_name: str = typer.Argument(..., help="Old name"),
     new_name: str = typer.Argument(..., help="New name"),
-):
+) -> None:
     """Rename collection"""
     try:
         with utils.ProgressTracker(f"Renaming {old_name}"):
@@ -923,7 +923,7 @@ def collection_rename(
 def library_dedupe(
     folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
     remove: bool = typer.Option(False, "--remove", help="Remove duplicates"),
-):
+) -> None:
     """Find duplicate files in library"""
     try:
         files = utils.get_audio_files(folder)
@@ -944,7 +944,7 @@ def library_dedupe(
 def library_cleanup(
     folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
     remove: bool = typer.Option(False, "--remove", help="Remove broken files"),
-):
+) -> None:
     """Remove broken/invalid audio files"""
     try:
         files = utils.get_audio_files(folder)
@@ -964,7 +964,7 @@ def library_cleanup(
 @utils.with_error_handling
 def library_orphans(
     folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
-):
+) -> None:
     """Find files without metadata"""
     try:
         files = utils.get_audio_files(folder)
@@ -984,7 +984,7 @@ def library_orphans(
 @utils.with_error_handling
 def library_unused(
     folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
-):
+) -> None:
     """Find unused samples (not in any collection)"""
     try:
         files = utils.get_audio_files(folder)
@@ -1006,7 +1006,7 @@ def library_prune(
     days: int = typer.Argument(90, help="Older than N days"),
     folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
     remove: bool = typer.Option(False, "--remove", help="Remove files"),
-):
+) -> None:
     """Remove files older than N days"""
     try:
         console.print(f"[cyan]Finding files older than {days} days[/cyan]")
@@ -1025,7 +1025,7 @@ def library_prune(
 @utils.with_error_handling
 def library_optimize(
     folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
-):
+) -> None:
     """Optimize library for performance"""
     try:
         with utils.ProgressTracker("Optimizing"):

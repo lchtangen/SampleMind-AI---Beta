@@ -22,7 +22,7 @@ console = utils.console
 async def analyze_layering(
     file1: Optional[Path] = typer.Argument(None, help="First audio file"),
     file2: Optional[Path] = typer.Argument(None, help="Second audio file"),
-):
+) -> None:
     """Analyze compatibility of two samples for layering"""
     try:
         if not file1:
