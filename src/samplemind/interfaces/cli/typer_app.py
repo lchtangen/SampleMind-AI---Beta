@@ -45,7 +45,7 @@ console = Console()
 # COMMAND GROUP IMPORTS
 # ============================================================================
 
-from .commands import analyze, library, ai, metadata, audio, visualization, reporting
+from .commands import analyze, library, ai, metadata, audio, visualization, reporting, similarity, theory, daw
 
 # ============================================================================
 # MAIN APP CALLBACKS
@@ -178,7 +178,7 @@ def version():
 def register_command_groups():
     """Register all command groups with the main app"""
 
-    # Register all 7 command groups (200+ total commands)
+    # Register all 10 command groups (215+ total commands)
     app.add_typer(analyze.app, name="analyze", help="🎵 Audio analysis & feature extraction (40 commands)")
     app.add_typer(library.app, name="library", help="📁 Sample library management (50 commands)")
     app.add_typer(ai.app, name="ai", help="🤖 AI-powered features (30 commands)")
@@ -186,6 +186,9 @@ def register_command_groups():
     app.add_typer(audio.app, name="audio", help="🎙️  Audio processing & conversion (25 commands)")
     app.add_typer(visualization.app, name="viz", help="📊 Visualizations & charts (15 commands)")
     app.add_typer(reporting.app, name="report", help="📋 Reports & data export (10 commands)")
+    app.add_typer(similarity.app, name="similar", help="🔍 Sample similarity search (5 commands)")
+    app.add_typer(theory.app, name="theory", help="🎼 Music theory analysis (4 commands)")
+    app.add_typer(daw.app, name="daw", help="🎹 DAW integration (4 commands)")
 
 
 # Register command groups at module load

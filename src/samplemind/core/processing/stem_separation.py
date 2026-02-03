@@ -3,7 +3,8 @@ import logging
 import subprocess
 import sys
 import tempfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional
 
@@ -12,6 +13,51 @@ from .exceptions import OptionalDependencyError
 logger = logging.getLogger(__name__)
 
 _DEFAULT_STEMS = ("vocals", "drums", "bass", "other")
+
+
+class StemQuality(str, Enum):
+    """Quality presets for stem separation"""
+    FAST = "fast"           # Quick, lower quality
+    STANDARD = "standard"   # Balanced quality/speed
+    HIGH = "high"           # Best quality, slower
+
+
+class StemBackend(str, Enum):
+    """Available stem separation backends"""
+    DEMUCS = "demucs"
+    SPLEETER = "spleeter"
+
+
+@dataclass
+class QualityPreset:
+    """Configuration for a quality preset"""
+    model: str
+    shifts: int
+    overlap: float
+    description: str
+
+
+# Quality preset configurations
+QUALITY_PRESETS: Dict[StemQuality, QualityPreset] = {
+    StemQuality.FAST: QualityPreset(
+        model="mdx",
+        shifts=1,
+        overlap=0.1,
+        description="Fast processing, good for previews"
+    ),
+    StemQuality.STANDARD: QualityPreset(
+        model="mdx_extra",
+        shifts=1,
+        overlap=0.25,
+        description="Balanced quality and speed (recommended)"
+    ),
+    StemQuality.HIGH: QualityPreset(
+        model="mdx_extra",
+        shifts=5,
+        overlap=0.5,
+        description="Best quality, slower processing"
+    ),
+}
 
 
 @dataclass
@@ -64,6 +110,43 @@ class StemSeparationEngine:
                 "Valid models: %s", model, self.ALL_MODELS
             )
         self.is_v4 = model in self.V4_MODELS or model not in self.V3_MODELS
+
+    @classmethod
+    def from_quality(
+        cls,
+        quality: StemQuality = StemQuality.STANDARD,
+        device: Optional[str] = None,
+        verbose: bool = False,
+    ) -> "StemSeparationEngine":
+        """
+        Create a StemSeparationEngine from a quality preset.
+
+        Args:
+            quality: Quality preset (FAST, STANDARD, HIGH)
+            device: Device to use (cpu, cuda, mps)
+            verbose: Enable verbose output
+
+        Returns:
+            Configured StemSeparationEngine instance
+
+        Example:
+            engine = StemSeparationEngine.from_quality(StemQuality.HIGH)
+            result = engine.separate("track.wav")
+        """
+        preset = QUALITY_PRESETS[quality]
+        logger.info(f"Creating stem separation engine with {quality.value} preset: {preset.description}")
+        return cls(
+            model=preset.model,
+            device=device,
+            shifts=preset.shifts,
+            overlap=preset.overlap,
+            verbose=verbose,
+        )
+
+    @staticmethod
+    def get_available_presets() -> Dict[str, str]:
+        """Get available quality presets with descriptions"""
+        return {q.value: QUALITY_PRESETS[q].description for q in StemQuality}
 
     @staticmethod
     def _assert_dependency() -> None:

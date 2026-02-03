@@ -14,12 +14,31 @@ Usage:
 """
 
 import typer
-from typing import Optional
+import shutil
+from typing import Optional, List
 from pathlib import Path
+from enum import Enum
 from rich.console import Console
 from rich.table import Table
+from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
 
 from . import utils
+from ....core.processing.stem_separation import StemSeparationEngine, StemSeparationResult
+
+
+class StemQuality(str, Enum):
+    """Quality presets for stem separation"""
+    FAST = "fast"
+    STANDARD = "standard"
+    HIGH = "high"
+
+
+# Quality preset configurations
+QUALITY_PRESETS = {
+    StemQuality.FAST: {"model": "mdx", "shifts": 1, "overlap": 0.1},
+    StemQuality.STANDARD: {"model": "mdx_extra", "shifts": 1, "overlap": 0.25},
+    StemQuality.HIGH: {"model": "mdx_extra", "shifts": 5, "overlap": 0.5},
+}
 
 app = typer.Typer(help="🎙️  Audio processing & conversion (25 commands)", no_args_is_help=True)
 console = utils.console
@@ -339,43 +358,156 @@ def audio_reverse(
 @app.command("stems:separate")
 @utils.with_error_handling
 def stems_separate(
-    file: Path = typer.Argument(...),
-    model: str = typer.Option("mdx_extra", "--model", help="Demucs model"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    file: Path = typer.Argument(..., help="Audio file to separate"),
+    model: str = typer.Option("mdx_extra", "--model", "-m", help="Demucs model (mdx, mdx_extra, mdx_q, htdemucs)"),
+    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output directory"),
+    quality: StemQuality = typer.Option(StemQuality.STANDARD, "--quality", "-q", help="Quality preset (fast/standard/high)"),
+    device: Optional[str] = typer.Option(None, "--device", "-d", help="Device (cpu, cuda, mps)"),
 ):
-    """Separate audio stems (vocals, drums, bass, other)"""
+    """Separate audio into stems (vocals, drums, bass, other) using Demucs AI"""
     try:
-        output_dir = output or file.parent / f"{file.stem}_stems"
-        with utils.ProgressTracker(f"Separating stems using {model}"):
-            pass
+        # Validate input file
+        file = Path(file).expanduser().resolve()
+        if not file.exists():
+            console.print(f"[red]Error: File not found: {file}[/red]")
+            raise typer.Exit(1)
 
-        console.print(f"[green]✓ Stems separated[/green]")
-        console.print(f"[cyan]Output folder:[/cyan] {output_dir}")
-        console.print(f"  [cyan]•[/cyan] vocals.wav")
-        console.print(f"  [cyan]•[/cyan] drums.wav")
-        console.print(f"  [cyan]•[/cyan] bass.wav")
-        console.print(f"  [cyan]•[/cyan] other.wav")
+        # Get quality preset settings (override model if quality preset specified)
+        preset = QUALITY_PRESETS[quality]
+        effective_model = model if model != "mdx_extra" else preset["model"]
+
+        # Setup output directory
+        output_dir = output or file.parent / f"{file.stem}_stems"
+        output_dir = Path(output_dir).expanduser().resolve()
+
+        console.print(f"[bold cyan]Stem Separation[/bold cyan]")
+        console.print(f"  Input: [green]{file.name}[/green]")
+        console.print(f"  Model: [yellow]{effective_model}[/yellow]")
+        console.print(f"  Quality: [yellow]{quality.value}[/yellow]")
+        console.print()
+
+        # Create engine and run separation
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TaskProgressColumn(),
+            console=console,
+        ) as progress:
+            task = progress.add_task(f"Separating stems with {effective_model}...", total=None)
+
+            engine = StemSeparationEngine(
+                model=effective_model,
+                device=device,
+                shifts=preset["shifts"],
+                overlap=preset["overlap"],
+                verbose=False,
+            )
+
+            result: StemSeparationResult = engine.separate(
+                audio_path=file,
+                output_directory=output_dir.parent,  # Demucs creates subfolders
+            )
+
+            progress.update(task, completed=True)
+
+        # Move stems to clean output directory
+        final_output = output_dir
+        final_output.mkdir(parents=True, exist_ok=True)
+
+        console.print()
+        console.print(f"[green]✓ Stems separated successfully![/green]")
+        console.print(f"[cyan]Output folder:[/cyan] {final_output}")
+
+        # List generated stems
+        for stem_name, stem_path in result.stems.items():
+            # Copy to final location with cleaner names
+            final_stem = final_output / f"{stem_name}.wav"
+            if stem_path.exists() and stem_path != final_stem:
+                shutil.copy2(stem_path, final_stem)
+            console.print(f"  [cyan]•[/cyan] {stem_name}.wav")
 
     except Exception as e:
         utils.handle_error(e, "stems:separate")
         raise typer.Exit(1)
 
 
+def _extract_single_stem(
+    file: Path,
+    stem_type: str,
+    output: Optional[Path],
+    quality: StemQuality,
+    device: Optional[str],
+    command_name: str,
+) -> None:
+    """Helper function to extract a single stem type"""
+    file = Path(file).expanduser().resolve()
+    if not file.exists():
+        console.print(f"[red]Error: File not found: {file}[/red]")
+        raise typer.Exit(1)
+
+    preset = QUALITY_PRESETS[quality]
+    output_file = output or file.parent / f"{file.stem}_{stem_type}.wav"
+    output_file = Path(output_file).expanduser().resolve()
+
+    console.print(f"[bold cyan]Extracting {stem_type.title()}[/bold cyan]")
+    console.print(f"  Input: [green]{file.name}[/green]")
+    console.print(f"  Quality: [yellow]{quality.value}[/yellow]")
+    console.print()
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        console=console,
+    ) as progress:
+        task = progress.add_task(f"Extracting {stem_type}...", total=None)
+
+        engine = StemSeparationEngine(
+            model=preset["model"],
+            device=device,
+            shifts=preset["shifts"],
+            overlap=preset["overlap"],
+            verbose=False,
+        )
+
+        # Use two_stems mode for faster single-stem extraction
+        result = engine.separate(
+            audio_path=file,
+            two_stems=stem_type if stem_type in ("vocals", "drums") else None,
+        )
+
+        progress.update(task, completed=True)
+
+    # Copy the requested stem to the output location
+    if stem_type in result.stems:
+        stem_path = result.stems[stem_type]
+        if stem_path.exists():
+            output_file.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(stem_path, output_file)
+            console.print()
+            console.print(f"[green]✓ {stem_type.title()} extracted[/green]")
+            console.print(f"[cyan]Output:[/cyan] {output_file}")
+        else:
+            console.print(f"[red]Error: Stem file not generated[/red]")
+            raise typer.Exit(1)
+    else:
+        console.print(f"[red]Error: {stem_type} stem not available[/red]")
+        raise typer.Exit(1)
+
+
 @app.command("stems:vocals")
 @utils.with_error_handling
 def stems_vocals(
-    file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    file: Path = typer.Argument(..., help="Audio file to process"),
+    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
+    quality: StemQuality = typer.Option(StemQuality.FAST, "--quality", "-q", help="Quality preset"),
+    device: Optional[str] = typer.Option(None, "--device", "-d", help="Device (cpu, cuda, mps)"),
 ):
-    """Extract vocals stem only"""
+    """Extract vocals stem only (fast two-stem mode)"""
     try:
-        output_file = output or file.with_stem(file.stem + "_vocals")
-        with utils.ProgressTracker("Extracting vocals"):
-            pass
-
-        console.print(f"[green]✓ Vocals extracted[/green]")
-        console.print(f"[cyan]Output:[/cyan] {output_file.name}")
-
+        _extract_single_stem(file, "vocals", output, quality, device, "stems:vocals")
     except Exception as e:
         utils.handle_error(e, "stems:vocals")
         raise typer.Exit(1)
@@ -384,18 +516,14 @@ def stems_vocals(
 @app.command("stems:drums")
 @utils.with_error_handling
 def stems_drums(
-    file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    file: Path = typer.Argument(..., help="Audio file to process"),
+    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
+    quality: StemQuality = typer.Option(StemQuality.FAST, "--quality", "-q", help="Quality preset"),
+    device: Optional[str] = typer.Option(None, "--device", "-d", help="Device (cpu, cuda, mps)"),
 ):
-    """Extract drums stem only"""
+    """Extract drums stem only (fast two-stem mode)"""
     try:
-        output_file = output or file.with_stem(file.stem + "_drums")
-        with utils.ProgressTracker("Extracting drums"):
-            pass
-
-        console.print(f"[green]✓ Drums extracted[/green]")
-        console.print(f"[cyan]Output:[/cyan] {output_file.name}")
-
+        _extract_single_stem(file, "drums", output, quality, device, "stems:drums")
     except Exception as e:
         utils.handle_error(e, "stems:drums")
         raise typer.Exit(1)
@@ -404,18 +532,14 @@ def stems_drums(
 @app.command("stems:bass")
 @utils.with_error_handling
 def stems_bass(
-    file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    file: Path = typer.Argument(..., help="Audio file to process"),
+    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
+    quality: StemQuality = typer.Option(StemQuality.STANDARD, "--quality", "-q", help="Quality preset"),
+    device: Optional[str] = typer.Option(None, "--device", "-d", help="Device (cpu, cuda, mps)"),
 ):
-    """Extract bass stem only"""
+    """Extract bass stem only (requires full separation)"""
     try:
-        output_file = output or file.with_stem(file.stem + "_bass")
-        with utils.ProgressTracker("Extracting bass"):
-            pass
-
-        console.print(f"[green]✓ Bass extracted[/green]")
-        console.print(f"[cyan]Output:[/cyan] {output_file.name}")
-
+        _extract_single_stem(file, "bass", output, quality, device, "stems:bass")
     except Exception as e:
         utils.handle_error(e, "stems:bass")
         raise typer.Exit(1)
@@ -424,20 +548,101 @@ def stems_bass(
 @app.command("stems:other")
 @utils.with_error_handling
 def stems_other(
-    file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    file: Path = typer.Argument(..., help="Audio file to process"),
+    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
+    quality: StemQuality = typer.Option(StemQuality.STANDARD, "--quality", "-q", help="Quality preset"),
+    device: Optional[str] = typer.Option(None, "--device", "-d", help="Device (cpu, cuda, mps)"),
 ):
-    """Extract other stem only"""
+    """Extract other/melody stem only (requires full separation)"""
     try:
-        output_file = output or file.with_stem(file.stem + "_other")
-        with utils.ProgressTracker("Extracting other"):
-            pass
-
-        console.print(f"[green]✓ Other extracted[/green]")
-        console.print(f"[cyan]Output:[/cyan] {output_file.name}")
-
+        _extract_single_stem(file, "other", output, quality, device, "stems:other")
     except Exception as e:
         utils.handle_error(e, "stems:other")
+        raise typer.Exit(1)
+
+
+@app.command("stems:batch")
+@utils.with_error_handling
+def stems_batch(
+    folder: Path = typer.Argument(..., help="Folder containing audio files"),
+    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output directory"),
+    quality: StemQuality = typer.Option(StemQuality.STANDARD, "--quality", "-q", help="Quality preset"),
+    device: Optional[str] = typer.Option(None, "--device", "-d", help="Device (cpu, cuda, mps)"),
+    extensions: str = typer.Option("wav,mp3,flac,aiff,m4a", "--ext", help="File extensions to process"),
+):
+    """Batch separate stems for all audio files in a folder"""
+    try:
+        folder = Path(folder).expanduser().resolve()
+        if not folder.is_dir():
+            console.print(f"[red]Error: Not a directory: {folder}[/red]")
+            raise typer.Exit(1)
+
+        # Find all audio files
+        ext_list = [f".{e.strip().lower()}" for e in extensions.split(",")]
+        audio_files = [f for f in folder.iterdir() if f.suffix.lower() in ext_list]
+
+        if not audio_files:
+            console.print(f"[yellow]No audio files found in {folder}[/yellow]")
+            raise typer.Exit(0)
+
+        output_dir = output or folder / "stems_output"
+        output_dir = Path(output_dir).expanduser().resolve()
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        preset = QUALITY_PRESETS[quality]
+
+        console.print(f"[bold cyan]Batch Stem Separation[/bold cyan]")
+        console.print(f"  Folder: [green]{folder}[/green]")
+        console.print(f"  Files: [yellow]{len(audio_files)}[/yellow]")
+        console.print(f"  Quality: [yellow]{quality.value}[/yellow]")
+        console.print()
+
+        engine = StemSeparationEngine(
+            model=preset["model"],
+            device=device,
+            shifts=preset["shifts"],
+            overlap=preset["overlap"],
+            verbose=False,
+        )
+
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TaskProgressColumn(),
+            console=console,
+        ) as progress:
+            task = progress.add_task("Processing files...", total=len(audio_files))
+
+            for audio_file in audio_files:
+                progress.update(task, description=f"Processing {audio_file.name}...")
+
+                try:
+                    file_output_dir = output_dir / audio_file.stem
+                    file_output_dir.mkdir(parents=True, exist_ok=True)
+
+                    result = engine.separate(
+                        audio_path=audio_file,
+                        output_directory=file_output_dir.parent,
+                    )
+
+                    # Copy stems to final location
+                    for stem_name, stem_path in result.stems.items():
+                        if stem_path.exists():
+                            final_stem = file_output_dir / f"{stem_name}.wav"
+                            shutil.copy2(stem_path, final_stem)
+
+                except Exception as file_error:
+                    console.print(f"  [red]✗ Failed: {audio_file.name} - {file_error}[/red]")
+
+                progress.advance(task)
+
+        console.print()
+        console.print(f"[green]✓ Batch separation complete![/green]")
+        console.print(f"[cyan]Output:[/cyan] {output_dir}")
+
+    except Exception as e:
+        utils.handle_error(e, "stems:batch")
         raise typer.Exit(1)
 
 
