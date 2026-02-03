@@ -158,6 +158,7 @@ def similar_index(
             task = progress.add_task("Indexing files...", total=100)
 
             def progress_callback(current: int, total: int, filename: str):
+                """Update progress bar during indexing"""
                 progress.update(task, completed=(current / total) * 100, description=f"Indexing {filename}...")
 
             indexed = db.index_library(
