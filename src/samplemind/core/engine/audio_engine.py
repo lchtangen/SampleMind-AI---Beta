@@ -240,16 +240,43 @@ class AudioProcessor:
         """
         # Input validation
         if not isinstance(y, np.ndarray) or y.ndim != 1:
-            raise ValueError("Input must be a 1D numpy array")
+            raise ValueError(
+                f"Invalid input format for HPSS separation\n"
+                f"Expected: 1D numpy array\n"
+                f"Got: {type(y).__name__} with shape {y.shape if isinstance(y, np.ndarray) else 'N/A'}\n"
+                f"Solution: Ensure audio is loaded as a mono (1D) numpy array"
+            )
 
         if len(y) < 512:  # Minimum length for STFT
-            raise ValueError(f"Input signal too short for HPSS. Got {len(y)} samples, need at least 512.")
+            duration_sec = len(y) / self.sample_rate if hasattr(self, 'sample_rate') else len(y) / 44100
+            raise ValueError(
+                f"Audio signal too short for HPSS separation\n"
+                f"Minimum required: 512 samples (~0.012 seconds at 44.1kHz)\n"
+                f"Got: {len(y)} samples (~{duration_sec:.3f} seconds)\n"
+                f"Solution: Use audio files longer than 0.012 seconds"
+            )
 
         if not np.isfinite(y).all():
-            raise ValueError("Input contains NaN or infinite values")
+            nan_count = np.isnan(y).sum()
+            inf_count = np.isinf(y).sum()
+            raise ValueError(
+                f"Audio signal contains invalid values\n"
+                f"NaN values: {nan_count}\n"
+                f"Infinite values: {inf_count}\n"
+                f"Total samples: {len(y)}\n"
+                f"Solution: Check your audio file for corruption or processing errors"
+            )
 
         if margin < 1.0 or margin > 10.0:
-            raise ValueError(f"Margin must be between 1.0 and 10.0, got {margin}")
+            raise ValueError(
+                f"Invalid margin parameter for HPSS separation\n"
+                f"Valid range: 1.0 to 10.0\n"
+                f"Got: {margin}\n"
+                f"Recommended values:\n"
+                f"  - 1.0-2.0: Subtle separation\n"
+                f"  - 2.0-5.0: Standard separation (default)\n"
+                f"  - 5.0-10.0: Aggressive separation"
+            )
 
         try:
             # Normalize input to prevent numerical issues
@@ -306,7 +333,16 @@ class AudioProcessor:
             return y_harmonic, y_percussive
 
         except Exception as e:
-            raise RuntimeError(f"HPSS separation failed: {str(e)}")
+            raise RuntimeError(
+                f"HPSS (Harmonic-Percussive Source Separation) failed\n"
+                f"Error: {type(e).__name__}: {str(e)}\n"
+                f"Audio details: {len(y)} samples, margin={margin}\n"
+                f"Possible causes:\n"
+                f"  1. Audio signal is too short or has insufficient content\n"
+                f"  2. Signal contains only silence or noise\n"
+                f"  3. Memory or processing error occurred\n"
+                f"Solution: Try with a different audio file or adjust the margin parameter"
+            ) from e
 
 
 class AdvancedFeatureExtractor:
@@ -436,8 +472,18 @@ class AdvancedFeatureExtractor:
         except Exception as e:
             import traceback
             traceback.print_exc()
-            logger.error(f"Error extracting rhythmic features: {e}")
-            raise
+            error_msg = (
+                f"Failed to extract rhythmic features\n"
+                f"Error: {type(e).__name__}: {str(e)}\n"
+                f"Audio details: {len(y) if isinstance(y, np.ndarray) else 'unknown'} samples\n"
+                f"Possible causes:\n"
+                f"  1. Audio signal is too short or has no rhythmic content\n"
+                f"  2. Signal contains only silence\n"
+                f"  3. Sample rate mismatch or invalid audio data\n"
+                f"Solution: Verify the audio file contains valid rhythmic content (drums, beats)"
+            )
+            logger.error(error_msg)
+            raise RuntimeError(error_msg) from e
 
     def extract_spectral_features(self, y: np.ndarray) -> dict[str, Any]:
         """
@@ -522,8 +568,18 @@ class AdvancedFeatureExtractor:
             return result
 
         except Exception as e:
-            logger.error(f"Error extracting spectral features: {e}")
-            raise
+            error_msg = (
+                f"Failed to extract spectral features\n"
+                f"Error: {type(e).__name__}: {str(e)}\n"
+                f"Audio details: {len(y) if isinstance(y, np.ndarray) else 'unknown'} samples\n"
+                f"Possible causes:\n"
+                f"  1. Audio signal is too short for spectral analysis\n"
+                f"  2. Signal contains invalid data (NaN, inf)\n"
+                f"  3. Memory or FFT processing error\n"
+                f"Solution: Check audio file integrity and ensure sufficient duration (>0.1s)"
+            )
+            logger.error(error_msg)
+            raise RuntimeError(error_msg) from e
 
     def extract_mfcc_features(self, y: np.ndarray, n_mfcc: int = 20) -> dict[str, Any]:
         """
@@ -584,8 +640,18 @@ class AdvancedFeatureExtractor:
             return result
 
         except Exception as e:
-            logger.error(f"Error extracting MFCC features: {e}")
-            raise
+            error_msg = (
+                f"Failed to extract MFCC features\n"
+                f"Error: {type(e).__name__}: {str(e)}\n"
+                f"Audio details: {len(y) if isinstance(y, np.ndarray) else 'unknown'} samples, n_mfcc={n_mfcc}\n"
+                f"Possible causes:\n"
+                f"  1. Audio signal is too short for MFCC computation\n"
+                f"  2. Invalid n_mfcc parameter (typical range: 13-40)\n"
+                f"  3. Signal contains invalid values\n"
+                f"Solution: Ensure audio is at least 0.5 seconds and n_mfcc is reasonable (13-40)"
+            )
+            logger.error(error_msg)
+            raise RuntimeError(error_msg) from e
 
     def _get_cache_key(self, feature_type: str, y: np.ndarray) -> dict[str, Any]:
         """
@@ -741,7 +807,15 @@ class AudioEngine:
         file_path = Path(file_path)
 
         if not file_path.exists():
-            raise FileNotFoundError(f"Audio file not found: {file_path}")
+            supported_formats = ", ".join([fmt.value.upper() for fmt in AudioFormat])
+            raise FileNotFoundError(
+                f"Audio file not found: {file_path}\n"
+                f"Supported formats: {supported_formats}\n"
+                f"Please check that:\n"
+                f"  1. The file path is correct\n"
+                f"  2. The file exists at the specified location\n"
+                f"  3. You have read permissions for the file"
+            )
 
         try:
             # Load audio using soundfile for better format support
@@ -765,9 +839,23 @@ class AudioEngine:
             logger.info(f"✅ Loaded audio: {file_path.name} ({len(y)/sr:.2f}s, {sr}Hz)")
             return y, sr
 
-        except Exception as e:
-            logger.error(f"❌ Failed to load audio {file_path}: {e}")
+        except FileNotFoundError:
+            # Re-raise our enhanced FileNotFoundError
             raise
+        except Exception as e:
+            supported_formats = ", ".join([fmt.value.upper() for fmt in AudioFormat])
+            error_msg = (
+                f"Failed to load audio file: {file_path}\n"
+                f"Error: {type(e).__name__}: {str(e)}\n"
+                f"Supported formats: {supported_formats}\n"
+                f"Common solutions:\n"
+                f"  1. Verify the file is a valid audio file\n"
+                f"  2. Check if the file is corrupted (try opening in a media player)\n"
+                f"  3. Ensure the file format is supported\n"
+                f"  4. Convert the file to WAV or MP3 format if needed"
+            )
+            logger.error(f"❌ {error_msg}")
+            raise RuntimeError(error_msg) from e
 
     def analyze_audio(
         self,
@@ -884,9 +972,30 @@ class AudioEngine:
             logger.info(f"🎯 Analysis complete: {file_path.name} ({analysis_time:.2f}s, {level.value})")
             return features
 
-        except Exception as e:
-            logger.error(f"❌ Analysis failed for {file_path}: {e}")
+        except FileNotFoundError:
+            # Re-raise our enhanced FileNotFoundError
             raise
+        except RuntimeError:
+            # Re-raise our enhanced RuntimeError messages
+            raise
+        except Exception as e:
+            error_msg = (
+                f"Audio analysis failed for: {file_path}\n"
+                f"Error: {type(e).__name__}: {str(e)}\n"
+                f"Analysis level: {level.value}\n"
+                f"Possible causes:\n"
+                f"  1. Corrupted or invalid audio file\n"
+                f"  2. Unsupported audio format\n"
+                f"  3. Insufficient audio content for analysis\n"
+                f"  4. Memory or processing error\n"
+                f"Solutions:\n"
+                f"  - Try with a lower analysis level (BASIC or STANDARD)\n"
+                f"  - Verify the audio file plays correctly in a media player\n"
+                f"  - Convert to a standard format (WAV, MP3, FLAC)\n"
+                f"  - Ensure the file is at least 1 second long"
+            )
+            logger.error(f"❌ {error_msg}")
+            raise RuntimeError(error_msg) from e
 
     async def analyze_audio_async(
         self,
