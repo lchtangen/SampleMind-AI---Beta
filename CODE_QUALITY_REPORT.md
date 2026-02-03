@@ -2,13 +2,13 @@
 
 **Generated:** 1770105079.2611232
 
-**Total Issues:** 408
+**Total Issues:** 413
 
 ## Issues by Severity
 
 - **Critical:** 0
-- **High:** 23
-- **Medium:** 385
+- **High:** 24
+- **Medium:** 389
 - **Low:** 0
 
 ## Detailed Issues
@@ -799,12 +799,6 @@
 - **Message:** Function '_generate_tags_from_classification' missing type hints for: parameter 'classification'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### branding.py:115
-- **Severity:** high
-- **Category:** error_handling
-- **Message:** Bare except clause in 'get_version'
-- **Suggestion:** Catch specific exceptions instead of bare except
-
 ### menu.py:66
 - **Severity:** medium
 - **Category:** type_hints
@@ -889,29 +883,23 @@
 - **Message:** Function '_display_analysis_results' missing type hints for: return type, parameter 'ai_result', parameter 'loaded_audio', parameter 'features'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### menu.py:1767
+### menu.py:1768
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function '_display_batch_summary' missing type hints for: return type, parameter 'results', parameter 'processing_time'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### menu.py:1807
+### menu.py:1808
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function '_display_directory_info' missing type hints for: return type, parameter 'dir_info'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### menu.py:1833
+### menu.py:1834
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function '_save_analysis' missing type hints for: return type, parameter 'ai_result', parameter 'loaded_audio', parameter 'features', parameter 'output_file'
 - **Suggestion:** Add type hints for all parameters and return values
-
-### menu.py:1755
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'get_rating' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
 
 ### menu.py:1755
 - **Severity:** medium
@@ -985,6 +973,78 @@
 - **Message:** Function 'list_commands' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
+### error_handler.py:362
+- **Severity:** medium
+- **Category:** type_hints
+- **Message:** Function 'with_error_recovery' missing type hints for: return type
+- **Suggestion:** Add type hints for all parameters and return values
+
+### error_handler.py:183
+- **Severity:** high
+- **Category:** docstring
+- **Message:** Function 'get_suggestions' missing docstring
+- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
+
+### error_handler.py:191
+- **Severity:** high
+- **Category:** docstring
+- **Message:** Function 'get_recovery_options' missing docstring
+- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
+
+### error_handler.py:210
+- **Severity:** high
+- **Category:** docstring
+- **Message:** Function 'get_suggestions' missing docstring
+- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
+
+### error_handler.py:232
+- **Severity:** high
+- **Category:** docstring
+- **Message:** Function 'get_suggestions' missing docstring
+- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
+
+### error_handler.py:241
+- **Severity:** high
+- **Category:** docstring
+- **Message:** Function 'get_recovery_options' missing docstring
+- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
+
+### error_handler.py:374
+- **Severity:** high
+- **Category:** docstring
+- **Message:** Function 'decorator' missing docstring
+- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
+
+### error_handler.py:437
+- **Severity:** medium
+- **Category:** type_hints
+- **Message:** Function '__enter__' missing type hints for: return type
+- **Suggestion:** Add type hints for all parameters and return values
+
+### error_handler.py:440
+- **Severity:** medium
+- **Category:** type_hints
+- **Message:** Function '__exit__' missing type hints for: return type, parameter 'exc_type', parameter 'exc_val', parameter 'exc_tb'
+- **Suggestion:** Add type hints for all parameters and return values
+
+### error_handler.py:194
+- **Severity:** high
+- **Category:** docstring
+- **Message:** Function 'pick_file' missing docstring
+- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
+
+### error_handler.py:194
+- **Severity:** medium
+- **Category:** type_hints
+- **Message:** Function 'pick_file' missing type hints for: return type
+- **Suggestion:** Add type hints for all parameters and return values
+
+### error_handler.py:376
+- **Severity:** high
+- **Category:** docstring
+- **Message:** Function 'wrapper' missing docstring
+- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
+
 ### modern_menu.py:196
 - **Severity:** medium
 - **Category:** type_hints
@@ -1038,12 +1098,6 @@
 - **Category:** type_hints
 - **Message:** Function 'main' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
-
-### config.py:90
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'Config' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
 
 ### dependencies.py:9
 - **Severity:** medium
@@ -1135,7 +1189,7 @@
 - **Message:** Function 'create_progress_bar' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### utils.py:245
+### utils.py:247
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'with_progress' missing type hints for: return type
@@ -1154,42 +1208,18 @@
 - **Suggestion:** Add type hints for all parameters and return values
 
 ### utils.py:223
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'wrapper' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### utils.py:223
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'wrapper' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### utils.py:233
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'wrapper' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### utils.py:233
+### utils.py:234
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'wrapper' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### utils.py:247
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'decorator' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### utils.py:249
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'wrapper' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### utils.py:249
+### utils.py:252
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'wrapper' missing type hints for: return type

@@ -603,6 +603,7 @@ class BatchScreen(Screen):
             )
 
             def on_back_confirm(result: bool) -> None:
+                """Handle confirmation dialog result"""
                 if result:
                     self.cancel_requested = True
                     self.app.pop_screen()

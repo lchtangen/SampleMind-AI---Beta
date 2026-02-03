@@ -230,6 +230,7 @@ class PluginManager:
         plugin = self.plugins[plugin_name]
 
         def plugin_hook_callback(*args, **kwargs):
+            """Callback wrapper for plugin hooks"""
             return plugin.on_hook(hook_name, *args, **kwargs)
 
         self.hook_system.register_hook(hook_name, plugin_hook_callback)
