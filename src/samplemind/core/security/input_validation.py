@@ -166,6 +166,7 @@ class SafeSearchQuery(BaseModel):
     
     @validator('query')
     def sanitize_query(cls, v):
+        """Sanitize search query"""
         return InputSanitizer.sanitize_string(v, max_length=500)
 
 
@@ -175,6 +176,7 @@ class SafeFilename(BaseModel):
     
     @validator('filename')
     def sanitize_filename(cls, v):
+        """Sanitize filename"""
         return InputSanitizer.sanitize_filename(v)
 
 
@@ -184,6 +186,7 @@ class SafeUsername(BaseModel):
     
     @validator('username')
     def validate_username(cls, v):
+        """Validate username format"""
         if not InputSanitizer.validate_username(v):
             raise ValueError("Invalid username format. Use 3-30 alphanumeric characters, underscore, or hyphen.")
         return v
@@ -196,6 +199,7 @@ class SafeMetadata(BaseModel):
     
     @validator('key', 'value')
     def sanitize_field(cls, v):
+        """Sanitize metadata field"""
         return InputSanitizer.sanitize_string(v, max_length=1000)
 
 
