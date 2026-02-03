@@ -4,6 +4,7 @@ import '@/styles/globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
+import { AnalyticsProvider } from '@/components/analytics-provider';
 
 export const metadata: Metadata = {
   title: 'SampleMind AI - Next-Gen Music Production',
@@ -38,12 +39,13 @@ export default function RootLayout({
         "text-text-primary",
         inter.variable
       )}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-          disableTransitionOnChange
-        >
+        <AnalyticsProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem={false}
+            disableTransitionOnChange
+          >
           <div className="relative min-h-screen overflow-hidden">
             {/* Animated background elements */}
             <div className="fixed inset-0 -z-10">
@@ -71,6 +73,7 @@ export default function RootLayout({
             />
           </div>
         </ThemeProvider>
+        </AnalyticsProvider>
       </body>
     </html>
   );

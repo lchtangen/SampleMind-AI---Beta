@@ -34,6 +34,7 @@ from .routes import (
 from .routes import (
     settings as settings_router,
 )
+from .middleware.analytics import AnalyticsMiddleware
 
 # Configure logging
 logging.basicConfig(
@@ -178,6 +179,21 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     if not settings.GOOGLE_AI_API_KEY and not settings.OPENAI_API_KEY:
         logger.warning("⚠️  No AI API keys configured. AI features will be limited.")
 
+    # Initialize Analytics
+    try:
+        from samplemind.integrations.analytics import init_analytics
+        analytics = init_analytics(
+            api_key=settings.POSTHOG_API_KEY,
+            host=settings.POSTHOG_HOST
+        )
+        set_app_state("analytics", analytics)
+        if analytics.enabled:
+            logger.info("✓ PostHog analytics initialized")
+        else:
+            logger.info("ℹ️  Analytics disabled (PostHog API key not configured)")
+    except Exception as e:
+        logger.warning(f"Analytics initialization warning: {e}")
+
     logger.info(f"✅ SampleMind AI Backend v{__version__} ready!")
     logger.info(f"📊 Environment: {settings.ENVIRONMENT}")
     logger.info(f"🔧 Max workers: {settings.MAX_WORKERS}")
@@ -189,6 +205,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     logger.info("🛑 Shutting down SampleMind AI Backend...")
 
     from .dependencies import get_app_state
+
+    # Flush analytics
+    analytics = get_app_state("analytics")
+    if analytics:
+        try:
+            analytics.flush()
+            logger.info("✓ Analytics events flushed")
+        except Exception as e:
+            logger.debug(f"Error flushing analytics: {e}")
 
     # Close databases
     if get_app_state("mongodb"):
@@ -236,11 +261,9 @@ def create_application() -> FastAPI:
 
     # Register Custom Middleware
     # Note: Middleware is added in reverse order (last added runs first)
-    # but since we want CORS to be outermost, we add this BEFORE CORS?
-    # Actually add_middleware wraps. So last added = outer.
-    # If we want CORS outer, we add it LAST.
-    # So let's add Auth first here (inner), then CORS (outer).
+    # Order (from inner to outer): Auth → Analytics → CORS
     app.add_middleware(SimpleAuthMiddleware)
+    app.add_middleware(AnalyticsMiddleware)
 
     # Configure CORS
     app.add_middleware(

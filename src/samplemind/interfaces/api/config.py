@@ -87,6 +87,11 @@ class Settings(BaseSettings):
     REQUEST_TIMEOUT: int = 300  # 5 minutes
     AI_TIMEOUT: int = 120  # 2 minutes
 
+    # Analytics (PostHog)
+    POSTHOG_API_KEY: str = ""
+    POSTHOG_HOST: str = "https://app.posthog.com"
+    POSTHOG_ENABLED: bool = True
+
     class Config:
         """Pydantic configuration"""
         env_file = ".env"
