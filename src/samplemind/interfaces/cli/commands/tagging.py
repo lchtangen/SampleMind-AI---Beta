@@ -48,7 +48,7 @@ async def auto_tag(
     show_sources: bool = typer.Option(False, "--sources", "-s", help="Show tag sources"),
     min_confidence: float = typer.Option(0.5, "--min-confidence", help="Minimum confidence (0.0-1.0)"),
     save: bool = typer.Option(False, "--save", help="Save tags to database"),
-):
+) -> None:
     """Auto-generate tags for an audio file using AI and feature analysis"""
     try:
         # Handle file selection
@@ -144,7 +144,7 @@ async def auto_tag(
 def show_vocabulary(
     category: Optional[str] = typer.Option(None, "--category", "-c", help="Show specific category"),
     limit: int = typer.Option(20, "--limit", "-l", help="Number of tags to show"),
-):
+) -> None:
     """Show available tag vocabulary and categories"""
     vocab = get_vocabulary()
     stats = vocab.stats()
@@ -205,7 +205,7 @@ def show_vocabulary(
 def search_by_tags(
     tags: str = typer.Option(..., "--tags", "-t", help="Tags to search (comma-separated)"),
     limit: int = typer.Option(20, "--limit", "-l", help="Max results"),
-):
+) -> None:
     """Search library by tags (integrates with tag database)"""
     tag_list = [t.strip() for t in tags.split(",")]
 
@@ -248,7 +248,7 @@ def search_by_tags(
 def edit_tags(
     file: Optional[Path] = typer.Argument(None, help="Audio file to edit tags for"),
     interactive: bool = typer.Option(False, "--interactive", "-i", help="Launch file picker"),
-):
+) -> None:
     """Edit tags for a sample (interactive mode)"""
     # Handle file selection
     if not file or interactive:
@@ -283,7 +283,7 @@ async def batch_tag(
     folder: Optional[Path] = typer.Argument(None, help="Folder to batch tag"),
     interactive: bool = typer.Option(False, "--interactive", "-i", help="Launch folder picker"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Show results without saving"),
-):
+) -> None:
     """Batch tag all audio files in a folder"""
     # Handle folder selection
     if not folder or interactive:

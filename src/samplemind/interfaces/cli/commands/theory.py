@@ -41,7 +41,7 @@ def _get_analyzer():
 def theory_key(
     file: Path = typer.Argument(..., help="Audio file to analyze"),
     detail: bool = typer.Option(False, "--detail", "-d", help="Show detailed analysis with modulations"),
-):
+) -> None:
     """Detect the musical key of an audio file"""
     try:
         file = Path(file).expanduser().resolve()
@@ -104,7 +104,7 @@ def theory_chords(
     format: str = typer.Option("table", "--format", "-f", help="Output format (table, timeline, list)"),
     roman: bool = typer.Option(False, "--roman", "-r", help="Include Roman numeral analysis"),
     min_duration: float = typer.Option(0.25, "--min-duration", help="Minimum chord duration (seconds)"),
-):
+) -> None:
     """Detect chord progression in an audio file"""
     try:
         file = Path(file).expanduser().resolve()
@@ -196,7 +196,7 @@ def theory_chords(
 def theory_harmony(
     file: Path = typer.Argument(..., help="Audio file to analyze"),
     roman: bool = typer.Option(True, "--roman/--no-roman", help="Show Roman numeral analysis"),
-):
+) -> None:
     """Perform full harmonic analysis on an audio file"""
     try:
         file = Path(file).expanduser().resolve()
@@ -273,7 +273,7 @@ def theory_harmony(
 @utils.with_error_handling
 def theory_scale(
     key: str = typer.Argument(..., help="Key name (e.g., 'C major', 'Am', 'F# minor')"),
-):
+) -> None:
     """Show scale notes for a given key"""
     try:
         from ....core.analysis.chord_templates import NOTE_NAMES, NOTE_TO_PC

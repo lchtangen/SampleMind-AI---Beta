@@ -52,7 +52,7 @@ console = utils.console
 def convert_wav(
     file: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Convert audio to WAV"""
     try:
         output_file = output or file.with_suffix(".wav")
@@ -72,7 +72,7 @@ def convert_mp3(
     file: Path = typer.Argument(...),
     bitrate: int = typer.Option(320, "--bitrate"),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Convert audio to MP3"""
     try:
         output_file = output or file.with_suffix(".mp3")
@@ -91,7 +91,7 @@ def convert_mp3(
 def convert_flac(
     file: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Convert audio to FLAC"""
     try:
         output_file = output or file.with_suffix(".flac")
@@ -110,7 +110,7 @@ def convert_flac(
 def convert_ogg(
     file: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Convert audio to OGG"""
     try:
         output_file = output or file.with_suffix(".ogg")
@@ -129,7 +129,7 @@ def convert_ogg(
 def convert_aiff(
     file: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Convert audio to AIFF"""
     try:
         output_file = output or file.with_suffix(".aiff")
@@ -148,7 +148,7 @@ def convert_aiff(
 def convert_m4a(
     file: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Convert audio to M4A"""
     try:
         output_file = output or file.with_suffix(".m4a")
@@ -167,7 +167,7 @@ def convert_m4a(
 def convert_batch(
     folder: Path = typer.Argument(...),
     format: str = typer.Option("wav", "--format", "-f", help="Target format"),
-):
+) -> None:
     """Batch convert all audio files"""
     try:
         files = utils.get_audio_files(folder)
@@ -191,7 +191,7 @@ def audio_normalize(
     file: Path = typer.Argument(...),
     loudness: float = typer.Option(-14.0, "--loudness", "-l", help="Target LUFS"),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Normalize audio loudness (LUFS)"""
     try:
         output_file = output or file.with_stem(file.stem + "_normalized")
@@ -212,7 +212,7 @@ def audio_trim(
     file: Path = typer.Argument(...),
     threshold: float = typer.Option(-40, "--threshold", help="Silence threshold (dB)"),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Trim silence from beginning and end"""
     try:
         output_file = output or file.with_stem(file.stem + "_trimmed")
@@ -234,7 +234,7 @@ def audio_fade(
     fade_in: float = typer.Option(0.5, "--in", help="Fade in duration (s)"),
     fade_out: float = typer.Option(0.5, "--out", help="Fade out duration (s)"),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Add fade in/out"""
     try:
         output_file = output or file.with_stem(file.stem + "_faded")
@@ -255,7 +255,7 @@ def audio_split(
     file: Path = typer.Argument(...),
     duration: float = typer.Option(30, "--duration", help="Segment duration (s)"),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Split audio into segments"""
     try:
         output_dir = output or file.parent / f"{file.stem}_segments"
@@ -275,7 +275,7 @@ def audio_split(
 def audio_join(
     files: list[Path] = typer.Argument(..., help="Audio files to join"),
     output: Path = typer.Option(Path.cwd() / "joined.wav", "--output", "-o"),
-):
+) -> None:
     """Join multiple audio files"""
     try:
         with utils.ProgressTracker(f"Joining {len(files)} files"):
@@ -295,7 +295,7 @@ def audio_speed(
     file: Path = typer.Argument(...),
     factor: float = typer.Argument(..., help="Speed factor (1.0=100%, 1.5=150%)"),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Change audio speed without pitch change"""
     try:
         output_file = output or file.with_stem(file.stem + f"_speed{factor}")
@@ -316,7 +316,7 @@ def audio_pitch(
     file: Path = typer.Argument(...),
     semitones: float = typer.Argument(..., help="Pitch shift (semitones)"),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Change audio pitch"""
     try:
         output_file = output or file.with_stem(file.stem + f"_pitch{semitones}")
@@ -336,7 +336,7 @@ def audio_pitch(
 def audio_reverse(
     file: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Reverse audio"""
     try:
         output_file = output or file.with_stem(file.stem + "_reversed")
@@ -363,7 +363,7 @@ def stems_separate(
     output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output directory"),
     quality: StemQuality = typer.Option(StemQuality.STANDARD, "--quality", "-q", help="Quality preset (fast/standard/high)"),
     device: Optional[str] = typer.Option(None, "--device", "-d", help="Device (cpu, cuda, mps)"),
-):
+) -> None:
     """Separate audio into stems (vocals, drums, bass, other) using Demucs AI"""
     try:
         # Validate input file
@@ -504,7 +504,7 @@ def stems_vocals(
     output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
     quality: StemQuality = typer.Option(StemQuality.FAST, "--quality", "-q", help="Quality preset"),
     device: Optional[str] = typer.Option(None, "--device", "-d", help="Device (cpu, cuda, mps)"),
-):
+) -> None:
     """Extract vocals stem only (fast two-stem mode)"""
     try:
         _extract_single_stem(file, "vocals", output, quality, device, "stems:vocals")
@@ -520,7 +520,7 @@ def stems_drums(
     output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
     quality: StemQuality = typer.Option(StemQuality.FAST, "--quality", "-q", help="Quality preset"),
     device: Optional[str] = typer.Option(None, "--device", "-d", help="Device (cpu, cuda, mps)"),
-):
+) -> None:
     """Extract drums stem only (fast two-stem mode)"""
     try:
         _extract_single_stem(file, "drums", output, quality, device, "stems:drums")
@@ -536,7 +536,7 @@ def stems_bass(
     output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
     quality: StemQuality = typer.Option(StemQuality.STANDARD, "--quality", "-q", help="Quality preset"),
     device: Optional[str] = typer.Option(None, "--device", "-d", help="Device (cpu, cuda, mps)"),
-):
+) -> None:
     """Extract bass stem only (requires full separation)"""
     try:
         _extract_single_stem(file, "bass", output, quality, device, "stems:bass")
@@ -552,7 +552,7 @@ def stems_other(
     output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
     quality: StemQuality = typer.Option(StemQuality.STANDARD, "--quality", "-q", help="Quality preset"),
     device: Optional[str] = typer.Option(None, "--device", "-d", help="Device (cpu, cuda, mps)"),
-):
+) -> None:
     """Extract other/melody stem only (requires full separation)"""
     try:
         _extract_single_stem(file, "other", output, quality, device, "stems:other")
@@ -569,7 +569,7 @@ def stems_batch(
     quality: StemQuality = typer.Option(StemQuality.STANDARD, "--quality", "-q", help="Quality preset"),
     device: Optional[str] = typer.Option(None, "--device", "-d", help="Device (cpu, cuda, mps)"),
     extensions: str = typer.Option("wav,mp3,flac,aiff,m4a", "--ext", help="File extensions to process"),
-):
+) -> None:
     """Batch separate stems for all audio files in a folder"""
     try:
         folder = Path(folder).expanduser().resolve()
@@ -654,7 +654,7 @@ def stems_batch(
 @utils.with_error_handling
 def audio_duration(
     file: Path = typer.Argument(...),
-):
+) -> None:
     """Get audio duration"""
     try:
         console.print(f"[bold]{file.name}[/bold]")
@@ -669,7 +669,7 @@ def audio_duration(
 @utils.with_error_handling
 def audio_info(
     file: Path = typer.Argument(...),
-):
+) -> None:
     """Show full audio information"""
     try:
         table = Table(title=f"Audio Info: {file.name}", show_header=False)
@@ -691,7 +691,7 @@ def audio_info(
 @utils.with_error_handling
 def audio_validate(
     file: Path = typer.Argument(...),
-):
+) -> None:
     """Validate audio file integrity"""
     try:
         with utils.ProgressTracker("Validating"):

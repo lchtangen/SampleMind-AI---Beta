@@ -23,7 +23,7 @@ async def extract_groove(
     name: Optional[str] = typer.Option(None, "--name", "-n", help="Groove name"),
     tempo: Optional[float] = typer.Option(None, "--tempo", "-t", help="Tempo in BPM"),
     save_path: Optional[Path] = typer.Option(None, "--save", "-s", help="Save groove to file"),
-):
+) -> None:
     """Extract groove template from drum loop"""
     try:
         if not file:
@@ -79,7 +79,7 @@ async def extract_groove(
 def apply_groove(
     groove_file: Path = typer.Argument(..., help="Groove template file"),
     midi_file: Optional[Path] = typer.Option(None, "--midi", "-m", help="MIDI file to apply groove to"),
-):
+) -> None:
     """Apply groove template to MIDI"""
     console.print()
     console.print("[yellow]⏳ MIDI groove application coming soon![/yellow]")

@@ -44,7 +44,7 @@ def similar_find(
     tempo_min: Optional[float] = typer.Option(None, "--tempo-min", help="Filter: minimum BPM"),
     tempo_max: Optional[float] = typer.Option(None, "--tempo-max", help="Filter: maximum BPM"),
     key: Optional[str] = typer.Option(None, "--key", "-k", help="Filter: musical key (e.g., 'C', 'Am')"),
-):
+) -> None:
     """Find similar samples to a query file"""
     try:
         file = Path(file).expanduser().resolve()
@@ -127,7 +127,7 @@ def similar_index(
     recursive: bool = typer.Option(True, "--recursive/--no-recursive", "-r", help="Include subdirectories"),
     extensions: str = typer.Option("wav,mp3,flac,aiff,m4a,ogg", "--ext", help="File extensions to index"),
     rebuild: bool = typer.Option(False, "--rebuild", help="Clear and rebuild entire index"),
-):
+) -> None:
     """Build similarity index for a folder of audio files"""
     try:
         folder = Path(folder).expanduser().resolve()
@@ -187,7 +187,7 @@ def similar_index(
 def similar_compare(
     file1: Path = typer.Argument(..., help="First audio file"),
     file2: Path = typer.Argument(..., help="Second audio file"),
-):
+) -> None:
     """Compare similarity between two audio files"""
     try:
         file1 = Path(file1).expanduser().resolve()
@@ -274,7 +274,7 @@ def similar_stats():
 @utils.with_error_handling
 def similar_clear(
     confirm: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation"),
-):
+) -> None:
     """Clear the similarity database"""
     try:
         if not confirm:

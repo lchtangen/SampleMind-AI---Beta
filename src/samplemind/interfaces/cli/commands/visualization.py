@@ -33,7 +33,7 @@ def viz_waveform(
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
     size: str = typer.Option("1920x1080", "--size", help="Image size (WIDTHxHEIGHT)"),
     color: str = typer.Option("blue", "--color", help="Color scheme"),
-):
+) -> None:
     """Generate waveform visualization"""
     try:
         output_file = output or file.with_suffix(".png").with_stem(file.stem + "_waveform")
@@ -54,7 +54,7 @@ def viz_spectrogram(
     file: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
     cmap: str = typer.Option("viridis", "--cmap", help="Colormap"),
-):
+) -> None:
     """Generate spectrogram visualization"""
     try:
         output_file = output or file.with_suffix(".png").with_stem(file.stem + "_spectrogram")
@@ -74,7 +74,7 @@ def viz_spectrogram(
 def viz_chromagram(
     file: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Generate chromagram (chroma over time)"""
     try:
         output_file = output or file.with_suffix(".png").with_stem(file.stem + "_chromagram")
@@ -94,7 +94,7 @@ def viz_chromagram(
 def viz_mfcc(
     file: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Generate MFCC visualization"""
     try:
         output_file = output or file.with_suffix(".png").with_stem(file.stem + "_mfcc")
@@ -114,7 +114,7 @@ def viz_mfcc(
 def viz_tempogram(
     file: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Generate tempogram (tempo over time)"""
     try:
         output_file = output or file.with_suffix(".png").with_stem(file.stem + "_tempogram")
@@ -135,7 +135,7 @@ def viz_frequency(
     file: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
     scale: str = typer.Option("log", "--scale", help="Frequency scale (linear|log)"),
-):
+) -> None:
     """Generate frequency response curve"""
     try:
         output_file = output or file.with_suffix(".png").with_stem(file.stem + "_frequency")
@@ -155,7 +155,7 @@ def viz_frequency(
 def viz_phase(
     file: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Generate phase visualization"""
     try:
         output_file = output or file.with_suffix(".png").with_stem(file.stem + "_phase")
@@ -175,7 +175,7 @@ def viz_phase(
 def viz_stereo(
     file: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Generate stereo field visualization"""
     try:
         output_file = output or file.with_suffix(".png").with_stem(file.stem + "_stereo")
@@ -200,7 +200,7 @@ def viz_export(
     file: Path = typer.Argument(...),
     format: str = typer.Option("png", "--format", "-f", help="Export format (png|svg|pdf)"),
     dpi: int = typer.Option(300, "--dpi", help="DPI for export"),
-):
+) -> None:
     """Export visualization to file"""
     try:
         output_file = file.with_suffix(f".{format}").with_stem(file.stem + "_viz")
@@ -220,7 +220,7 @@ def viz_compare(
     file1: Path = typer.Argument(...),
     file2: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Compare spectrograms of two files"""
     try:
         output_file = output or Path(f"comparison_{file1.stem}_vs_{file2.stem}.png")
@@ -240,7 +240,7 @@ def viz_compare(
 def viz_compare_batch(
     folder: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """Compare all samples in folder"""
     try:
         files = utils.get_audio_files(folder)
@@ -261,7 +261,7 @@ def viz_compare_batch(
 def viz_heatmap(
     folder: Path = typer.Argument(...),
     metric: str = typer.Option("bpm", "--metric", help="Metric for heatmap (bpm|key|genre)"),
-):
+) -> None:
     """Generate sample BPM/key/genre heatmap"""
     try:
         files = utils.get_audio_files(folder)
@@ -281,7 +281,7 @@ def viz_heatmap(
 @utils.with_error_handling
 def viz_timeline(
     folder: Path = typer.Argument(...),
-):
+) -> None:
     """Generate sample timeline visualization"""
     try:
         files = utils.get_audio_files(folder)
@@ -301,7 +301,7 @@ def viz_timeline(
 @utils.with_error_handling
 def viz_interactive(
     file: Path = typer.Argument(...),
-):
+) -> None:
     """Open interactive waveform viewer"""
     try:
         with utils.ProgressTracker("Launching viewer"):
@@ -320,7 +320,7 @@ def viz_interactive(
 def viz_export_batch(
     folder: Path = typer.Argument(...),
     format: str = typer.Option("png", "--format", "-f"),
-):
+) -> None:
     """Batch export visualizations for all files"""
     try:
         files = utils.get_audio_files(folder)

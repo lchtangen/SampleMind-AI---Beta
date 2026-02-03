@@ -34,7 +34,7 @@ console = utils.console
 def meta_show(
     file: Path = typer.Argument(..., help="Audio file"),
     format: str = typer.Option("table", "--format", "-f"),
-):
+) -> None:
     """Display all metadata"""
     try:
         table = Table(title=f"Metadata: {file.name}", show_header=False)
@@ -106,7 +106,7 @@ def meta_export(
     file: Path = typer.Argument(...),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
     format: str = typer.Option("json", "--format", "-f"),
-):
+) -> None:
     """Export metadata to file"""
     try:
         with utils.ProgressTracker("Exporting metadata"):
@@ -125,7 +125,7 @@ def meta_export(
 def meta_diff(
     file1: Path = typer.Argument(...),
     file2: Path = typer.Argument(...),
-):
+) -> None:
     """Compare metadata between two files"""
     try:
         table = Table(title="Metadata Comparison", show_header=True, header_style="bold cyan")
@@ -149,7 +149,7 @@ def meta_diff(
 @utils.with_error_handling
 def meta_validate(
     file: Path = typer.Argument(...),
-):
+) -> None:
     """Validate metadata integrity"""
     try:
         with utils.ProgressTracker("Validating"):
@@ -170,7 +170,7 @@ def meta_validate(
 @utils.with_error_handling
 def meta_edit(
     file: Path = typer.Argument(...),
-):
+) -> None:
     """Interactive metadata editor"""
     try:
         console.print(f"[bold cyan]Editing metadata: {file.name}[/bold cyan]\n")
@@ -194,7 +194,7 @@ def meta_set(
     file: Path = typer.Argument(...),
     key: str = typer.Argument(...),
     value: str = typer.Argument(...),
-):
+) -> None:
     """Set single metadata value"""
     try:
         with utils.ProgressTracker(f"Setting {key}"):
@@ -212,7 +212,7 @@ def meta_set(
 def meta_add_tag(
     file: Path = typer.Argument(...),
     tag: str = typer.Argument(...),
-):
+) -> None:
     """Add tag to file"""
     try:
         with utils.ProgressTracker(f"Adding tag: {tag}"):
@@ -230,7 +230,7 @@ def meta_add_tag(
 def meta_remove_tag(
     file: Path = typer.Argument(...),
     tag: str = typer.Argument(...),
-):
+) -> None:
     """Remove tag from file"""
     try:
         with utils.ProgressTracker(f"Removing tag: {tag}"):
@@ -248,7 +248,7 @@ def meta_remove_tag(
 def meta_copy(
     source: Path = typer.Argument(...),
     destination: Path = typer.Argument(...),
-):
+) -> None:
     """Copy metadata from one file to another"""
     try:
         with utils.ProgressTracker("Copying metadata"):
@@ -266,7 +266,7 @@ def meta_copy(
 def meta_clear(
     file: Path = typer.Argument(...),
     confirm: bool = typer.Option(False, "--confirm", "-y"),
-):
+) -> None:
     """Clear all metadata"""
     try:
         if not confirm and not typer.confirm(f"Clear all metadata from {file.name}?"):
@@ -291,7 +291,7 @@ def meta_clear(
 def meta_batch_tag(
     folder: Path = typer.Argument(...),
     tag: str = typer.Option(..., "--tag", "-t", help="Tag to add"),
-):
+) -> None:
     """Batch add tag to all files"""
     try:
         files = utils.get_audio_files(folder)
@@ -309,7 +309,7 @@ def meta_batch_tag(
 @utils.with_error_handling
 def meta_batch_fix(
     folder: Path = typer.Argument(...),
-):
+) -> None:
     """Batch fix metadata issues"""
     try:
         files = utils.get_audio_files(folder)
@@ -327,7 +327,7 @@ def meta_batch_fix(
 @utils.with_error_handling
 def meta_batch_sync(
     folder: Path = typer.Argument(...),
-):
+) -> None:
     """Batch sync metadata from AI analysis"""
     try:
         files = utils.get_audio_files(folder)
@@ -346,7 +346,7 @@ def meta_batch_sync(
 def meta_batch_export(
     folder: Path = typer.Argument(...),
     output: Path = typer.Option(Path.cwd() / "metadata_export", "--output", "-o"),
-):
+) -> None:
     """Batch export metadata for all files"""
     try:
         files = utils.get_audio_files(folder)
@@ -365,7 +365,7 @@ def meta_batch_export(
 def meta_batch_import(
     folder: Path = typer.Argument(...),
     source: Path = typer.Option(..., "--source", "-s", help="Metadata file/folder"),
-):
+) -> None:
     """Batch import metadata from file"""
     try:
         with utils.ProgressTracker("Importing metadata"):
@@ -383,7 +383,7 @@ def meta_batch_import(
 def meta_batch_clear(
     folder: Path = typer.Argument(...),
     confirm: bool = typer.Option(False, "--confirm", "-y"),
-):
+) -> None:
     """Batch clear metadata from all files"""
     try:
         files = utils.get_audio_files(folder)
@@ -404,7 +404,7 @@ def meta_batch_clear(
 @utils.with_error_handling
 def meta_batch_validate(
     folder: Path = typer.Argument(...),
-):
+) -> None:
     """Batch validate metadata integrity"""
     try:
         files = utils.get_audio_files(folder)
@@ -422,7 +422,7 @@ def meta_batch_validate(
 @utils.with_error_handling
 def meta_batch_standardize(
     folder: Path = typer.Argument(...),
-):
+) -> None:
     """Batch standardize metadata format"""
     try:
         files = utils.get_audio_files(folder)
@@ -444,7 +444,7 @@ def meta_batch_standardize(
 @utils.with_error_handling
 def meta_recover(
     file: Path = typer.Argument(...),
-):
+) -> None:
     """Recover lost metadata"""
     try:
         with utils.ProgressTracker("Recovering metadata"):
@@ -496,7 +496,7 @@ def meta_snapshot_list():
 @utils.with_error_handling
 def meta_restore(
     snapshot_id: str = typer.Argument(..., help="Snapshot ID"),
-):
+) -> None:
     """Restore metadata from snapshot"""
     try:
         if not typer.confirm(f"Restore from {snapshot_id}?"):

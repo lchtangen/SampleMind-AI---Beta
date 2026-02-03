@@ -42,7 +42,7 @@ async def ai_analyze(
     file: Path = typer.Argument(..., help="Audio file"),
     format: str = typer.Option("table", "--format", "-f"),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
-):
+) -> None:
     """AI-powered comprehensive analysis"""
     try:
         with utils.ProgressTracker("🤖 AI analyzing"):
@@ -74,7 +74,7 @@ async def ai_analyze(
 def ai_classify(
     file: Path = typer.Argument(..., help="Audio file"),
     confidence: bool = typer.Option(False, "--confidence", help="Show confidence scores"),
-):
+) -> None:
     """AI audio classification (genre, mood, instrument)"""
     try:
         with utils.ProgressTracker("🎵 Classifying"):
@@ -102,7 +102,7 @@ def ai_classify(
 def ai_tag(
     file: Path = typer.Argument(..., help="Audio file"),
     apply: bool = typer.Option(False, "--apply", help="Apply tags to file"),
-):
+) -> None:
     """AI auto-tagging for samples"""
     try:
         with utils.ProgressTracker("🏷️  Auto-tagging"):
@@ -129,7 +129,7 @@ def ai_tag(
 def ai_suggest(
     file: Path = typer.Argument(..., help="Reference audio file"),
     count: int = typer.Option(5, "--count", "-n", help="Number of suggestions"),
-):
+) -> None:
     """AI-powered similar sample suggestions"""
     try:
         with utils.ProgressTracker("🔍 Finding similar samples"):
@@ -159,7 +159,7 @@ def ai_suggest(
 def ai_coach(
     file: Path = typer.Argument(..., help="Audio file to analyze"),
     category: str = typer.Option("general", "--category", help="Coaching category (general|mixing|mastering|sound-design)"),
-):
+) -> None:
     """AI production coaching for your track"""
     try:
         with utils.ProgressTracker("💡 AI Coach analyzing"):
@@ -189,7 +189,7 @@ def ai_coach(
 def ai_preset(
     file: Path = typer.Argument(..., help="Audio file"),
     type: str = typer.Option("eq", "--type", help="Preset type (eq|compressor|reverb)"),
-):
+) -> None:
     """Generate EQ/compressor/reverb AI presets"""
     try:
         with utils.ProgressTracker("⚙️  Generating presets"):
@@ -217,7 +217,7 @@ def ai_preset(
 def ai_mastering(
     file: Path = typer.Argument(..., help="Audio file"),
     reference: Optional[Path] = typer.Option(None, "--reference", help="Reference track"),
-):
+) -> None:
     """AI mastering suggestions and analysis"""
     try:
         with utils.ProgressTracker("🎛️  AI Mastering analysis"):
@@ -245,7 +245,7 @@ def ai_mastering(
 @utils.with_error_handling
 def ai_reference(
     file: Path = typer.Argument(..., help="Reference track to analyze"),
-):
+) -> None:
     """Analyze track as reference for your mix"""
     try:
         with utils.ProgressTracker("📊 Analyzing reference"):
@@ -273,7 +273,7 @@ def ai_reference(
 def ai_remix(
     file: Path = typer.Argument(..., help="Audio file"),
     style: str = typer.Option("minimal", "--style", help="Remix style"),
-):
+) -> None:
     """AI remix ideas and suggestions"""
     try:
         with utils.ProgressTracker("🎵 Generating remix ideas"):
@@ -300,7 +300,7 @@ def ai_remix(
 @utils.with_error_handling
 def ai_mix_tips(
     file: Path = typer.Argument(..., help="Audio file"),
-):
+) -> None:
     """AI mixing tips for your track"""
     try:
         with utils.ProgressTracker("🎚️  Analyzing mix"):
@@ -372,7 +372,7 @@ def ai_provider_list():
 @utils.with_error_handling
 def ai_provider_set(
     provider: str = typer.Argument(..., help="Provider name (gemini|openai|anthropic|ollama)"),
-):
+) -> None:
     """Set default AI provider"""
     try:
         with utils.ProgressTracker(f"Setting provider to {provider}"):
@@ -402,7 +402,7 @@ def ai_model():
 @utils.with_error_handling
 def ai_model_list(
     provider: str = typer.Option("all", "--provider", "-p", help="Filter by provider"),
-):
+) -> None:
     """List available AI models"""
     try:
         table = Table(title="Available AI Models", show_header=True, header_style="bold cyan")
@@ -428,7 +428,7 @@ def ai_model_list(
 @utils.with_error_handling
 def ai_model_set(
     model: str = typer.Argument(..., help="Model name"),
-):
+) -> None:
     """Set default AI model"""
     try:
         with utils.ProgressTracker(f"Setting model to {model}"):
@@ -445,7 +445,7 @@ def ai_model_set(
 @utils.with_error_handling
 def ai_key_test(
     provider: str = typer.Option("all", "--provider", "-p", help="Test specific provider"),
-):
+) -> None:
     """Test API key connectivity"""
     try:
         with utils.ProgressTracker("Testing API connections"):
@@ -471,7 +471,7 @@ def ai_key_test(
 @utils.with_error_handling
 def ai_usage(
     provider: str = typer.Option("all", "--provider", "-p"),
-):
+) -> None:
     """Show AI API usage and quotas"""
     try:
         table = Table(title="AI Usage Statistics", show_header=True, header_style="bold cyan")
@@ -518,7 +518,7 @@ def ai_config():
 @utils.with_error_handling
 def ai_config_temperature(
     value: float = typer.Argument(..., help="Temperature (0.0-1.0)"),
-):
+) -> None:
     """Set AI temperature (creativity)"""
     try:
         if not 0.0 <= value <= 1.0:
@@ -540,7 +540,7 @@ def ai_config_temperature(
 @utils.with_error_handling
 def ai_config_max_tokens(
     value: int = typer.Argument(..., help="Max tokens"),
-):
+) -> None:
     """Set maximum tokens for AI responses"""
     try:
         with utils.ProgressTracker(f"Setting max tokens to {value}"):
@@ -557,7 +557,7 @@ def ai_config_max_tokens(
 @utils.with_error_handling
 def ai_config_cache(
     enable: bool = typer.Argument(..., help="Enable or disable"),
-):
+) -> None:
     """Enable/disable AI response caching"""
     try:
         status = "enabled" if enable else "disabled"
@@ -576,7 +576,7 @@ def ai_config_cache(
 @utils.with_error_handling
 def ai_config_offline(
     enable: bool = typer.Argument(..., help="Enable or disable"),
-):
+) -> None:
     """Enable/disable offline-first AI mode (use local models only)"""
     try:
         status = "enabled" if enable else "disabled"
@@ -597,7 +597,7 @@ def ai_config_offline(
 @utils.with_error_handling
 def ai_config_rate_limit(
     rps: float = typer.Argument(..., help="Requests per second"),
-):
+) -> None:
     """Set AI request rate limit"""
     try:
         with utils.ProgressTracker(f"Setting rate limit to {rps} RPS"):
@@ -614,7 +614,7 @@ def ai_config_rate_limit(
 @utils.with_error_handling
 def ai_config_timeout(
     seconds: int = typer.Argument(..., help="Timeout in seconds"),
-):
+) -> None:
     """Set AI request timeout"""
     try:
         with utils.ProgressTracker(f"Setting timeout to {seconds}s"):
@@ -678,7 +678,7 @@ def ai_features():
 @utils.with_error_handling
 def ai_features_enable(
     feature: str = typer.Argument(..., help="Feature name"),
-):
+) -> None:
     """Enable AI feature"""
     try:
         with utils.ProgressTracker(f"Enabling {feature}"):
@@ -695,7 +695,7 @@ def ai_features_enable(
 @utils.with_error_handling
 def ai_features_disable(
     feature: str = typer.Argument(..., help="Feature name"),
-):
+) -> None:
     """Disable AI feature"""
     try:
         with utils.ProgressTracker(f"Disabling {feature}"):
@@ -712,7 +712,7 @@ def ai_features_disable(
 @utils.with_error_handling
 def ai_features_test(
     feature: str = typer.Argument(..., help="Feature to test"),
-):
+) -> None:
     """Test AI feature"""
     try:
         with utils.ProgressTracker(f"Testing {feature}"):
