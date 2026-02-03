@@ -22,6 +22,7 @@ from rich.table import Table
 from rich.panel import Panel
 
 from . import utils
+from samplemind.utils.file_picker import select_audio_file
 
 # Create analyze app group
 app = typer.Typer(
@@ -39,13 +40,24 @@ console = utils.console
 @utils.with_error_handling
 @utils.async_command
 async def analyze_full(
-    file: Path = typer.Argument(..., help="Audio file to analyze"),
+    file: Optional[Path] = typer.Argument(None, help="Audio file to analyze"),
     output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file"),
     format: str = typer.Option("table", "--format", "-f", help="Output format (json|csv|yaml|table)"),
     show_profile: bool = typer.Option(False, "--profile", help="Show profiling info"),
+    interactive: bool = typer.Option(False, "--interactive", "-i", help="Launch file picker"),
 ):
     """Run comprehensive (DETAILED level) analysis with all features"""
     try:
+        # Handle file selection
+        if not file or interactive:
+            console.print("[cyan]📁 Opening file picker...[/cyan]")
+            selected_file = select_audio_file(title="Select Audio File for Full Analysis")
+            if not selected_file:
+                console.print("[yellow]❌ No file selected[/yellow]")
+                raise typer.Exit(1)
+            file = selected_file
+            console.print(f"[green]✅ Selected: {file.name}[/green]")
+
         with utils.ProgressTracker("🔍 Analyzing (DETAILED level)"):
             result = await utils.analyze_file_async(file, "DETAILED")
 
@@ -139,10 +151,21 @@ async def analyze_professional(
 @utils.with_error_handling
 @utils.async_command
 async def analyze_quick(
-    file: Path = typer.Argument(..., help="Audio file to analyze"),
+    file: Optional[Path] = typer.Argument(None, help="Audio file to analyze"),
+    interactive: bool = typer.Option(False, "--interactive", "-i", help="Launch file picker"),
 ):
     """Ultra-fast analysis (< 1 second)"""
     try:
+        # Handle file selection
+        if not file or interactive:
+            console.print("[cyan]📁 Opening file picker...[/cyan]")
+            selected_file = select_audio_file(title="Select Audio File for Quick Analysis")
+            if not selected_file:
+                console.print("[yellow]❌ No file selected[/yellow]")
+                raise typer.Exit(1)
+            file = selected_file
+            console.print(f"[green]✅ Selected: {file.name}[/green]")
+
         with utils.ProgressTracker("⚡ Quick analysis"):
             result = await utils.analyze_file_async(file, "BASIC")
 

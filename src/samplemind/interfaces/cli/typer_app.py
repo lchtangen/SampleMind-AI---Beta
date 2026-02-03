@@ -51,10 +51,15 @@ from .commands import (
     analyze,
     audio,
     daw,
+    groove,
+    layering,
     library,
+    mastering,
     metadata,
+    recent,
     reporting,
     similarity,
+    tagging,
     theory,
     visualization,
 )
@@ -191,7 +196,7 @@ def version():
 def register_command_groups():
     """Register all command groups with the main app"""
 
-    # Register all 10 command groups (215+ total commands)
+    # Register command groups - Core (215+ original)
     app.add_typer(analyze.app, name="analyze", help="🎵 Audio analysis & feature extraction (40 commands)")
     app.add_typer(library.app, name="library", help="📁 Sample library management (50 commands)")
     app.add_typer(ai.app, name="ai", help="🤖 AI-powered features (30 commands)")
@@ -202,6 +207,13 @@ def register_command_groups():
     app.add_typer(similarity.app, name="similar", help="🔍 Sample similarity search (5 commands)")
     app.add_typer(theory.app, name="theory", help="🎼 Music theory analysis (4 commands)")
     app.add_typer(daw.app, name="daw", help="🎹 DAW integration (4 commands)")
+
+    # Register Phase 10+ Premium Features
+    app.add_typer(tagging.app, name="tag", help="🏷️  AI-powered sample tagging")
+    app.add_typer(mastering.app, name="mastering", help="🎚️  Professional mastering assistant")
+    app.add_typer(layering.app, name="layer", help="🔀 Sample layering & phase analysis")
+    app.add_typer(groove.app, name="groove", help="🎵 Groove template extraction")
+    app.add_typer(recent.app, name="recent", help="📁 Quick access to recent files")
 
 
 # Register command groups at module load

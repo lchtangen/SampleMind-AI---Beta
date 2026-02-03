@@ -24,6 +24,7 @@ from rich.table import Table
 from samplemind.ai.classification.classifier import AIClassifier
 from samplemind.core.engine.audio_engine import AudioEngine
 from samplemind.services.organizer import OrganizationEngine
+from samplemind.utils.file_picker import select_directory
 
 from . import utils
 
@@ -42,13 +43,24 @@ console = utils.console
 @app.command("organize")
 @utils.with_error_handling
 def library_organize(
-    folder: Path = typer.Argument(..., help="Library folder to organize"),
+    folder: Optional[Path] = typer.Argument(None, help="Library folder to organize"),
     by: str = typer.Option("{genre}/{bpm}/{key}/{filename}", "--pattern", "-p", help="Organization pattern"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Show changes without applying"),
     strategy: str = typer.Option("move", "--strategy", "-s", help="move or copy"),
+    interactive: bool = typer.Option(False, "--interactive", "-i", help="Launch folder picker"),
 ):
     """Auto-organize library by metadata (BPM, key, genre)"""
     import asyncio
+
+    # Handle folder selection
+    if not folder or interactive:
+        console.print("[cyan]📁 Opening folder picker...[/cyan]")
+        selected_folder = select_directory(title="Select Library Folder to Organize")
+        if not selected_folder:
+            console.print("[yellow]❌ No folder selected[/yellow]")
+            raise typer.Exit(1)
+        folder = selected_folder
+        console.print(f"[green]✅ Selected: {folder}[/green]")
 
     async def _process():
         files = utils.get_audio_files(folder)
