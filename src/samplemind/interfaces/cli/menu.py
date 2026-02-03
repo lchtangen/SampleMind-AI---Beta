@@ -34,6 +34,7 @@ from rich.text import Text
 sys.path.append(str(Path(__file__).parent.parent.parent.parent))
 
 from samplemind.core.engine.audio_engine import AnalysisLevel, AudioEngine
+from samplemind.core.generation.chain_recommender import ChainRecommender
 from samplemind.core.library.pack_creator import PackTemplate, SamplePackCreator
 from samplemind.core.loader import AdvancedAudioLoader, LoadingStrategy
 from samplemind.core.processing.audio_effects import AudioEffectsProcessor, EffectType
@@ -67,6 +68,7 @@ class SampleMindCLI:
         self.effects_processor: AudioEffectsProcessor | None = None
         self.midi_generator: MIDIGenerator | None = None
         self.pack_creator: SamplePackCreator | None = None
+        self.chain_recommender: ChainRecommender | None = None
         self.initialized = False
         self.current_directory = Path.cwd()
 
@@ -208,6 +210,7 @@ class SampleMindCLI:
         menu_table.add_row("B", "🎛️ Audio Effects", "Apply professional audio effects")
         menu_table.add_row("C", "🎹 Audio to MIDI", "Convert audio to MIDI")
         menu_table.add_row("D", "📦 Create Sample Pack", "Create organized sample packs")
+        menu_table.add_row("E", "🔗 Chain Recommender", "Build kits from seed sample")
         menu_table.add_row("0", "🚪 Exit", "Quit SampleMind AI")
 
         panel = Panel(
@@ -2015,6 +2018,70 @@ class SampleMindCLI:
                 shutil.make_archive(str(pack.pack_dir), 'zip', pack.pack_dir)
                 console.print(f"[green]✅ ZIP exported to: {zip_path}[/green]")
 
+    def run_chain_recommender(self):
+        """Run Intelligent Chain Recommender"""
+        console.print("\n[bold blue]🔗 Intelligent Chain Recommender[/bold blue]")
+
+        # Select Seed
+        console.print("[cyan]📁 Select Seed Sample (e.g., your Kick drum)...[/cyan]")
+        seed_path = select_audio_file()
+        if not seed_path:
+            return
+
+        # Select Library/Search Path
+        console.print("\n[cyan]📁 Select Library/Folder to search for candidates...[/cyan]")
+        library_path = select_directory(title="Select Library Folder")
+        if not library_path:
+            library_path = seed_path.parent
+
+        if not self.chain_recommender:
+            self.chain_recommender = ChainRecommender(library_path=None)
+
+        # Build Chain
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console
+        ) as progress:
+            task = progress.add_task("Building Kit Chain...", total=None)
+
+            chain_ctx = self.chain_recommender.build_chain(
+                seed_sample=seed_path,
+                template_name="standard_kit",
+                search_paths=[library_path]
+            )
+
+            progress.remove_task(task)
+
+        # Display Results
+        if not chain_ctx.nodes:
+            console.print("[red]❌ Failed to build chain[/red]")
+            return
+
+        console.print("\n[bold green]✅ Proposed Chain:[/bold green]")
+        table = Table(box=None)
+        table.add_column("Slot", style="cyan")
+        table.add_column("Sample", style="white")
+        table.add_column("Score", style="yellow")
+
+        for node in chain_ctx.nodes:
+            table.add_row(node.slot_name, node.file_path.name, f"{node.compatibility_score:.2f}")
+
+        console.print(table)
+
+        # Save/Export Option
+        if Confirm.ask("💾 Export this kit to a folder?"):
+            kit_name = Prompt.ask("Kit Name", default=f"Kit_from_{seed_path.stem}")
+            output_dir = Path.cwd() / "kits" / kit_name
+            output_dir.mkdir(parents=True, exist_ok=True)
+
+            import shutil
+            for node in chain_ctx.nodes:
+                dest = output_dir / f"{node.slot_name}_{node.file_path.name}"
+                shutil.copy2(node.file_path, dest)
+
+            console.print(f"[green]✅ Kit exported to: {output_dir}[/green]")
+
     def _save_analysis(self, ai_result, loaded_audio, features, output_file) -> None:
         """Save analysis results to file"""
         import json
@@ -2059,7 +2126,7 @@ class SampleMindCLI:
                 console.print("\n")
                 self.display_main_menu()
 
-                choice = Prompt.ask("\n🎵 Select option", choices=["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "a", "B", "b", "C", "c", "D", "d"])
+                choice = Prompt.ask("\n🎵 Select option", choices=["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "a", "B", "b", "C", "c", "D", "d", "E", "e"])
 
                 if choice == "0":
                     console.print("\n[bold blue]👋 Thank you for using SampleMind AI v6![/bold blue]")
@@ -2090,6 +2157,8 @@ class SampleMindCLI:
                     self.run_midi_conversion()
                 elif choice.upper() == "D":
                     self.run_pack_creation()
+                elif choice.upper() == "E":
+                    self.run_chain_recommender()
 
                 # Pause before showing menu again
                 if choice != "0":
