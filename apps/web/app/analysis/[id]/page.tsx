@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, type ReactNode, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -27,11 +28,18 @@ import { useNotification } from '@/contexts/NotificationContext';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { BentoGrid } from '@/components/layouts/BentoGrid';
 import { AdvancedWaveform } from '@/components/audio/AdvancedWaveform';
-import { ThreeJSAudioVisualizer } from '@/components/audio/ThreeJSAudioVisualizer';
 import { MusicTheoryCard } from '@/components/analysis/MusicTheoryCard';
 import { AIConfidenceMeter } from '@/components/analysis/AIConfidenceMeter';
 import { AnalysisProgress } from '@/components/analysis/AnalysisProgress';
 import { AnalysisDetailSkeleton } from '@/components/ui/SkeletonLoaders';
+
+// Lazy load heavy 3D component
+const ThreeJSAudioVisualizer = dynamic(() =>
+  import('@/components/audio/ThreeJSAudioVisualizer').then(mod => ({
+    default: mod.ThreeJSAudioVisualizer
+  })),
+  { ssr: false }
+);
 
 interface AudioFeatures {
   tempo?: number;
@@ -250,7 +258,7 @@ function AnalysisContent() {
       height: 'large' as const,
       children: (
         <Suspense fallback={<div className="p-4 text-slate-400">Loading visualizer...</div>}>
-          <ThreeJSVisualizer preset="waves" qualityLevel="high" />
+          <ThreeJSAudioVisualizer preset="waves" qualityLevel="high" />
         </Suspense>
       ),
     },

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SampleMind - Max Device Prototype</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="device-frame">
+        <!-- Header -->
+        <div class="header">
+            <h1>SampleMind</h1>
+            <div class="status" id="status">Ready</div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="analyze">Analyze</button>
+            <button class="tab-btn" data-tab="similar">Similar</button>
+            <button class="tab-btn" data-tab="sync">Project Sync</button>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content">
+            <!-- Tab 1: Analyze -->
+            <div class="tab-content active" id="analyze">
+                <div class="tab-section">
+                    <label for="audio-file">Audio File:</label>
+                    <input type="file" id="audio-file" accept="audio/*">
+
+                    <label for="analysis-level">Level:</label>
+                    <select id="analysis-level">
+                        <option value="BASIC">Basic</option>
+                        <option value="STANDARD" selected>Standard</option>
+                        <option value="DETAILED">Detailed</option>
+                        <option value="PROFESSIONAL">Professional</option>
+                    </select>
+
+                    <button id="analyze-btn" class="primary-btn">Analyze</button>
+                </div>
+
+                <div id="analysis-results" class="results hidden">
+                    <div class="result-item">
+                        <span class="label">Tempo:</span>
+                        <span class="value" id="tempo-value">--</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">Key:</span>
+                        <span class="value" id="key-value">--</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">Genre:</span>
+                        <span class="value" id="genre-value">--</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">Energy:</span>
+                        <div class="meter">
+                            <div class="meter-fill" id="energy-meter" style="width: 0%"></div>
+                        </div>
+                        <span class="value" id="energy-value">--</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">Confidence:</span>
+                        <span class="value" id="confidence-value">--</span>
+                    </div>
+                </div>
+
+                <div id="analysis-error" class="error hidden"></div>
+                <div id="analysis-loading" class="loading hidden">
+                    <div class="spinner"></div>
+                    <span>Analyzing...</span>
+                </div>
+            </div>
+
+            <!-- Tab 2: Similar Samples -->
+            <div class="tab-content" id="similar">
+                <div class="tab-section">
+                    <label for="query-file">Query File:</label>
+                    <input type="file" id="query-file" accept="audio/*">
+
+                    <label for="similar-limit">Results:</label>
+                    <input type="number" id="similar-limit" value="5" min="1" max="20">
+
+                    <button id="search-btn" class="primary-btn">Search Similar</button>
+                </div>
+
+                <div id="similar-results" class="results-list hidden">
+                    <div class="results-header">
+                        <span class="col-1">File</span>
+                        <span class="col-2">Similarity</span>
+                    </div>
+                    <div id="similar-items"></div>
+                </div>
+
+                <div id="similar-error" class="error hidden"></div>
+                <div id="similar-loading" class="loading hidden">
+                    <div class="spinner"></div>
+                    <span>Searching...</span>
+                </div>
+            </div>
+
+            <!-- Tab 3: Project Sync -->
+            <div class="tab-content" id="sync">
+                <div class="tab-section">
+                    <label for="project-bpm">Project BPM:</label>
+                    <input type="number" id="project-bpm" value="120" min="40" max="300">
+
+                    <label for="project-key">Project Key:</label>
+                    <select id="project-key">
+                        <option value="">Select Key...</option>
+                        <optgroup label="Major Keys">
+                            <option value="C Major">C Major</option>
+                            <option value="D Major">D Major</option>
+                            <option value="E Major">E Major</option>
+                            <option value="F Major">F Major</option>
+                            <option value="G Major">G Major</option>
+                            <option value="A Major">A Major</option>
+                            <option value="B Major">B Major</option>
+                        </optgroup>
+                        <optgroup label="Minor Keys">
+                            <option value="C Minor">C Minor</option>
+                            <option value="D Minor">D Minor</option>
+                            <option value="E Minor">E Minor</option>
+                            <option value="F Minor">F Minor</option>
+                            <option value="G Minor">G Minor</option>
+                            <option value="A Minor">A Minor</option>
+                            <option value="B Minor">B Minor</option>
+                        </optgroup>
+                    </select>
+
+                    <label for="sync-limit">Suggestions:</label>
+                    <input type="number" id="sync-limit" value="10" min="1" max="20">
+
+                    <button id="sync-btn" class="primary-btn">Get Recommendations</button>
+                </div>
+
+                <div id="sync-results" class="results-list hidden">
+                    <div class="results-header">
+                        <span class="col-1">File</span>
+                        <span class="col-2">BPM</span>
+                        <span class="col-3">Score</span>
+                    </div>
+                    <div id="sync-items"></div>
+                </div>
+
+                <div id="sync-error" class="error hidden"></div>
+                <div id="sync-loading" class="loading hidden">
+                    <div class="spinner"></div>
+                    <span>Finding matches...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="server-status">
+                <span id="server-indicator" class="indicator disconnected"></span>
+                <span id="server-text">Disconnected</span>
+            </div>
+            <button id="settings-btn" class="icon-btn">⚙️</button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button id="close-modal" class="close-btn">✕</button>
+            </div>
+            <div class="modal-body">
+                <label for="backend-url">Backend URL:</label>
+                <input type="text" id="backend-url" value="http://localhost:8001">
+
+                <label for="retry-count">Retry Attempts:</label>
+                <input type="number" id="retry-count" value="3" min="1" max="10">
+
+                <label for="cache-enabled">
+                    <input type="checkbox" id="cache-enabled" checked>
+                    Enable Result Caching
+                </label>
+            </div>
+            <div class="modal-footer">
+                <button id="save-settings" class="primary-btn">Save</button>
+                <button id="cancel-settings" class="secondary-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="communication.js"></script>
+    <script>
+        // Initialize API client
+        const api = new SampleMindAPIClient('http://localhost:8001');
+
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                e.target.classList.add('active');
+                document.getElementById(e.target.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Check server connection
+        async function checkConnection() {
+            const indicator = document.getElementById('server-indicator');
+            const text = document.getElementById('server-text');
+            try {
+                const health = await api.health();
+                indicator.classList.remove('disconnected');
+                indicator.classList.add('connected');
+                text.textContent = 'Connected';
+                updateStatus('Ready', 'success');
+            } catch (e) {
+                indicator.classList.remove('connected');
+                indicator.classList.add('disconnected');
+                text.textContent = 'Disconnected';
+                updateStatus('Offline', 'error');
+            }
+        }
+
+        function updateStatus(text, type = 'default') {
+            const status = document.getElementById('status');
+            status.textContent = text;
+            status.className = 'status ' + type;
+        }
+
+        // === ANALYZE TAB ===
+        document.getElementById('analyze-btn').addEventListener('click', async () => {
+            const fileInput = document.getElementById('audio-file');
+            if (!fileInput.files.length) {
+                showAnalysisError('Please select an audio file');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const level = document.getElementById('analysis-level').value;
+
+            showAnalysisLoading(true);
+            updateStatus('Analyzing...', 'processing');
+
+            try {
+                const result = await api.analyzeAudio(file, level);
+                displayAnalysisResults(result);
+                updateStatus('Analysis Complete', 'success');
+            } catch (error) {
+                showAnalysisError(`Failed to analyze: ${error.message}`);
+                updateStatus('Analysis Failed', 'error');
+            } finally {
+                showAnalysisLoading(false);
+            }
+        });
+
+        function displayAnalysisResults(result) {
+            document.getElementById('tempo-value').textContent =
+                result.tempo_bpm ? `${result.tempo_bpm} BPM` : '--';
+            document.getElementById('key-value').textContent = result.key || '--';
+            document.getElementById('genre-value').textContent = result.genre || '--';
+
+            const energy = result.energy || 0;
+            document.getElementById('energy-meter').style.width = (energy * 100) + '%';
+            document.getElementById('energy-value').textContent = energy.toFixed(2);
+
+            document.getElementById('confidence-value').textContent =
+                result.confidence ? (result.confidence * 100).toFixed(1) + '%' : '--';
+
+            document.getElementById('analysis-results').classList.remove('hidden');
+            document.getElementById('analysis-error').classList.add('hidden');
+        }
+
+        function showAnalysisError(message) {
+            document.getElementById('analysis-error').textContent = message;
+            document.getElementById('analysis-error').classList.remove('hidden');
+            document.getElementById('analysis-results').classList.add('hidden');
+        }
+
+        function showAnalysisLoading(show) {
+            document.getElementById('analysis-loading').classList.toggle('hidden', !show);
+            document.getElementById('analyze-btn').disabled = show;
+        }
+
+        // === SIMILAR TAB ===
+        document.getElementById('search-btn').addEventListener('click', async () => {
+            const fileInput = document.getElementById('query-file');
+            if (!fileInput.files.length) {
+                showSimilarError('Please select a query file');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const limit = parseInt(document.getElementById('similar-limit').value) || 5;
+
+            showSimilarLoading(true);
+            updateStatus('Searching...', 'processing');
+
+            try {
+                const results = await api.findSimilar(file, limit);
+                displaySimilarResults(results);
+                updateStatus(`Found ${results.length} results`, 'success');
+            } catch (error) {
+                showSimilarError(`Search failed: ${error.message}`);
+                updateStatus('Search Failed', 'error');
+            } finally {
+                showSimilarLoading(false);
+            }
+        });
+
+        function displaySimilarResults(results) {
+            const container = document.getElementById('similar-items');
+            container.innerHTML = '';
+
+            results.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'result-row';
+
+                const similarity = (item.similarity * 100).toFixed(1);
+                row.innerHTML = `
+                    <span class="col-1">${item.file_path.split('/').pop()}</span>
+                    <span class="col-2">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${similarity}%"></div>
+                        </div>
+                        ${similarity}%
+                    </span>
+                `;
+                container.appendChild(row);
+            });
+
+            document.getElementById('similar-results').classList.remove('hidden');
+            document.getElementById('similar-error').classList.add('hidden');
+        }
+
+        function showSimilarError(message) {
+            document.getElementById('similar-error').textContent = message;
+            document.getElementById('similar-error').classList.remove('hidden');
+            document.getElementById('similar-results').classList.add('hidden');
+        }
+
+        function showSimilarLoading(show) {
+            document.getElementById('similar-loading').classList.toggle('hidden', !show);
+            document.getElementById('search-btn').disabled = show;
+        }
+
+        // === SYNC TAB ===
+        document.getElementById('sync-btn').addEventListener('click', async () => {
+            const bpm = parseInt(document.getElementById('project-bpm').value);
+            const key = document.getElementById('project-key').value;
+
+            if (!key) {
+                showSyncError('Please select a project key');
+                return;
+            }
+
+            showSyncLoading(true);
+            updateStatus('Syncing...', 'processing');
+
+            try {
+                const limit = parseInt(document.getElementById('sync-limit').value) || 10;
+                const results = await api.projectSync(bpm, key, limit);
+                displaySyncResults(results);
+                updateStatus(`Found ${results.length} matches`, 'success');
+            } catch (error) {
+                showSyncError(`Sync failed: ${error.message}`);
+                updateStatus('Sync Failed', 'error');
+            } finally {
+                showSyncLoading(false);
+            }
+        });
+
+        function displaySyncResults(results) {
+            const container = document.getElementById('sync-items');
+            container.innerHTML = '';
+
+            results.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'result-row';
+
+                const score = (item.match_score * 100).toFixed(1);
+                row.innerHTML = `
+                    <span class="col-1">${item.file_path.split('/').pop()}</span>
+                    <span class="col-2">${item.bpm} BPM</span>
+                    <span class="col-3">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${score}%"></div>
+                        </div>
+                        ${score}%
+                    </span>
+                `;
+                container.appendChild(row);
+            });
+
+            document.getElementById('sync-results').classList.remove('hidden');
+            document.getElementById('sync-error').classList.add('hidden');
+        }
+
+        function showSyncError(message) {
+            document.getElementById('sync-error').textContent = message;
+            document.getElementById('sync-error').classList.remove('hidden');
+            document.getElementById('sync-results').classList.add('hidden');
+        }
+
+        function showSyncLoading(show) {
+            document.getElementById('sync-loading').classList.toggle('hidden', !show);
+            document.getElementById('sync-btn').disabled = show;
+        }
+
+        // === SETTINGS MODAL ===
+        document.getElementById('settings-btn').addEventListener('click', () => {
+            document.getElementById('settings-modal').classList.remove('hidden');
+        });
+
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.getElementById('settings-modal').classList.add('hidden');
+        });
+
+        document.getElementById('cancel-settings').addEventListener('click', () => {
+            document.getElementById('settings-modal').classList.add('hidden');
+        });
+
+        document.getElementById('save-settings').addEventListener('click', () => {
+            const url = document.getElementById('backend-url').value;
+            const retries = parseInt(document.getElementById('retry-count').value);
+            const cacheEnabled = document.getElementById('cache-enabled').checked;
+
+            // Update API client with new settings
+            api.baseUrl = url;
+            api.maxRetries = retries;
+            api.cacheEnabled = cacheEnabled;
+
+            document.getElementById('settings-modal').classList.add('hidden');
+            updateStatus('Settings saved', 'success');
+
+            // Check connection with new settings
+            checkConnection();
+        });
+
+        // Initial setup
+        window.addEventListener('load', checkConnection);
+        setInterval(checkConnection, 5000); // Check connection every 5 seconds
+    </script>
+</body>
+</html>

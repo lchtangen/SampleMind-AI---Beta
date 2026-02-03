@@ -17,6 +17,21 @@ Usage:
     from samplemind.integrations.ai_manager import SampleMindAIManager
     from samplemind.interfaces.cli.menu import SampleMindCLI
 """
+import logging
+import sys
+import warnings
+
+# --- MONKEY PATCH START ---
+# Fix for Librosa 0.10.1 compability with Scipy 1.14+ (removal of signal.hann)
+try:
+    import scipy.signal
+    if not hasattr(scipy.signal, 'hann'):
+        import scipy.signal.windows
+        scipy.signal.hann = scipy.signal.windows.hann
+except ImportError:
+    pass
+# --- MONKEY PATCH END ---
+
 from typing import Any
 
 """

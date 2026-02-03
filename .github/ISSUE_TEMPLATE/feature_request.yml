@@ -1,0 +1,89 @@
+name: Feature Request
+description: Suggest an idea for SampleMind AI
+labels: ["enhancement", "feature-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Feature Request
+        Thanks for helping us improve SampleMind AI! Please describe your feature idea below.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Problem Statement
+      description: Describe the problem or limitation you're facing
+      placeholder: |
+        I'm trying to do [X], but it's difficult because [Y]...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: How would you like SampleMind AI to solve this?
+      placeholder: |
+        I'd like SampleMind AI to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Use Case
+      description: When would you use this feature?
+      placeholder: |
+        I use SampleMind AI for [workflow], and this feature would help me...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions (Optional)
+      description: Are there other ways to solve this?
+      placeholder: "Another way could be..."
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What area does this feature relate to?
+      options:
+        - Audio Analysis
+        - Search & Discovery
+        - Audio Effects
+        - MIDI Generation
+        - Sample Packs
+        - DAW Integration
+        - CLI Interface
+        - Web UI
+        - Performance
+        - Accessibility
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature?
+      options:
+        - "🔴 Critical - Blocks my workflow"
+        - "🟠 High - Very important"
+        - "🟡 Medium - Would be nice to have"
+        - "🟢 Low - Nice to have eventually"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before Submitting
+      options:
+        - label: I've searched for similar feature requests and didn't find any
+          required: true
+        - label: This feature would be useful for other users too
+          required: true

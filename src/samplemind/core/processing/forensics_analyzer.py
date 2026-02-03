@@ -10,22 +10,36 @@ Detects:
 """
 
 import logging
-import numpy as np
-from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from pathlib import Path
-import librosa
-from scipy import signal
-from scipy.fft import fft
+
+import numpy as np
+
+# Lazy load heavy dependencies
+librosa = None
+signal = None
+fft = None
 
 logger = logging.getLogger(__name__)
+
+def _ensure_deps():
+    global librosa, signal, fft
+    if librosa is None:
+        import librosa as _librosa
+        librosa = _librosa
+    if signal is None:
+        from scipy import signal as _signal
+        signal = _signal
+    if fft is None:
+        from scipy.fft import fft as _fft
+        fft = _fft
 
 
 @dataclass
 class CompressionAnalysis:
     """Compression detection result"""
     probability: float  # 0.0-1.0, likelihood of compression
-    indicators: List[str]  # Types of indicators found
+    indicators: list[str]  # Types of indicators found
     estimated_ratio: str  # Estimated compression ratio
     estimated_threshold: float  # Estimated threshold in dB
 
@@ -35,7 +49,7 @@ class DistortionAnalysis:
     """Distortion detection result"""
     probability: float  # 0.0-1.0
     distortion_type: str  # "clipping", "overdrive", "saturation", "none"
-    affected_frequencies: List[Tuple[float, float]]  # Hz ranges
+    affected_frequencies: list[tuple[float, float]]  # Hz ranges
     severity: float  # 0.0-1.0, how severe
 
 
@@ -54,16 +68,16 @@ class ForensicsResult:
     file_path: str
     duration_seconds: float
     sample_rate: int
-    bit_depth: Optional[int]
+    bit_depth: int | None
 
     compression_detected: CompressionAnalysis
     distortion_detected: DistortionAnalysis
-    edit_points: List[EditPoint]
+    edit_points: list[EditPoint]
 
     overall_quality_score: float  # 0-100
-    recommendations: List[str]
+    recommendations: list[str]
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary"""
         return {
             "file_path": self.file_path,
@@ -111,6 +125,8 @@ class ForensicsAnalyzer:
         Returns:
             ForensicsResult with analysis findings
         """
+        _ensure_deps()
+
         # Load audio
         y, sr = librosa.load(audio_path, sr=None, mono=False)
 
@@ -270,7 +286,7 @@ class ForensicsAnalyzer:
             return min(1.0, harmonic_energy / (peak_mag * 5))
         return 0.0
 
-    def _detect_edits(self, y: np.ndarray, sr: int) -> List[EditPoint]:
+    def _detect_edits(self, y: np.ndarray, sr: int) -> list[EditPoint]:
         """Detect edit points (splices, cuts)"""
         edit_points = []
 
@@ -325,7 +341,7 @@ class ForensicsAnalyzer:
         self,
         compression: CompressionAnalysis,
         distortion: DistortionAnalysis,
-        edits: List[EditPoint],
+        edits: list[EditPoint],
         y: np.ndarray,
         sr: int,
     ) -> float:
@@ -363,9 +379,9 @@ class ForensicsAnalyzer:
         self,
         compression: CompressionAnalysis,
         distortion: DistortionAnalysis,
-        edits: List[EditPoint],
+        edits: list[EditPoint],
         quality_score: float,
-    ) -> List[str]:
+    ) -> list[str]:
         """Generate recommendations based on analysis"""
         recommendations = []
 
@@ -408,7 +424,7 @@ class ForensicsAnalyzer:
 
 
 # Global instance
-_analyzer_instance: Optional[ForensicsAnalyzer] = None
+_analyzer_instance: ForensicsAnalyzer | None = None
 
 
 def init_analyzer(sample_rate: int = 44100) -> ForensicsAnalyzer:
