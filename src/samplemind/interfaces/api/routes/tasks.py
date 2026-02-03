@@ -34,7 +34,7 @@ router = APIRouter(prefix="/tasks", tags=["Tasks"])
 async def submit_audio_analysis(
     request: TaskSubmitRequest,
     current_user = Depends(get_current_active_user)
-):
+) -> None:
     """
     Submit a single audio file for background analysis
     """
@@ -64,7 +64,7 @@ async def submit_audio_analysis(
 async def submit_batch_audio_analysis(
     request: BatchTaskSubmitRequest,
     current_user = Depends(get_current_active_user)
-):
+) -> None:
     """
     Submit multiple audio files for background batch processing
     """
@@ -93,7 +93,7 @@ async def submit_batch_audio_analysis(
 async def get_task_status(
     task_id: str,
     current_user = Depends(get_current_active_user)
-):
+) -> None:
     """
     Get task status and result
     """

@@ -100,7 +100,7 @@ def handle_errors(
     exit_on_error: bool = False,
     include_suggestion: bool = True,
     verbose_errors: bool = False,
-):
+) -> None:
     """
     Decorator for handling errors in CLI commands.
 

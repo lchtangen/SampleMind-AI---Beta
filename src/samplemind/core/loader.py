@@ -250,7 +250,7 @@ class MetadataExtractor:
         return metadata
     
     @staticmethod
-    def _get_tag(audio_file, tag_names: List[str]) -> Optional[str]:
+    def _get_tag(audio_file: Any, tag_names: List[str]) -> Optional[str]:
         """Get tag value from multiple possible tag names"""
         for tag_name in tag_names:
             if tag_name in audio_file:
@@ -262,7 +262,7 @@ class MetadataExtractor:
         return None
     
     @staticmethod
-    def _get_year(audio_file) -> Optional[int]:
+    def _get_year(audio_file: Any) -> Optional[int]:
         """Extract year from various date formats"""
         year_tags = ['TDRC', 'TYER', 'DATE', '\xa9day']
         for tag in year_tags:
@@ -280,7 +280,7 @@ class MetadataExtractor:
         return None
     
     @staticmethod
-    def _get_track_number(audio_file) -> Optional[int]:
+    def _get_track_number(audio_file: Any) -> Optional[int]:
         """Extract track number"""
         track_tags = ['TRCK', 'TRACKNUMBER', 'trkn']
         for tag in track_tags:
@@ -689,7 +689,7 @@ class AdvancedAudioLoader:
                 hash_sha256.update(chunk)
         return hash_sha256.hexdigest()
     
-    def _cache_audio(self, cache_key: str, loaded_audio: LoadedAudio):
+    def _cache_audio(self, cache_key: str, loaded_audio: LoadedAudio) -> None:
         """Cache loaded audio with size management"""
         if len(self.audio_cache) >= self.cache_size:
             # Remove oldest entry
@@ -698,7 +698,7 @@ class AdvancedAudioLoader:
         
         self.audio_cache[cache_key] = loaded_audio
     
-    def _update_loading_stats(self, audio_format: AudioFormat, load_time: float):
+    def _update_loading_stats(self, audio_format: AudioFormat, load_time: float) -> None:
         """Update loading statistics"""
         self.loading_stats['total_loads'] += 1
         
@@ -727,7 +727,7 @@ class AdvancedAudioLoader:
             'supported_formats': [fmt.name for fmt in AudioFormat]
         }
     
-    def clear_cache(self):
+    def clear_cache(self) -> None:
         """Clear all caches"""
         self.audio_cache.clear()
         self.metadata_cache.clear()
@@ -735,7 +735,7 @@ class AdvancedAudioLoader:
         self.loading_stats['cache_misses'] = 0
         logger.info("🧹 Audio loader cache cleared")
     
-    def shutdown(self):
+    def shutdown(self) -> None:
         """Shutdown the audio loader"""
         self.executor.shutdown(wait=True)
         logger.info("🔴 Audio Loader shutdown complete")

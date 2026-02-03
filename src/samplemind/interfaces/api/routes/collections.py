@@ -51,7 +51,7 @@ async def list_collections(
     request: Request,
     skip: int = 0,
     limit: int = 100
-):
+) -> None:
     """List all collections"""
     if is_db_available():
         # Get user ID from request state (injected by AuthMiddleware)

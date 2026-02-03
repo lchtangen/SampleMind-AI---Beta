@@ -218,7 +218,7 @@ async def get_current_user_info(current_user = Depends(get_current_active_user))
 async def update_user_profile(
     profile: UserProfileUpdate,
     current_user = Depends(get_current_active_user)
-):
+) -> None:
     """
     Update current user profile
     
@@ -250,7 +250,7 @@ async def update_user_profile(
 async def change_password(
     request: ChangePasswordRequest,
     current_user = Depends(get_current_active_user)
-):
+) -> None:
     """
     Change user password
     

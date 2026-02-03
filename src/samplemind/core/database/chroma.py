@@ -44,7 +44,7 @@ def _cache_embedding_hash(embedding: List[float]) -> str:
 def init_chromadb(
     persist_directory: str = "./data/chroma",
     collection_name: str = _settings.chroma_collection
-):
+) -> None:
     """Initialize ChromaDB client"""
     global _chroma_client, _collection
 

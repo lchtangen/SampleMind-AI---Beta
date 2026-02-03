@@ -91,7 +91,7 @@ async def get_user_settings(current_user=Depends(get_current_active_user)):
 async def update_user_settings(
     settings_update: UserSettingsUpdate,
     current_user=Depends(get_current_active_user)
-):
+) -> None:
     """
     Update current user settings and preferences
 
@@ -207,7 +207,7 @@ async def get_preferences(current_user=Depends(get_current_active_user)):
 async def update_preferences(
     preferences: UserPreferences,
     current_user=Depends(get_current_active_user)
-):
+) -> None:
     """
     Update user preferences
 
@@ -246,7 +246,7 @@ async def update_preferences(
 async def create_api_key(
     request: APIKeyCreate,
     current_user=Depends(get_current_active_user)
-):
+) -> None:
     """
     Create a new API key for the current user
 
@@ -300,7 +300,7 @@ async def list_api_keys(
     current_user=Depends(get_current_active_user),
     limit: int = 50,
     offset: int = 0
-):
+) -> None:
     """
     List all API keys for the current user
 
@@ -348,7 +348,7 @@ async def list_api_keys(
 async def delete_api_key(
     key_id: str,
     current_user=Depends(get_current_active_user)
-):
+) -> None:
     """
     Delete an API key
 
@@ -386,7 +386,7 @@ async def delete_api_key(
 async def toggle_api_key(
     key_id: str,
     current_user=Depends(get_current_active_user)
-):
+) -> None:
     """
     Toggle an API key's active status
 

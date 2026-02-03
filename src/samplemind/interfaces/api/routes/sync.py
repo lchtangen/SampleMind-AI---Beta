@@ -175,7 +175,7 @@ async def queue_sync_event(
     data: dict,
     device_id: Optional[str] = None,
     current_user=Depends(get_current_active_user)
-):
+) -> None:
     """
     Queue a sync event (used by client for offline operations)
 
@@ -250,7 +250,7 @@ async def get_remote_changes(
     since: Optional[str] = None,
     limit: int = 100,
     current_user=Depends(get_current_active_user)
-):
+) -> None:
     """
     Get remote changes since specified timestamp
 

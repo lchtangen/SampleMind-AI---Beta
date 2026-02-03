@@ -55,7 +55,7 @@ async def create_workspace(
     request: WorkspaceCreate,
     current_user=Depends(get_current_active_user),
     db: AsyncIOMotorDatabase = Depends(get_db)
-):
+) -> None:
     """
     Create a new workspace
 
@@ -109,7 +109,7 @@ async def list_workspaces(
     limit: int = 50,
     offset: int = 0,
     db: AsyncIOMotorDatabase = Depends(get_db)
-):
+) -> None:
     """
     List all workspaces for current user
 
@@ -160,7 +160,7 @@ async def get_workspace(
     workspace_id: str,
     current_user=Depends(get_current_active_user),
     db: AsyncIOMotorDatabase = Depends(get_db)
-):
+) -> None:
     """
     Get workspace details
 
@@ -210,7 +210,7 @@ async def update_workspace(
     request: WorkspaceUpdate,
     current_user=Depends(get_current_active_user),
     db: AsyncIOMotorDatabase = Depends(get_db)
-):
+) -> None:
     """
     Update workspace
 
@@ -274,7 +274,7 @@ async def delete_workspace(
     workspace_id: str,
     current_user=Depends(get_current_active_user),
     db: AsyncIOMotorDatabase = Depends(get_db)
-):
+) -> None:
     """
     Delete a workspace
 
@@ -324,7 +324,7 @@ async def add_sample_to_workspace(
     sample_id: str,
     current_user=Depends(get_current_active_user),
     db: AsyncIOMotorDatabase = Depends(get_db)
-):
+) -> None:
     """
     Add sample to workspace
 
@@ -398,7 +398,7 @@ async def remove_sample_from_workspace(
     sample_id: str,
     current_user=Depends(get_current_active_user),
     db: AsyncIOMotorDatabase = Depends(get_db)
-):
+) -> None:
     """
     Remove sample from workspace
 
