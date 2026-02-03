@@ -37,6 +37,7 @@ class FrequencyMask:
 
     @property
     def is_severe(self) -> bool:
+        """Check if conflict is severe"""
         return self.severity == "high"
 
 
@@ -263,6 +264,7 @@ class LayeringAnalyzer:
         window_size = int(0.01 * sample_rate)  # 10ms windows
 
         def get_onsets(audio):
+            """Detect onsets in audio signal"""
             energy = np.array([
                 np.sum(audio[i:i+window_size]**2)
                 for i in range(0, len(audio)-window_size, window_size)

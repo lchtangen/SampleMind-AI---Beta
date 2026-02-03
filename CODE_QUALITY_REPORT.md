@@ -2,12 +2,12 @@
 
 **Generated:** 1770105079.2611232
 
-**Total Issues:** 422
+**Total Issues:** 414
 
 ## Issues by Severity
 
 - **Critical:** 0
-- **High:** 37
+- **High:** 29
 - **Medium:** 385
 - **Low:** 0
 
@@ -523,29 +523,11 @@
 - **Message:** Function 'receive_checkin' missing type hints for: return type, parameter 'dbapi_conn', parameter 'connection_record'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### mongo.py:299
+### mongo.py:302
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'get_database' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
-
-### mongo.py:195
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'Settings' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
-
-### mongo.py:221
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'Settings' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
-
-### mongo.py:243
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'Settings' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
 
 ### neural_engine.py:32
 - **Severity:** medium
@@ -595,55 +577,25 @@
 - **Message:** Function 'time_feature_extraction' missing type hints for: return type, parameter 'feature_name', parameter 'extract_func'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### recent_files.py:65
-- **Severity:** high
-- **Category:** error_handling
-- **Message:** Bare except clause in 'time_ago'
-- **Suggestion:** Catch specific exceptions instead of bare except
-
-### input_validation.py:168
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'sanitize_query' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
 ### input_validation.py:168
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'sanitize_query' missing type hints for: return type, parameter 'v'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### input_validation.py:177
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'sanitize_filename' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### input_validation.py:177
+### input_validation.py:178
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'sanitize_filename' missing type hints for: return type, parameter 'v'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### input_validation.py:186
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'validate_username' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### input_validation.py:186
+### input_validation.py:188
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'validate_username' missing type hints for: return type, parameter 'v'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### input_validation.py:198
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'sanitize_field' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### input_validation.py:198
+### input_validation.py:201
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'sanitize_field' missing type hints for: return type, parameter 'v'

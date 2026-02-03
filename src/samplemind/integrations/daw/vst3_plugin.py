@@ -275,6 +275,7 @@ class VST3Plugin:
                 """Simple web UI handler"""
 
                 def do_GET(self):
+                    """Handle GET requests"""
                     if self.path == "/":
                         self.send_response(200)
                         self.send_header("Content-type", "text/html")
@@ -310,6 +311,7 @@ class VST3Plugin:
                         self.wfile.write(json.dumps(status).encode())
 
                 def log_message(self, format, *args):
+                    """Suppress HTTP server logging"""
                     pass  # Suppress logging
 
                 def _get_html(self):

@@ -314,12 +314,12 @@ class AIClassifier:
                     # Flatten simplisticly or just take mean
                     return float(np.mean(feature_array))
                 return float(sum(float(x) for x in feature_array) / len(feature_array))
-            except:
+            except (TypeError, ValueError, IndexError):
                 return None
         # Handle numpy array
         try:
              return float(np.mean(feature_array))
-        except:
+        except (TypeError, ValueError):
              return None
 
     def _get_cache_key(self, features: AudioFeatures) -> str:
