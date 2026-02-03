@@ -23,13 +23,9 @@ Usage:
 """
 
 import asyncio
-from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
-from rich.panel import Panel
-from rich.syntax import Syntax
 from rich.table import Table
 
 # Create main app
@@ -63,6 +59,7 @@ from .commands import (
     reporting,
     similarity,
     stems,
+    sync,
     tagging,
     theory,
     visualization,
@@ -83,8 +80,7 @@ def main_callback(
 ) -> None:
     """SampleMind AI - Professional Audio Analysis & Library Management"""
     if version:
-        from . import __version__
-        console.print(f"[bold cyan]SampleMind AI[/bold cyan] v2.1.0-beta")
+        console.print("[bold cyan]SampleMind AI[/bold cyan] v2.1.0-beta")
         raise typer.Exit()
 
 
@@ -95,7 +91,6 @@ def main_callback(
 @app.command()
 def interactive():
     """Start interactive menu mode (modern interface)"""
-    import asyncio
 
     from .modern_menu import ModernMenu
 
@@ -204,6 +199,7 @@ def register_command_groups():
     app.add_typer(analyze.app, name="analyze", help="🎵 Audio analysis & feature extraction (40 commands)")
     app.add_typer(library.app, name="library", help="📁 Sample library management (50 commands)")
     app.add_typer(ai.app, name="ai", help="🤖 AI-powered features (30 commands)")
+    app.add_typer(sync.app, name="sync", help="☁️  Sync & Cloud")
     app.add_typer(metadata.app, name="meta", help="📝 Metadata operations (30 commands)")
     app.add_typer(audio.app, name="audio", help="🎙️  Audio processing & conversion (25 commands)")
     app.add_typer(visualization.app, name="viz", help="📊 Visualizations & charts (15 commands)")
