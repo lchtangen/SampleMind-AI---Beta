@@ -10,15 +10,28 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import AsyncGenerator
 
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import uvicorn
 
 from . import __version__
 from .config import get_settings
 from .exceptions import SampleMindException
-from .routes import audio, ai, batch, health, websocket, auth, tasks, settings, sync
+from .routes import (
+    ai,
+    audio,
+    auth,
+    batch,
+    collections,
+    health,
+    sync,
+    tasks,
+    websocket,
+)
+from .routes import (
+    settings as settings_router,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -36,14 +49,14 @@ from .dependencies import set_app_state
 async def lifespan(app: FastAPI) -> AsyncGenerator:
     """Application lifespan management"""
     logger.info("🚀 Starting SampleMind AI Backend...")
-    
+
     settings = get_settings()
-    
+
     # Create required directories
     for directory in [settings.UPLOAD_DIR, settings.ANALYSIS_DIR, settings.CACHE_DIR]:
         directory.mkdir(parents=True, exist_ok=True)
         logger.info(f"✓ Created directory: {directory}")
-    
+
     # Initialize AudioEngine
     try:
         from samplemind.core.engine.audio_engine import AudioEngine
@@ -56,12 +69,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as e:
         logger.error(f"Failed to initialize AudioEngine: {e}")
         raise
-    
+
     # Initialize databases (optional, fail gracefully)
     try:
         from samplemind.core.database import init_mongodb, init_redis
         from samplemind.core.database.chroma import init_chromadb
-        
+
         # MongoDB
         try:
             await init_mongodb(settings.MONGODB_URL, settings.MONGODB_DB_NAME)
@@ -69,7 +82,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         except Exception as e:
             logger.warning(f"MongoDB not available: {e}")
             set_app_state("mongodb", False)
-        
+
         # Redis
         try:
             await init_redis(settings.REDIS_URL)
@@ -77,7 +90,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         except Exception as e:
             logger.warning(f"Redis not available: {e}")
             set_app_state("redis", False)
-        
+
         # ChromaDB
         try:
             init_chromadb(settings.CHROMA_PERSIST_DIR, settings.CHROMA_COLLECTION_NAME)
@@ -85,24 +98,24 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         except Exception as e:
             logger.warning(f"ChromaDB not available: {e}")
             set_app_state("chromadb", False)
-            
+
     except Exception as e:
         logger.warning(f"Database initialization warning: {e}")
-    
+
     # Initialize AI Manager
     try:
         from samplemind.integrations.ai_manager import SampleMindAIManager
         ai_manager = SampleMindAIManager()
         set_app_state("ai_manager", ai_manager)
         logger.info("✓ SampleMindAIManager initialized")
-        
+
         # Log available providers
         providers = ai_manager.get_available_providers()
         logger.info(f"✓ Available AI providers: {[p.value for p in providers]}")
     except Exception as e:
         logger.error(f"Failed to initialize AI Manager: {e}")
         raise
-    
+
     # Configure JWT authentication
     try:
         from samplemind.core.auth.jwt_handler import configure_jwt
@@ -115,23 +128,23 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         logger.info("✓ JWT authentication configured")
     except Exception as e:
         logger.warning(f"JWT configuration warning: {e}")
-    
+
     # Validate API keys
     if not settings.GOOGLE_AI_API_KEY and not settings.OPENAI_API_KEY:
         logger.warning("⚠️  No AI API keys configured. AI features will be limited.")
-    
+
     logger.info(f"✅ SampleMind AI Backend v{__version__} ready!")
     logger.info(f"📊 Environment: {settings.ENVIRONMENT}")
     logger.info(f"🔧 Max workers: {settings.MAX_WORKERS}")
     logger.info(f"💾 Upload dir: {settings.UPLOAD_DIR}")
-    
+
     yield
-    
+
     # Cleanup on shutdown
     logger.info("🛑 Shutting down SampleMind AI Backend...")
-    
+
     from .dependencies import get_app_state
-    
+
     # Close databases
     if get_app_state("mongodb"):
         try:
@@ -139,33 +152,33 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
             await close_mongodb()
         except Exception as e:
             logger.error(f"Error closing MongoDB: {e}")
-    
+
     if get_app_state("redis"):
         try:
             from samplemind.core.database import close_redis
             await close_redis()
         except Exception as e:
             logger.error(f"Error closing Redis: {e}")
-    
+
     # Close audio engine and AI manager
     audio_engine = get_app_state("audio_engine")
     if audio_engine:
         audio_engine.shutdown()
         logger.info("✓ AudioEngine shutdown complete")
-    
+
     ai_manager = get_app_state("ai_manager")
     if ai_manager:
         await ai_manager.close()
         logger.info("✓ AI Manager shutdown complete")
-    
+
     logger.info("👋 Shutdown complete")
 
 
 def create_application() -> FastAPI:
     """Create and configure FastAPI application"""
-    
+
     settings = get_settings()
-    
+
     app = FastAPI(
         title="SampleMind AI API",
         description="AI-powered music production and sample analysis API",
@@ -175,7 +188,7 @@ def create_application() -> FastAPI:
         redoc_url="/api/redoc",
         openapi_url="/api/openapi.json",
     )
-    
+
     # Configure CORS
     app.add_middleware(
         CORSMiddleware,
@@ -184,7 +197,7 @@ def create_application() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    
+
     # Register exception handlers
     @app.exception_handler(SampleMindException)
     async def samplemind_exception_handler(request, exc: SampleMindException):
@@ -196,7 +209,7 @@ def create_application() -> FastAPI:
                 "details": exc.details
             }
         )
-    
+
     @app.exception_handler(Exception)
     async def general_exception_handler(request, exc: Exception):
         logger.exception("Unhandled exception")
@@ -208,18 +221,19 @@ def create_application() -> FastAPI:
                 "details": str(exc) if settings.ENVIRONMENT == "development" else None
             }
         )
-    
+
     # Register routers
     app.include_router(health.router, prefix="/api/v1", tags=["health"])
     app.include_router(auth.router, prefix="/api/v1", tags=["Authentication"])
-    app.include_router(settings.router, prefix="/api/v1", tags=["Settings"])
+    app.include_router(settings_router.router, prefix="/api/v1", tags=["Settings"])
     app.include_router(sync.router, prefix="/api/v1", tags=["Cloud Sync"])
     app.include_router(tasks.router, prefix="/api/v1", tags=["Tasks"])
     app.include_router(audio.router, prefix="/api/v1/audio", tags=["audio"])
     app.include_router(ai.router, prefix="/api/v1/ai", tags=["ai"])
     app.include_router(batch.router, prefix="/api/v1/batch", tags=["batch"])
+    app.include_router(collections.router, prefix="/api/v1", tags=["collections"])
     app.include_router(websocket.router, prefix="/api/v1", tags=["websocket"])
-    
+
     @app.get("/", include_in_schema=False)
     async def root():
         """Root endpoint - redirect to docs"""
@@ -229,7 +243,7 @@ def create_application() -> FastAPI:
             "status": "operational",
             "docs": "/api/docs"
         }
-    
+
     return app
 
 

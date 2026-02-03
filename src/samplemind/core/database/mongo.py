@@ -2,7 +2,8 @@
 
 import logging
 from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Optional
+
 from beanie import Document, init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import Field
@@ -29,7 +30,7 @@ class AudioFile(Document):
     uploaded_at: datetime = Field(default_factory=datetime.utcnow)
     tags: List[str] = Field(default_factory=list)
     metadata: Dict[str, Any] = Field(default_factory=dict)
-    
+
     class Settings:
         name = "audio_files"
         indexes = [
@@ -44,17 +45,17 @@ class Analysis(Document):
     analysis_id: str = Field(..., unique=True, index=True)
     file_id: str = Field(..., index=True)
     user_id: Optional[str] = None
-    
+
     # Audio features
     tempo: float
     key: str
     mode: str
     time_signature: List[int]
     duration: float
-    
+
     # Spectral features
     spectral_features: Optional[Dict[str, Any]] = None
-    
+
     # AI analysis
     ai_provider: Optional[str] = None
     ai_model: Optional[str] = None
@@ -63,12 +64,12 @@ class Analysis(Document):
     production_tips: List[str] = Field(default_factory=list)
     creative_ideas: List[str] = Field(default_factory=list)
     fl_studio_recommendations: List[str] = Field(default_factory=list)
-    
+
     # Metadata
     analysis_level: str
     processing_time: float
     analyzed_at: datetime = Field(default_factory=datetime.utcnow)
-    
+
     class Settings:
         name = "analyses"
         indexes = [
@@ -195,6 +196,32 @@ class User(Document):
         ]
 
 
+class AudioCollection(Document):
+    """Audio collection/playlist model"""
+    collection_id: str = Field(..., unique=True, index=True)
+    user_id: str = Field(..., index=True)
+    name: str
+    description: Optional[str] = None
+    is_public: bool = False
+    tags: List[str] = Field(default_factory=list)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+    # Stats (denormalized for performance)
+    file_count: int = 0
+    total_duration: float = 0.0
+
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+    class Settings:
+        name = "audio_collections"
+        indexes = [
+            "collection_id",
+            "user_id",
+            "name",
+        ]
+
+
 class APIKey(Document):
     """API key model for external access"""
     key_id: str = Field(..., unique=True, index=True)
@@ -221,31 +248,31 @@ class APIKey(Document):
 async def init_mongodb(mongodb_url: str, database_name: str = "samplemind"):
     """Initialize MongoDB connection and Beanie ODM"""
     global _mongo_client, _database
-    
+
     try:
         logger.info(f"🔌 Connecting to MongoDB: {database_name}")
-        
+
         _mongo_client = AsyncIOMotorClient(
             mongodb_url,
             serverSelectionTimeoutMS=5000,
             maxPoolSize=10,
             minPoolSize=1,
         )
-        
+
         # Test connection
         await _mongo_client.admin.command('ping')
-        
+
         _database = _mongo_client[database_name]
-        
+
         # Initialize Beanie with document models
         await init_beanie(
             database=_database,
-            document_models=[AudioFile, Analysis, BatchJob, User, APIKey, Favorite, UserSettings]
+            document_models=[AudioFile, Analysis, BatchJob, User, APIKey, Favorite, UserSettings, AudioCollection]
         )
-        
+
         logger.info("✅ MongoDB connected and Beanie initialized")
         return _database
-        
+
     except ConnectionFailure as e:
         logger.error(f"❌ MongoDB connection failed: {e}")
         raise
@@ -257,7 +284,7 @@ async def init_mongodb(mongodb_url: str, database_name: str = "samplemind"):
 async def close_mongodb():
     """Close MongoDB connection"""
     global _mongo_client
-    
+
     if _mongo_client:
         _mongo_client.close()
         logger.info("✅ MongoDB connection closed")

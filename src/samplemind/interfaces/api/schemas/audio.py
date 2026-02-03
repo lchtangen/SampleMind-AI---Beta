@@ -1,7 +1,8 @@
 """Audio-related schemas"""
 
-from typing import Optional, Dict, Any, List
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -36,21 +37,35 @@ class AudioAnalysisResponse(BaseModel):
     """Audio analysis results"""
     analysis_id: str
     file_id: str
-    
+
     # Basic audio features
     duration: float
     tempo: float
     key: str
     mode: str
     time_signature: List[int]
-    
+
     # Spectral features
     spectral_features: Optional[Dict[str, Any]] = None
-    
+
     # AI analysis
     ai_analysis: Optional[Dict[str, Any]] = None
-    
+
     # Metadata
     analysis_level: str
     processing_time: float
     analyzed_at: datetime
+
+class AudioProcessRequest(BaseModel):
+    """Request for audio processing"""
+    operation: str
+    params: Dict[str, Any] = {}
+
+class AudioFeatureExtractionResponse(BaseModel):
+    """Response for feature extraction"""
+    features: Dict[str, Any]
+
+class AudioProcessResponse(BaseModel):
+    """Response for audio processing"""
+    success: bool
+    result: Dict[str, Any]

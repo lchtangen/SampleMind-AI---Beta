@@ -22,13 +22,14 @@ Usage:
     samplemind analyze --help                   # Show analyze subcommands
 """
 
-import typer
 import asyncio
-from typing import Optional
 from pathlib import Path
+from typing import Optional
+
+import typer
 from rich.console import Console
-from rich.syntax import Syntax
 from rich.panel import Panel
+from rich.syntax import Syntax
 from rich.table import Table
 
 # Create main app
@@ -45,7 +46,18 @@ console = Console()
 # COMMAND GROUP IMPORTS
 # ============================================================================
 
-from .commands import analyze, library, ai, metadata, audio, visualization, reporting, similarity, theory, daw
+from .commands import (
+    ai,
+    analyze,
+    audio,
+    daw,
+    library,
+    metadata,
+    reporting,
+    similarity,
+    theory,
+    visualization,
+)
 
 # ============================================================================
 # MAIN APP CALLBACKS
@@ -74,8 +86,9 @@ def main_callback(
 @app.command()
 def interactive():
     """Start interactive menu mode (modern interface)"""
-    from .modern_menu import ModernMenu
     import asyncio
+
+    from .modern_menu import ModernMenu
 
     console.print("[bold cyan]🎵 Starting SampleMind AI Interactive Menu[/bold cyan]")
     console.print("[dim]✨ Modern interactive interface with 60+ commands[/dim]\n")
@@ -232,7 +245,7 @@ def completion(
         "--shell",
         "-s",
         help="Shell type",
-        autocompletion=["bash", "zsh", "fish", "powershell"],
+        autocompletion=lambda: ["bash", "zsh", "fish", "powershell"],
     ),
 ):
     """Generate shell completion script"""
