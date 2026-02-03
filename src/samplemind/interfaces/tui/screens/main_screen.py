@@ -3,13 +3,14 @@ Main Screen for SampleMind TUI
 Entry point with menu and navigation
 """
 
-import asyncio
+from textual.containers import Vertical
 from textual.screen import Screen
-from textual.widgets import Header, Footer
-from textual.containers import Container, Vertical
-from textual.message import Message
+from textual.widgets import Footer, Header
+
 from ..widgets import MainMenu, StatusBar
+from .chain_screen import ChainScreen
 from .favorites_screen import FavoritesScreen
+from .search_screen import SearchScreen
 from .settings_screen import SettingsScreen
 
 
@@ -47,6 +48,8 @@ class MainScreen(Screen):
         ("f", "favorites", "Favorites"),
         ("s", "settings", "Settings"),
         ("h", "help", "Help"),
+        ("k", "search", "Search (Keywords/Semantic)"),
+        ("c", "chain", "Chain Recommender"),
     ]
 
     def compose(self):
@@ -81,6 +84,14 @@ class MainScreen(Screen):
         # This will be handled by the app when screen is implemented
         self.notify("Batch processing coming soon!")
 
+    def action_search(self) -> None:
+        """Navigate to search screen"""
+        self.app.push_screen(SearchScreen())
+
+    def action_chain(self) -> None:
+        """Navigate to chain recommender"""
+        self.app.push_screen(ChainScreen())
+
     def action_favorites(self) -> None:
         """Navigate to favorites screen"""
         self.app.push_screen(FavoritesScreen())
@@ -97,6 +108,8 @@ class MainScreen(Screen):
             "  Q - Quit application\n"
             "  A - Analyze single file\n"
             "  B - Batch process folder\n"
+            "  K - Search (Semantic/Keyword)\n"
+            "  C - Chain Recommender\n"
             "  F - View favorites\n"
             "  S - Settings\n"
             "  H - Show this help\n\n"

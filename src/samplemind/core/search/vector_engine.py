@@ -20,7 +20,9 @@ except ImportError:
     # Handle missing deps gracefully (e.g. for lightweight installs)
     chromadb = None
     ClapModel = None
+    ClapProcessor = None
     torch = None
+    librosa = None
 
 logger = logging.getLogger(__name__)
 

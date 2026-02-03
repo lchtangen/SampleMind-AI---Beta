@@ -1,378 +1,253 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Icons } from '@/components/icons';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
+'use client';
 
-// Animation variants
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
+import { useState, useEffect } from 'react';
+import { Mic, Upload, Moon, Sun, Laptop } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { useAuthContext } from '@/contexts/AuthContext';
+import LoginForm from '@/components/LoginForm';
+import { useRouter } from 'next/navigation';
+import LoadingSpinner from '@/components/LoadingSpinner';
+
+// Dynamically import the AIChatWindow component with no SSR
+const AIChatWindow = dynamic(
+  () => import('@/components/AIChatWindow'),
+  { ssr: false }
+);
+
+// Theme toggle component
+function ThemeToggle() {
+  const [mounted, setMounted] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
+
+  useEffect(() => {
+    setMounted(true);
+    // Get theme from localStorage or system preference
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' || 'system';
+    setTheme(savedTheme);
+    applyTheme(savedTheme);
+  }, []);
+
+  const applyTheme = (newTheme: string) => {
+    const root = window.document.documentElement;
+    
+    if (newTheme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      root.classList.remove('light', 'dark');
+      root.classList.add(systemTheme);
+    } else {
+      root.classList.remove('light', 'dark');
+      root.classList.add(newTheme);
     }
+    
+    localStorage.setItem('theme', newTheme);
+  };
+
+  const toggleTheme = (newTheme: 'light' | 'dark' | 'system') => {
+    setTheme(newTheme);
+    applyTheme(newTheme);
+  };
+
+  if (!mounted) {
+    return (
+      <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+    );
   }
-};
-
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { 
-    opacity: 1, 
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: "easeOut"
-    }
-  }
-};
-
-export default function Home() {
-  const features = [
-    {
-      icon: <Icons.music className="h-8 w-8" />,
-      title: 'Quantum Audio Synthesis',
-      description: 'Generate never-before-heard sounds using quantum-inspired algorithms that push the boundaries of digital audio.'
-    },
-    {
-      icon: <Icons.waveform className="h-8 w-8" />,
-      title: 'Neural Sample Engine',
-      description: 'AI-powered sample manipulation that understands musical context and adapts to your style in real-time.'
-    },
-    {
-      icon: <Icons.brain className="h-8 w-8" />,
-      title: 'Cognitive Mixing',
-      description: 'Let our AI analyze and enhance your mix with intelligent processing that learns from professional tracks.'
-    },
-    {
-      icon: <Icons.collaborate className="h-8 w-8" />,
-      title: 'Holographic Collaboration',
-      description: 'Work with artists worldwide in our immersive 3D audio workspace with real-time synchronization.'
-    },
-    {
-      icon: <Icons.music className="h-8 w-8" />,
-      title: 'Generative Compositions',
-      description: 'Create endless variations of your ideas with AI that understands music theory and your personal style.'
-    },
-    {
-      icon: <Icons.waveform className="h-8 w-8" />,
-      title: 'Spatial Audio Design',
-      description: 'Design for next-gen audio formats with intuitive 3D sound positioning and movement.'
-    }
-  ];
 
   return (
-    <div className="flex flex-col min-h-screen overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#4f46e5_0%,transparent_70%)] opacity-20 mix-blend-overlay" />
-        
-        {/* Animated particles */}
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute rounded-full bg-gradient-to-r from-neon-cyan to-neon-pink"
-            style={{
-              width: Math.random() * 10 + 5,
-              height: Math.random() * 10 + 5,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              filter: 'blur(1px)',
-              opacity: 0.6
-            }}
-            animate={{
-              y: [0, -50, 0],
-              x: [0, (Math.random() - 0.5) * 100],
-              opacity: [0.3, 0.8, 0.3],
-            }}
-            transition={{
-              duration: 5 + Math.random() * 10,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
-        ))}
-      </div>
+    <div className="flex items-center space-x-1 p-1 rounded-full bg-gray-100 dark:bg-gray-800">
+      <button
+        onClick={() => toggleTheme('light')}
+        className={`p-2 rounded-full transition-colors ${theme === 'light' ? 'bg-white text-amber-500 shadow' : 'text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+        aria-label="Light mode"
+      >
+        <Sun className="h-4 w-4" />
+      </button>
+      <button
+        onClick={() => toggleTheme('dark')}
+        className={`p-2 rounded-full transition-colors ${theme === 'dark' ? 'bg-gray-900 text-blue-400 shadow' : 'text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+        aria-label="Dark mode"
+      >
+        <Moon className="h-4 w-4" />
+      </button>
+      <button
+        onClick={() => toggleTheme('system')}
+        className={`p-2 rounded-full transition-colors ${theme === 'system' ? 'bg-gray-200 dark:bg-gray-700 text-blue-500' : 'text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+        aria-label="System preference"
+      >
+        <Laptop className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
 
-      {/* Hero Section */}
-      <section className="relative w-full min-h-screen flex items-center justify-center overflow-hidden pt-20">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-transparent z-0" />
-        
-        <div className="container px-4 md:px-6 relative z-10">
-          <motion.div 
-            className="grid gap-12 lg:grid-cols-2 lg:gap-24 items-center"
-            initial="hidden"
-            animate="show"
-            variants={container}
-          >
-            <motion.div className="space-y-6" variants={item}>
-              <motion.div className="inline-block px-3 py-1 text-sm font-medium bg-neon-pink/20 text-neon-pink rounded-full mb-4">
-                BETA NOW LIVE
-              </motion.div>
-              
-              <motion.h1 
-                className="text-5xl md:text-7xl lg:text-8xl font-bold leading-tight"
-                variants={item}
-              >
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan via-neon-pink to-neon-purple">
-                  SampleMind
-                </span>
-                <span className="block mt-2 text-3xl md:text-5xl text-white/80">
-                  The Future of Music Production
-                </span>
-              </motion.h1>
-              
-              <motion.p 
-                className="text-xl md:text-2xl text-white/70 max-w-2xl"
-                variants={item}
-              >
-                Harness the power of quantum computing and neural networks to create music that transcends boundaries.
-              </motion.p>
-              
-              <motion.div 
-                className="flex flex-col sm:flex-row gap-4 pt-4"
-                variants={item}
-              >
-                <Button 
-                  size="lg" 
-                  className="glass-effect group relative overflow-hidden px-8 py-6 text-lg font-bold"
-                >
-                  <span className="relative z-10 flex items-center">
-                    <Icons.play className="mr-2 h-5 w-5" />
-                    Start Creating Free
-                  </span>
-                  <span className="absolute inset-0 bg-gradient-to-r from-neon-pink to-neon-purple opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="glass-effect border-neon-cyan/30 text-neon-cyan hover:bg-neon-cyan/10 hover:text-neon-cyan px-8 py-6 text-lg font-bold"
-                >
-                  <span className="flex items-center">
-                    <Icons.arrowRight className="mr-2 h-5 w-5" />
-                    Watch Demo
-                  </span>
-                </Button>
-              </motion.div>
-              
-              <motion.div 
-                className="pt-4 flex items-center space-x-4 text-sm text-white/60"
-                variants={item}
-              >
-                <div className="flex -space-x-2">
-                  {[1, 2, 3].map((i) => (
-                    <div 
-                      key={i}
-                      className="h-8 w-8 rounded-full border-2 border-background bg-gradient-to-r from-neon-cyan to-neon-pink"
-                      style={{ zIndex: 3 - i }}
-                    />
-                  ))}
+export default function Home() {
+  const [showChat, setShowChat] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [allowContentRender, setAllowContentRender] = useState(false);
+  const { isAuthenticated, loading: authLoading, user } = useAuthContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!authLoading) {
+      setAllowContentRender(true);
+      return;
+    }
+
+    if (allowContentRender) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setAllowContentRender(true);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [authLoading, allowContentRender]);
+
+  const showPreparingState = authLoading && !allowContentRender;
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      {showPreparingState && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
+          <LoadingSpinner size="lg" text="Preparing experience..." />
+        </div>
+      )}
+      {showChat ? (
+        <AIChatWindow />
+      ) : (
+        <main className="flex-1 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
+          <div className="w-full max-w-6xl mx-auto">
+            {/* Header */}
+            <header className="flex items-center justify-between mb-12">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+                  <span className="text-white font-bold text-xl">SM</span>
                 </div>
-                <div>
-                  <div className="font-medium text-white/90">Join 10,000+ producers</div>
-                  <div className="text-xs">Already creating with SampleMind</div>
-                </div>
-              </motion.div>
-            </motion.div>
-            
-            <motion.div 
-              className="relative"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.8 }}
-            >
-              <div className="relative z-10 aspect-square w-full max-w-2xl mx-auto">
-                <div className="absolute inset-0 bg-gradient-to-br from-neon-pink/20 via-neon-purple/20 to-neon-cyan/20 rounded-3xl blur-xl opacity-70" />
-                <div className="relative z-20 h-full w-full rounded-2xl glass-effect border border-white/10 overflow-hidden">
-                  {/* Placeholder for DAW interface */}
-                  <div className="h-full w-full bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center">
-                    <div className="text-center p-8">
-                      <Icons.logo className="h-20 w-20 mx-auto mb-4 text-neon-cyan" />
-                      <h3 className="text-xl font-bold text-white mb-2">SampleMind DAW</h3>
-                      <p className="text-white/60">Your next hit starts here</p>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Floating elements */}
-                <motion.div 
-                  className="absolute -bottom-6 -left-6 h-32 w-32 rounded-full bg-neon-pink/20 blur-xl"
-                  animate={{
-                    y: [0, -20, 0],
-                  }}
-                  transition={{
-                    duration: 6,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                />
-                <motion.div 
-                  className="absolute -top-6 -right-6 h-40 w-40 rounded-full bg-neon-cyan/20 blur-xl"
-                  animate={{
-                    y: [0, 20, 0],
-                  }}
-                  transition={{
-                    duration: 8,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: 1
-                  }}
-                />
+                <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
+                  SampleMind AI
+                </h1>
               </div>
-            </motion.div>
-          </motion.div>
-        </div>
-        
-        {/* Scroll indicator */}
-        <motion.div 
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center"
-          animate={{
-            y: [0, 10, 0],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        >
-          <div className="h-8 w-0.5 bg-gradient-to-b from-neon-cyan to-transparent" />
-          <span className="mt-2 text-sm text-neon-cyan/80">Scroll to explore</span>
-        </motion.div>
-      </section>
+              <ThemeToggle />
+            </header>
 
-      {/* Features Section */}
-      <section className="relative py-24 md:py-32 overflow-hidden">
-        <div className="container px-4 md:px-6 relative z-10">
-          <motion.div 
-            className="text-center max-w-4xl mx-auto mb-20"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <span className="inline-block px-3 py-1 text-sm font-medium bg-neon-cyan/20 text-neon-cyan rounded-full mb-4">
-              POWERFUL FEATURES
-            </span>
-            <h2 className="text-4xl md:text-6xl font-bold mb-6">
-              Next-Gen Music Production
-            </h2>
-            <p className="text-xl text-white/70 max-w-2xl mx-auto">
-              Experience the future of music creation with our cutting-edge AI-powered tools and workflows.
-            </p>
-          </motion.div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ delay: index * 0.1, duration: 0.5 }}
-              >
-                <Card className="glass-effect border-white/5 hover:border-neon-cyan/30 transition-all duration-300 h-full">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center space-x-4">
-                      <div className="p-2 rounded-lg bg-neon-cyan/10 text-neon-cyan">
-                        {feature.icon}
-                      </div>
-                      <CardTitle className="text-xl">{feature.title}</CardTitle>
+            {/* Hero Section */}
+            <div className="glass p-8 rounded-2xl shadow-xl mb-12">
+              <div className="grid lg:grid-cols-2 gap-10 items-start">
+                <div>
+                  <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
+                AI-Powered Music Production
+              </h2>
+                  <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-xl">
+                    Create, edit, and master your music with the power of artificial intelligence. Experience the future of music production today with real-time insights, audio analysis, and creative assistance.
+              </p>
+              
+                  <div className="flex flex-col sm:flex-row gap-4">
+                <button
+                  onClick={() => setShowChat(true)}
+                  className="btn btn-primary flex items-center justify-center space-x-2"
+                >
+                  <span>Talk to AI Assistant</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
+                  </svg>
+                </button>
+                
+                    {isAuthenticated ? (
+                      <button
+                        onClick={() => router.push('/dashboard')}
+                        className="btn btn-secondary flex items-center justify-center space-x-2"
+                      >
+                        <Upload className="h-5 w-5" />
+                        <span>Open Dashboard</span>
+                      </button>
+                    ) : (
+                <button
+                  onClick={() => setIsLoading(!isLoading)}
+                  className="btn btn-secondary flex items-center justify-center space-x-2"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Processing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Mic className="h-5 w-5" />
+                      <span>Start Recording</span>
+                    </>
+                  )}
+                </button>
+                    )}
+                  </div>
+
+                  {isAuthenticated && (
+                    <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+                      Signed in as <span className="font-medium text-gray-700 dark:text-gray-200">{user?.full_name || user?.email}</span>. Jump into the dashboard to manage your projects.
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex justify-center">
+                  {isAuthenticated ? (
+                    <div className="w-full max-w-md backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+                      <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                        You&apos;re all set!
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300 mb-6">
+                        Access the dashboard to upload new tracks, monitor analysis, and view insights in real time.
+                      </p>
+                      <button
+                        onClick={() => router.push('/dashboard')}
+                        className="btn btn-primary w-full"
+                      >
+                        Go to Dashboard
+                      </button>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-white/70">{feature.description}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-        
-        {/* Background elements */}
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-transparent" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#4f46e5_0%,transparent_50%)] opacity-20" />
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="relative py-24 md:py-32 overflow-hidden">
-        <div className="container px-4 md:px-6 relative z-10">
-          <motion.div 
-            className="max-w-4xl mx-auto text-center"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="text-4xl md:text-6xl font-bold mb-6">
-              Ready to Revolutionize Your Music?
-            </h2>
-            <p className="text-xl text-white/70 mb-10 max-w-2xl mx-auto">
-              Join the future of music production today. No credit card required.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg" 
-                className="glass-effect group relative overflow-hidden px-8 py-6 text-lg font-bold"
-              >
-                <span className="relative z-10 flex items-center">
-                  Start Free Trial
-                </span>
-                <span className="absolute inset-0 bg-gradient-to-r from-neon-pink to-neon-purple opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="glass-effect border-neon-cyan/30 text-neon-cyan hover:bg-neon-cyan/10 hover:text-neon-cyan px-8 py-6 text-lg font-bold"
-              >
-                <span className="flex items-center">
-                  Schedule Demo
-                </span>
-              </Button>
+                  ) : (
+                    <LoginForm />
+                  )}
+                </div>
+              </div>
             </div>
-            <p className="mt-6 text-sm text-white/50">
-              14-day free trial • No credit card required • Cancel anytime
-            </p>
-          </motion.div>
-        </div>
-        
-        {/* Animated background */}
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/80" />
-          <div className="absolute inset-0 bg-[url('/images/grid.svg')] opacity-5" />
-          
-          {[...Array(15)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute rounded-full"
-              style={{
-                width: Math.random() * 400 + 100,
-                height: Math.random() * 400 + 100,
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                background: `radial-gradient(circle, ${
-                  Math.random() > 0.5 ? 'var(--neon-pink)' : 'var(--neon-cyan)'
-                }10 0%, transparent 70%)`,
-                filter: 'blur(20px)'
-              }}
-              animate={{
-                x: [0, (Math.random() - 0.5) * 100],
-                y: [0, (Math.random() - 0.5) * 50],
-                opacity: [0.1, 0.3, 0.1],
-              }}
-              transition={{
-                duration: 10 + Math.random() * 20,
-                repeat: Infinity,
-                repeatType: 'reverse',
-                ease: 'easeInOut'
-              }}
-            />
-          ))}
-        </div>
-      </section>
+
+            {/* Features Grid */}
+            <div className="grid md:grid-cols-3 gap-6 mb-12">
+              {[
+                {
+                  icon: '🎵',
+                  title: 'AI-Powered Composition',
+                  description: 'Generate unique melodies and harmonies with our advanced AI algorithms.'
+                },
+                {
+                  icon: '🎛️',
+                  title: 'Smart Mixing',
+                  description: 'Automatically balance and enhance your tracks with intelligent mixing tools.'
+                },
+                {
+                  icon: '🎧',
+                  title: 'Mastering',
+                  description: 'Get professional-sounding masters with our AI mastering technology.'
+                }
+              ].map((feature, index) => (
+                <div key={index} className="glass p-6 rounded-xl hover:shadow-lg transition-all duration-300">
+                  <div className="text-4xl mb-4">{feature.icon}</div>
+                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <footer className="mt-auto pt-8 pb-6 text-center text-sm text-gray-500 dark:text-gray-400">
+            <p>© {new Date().getFullYear()} SampleMind AI. All rights reserved.</p>
+          </footer>
+        </main>
+      )}
     </div>
   );
 }

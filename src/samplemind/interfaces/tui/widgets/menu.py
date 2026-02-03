@@ -3,13 +3,12 @@ Main Menu Widget for SampleMind TUI
 Provides a modern interactive menu interface
 """
 
-from textual.widget import Widget
-from textual.widgets import Static, ListItem, Label
-from textual.containers import Container, Vertical
-from textual.message import Message
-from rich.text import Text
-from rich.panel import Panel
 from rich.align import Align
+from rich.panel import Panel
+from rich.text import Text
+from textual.containers import Vertical
+from textual.message import Message
+from textual.widgets import Label, Static
 
 
 class MainMenuOption(Message):
@@ -57,6 +56,8 @@ class MainMenu(Static):
         self.menu_items = [
             ("analyze", "🎯 Analyze Single File"),
             ("batch", "📁 Batch Process Folder"),
+            ("search", "🔎 Semantic Search"),
+            ("chain", "🔗 Chain Recommender"),
             ("favorites", "⭐ Favorites"),
             ("settings", "⚙️  Settings"),
             ("analytics", "📊 Session Analytics"),
