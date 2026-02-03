@@ -248,12 +248,12 @@ class AudioProcessor:
             )
 
         if len(y) < 512:  # Minimum length for STFT
-            # Estimate duration assuming typical sample rate
+            # Estimate duration assuming typical sample rate (actual rate may vary)
             duration_sec = len(y) / 44100
             raise ValueError(
                 f"Audio signal too short for HPSS separation\n"
                 f"Minimum required: 512 samples (~0.012 seconds at 44.1kHz)\n"
-                f"Got: {len(y)} samples (~{duration_sec:.3f} seconds)\n"
+                f"Got: {len(y)} samples (~{duration_sec:.3f} seconds at 44.1kHz)\n"
                 f"Solution: Use audio files longer than 0.012 seconds"
             )
 
