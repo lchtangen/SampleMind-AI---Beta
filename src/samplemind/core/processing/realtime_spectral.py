@@ -9,15 +9,30 @@ Features:
 """
 
 import logging
-import numpy as np
-from typing import Dict, Optional, List, Tuple
 from dataclasses import dataclass
 from enum import Enum
-import librosa
-from scipy import signal
-from scipy.signal.windows import hann
+
+import numpy as np
 
 logger = logging.getLogger(__name__)
+
+# Lazy loaded modules
+librosa = None
+signal = None
+hann = None
+
+def _ensure_libs():
+    """Lazily import heavy dependencies."""
+    global librosa, signal, hann
+    if librosa is None:
+        import librosa as _librosa
+        librosa = _librosa
+    if signal is None:
+        from scipy import signal as _signal
+        signal = _signal
+    if hann is None:
+        from scipy.signal.windows import hann as _hann
+        hann = _hann
 
 
 class FrequencyScale(Enum):
@@ -34,7 +49,7 @@ class SpectralFrame:
     frequencies_hz: np.ndarray  # Frequency bins in Hz
     magnitude: np.ndarray  # Magnitude in dB
     phase: np.ndarray  # Phase in radians
-    pitch_hz: Optional[float]  # Detected fundamental frequency
+    pitch_hz: float | None  # Detected fundamental frequency
     pitch_confidence: float  # Confidence in pitch detection (0.0-1.0)
     peak_frequency_hz: float  # Strongest frequency component
 
@@ -65,6 +80,7 @@ class RealtimeSpectral:
             hop_length: Samples between frames
             target_fps: Target frame rate for real-time display
         """
+        _ensure_libs()
         self.sample_rate = sample_rate
         self.fft_size = fft_size
         self.hop_length = hop_length
@@ -146,7 +162,7 @@ class RealtimeSpectral:
         scale: FrequencyScale = FrequencyScale.LOG,
         freq_min: float = 20.0,
         freq_max: float = 20000.0,
-    ) -> Dict:
+    ) -> dict:
         """
         Get data formatted for display.
 
@@ -213,11 +229,12 @@ class PitchDetector:
     """Efficient pitch detection for real-time use"""
 
     def __init__(self, sample_rate: int) -> None:
+        _ensure_libs()
         self.sample_rate = sample_rate
         self.min_freq = 50.0  # Minimum detectable frequency (Hz)
         self.max_freq = 4000.0  # Maximum detectable frequency (Hz)
 
-    def detect(self, audio_chunk: np.ndarray) -> Tuple[Optional[float], float]:
+    def detect(self, audio_chunk: np.ndarray) -> tuple[float | None, float]:
         """
         Detect fundamental frequency (pitch) in audio chunk.
 
@@ -310,7 +327,7 @@ class SpectrumAnalyzer:
         self.sample_rate = sample_rate
         self.spectral = RealtimeSpectral(sample_rate)
 
-    def get_spectral_features(self, frame: SpectralFrame) -> Dict:
+    def get_spectral_features(self, frame: SpectralFrame) -> dict:
         """
         Extract useful features from spectral frame.
 
@@ -343,7 +360,7 @@ class SpectrumAnalyzer:
 
 
 # Global instance
-_spectral_instance: Optional[RealtimeSpectral] = None
+_spectral_instance: RealtimeSpectral | None = None
 
 
 def init_spectral(sample_rate: int = 44100) -> RealtimeSpectral:

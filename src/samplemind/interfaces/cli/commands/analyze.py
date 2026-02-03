@@ -13,16 +13,20 @@ Usage:
     samplemind batch:analyze <folder>           # Batch processing
 """
 
-import asyncio
-import typer
-from typing import Optional
+import time
 from pathlib import Path
-from rich.console import Console
-from rich.table import Table
+
+import numpy as np
+import soundfile as sf
+import typer
+from rich.live import Live
 from rich.panel import Panel
+from rich.table import Table
+
+from samplemind.core.processing.realtime_spectral import RealtimeSpectral, SpectralFrame
+from samplemind.utils.file_picker import select_audio_file
 
 from . import utils
-from samplemind.utils.file_picker import select_audio_file
 
 # Create analyze app group
 app = typer.Typer(
@@ -40,8 +44,8 @@ console = utils.console
 @utils.with_error_handling
 @utils.async_command
 async def analyze_full(
-    file: Optional[Path] = typer.Argument(None, help="Audio file to analyze"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file"),
+    file: Path | None = typer.Argument(None, help="Audio file to analyze"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file"),
     format: str = typer.Option("table", "--format", "-f", help="Output format (json|csv|yaml|table)"),
     show_profile: bool = typer.Option(False, "--profile", help="Show profiling info"),
     interactive: bool = typer.Option(False, "--interactive", "-i", help="Launch file picker"),
@@ -80,7 +84,7 @@ async def analyze_full(
 @utils.async_command
 async def analyze_standard(
     file: Path = typer.Argument(..., help="Audio file to analyze"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
     format: str = typer.Option("table", "--format", "-f"),
 ) -> None:
     """Run standard analysis with core features (recommended)"""
@@ -100,7 +104,7 @@ async def analyze_standard(
 @utils.async_command
 async def analyze_basic(
     file: Path = typer.Argument(..., help="Audio file to analyze"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Run quick basic analysis (fast, minimal features)"""
     try:
@@ -124,7 +128,7 @@ async def analyze_basic(
 @utils.async_command
 async def analyze_professional(
     file: Path = typer.Argument(..., help="Audio file to analyze"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
     format: str = typer.Option("json", "--format", "-f"),
     export_features: bool = typer.Option(False, "--export-features", help="Export raw feature vectors"),
 ) -> None:
@@ -151,7 +155,7 @@ async def analyze_professional(
 @utils.with_error_handling
 @utils.async_command
 async def analyze_quick(
-    file: Optional[Path] = typer.Argument(None, help="Audio file to analyze"),
+    file: Path | None = typer.Argument(None, help="Audio file to analyze"),
     interactive: bool = typer.Option(False, "--interactive", "-i", help="Launch file picker"),
 ) -> None:
     """Ultra-fast analysis (< 1 second)"""
@@ -256,7 +260,7 @@ async def analyze_compare(
 ) -> None:
     """Compare two audio files"""
     try:
-        console.print(f"[bold]Comparing audio files[/bold]")
+        console.print("[bold]Comparing audio files[/bold]")
 
         with utils.ProgressTracker("📊 Comparing"):
             engine = await utils.get_audio_engine()
@@ -658,7 +662,7 @@ async def analyze_zero_crossing(
 @utils.async_command
 async def batch_analyze(
     folder: Path = typer.Argument(..., help="Folder with audio files"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file"),
     format: str = typer.Option("json", "--format", "-f"),
     level: str = typer.Option("STANDARD", "--level", "-l", help="Analysis level"),
 ) -> None:
@@ -690,6 +694,74 @@ async def batch_analyze(
 
 
 @app.command()
+@app.command("monitor")
+@utils.with_error_handling
+def analyze_monitor(
+    file: Path = typer.Argument(..., help="Audio file to monitor"),
+    fps: int = typer.Option(30, "--fps", help="Target FPS"),
+) -> None:
+    """Real-time spectral monitoring visualization"""
+    try:
+        if not file.exists():
+            raise FileNotFoundError(f"File not found: {file}")
+
+        # Initialize analyzer
+        info = sf.info(file)
+        sr = info.samplerate
+
+        analyzer = RealtimeSpectral(sample_rate=sr, target_fps=fps, fft_size=2048)
+
+        # Generator for blocks
+        blocks = sf.blocks(str(file), blocksize=analyzer.fft_size, overlap=0, fill_value=0)
+
+        console.print(f"[cyan]Starting Real-time Monitor for {file.name} ({sr} Hz)[/cyan]")
+        console.print("[dim]Press Ctrl+C to stop[/dim]")
+
+        def generate_table(frame: SpectralFrame) -> Panel:
+            table = Table(show_header=False, box=None, expand=True)
+            table.add_column("Metric", style="cyan", width=15)
+            table.add_column("Value", style="bold green", justify="left")
+
+            table.add_row("Time", f"{frame.timestamp_ms/1000:.1f}s")
+            table.add_row("Peak Freq", f"{frame.peak_frequency_hz:.1f} Hz")
+
+            pitch_str = f"{frame.pitch_hz:.1f} Hz" if frame.pitch_hz else "--"
+            conf_str = f"({int(frame.pitch_confidence*100)}%)" if frame.pitch_hz else ""
+            table.add_row("Pitch", f"{pitch_str} {conf_str}")
+
+            # Simple bar for energy
+            energy = np.mean(frame.magnitude) # roughly 0-100
+            bar_len = int(energy / 2) # max 50 chars
+            table.add_row("Energy", "█" * bar_len)
+
+            return Panel(table, title="Spectral Monitor", border_style="cyan")
+
+        with Live(console=console, refresh_per_second=fps) as live:
+            start_time = time.time()
+            for i, block in enumerate(blocks):
+                # If stereo, mix to mono
+                if len(block.shape) > 1:
+                    block = np.mean(block, axis=1)
+
+                # Process
+                current_time = (i * analyzer.fft_size / sr) * 1000
+                frame = analyzer.process_chunk(block, current_time_ms=current_time)
+
+                live.update(generate_table(frame))
+
+                # Sync to realtime
+                elapsed = time.time() - start_time
+                expected = current_time / 1000.0
+                if expected > elapsed:
+                    time.sleep(expected - elapsed)
+
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Monitoring stopped[/yellow]")
+    except Exception as e:
+        utils.handle_error(e, "analyze:monitor")
+        raise typer.Exit(1)
+
+
 def list():
     """List all analyze commands"""
     console.print("[bold cyan]Analyze Commands[/bold cyan]\n")

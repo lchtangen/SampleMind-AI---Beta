@@ -9,15 +9,14 @@ Extract musical information from audio and convert to MIDI:
 """
 
 import logging
-import numpy as np
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 import librosa
 import mido
-from mido import MidiFile, MidiTrack, Message
+import numpy as np
+from mido import Message, MidiFile, MidiTrack
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +50,7 @@ class MidiNote:
     velocity: int = 64      # Velocity (0-127)
     confidence: float = 1.0 # Confidence (0-1)
 
-    def to_mido_events(self, tick_rate: float) -> Tuple[Message, Message]:
+    def to_mido_events(self, tick_rate: float) -> tuple[Message, Message]:
         """Convert to mido note on/off messages"""
         start_ticks = int(self.start_time * tick_rate)
         duration_ticks = int(self.duration * tick_rate)
@@ -69,7 +68,7 @@ class Chord:
     duration: float             # Seconds
     root: int                   # Root note MIDI number
     chord_type: ChordType       # Chord type
-    notes: List[int]            # MIDI notes in chord
+    notes: list[int]            # MIDI notes in chord
     confidence: float = 1.0     # Confidence (0-1)
 
     def get_name(self) -> str:
@@ -83,12 +82,12 @@ class Chord:
 class MIDIExtractionResult:
     """Result of MIDI extraction"""
     extraction_type: MIDIExtractionType
-    notes: List[MidiNote]           # For melody
-    chords: List[Chord]             # For harmony
-    tempo_bpm: Optional[float]      # Detected tempo
-    time_signature: Optional[Tuple[int, int]]  # (numerator, denominator)
+    notes: list[MidiNote]           # For melody
+    chords: list[Chord]             # For harmony
+    tempo_bpm: float | None      # Detected tempo
+    time_signature: tuple[int, int] | None  # (numerator, denominator)
     confidence: float               # Overall confidence (0-1)
-    midi_file: Optional[MidiFile] = None  # Generated MIDI file
+    midi_file: MidiFile | None = None  # Generated MIDI file
 
 
 class MIDIGenerator:
@@ -111,7 +110,7 @@ class MIDIGenerator:
         self.sample_rate = sample_rate
         logger.info(f"MIDI Generator initialized (SR: {sample_rate}Hz)")
 
-    def load_audio(self, file_path: Path) -> Tuple[np.ndarray, int]:
+    def load_audio(self, file_path: Path) -> tuple[np.ndarray, int]:
         """Load audio file"""
         audio, sr = librosa.load(str(file_path), sr=self.sample_rate, mono=True)
         logger.info(f"Loaded audio: {audio.shape}, SR: {sr}")
@@ -192,7 +191,7 @@ class MIDIGenerator:
         sr: int,
         min_duration: float,
         confidence_threshold: float,
-    ) -> List[MidiNote]:
+    ) -> list[MidiNote]:
         """Convert pitch contour to discrete notes"""
         notes = []
         hop_length = 512
@@ -302,7 +301,7 @@ class MIDIGenerator:
         self,
         chroma: np.ndarray,
         sr: int,
-    ) -> List[Chord]:
+    ) -> list[Chord]:
         """Detect chords from chroma features"""
         chords = []
         hop_length = 512
@@ -425,7 +424,7 @@ class MIDIGenerator:
         onset_times: np.ndarray,
         tempo: float,
         grid: int,
-    ) -> List[MidiNote]:
+    ) -> list[MidiNote]:
         """Quantize onset times to a grid"""
         beat_duration = 60.0 / tempo  # Duration of one beat
         grid_duration = beat_duration / (grid / 4)  # Duration of one grid point
@@ -459,9 +458,9 @@ class MIDIGenerator:
 
     def _create_midi_file(
         self,
-        notes: List[MidiNote],
+        notes: list[MidiNote],
         tempo_bpm: float = 120.0,
-        time_signature: Tuple[int, int] = (4, 4),
+        time_signature: tuple[int, int] = (4, 4),
     ) -> MidiFile:
         """Create a MIDI file from notes"""
         mid = MidiFile()
@@ -471,7 +470,7 @@ class MIDIGenerator:
         # Set tempo
         tempo_us = int(60_000_000 / tempo_bpm)
         track.append(Message('program_change', program=0, time=0))
-        track.append(Message('set_tempo', tempo=tempo_us, time=0))
+        track.append(mido.MetaMessage('set_tempo', tempo=tempo_us, time=0))
 
         # Add time signature
         track.append(mido.MetaMessage('time_signature', numerator=time_signature[0],
