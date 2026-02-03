@@ -1,12 +1,14 @@
+import asyncio
 import importlib.util
 import logging
 import subprocess
 import sys
 import tempfile
+import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional
+from typing import Dict, Iterable, List, Optional, Callable
 
 from .exceptions import OptionalDependencyError
 
@@ -279,4 +281,91 @@ class StemSeparationEngine:
             output_directory=track_dir,
             stems=stem_map,
             command=command,
+        )
+
+    async def batch_separate(
+        self,
+        audio_paths: List[Path],
+        output_directory: Optional[Path] = None,
+        max_concurrent: int = 1,
+        progress_callback: Optional[Callable[[int, int], None]] = None,
+    ) -> List[StemSeparationResult]:
+        """
+        Separate multiple audio files with optional concurrency control.
+
+        Args:
+            audio_paths: List of paths to audio files
+            output_directory: Base output directory for all stems
+            max_concurrent: Maximum concurrent separations (default: 1 for stability)
+            progress_callback: Callback function(current, total) for progress tracking
+
+        Returns:
+            List of StemSeparationResult objects
+
+        Example:
+            results = await engine.batch_separate(
+                [Path("track1.wav"), Path("track2.wav")],
+                max_concurrent=2,
+                progress_callback=lambda c, t: print(f"{c}/{t} complete")
+            )
+        """
+        self._assert_dependency()
+
+        results = []
+        total = len(audio_paths)
+
+        # Use semaphore to limit concurrency
+        semaphore = asyncio.Semaphore(max_concurrent)
+
+        async def process_file(index: int, path: Path) -> StemSeparationResult:
+            async with semaphore:
+                try:
+                    # Run separation in thread pool to avoid blocking
+                    loop = asyncio.get_event_loop()
+                    result = await loop.run_in_executor(
+                        None,
+                        self.separate,
+                        path,
+                        None,
+                        output_directory,
+                        "rescale",
+                        None,
+                        None,
+                    )
+                    logger.info(f"Separated {path.name} ({index+1}/{total})")
+                    if progress_callback:
+                        progress_callback(index + 1, total)
+                    return result
+                except Exception as e:
+                    logger.error(f"Failed to separate {path.name}: {e}")
+                    raise
+
+        # Create tasks for all files
+        tasks = [process_file(i, path) for i, path in enumerate(audio_paths)]
+
+        # Run all tasks with progress tracking
+        results = await asyncio.gather(*tasks, return_exceptions=False)
+
+        logger.info(f"Batch separation complete. Processed {len(results)} files.")
+        return results
+
+    def batch_separate_sync(
+        self,
+        audio_paths: List[Path],
+        output_directory: Optional[Path] = None,
+        progress_callback: Optional[Callable[[int, int], None]] = None,
+    ) -> List[StemSeparationResult]:
+        """
+        Synchronous wrapper for batch_separate (blocks until complete).
+
+        Args:
+            audio_paths: List of paths to audio files
+            output_directory: Base output directory
+            progress_callback: Callback function(current, total)
+
+        Returns:
+            List of StemSeparationResult objects
+        """
+        return asyncio.run(
+            self.batch_separate(audio_paths, output_directory, 1, progress_callback)
         )

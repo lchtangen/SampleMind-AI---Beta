@@ -39,7 +39,7 @@ class MasteringChain:
         low_freq: float = 80.0,
         mid_freq: float = 1000.0,
         high_freq: float = 8000.0,
-    ):
+    ) -> Any:
         """Add parametric EQ to chain.
 
         Args:
@@ -71,7 +71,7 @@ class MasteringChain:
         attack: float = 0.005,
         release: float = 0.100,
         makeup_gain: float = 0.0,
-    ):
+    ) -> Any:
         """Add dynamic range compressor.
 
         Args:
@@ -98,7 +98,7 @@ class MasteringChain:
         self,
         threshold: float = -0.1,
         release: float = 0.05,
-    ):
+    ) -> Any:
         """Add brickwall limiter (peak protection).
 
         Args:
@@ -115,7 +115,7 @@ class MasteringChain:
             )
         )
 
-    def add_stereo_width(self, width: float = 1.0):
+    def add_stereo_width(self, width: float = 1.0) -> Any:
         """Add stereo width enhancement via mid-side processing.
 
         Args:

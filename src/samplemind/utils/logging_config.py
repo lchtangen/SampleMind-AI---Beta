@@ -295,7 +295,7 @@ class AILogger:
         )
 
     @staticmethod
-    def fallback_triggered(original_provider: str, fallback_provider: str):
+    def fallback_triggered(original_provider: str, fallback_provider: str) -> None:
         """Log fallback to different AI provider."""
         logger.warning(
             f"Falling back to {fallback_provider}",

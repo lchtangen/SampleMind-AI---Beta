@@ -20,7 +20,7 @@ class JWTConfig:
 
 
 def configure_jwt(secret_key: str, algorithm: str = "HS256", 
-                  access_expire: int = 30, refresh_expire: int = 7):
+                  access_expire: int = 30, refresh_expire: int = 7) -> None:
     """Configure JWT settings from application config"""
     JWTConfig.SECRET_KEY = secret_key
     JWTConfig.ALGORITHM = algorithm

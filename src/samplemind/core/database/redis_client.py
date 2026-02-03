@@ -161,7 +161,7 @@ async def session_delete(session_id: str) -> bool:
 
 # Decorator for caching function results
 
-def redis_cache(ttl: int = 3600, key_prefix: str = "cache"):
+def redis_cache(ttl: int = 3600, key_prefix: str = "cache") -> Any:
     """
     Decorator to cache function results in Redis
     
@@ -170,7 +170,7 @@ def redis_cache(ttl: int = 3600, key_prefix: str = "cache"):
         async def expensive_operation(param1, param2):
             # ...
     """
-    def decorator(func):
+    def decorator(func: Any) -> Any:
         """Decorator wrapper for Redis caching"""
         @wraps(func)
         async def wrapper(*args, **kwargs) -> None:

@@ -27,7 +27,7 @@ class InsufficientRole(HTTPException):
         )
 
 
-def require_permission(permission: Permission):
+def require_permission(permission: Permission) -> Any:
     """
     Dependency that checks if current user has required permission
     
@@ -47,7 +47,7 @@ def require_permission(permission: Permission):
     return permission_checker
 
 
-def require_any_permission(*permissions: Permission):
+def require_any_permission(*permissions: Permission) -> Any:
     """
     Dependency that checks if user has ANY of the required permissions
     
@@ -73,7 +73,7 @@ def require_any_permission(*permissions: Permission):
     return permission_checker
 
 
-def require_all_permissions(*permissions: Permission):
+def require_all_permissions(*permissions: Permission) -> Any:
     """
     Dependency that checks if user has ALL required permissions
     """
@@ -91,7 +91,7 @@ def require_all_permissions(*permissions: Permission):
     return permission_checker
 
 
-def require_role(minimum_role: UserRole):
+def require_role(minimum_role: UserRole) -> Any:
     """
     Dependency that checks if user has minimum required role
     
@@ -119,7 +119,7 @@ def require_role(minimum_role: UserRole):
     return role_checker
 
 
-def admin_only():
+def admin_only() -> Any:
     """Shortcut for admin-only routes"""
     return require_role(UserRole.ADMIN)
 

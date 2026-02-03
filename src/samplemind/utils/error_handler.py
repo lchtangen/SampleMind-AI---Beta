@@ -284,7 +284,7 @@ class ErrorHandling:
         logger.debug(f"Starting operation: {self.operation}")
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Exit context and handle errors."""
         if exc_type is None:
             logger.debug(f"Operation completed: {self.operation}")

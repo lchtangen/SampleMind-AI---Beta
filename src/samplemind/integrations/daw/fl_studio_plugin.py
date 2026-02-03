@@ -288,13 +288,13 @@ def get_plugin() -> FLStudioPlugin:
     return _plugin_instance
 
 
-def init():
+def init() -> None:
     """Initialize plugin (called by FL Studio)"""
     plugin = get_plugin()
     plugin.on_init()
 
 
-def destroy():
+def destroy() -> None:
     """Destroy plugin (called by FL Studio)"""
     plugin = get_plugin()
     plugin.on_destroy()

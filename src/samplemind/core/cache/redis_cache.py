@@ -345,7 +345,7 @@ def cached(
     ttl: int = CacheConfig.DEFAULT_TTL,
     key_prefix: str = "",
     key_builder: Optional[Callable] = None
-):
+) -> Any:
     """
     Decorator for caching function results
     
@@ -355,7 +355,7 @@ def cached(
             # Expensive operation
             return features
     """
-    def decorator(func: Callable):
+    def decorator(func: Callable) -> Callable:
         """Decorator wrapper for caching"""
         @wraps(func)
         async def wrapper(*args, **kwargs) -> None:

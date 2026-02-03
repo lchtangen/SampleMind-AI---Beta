@@ -117,7 +117,7 @@ async def create_collection(collection: CollectionCreate):
     return new_col
 
 @router.get("/{collection_id}", response_model=CollectionResponse)
-async def get_collection(collection_id: str):
+async def get_collection(collection_id: str) -> Any:
     """Get a specific collection"""
     if is_db_available():
         c = await CollectionRepository.get_by_id(collection_id)

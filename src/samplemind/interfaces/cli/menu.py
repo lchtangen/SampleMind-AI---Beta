@@ -63,7 +63,7 @@ class SampleMindCLI:
             'session_start': time.time()
         }
     
-    def display_banner(self):
+    def display_banner(self) -> None:
         """Display the SampleMind AI banner"""
         banner = """
         ╔══════════════════════════════════════════════════════════════╗
@@ -166,7 +166,7 @@ class SampleMindCLI:
             console.print(f"[bold red]❌ Initialization failed: {e}[/bold red]")
             return False
     
-    def display_main_menu(self):
+    def display_main_menu(self) -> None:
         """Display the main menu options"""
         menu_table = Table(show_header=False, box=None, padding=(0, 2))
         menu_table.add_column("Option", style="bold cyan", width=3)
@@ -554,7 +554,7 @@ class SampleMindCLI:
         self.session_stats['total_processing_time'] += time.time() - start_time
         self.session_stats['ai_requests'] += len(results)
     
-    def scan_and_preview(self):
+    def scan_and_preview(self) -> None:
         """Scan directory and show preview"""
         console.print("\n[bold blue]🔍 Scan & Preview[/bold blue]")
         
@@ -585,7 +585,7 @@ class SampleMindCLI:
         # Display summary
         self._display_directory_info(dir_info)
     
-    def show_system_status(self):
+    def show_system_status(self) -> None:
         """Display comprehensive system status"""
         console.print("\n[bold blue]📊 System Status[/bold blue]")
         
@@ -644,7 +644,7 @@ class SampleMindCLI:
         
         console.print(layout)
     
-    def show_session_analytics(self):
+    def show_session_analytics(self) -> None:
         """Display current session analytics"""
         console.print("\n[bold blue]📈 Session Analytics[/bold blue]")
         

@@ -169,7 +169,7 @@ class RequestContext:
 
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Exit context and restore previous context."""
         # Restore previous context
         if self._previous_context:
@@ -284,7 +284,7 @@ class OperationTimer:
         log_info(f"Operation started", operation=self.operation)
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Exit context and log duration."""
         import time
 
@@ -331,7 +331,7 @@ def with_logging(
         ...     return user_id
     """
 
-    def decorator(func):
+    def decorator(func: Any) -> Any:
         """Decorator wrapper for log_operation"""
         import functools
         import inspect

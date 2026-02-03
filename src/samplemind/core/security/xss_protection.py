@@ -228,7 +228,7 @@ class SafeHTML(BaseModel):
     content: str
     
     @validator('content')
-    def sanitize_html(cls, v):
+    def sanitize_html(cls, v: Any) -> Any:
         """Automatically sanitize HTML on input"""
         if XSSProtection.detect_xss_attempt(v):
             # Strip all HTML if XSS detected
@@ -243,7 +243,7 @@ class SafeURL(BaseModel):
     url: str
     
     @validator('url')
-    def sanitize_url(cls, v):
+    def sanitize_url(cls, v: Any) -> Any:
         """Automatically sanitize URL"""
         safe_url = XSSProtection.sanitize_url(v)
         if safe_url is None:

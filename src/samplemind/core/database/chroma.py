@@ -78,14 +78,14 @@ def init_chromadb(
         raise
 
 
-def get_chroma_client():
+def get_chroma_client() -> Any:
     """Get ChromaDB client instance"""
     if _chroma_client is None:
         raise RuntimeError("ChromaDB not initialized. Call init_chromadb() first.")
     return _chroma_client
 
 
-def get_collection():
+def get_collection() -> Any:
     """Get ChromaDB collection"""
     if _collection is None:
         raise RuntimeError("ChromaDB collection not initialized")

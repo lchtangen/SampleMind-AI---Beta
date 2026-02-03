@@ -2,22 +2,16 @@
 
 **Generated:** 1770105079.2611232
 
-**Total Issues:** 158
+**Total Issues:** 102
 
 ## Issues by Severity
 
 - **Critical:** 0
 - **High:** 0
-- **Medium:** 158
+- **Medium:** 102
 - **Low:** 0
 
 ## Detailed Issues
-
-### __init__.py:38
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function '__getattr__' missing type hints for: return type, parameter 'name'
-- **Suggestion:** Add type hints for all parameters and return values
 
 ### config.py:301
 - **Severity:** medium
@@ -31,184 +25,10 @@
 - **Message:** Function 'run_server' missing type hints for: return type, parameter 'host', parameter 'port'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### log_context.py:172
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function '__exit__' missing type hints for: parameter 'exc_type', parameter 'exc_val', parameter 'exc_tb'
-- **Suggestion:** Add type hints for all parameters and return values
-
-### log_context.py:287
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function '__exit__' missing type hints for: parameter 'exc_type', parameter 'exc_val', parameter 'exc_tb'
-- **Suggestion:** Add type hints for all parameters and return values
-
-### log_context.py:334
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'decorator' missing type hints for: return type, parameter 'func'
-- **Suggestion:** Add type hints for all parameters and return values
-
-### log_context.py:340
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'wrapper' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### error_handler.py:287
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function '__exit__' missing type hints for: parameter 'exc_type', parameter 'exc_val', parameter 'exc_tb'
-- **Suggestion:** Add type hints for all parameters and return values
-
-### logging_config.py:298
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'fallback_triggered' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### storage.py:219
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function '_list' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### ai_manager.py:693
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function '_update_provider_stats' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### openai_integration.py:474
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'clear_cache' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### generation_manager.py:114
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'neural_engine' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### generation_manager.py:126
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'stem_engine' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
 ### generation_manager.py:352
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function '_suggest_transforms' missing type hints for: parameter 'features'
-- **Suggestion:** Add type hints for all parameters and return values
-
-### audio_tasks.py:390
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'cleanup_old_results' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### audio_tasks.py:23
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'on_success' missing type hints for: return type, parameter 'retval', parameter 'task_id', parameter 'args', parameter 'kwargs'
-- **Suggestion:** Add type hints for all parameters and return values
-
-### audio_tasks.py:27
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'on_failure' missing type hints for: return type, parameter 'exc', parameter 'task_id', parameter 'args', parameter 'kwargs', parameter 'einfo'
-- **Suggestion:** Add type hints for all parameters and return values
-
-### audio_tasks.py:31
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'on_retry' missing type hints for: return type, parameter 'exc', parameter 'task_id', parameter 'args', parameter 'kwargs', parameter 'einfo'
-- **Suggestion:** Add type hints for all parameters and return values
-
-### redis_cache.py:344
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'cached' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### redis_cache.py:358
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'decorator' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### permissions.py:30
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'require_permission' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### permissions.py:50
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'require_any_permission' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### permissions.py:76
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'require_all_permissions' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### permissions.py:94
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'require_role' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### permissions.py:122
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'admin_only' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### jwt_handler.py:22
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'configure_jwt' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### chroma.py:81
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'get_chroma_client' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### chroma.py:88
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'get_collection' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### redis_client.py:164
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'redis_cache' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### redis_client.py:173
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'decorator' missing type hints for: return type, parameter 'func'
-- **Suggestion:** Add type hints for all parameters and return values
-
-### query_optimizer.py:345
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'optimized_query' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### query_optimizer.py:354
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'decorator' missing type hints for: return type, parameter 'func'
 - **Suggestion:** Add type hints for all parameters and return values
 
 ### connection_pool.py:139
@@ -241,76 +61,40 @@
 - **Message:** Function 'receive_checkin' missing type hints for: return type, parameter 'dbapi_conn', parameter 'connection_record'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### mongo.py:302
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'get_database' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### neural_engine.py:32
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function '_get_embedding_cache' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### cloud_processor.py:106
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function '__exit__' missing type hints for: parameter 'exc_type', parameter 'exc_val', parameter 'exc_tb'
-- **Suggestion:** Add type hints for all parameters and return values
-
-### distributed_processor.py:73
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function '__exit__' missing type hints for: parameter 'exc_type', parameter 'exc_val', parameter 'exc_tb'
-- **Suggestion:** Add type hints for all parameters and return values
-
 ### distributed_processor.py:276
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'time_feature_extraction' missing type hints for: return type, parameter 'feature_name', parameter 'extract_func'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### input_validation.py:168
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'sanitize_query' missing type hints for: return type, parameter 'v'
-- **Suggestion:** Add type hints for all parameters and return values
-
-### input_validation.py:178
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'sanitize_filename' missing type hints for: return type, parameter 'v'
-- **Suggestion:** Add type hints for all parameters and return values
-
-### input_validation.py:188
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'validate_username' missing type hints for: return type, parameter 'v'
-- **Suggestion:** Add type hints for all parameters and return values
-
-### input_validation.py:201
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'sanitize_field' missing type hints for: return type, parameter 'v'
-- **Suggestion:** Add type hints for all parameters and return values
-
-### xss_protection.py:231
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'sanitize_html' missing type hints for: return type, parameter 'v'
-- **Suggestion:** Add type hints for all parameters and return values
-
-### xss_protection.py:246
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'sanitize_url' missing type hints for: return type, parameter 'v'
-- **Suggestion:** Add type hints for all parameters and return values
-
 ### layering_analyzer.py:266
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'get_onsets' missing type hints for: return type, parameter 'audio'
+- **Suggestion:** Add type hints for all parameters and return values
+
+### audio_effects.py:45
+- **Severity:** medium
+- **Category:** type_hints
+- **Message:** Function '__post_init__' missing type hints for: return type
+- **Suggestion:** Add type hints for all parameters and return values
+
+### audio_effects.py:87
+- **Severity:** medium
+- **Category:** type_hints
+- **Message:** Function '__post_init__' missing type hints for: return type
+- **Suggestion:** Add type hints for all parameters and return values
+
+### audio_effects.py:91
+- **Severity:** medium
+- **Category:** type_hints
+- **Message:** Function 'add_effect' missing type hints for: return type
+- **Suggestion:** Add type hints for all parameters and return values
+
+### audio_effects.py:95
+- **Severity:** medium
+- **Category:** type_hints
+- **Message:** Function 'clear' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
 ### usage_patterns.py:306
@@ -373,24 +157,6 @@
 - **Message:** Function '__init__' missing type hints for: parameter 'mongodb_client', parameter 'redis_client', parameter 's3_client'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### vst3_plugin.py:277
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'do_GET' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### vst3_plugin.py:313
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'log_message' missing type hints for: return type, parameter 'format'
-- **Suggestion:** Add type hints for all parameters and return values
-
-### vst3_plugin.py:317
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function '_get_html' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
 ### ableton_integration.py:54
 - **Severity:** medium
 - **Category:** type_hints
@@ -415,42 +181,6 @@
 - **Message:** Function '_get_clip_file_path' missing type hints for: parameter 'clip'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### fl_studio_plugin.py:291
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'init' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### fl_studio_plugin.py:297
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'destroy' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### processing_chain.py:34
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'add_eq' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### processing_chain.py:67
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'add_compressor' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### processing_chain.py:97
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'add_limiter' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### processing_chain.py:118
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'add_stereo_width' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
 ### classifier.py:297
 - **Severity:** medium
 - **Category:** type_hints
@@ -461,36 +191,6 @@
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function '_generate_tags_from_classification' missing type hints for: parameter 'classification'
-- **Suggestion:** Add type hints for all parameters and return values
-
-### menu.py:66
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'display_banner' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### menu.py:169
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'display_main_menu' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### menu.py:557
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'scan_and_preview' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### menu.py:588
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'show_system_status' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### menu.py:647
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'show_session_analytics' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
 ### menu.py:1698
@@ -523,55 +223,55 @@
 - **Message:** Function 'get_rating' missing type hints for: return type, parameter 'score'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### typer_app.py:92
+### typer_app.py:93
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'interactive' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### typer_app.py:115
+### typer_app.py:116
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'menu' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### typer_app.py:121
+### typer_app.py:122
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'status' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### typer_app.py:164
+### typer_app.py:165
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'version' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### typer_app.py:196
+### typer_app.py:197
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'register_command_groups' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### typer_app.py:227
+### typer_app.py:231
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'create_progress_spinner' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### typer_app.py:242
+### typer_app.py:246
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'handle_command_error' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### typer_app.py:286
+### typer_app.py:290
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'help' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### typer_app.py:366
+### typer_app.py:370
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'list_commands' missing type hints for: return type
@@ -581,12 +281,6 @@
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'with_error_recovery' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### error_handler.py:490
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function '__exit__' missing type hints for: parameter 'exc_type', parameter 'exc_val', parameter 'exc_tb'
 - **Suggestion:** Add type hints for all parameters and return values
 
 ### error_handler.py:204
@@ -623,12 +317,6 @@
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'show_about' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### modern_menu.py:841
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'display_banner' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
 ### modern_menu.py:858
@@ -677,24 +365,6 @@
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'with_progress' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### utils.py:223
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'wrapper' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### utils.py:234
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'wrapper' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### utils.py:252
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'wrapper' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
 ### metadata.py:57
@@ -809,12 +479,6 @@
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'compose' missing type hints for: return type
-- **Suggestion:** Add type hints for all parameters and return values
-
-### plugin_manager.py:232
-- **Severity:** medium
-- **Category:** type_hints
-- **Message:** Function 'plugin_hook_callback' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
 ### main_screen.py:52
