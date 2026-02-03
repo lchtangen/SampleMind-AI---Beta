@@ -2,12 +2,12 @@
 
 **Generated:** 1770105079.2611232
 
-**Total Issues:** 435
+**Total Issues:** 428
 
 ## Issues by Severity
 
 - **Critical:** 0
-- **High:** 50
+- **High:** 43
 - **Medium:** 385
 - **Low:** 0
 
@@ -349,31 +349,19 @@
 - **Message:** Function '_update_usage_stats' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### generation_manager.py:57
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'to_dict' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### generation_manager.py:80
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'to_dict' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### generation_manager.py:112
+### generation_manager.py:114
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'neural_engine' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### generation_manager.py:124
+### generation_manager.py:126
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'stem_engine' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### generation_manager.py:350
+### generation_manager.py:352
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function '_suggest_transforms' missing type hints for: parameter 'features'
@@ -517,24 +505,6 @@
 - **Message:** Function '__repr__' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### models.py:271
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'Settings' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
-
-### models.py:305
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'Settings' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
-
-### models.py:339
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'Settings' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
-
 ### connection_pool.py:135
 - **Severity:** medium
 - **Category:** type_hints
@@ -571,55 +541,43 @@
 - **Message:** Function 'receive_checkin' missing type hints for: return type, parameter 'dbapi_conn', parameter 'connection_record'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### mongo.py:294
+### mongo.py:296
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'get_database' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### mongo.py:34
+### mongo.py:98
 - **Severity:** high
 - **Category:** docstring
 - **Message:** Class 'Settings' missing docstring
 - **Suggestion:** Add class docstring describing purpose and usage
 
-### mongo.py:73
+### mongo.py:118
 - **Severity:** high
 - **Category:** docstring
 - **Message:** Class 'Settings' missing docstring
 - **Suggestion:** Add class docstring describing purpose and usage
 
-### mongo.py:96
+### mongo.py:157
 - **Severity:** high
 - **Category:** docstring
 - **Message:** Class 'Settings' missing docstring
 - **Suggestion:** Add class docstring describing purpose and usage
 
-### mongo.py:116
+### mongo.py:192
 - **Severity:** high
 - **Category:** docstring
 - **Message:** Class 'Settings' missing docstring
 - **Suggestion:** Add class docstring describing purpose and usage
 
-### mongo.py:155
+### mongo.py:218
 - **Severity:** high
 - **Category:** docstring
 - **Message:** Class 'Settings' missing docstring
 - **Suggestion:** Add class docstring describing purpose and usage
 
-### mongo.py:190
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'Settings' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
-
-### mongo.py:216
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'Settings' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
-
-### mongo.py:238
+### mongo.py:240
 - **Severity:** high
 - **Category:** docstring
 - **Message:** Class 'Settings' missing docstring
