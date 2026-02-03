@@ -4,13 +4,66 @@ Manages synchronization between local library and cloud storage.
 """
 
 import asyncio
+import hashlib
 import logging
+import os
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from .storage import StorageProvider
+from .storage import FileMetadata, StorageProvider
 
 logger = logging.getLogger(__name__)
+
+def calculate_file_hash(file_path: Path, algorithm: str = "sha256", chunk_size: int = 65536) -> str:
+    """
+    Calculate a fast hash of a local file.
+    """
+    hasher = hashlib.new(algorithm)
+    try:
+        with open(file_path, "rb") as f:
+            while chunk := f.read(chunk_size):
+                hasher.update(chunk)
+        return hasher.hexdigest()
+    except OSError as e:
+        logger.error(f"Failed to calculate hash for {file_path}: {e}")
+        return ""
+
+def files_differ(local_path: Path, remote_metadata: Optional[FileMetadata], use_hash: bool = False) -> bool:
+    """
+    Check if local file differs from remote version.
+
+    Strategy:
+    1. If remote doesn't exist -> Different (True)
+    2. Check Size -> Different (True)
+    3. Check MTime -> Different if local is newer (True)
+    4. (Optional) Check Hash -> Different (True)
+    """
+    if not remote_metadata:
+        return True
+
+    try:
+        local_stat = local_path.stat()
+    except OSError:
+        # If local file disappeared or is inaccessible
+        return True # Treat as "needs sync/action"
+
+    # 1. Size check (Fastest)
+    if local_stat.st_size != remote_metadata["size"]:
+        return True
+
+    # 2. MTime check (Fast)
+    # Note: If local mtime is > remote mtime, we assume local has changed.
+    # We use a small epsilon for float comparison safety
+    if local_stat.st_mtime > remote_metadata["mtime"] + 1.0:
+        return True
+
+    # 3. Hash check (Slowest, Optional)
+    if use_hash and remote_metadata.get("hash"):
+        local_hash = calculate_file_hash(local_path)
+        if local_hash != remote_metadata["hash"]:
+            return True
+
+    return False
 
 class SyncManager:
     """
@@ -82,9 +135,10 @@ class SyncManager:
 
                     # Check if already exists remotely
                     if remote_path in remote_files_set:
-                        # Basic optimization: Skip if exists.
-                        # TODO: Add hash/size check for update
-                        continue
+                        # Check if it differs
+                        metadata = await self.storage.get_metadata(remote_path)
+                        if not files_differ(file_path, metadata):
+                            continue
 
                     await self.storage.upload_file(file_path, remote_path)
                     count += 1
@@ -113,8 +167,9 @@ class SyncManager:
 
                 # Check if exists locally
                 if local_dest.exists():
-                    # TODO: Check size/modtime
-                    continue
+                    metadata = await self.storage.get_metadata(remote_path)
+                    if not files_differ(local_dest, metadata):
+                        continue
 
                 # Download
                 success = await self.storage.download_file(remote_path, local_dest)

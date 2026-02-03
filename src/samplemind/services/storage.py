@@ -9,12 +9,23 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import BinaryIO, List, Optional, Union
+from typing import BinaryIO, List, Optional, TypedDict, Union
 
 logger = logging.getLogger(__name__)
 
+class FileMetadata(TypedDict):
+    """Metadata for a stored file"""
+    size: int
+    mtime: float
+    hash: Optional[str] = None
+
 class StorageProvider(abc.ABC):
     """Abstract base class for storage providers"""
+
+    @abc.abstractmethod
+    async def get_metadata(self, remote_path: str) -> Optional[FileMetadata]:
+        """Get metadata for a file (size, mtime, hash). Returns None if not found."""
+        pass
 
     @abc.abstractmethod
     async def upload_file(self, content: Union[BinaryIO, bytes, Path], remote_path: str) -> str:
@@ -43,6 +54,18 @@ class LocalStorageProvider(StorageProvider):
     def __init__(self, root_dir: Path):
         self.root_dir = Path(root_dir).resolve()
         self.root_dir.mkdir(parents=True, exist_ok=True)
+
+    async def get_metadata(self, remote_path: str) -> Optional[FileMetadata]:
+        target_path = self.root_dir / remote_path
+        if not target_path.exists() or not target_path.is_file():
+            return None
+
+        stat = target_path.stat()
+        return FileMetadata(
+            size=stat.st_size,
+            mtime=stat.st_mtime,
+            hash=None  # Hash is expensive, compute only if needed or cached
+        )
 
     async def upload_file(self, content: Union[BinaryIO, bytes, Path], remote_path: str) -> str:
         dest_path = self.root_dir / remote_path
@@ -98,6 +121,10 @@ class MockS3StorageProvider(StorageProvider):
         self.region = region
         logger.info(f"Initialized Mock S3 Provider: {bucket_name}")
 
+    async def get_metadata(self, remote_path: str) -> Optional[FileMetadata]:
+        # In a real mock, this would check an internal dict
+        return None
+
     async def upload_file(self, content: Union[BinaryIO, bytes, Path], remote_path: str) -> str:
         logger.info(f"[MOCK] Uploading to S3://{self.bucket}/{remote_path}")
         return f"s3://{self.bucket}/{remote_path}"
@@ -131,6 +158,21 @@ class S3StorageProvider(StorageProvider):
         self.s3_client = boto3.client('s3', region_name=region)
         self.ClientError = ClientError
         logger.info(f"Initialized S3 Provider: {bucket_name} ({region})")
+
+    async def get_metadata(self, remote_path: str) -> Optional[FileMetadata]:
+        try:
+            response = await asyncio.to_thread(
+                self.s3_client.head_object, Bucket=self.bucket_name, Key=remote_path
+            )
+            return FileMetadata(
+                size=response['ContentLength'],
+                mtime=response['LastModified'].timestamp(),
+                # ETag is often the MD5, but surrounded by quotes
+                hash=response.get('ETag', '').strip('"')
+            )
+        except self.ClientError:
+            # 404 or other error -> treat as not found for now
+            return None
 
     async def upload_file(self, content: Union[BinaryIO, bytes, Path], remote_path: str) -> str:
         try:

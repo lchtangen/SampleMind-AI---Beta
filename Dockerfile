@@ -15,11 +15,13 @@ RUN apt-get update && apt-get install -y \
 RUN pip install poetry
 
 # Copy dependency files
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml ./
 
 # Install dependencies
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-dev
+ENV POETRY_CACHE_DIR=/root/.cache/pypoetry
+RUN --mount=type=cache,target=$POETRY_CACHE_DIR \
+    poetry config virtualenvs.create false \
+    && poetry install --without dev --no-root
 
 # Copy application code
 COPY src/ ./src/
@@ -29,6 +31,8 @@ COPY config/ ./config/
 RUN useradd -m -u 1000 samplemind
 USER samplemind
 
+ENV PYTHONPATH="${PYTHONPATH}:/app/src"
+
 # Expose port
 EXPOSE 8000
 
@@ -37,4 +41,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
 # Start application
-CMD ["uvicorn", "src.samplemind.interfaces.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "samplemind.interfaces.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -18,6 +18,7 @@ from fastapi.responses import JSONResponse
 from . import __version__
 from .config import get_settings
 from .exceptions import SampleMindException
+from .middleware.auth import SimpleAuthMiddleware
 from .routes import (
     ai,
     audio,
@@ -119,15 +120,43 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
 
     # Initialize Sync Manager
     try:
-        from samplemind.services.storage import LocalStorageProvider
+        from samplemind.services.storage import (
+            LocalStorageProvider,
+            MockS3StorageProvider,
+            S3StorageProvider,
+        )
         from samplemind.services.sync import SyncManager
 
-        # Use local storage for now (mocking cloud in a local folder)
-        storage_path = settings.CACHE_DIR / "cloud_storage_mock"
-        storage_provider = LocalStorageProvider(storage_path)
+        storage_provider = None
+        storage_info = ""
+
+        if settings.STORAGE_PROVIDER == "s3":
+            try:
+                storage_provider = S3StorageProvider(
+                    bucket_name=settings.S3_BUCKET,
+                    region=settings.S3_REGION
+                )
+                storage_info = f"S3 ({settings.S3_BUCKET})"
+            except ImportError:
+                 logger.warning("Boto3 not installed, falling back to Mock S3")
+                 storage_provider = MockS3StorageProvider(settings.S3_BUCKET, settings.S3_REGION)
+                 storage_info = f"Mock S3 ({settings.S3_BUCKET})"
+            except Exception as e:
+                logger.error(f"Failed to init S3 provider: {e}. Falling back to local.")
+
+        if settings.STORAGE_PROVIDER == "s3-mock":
+             storage_provider = MockS3StorageProvider(settings.S3_BUCKET, settings.S3_REGION)
+             storage_info = f"Mock S3 ({settings.S3_BUCKET})"
+
+        if not storage_provider or settings.STORAGE_PROVIDER == "local":
+            # Use local storage (default)
+            storage_path = settings.CACHE_DIR / "cloud_storage_mock"
+            storage_provider = LocalStorageProvider(storage_path)
+            storage_info = f"Local ({storage_path})"
+
         sync_manager = SyncManager(storage_provider)
         set_app_state("sync_manager", sync_manager)
-        logger.info(f"✓ SyncManager initialized (Storage: {storage_path})")
+        logger.info(f"✓ SyncManager initialized ({storage_info})")
     except Exception as e:
         logger.error(f"Failed to initialize SyncManager: {e}")
 
@@ -203,6 +232,14 @@ def create_application() -> FastAPI:
         redoc_url="/api/redoc",
         openapi_url="/api/openapi.json",
     )
+
+    # Register Custom Middleware
+    # Note: Middleware is added in reverse order (last added runs first)
+    # but since we want CORS to be outermost, we add this BEFORE CORS?
+    # Actually add_middleware wraps. So last added = outer.
+    # If we want CORS outer, we add it LAST.
+    # So let's add Auth first here (inner), then CORS (outer).
+    app.add_middleware(SimpleAuthMiddleware)
 
     # Configure CORS
     app.add_middleware(
