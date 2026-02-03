@@ -356,6 +356,7 @@ def cached(
             return features
     """
     def decorator(func: Callable):
+        """Decorator wrapper for caching"""
         @wraps(func)
         async def wrapper(*args, **kwargs):
             # Get cache instance (assumes global cache)
