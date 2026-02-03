@@ -13,12 +13,17 @@ Usage:
     samplemind collection:create <name>       # Create collection
 """
 
-import typer
-from typing import Optional
 from pathlib import Path
+from typing import Optional
+
+import typer
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
+from rich.table import Table
+
+from samplemind.ai.classification.classifier import AIClassifier
+from samplemind.core.engine.audio_engine import AudioEngine
+from samplemind.services.organizer import OrganizationEngine
 
 from . import utils
 
@@ -38,23 +43,78 @@ console = utils.console
 @utils.with_error_handling
 def library_organize(
     folder: Path = typer.Argument(..., help="Library folder to organize"),
-    by: str = typer.Option("metadata", "--by", help="Organization method (metadata|genre|bpm|key)"),
+    by: str = typer.Option("{genre}/{bpm}/{key}/{filename}", "--pattern", "-p", help="Organization pattern"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Show changes without applying"),
+    strategy: str = typer.Option("move", "--strategy", "-s", help="move or copy"),
 ):
     """Auto-organize library by metadata (BPM, key, genre)"""
-    try:
+    import asyncio
+
+    async def _process():
         files = utils.get_audio_files(folder)
         console.print(f"[cyan]Found {len(files)} audio files[/cyan]")
-        console.print(f"[cyan]Organization method: {by}[/cyan]")
+        console.print(f"[cyan]Organization pattern: {by}[/cyan]")
+        console.print(f"[cyan]Strategy: {strategy}[/cyan]")
 
         if dry_run:
             console.print("[yellow]DRY RUN - No changes will be made[/yellow]\n")
 
-        with utils.ProgressTracker(f"Organizing by {by}"):
-            for file in files:
-                console.print(f"  → {file.name}")
+        # Initialize engines
+        organizer = OrganizationEngine(dry_run=dry_run)
+        audio_engine = AudioEngine()
+        ai_classifier = AIClassifier()
 
-        console.print(f"\n[green]✓ Library organized by {by}[/green]")
+        success_count = 0
+
+        with utils.ProgressTracker(f"Organizing {len(files)} files"):
+            for file in files:
+                try:
+                    # 1. Analyze Audio (Features)
+                    features = await asyncio.to_thread(audio_engine.analyze_audio, file)
+
+                    # 2. Classify (AI Tags)
+                    classification = await asyncio.to_thread(ai_classifier.classify_audio, features)
+
+                    # 3. Construct Metadata
+                    metadata = {
+                        "genre": classification.genre or "Uncategorized",
+                        "bpm": f"{int(features.tempo)}" if features.tempo > 0 else "Unknown",
+                        "key": features.key or "Unknown",
+                        "mood": classification.mood or "Unknown",
+                        "instrument": classification.instrument or "Unknown",
+                        "filename": file.name
+                    }
+
+                    # 4. Organize
+                    result = await organizer.organize_file(
+                        file_path=file,
+                        metadata=metadata,
+                        pattern=by,
+                        root_dir=folder,
+                        strategy=strategy
+                    )
+
+                    if result.success:
+                        success_count += 1
+                        status = "[green]✓[/green]" if not dry_run else "[yellow]DRY[/yellow]"
+                        try:
+                            rel_dest = result.destination.relative_to(folder)
+                        except ValueError:
+                            rel_dest = result.destination
+
+                        # Show what analysis found
+                        tags = f"[dim]({metadata['genre']}, {metadata['bpm']}bpm, {metadata['key']})[/dim]"
+                        console.print(f"  {status} {file.name} -> {rel_dest} {tags}")
+                    else:
+                        console.print(f"  [red]✗[/red] {file.name}: {result.error}")
+
+                except Exception as e:
+                     console.print(f"  [red]![/red] Failed to process {file.name}: {e}")
+
+        console.print(f"\n[green]✓ Operation complete. {success_count}/{len(files)} files processed.[/green]")
+
+    try:
+        asyncio.run(_process())
 
     except Exception as e:
         utils.handle_error(e, "library:organize")
@@ -726,10 +786,13 @@ def collection_delete(
 @utils.with_error_handling
 def collection_export(
     name: str = typer.Argument(..., help="Collection name"),
-    output: Path = typer.Option(Path.cwd() / f"{name}.json", "--output", "-o"),
+    output: Optional[Path] = typer.Option(None, "--output", "-o"),
     format: str = typer.Option("json", "--format", "-f"),
 ):
     """Export collection to file"""
+    if output is None:
+        output = Path.cwd() / f"{name}.json"
+
     try:
         with utils.ProgressTracker(f"Exporting {name}"):
             pass

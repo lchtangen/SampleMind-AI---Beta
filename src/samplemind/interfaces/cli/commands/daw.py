@@ -16,12 +16,13 @@ Usage:
 """
 
 import json
-import typer
-from typing import Optional, List
 from pathlib import Path
+from typing import List, Optional
+
+import typer
 from rich.console import Console
-from rich.table import Table
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
 
 from . import utils
 
@@ -29,14 +30,35 @@ app = typer.Typer(help="🎹 DAW integration (4 commands)", no_args_is_help=True
 console = utils.console
 
 
+@app.command("server")
+@utils.with_error_handling
+def daw_server(
+    port: int = typer.Option(8000, "--port", "-p", help="Port to run on"),
+    host: str = typer.Option("127.0.0.1", "--host", help="Host address"),
+):
+    """Start the DAW Bridge WebSocket Server"""
+    try:
+        from samplemind.server.bridge import run_server
+
+        console.print(f"[bold green]🎹 Starting SampleMind DAW Bridge on ws://{host}:{port}/ws[/bold green]")
+        console.print("Press Ctrl+C to stop.")
+
+        run_server(host=host, port=port)
+
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Server stopped.[/yellow]")
+    except Exception as e:
+        utils.handle_error(e, "daw:server")
+        raise typer.Exit(1)
+
 @app.command("status")
 @utils.with_error_handling
 def daw_status():
     """Show DAW integration status and available plugins"""
     try:
         from ....integrations.daw import (
-            FLStudioPlugin,
             DAWType,
+            FLStudioPlugin,
         )
 
         console.print("[bold cyan]DAW Integration Status[/bold cyan]")

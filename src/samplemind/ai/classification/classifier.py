@@ -198,268 +198,142 @@ class AIClassifier:
             return "bass", 0.70
 
         # Vocal: specific formant structure (simplified)
-        if 300 < centroid < 2000:
+        if 200 < centroid < 3000 and energy > 0.05 and zcr < 0.2:
             return "vocal", 0.60
 
-        # Synth/pad: varied spectral characteristics
-        if centroid > 2000 and energy > 0.05:
-            return "synth", 0.60
+        # Percussion / FX
+        if zcr > 0.3:
+            return "percussion", 0.65
 
-        return "other", 0.50
+        return "synth", 0.40
 
-    def _get_feature_mean(self, feature_array) -> Optional[float]:
-        """Extract mean value from feature array or return scalar."""
-        if feature_array is None:
-            return None
-
-        if isinstance(feature_array, (list, np.ndarray)):
-            if len(feature_array) == 0:
-                return None
-            try:
-                return float(np.mean(feature_array))
-            except (ValueError, TypeError):
-                return None
-
-        try:
-            return float(feature_array)
-        except (ValueError, TypeError):
-            return None
+    def _get_instrument_scores(self, features: AudioFeatures) -> Dict[str, float]:
+        """Get confidence scores for all instruments."""
+        primary, conf = self._classify_instrument(features)
+        scores = {inst: 0.1 for inst in ["kick", "snare", "hihat", "bass", "vocal", "synth", "percussion"]}
+        scores[primary] = conf
+        return scores
 
     def _classify_genre(
         self,
         features: AudioFeatures,
     ) -> Tuple[str, float]:
-        """Classify genre using tempo and spectral characteristics."""
-        tempo = features.tempo if features.tempo else 120.0
-        centroid = self._get_feature_mean(features.spectral_centroid) or 2000.0
-        energy = self._get_feature_mean(features.rms_energy) or 0.1
+        """Classify genre using BPM and spectral characteristics."""
+        bpm = features.tempo
 
-        # Techno: 120-140 BPM, high spectral energy
-        if 115 <= tempo <= 145:
-            if centroid > 2000:
-                return "techno", 0.75
-            else:
-                return "house", 0.70
+        if not bpm:
+            return "unknown", 0.0
 
-        # Hip-hop: 80-110 BPM
-        if 75 <= tempo <= 115:
-            return "hiphop", 0.70
+        # Techno: 120-145 BPM
+        if 120 <= bpm <= 145:
+             return "techno", 0.7
 
-        # Drum & Bass: 160-180 BPM
-        if 155 <= tempo <= 185:
-            return "dnb", 0.75
+        # Hip Hop: 75-115 BPM
+        if 75 <= bpm <= 115:
+            return "hiphop", 0.6
 
-        # Ambient: slow tempo, low energy
-        if tempo < 80 and energy < 0.08:
-            return "ambient", 0.70
+        # DnB: 160-190 BPM
+        if 160 <= bpm <= 190:
+            return "dnb", 0.8
 
-        # Fast upbeat: 130+ BPM
-        if tempo > 130:
-            return "upbeat", 0.65
+        # Dubstep: 135-145 BPM (Overlaps techno, but structure differs. strict bpm rule here)
+        # We can favor Dubstep if halfstep rhythm detected, but pure BPM mapping is simple for now.
 
-        # Slow ballad: <80 BPM
-        if tempo < 80:
-            return "slow", 0.65
+        # Ambient: usually slow or no beat
+        if bpm < 70:
+            return "ambient", 0.5
 
-        return "unknown", 0.50
+        return "electronic", 0.4
+
+    def _get_genre_scores(self, features: AudioFeatures) -> Dict[str, float]:
+         primary, conf = self._classify_genre(features)
+         # In reality, multiple genres can have high scores
+         return {primary: conf}
 
     def _classify_mood(
         self,
         features: AudioFeatures,
     ) -> Tuple[str, float]:
-        """Classify mood using tonal and energy characteristics."""
-        energy = self._get_feature_mean(features.rms_energy) or 0.1
-        tempo = features.tempo if features.tempo else 120.0
-        centroid = self._get_feature_mean(features.spectral_centroid) or 2000.0
-        mode = features.mode if hasattr(features, "mode") else "unknown"
+        """Classify mood using energy and key."""
+        energy = self._get_feature_mean(features.rms_energy) or 0.0
+        details = features.key_details or {}
+        scale = details.get("scale", "unknown")
 
-        # Dark mood: low energy, minor mode or low frequencies
-        if energy < 0.10 and (mode == "minor" or centroid < 500):
-            return "dark", 0.70
-
-        # Aggressive: high energy
-        if energy > 0.25:
-            return "aggressive", 0.70
-
-        # Mellow: low energy, major mode or mid frequencies
-        if energy < 0.12 and (mode == "major" or 500 < centroid < 2000):
-            return "mellow", 0.70
-
-        # Energetic: high energy + fast tempo
-        if energy > 0.18 and tempo > 120:
+        # High energy + Major = Happy/Energetic
+        if energy > 0.2 and scale == "major":
             return "energetic", 0.75
 
-        # Sad: low energy, slow tempo
-        if energy < 0.10 and tempo < 100:
-            return "sad", 0.65
+        # Low energy + Minor = Dark/Sad
+        if energy < 0.1 and scale == "minor":
+            return "dark", 0.70
 
-        # Bright: high spectral centroid, positive
-        if centroid > 4000:
-            return "bright", 0.65
+        # High energy + Minor = Aggressive
+        if energy > 0.25 and scale == "minor":
+            return "aggressive", 0.8
 
-        return "neutral", 0.60
-
-    def _assess_quality(self, features: AudioFeatures) -> float:
-        """Assess production quality (0.0 lo-fi, 1.0 professional)."""
-        quality_score = 0.5
-
-        # Sample rate quality (target 44.1kHz or higher)
-        if features.sample_rate:
-            if features.sample_rate >= 44100:
-                quality_score += 0.20
-            elif features.sample_rate >= 22050:
-                quality_score += 0.10
-            else:
-                quality_score -= 0.15
-
-        # Bit depth quality (if available)
-        if features.bit_depth:
-            if features.bit_depth >= 24:
-                quality_score += 0.15
-            elif features.bit_depth >= 16:
-                quality_score += 0.05
-
-        # Dynamic range estimation from RMS energy variation
-        try:
-            energy_mean = self._get_feature_mean(features.rms_energy)
-            if energy_mean and energy_mean > 0:
-                # Calculate energy variation (standard deviation)
-                if isinstance(features.rms_energy, (list, np.ndarray)) and len(features.rms_energy) > 1:
-                    energy_std = float(np.std(features.rms_energy))
-                    dynamic_range = energy_std / (energy_mean + 1e-6)
-                    if 0.1 < dynamic_range < 0.5:  # Good dynamic range
-                        quality_score += 0.15
-                    elif dynamic_range > 0.5:  # Very good dynamics
-                        quality_score += 0.10
-                    elif dynamic_range < 0.03:  # Over-compressed
-                        quality_score -= 0.15
-        except (TypeError, ZeroDivisionError, ValueError):
-            pass
-
-        # Spectral richness (bandwidth)
-        bandwidth_mean = self._get_feature_mean(features.spectral_bandwidth)
-        if bandwidth_mean and bandwidth_mean > 2000:
-            quality_score += 0.10
-
-        return max(0.0, min(1.0, quality_score))
-
-    def _categorize_tempo(self, features: AudioFeatures) -> str:
-        """Categorize tempo into fast, medium, slow."""
-        tempo = features.tempo if hasattr(features, "tempo") and features.tempo else 120.0
-
-        if tempo < 90:
-            return "slow"
-        elif tempo < 130:
-            return "medium"
-        else:
-            return "fast"
-
-    def _generate_tags(
-        self,
-        instrument: str,
-        genre: str,
-        mood: str,
-        quality: float,
-        tempo_category: str,
-    ) -> list:
-        """Generate suggested tags based on classification."""
-        tags = []
-
-        # Add primary classifications
-        if instrument != "unknown":
-            tags.append(instrument)
-        if genre != "unknown":
-            tags.append(genre)
-        if mood != "neutral":
-            tags.append(mood)
-
-        # Add quality tag
-        if quality >= 0.80:
-            tags.append("professional")
-        elif quality <= 0.30:
-            tags.append("lo-fi")
-        else:
-            tags.append("standard")
-
-        # Add tempo tag
-        tags.append(tempo_category)
-
-        return list(set(tags))  # Remove duplicates
-
-    def _get_instrument_scores(self, features: AudioFeatures) -> Dict[str, float]:
-        """Get all instrument classification scores."""
-        centroid = self._get_feature_mean(features.spectral_centroid) or 2000.0
-        zcr = self._get_feature_mean(features.zero_crossing_rate) or 0.0
-        energy = self._get_feature_mean(features.rms_energy) or 0.1
-
-        scores = {}
-
-        # Calculate scores for each instrument
-        if centroid < 150 and energy > 0.15:
-            scores["kick"] = 0.75
-        else:
-            scores["kick"] = max(0.0, 0.5 - (centroid / 200) * 0.3)
-
-        if zcr > 0.15 and centroid > 5000:
-            scores["hihat"] = 0.70
-        else:
-            scores["hihat"] = max(0.0, min(0.5, zcr * 2))
-
-        if 800 < centroid < 3000:
-            scores["snare"] = 0.65
-        else:
-            scores["snare"] = max(0.0, 0.5 - abs(centroid - 1500) / 1000 * 0.3)
-
-        scores["other"] = 0.50
-
-        return scores
-
-    def _get_genre_scores(self, features: AudioFeatures) -> Dict[str, float]:
-        """Get all genre classification scores."""
-        tempo = features.tempo if hasattr(features, "tempo") else 120.0
-
-        scores = {
-            "techno": 0.5 if 115 <= tempo <= 145 else 0.3,
-            "house": 0.5 if 115 <= tempo <= 130 else 0.3,
-            "hiphop": 0.5 if 75 <= tempo <= 115 else 0.3,
-            "dnb": 0.5 if 155 <= tempo <= 185 else 0.3,
-            "ambient": 0.5 if tempo < 80 else 0.3,
-        }
-
-        return scores
+        return "neutral", 0.5
 
     def _get_mood_scores(self, features: AudioFeatures) -> Dict[str, float]:
-        """Get all mood classification scores."""
-        energy = self._get_feature_mean(features.rms_energy) or 0.1
+        primary, conf = self._classify_mood(features)
+        return {primary: conf}
 
-        scores = {
-            "dark": 0.7 if energy < 0.10 else 0.3,
-            "bright": 0.7 if energy > 0.15 else 0.3,
-            "aggressive": 0.7 if energy > 0.25 else 0.3,
-            "mellow": 0.7 if energy < 0.12 else 0.3,
-            "neutral": 0.6,
-        }
+    def _assess_quality(self, features: AudioFeatures) -> float:
+        """Assess audio quality score (0.0 - 1.0)."""
+        energy = self._get_feature_mean(features.rms_energy) or 0.0
 
-        return scores
+        if energy > 0.98: # Potential clipping
+            return 0.4
+        if energy < 0.01: # Too quiet
+            return 0.3
+
+        return 0.9
+
+    def _categorize_tempo(self, features: AudioFeatures) -> str:
+        bpm = features.tempo
+        if not bpm: return "unknown"
+        if bpm < 90: return "slow"
+        if bpm < 130: return "medium"
+        return "fast"
+
+    def _generate_tags(self, instrument, genre, mood, quality, tempo) -> list:
+        return [t for t in [instrument, genre, mood, tempo] if t != "unknown"]
+
+    def _get_feature_mean(self, feature_array: Any) -> Optional[float]:
+        """Helper to safely get mean of feature array."""
+        if feature_array is None:
+            return None
+        # Handle single float/int
+        if isinstance(feature_array, (float, int)):
+            return float(feature_array)
+        # Handle list/tuple/set
+        if isinstance(feature_array, (list, tuple, set)):
+            if not feature_array:
+                return None
+            try:
+                # If nested list (like from librosa)
+                if isinstance(feature_array[0], (list, tuple)):
+                    # Flatten simplisticly or just take mean
+                    return float(np.mean(feature_array))
+                return float(sum(float(x) for x in feature_array) / len(feature_array))
+            except:
+                return None
+        # Handle numpy array
+        try:
+             return float(np.mean(feature_array))
+        except:
+             return None
 
     def _get_cache_key(self, features: AudioFeatures) -> str:
-        """Generate cache key based on audio features."""
-        # Use file hash if available, otherwise use feature hash
-        if hasattr(features, "file_hash"):
-            return features.file_hash
+        """Generate a cache key from features."""
+        # Simple hash of duration + tempo + random logic for now
+        # Here we assume features come from a file and might have path.
+        if hasattr(features, "path") and features.path:
+            return hashlib.md5(str(features.path).encode()).hexdigest()
+        return hashlib.md5(str(features.duration).encode()).hexdigest()
 
-        # Generate hash from key features
-        key_data = f"{features.duration:.2f}_{features.sample_rate}_{features.tempo:.1f}"
-        return hashlib.sha256(key_data.encode()).hexdigest()
-
-    def _cache_result(self, key: str, result: ClassificationResult) -> None:
-        """Cache classification result with LRU eviction."""
-        # Implement simple LRU cache eviction
-        if len(self._cache) >= self.cache_size:
-            # Remove oldest entry (first key)
-            oldest_key = next(iter(self._cache))
-            del self._cache[oldest_key]
-
+    def _cache_result(self, key: str, result: ClassificationResult):
+        if len(self._cache) > self.cache_size:
+            self._cache.pop(next(iter(self._cache)))
         self._cache[key] = result
 
     def clear_cache(self) -> None:
