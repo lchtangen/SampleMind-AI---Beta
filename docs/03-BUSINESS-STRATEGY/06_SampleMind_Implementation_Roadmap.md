@@ -16,12 +16,12 @@ gantt
     
     section Foundation
     Technical Architecture    :2024-10, 2025-03
-    MVP Development          :2025-01, 2025-06
-    Beta Testing            :2025-06, 2025-12
+    MVP Development          :2025-01, 2025-12
+    Beta Testing (v2.1.0)    :2026-02, 2026-03
     
     section Launch
-    Public Launch           :2026-01, 2026-03
-    Market Entry            :2026-03, 2026-12
+    Public Launch           :2026-03, 2026-04
+    Market Entry            :2026-04, 2026-12
     
     section Growth
     Scale Operations        :2027-01, 2028-12

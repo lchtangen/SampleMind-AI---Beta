@@ -140,39 +140,49 @@ const frontend_stack = {
 
 ### Database Architecture
 
-#### **Primary Database: PostgreSQL 15 with pgvector**
-**Why PostgreSQL with pgvector?**
-- **Vector Storage**: Store AI embeddings (audio fingerprints) efficiently
-- **ACID Compliance**: Data integrity for financial transactions
-- **JSON Support**: Store complex audio metadata
-- **Scalability**: Handles millions of samples
+#### **Primary Database: MongoDB (Beanie ODM)**
+**Why MongoDB?**
+- **Flexibility**: Schema-less document storage ideal for varying audio metadata
+- **Performance**: High read/write throughput for realtime applications
+- **Beanie ODM**: Asynchronous Python ODM for MongoDB, ensuring non-blocking operations
+- **Integration**: Seamlessly integrates with AI data structures
 
-```sql
--- Example: Audio Sample Table with Vector Embeddings
-CREATE TABLE audio_samples (
-    id UUID PRIMARY KEY,
-    file_name VARCHAR(255),
-    file_path TEXT,
-    duration FLOAT,
-    sample_rate INTEGER,
-    
-    -- Vector embedding for AI similarity search
-    audio_embedding vector(512),  -- 512-dimensional vector
-    
-    -- Multi-dimensional classification
-    genre_tags JSONB,
-    mood_tags JSONB,
-    instrument_tags JSONB,
-    energy_level FLOAT,
-    tempo_bpm FLOAT,
-    
-    -- Metadata
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
-);
+```python
+# Example: Audio AudioCollection Model
+from beanie import Document
+from pydantic import BaseModel
+from typing import Optional, List, Dict
 
--- Create index for fast vector similarity search
-CREATE INDEX ON audio_samples USING ivfflat (audio_embedding vector_cosine_ops);
+class AudioCollection(Document):
+    name: str
+    description: Optional[str] = None
+    file_count: int = 0
+    total_duration: float = 0.0
+    tags: List[str] = []
+    metadata: Dict = {}
+
+    class Settings:
+        name = "collections"
+```
+
+#### **Vector Database: ChromaDB**
+**Why ChromaDB?**
+- **AI-Native**: Built specifically for LLM and audio embeddings
+- **Local & Server**: Runs locally for dev/offline or client-server for production
+- **Efficiency**: Optimized for similarity search on high-dimensional vectors
+- **Python Integration**: First-class Python client
+
+```python
+# Example: Querying ChromaDB
+import chromadb
+
+client = chromadb.PersistentClient(path="./chroma_db")
+collection = client.get_or_create_collection(name="audio_embeddings")
+
+results = collection.query(
+    query_embeddings=[[0.1, 1.2, ...]], # Your audio feature vector
+    n_results=10
+)
 ```
 
 **Concept Explanation: Vector Embeddings**

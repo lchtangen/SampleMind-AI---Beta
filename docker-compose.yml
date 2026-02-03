@@ -62,17 +62,6 @@ services:
       - samplemind-network
     restart: unless-stopped
 
-  chromadb:
-    image: chromadb/chroma:latest
-    container_name: samplemind-chromadb
-    ports:
-      - "8002:8000"
-    volumes:
-      - chromadb_data:/chroma/chroma
-    networks:
-      - samplemind-network
-    restart: unless-stopped
-
   # Monitoring Stack
   prometheus:
     image: prom/prometheus:latest
@@ -91,8 +80,8 @@ services:
     networks:
       - samplemind-network
     restart: unless-stopped
-    depends_on:
-      - postgres
+    # depends_on:
+    #   - postgres
 
   grafana:
     image: grafana/grafana:latest
@@ -112,40 +101,6 @@ services:
     depends_on:
       - prometheus
 
-  # PostgreSQL Exporter
-  postgres-exporter:
-    image: prometheuscommunity/postgres-exporter:latest
-    container_name: samplemind-postgres-exporter
-    environment:
-      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
-    ports:
-      - "9187:9187"
-    networks:
-      - samplemind-network
-    restart: unless-stopped
-    depends_on:
-      - postgres
-
-  postgres:
-    image: ankane/pgvector:latest
-    container_name: samplemind-postgres
-    environment:
-      POSTGRES_USER: samplemind
-      POSTGRES_PASSWORD: samplemind123
-      POSTGRES_DB: samplemind
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./initdb.d:/docker-entrypoint-initdb.d
-    networks:
-      - samplemind-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U samplemind -d samplemind"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
 networks:
   samplemind-network:
@@ -155,5 +110,5 @@ volumes:
   mongodb_data:
   redis_data:
   ollama_models:
-  postgres_data:
-  chromadb_data:
+  prometheus_data:
+  grafana_data:
