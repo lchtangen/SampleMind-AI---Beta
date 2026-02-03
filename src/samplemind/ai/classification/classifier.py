@@ -256,8 +256,7 @@ class AIClassifier:
     ) -> Tuple[str, float]:
         """Classify mood using energy and key."""
         energy = self._get_feature_mean(features.rms_energy) or 0.0
-        details = features.key_details or {}
-        scale = details.get("scale", "unknown")
+        scale = features.mode.lower() if features.mode else "unknown"
 
         # High energy + Major = Happy/Energetic
         if energy > 0.2 and scale == "major":

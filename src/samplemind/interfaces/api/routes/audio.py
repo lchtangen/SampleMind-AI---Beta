@@ -8,6 +8,7 @@ and feature extraction in the SampleMind AI platform.
 import asyncio
 import logging
 import uuid
+from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -230,41 +231,75 @@ async def analyze_audio(
 
     file_path = files[0]
 
-    # Analyze audio using the audio engine
+    # Get services from app state
+    try:
+        audio_engine = get_app_state("audio_engine")
+    except Exception:
+        # Fallback if app state not initialized (e.g. testing)
+        from samplemind.core.engine.audio_engine import AudioEngine
+        audio_engine = AudioEngine()
+
     from samplemind.core.engine.audio_engine import AnalysisLevel
-    level = AnalysisLevel[request.analysis_level.upper()]
+
+    try:
+        level_enum = AnalysisLevel[request.analysis_level.upper()]
+    except KeyError:
+        level_enum = AnalysisLevel.STANDARD
 
     import time
     start_time = time.time()
 
     try:
-        # Load and preprocess audio
-        pipeline = AudioPipeline()
-        y, sr = pipeline.load(file_path).to_mono().get_audio_data()
+        # 1. Audio Engine Analysis
+        # Run in thread pool to avoid blocking async event loop
+        features = await asyncio.to_thread(
+            audio_engine.analyze_audio,
+            file_path,
+            analysis_level=level_enum
+        )
 
-        # Extract features using AdvancedFeatureExtractor
-        extractor = AdvancedFeatureExtractor(sample_rate=sr)
+        # 2. AI Analysis (Optional)
+        ai_analysis_result = None
+        if request.include_ai:
+            try:
+                ai_manager = get_app_state("ai_manager")
+                if ai_manager:
+                    # AI Manager might need the file path or the extracted features
+                    # Assuming an interface that accepts file_path + prompt/context
+                    # For now, let's assume a method classify_genre_style or similar
+                    # Or generic analyze method
 
-        # Extract all features
-        tonal_features = extractor.extract_tonal_features(y)
-        rhythmic_features = extractor.extract_rhythmic_features(y)
-        spectral_features = extractor.extract_spectral_features(y)
-        mfcc_features = extractor.extract_mfcc_features(y)
+                    # If ai_manager isn't ready, we skip or use mock
+                     if hasattr(ai_manager, "analyze_content"):
+                        ai_analysis_result = await ai_manager.analyze_content(
+                            content_type="audio_features",
+                            content=asdict(features),
+                            prompt="Analyze genre, mood, and style based on these audio features."
+                        )
+            except Exception as e:
+                logger.warning(f"AI analysis failed or skipped: {e}")
 
-        # Combine all features
-        features = {
-            'tonal': tonal_features,
-            'rhythmic': rhythmic_features,
-            'spectral': spectral_features,
-            'mfcc': mfcc_features,
-            'metadata': {
-                'filename': file_path.name,
-                'duration': len(y) / sr,
-                'sample_rate': sr,
-                'channels': 1,  # Always mono after processing
-                'analysis_level': request.analysis_level
-            }
-        }
+        # 3. Construct Response
+        processing_time = time.time() - start_time
+        analysis_id = str(uuid.uuid4())
+
+        return AudioAnalysisResponse(
+            analysis_id=analysis_id,
+            file_id=file_id,
+            duration=features.duration,
+            tempo=features.tempo,
+            key=features.key,
+            mode=features.mode,
+            time_signature=list(features.time_signature),
+            spectral_features={
+                "centroid_mean": sum(features.spectral_centroid)/len(features.spectral_centroid) if features.spectral_centroid else 0,
+                "rolloff_mean": sum(features.spectral_rolloff)/len(features.spectral_rolloff) if features.spectral_rolloff else 0,
+            },
+            ai_analysis=ai_analysis_result,
+            analysis_level=request.analysis_level,
+            processing_time=processing_time,
+            analyzed_at=datetime.utcnow()
+        )
 
     except Exception as e:
         logger.error(f"Audio analysis failed for {file_id}: {str(e)}", exc_info=True)
@@ -272,19 +307,6 @@ async def analyze_audio(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Audio analysis failed: {str(e)}"
         )
-
-    processing_time = time.time() - start_time
-    analysis_id = str(uuid.uuid4())
-    logger.info(f"Audio features extracted in {processing_time:.2f}s for file {file_id}")
-
-    # Optional AI analysis
-    ai_result = None
-    if request.include_ai and ai_manager:
-        from samplemind.integrations.ai_manager import AIProvider, AnalysisType
-
-        provider = None
-        if request.ai_provider:
-            provider = AIProvider[request.ai_provider.upper()]
 
 
 

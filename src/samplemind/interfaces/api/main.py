@@ -114,7 +114,22 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         logger.info(f"✓ Available AI providers: {[p.value for p in providers]}")
     except Exception as e:
         logger.error(f"Failed to initialize AI Manager: {e}")
-        raise
+        # Don't raise, allow running without AI
+        # raise
+
+    # Initialize Sync Manager
+    try:
+        from samplemind.services.storage import LocalStorageProvider
+        from samplemind.services.sync import SyncManager
+
+        # Use local storage for now (mocking cloud in a local folder)
+        storage_path = settings.CACHE_DIR / "cloud_storage_mock"
+        storage_provider = LocalStorageProvider(storage_path)
+        sync_manager = SyncManager(storage_provider)
+        set_app_state("sync_manager", sync_manager)
+        logger.info(f"✓ SyncManager initialized (Storage: {storage_path})")
+    except Exception as e:
+        logger.error(f"Failed to initialize SyncManager: {e}")
 
     # Configure JWT authentication
     try:

@@ -205,15 +205,53 @@ def library_export(
 @app.command("sync")
 @utils.with_error_handling
 def library_sync(
+    folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder to sync"),
     direction: str = typer.Option("both", "--direction", help="Sync direction (up|down|both)"),
-    service: str = typer.Option("cloud", "--service", help="Cloud service (cloud|dropbox|gdrive)"),
+    service: str = typer.Option("cloud", "--service", help="Cloud service (cloud|dropbox|gdrive|s3)"),
 ):
     """Sync library with cloud storage"""
-    try:
-        with utils.ProgressTracker(f"Syncing with {service}"):
-            pass
+    import asyncio
 
-        console.print(f"[green]✓ Sync complete[/green]")
+    from samplemind.services.storage import LocalStorageProvider, MockS3StorageProvider
+    from samplemind.services.sync import SyncManager
+
+    async def _run_sync():
+        console.print(f"[cyan]Syncing {folder} with {service} ({direction})[/cyan]")
+
+        # Select provider
+        provider = None
+        if service == "cloud" or service == "local":
+             # Use mock S3/Local "Cloud"
+             # Simulate cloud in .samplemind/cloud_storage
+             cloud_path = Path.home() / ".samplemind" / "cloud_storage"
+             console.print(f"[dim]Using local cloud simulation at {cloud_path}[/dim]")
+             provider = LocalStorageProvider(cloud_path)
+        elif service == "s3":
+             provider = MockS3StorageProvider("samplemind-user-bucket")
+        else:
+             console.print(f"[yellow]Service '{service}' not fully implemented, falling back to local simulation[/yellow]")
+             cloud_path = Path.home() / ".samplemind" / "cloud_storage"
+             provider = LocalStorageProvider(cloud_path)
+
+        manager = SyncManager(provider)
+        await manager.enable_sync("cli_user")
+
+        stats = {"uploaded": 0, "downloaded": 0, "errors": 0}
+
+        # Using context manager for spinner
+        with utils.ProgressTracker(f"Syncing files..."):
+             stats = await manager.sync_library(folder, direction)
+
+        console.print(f"\n[bold green]✓ Sync Complete[/bold green]")
+        console.print(f"  Uploaded: {stats.get('uploaded', 0)}")
+        console.print(f"  Downloaded: {stats.get('downloaded', 0)}")
+        if stats.get('errors', 0) > 0:
+            console.print(f"  [red]Errors: {stats.get('errors')}[/red]")
+        else:
+            console.print(f"  Errors: 0")
+
+    try:
+        asyncio.run(_run_sync())
 
     except Exception as e:
         utils.handle_error(e, "library:sync")

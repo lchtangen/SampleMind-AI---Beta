@@ -91,6 +91,23 @@ samplemind menu --theme cyberpunk
 - Tokyo Night
 - One Dark
 
+#### 5. **Containerization & Deployment**
+- Full Docker support for API and Workers
+- Docker Compose orchestration
+- Integrated Services:
+    - FastAPI Application (Uvicorn)
+    - MongoDB (Data Persistence)
+    - Redis (Caching)
+    - Ollama (Local LLM Inference)
+- ChromaDB embedded persistence via docker volumes
+- Prometheus & Grafana Monitoring stack
+- Optimized build with multi-stage Dockerfile
+
+```bash
+# Start the full stack
+docker-compose up -d --build
+```
+
 ### Minor Features
 
 #### Menu System
