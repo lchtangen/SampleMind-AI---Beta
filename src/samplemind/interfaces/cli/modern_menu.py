@@ -838,7 +838,7 @@ License: MIT
         console.print(panel)
         input("\nPress Enter to continue...")
 
-    def display_banner(self):
+    def display_banner(self) -> None:
         """Display the application banner"""
         banner_text = f"""
 ╔══════════════════════════════════════════════════════════════╗

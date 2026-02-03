@@ -342,7 +342,7 @@ class QueryOptimizer:
 
 
 # Automatic query optimization decorator
-def optimized_query(cache_plan: bool = True):
+def optimized_query(cache_plan: bool = True) -> Any:
     """
     Decorator to automatically optimize queries
     
@@ -351,7 +351,7 @@ def optimized_query(cache_plan: bool = True):
         async def get_users(session):
             return await session.execute(query)
     """
-    def decorator(func):
+    def decorator(func: Any) -> Any:
         """Decorator wrapper for query optimization"""
         async def wrapper(*args, **kwargs) -> None:
             # Execute query

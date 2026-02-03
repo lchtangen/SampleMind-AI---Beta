@@ -696,7 +696,7 @@ class SampleMindAIManager:
         tokens_used: int, 
         response_time: float, 
         success: bool
-    ):
+    ) -> None:
         """Update provider performance statistics"""
         config = self.provider_configs[provider]
         

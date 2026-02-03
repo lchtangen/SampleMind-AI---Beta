@@ -59,6 +59,7 @@ from .commands import (
     recent,
     reporting,
     similarity,
+    stems,
     tagging,
     theory,
     visualization,
@@ -214,6 +215,9 @@ def register_command_groups():
     app.add_typer(layering.app, name="layer", help="🔀 Sample layering & phase analysis")
     app.add_typer(groove.app, name="groove", help="🎵 Groove template extraction")
     app.add_typer(recent.app, name="recent", help="📁 Quick access to recent files")
+
+    # Register Phase 13 Advanced Features
+    app.add_typer(stems.app, name="stems", help="🎼 AI Stem Separation - Split audio into stems")
 
 
 # Register command groups at module load

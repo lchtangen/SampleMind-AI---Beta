@@ -20,15 +20,15 @@ logger = logging.getLogger(__name__)
 class CallbackTask(Task):
     """Base task with callbacks for progress tracking"""
     
-    def on_success(self, retval, task_id, args, kwargs):
+    def on_success(self, retval: Any, task_id: Any, args: Any, kwargs: Any) -> None:
         """Called when task completes successfully"""
         logger.info(f"Task {task_id} completed successfully")
     
-    def on_failure(self, exc, task_id, args, kwargs, einfo):
+    def on_failure(self, exc: Any, task_id: Any, args: Any, kwargs: Any, einfo: Any) -> None:
         """Called when task fails"""
         logger.error(f"Task {task_id} failed: {exc}")
     
-    def on_retry(self, exc, task_id, args, kwargs, einfo):
+    def on_retry(self, exc: Any, task_id: Any, args: Any, kwargs: Any, einfo: Any) -> None:
         """Called when task is retried"""
         logger.warning(f"Task {task_id} retrying: {exc}")
 
@@ -387,7 +387,7 @@ def generate_audio_embeddings(
 
 
 @celery_app.task(name="samplemind.core.tasks.audio_tasks.cleanup_old_results")
-def cleanup_old_results():
+def cleanup_old_results() -> None:
     """
     Periodic task to cleanup old analysis results
     Runs every hour via Celery Beat

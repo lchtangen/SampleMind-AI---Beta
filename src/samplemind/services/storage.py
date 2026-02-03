@@ -216,7 +216,7 @@ class S3StorageProvider(StorageProvider):
             files = []
 
             # Use thread for blocking I/O
-            def _list():
+            def _list() -> Any:
                 for page in paginator.paginate(Bucket=self.bucket_name, Prefix=prefix):
                     if 'Contents' in page:
                         for obj in page['Contents']:

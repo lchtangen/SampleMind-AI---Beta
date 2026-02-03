@@ -17,6 +17,7 @@ Usage:
     from samplemind.integrations.ai_manager import SampleMindAIManager
     from samplemind.interfaces.cli.menu import SampleMindCLI
 """
+from typing import Any
 
 """
 SampleMind AI Beta v2.0 Phoenix
@@ -35,7 +36,7 @@ __author__ = "SampleMind AI Team"
 __description__ = "Professional AI-powered music production suite"
 
 # Lazy imports - import on demand to avoid loading heavy dependencies at startup
-def __getattr__(name):
+def __getattr__(name: str) -> Any:
     """Lazy load modules on demand"""
     if name == "AudioEngine":
         from .core.engine.audio_engine import AudioEngine

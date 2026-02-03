@@ -299,7 +299,7 @@ async def close_mongodb():
         _mongo_client = None
 
 
-def get_database():
+def get_database() -> Any:
     """Get MongoDB database instance"""
     if _database is None:
         raise RuntimeError("MongoDB not initialized. Call init_mongodb() first.")

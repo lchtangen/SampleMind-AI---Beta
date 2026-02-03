@@ -487,7 +487,7 @@ class ErrorContext:
     def __enter__(self) -> None:
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         if exc_type is None:
             return False
 

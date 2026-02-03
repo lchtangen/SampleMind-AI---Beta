@@ -111,7 +111,7 @@ class GenerationManager:
         logger.info("GenerationManager initialized")
 
     @property
-    def neural_engine(self):
+    def neural_engine(self) -> Any:
         """Lazy-load neural feature extractor"""
         if self._neural_engine is None:
             try:
@@ -123,7 +123,7 @@ class GenerationManager:
         return self._neural_engine
 
     @property
-    def stem_engine(self):
+    def stem_engine(self) -> Any:
         """Lazy-load stem separation engine"""
         if self._stem_engine is None:
             try:

@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 _embedding_cache = None
 
 
-def _get_embedding_cache():
+def _get_embedding_cache() -> Any:
     """Get or initialize the embedding cache."""
     global _embedding_cache
     if _embedding_cache is None:

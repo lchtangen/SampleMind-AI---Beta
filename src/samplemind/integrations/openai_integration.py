@@ -471,7 +471,7 @@ class OpenAIMusicProducer:
             'cache_hit_rate': self.usage_stats['cache_hits'] / max(1, self.usage_stats['total_requests'])
         }
     
-    def clear_cache(self):
+    def clear_cache(self) -> None:
         """Clear analysis cache"""
         self.analysis_cache.clear()
         logger.info("🧹 OpenAI analysis cache cleared")
