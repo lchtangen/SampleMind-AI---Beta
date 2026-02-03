@@ -2,12 +2,12 @@
 
 **Generated:** 1770105079.2611232
 
-**Total Issues:** 442
+**Total Issues:** 435
 
 ## Issues by Severity
 
 - **Critical:** 0
-- **High:** 57
+- **High:** 50
 - **Medium:** 385
 - **Low:** 0
 
@@ -104,24 +104,12 @@
 - **Suggestion:** Add type hints for all parameters and return values
 
 ### log_context.py:334
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'decorator' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### log_context.py:334
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'decorator' missing type hints for: return type, parameter 'func'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### log_context.py:339
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'wrapper' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### log_context.py:339
+### log_context.py:340
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'wrapper' missing type hints for: return type
@@ -133,29 +121,17 @@
 - **Message:** Function 'handle_errors' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### error_handler.py:131
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'decorator' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### error_handler.py:279
+### error_handler.py:282
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function '__enter__' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### error_handler.py:284
+### error_handler.py:287
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function '__exit__' missing type hints for: return type, parameter 'exc_type', parameter 'exc_val', parameter 'exc_tb'
 - **Suggestion:** Add type hints for all parameters and return values
-
-### error_handler.py:192
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'sync_wrapper' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
 
 ### logging_config.py:154
 - **Severity:** medium
@@ -289,12 +265,6 @@
 - **Message:** Function '_list' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### organizer.py:10
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'OrganizationResult' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
-
 ### anthropic_integration.py:403
 - **Severity:** medium
 - **Category:** type_hints
@@ -378,18 +348,6 @@
 - **Category:** type_hints
 - **Message:** Function '_update_usage_stats' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
-
-### user.py:59
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'Config' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
-
-### user.py:74
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'Config' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
 
 ### generation_manager.py:57
 - **Severity:** high
