@@ -11,16 +11,36 @@ router = APIRouter(prefix="/search", tags=["Search"])
 logger = logging.getLogger(__name__)
 
 class SearchResult(BaseModel):
+    """Search result containing file information and similarity score.
+    
+    Attributes:
+        file_id: Unique identifier for the audio file
+        score: Similarity score (0-1, higher is more similar)
+        filename: Optional filename of the audio file
+        metadata: Optional metadata dictionary with additional file info
+    """
     file_id: str
     score: float
     filename: Optional[str] = None
     metadata: Optional[dict] = None
 
 class SearchRequest(BaseModel):
+    """Request for semantic search operation.
+    
+    Attributes:
+        query: Text description to search for
+        limit: Maximum number of results to return (default: 10)
+    """
     query: str
     limit: int = 10
 
 class SearchResponse(BaseModel):
+    """Response containing search results.
+    
+    Attributes:
+        results: List of search results ordered by relevance
+        total_found: Total number of matching results found
+    """
     results: List[SearchResult]
     total_found: int
 

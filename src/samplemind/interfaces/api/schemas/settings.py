@@ -28,6 +28,7 @@ class APIKeyResponse(APIKeyBase):
     permissions: List[str]
 
     class Config:
+        """Pydantic configuration for ORM mode compatibility."""
         from_attributes = True
 
 
@@ -104,6 +105,7 @@ class UserSettingsResponse(BaseModel):
     updated_at: datetime
 
     class Config:
+        """Pydantic configuration for ORM mode compatibility."""
         from_attributes = True
 
 

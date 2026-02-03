@@ -34,4 +34,5 @@ class CollectionResponse(CollectionBase):
     updated_at: datetime
 
     class Config:
+        """Pydantic configuration for ORM mode compatibility."""
         from_attributes = True

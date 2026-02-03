@@ -612,6 +612,11 @@ class BatchScreen(Screen):
             original_pop = self.app.pop_screen
 
             def pop_with_handler() -> None:
+                """Handle screen pop with confirmation result.
+                
+                Calls the confirmation callback with the dialog result
+                before popping the screen.
+                """
                 if confirm_dialog.result:
                     on_back_confirm(True)
                 original_pop()

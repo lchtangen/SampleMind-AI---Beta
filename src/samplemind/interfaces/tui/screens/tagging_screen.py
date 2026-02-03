@@ -217,7 +217,8 @@ class TaggingScreen(Screen):
             try:
                 btn = self.query_one(f"#{btn_id}", Button)
                 btn.variant = "primary" if cat.value == self.current_category else "default"
-            except:
+            except (NoMatches, Exception) as e:
+                logger.debug(f"Button {btn_id} not found: {e}")
                 pass
 
     def _refresh_available_tags(self) -> None:
@@ -225,7 +226,8 @@ class TaggingScreen(Screen):
         try:
             available_area = self.query_one("#available_tags")
             available_area.update(self._render_available_tags())
-        except:
+        except (NoMatches, Exception) as e:
+            logger.debug(f"Failed to refresh available tags: {e}")
             pass
 
     async def _add_tag(self) -> None:
