@@ -4,7 +4,7 @@ Loads all environment variables and provides type-safe settings
 """
 
 from pydantic_settings import BaseSettings
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 from typing import List, Optional
 import secrets
 from pathlib import Path
@@ -287,20 +287,22 @@ class Settings(BaseSettings):
     # VALIDATORS
     # ========================================================================
     
-    @validator('environment')
-    def validate_environment(cls, v):
+    @field_validator('environment')
+    @classmethod
+    def validate_environment(cls, v: str) -> str:
         """Validate environment is one of allowed values"""
         allowed = ['development', 'staging', 'production', 'testing']
         if v not in allowed:
             raise ValueError(f"Environment must be one of {allowed}")
         return v
-    
-    @validator('jwt_secret_key', 'session_secret_key')
-    def validate_secret_keys(cls, v, values, field):
+
+    @field_validator('jwt_secret_key', 'session_secret_key')
+    @classmethod
+    def validate_secret_keys(cls, v: str, info) -> str:
         """Ensure secret keys are secure in production"""
-        env = values.get('environment', 'development')
+        env = info.data.get('environment', 'development')
         if env == 'production' and len(v) < 32:
-            raise ValueError(f"{field.name} must be at least 32 characters in production")
+            raise ValueError(f"{info.field_name} must be at least 32 characters in production")
         return v
     
     # ========================================================================

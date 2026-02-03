@@ -13,6 +13,8 @@ services:
       - MONGODB_URL=mongodb://mongodb:27017/samplemind
       - REDIS_URL=redis://redis:6379/0
       - OLLAMA_HOST=http://ollama:11434
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
     volumes:
       - ./src:/app/src:cached
       - ./data:/data
@@ -20,6 +22,18 @@ services:
       - mongodb
       - redis
       - ollama
+      - chromadb
+    networks:
+      - samplemind-network
+    restart: unless-stopped
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: samplemind-chroma
+    ports:
+      - "8002:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
     networks:
       - samplemind-network
     restart: unless-stopped
@@ -112,3 +126,4 @@ volumes:
   ollama_models:
   prometheus_data:
   grafana_data:
+  chroma_data:

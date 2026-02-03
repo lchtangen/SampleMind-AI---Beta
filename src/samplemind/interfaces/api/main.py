@@ -26,6 +26,7 @@ from .routes import (
     batch,
     collections,
     health,
+    search,
     sync,
     tasks,
     websocket,
@@ -282,6 +283,7 @@ def create_application() -> FastAPI:
     app.include_router(tasks.router, prefix="/api/v1", tags=["Tasks"])
     app.include_router(audio.router, prefix="/api/v1/audio", tags=["audio"])
     app.include_router(ai.router, prefix="/api/v1/ai", tags=["ai"])
+    app.include_router(search.router, prefix="/api/v1/ai", tags=["Search"])
     app.include_router(batch.router, prefix="/api/v1/batch", tags=["batch"])
     app.include_router(collections.router, prefix="/api/v1", tags=["collections"])
     app.include_router(websocket.router, prefix="/api/v1", tags=["websocket"])

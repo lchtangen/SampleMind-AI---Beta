@@ -258,7 +258,37 @@ async def analyze_audio(
             analysis_level=level_enum
         )
 
-        # 2. AI Analysis (Optional)
+        # 2. Save Semantic Embedding (Phase 4.5)
+        analysis_id = str(uuid.uuid4())
+        try:
+            if features.neural_embedding:
+                from samplemind.core.database.chroma import add_embedding
+
+                # Basic metadata for filtering
+                meta = {
+                    "filename": file_path.name,
+                    "analysis_id": analysis_id,
+                    "tempo": float(features.tempo) if features.tempo else 0.0,
+                    "key": str(features.key),
+                    "mode": str(features.mode),
+                    "duration": float(features.duration)
+                }
+
+                await add_embedding(
+                    file_id=file_id,
+                    embedding=features.neural_embedding,
+                    metadata=meta
+                )
+                logger.info(f"✅ Saved embedding for {file_id} to ChromaDB")
+
+                # ALSO, save sidecar JSON for SyncManager to pick up
+                await asyncio.to_thread(features.save, file_path)
+                logger.info(f"✅ Saved analysis sidecar for {file_path}")
+
+        except Exception as e:
+            logger.error(f"Failed to save embedding to ChromaDB: {e}")
+
+        # 3. AI Analysis (Optional)
         ai_analysis_result = None
         if request.include_ai:
             try:
@@ -281,7 +311,7 @@ async def analyze_audio(
 
         # 3. Construct Response
         processing_time = time.time() - start_time
-        analysis_id = str(uuid.uuid4())
+        # analysis_id defined above
 
         return AudioAnalysisResponse(
             analysis_id=analysis_id,
