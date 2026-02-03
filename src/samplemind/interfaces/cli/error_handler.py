@@ -181,6 +181,11 @@ class FileNotFoundRecovery(ErrorRecoveryStrategy):
     """Recovery for file not found errors"""
 
     def get_suggestions(self) -> List[str]:
+        """Get recovery suggestions for file not found errors.
+        
+        Returns:
+            List of actionable suggestions for the user
+        """
         return [
             "Check the file path is correct",
             "Verify the file exists and is accessible",
@@ -189,9 +194,19 @@ class FileNotFoundRecovery(ErrorRecoveryStrategy):
         ]
 
     def get_recovery_options(self) -> Dict[str, Callable]:
+        """Get interactive recovery options for file not found errors.
+        
+        Returns:
+            Dictionary mapping option names to recovery functions
+        """
         from samplemind.utils.file_picker import select_audio_file
 
         def pick_file():
+            """Launch file picker to select audio file.
+            
+            Returns:
+                Selected file path or None if cancelled
+            """
             selected = select_audio_file(title="Select Audio File")
             if selected:
                 console.print(f"[green]✓[/green] File selected: {selected}")
@@ -208,6 +223,11 @@ class InsufficientMemoryRecovery(ErrorRecoveryStrategy):
     """Recovery for memory errors"""
 
     def get_suggestions(self) -> List[str]:
+        """Get recovery suggestions for memory errors.
+        
+        Returns:
+            List of actionable suggestions for the user
+        """
         return [
             "Close other applications to free up memory",
             "Try analysis with lower detail level (--level basic)",
@@ -230,6 +250,11 @@ class APIErrorRecovery(ErrorRecoveryStrategy):
     """Recovery for API/network errors"""
 
     def get_suggestions(self) -> List[str]:
+        """Get recovery suggestions for API/network errors.
+        
+        Returns:
+            List of actionable suggestions for the user
+        """
         return [
             "Check your internet connection",
             "Verify API keys are configured correctly",
@@ -239,6 +264,11 @@ class APIErrorRecovery(ErrorRecoveryStrategy):
         ]
 
     def get_recovery_options(self) -> Dict[str, Callable]:
+        """Get interactive recovery options for API errors.
+        
+        Returns:
+            Dictionary mapping option names to recovery functions
+        """
         return {
             "Retry operation": lambda: True,
             "Use offline mode": lambda: False,
@@ -372,8 +402,28 @@ def with_error_recovery(
         exit_on_error: Exit program on error (default) or continue
     """
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
+        """Decorator function that wraps the target function with error handling.
+        
+        Args:
+            func: Function to wrap with error handling
+            
+        Returns:
+            Wrapped function with error handling
+        """
         @wraps(func)
         def wrapper(*args, **kwargs) -> T:
+            """Wrapper function that executes the target function with error handling.
+            
+            Args:
+                *args: Positional arguments for the wrapped function
+                **kwargs: Keyword arguments for the wrapped function
+                
+            Returns:
+                Result from the wrapped function
+                
+            Raises:
+                SystemExit: If error occurs and exit_on_error is True
+            """
             try:
                 return func(*args, **kwargs)
 

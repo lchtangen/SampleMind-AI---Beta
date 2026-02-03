@@ -90,6 +90,7 @@ class UserResponse(BaseModel):
     total_uploads: int = 0
     
     class Config:
+        """Pydantic configuration for ORM mode compatibility."""
         from_attributes = True
 
 

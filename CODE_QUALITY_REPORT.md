@@ -2,12 +2,12 @@
 
 **Generated:** 1770105079.2611232
 
-**Total Issues:** 410
+**Total Issues:** 389
 
 ## Issues by Severity
 
 - **Critical:** 0
-- **High:** 21
+- **High:** 0
 - **Medium:** 389
 - **Low:** 0
 
@@ -973,77 +973,29 @@
 - **Message:** Function 'list_commands' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### error_handler.py:362
+### error_handler.py:392
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'with_error_recovery' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### error_handler.py:183
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'get_suggestions' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### error_handler.py:191
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'get_recovery_options' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### error_handler.py:210
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'get_suggestions' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### error_handler.py:232
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'get_suggestions' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### error_handler.py:241
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'get_recovery_options' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### error_handler.py:374
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'decorator' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### error_handler.py:437
+### error_handler.py:487
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function '__enter__' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### error_handler.py:440
+### error_handler.py:490
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function '__exit__' missing type hints for: return type, parameter 'exc_type', parameter 'exc_val', parameter 'exc_tb'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### error_handler.py:194
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'pick_file' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### error_handler.py:194
+### error_handler.py:204
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'pick_file' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
-
-### error_handler.py:376
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'wrapper' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
 
 ### modern_menu.py:196
 - **Severity:** medium
@@ -2281,12 +2233,6 @@
 - **Message:** Function 'on_key' missing type hints for: parameter 'event'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### batch_screen.py:614
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'pop_with_handler' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
 ### favorites_screen.py:69
 - **Severity:** medium
 - **Category:** type_hints
@@ -2341,18 +2287,6 @@
 - **Message:** Function 'on_button_pressed' missing type hints for: parameter 'event'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### tagging_screen.py:220
-- **Severity:** high
-- **Category:** error_handling
-- **Message:** Bare except clause in '_update_category_buttons'
-- **Suggestion:** Catch specific exceptions instead of bare except
-
-### tagging_screen.py:228
-- **Severity:** high
-- **Category:** error_handling
-- **Message:** Bare except clause in '_refresh_available_tags'
-- **Suggestion:** Catch specific exceptions instead of bare except
-
 ### search_screen.py:91
 - **Severity:** medium
 - **Category:** type_hints
@@ -2383,53 +2317,11 @@
 - **Message:** Function 'on_button_pressed' missing type hints for: parameter 'event'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### search.py:13
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'SearchResult' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
-
-### search.py:19
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'SearchRequest' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
-
-### search.py:23
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'SearchResponse' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
-
-### websocket.py:12
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'ConnectionManager' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
-
-### websocket.py:21
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'disconnect' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### websocket.py:21
+### websocket.py:29
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'disconnect' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
-
-### auth.py:8
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'SimpleAuthMiddleware' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
-
-### collections.py:36
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'Config' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
 
 ### auth.py:20
 - **Severity:** medium
@@ -2449,27 +2341,9 @@
 - **Message:** Function 'password_strength' missing type hints for: return type, parameter 'v'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### auth.py:92
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'Config' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
-
-### auth.py:102
+### auth.py:103
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'username_alphanumeric' missing type hints for: return type, parameter 'v'
 - **Suggestion:** Add type hints for all parameters and return values
-
-### settings.py:30
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'Config' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
-
-### settings.py:106
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'Config' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
 

@@ -10,6 +10,14 @@ logger = logging.getLogger(__name__)
 
 # Connection manager
 class ConnectionManager:
+    """Manages WebSocket connections for real-time updates.
+    
+    Handles client connections, disconnections, and message broadcasting
+    for real-time communication with clients.
+    
+    Attributes:
+        active_connections: Dictionary mapping client IDs to WebSocket instances
+    """
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
     
@@ -19,6 +27,11 @@ class ConnectionManager:
         logger.info(f"Client {client_id} connected")
     
     def disconnect(self, client_id: str):
+        """Disconnect a client and remove from active connections.
+        
+        Args:
+            client_id: Unique identifier for the client to disconnect
+        """
         if client_id in self.active_connections:
             del self.active_connections[client_id]
             logger.info(f"Client {client_id} disconnected")
