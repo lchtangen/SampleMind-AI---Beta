@@ -48,7 +48,7 @@ class Metric:
 class SystemMetricsCollector:
     """Collects system-level metrics."""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.process = psutil.Process()
     
     def collect(self) -> List[Metric]:
@@ -115,7 +115,7 @@ class SystemMetricsCollector:
 class AudioProcessingMetrics:
     """Collects audio processing specific metrics."""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self._metrics = {}
     
     def record_processing_time(self, file_path: str, duration_seconds: float, 
@@ -187,7 +187,7 @@ class AudioProcessingMetrics:
 class Monitor:
     """Main monitoring class that coordinates metric collection and export."""
     
-    def __init__(self, service_name: str = 'samplemind-audio'):
+    def __init__(self, service_name: str = 'samplemind-audio') -> None:
         self.service_name = service_name
         self.system_collector = SystemMetricsCollector()
         self.audio_metrics = AudioProcessingMetrics()

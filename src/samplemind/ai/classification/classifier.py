@@ -45,7 +45,7 @@ class AIClassifier:
     TensorFlow/YAMNet-based classification for improved accuracy.
     """
 
-    def __init__(self, use_gpu: bool = False, cache_size: int = 1000):
+    def __init__(self, use_gpu: bool = False, cache_size: int = 1000) -> None:
         """Initialize the classifier.
 
         Args:
@@ -330,7 +330,7 @@ class AIClassifier:
             return hashlib.md5(str(features.path).encode()).hexdigest()
         return hashlib.md5(str(features.duration).encode()).hexdigest()
 
-    def _cache_result(self, key: str, result: ClassificationResult):
+    def _cache_result(self, key: str, result: ClassificationResult) -> None:
         if len(self._cache) > self.cache_size:
             self._cache.pop(next(iter(self._cache)))
         self._cache[key] = result

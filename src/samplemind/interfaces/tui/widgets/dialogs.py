@@ -61,7 +61,7 @@ class ErrorDialog(ModalScreen):
     }
     """
 
-    def __init__(self, title: str, message: str):
+    def __init__(self, title: str, message: str) -> None:
         """Initialize error dialog.
 
         Args:
@@ -138,7 +138,7 @@ class InfoDialog(ModalScreen):
     }
     """
 
-    def __init__(self, title: str, message: str):
+    def __init__(self, title: str, message: str) -> None:
         """Initialize info dialog.
 
         Args:
@@ -215,7 +215,7 @@ class ConfirmDialog(ModalScreen):
     }
     """
 
-    def __init__(self, title: str, message: str):
+    def __init__(self, title: str, message: str) -> None:
         """Initialize confirmation dialog.
 
         Args:
@@ -281,7 +281,7 @@ class LoadingDialog(ModalScreen):
     }
     """
 
-    def __init__(self, message: str = "Processing..."):
+    def __init__(self, message: str = "Processing...") -> None:
         """Initialize loading dialog.
 
         Args:
@@ -354,7 +354,7 @@ class WarningDialog(ModalScreen):
     }
     """
 
-    def __init__(self, title: str, message: str):
+    def __init__(self, title: str, message: str) -> None:
         """Initialize warning dialog.
 
         Args:

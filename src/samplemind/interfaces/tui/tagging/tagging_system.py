@@ -80,7 +80,7 @@ class TaggingProfile:
 class TaggingSystem:
     """Comprehensive tagging system for analyses"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize tagging system"""
         self.profiles: Dict[str, TaggingProfile] = {}
         self.all_tags: Dict[str, Tag] = {}

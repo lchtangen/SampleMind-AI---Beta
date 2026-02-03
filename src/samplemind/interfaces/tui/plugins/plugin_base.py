@@ -51,7 +51,7 @@ class PluginMetadata:
     dependencies: List[str] = None
     supported_hooks: List[PluginHook] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.dependencies is None:
             self.dependencies = []
         if self.supported_hooks is None:
@@ -61,7 +61,7 @@ class PluginMetadata:
 class TUIPlugin(ABC):
     """Base class for TUI plugins"""
 
-    def __init__(self, metadata: PluginMetadata):
+    def __init__(self, metadata: PluginMetadata) -> None:
         """
         Initialize plugin
 
@@ -148,7 +148,7 @@ class HookHandler:
         self.is_async = is_async
         self.enabled = True
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs) -> None:
         """Call the handler"""
         if self.enabled:
             return self.callback(*args, **kwargs)
@@ -158,7 +158,7 @@ class HookHandler:
 class HookSystem:
     """Plugin hook system"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize hook system"""
         self.hooks: Dict[str, List[HookHandler]] = {}
         self.hook_history: List[Dict[str, Any]] = []

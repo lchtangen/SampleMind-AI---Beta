@@ -21,7 +21,7 @@ class OrganizationEngine:
     Engine for organizing audio files based on metadata and patterns.
     """
 
-    def __init__(self, dry_run: bool = False):
+    def __init__(self, dry_run: bool = False) -> None:
         self.dry_run = dry_run
 
 

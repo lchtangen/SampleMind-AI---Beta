@@ -38,7 +38,7 @@ class FLStudioMetadata:
     ai_tags: List[str] = None
     analysis_level: str = "STANDARD"
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.timestamp is None:
             self.timestamp = datetime.now().isoformat()
         if self.ai_tags is None:
@@ -70,7 +70,7 @@ class FLStudioPlugin:
     AUTHOR = "SampleMind Team"
     DESCRIPTION = "AI-powered sample analysis and suggestion engine for FL Studio"
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize FL Studio plugin"""
         self.is_active = False
         self.project_bpm = 120.0

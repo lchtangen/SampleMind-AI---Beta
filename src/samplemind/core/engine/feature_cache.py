@@ -22,7 +22,7 @@ class FeatureCache:
     the audio content and feature extraction parameters.
     """
     
-    def __init__(self, cache_dir: str = ".feature_cache"):
+    def __init__(self, cache_dir: str = ".feature_cache") -> None:
         """
         Initialize the feature cache.
         

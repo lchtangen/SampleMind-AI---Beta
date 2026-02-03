@@ -234,7 +234,7 @@ def create_progress_spinner(description: str = "Processing"):
     )
 
 
-async def run_command_async(async_func, *args, **kwargs):
+async def run_command_async(async_func, *args, **kwargs) -> None:
     """Helper to run async functions from sync commands"""
     return await async_func(*args, **kwargs)
 

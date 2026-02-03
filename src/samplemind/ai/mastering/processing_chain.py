@@ -22,7 +22,7 @@ class ProcessingStep:
 class MasteringChain:
     """Audio mastering processing chain with multiple DSP effects."""
 
-    def __init__(self, sample_rate: int = 44100):
+    def __init__(self, sample_rate: int = 44100) -> None:
         """Initialize mastering chain.
 
         Args:

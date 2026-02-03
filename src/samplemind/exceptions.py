@@ -84,7 +84,7 @@ class AudioFileError(SampleMindError):
 class FileNotFoundError(AudioFileError):
     """Audio file not found."""
 
-    def __init__(self, file_path: Path):
+    def __init__(self, file_path: Path) -> None:
         super().__init__(
             message=f"Audio file not found: {file_path}",
             user_message=f"Could not find audio file: {file_path.name}",
@@ -97,7 +97,7 @@ class FileNotFoundError(AudioFileError):
 class UnsupportedFormatError(AudioFileError):
     """Audio format not supported."""
 
-    def __init__(self, file_path: Path, format: str):
+    def __init__(self, file_path: Path, format: str) -> None:
         super().__init__(
             message=f"Unsupported audio format: {format}",
             user_message=f"File format '.{format}' is not supported",
@@ -111,7 +111,7 @@ class UnsupportedFormatError(AudioFileError):
 class CorruptedAudioError(AudioFileError):
     """Audio file is corrupted."""
 
-    def __init__(self, file_path: Path, reason: Optional[str] = None):
+    def __init__(self, file_path: Path, reason: Optional[str] = None) -> None:
         super().__init__(
             message=f"Corrupted audio file: {file_path}" + (f" ({reason})" if reason else ""),
             user_message=f"Audio file appears to be corrupted: {file_path.name}",
@@ -125,7 +125,7 @@ class CorruptedAudioError(AudioFileError):
 class EmptyAudioFileError(AudioFileError):
     """Audio file is empty."""
 
-    def __init__(self, file_path: Path):
+    def __init__(self, file_path: Path) -> None:
         super().__init__(
             message=f"Empty audio file: {file_path}",
             user_message=f"Audio file is empty: {file_path.name}",
@@ -138,7 +138,7 @@ class EmptyAudioFileError(AudioFileError):
 class AudioProcessingError(AudioFileError):
     """Error during audio processing."""
 
-    def __init__(self, file_path: Path, operation: str, reason: str):
+    def __init__(self, file_path: Path, operation: str, reason: str) -> None:
         super().__init__(
             message=f"Audio processing error in {operation}: {reason}",
             user_message=f"Could not process audio file during {operation}",
@@ -163,7 +163,7 @@ class AIServiceError(SampleMindError):
 class APIKeyMissingError(AIServiceError):
     """API key not configured."""
 
-    def __init__(self, provider: str):
+    def __init__(self, provider: str) -> None:
         super().__init__(
             message=f"API key missing for {provider}",
             user_message=f"API key not configured for {provider}",
@@ -176,7 +176,7 @@ class APIKeyMissingError(AIServiceError):
 class RateLimitError(AIServiceError):
     """API rate limit exceeded."""
 
-    def __init__(self, provider: str, retry_after: Optional[int] = None):
+    def __init__(self, provider: str, retry_after: Optional[int] = None) -> None:
         super().__init__(
             message=f"Rate limit exceeded for {provider}",
             user_message=f"Too many requests to {provider} API",
@@ -190,7 +190,7 @@ class RateLimitError(AIServiceError):
 class NetworkError(AIServiceError):
     """Network connectivity error."""
 
-    def __init__(self, provider: str, reason: Optional[str] = None):
+    def __init__(self, provider: str, reason: Optional[str] = None) -> None:
         super().__init__(
             message=f"Network error connecting to {provider}: {reason or 'Connection failed'}",
             user_message="Could not connect to AI service",
@@ -204,7 +204,7 @@ class NetworkError(AIServiceError):
 class AuthenticationError(AIServiceError):
     """API authentication failed."""
 
-    def __init__(self, provider: str):
+    def __init__(self, provider: str) -> None:
         super().__init__(
             message=f"Authentication failed for {provider}",
             user_message=f"Invalid credentials for {provider}",
@@ -217,7 +217,7 @@ class AuthenticationError(AIServiceError):
 class APIError(AIServiceError):
     """General API error."""
 
-    def __init__(self, provider: str, status_code: int, reason: str):
+    def __init__(self, provider: str, status_code: int, reason: str) -> None:
         super().__init__(
             message=f"API error from {provider}: {status_code} {reason}",
             user_message=f"Error from {provider} API (HTTP {status_code})",
@@ -237,7 +237,7 @@ class APIError(AIServiceError):
 class DatabaseError(SampleMindError):
     """Base exception for database-related errors."""
 
-    def __init__(self, message: str, operation: str):
+    def __init__(self, message: str, operation: str) -> None:
         super().__init__(
             message=message,
             user_message="Database operation failed",
@@ -250,7 +250,7 @@ class DatabaseError(SampleMindError):
 class DatabaseConnectionError(DatabaseError):
     """Failed to connect to database."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             message="Failed to connect to MongoDB",
             operation="connect",
@@ -267,7 +267,7 @@ class DatabaseConnectionError(DatabaseError):
 class CacheError(SampleMindError):
     """Base exception for cache-related errors."""
 
-    def __init__(self, message: str, operation: str):
+    def __init__(self, message: str, operation: str) -> None:
         super().__init__(
             message=message,
             user_message="Cache operation failed",
@@ -280,7 +280,7 @@ class CacheError(SampleMindError):
 class CacheLimitError(CacheError):
     """Cache limit exceeded."""
 
-    def __init__(self, current_size: int, limit: int):
+    def __init__(self, current_size: int, limit: int) -> None:
         super().__init__(
             message=f"Cache limit exceeded: {current_size}MB / {limit}MB",
             operation="store",
@@ -298,7 +298,7 @@ class CacheLimitError(CacheError):
 class ConfigurationError(SampleMindError):
     """Configuration-related error."""
 
-    def __init__(self, message: str, config_key: Optional[str] = None):
+    def __init__(self, message: str, config_key: Optional[str] = None) -> None:
         super().__init__(
             message=message,
             user_message="Configuration error",
@@ -311,7 +311,7 @@ class ConfigurationError(SampleMindError):
 class InvalidConfigurationError(ConfigurationError):
     """Invalid configuration value."""
 
-    def __init__(self, key: str, value: Any, reason: str):
+    def __init__(self, key: str, value: Any, reason: str) -> None:
         super().__init__(
             message=f"Invalid configuration value for {key}: {value} ({reason})",
             config_key=key,
@@ -323,7 +323,7 @@ class InvalidConfigurationError(ConfigurationError):
 class MissingConfigurationError(ConfigurationError):
     """Required configuration is missing."""
 
-    def __init__(self, key: str):
+    def __init__(self, key: str) -> None:
         super().__init__(
             message=f"Missing required configuration: {key}",
             config_key=key,
@@ -340,7 +340,7 @@ class MissingConfigurationError(ConfigurationError):
 class ValidationError(SampleMindError):
     """Input validation error."""
 
-    def __init__(self, message: str, field: Optional[str] = None):
+    def __init__(self, message: str, field: Optional[str] = None) -> None:
         super().__init__(
             message=message,
             user_message="Invalid input",
@@ -353,7 +353,7 @@ class ValidationError(SampleMindError):
 class InvalidFormatError(ValidationError):
     """Invalid format specification."""
 
-    def __init__(self, format: str, supported_formats: list):
+    def __init__(self, format: str, supported_formats: list) -> None:
         super().__init__(
             message=f"Invalid format: {format}",
             field="format",
@@ -365,7 +365,7 @@ class InvalidFormatError(ValidationError):
 class InvalidRangeError(ValidationError):
     """Invalid range specification."""
 
-    def __init__(self, field: str, min_val: Any, max_val: Any):
+    def __init__(self, field: str, min_val: Any, max_val: Any) -> None:
         super().__init__(
             message=f"Invalid range for {field}: min ({min_val}) > max ({max_val})",
             field=field,
@@ -387,7 +387,7 @@ class ResourceError(SampleMindError):
 class DiskFullError(ResourceError):
     """Disk space is full."""
 
-    def __init__(self, available_gb: float, required_gb: float):
+    def __init__(self, available_gb: float, required_gb: float) -> None:
         super().__init__(
             message=f"Disk full: {available_gb}GB available, {required_gb}GB required",
             user_message="Not enough disk space available",
@@ -401,7 +401,7 @@ class DiskFullError(ResourceError):
 class OutOfMemoryError(ResourceError):
     """Out of memory."""
 
-    def __init__(self, operation: str):
+    def __init__(self, operation: str) -> None:
         super().__init__(
             message=f"Out of memory during {operation}",
             user_message="Not enough memory available",
@@ -414,7 +414,7 @@ class OutOfMemoryError(ResourceError):
 class ProcessTimeoutError(ResourceError):
     """Process timed out."""
 
-    def __init__(self, operation: str, timeout_seconds: int):
+    def __init__(self, operation: str, timeout_seconds: int) -> None:
         super().__init__(
             message=f"Operation timed out after {timeout_seconds}s: {operation}",
             user_message=f"Operation took too long and was cancelled",
@@ -433,7 +433,7 @@ class ProcessTimeoutError(ResourceError):
 class UserInterruptedError(SampleMindError):
     """User interrupted the operation (Ctrl+C)."""
 
-    def __init__(self, operation: str):
+    def __init__(self, operation: str) -> None:
         super().__init__(
             message=f"Operation interrupted by user: {operation}",
             user_message="Operation cancelled",

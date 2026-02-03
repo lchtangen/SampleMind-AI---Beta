@@ -47,7 +47,7 @@ class CloudConfig:
 class CloudProcessor(ABC):
     """Base class for cloud-based audio processors."""
     
-    def __init__(self, config: CloudConfig):
+    def __init__(self, config: CloudConfig) -> None:
         """Initialize the cloud processor."""
         self.config = config
         self._client = None
@@ -98,12 +98,12 @@ class CloudProcessor(ABC):
                 **kwargs
             )
     
-    def __enter__(self):
+    def __enter__(self) -> None:
         """Context manager entry."""
         self.start_cluster()
         return self
     
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """Context manager exit."""
         self.stop_cluster()
 

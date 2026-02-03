@@ -189,7 +189,7 @@ class ThemeManager:
         }
     }
 
-    def __init__(self, theme: MenuTheme = MenuTheme.DARK):
+    def __init__(self, theme: MenuTheme = MenuTheme.DARK) -> None:
         self.current_theme = theme
         self.colors = self.THEMES[theme]
 
@@ -227,7 +227,7 @@ class KeyboardShortcuts:
         "settings": ["s"],             # Settings menu
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.custom_shortcuts: Dict[str, str] = {}
 
     def get_shortcut_help(self) -> str:

@@ -31,7 +31,7 @@ class ExamplePlugin(TUIPlugin):
         ],
     )
 
-    def __init__(self, metadata: PluginMetadata):
+    def __init__(self, metadata: PluginMetadata) -> None:
         super().__init__(metadata)
         self.analysis_count = 0
         self.settings_changes = 0

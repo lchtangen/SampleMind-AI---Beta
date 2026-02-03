@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class PerformanceSummaryWidget(Static):
     """Widget showing performance summary and health score"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.monitor = get_performance_monitor()
 
@@ -71,7 +71,7 @@ class PerformanceSummaryWidget(Static):
 class CPUTrendWidget(Static):
     """Widget showing CPU trend"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.monitor = get_performance_monitor()
 
@@ -104,7 +104,7 @@ class CPUTrendWidget(Static):
 class MemoryTrendWidget(Static):
     """Widget showing memory trend"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.monitor = get_performance_monitor()
 
@@ -139,7 +139,7 @@ class MemoryTrendWidget(Static):
 class CacheStatsWidget(Static):
     """Widget showing cache statistics"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.monitor = get_performance_monitor()
 
@@ -171,7 +171,7 @@ class CacheStatsWidget(Static):
 class QueryStatsWidget(Static):
     """Widget showing query performance"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.monitor = get_performance_monitor()
 
@@ -198,7 +198,7 @@ class QueryStatsWidget(Static):
 class AnalysisStatsWidget(Static):
     """Widget showing analysis performance"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.monitor = get_performance_monitor()
 

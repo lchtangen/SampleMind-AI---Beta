@@ -82,7 +82,7 @@ async def run_tui():
     await app.run_async()
 
 
-def main():
+def main() -> None:
     """Entry point for TUI"""
     import asyncio
 

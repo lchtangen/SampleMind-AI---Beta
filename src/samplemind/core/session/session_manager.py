@@ -235,7 +235,7 @@ class SessionManager:
     - Session search
     """
 
-    def __init__(self, storage_dir: str = ".samplemind/sessions"):
+    def __init__(self, storage_dir: str = ".samplemind/sessions") -> None:
         """
         Initialize session manager.
 

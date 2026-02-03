@@ -194,7 +194,7 @@ class AICoach:
         ),
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize AI coach"""
         self.tips_shown: List[str] = []
         self.current_context: Dict[str, Any] = {}

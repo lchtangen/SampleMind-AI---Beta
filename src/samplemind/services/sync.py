@@ -70,7 +70,7 @@ class SyncManager:
     Manages synchronization tasks.
     """
 
-    def __init__(self, storage_provider: StorageProvider):
+    def __init__(self, storage_provider: StorageProvider) -> None:
         self.storage = storage_provider
         self.is_syncing = False
         self._sync_enabled = False

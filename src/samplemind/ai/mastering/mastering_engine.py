@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class MasteringEngine:
     """AI-powered mastering engine with reference matching."""
 
-    def __init__(self, sample_rate: int = 44100):
+    def __init__(self, sample_rate: int = 44100) -> None:
         """Initialize mastering engine.
 
         Args:

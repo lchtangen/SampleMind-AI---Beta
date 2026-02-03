@@ -11,7 +11,7 @@ from .dependencies import get_current_user
 
 class PermissionDenied(HTTPException):
     """Exception raised when user lacks required permission"""
-    def __init__(self, permission: Permission):
+    def __init__(self, permission: Permission) -> None:
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"Permission denied. Required permission: {permission.value}"
@@ -20,7 +20,7 @@ class PermissionDenied(HTTPException):
 
 class InsufficientRole(HTTPException):
     """Exception raised when user role is insufficient"""
-    def __init__(self, required_role: UserRole):
+    def __init__(self, required_role: UserRole) -> None:
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"Insufficient role. Required: {required_role.value}"
@@ -145,7 +145,7 @@ def check_rate_limit(user_role: UserRole, resource: str, current_usage: int) -> 
 
 class RateLimitExceeded(HTTPException):
     """Exception for rate limit violations"""
-    def __init__(self, resource: str, limit: int):
+    def __init__(self, resource: str, limit: int) -> None:
         super().__init__(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail=f"Rate limit exceeded for {resource}. Limit: {limit}"

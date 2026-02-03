@@ -110,7 +110,7 @@ class SampleMindError(Exception):
 class AudioFileError(SampleMindError):
     """Error loading or processing audio file"""
 
-    def __init__(self, message: str, file_path: Optional[Path] = None, **kwargs):
+    def __init__(self, message: str, file_path: Optional[Path] = None, **kwargs) -> None:
         kwargs['category'] = ErrorCategory.FILE_NOT_FOUND
         kwargs['severity'] = ErrorSeverity.ERROR
         if file_path:
@@ -121,7 +121,7 @@ class AudioFileError(SampleMindError):
 class AnalysisError(SampleMindError):
     """Error during audio analysis"""
 
-    def __init__(self, message: str, **kwargs):
+    def __init__(self, message: str, **kwargs) -> None:
         kwargs['category'] = kwargs.get('category', ErrorCategory.ANALYSIS_FAILED)
         kwargs['severity'] = kwargs.get('severity', ErrorSeverity.ERROR)
         super().__init__(message, **kwargs)
@@ -130,7 +130,7 @@ class AnalysisError(SampleMindError):
 class AIServiceError(SampleMindError):
     """Error with AI services"""
 
-    def __init__(self, message: str, **kwargs):
+    def __init__(self, message: str, **kwargs) -> None:
         kwargs['category'] = kwargs.get('category', ErrorCategory.AI_SERVICE_UNAVAILABLE)
         kwargs['severity'] = kwargs.get('severity', ErrorSeverity.ERROR)
         super().__init__(message, **kwargs)
@@ -139,7 +139,7 @@ class AIServiceError(SampleMindError):
 class ValidationError(SampleMindError):
     """Error validating user input"""
 
-    def __init__(self, message: str, **kwargs):
+    def __init__(self, message: str, **kwargs) -> None:
         kwargs['category'] = kwargs.get('category', ErrorCategory.INVALID_INPUT)
         kwargs['severity'] = kwargs.get('severity', ErrorSeverity.ERROR)
         super().__init__(message, **kwargs)
@@ -148,7 +148,7 @@ class ValidationError(SampleMindError):
 class ResourceError(SampleMindError):
     """Error with system resources"""
 
-    def __init__(self, message: str, **kwargs):
+    def __init__(self, message: str, **kwargs) -> None:
         kwargs['category'] = kwargs.get('category', ErrorCategory.UNKNOWN)
         kwargs['severity'] = kwargs.get('severity', ErrorSeverity.ERROR)
         super().__init__(message, **kwargs)
@@ -161,7 +161,7 @@ class ResourceError(SampleMindError):
 class ErrorRecoveryStrategy:
     """Base class for error recovery strategies"""
 
-    def __init__(self, error: SampleMindError):
+    def __init__(self, error: SampleMindError) -> None:
         self.error = error
 
     def get_suggestions(self) -> List[str]:
@@ -484,10 +484,10 @@ class ErrorContext:
         self.fallback_value = fallback_value
         self.error: Optional[Exception] = None
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         if exc_type is None:
             return False
 

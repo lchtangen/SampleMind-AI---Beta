@@ -91,7 +91,7 @@ class RecentFile:
 class RecentFilesManager:
     """Manages recent file history"""
 
-    def __init__(self, max_history: int = 50):
+    def __init__(self, max_history: int = 50) -> None:
         """
         Initialize Recent Files Manager
 

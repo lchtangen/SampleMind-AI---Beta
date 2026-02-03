@@ -22,7 +22,7 @@ class ResultExporter:
     # Supported formats
     FORMATS = ["JSON", "CSV", "YAML", "Markdown"]
 
-    def __init__(self, output_dir: Optional[str] = None):
+    def __init__(self, output_dir: Optional[str] = None) -> None:
         """
         Initialize exporter
 

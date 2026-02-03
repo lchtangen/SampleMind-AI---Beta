@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class LibraryStatsWidget(Static):
     """Widget displaying library statistics"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.browser = get_library_browser()
 
@@ -60,7 +60,7 @@ class LibraryStatsWidget(Static):
 class LibraryFileTableWidget(Static):
     """Widget displaying files in table format"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.browser = get_library_browser()
         self.table = DataTable(id="library-table")
@@ -96,7 +96,7 @@ class LibraryScreen(Screen):
         ("q", "back", "Back"),
     ]
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.browser = get_library_browser()
         self.search_query = ""

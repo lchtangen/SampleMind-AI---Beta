@@ -166,7 +166,7 @@ THEMES: Dict[ThemeName, ThemeColors] = {
 class ThemeManager:
     """Manages application themes and color schemes"""
 
-    def __init__(self, default_theme: ThemeName = ThemeName.DARK):
+    def __init__(self, default_theme: ThemeName = ThemeName.DARK) -> None:
         """Initialize theme manager with default theme"""
         self.current_theme = default_theme
         self.current_colors = THEMES[default_theme]

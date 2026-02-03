@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class FavoritesManager:
     """High-level favorites management interface for TUI screens"""
 
-    def __init__(self, user_id: Optional[str] = None):
+    def __init__(self, user_id: Optional[str] = None) -> None:
         """Initialize favorites manager"""
         self.user_id = user_id or "default_user"
 

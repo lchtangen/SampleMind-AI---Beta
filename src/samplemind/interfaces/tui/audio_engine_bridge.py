@@ -20,7 +20,7 @@ from samplemind.core.engine.audio_engine import AudioEngine, AudioFeatures, Anal
 class SessionStats:
     """Track session-level statistics for TUI status bar."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize session statistics."""
         self.files_analyzed = 0
         self.total_analysis_time = 0.0
@@ -63,7 +63,7 @@ class SessionStats:
 class AudioCache:
     """Simple in-memory cache for audio analysis results."""
 
-    def __init__(self, max_size: int = 100):
+    def __init__(self, max_size: int = 100) -> None:
         """Initialize cache with maximum size."""
         self.cache: Dict[str, Tuple[AudioFeatures, float]] = {}
         self.max_size = max_size
@@ -122,7 +122,7 @@ class AudioCache:
 class TUIAudioEngine:
     """Bridge between AudioEngine and Textual TUI with async support."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize TUI AudioEngine bridge."""
         self.engine = AudioEngine()
         self.cache = AudioCache()

@@ -91,7 +91,7 @@ class LayeringAnalysis:
 class LayeringAnalyzer:
     """Analyzes compatibility of samples for layering"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.fft_size = 2048
         self.hop_length = 512
 

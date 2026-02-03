@@ -358,7 +358,7 @@ def cached(
     def decorator(func: Callable):
         """Decorator wrapper for caching"""
         @wraps(func)
-        async def wrapper(*args, **kwargs):
+        async def wrapper(*args, **kwargs) -> None:
             # Get cache instance (assumes global cache)
             cache = get_cache()
             
@@ -411,7 +411,7 @@ def get_cache() -> RedisCache:
 class AudioFeatureCache:
     """Cache manager for audio features"""
     
-    def __init__(self, cache: RedisCache):
+    def __init__(self, cache: RedisCache) -> None:
         self.cache = cache
         self.prefix = CacheConfig.AUDIO_FEATURES
     
@@ -436,7 +436,7 @@ class AudioFeatureCache:
 class RateLimitCache:
     """Cache-based rate limiting"""
     
-    def __init__(self, cache: RedisCache):
+    def __init__(self, cache: RedisCache) -> None:
         self.cache = cache
         self.prefix = CacheConfig.API_RATE_LIMIT
     

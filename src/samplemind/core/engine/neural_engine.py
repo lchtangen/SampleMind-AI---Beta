@@ -54,7 +54,7 @@ class NeuralFeatureExtractor:
     - Performance: ~90% reduction in embedding generation time with cache hits
     """
 
-    def __init__(self, model_name: str = "laion/clap-htsat-unfused", use_gpu: bool = False, use_mock: bool = False, enable_cache: bool = True):
+    def __init__(self, model_name: str = "laion/clap-htsat-unfused", use_gpu: bool = False, use_mock: bool = False, enable_cache: bool = True) -> None:
         """
         Initialize the neural engine.
 
@@ -81,7 +81,7 @@ class NeuralFeatureExtractor:
         else:
             logger.info("NeuralFeatureExtractor initialized in MOCK mode explicitly.")
 
-    def _init_device(self, use_gpu: bool):
+    def _init_device(self, use_gpu: bool) -> None:
         """Determine the best available device."""
         if use_gpu and TRANSFORMERS_AVAILABLE:
             if torch.cuda.is_available():
@@ -89,7 +89,7 @@ class NeuralFeatureExtractor:
             elif torch.backends.mps.is_available():
                 self.device = "mps"
 
-    def _load_model(self):
+    def _load_model(self) -> None:
         """Lazy loader for the heavy transformer models."""
         try:
             logger.info(f"🧠 Loading Neural Model: {self.model_name} on {self.device}...")

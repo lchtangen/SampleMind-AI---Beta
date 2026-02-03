@@ -11,7 +11,7 @@ Provides comprehensive logging using Loguru with:
 
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Any
 from loguru import logger
 
 
@@ -112,7 +112,7 @@ def setup_logging(
     if enable_json:
         json_file = log_dir / "samplemind.json"
 
-        def json_formatter(record):
+        def json_formatter(record: Any) -> dict:
             """Format log record as JSON for aggregation services."""
             return {
                 "timestamp": record["time"].isoformat(),
@@ -151,7 +151,7 @@ def setup_logging(
     return log_dir
 
 
-def get_logger(name: str):
+def get_logger(name: str) -> Any:
     """
     Get a logger instance with the given name.
 
@@ -173,7 +173,7 @@ def configure_log_level(level: str) -> None:
 class LogContext:
     """Context manager for adding context to logs."""
 
-    def __init__(self, **context):
+    def __init__(self, **context) -> None:
         """
         Initialize log context.
 
@@ -187,12 +187,12 @@ class LogContext:
         self.context = context
         self._token = None
 
-    def __enter__(self):
+    def __enter__(self) -> "LogContext":
         """Enter context."""
         self._token = logger.contextualize(**self.context)
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Exit context."""
         if self._token:
             self._token.__exit__(exc_type, exc_val, exc_tb)
@@ -207,12 +207,12 @@ class CLILogger:
     """Logger for CLI operations."""
 
     @staticmethod
-    def command_start(command: str, **kwargs):
+    def command_start(command: str, **kwargs) -> None:
         """Log start of command."""
         logger.info(f"Command started: {command}", extra=kwargs)
 
     @staticmethod
-    def command_complete(command: str, duration_ms: float, **kwargs):
+    def command_complete(command: str, duration_ms: float, **kwargs) -> None:
         """Log successful command completion."""
         logger.info(
             f"Command completed: {command}",
@@ -220,7 +220,7 @@ class CLILogger:
         )
 
     @staticmethod
-    def command_error(command: str, error: str, **kwargs):
+    def command_error(command: str, error: str, **kwargs) -> None:
         """Log command error."""
         logger.error(
             f"Command failed: {command}",
@@ -232,7 +232,7 @@ class AudioLogger:
     """Logger for audio processing operations."""
 
     @staticmethod
-    def analysis_start(file_path: str, level: str):
+    def analysis_start(file_path: str, level: str) -> None:
         """Log start of audio analysis."""
         logger.info(
             f"Audio analysis started",
@@ -240,7 +240,7 @@ class AudioLogger:
         )
 
     @staticmethod
-    def analysis_complete(file_path: str, duration_ms: float, features: dict):
+    def analysis_complete(file_path: str, duration_ms: float, features: dict) -> None:
         """Log completed audio analysis."""
         logger.info(
             f"Audio analysis completed",
@@ -252,7 +252,7 @@ class AudioLogger:
         )
 
     @staticmethod
-    def analysis_error(file_path: str, error: str):
+    def analysis_error(file_path: str, error: str) -> None:
         """Log audio analysis error."""
         logger.error(
             f"Audio analysis failed",
@@ -264,7 +264,7 @@ class AILogger:
     """Logger for AI operations."""
 
     @staticmethod
-    def request_start(provider: str, model: str, **kwargs):
+    def request_start(provider: str, model: str, **kwargs) -> None:
         """Log start of AI request."""
         logger.info(
             f"AI request started",
@@ -274,7 +274,7 @@ class AILogger:
     @staticmethod
     def request_complete(
         provider: str, response_time_ms: float, tokens_used: int, **kwargs
-    ):
+    ) -> None:
         """Log completed AI request."""
         logger.info(
             f"AI request completed",
@@ -287,7 +287,7 @@ class AILogger:
         )
 
     @staticmethod
-    def request_error(provider: str, error: str, **kwargs):
+    def request_error(provider: str, error: str, **kwargs) -> None:
         """Log AI request error."""
         logger.error(
             f"AI request failed",
@@ -310,12 +310,12 @@ class DatabaseLogger:
     """Logger for database operations."""
 
     @staticmethod
-    def query_start(operation: str, **kwargs):
+    def query_start(operation: str, **kwargs) -> None:
         """Log start of database query."""
         logger.debug(f"Database query started", extra={"operation": operation, **kwargs})
 
     @staticmethod
-    def query_complete(operation: str, duration_ms: float, rows: int = 0):
+    def query_complete(operation: str, duration_ms: float, rows: int = 0) -> None:
         """Log completed database query."""
         logger.debug(
             f"Database query completed",
@@ -323,7 +323,7 @@ class DatabaseLogger:
         )
 
     @staticmethod
-    def query_error(operation: str, error: str):
+    def query_error(operation: str, error: str) -> None:
         """Log database query error."""
         logger.error(
             f"Database query failed",
@@ -335,7 +335,7 @@ class CacheLogger:
     """Logger for cache operations."""
 
     @staticmethod
-    def hit(key: str, size_bytes: int):
+    def hit(key: str, size_bytes: int) -> None:
         """Log cache hit."""
         logger.debug(
             f"Cache hit",
@@ -343,17 +343,17 @@ class CacheLogger:
         )
 
     @staticmethod
-    def miss(key: str):
+    def miss(key: str) -> None:
         """Log cache miss."""
         logger.debug(f"Cache miss", extra={"key": key})
 
     @staticmethod
-    def store(key: str, size_bytes: int):
+    def store(key: str, size_bytes: int) -> None:
         """Log cache store."""
         logger.debug(f"Cache store", extra={"key": key, "size_bytes": size_bytes})
 
     @staticmethod
-    def evict(reason: str, freed_bytes: int):
+    def evict(reason: str, freed_bytes: int) -> None:
         """Log cache eviction."""
         logger.info(
             f"Cache eviction: {reason}",

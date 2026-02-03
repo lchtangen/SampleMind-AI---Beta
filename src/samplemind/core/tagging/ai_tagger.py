@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 class AITagger:
     """Generates AI-powered tags for audio samples"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.vocabulary = get_vocabulary()
         self.min_confidence = 0.5  # Only include tags with 50%+ confidence
 

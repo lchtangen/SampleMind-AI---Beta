@@ -48,7 +48,7 @@ class SampleMindCLI:
     real-time progress indicators, and comprehensive functionality.
     """
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.audio_engine: Optional[AudioEngine] = None
         self.audio_loader: Optional[AdvancedAudioLoader] = None
         self.ai_manager: Optional[SampleMindAIManager] = None
@@ -1104,7 +1104,7 @@ class SampleMindCLI:
         elif choice == "7":
             await self._show_ai_coaching()
     
-    def _show_mixing_tips(self):
+    def _show_mixing_tips(self) -> None:
         """Display mixing fundamentals"""
         console.print("\n[bold cyan]🎛️ Mixing Fundamentals[/bold cyan]")
         
@@ -1124,7 +1124,7 @@ class SampleMindCLI:
         
         console.print("\n[yellow]💡 Pro Tip: Trust your ears over your eyes when mixing![/yellow]")
     
-    def _show_arrangement_tips(self):
+    def _show_arrangement_tips(self) -> None:
         """Display arrangement techniques"""
         console.print("\n[bold cyan]🎵 Arrangement Techniques[/bold cyan]")
         
@@ -1144,7 +1144,7 @@ class SampleMindCLI:
         
         console.print("\n[yellow]💡 Pro Tip: Less is often more - every element should serve a purpose![/yellow]")
     
-    def _show_mastering_tips(self):
+    def _show_mastering_tips(self) -> None:
         """Display mastering basics"""
         console.print("\n[bold cyan]🔊 Mastering Basics[/bold cyan]")
         
@@ -1164,7 +1164,7 @@ class SampleMindCLI:
         
         console.print("\n[yellow]💡 Pro Tip: Mastering should enhance, not fix - get your mix right first![/yellow]")
     
-    def _show_sound_design_tips(self):
+    def _show_sound_design_tips(self) -> None:
         """Display sound design tips"""
         console.print("\n[bold cyan]🎹 Sound Design Tips[/bold cyan]")
         
@@ -1184,7 +1184,7 @@ class SampleMindCLI:
         
         console.print("\n[yellow]💡 Pro Tip: Record real-world sounds and process them for unique textures![/yellow]")
     
-    def _show_workflow_tips(self):
+    def _show_workflow_tips(self) -> None:
         """Display workflow optimization tips"""
         console.print("\n[bold cyan]📈 Workflow Optimization[/bold cyan]")
         
@@ -1592,7 +1592,7 @@ class SampleMindCLI:
         
         console.print("\n[yellow]💡 Pro Tip: Save this as an FL Studio template file for quick project starts![/yellow]")
     
-    def _show_fl_tips(self):
+    def _show_fl_tips(self) -> None:
         """Show FL Studio specific production tips"""
         console.print("\n[bold cyan]🎯 FL Studio Production Tips[/bold cyan]")
         
@@ -1612,7 +1612,7 @@ class SampleMindCLI:
         
         console.print("\n[yellow]💡 Master Tip: Use FL's lifetime free updates - always stay current![/yellow]")
     
-    def _show_fl_workflow(self):
+    def _show_fl_workflow(self) -> None:
         """Show FL Studio workflow optimization"""
         console.print("\n[bold cyan]⚙️ FL Studio Workflow Optimization[/bold cyan]")
         
@@ -1644,7 +1644,7 @@ class SampleMindCLI:
         
         console.print("\n[yellow]💡 Workflow Tip: Spend time customizing FL Studio to match your creative process![/yellow]")
     
-    def _show_export_settings(self):
+    def _show_export_settings(self) -> None:
         """Show FL Studio export settings guide"""
         console.print("\n[bold cyan]🔄 FL Studio Export Settings Guide[/bold cyan]")
         
@@ -1695,7 +1695,7 @@ class SampleMindCLI:
         console.print("   4. Enable 'Split mixer tracks' if needed")
         console.print("   5. Click 'Start' to export")
     
-    def _display_analysis_results(self, ai_result, loaded_audio, features):
+    def _display_analysis_results(self, ai_result, loaded_audio, features) -> None:
         """Display comprehensive analysis results"""
         
         # File info panel
@@ -1765,7 +1765,7 @@ class SampleMindCLI:
         
         console.print(scores_table)
     
-    def _display_batch_summary(self, results, processing_time):
+    def _display_batch_summary(self, results, processing_time) -> None:
         """Display batch processing summary"""
         if not results:
             return
@@ -1805,7 +1805,7 @@ class SampleMindCLI:
         
         console.print(top_table)
     
-    def _display_directory_info(self, dir_info):
+    def _display_directory_info(self, dir_info) -> None:
         """Display directory scanning info"""
         
         summary_table = Table(title="📁 Directory Summary")
@@ -1831,7 +1831,7 @@ class SampleMindCLI:
             
             console.print(format_table)
     
-    def _save_analysis(self, ai_result, loaded_audio, features, output_file):
+    def _save_analysis(self, ai_result, loaded_audio, features, output_file) -> None:
         """Save analysis results to file"""
         import json
         

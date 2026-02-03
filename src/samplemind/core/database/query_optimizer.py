@@ -32,7 +32,7 @@ class QueryOptimizer:
     Analyzes and optimizes database queries automatically
     """
     
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession) -> None:
         self.session = session
         self.slow_query_threshold_ms = 100.0
     
@@ -353,7 +353,7 @@ def optimized_query(cache_plan: bool = True):
     """
     def decorator(func):
         """Decorator wrapper for query optimization"""
-        async def wrapper(*args, **kwargs):
+        async def wrapper(*args, **kwargs) -> None:
             # Execute query
             result = await func(*args, **kwargs)
             

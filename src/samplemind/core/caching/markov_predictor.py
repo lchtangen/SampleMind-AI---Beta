@@ -69,7 +69,7 @@ class MarkovPredictor:
     historical transition patterns.
     """
 
-    def __init__(self, usage_tracker=None, confidence_threshold: float = 0.60):
+    def __init__(self, usage_tracker=None, confidence_threshold: float = 0.60) -> None:
         """
         Initialize predictor.
 

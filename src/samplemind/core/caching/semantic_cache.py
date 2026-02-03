@@ -31,7 +31,7 @@ class SemanticCache:
     - Memory limits: Automatic eviction of least-used entries
     """
 
-    def __init__(self, max_embeddings: int = 10000, cache_dir: str = ".semantic_cache"):
+    def __init__(self, max_embeddings: int = 10000, cache_dir: str = ".semantic_cache") -> None:
         """
         Initialize semantic cache.
 

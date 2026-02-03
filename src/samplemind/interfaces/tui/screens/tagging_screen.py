@@ -81,7 +81,7 @@ class TaggingScreen(Screen):
     current_category: reactive[str] = reactive("instrument")
     selected_tags: reactive[Set[str]] = reactive(set())
 
-    def __init__(self, analysis_id: str = ""):
+    def __init__(self, analysis_id: str = "") -> None:
         """
         Initialize tagging screen
 

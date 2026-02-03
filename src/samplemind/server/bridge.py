@@ -21,7 +21,7 @@ class DAWBridgeServer:
     Allows plugins (VST/AU) to sync with SampleMind.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.active_connections: List[WebSocket] = []
         self._is_running = False
 

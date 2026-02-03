@@ -19,7 +19,7 @@ from .monitor import Monitor
 class MonitoringServer:
     """HTTP server for exposing monitoring metrics."""
     
-    def __init__(self, monitor: Monitor, host: str = '0.0.0.0', port: int = 8000):
+    def __init__(self, monitor: Monitor, host: str = '0.0.0.0', port: int = 8000) -> None:
         """Initialize the monitoring server."""
         self.monitor = monitor
         self.host = host

@@ -326,7 +326,7 @@ class CrossPlatformFilePicker:
     For Windows: Uses Tkinter
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.os = PlatformDetector.get_os()
         self.detector = PlatformDetector()
 

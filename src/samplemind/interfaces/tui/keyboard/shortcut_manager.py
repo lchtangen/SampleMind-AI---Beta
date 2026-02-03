@@ -94,7 +94,7 @@ EMACS_SHORTCUTS = {
 class ShortcutManager:
     """Manages keyboard shortcuts"""
 
-    def __init__(self, config_dir: Optional[str] = None):
+    def __init__(self, config_dir: Optional[str] = None) -> None:
         """
         Initialize shortcut manager
 

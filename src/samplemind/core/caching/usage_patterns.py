@@ -97,7 +97,7 @@ class UsagePatternTracker:
     - Statistics (hit/miss ratio, processing times)
     """
 
-    def __init__(self, max_events: int = 1000, redis_cache=None):
+    def __init__(self, max_events: int = 1000, redis_cache=None) -> None:
         """
         Initialize tracker.
 

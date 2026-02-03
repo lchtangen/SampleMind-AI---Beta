@@ -40,7 +40,7 @@ class AbletonControlSurface:
     NAME = "SampleMind AI Control Surface"
     VERSION = "2.1.0-beta"
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Ableton Control Surface"""
         self.is_connected = False
         self.current_song = None

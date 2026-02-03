@@ -40,7 +40,7 @@ class PlaybackStats:
 class AudioPlayer:
     """Audio playback and transport control"""
 
-    def __init__(self, audio_data: Optional[List[float]] = None, sample_rate: int = 44100):
+    def __init__(self, audio_data: Optional[List[float]] = None, sample_rate: int = 44100) -> None:
         """
         Initialize audio player
 

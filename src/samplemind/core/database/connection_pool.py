@@ -132,7 +132,7 @@ class DatabaseConnectionPool:
             f"max_overflow={max_overflow}, timeout={pool_timeout}s"
         )
     
-    def _register_event_listeners(self):
+    def _register_event_listeners(self) -> None:
         """Register SQLAlchemy event listeners for monitoring"""
         
         @event.listens_for(self.engine.sync_engine, "before_cursor_execute")

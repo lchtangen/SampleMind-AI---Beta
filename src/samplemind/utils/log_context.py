@@ -259,7 +259,7 @@ def log_critical(message: str, **kwargs) -> None:
 class OperationTimer:
     """Timer for tracking operation duration."""
 
-    def __init__(self, operation: str):
+    def __init__(self, operation: str) -> None:
         """
         Initialize operation timer.
 
@@ -337,7 +337,7 @@ def with_logging(
         import inspect
 
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> None:
             """Inner wrapper for function execution"""
             name = operation_name or func.__name__
             log_context = {"operation": name}
