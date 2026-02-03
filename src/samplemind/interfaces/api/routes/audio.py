@@ -64,7 +64,7 @@ router = APIRouter()
 async def upload_audio(
     file: UploadFile = File(..., description="Audio file to upload"),
     background_tasks: BackgroundTasks = None
-):
+) -> None:
     """
     Upload an audio file to the server for processing.
 
@@ -137,7 +137,7 @@ async def process_audio(
     file_id: str,
     request: AudioProcessRequest,
     background_tasks: BackgroundTasks = None
-):
+) -> None:
     """
     Process an audio file with the specified processing pipeline.
 
@@ -210,7 +210,7 @@ async def analyze_audio(
     file_id: str,
     request: AudioAnalysisRequest = Depends(),
     background_tasks: BackgroundTasks = None
-):
+) -> None:
     """
     Analyze an audio file and extract various audio features.
 
@@ -488,7 +488,7 @@ async def list_audio_files(
     page: int = Query(1, ge=1, description="Page number (1-based)"),
     page_size: int = Query(50, ge=1, le=100, description="Number of items per page"),
     file_type: Optional[str] = Query(None, description="Filter by file type (e.g., 'wav', 'mp3')")
-):
+) -> None:
     """
     List all uploaded audio files with pagination and filtering.
 

@@ -155,7 +155,7 @@ class RequestContext:
         self.extra_context = extra_context
         self._previous_context = None
 
-    def __enter__(self):
+    def __enter__(self) -> "LogContext":
         """Enter context."""
         # Save previous context
         self._previous_context = get_all_context()
@@ -169,7 +169,7 @@ class RequestContext:
 
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """Exit context and restore previous context."""
         # Restore previous context
         if self._previous_context:
@@ -276,7 +276,7 @@ class OperationTimer:
         self.duration_ms = 0
         self._start_time = None
 
-    def __enter__(self):
+    def __enter__(self) -> "OperationContext":
         """Enter context."""
         import time
 
@@ -284,7 +284,7 @@ class OperationTimer:
         log_info(f"Operation started", operation=self.operation)
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """Exit context and log duration."""
         import time
 
@@ -315,7 +315,7 @@ def with_logging(
     operation_name: str = None,
     include_args: bool = False,
     include_result: bool = False,
-):
+) -> None:
     """
     Decorator for logging function calls with context.
 

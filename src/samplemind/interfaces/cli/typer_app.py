@@ -76,7 +76,7 @@ def main_callback(
         "-v",
         help="Show version and exit",
     ),
-):
+) -> None:
     """SampleMind AI - Professional Audio Analysis & Library Management"""
     if version:
         from . import __version__
@@ -259,7 +259,7 @@ def completion(
         help="Shell type",
         autocompletion=lambda: ["bash", "zsh", "fish", "powershell"],
     ),
-):
+) -> None:
     """Generate shell completion script"""
     completions = {
         "bash": "completion_bash",
