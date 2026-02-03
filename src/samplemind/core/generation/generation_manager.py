@@ -55,6 +55,7 @@ class GenerationRequest:
     created_at: float = field(default_factory=time.time)
 
     def to_dict(self) -> Dict:
+        """Convert generation request to dictionary"""
         return {
             "id": self.id,
             "mode": self.mode.value,
@@ -78,6 +79,7 @@ class GenerationResult:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict:
+        """Convert generation result to dictionary"""
         return {
             "request_id": self.request_id,
             "mode": self.mode.value,

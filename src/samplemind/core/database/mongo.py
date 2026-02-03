@@ -32,6 +32,7 @@ class AudioFile(Document):
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
     class Settings:
+        """MongoDB collection settings"""
         name = "audio_files"
         indexes = [
             "file_id",
@@ -71,6 +72,7 @@ class Analysis(Document):
     analyzed_at: datetime = Field(default_factory=datetime.utcnow)
 
     class Settings:
+        """MongoDB collection settings"""
         name = "analyses"
         indexes = [
             "analysis_id",

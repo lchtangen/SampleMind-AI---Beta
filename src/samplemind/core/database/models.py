@@ -269,6 +269,7 @@ class AudioFile(Document):
     metadata: dict = Field(default_factory=dict)
     
     class Settings:
+        """MongoDB collection settings for AudioFile"""
         name = "audio_files"
         indexes = [
             "user_id",
@@ -303,6 +304,7 @@ class AnalysisResult(Document):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
     class Settings:
+        """MongoDB collection settings for AnalysisResult"""
         name = "analysis_results"
         indexes = [
             "audio_id",
@@ -337,6 +339,7 @@ class BatchJob(Document):
     completed_at: Optional[datetime] = None
     
     class Settings:
+        """MongoDB collection settings for BatchJob"""
         name = "batch_jobs"
         indexes = [
             "user_id",
