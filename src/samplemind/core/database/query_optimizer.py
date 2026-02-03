@@ -352,6 +352,7 @@ def optimized_query(cache_plan: bool = True):
             return await session.execute(query)
     """
     def decorator(func):
+        """Decorator wrapper for query optimization"""
         async def wrapper(*args, **kwargs):
             # Execute query
             result = await func(*args, **kwargs)

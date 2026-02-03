@@ -96,6 +96,7 @@ class BatchJob(Document):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
     class Settings:
+        """MongoDB collection settings"""
         name = "batch_jobs"
         indexes = [
             "batch_id",
@@ -116,6 +117,7 @@ class Favorite(Document):
     rating: int = Field(default=0, ge=0, le=5)
 
     class Settings:
+        """MongoDB collection settings"""
         name = "favorites"
         indexes = [
             "favorite_id",
@@ -155,6 +157,7 @@ class UserSettings(Document):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
     class Settings:
+        """MongoDB collection settings"""
         name = "user_settings"
         indexes = [
             "settings_id",

@@ -171,6 +171,7 @@ def redis_cache(ttl: int = 3600, key_prefix: str = "cache"):
             # ...
     """
     def decorator(func):
+        """Decorator wrapper for Redis caching"""
         @wraps(func)
         async def wrapper(*args, **kwargs):
             # Generate cache key from function name and arguments
