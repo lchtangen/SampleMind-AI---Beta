@@ -499,19 +499,19 @@
 - **Message:** Function 'configure_jwt' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### chroma.py:24
+### chroma.py:44
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'init_chromadb' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### chroma.py:61
+### chroma.py:81
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'get_chroma_client' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### chroma.py:68
+### chroma.py:88
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'get_collection' missing type hints for: return type

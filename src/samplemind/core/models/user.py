@@ -57,6 +57,7 @@ class UserPublic(UserBase):
     created_at: datetime
     
     class Config:
+        """Pydantic config for UserPublic"""
         from_attributes = True
 
 
@@ -72,6 +73,7 @@ class UserWithStats(UserPublic):
     max_collections: int
     
     class Config:
+        """Pydantic config for UserWithStats"""
         from_attributes = True
 
 
