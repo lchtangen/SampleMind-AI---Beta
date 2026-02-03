@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
 from samplemind.core.database.repositories.collection_repository import (
     CollectionRepository,
@@ -48,13 +48,14 @@ def is_db_available() -> bool:
 
 @router.get("/", response_model=List[CollectionResponse])
 async def list_collections(
+    request: Request,
     skip: int = 0,
     limit: int = 100
 ):
     """List all collections"""
     if is_db_available():
-        # TODO: Get real user ID from auth
-        user_id = "test_user_v6"
+        # Get user ID from request state (injected by AuthMiddleware)
+        user_id = request.state.user["id"]
         cols = await CollectionRepository.get_by_user(user_id, skip, limit)
         # Convert Beanie objects to Schema response
         return [

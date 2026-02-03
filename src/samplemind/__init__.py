@@ -27,7 +27,7 @@ Version: Beta 2.0 (Phoenix)
 Codename: Phoenix - Rising from the ashes of v6
 """
 
-__version__ = "2.0.0-beta"
+__version__ = "2.1.0-beta"
 __codename__ = "Phoenix"
 __status__ = "Beta"
 __release_date__ = "2025-10-04"
