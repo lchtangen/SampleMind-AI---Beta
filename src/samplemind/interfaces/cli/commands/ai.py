@@ -49,8 +49,81 @@ async def ai_analyze(
             ai_manager = await utils.get_ai_manager()
             engine = await utils.get_audio_engine()
 
+            # Enable Neural Engine if available
+            if engine.neural_extractor:
+                console.print("[dim]Using Neural Engine for semantic embedding[/dim]")
+
             # Get features from audio engine
             features = engine.analyze_audio(file, analysis_level="STANDARD")
+
+            # Save sidecar manually if running from CLI to ensure persistence
+            # (API does this automatically, CLI might need explicit call)
+            if hasattr(features, 'save'):
+                features.save(file)
+
+
+@app.command("search")
+@utils.with_error_handling
+@utils.async_command
+async def ai_search(
+    query: str = typer.Argument(..., help="Natural language search query"),
+    limit: int = typer.Option(10, "--limit", "-n", help="Number of results"),
+) -> None:
+    """
+    🔍 Semantic Search
+    Find samples using natural language descriptions.
+    """
+    from samplemind.core.database.chroma import query_similar
+
+    console.print(f"[bold cyan]🔍 Searching for:[/bold cyan] '{query}'")
+
+    with utils.ProgressTracker("Processing query"):
+        engine = await utils.get_audio_engine()
+
+        if not engine.neural_extractor:
+            console.print("[red]Neural Engine not available. Cannot perform semantic search.[/red]")
+            return
+
+        # Generate text embedding
+        text_embedding = engine.neural_extractor.generate_text_embedding(query)
+
+        if not text_embedding:
+            console.print("[red]Failed to understand query.[/red]")
+            return
+
+        # Query DB
+        results = await query_similar(text_embedding, n_results=limit)
+
+    # Display results
+    ids = results.get("ids", [])
+    distances = results.get("distances", [])
+    metadatas = results.get("metadatas", [])
+
+    if not ids:
+        console.print("[yellow]No matches found. Try analyzing some files first.[/yellow]")
+        return
+
+    table = Table(title=f"Semantic Search Results: '{query}'")
+    table.add_column("Score", style="magenta")
+    table.add_column("File", style="cyan")
+    table.add_column("Tempo", style="green")
+
+    for i, file_id in enumerate(ids):
+        dist = distances[i]
+        score = max(0, 1.0 - dist) * 100
+        meta = metadatas[i] if i < len(metadatas) else {}
+
+        filename = meta.get("filename", file_id)
+        bpm = meta.get("tempo", "?")
+
+        table.add_row(
+            f"{score:.1f}%",
+            str(filename),
+            f"{bpm} bpm"
+        )
+
+    console.print(table)
+
 
             result = {
                 "file": str(file),
