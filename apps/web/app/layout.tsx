@@ -1,9 +1,18 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+import dynamic from 'next/dynamic';
 import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
+
+// Dynamic imports for performance
+const CommandPalette = dynamic(() => import('@/components/ui/CommandPalette'), {
+  ssr: false,
+});
+const FeedbackWidget = dynamic(() => import('@/components/feedback/FeedbackWidget').then(mod => ({ default: mod.FeedbackWidget })), {
+  ssr: false,
+});
 
 // Optimize font loading with display: 'swap' and preload
 const inter = Inter({ 
@@ -73,7 +82,9 @@ export default function RootLayout({
         >
           <NotificationProvider>
             <AuthProvider>
-          {children}
+              <CommandPalette />
+              <FeedbackWidget />
+              {children}
             </AuthProvider>
           </NotificationProvider>
         </ThemeProvider>

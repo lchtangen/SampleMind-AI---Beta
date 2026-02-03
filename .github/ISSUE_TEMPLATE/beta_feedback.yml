@@ -1,0 +1,120 @@
+name: Beta Feedback
+description: Share your feedback as a beta tester
+labels: ["beta-feedback", "feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Beta Tester Feedback
+        Thank you for being part of the SampleMind AI beta! Your feedback helps us improve the product. Please share your experience below.
+
+  - type: dropdown
+    id: rating
+    attributes:
+      label: Overall Experience Rating
+      description: How would you rate your experience with SampleMind AI?
+      options:
+        - "⭐⭐⭐⭐⭐ Excellent"
+        - "⭐⭐⭐⭐ Very Good"
+        - "⭐⭐⭐ Good"
+        - "⭐⭐ Fair"
+        - "⭐ Poor"
+    validations:
+      required: true
+
+  - type: textarea
+    id: what_works_well
+    attributes:
+      label: What Works Well?
+      description: What features or aspects do you like about SampleMind AI?
+      placeholder: |
+        I really enjoyed...
+        - The [feature] is great because...
+        - I loved how...
+    validations:
+      required: true
+
+  - type: textarea
+    id: pain_points
+    attributes:
+      label: What Could Be Improved?
+      description: What's your biggest pain point or frustration?
+      placeholder: |
+        The main issue is...
+        - It's difficult to...
+        - I wish it would...
+    validations:
+      required: true
+
+  - type: textarea
+    id: workflow
+    attributes:
+      label: How Are You Using SampleMind AI?
+      description: Tell us about your workflow
+      placeholder: |
+        I use SampleMind AI to...
+        - My typical workflow is...
+        - I mostly work with [audio type]...
+    validations:
+      required: true
+
+  - type: textarea
+    id: feature_requests
+    attributes:
+      label: Feature Requests
+      description: What features would make SampleMind AI even better?
+      placeholder: |
+        I'd love to see...
+        - A [feature] for [use case]
+        - Better support for [workflow]
+
+  - type: dropdown
+    id: would_recommend
+    attributes:
+      label: Would You Recommend SampleMind AI?
+      description: Would you recommend this to other music producers?
+      options:
+        - "👍 Yes, definitely"
+        - "😊 Probably yes"
+        - "🤔 Maybe/depends"
+        - "😞 Probably not"
+        - "👎 No"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform_feedback
+    attributes:
+      label: Which Platform Are You Using Most?
+      description: CLI, Web UI, or both?
+      options:
+        - CLI (Command Line)
+        - Web UI
+        - Both equally
+    validations:
+      required: true
+
+  - type: textarea
+    id: technical_issues
+    attributes:
+      label: Any Technical Issues? (Optional)
+      description: |
+        Did you encounter any crashes, bugs, or performance issues?
+        If yes, please describe and check the bug report template instead
+      placeholder: "I encountered..."
+
+  - type: textarea
+    id: additional_comments
+    attributes:
+      label: Additional Comments (Optional)
+      description: Anything else you'd like to share?
+      placeholder: "Any other thoughts..."
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Feedback Preferences
+      options:
+        - label: I'm happy to be contacted for follow-up questions
+        - label: I'd like to be featured in "community showcases" if I share my work
+        - label: I'm interested in longer-term user research interviews

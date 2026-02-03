@@ -8,19 +8,35 @@ import hashlib
 import logging
 import random
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
-import numpy as np
+# Lazy load dependencies
+librosa = None
+torch = None
+F = None
+AutoModel = None
+AutoProcessor = None
+TRANSFORMERS_AVAILABLE = False
 
-# Check for meaningful dependencies
-try:
-    import librosa
-    import torch
-    import torch.nn.functional as F
-    from transformers import AutoModel, AutoProcessor
-    TRANSFORMERS_AVAILABLE = True
-except ImportError:
-    TRANSFORMERS_AVAILABLE = False
+def _ensure_deps():
+    global librosa, torch, F, AutoModel, AutoProcessor, TRANSFORMERS_AVAILABLE
+    if torch is None:
+        try:
+            import librosa as _librosa
+            import torch as _torch
+            import torch.nn.functional as _F
+            from transformers import AutoModel as _AutoModel
+            from transformers import AutoProcessor as _AutoProcessor
+
+            librosa = _librosa
+            torch = _torch
+            F = _F
+            AutoModel = _AutoModel
+            AutoProcessor = _AutoProcessor
+            TRANSFORMERS_AVAILABLE = True
+        except ImportError:
+            TRANSFORMERS_AVAILABLE = False
+            logging.getLogger(__name__).warning("Deep learning dependencies not available")
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +88,7 @@ class NeuralFeatureExtractor:
         self.enable_cache = enable_cache
 
         if not self.use_mock:
+            _ensure_deps()
             self._init_device(use_gpu)
             if TRANSFORMERS_AVAILABLE:
                 self._load_model()
@@ -101,7 +118,7 @@ class NeuralFeatureExtractor:
             logger.warning("Falling back to mock mode.")
             self.use_mock = True
 
-    def generate_embedding(self, audio_path: Union[str, Path]) -> List[float]:
+    def generate_embedding(self, audio_path: str | Path) -> list[float]:
         """
         Generate a semantic embedding vector for the audio file.
         Returns a list of floats (size 512 for CLAP).
@@ -147,7 +164,7 @@ class NeuralFeatureExtractor:
 
         return embedding
 
-    def _sync_get_cached_embedding(self, audio_path: str) -> Optional[List[float]]:
+    def _sync_get_cached_embedding(self, audio_path: str) -> list[float] | None:
         """Synchronous wrapper to get cached embedding."""
         import asyncio
         try:
@@ -173,7 +190,7 @@ class NeuralFeatureExtractor:
             logger.debug(f"Sync cache get failed: {e}")
             return None
 
-    def _sync_set_cached_embedding(self, audio_path: str, embedding: List[float]) -> None:
+    def _sync_set_cached_embedding(self, audio_path: str, embedding: list[float]) -> None:
         """Synchronous wrapper to set cached embedding."""
         import asyncio
         try:
@@ -198,7 +215,7 @@ class NeuralFeatureExtractor:
         except Exception as e:
             logger.debug(f"Sync cache set failed: {e}")
 
-    def _generate_real_embedding(self, audio_path: Path) -> List[float]:
+    def _generate_real_embedding(self, audio_path: Path) -> list[float]:
         """
         Generate actual embedding using CLAP model.
         """
@@ -216,7 +233,7 @@ class NeuralFeatureExtractor:
         # Return as list
         return outputs[0].cpu().numpy().tolist()
 
-    def generate_text_embedding(self, text: str) -> List[float]:
+    def generate_text_embedding(self, text: str) -> list[float]:
         """
         Generate embedding for a text query.
         Used for semantic search (Finding audio by description).
@@ -266,7 +283,7 @@ class NeuralFeatureExtractor:
 
         return embedding
 
-    def _generate_mock_embedding(self, seed_source: Union[str, Path], dim: int = 512) -> List[float]:
+    def _generate_mock_embedding(self, seed_source: str | Path, dim: int = 512) -> list[float]:
         """
         Generate a deterministic random embedding based on input string hash.
         """
@@ -274,5 +291,3 @@ class NeuralFeatureExtractor:
         random.seed(seed_val)
         # Simulate a 512-dim vector (typical size)
         return [random.uniform(-1.0, 1.0) for _ in range(dim)]
-
-

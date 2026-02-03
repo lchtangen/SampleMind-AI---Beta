@@ -18,13 +18,12 @@ import asyncio
 import hashlib
 import json
 import logging
-import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 import librosa
 import numpy as np
@@ -72,25 +71,25 @@ class AudioFeatures:
     duration: float
     sample_rate: int
     channels: int
-    bit_depth: Optional[int] = None
+    bit_depth: int | None = None
 
     # Temporal features
     tempo: float = 0.0
-    time_signature: Tuple[int, int] = (4, 4)
-    beats: List[float] = field(default_factory=list)
-    onset_times: List[float] = field(default_factory=list)
+    time_signature: tuple[int, int] = (4, 4)
+    beats: list[float] = field(default_factory=list)
+    onset_times: list[float] = field(default_factory=list)
 
     # Tonal features
     key: str = "C"
     mode: str = "major"
-    pitch_class_distribution: List[float] = field(default_factory=list)
+    pitch_class_distribution: list[float] = field(default_factory=list)
     chroma_features: np.ndarray = field(default_factory=lambda: np.array([]))
 
     # Spectral features
-    spectral_centroid: List[float] = field(default_factory=list)
-    spectral_bandwidth: List[float] = field(default_factory=list)
-    spectral_rolloff: List[float] = field(default_factory=list)
-    zero_crossing_rate: List[float] = field(default_factory=list)
+    spectral_centroid: list[float] = field(default_factory=list)
+    spectral_bandwidth: list[float] = field(default_factory=list)
+    spectral_rolloff: list[float] = field(default_factory=list)
+    zero_crossing_rate: list[float] = field(default_factory=list)
 
     # MFCC features
     mfccs: np.ndarray = field(default_factory=lambda: np.array([]))
@@ -98,16 +97,16 @@ class AudioFeatures:
     # Advanced features
     harmonic_content: np.ndarray = field(default_factory=lambda: np.array([]))
     percussive_content: np.ndarray = field(default_factory=lambda: np.array([]))
-    rms_energy: List[float] = field(default_factory=list)
-    neural_embedding: List[float] = field(default_factory=list)
+    rms_energy: list[float] = field(default_factory=list)
+    neural_embedding: list[float] = field(default_factory=list)
 
     # Rhythm and groove
-    rhythm_pattern: List[float] = field(default_factory=list)
+    rhythm_pattern: list[float] = field(default_factory=list)
     groove_template: np.ndarray = field(default_factory=lambda: np.array([]))
 
     # Phase 4.2: Forensics and advanced features
-    forensics_result: Optional[Dict] = None
-    advanced_features: Optional[Dict] = None
+    forensics_result: dict | None = None
+    advanced_features: dict | None = None
 
     # Metadata
     analysis_timestamp: float = field(default_factory=time.time)
@@ -163,7 +162,7 @@ class AudioFeatures:
                 hash_sha256.update(chunk)
         return hash_sha256.hexdigest()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert features to dictionary for JSON serialization"""
         result = {}
         for key, value in self.__dict__.items():
@@ -176,7 +175,7 @@ class AudioFeatures:
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'AudioFeatures':
+    def from_dict(cls, data: dict[str, Any]) -> 'AudioFeatures':
         """Create AudioFeatures from dictionary"""
         # Convert lists back to numpy arrays where needed
         numpy_fields = ['chroma_features', 'mfccs', 'harmonic_content', 'percussive_content', 'groove_template']
@@ -190,7 +189,7 @@ class AudioFeatures:
         return cls(**data)
 
 
-    def save(self, file_path: Union[str, Path]) -> bool:
+    def save(self, file_path: str | Path) -> bool:
         """Save features to a sidecar JSON file"""
         try:
             path = Path(file_path)
@@ -224,7 +223,7 @@ class AudioProcessor:
         return signal.filtfilt(b, a, y)
 
     @staticmethod
-    def extract_harmonic_percussive(y: np.ndarray, margin: float = 3.0) -> Tuple[np.ndarray, np.ndarray]:
+    def extract_harmonic_percussive(y: np.ndarray, margin: float = 3.0) -> tuple[np.ndarray, np.ndarray]:
         """
         Separate harmonic and percussive components of an audio signal.
 
@@ -332,7 +331,7 @@ class AdvancedFeatureExtractor:
         self.use_cache = use_cache
         self._cache = None
 
-    def extract_tonal_features(self, y: np.ndarray) -> Dict[str, Any]:
+    def extract_tonal_features(self, y: np.ndarray) -> dict[str, Any]:
         """
         Extract comprehensive tonal features including key and pitch information.
 
@@ -365,7 +364,7 @@ class AdvancedFeatureExtractor:
             'pitch_class_distribution': chroma_mean.tolist()
         }
 
-    def extract_rhythmic_features(self, y: np.ndarray) -> Dict[str, Any]:
+    def extract_rhythmic_features(self, y: np.ndarray) -> dict[str, Any]:
         """
         Extract rhythm and tempo information from audio.
 
@@ -435,10 +434,12 @@ class AdvancedFeatureExtractor:
             return result
 
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             logger.error(f"Error extracting rhythmic features: {e}")
             raise
 
-    def extract_spectral_features(self, y: np.ndarray) -> Dict[str, Any]:
+    def extract_spectral_features(self, y: np.ndarray) -> dict[str, Any]:
         """
         Extract spectral characteristics from audio.
 
@@ -524,7 +525,7 @@ class AdvancedFeatureExtractor:
             logger.error(f"Error extracting spectral features: {e}")
             raise
 
-    def extract_mfcc_features(self, y: np.ndarray, n_mfcc: int = 20) -> Dict[str, Any]:
+    def extract_mfcc_features(self, y: np.ndarray, n_mfcc: int = 20) -> dict[str, Any]:
         """
         Extract Mel-frequency cepstral coefficients (MFCCs) from audio.
 
@@ -586,7 +587,7 @@ class AdvancedFeatureExtractor:
             logger.error(f"Error extracting MFCC features: {e}")
             raise
 
-    def _get_cache_key(self, feature_type: str, y: np.ndarray) -> Dict[str, Any]:
+    def _get_cache_key(self, feature_type: str, y: np.ndarray) -> dict[str, Any]:
         """
         Generate cache key for the given feature type and audio data.
 
@@ -607,7 +608,7 @@ class AdvancedFeatureExtractor:
             'audio_hash': hashlib.sha256(y.tobytes()).hexdigest()[:16]  # First 16 chars of hash
         }
 
-    def _estimate_key_mode(self, chroma_mean: np.ndarray) -> Tuple[str, str]:
+    def _estimate_key_mode(self, chroma_mean: np.ndarray) -> tuple[str, str]:
         """
         Estimate musical key and mode from chroma features.
 
@@ -646,7 +647,7 @@ class AdvancedFeatureExtractor:
 
         return key, mode
 
-    def _analyze_rhythm_pattern(self, beat_times: np.ndarray, onset_times: np.ndarray) -> List[float]:
+    def _analyze_rhythm_pattern(self, beat_times: np.ndarray, onset_times: np.ndarray) -> list[float]:
         """
         Analyze rhythm pattern complexity based on beat and onset times.
 
@@ -726,7 +727,7 @@ class AudioEngine:
 
         logger.info(f"🎵 SampleMind Audio Engine initialized with {max_workers} workers")
 
-    def load_audio(self, file_path: Union[str, Path], target_sr: Optional[int] = None) -> Tuple[np.ndarray, int]:
+    def load_audio(self, file_path: str | Path, target_sr: int | None = None) -> tuple[np.ndarray, int]:
         """
         Load audio file with automatic format detection and conversion
 
@@ -770,7 +771,7 @@ class AudioEngine:
 
     def analyze_audio(
         self,
-        file_path: Union[str, Path],
+        file_path: str | Path,
         level: AnalysisLevel = AnalysisLevel.STANDARD,
         use_cache: bool = True
     ) -> AudioFeatures:
@@ -889,7 +890,7 @@ class AudioEngine:
 
     async def analyze_audio_async(
         self,
-        file_path: Union[str, Path],
+        file_path: str | Path,
         level: AnalysisLevel = AnalysisLevel.STANDARD
     ) -> AudioFeatures:
         """Asynchronous audio analysis"""
@@ -904,10 +905,10 @@ class AudioEngine:
 
     def batch_analyze(
         self,
-        file_paths: List[Union[str, Path]],
+        file_paths: list[str | Path],
         level: AnalysisLevel = AnalysisLevel.STANDARD,
         parallel: bool = True
-    ) -> List[AudioFeatures]:
+    ) -> list[AudioFeatures]:
         """
         Batch analyze multiple audio files
 
@@ -960,7 +961,7 @@ class AudioEngine:
         self,
         features1: AudioFeatures,
         features2: AudioFeatures,
-        weights: Optional[Dict[str, float]] = None
+        weights: dict[str, float] | None = None
     ) -> float:
         """
         Compare similarity between two audio files based on their features
@@ -1027,7 +1028,7 @@ class AudioEngine:
 
         return weighted_sum / total_weight if total_weight > 0 else 0.0
 
-    def get_performance_stats(self) -> Dict[str, Any]:
+    def get_performance_stats(self) -> dict[str, Any]:
         """Get performance statistics"""
         avg_analysis_time = np.mean(self.analysis_times) if self.analysis_times else 0
         cache_hit_rate = self.cache_hits / (self.cache_hits + self.cache_misses) if (self.cache_hits + self.cache_misses) > 0 else 0
@@ -1041,7 +1042,7 @@ class AudioEngine:
             'cache_misses': self.cache_misses
         }
 
-    def export_features(self, features: AudioFeatures, output_path: Union[str, Path]) -> None:
+    def export_features(self, features: AudioFeatures, output_path: str | Path) -> None:
         """Export features to JSON file"""
         output_path = Path(output_path)
 
@@ -1050,11 +1051,11 @@ class AudioEngine:
 
         logger.info(f"💾 Features exported to {output_path}")
 
-    def import_features(self, input_path: Union[str, Path]) -> AudioFeatures:
+    def import_features(self, input_path: str | Path) -> AudioFeatures:
         """Import features from JSON file"""
         input_path = Path(input_path)
 
-        with open(input_path, 'r') as f:
+        with open(input_path) as f:
             data = json.load(f)
 
         features = AudioFeatures.from_dict(data)
@@ -1102,7 +1103,7 @@ class FLStudioIntegration:
     """FL Studio specific integration utilities"""
 
     @staticmethod
-    def generate_fl_preset(features: AudioFeatures) -> Dict[str, Any]:
+    def generate_fl_preset(features: AudioFeatures) -> dict[str, Any]:
         """Generate FL Studio preset based on audio features"""
         preset = {
             'name': f"SampleMind_{features.key}_{int(features.tempo)}BPM",
@@ -1115,7 +1116,7 @@ class FLStudioIntegration:
         return preset
 
     @staticmethod
-    def _suggest_effects(features: AudioFeatures) -> List[str]:
+    def _suggest_effects(features: AudioFeatures) -> list[str]:
         """Suggest FL Studio effects based on audio characteristics"""
         effects = []
 
@@ -1142,7 +1143,7 @@ class FLStudioIntegration:
         return effects
 
     @staticmethod
-    def _suggest_mixer_settings(features: AudioFeatures) -> Dict[str, Any]:
+    def _suggest_mixer_settings(features: AudioFeatures) -> dict[str, Any]:
         """Suggest mixer settings based on audio analysis"""
         settings = {
             'eq': {

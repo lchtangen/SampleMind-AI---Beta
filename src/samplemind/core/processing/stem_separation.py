@@ -1,14 +1,14 @@
 import asyncio
 import importlib.util
 import logging
+import shutil
 import subprocess
 import sys
 import tempfile
-import time
-from dataclasses import dataclass, field
+from collections.abc import Callable, Iterable
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Callable
 
 from .exceptions import OptionalDependencyError
 
@@ -40,7 +40,7 @@ class QualityPreset:
 
 
 # Quality preset configurations
-QUALITY_PRESETS: Dict[StemQuality, QualityPreset] = {
+QUALITY_PRESETS: dict[StemQuality, QualityPreset] = {
     StemQuality.FAST: QualityPreset(
         model="mdx",
         shifts=1,
@@ -67,8 +67,8 @@ class StemSeparationResult:
     """Container for separated stem audio paths."""
 
     output_directory: Path
-    stems: Dict[str, Path]
-    command: List[str]
+    stems: dict[str, Path]
+    command: list[str]
 
 
 class StemSeparationEngine:
@@ -92,8 +92,8 @@ class StemSeparationEngine:
     def __init__(
         self,
         model: str = "mdx_extra",  # Changed default to v4 model
-        device: Optional[str] = None,
-        segment: Optional[float] = None,
+        device: str | None = None,
+        segment: float | None = None,
         shifts: int = 1,  # Number of random shifts for inference stability
         overlap: float = 0.25,  # Overlap between segments (0-1)
         verbose: bool = False,  # Print progress information
@@ -117,7 +117,7 @@ class StemSeparationEngine:
     def from_quality(
         cls,
         quality: StemQuality = StemQuality.STANDARD,
-        device: Optional[str] = None,
+        device: str | None = None,
         verbose: bool = False,
     ) -> "StemSeparationEngine":
         """
@@ -146,26 +146,26 @@ class StemSeparationEngine:
         )
 
     @staticmethod
-    def get_available_presets() -> Dict[str, str]:
+    def get_available_presets() -> dict[str, str]:
         """Get available quality presets with descriptions"""
         return {q.value: QUALITY_PRESETS[q].description for q in StemQuality}
 
     @staticmethod
     def _assert_dependency() -> None:
-        if importlib.util.find_spec("demucs") is None:
+        if importlib.util.find_spec("demucs") is None and shutil.which("demucs") is None:
             raise OptionalDependencyError(
                 "demucs",
-                "Demucs is required for stem separation. Install it with `pip install demucs`.",
+                "Demucs is required for stem separation. Please install it externally via 'pipx install demucs' (recommended for Python 3.12+), or 'pip install demucs'.",
             )
 
     def separate(
         self,
         audio_path: Path,
-        stems: Optional[Iterable[str]] = None,
-        output_directory: Optional[Path] = None,
+        stems: Iterable[str] | None = None,
+        output_directory: Path | None = None,
         clip_mode: str = "rescale",
-        jobs: Optional[int] = None,
-        two_stems: Optional[str] = None,  # v4: Split into 2 stems (e.g., "vocals")
+        jobs: int | None = None,
+        two_stems: str | None = None,  # v4: Split into 2 stems (e.g., "vocals")
     ) -> StemSeparationResult:
         """
         Run stem separation on an audio file and return the generated stems.
@@ -199,11 +199,12 @@ class StemSeparationEngine:
         target_dir = target_dir.expanduser().resolve()
         target_dir.mkdir(parents=True, exist_ok=True)
 
-        command: List[str] = [
-            sys.executable,
-            "-m",
-            "demucs",
-        ]
+        # Determine command base
+        if importlib.util.find_spec("demucs"):
+            command: list[str] = [sys.executable, "-m", "demucs"]
+        else:
+            # Fallback to external command (verified by _assert_dependency)
+            command: list[str] = ["demucs"]
 
         # Model selection (v3 vs v4 syntax)
         if self.is_v4:
@@ -267,7 +268,7 @@ class StemSeparationEngine:
             logger.error("Expected Demucs output directory not found: %s", track_dir)
             raise FileNotFoundError(f"Demucs output not found at {track_dir}")
 
-        stem_map: Dict[str, Path] = {}
+        stem_map: dict[str, Path] = {}
         for stem in _DEFAULT_STEMS:
             stem_path = track_dir / f"{stem}.wav"
             if stem_path.exists():
@@ -285,11 +286,11 @@ class StemSeparationEngine:
 
     async def batch_separate(
         self,
-        audio_paths: List[Path],
-        output_directory: Optional[Path] = None,
+        audio_paths: list[Path],
+        output_directory: Path | None = None,
         max_concurrent: int = 1,
-        progress_callback: Optional[Callable[[int, int], None]] = None,
-    ) -> List[StemSeparationResult]:
+        progress_callback: Callable[[int, int], None] | None = None,
+    ) -> list[StemSeparationResult]:
         """
         Separate multiple audio files with optional concurrency control.
 
@@ -351,10 +352,10 @@ class StemSeparationEngine:
 
     def batch_separate_sync(
         self,
-        audio_paths: List[Path],
-        output_directory: Optional[Path] = None,
-        progress_callback: Optional[Callable[[int, int], None]] = None,
-    ) -> List[StemSeparationResult]:
+        audio_paths: list[Path],
+        output_directory: Path | None = None,
+        progress_callback: Callable[[int, int], None] | None = None,
+    ) -> list[StemSeparationResult]:
         """
         Synchronous wrapper for batch_separate (blocks until complete).
 

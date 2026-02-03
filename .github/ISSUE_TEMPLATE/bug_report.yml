@@ -1,0 +1,109 @@
+name: Bug Report
+description: Report a bug to help us improve SampleMind AI
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug! Please fill out the details below to help us identify and fix the issue.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of the bug
+      placeholder: |
+        Describe what went wrong...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Go to...
+        2. Click on...
+        3. See error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should happen instead?
+      placeholder: "The feature should..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: "Instead, it..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform/Environment
+      description: Where did you encounter this bug?
+      options:
+        - CLI (Linux)
+        - CLI (macOS)
+        - CLI (Windows)
+        - Web UI (Chrome)
+        - Web UI (Firefox)
+        - Web UI (Safari)
+        - Web UI (Edge)
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: What version of SampleMind AI are you using?
+      placeholder: "v2.3.0-beta"
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots/Video (Optional)
+      description: If applicable, add screenshots or a screen recording
+      placeholder: "Paste images or video links here"
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs (Optional)
+      description: |
+        Paste any error messages or logs here
+        Use CLI: `samplemind --debug` for verbose logging
+        Use Web: Check browser console (F12 → Console tab)
+      placeholder: "Paste error logs here"
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context (Optional)
+      description: Any other context about the problem?
+      placeholder: "Any additional information..."
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before Submitting
+      options:
+        - label: I've searched for similar issues and didn't find any
+          required: true
+        - label: I'm using the latest version of SampleMind AI
+          required: true
+        - label: I've provided clear steps to reproduce the issue
+          required: true
