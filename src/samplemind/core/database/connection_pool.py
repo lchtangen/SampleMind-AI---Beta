@@ -136,12 +136,12 @@ class DatabaseConnectionPool:
         """Register SQLAlchemy event listeners for monitoring"""
         
         @event.listens_for(self.engine.sync_engine, "before_cursor_execute")
-        def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+        def before_cursor_execute(conn: Any, cursor: Any, statement: Any, parameters: Any, context: Any, executemany: Any) -> None:
             """Track query start time"""
             conn.info.setdefault("query_start_time", []).append(time.time())
         
         @event.listens_for(self.engine.sync_engine, "after_cursor_execute")
-        def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+        def after_cursor_execute(conn: Any, cursor: Any, statement: Any, parameters: Any, context: Any, executemany: Any) -> None:
             """Track query execution time"""
             start_times = conn.info.get("query_start_time", [])
             if start_times:
@@ -171,7 +171,7 @@ class DatabaseConnectionPool:
                         self.query_stats = self.query_stats[-100:]
         
         @event.listens_for(self.engine.sync_engine, "connect")
-        def receive_connect(dbapi_conn, connection_record):
+        def receive_connect(dbapi_conn: Any, connection_record: Any) -> None:
             """Configure connection on creation"""
             logger.debug("New database connection established")
             
@@ -184,12 +184,12 @@ class DatabaseConnectionPool:
             cursor.close()
         
         @event.listens_for(self.engine.sync_engine, "checkout")
-        def receive_checkout(dbapi_conn, connection_record, connection_proxy):
+        def receive_checkout(dbapi_conn: Any, connection_record: Any, connection_proxy: Any) -> None:
             """Track connection checkout"""
             logger.debug(f"Connection checked out: {id(dbapi_conn)}")
         
         @event.listens_for(self.engine.sync_engine, "checkin")
-        def receive_checkin(dbapi_conn, connection_record):
+        def receive_checkin(dbapi_conn: Any, connection_record: Any) -> None:
             """Track connection checkin"""
             logger.debug(f"Connection checked in: {id(dbapi_conn)}")
     
