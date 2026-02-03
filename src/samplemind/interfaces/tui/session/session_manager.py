@@ -60,7 +60,7 @@ class SessionSnapshot:
 class SessionManager:
     """Manages session saving and restoration"""
 
-    def __init__(self, session_dir: Optional[str] = None):
+    def __init__(self, session_dir: Optional[str] = None) -> None:
         """
         Initialize session manager
 

@@ -51,7 +51,7 @@ class NotificationManager:
     - Batch notification support
     """
 
-    def __init__(self, enable_desktop: bool = True, enable_terminal: bool = True):
+    def __init__(self, enable_desktop: bool = True, enable_terminal: bool = True) -> None:
         """
         Initialize notification manager.
 

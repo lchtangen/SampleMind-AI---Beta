@@ -146,11 +146,11 @@ def output_result(
 class ProgressTracker:
     """Context manager for progress tracking"""
 
-    def __init__(self, description: str = "Processing"):
+    def __init__(self, description: str = "Processing") -> None:
         self.description = description
         self.progress = None
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         self.progress = Progress(
             SpinnerColumn(),
             TextColumn(f"[progress.description]{self.description}[/progress.description]"),
@@ -159,7 +159,7 @@ class ProgressTracker:
         self.progress.__enter__()
         return self.progress
 
-    def __exit__(self, *args):
+    def __exit__(self, *args) -> None:
         self.progress.__exit__(*args)
 
 
@@ -220,7 +220,7 @@ T = TypeVar('T')
 def async_command(func: Callable[..., T]) -> Callable[..., T]:
     """Decorator to handle async commands"""
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args, **kwargs) -> None:
         """Wrapper for async command execution"""
         if asyncio.iscoroutinefunction(func):
             return asyncio.run(func(*args, **kwargs))
@@ -231,7 +231,7 @@ def async_command(func: Callable[..., T]) -> Callable[..., T]:
 def with_error_handling(func: Callable[..., T]) -> Callable[..., T]:
     """Decorator to add error handling to commands"""
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args, **kwargs) -> None:
         """Wrapper with error handling"""
         try:
             return func(*args, **kwargs)
@@ -249,7 +249,7 @@ def with_progress(description: str = "Processing"):
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         """Decorator wrapper"""
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> None:
             """Wrapper with progress tracking"""
             with ProgressTracker(description):
                 return func(*args, **kwargs)

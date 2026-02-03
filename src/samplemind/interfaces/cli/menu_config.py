@@ -38,7 +38,7 @@ class MenuConfigManager:
     CONFIG_DIR = Path.home() / ".samplemind" / "config"
     PREFERENCES_FILE = CONFIG_DIR / "menu_preferences.json"
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize configuration manager"""
         self.config_dir = self.CONFIG_DIR
         self.config_dir.mkdir(parents=True, exist_ok=True)
@@ -152,7 +152,7 @@ class MenuConfigManager:
 class MenuStateManager:
     """Manages current menu state during runtime"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize state manager"""
         self.menu_stack: list = []
         self.current_menu = "main"

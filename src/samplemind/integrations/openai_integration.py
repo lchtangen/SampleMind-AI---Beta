@@ -89,7 +89,7 @@ class OpenAIMusicAnalysis:
 class AdvancedMusicPromptEngine:
     """Advanced prompt engineering for music production"""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.base_prompts = self._load_base_prompts()
         self.context_enhancers = self._load_context_enhancers()
     
@@ -495,7 +495,7 @@ class OpenAIMusicProducer:
         key_string = json.dumps(key_data, sort_keys=True)
         return hashlib.md5(key_string.encode()).hexdigest()
     
-    def _update_usage_stats(self, tokens_used: int, response_time: float):
+    def _update_usage_stats(self, tokens_used: int, response_time: float) -> None:
         """Update usage statistics"""
         self.usage_stats['total_requests'] += 1
         self.usage_stats['total_tokens'] += tokens_used

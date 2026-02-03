@@ -198,7 +198,7 @@ class TagConfidence:
 class TagVocabulary:
     """Manages tag vocabulary and validation"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.genres = set(GENRES)
         self.moods = set(MOODS)
         self.instruments = set(INSTRUMENTS)

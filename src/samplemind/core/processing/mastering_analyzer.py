@@ -77,7 +77,7 @@ class MasteringAnalysis:
 class MasteringAnalyzer:
     """Comprehensive mastering analysis engine"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.loudness_analyzer = LoudnessAnalyzer()
 
     def analyze(

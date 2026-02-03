@@ -84,7 +84,7 @@ class BatchScreen(Screen):
     is_processing: reactive[bool] = reactive(False)
     analysis_level: reactive[str] = reactive("STANDARD")
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize batch screen"""
         super().__init__()
         self.audio_files: List[str] = []

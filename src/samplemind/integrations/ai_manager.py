@@ -135,7 +135,7 @@ ANALYSIS_ROUTING = {
 class AILoadBalancer:
     """Intelligent load balancing across AI providers"""
     
-    def __init__(self, providers: List[AIProviderConfig]):
+    def __init__(self, providers: List[AIProviderConfig]) -> None:
         self.providers = {p.provider: p for p in providers}
         self.request_counts = {p.provider: 0 for p in providers}
         self.last_request_time = {p.provider: 0 for p in providers}
@@ -192,7 +192,7 @@ class AILoadBalancer:
         
         return self.request_counts[provider.provider] < provider.max_requests_per_minute
     
-    def _update_request_count(self, provider: AIProvider):
+    def _update_request_count(self, provider: AIProvider) -> None:
         """Update request count for rate limiting"""
         self.request_counts[provider] += 1
         self.last_request_time[provider] = time.time()
@@ -206,7 +206,7 @@ class SampleMindAIManager:
     cost optimization, and performance monitoring.
     """
     
-    def __init__(self, config_path: Optional[Path] = None):
+    def __init__(self, config_path: Optional[Path] = None) -> None:
         self.config_path = config_path or Path.home() / ".samplemind" / "config" / "ai_config.json"
         self.providers: Dict[AIProvider, Any] = {}  # Will hold actual provider instances
         self.provider_configs: Dict[AIProvider, AIProviderConfig] = {}
@@ -227,7 +227,7 @@ class SampleMindAIManager:
         
         logger.info(f"🤖 SampleMind AI Manager initialized with {len(self.providers)} providers")
     
-    def _initialize_providers(self):
+    def _initialize_providers(self) -> None:
         """Initialize AI providers from config or environment"""
         
         # Try to load from config file first
@@ -241,7 +241,7 @@ class SampleMindAIManager:
         if self.provider_configs:
             self.load_balancer = AILoadBalancer(list(self.provider_configs.values()))
     
-    def _initialize_from_env(self):
+    def _initialize_from_env(self) -> None:
         """Initialize providers from environment variables"""
         from dotenv import load_dotenv
         load_dotenv()
@@ -315,7 +315,7 @@ class SampleMindAIManager:
         # Save configuration
         self._save_config()
     
-    def _load_from_config(self):
+    def _load_from_config(self) -> None:
         """Load provider configurations from JSON file"""
         try:
             with open(self.config_path, 'r') as f:
@@ -343,7 +343,7 @@ class SampleMindAIManager:
             logger.error(f"❌ Failed to load config: {e}")
             self._initialize_from_env()
     
-    def _save_config(self):
+    def _save_config(self) -> None:
         """Save current configuration to JSON file"""
         try:
             self.config_path.parent.mkdir(parents=True, exist_ok=True)
@@ -551,7 +551,7 @@ class SampleMindAIManager:
         }
         return mapping.get(analysis_type, OpenAIMusicAnalysisType.COMPREHENSIVE_ANALYSIS)
     
-    def _convert_to_google_type(self, analysis_type: AnalysisType):
+    def _convert_to_google_type(self, analysis_type: AnalysisType) -> Any:
         """Convert unified analysis type to Google AI type"""
         if not GOOGLE_AI_AVAILABLE:
             return None
@@ -610,7 +610,7 @@ class SampleMindAIManager:
             cost_estimate=openai_result.tokens_used * self.provider_configs[AIProvider.OPENAI].cost_per_token
         )
     
-    def _convert_google_result(self, google_result) -> UnifiedAnalysisResult:
+    def _convert_google_result(self, google_result: Any) -> UnifiedAnalysisResult:
         """Convert Google AI result to unified format"""
         if not GOOGLE_AI_AVAILABLE:
             raise RuntimeError("Google AI not available")
@@ -751,14 +751,14 @@ class SampleMindAIManager:
             'providers_enabled': sum(1 for c in self.provider_configs.values() if c.enabled)
         }
     
-    def set_provider_enabled(self, provider: AIProvider, enabled: bool):
+    def set_provider_enabled(self, provider: AIProvider, enabled: bool) -> None:
         """Enable or disable a provider"""
         if provider in self.provider_configs:
             self.provider_configs[provider].enabled = enabled
             logger.info(f"🔧 Provider {provider.value} {'enabled' if enabled else 'disabled'}")
             self._save_config()
     
-    def set_provider_priority(self, provider: AIProvider, priority: int):
+    def set_provider_priority(self, provider: AIProvider, priority: int) -> None:
         """Set provider priority (lower = higher priority)"""
         if provider in self.provider_configs:
             self.provider_configs[provider].priority = priority

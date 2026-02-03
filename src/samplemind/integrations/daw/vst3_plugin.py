@@ -61,7 +61,7 @@ class VST3SampleData:
     ai_tags: List[str] = None
     quality_score: float = 0.0
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.ai_tags is None:
             self.ai_tags = []
 
@@ -95,7 +95,7 @@ class VST3Plugin:
         VST3ParameterID.VERBOSE_LOGGING.value: "Verbose Logging",
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize VST3 plugin"""
         self.is_active = False
         self.process_context = VST3ProcessContext()

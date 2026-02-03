@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class AutoTagger:
     """Automatically tag audio samples based on AI classification."""
 
-    def __init__(self, confidence_threshold: float = 0.60):
+    def __init__(self, confidence_threshold: float = 0.60) -> None:
         """Initialize auto-tagger.
 
         Args:

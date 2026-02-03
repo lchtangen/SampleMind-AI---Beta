@@ -74,7 +74,7 @@ class SearchScreen(Screen):
     current_query: reactive[str] = reactive("")
     is_searching: reactive[bool] = reactive(False)
 
-    def __init__(self, initial_query: str = "", sample_data: Optional[List[Dict]] = None):
+    def __init__(self, initial_query: str = "", sample_data: Optional[List[Dict]] = None) -> None:
         """
         Initialize search screen
 

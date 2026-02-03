@@ -318,7 +318,7 @@ class AdvancedFeatureExtractor:
     with automatic caching and performance optimizations.
     """
 
-    def __init__(self, sample_rate: int = 44100, use_cache: bool = True):
+    def __init__(self, sample_rate: int = 44100, use_cache: bool = True) -> None:
         """
         Initialize the feature extractor.
 
@@ -700,7 +700,7 @@ class AudioEngine:
     Designed to integrate seamlessly with FL Studio and other DAWs.
     """
 
-    def __init__(self, max_workers: int = 4, cache_size: int = 1000):
+    def __init__(self, max_workers: int = 4, cache_size: int = 1000) -> None:
         self.max_workers = max_workers
         self.cache_size = cache_size
         self.feature_cache = {}

@@ -21,7 +21,7 @@ class ModernFilePicker:
     Only opens ONE dialog at a time, never multiple
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.os_type = platform.system().lower()
         self._has_zenity = shutil.which('zenity') is not None
 

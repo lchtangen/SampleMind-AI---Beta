@@ -48,7 +48,7 @@ class GrooveTemplate:
             "description": self.description,
         }
 
-    def save(self, path: Path):
+    def save(self, path: Path) -> None:
         """Save groove to JSON file"""
         path.write_text(json.dumps(self.to_dict(), indent=2))
         logger.info(f"Groove saved to {path}")
@@ -67,7 +67,7 @@ class GrooveTemplate:
 class GrooveExtractor:
     """Extracts groove templates from audio"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.window_size = 2048
         self.hop_length = 512
 

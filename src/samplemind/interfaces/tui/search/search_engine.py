@@ -66,7 +66,7 @@ class SearchFilter:
 class SearchQuery:
     """Parsed search query"""
 
-    def __init__(self, query_string: str = ""):
+    def __init__(self, query_string: str = "") -> None:
         """Initialize search query from string"""
         self.query_string = query_string
         self.filters: List[SearchFilter] = []
@@ -148,7 +148,7 @@ class SearchQuery:
 class SearchEngine:
     """Advanced search engine with fuzzy matching and filters"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize search engine"""
         self.saved_searches: Dict[str, SearchQuery] = {}
 
@@ -279,7 +279,7 @@ class SearchEngine:
 class QueryBuilder:
     """Helper class to build queries programmatically"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize query builder"""
         self.conditions: List[str] = []
 

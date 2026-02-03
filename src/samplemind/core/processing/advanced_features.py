@@ -54,7 +54,7 @@ class AdvancedAudioFeatures:
 class AdvancedFeatureExtractor:
     """Extract advanced audio features for detailed analysis"""
 
-    def __init__(self, sample_rate: int = 44100):
+    def __init__(self, sample_rate: int = 44100) -> None:
         self.sample_rate = sample_rate
 
     async def extract(self, audio: np.ndarray) -> AdvancedAudioFeatures:

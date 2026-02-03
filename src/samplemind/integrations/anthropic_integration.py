@@ -400,7 +400,7 @@ Provide your response as a structured JSON object with these keys:
             confidence_score=data.get("confidence_score", 0.85)
         )
     
-    def _update_stats(self, tokens_used: int, processing_time: float, success: bool):
+    def _update_stats(self, tokens_used: int, processing_time: float, success: bool) -> None:
         """Update performance statistics"""
         self.stats['total_analyses'] += 1
         
@@ -440,7 +440,7 @@ Provide your response as a structured JSON object with these keys:
             )
         }
     
-    def shutdown(self):
+    def shutdown(self) -> None:
         """Cleanup resources"""
         logger.info("🔄 Anthropic Music Producer shutting down")
         logger.info(f"📊 Final stats: {self.get_performance_stats()}")

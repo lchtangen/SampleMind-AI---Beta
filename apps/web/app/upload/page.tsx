@@ -3,11 +3,13 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Upload, File, X, CheckCircle, AlertCircle, LogOut, User } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Upload, File, X, CheckCircle, AlertCircle, LogOut, User, HardDrive } from 'lucide-react';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useAudio } from '@/hooks/useAudio';
 import { useNotification } from '@/contexts/NotificationContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { UploadAreaSkeleton, BatchQueueItemSkeleton } from '@/components/ui/SkeletonLoaders';
 
 interface UploadedFile {
   id: string;
@@ -125,38 +127,33 @@ function UploadPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[hsl(220,15%,8%)] to-[hsl(220,12%,12%)]">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-950 to-black">
       {/* Header */}
-      <header className="border-b border-white/10 backdrop-blur-md bg-black/20">
+      <header className="border-b border-slate-700/50 backdrop-blur-md bg-slate-900/50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center space-x-3">
-              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-[hsl(220,90%,60%)] to-[hsl(270,85%,65%)] flex items-center justify-center">
+              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
                 <span className="text-white font-bold text-xl">SM</span>
               </div>
-              <h1 className="text-2xl font-bold text-[hsl(0,0%,98%)]">
-                SampleMind AI
-              </h1>
+              <h1 className="text-2xl font-bold text-slate-100">SampleMind AI</h1>
             </Link>
-            
+
             <nav className="flex items-center space-x-6">
-              <Link href="/dashboard" className="text-[hsl(220,10%,65%)] hover:text-[hsl(0,0%,98%)] transition">
+              <Link href="/dashboard" className="text-slate-400 hover:text-slate-300 transition">
                 Dashboard
               </Link>
-              <Link href="/upload" className="text-[hsl(220,90%,60%)] font-medium">
+              <Link href="/upload" className="text-cyan-400 font-medium">
                 Upload
               </Link>
-              <Link href="/library" className="text-[hsl(220,10%,65%)] hover:text-[hsl(0,0%,98%)] transition">
+              <Link href="/library" className="text-slate-400 hover:text-slate-300 transition">
                 Library
               </Link>
-              <Link href="/gallery" className="text-[hsl(220,10%,65%)] hover:text-[hsl(0,0%,98%)] transition">
-                Gallery
-              </Link>
-              
-              <div className="flex items-center space-x-3 ml-6 pl-6 border-l border-white/10">
+
+              <div className="flex items-center space-x-3 ml-6 pl-6 border-l border-slate-700/50">
                 <div className="flex items-center space-x-2">
-                  <User className="h-4 w-4 text-[hsl(220,10%,65%)]" />
-                  <span className="text-[hsl(220,10%,65%)] text-sm">{user?.email}</span>
+                  <User className="h-4 w-4 text-slate-400" />
+                  <span className="text-slate-400 text-sm">{user?.email}</span>
                 </div>
                 <button
                   onClick={async () => {
@@ -164,10 +161,10 @@ function UploadPageContent() {
                     addNotification('success', 'Logged out successfully');
                     router.push('/');
                   }}
-                  className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 transition text-sm"
+                  className="flex items-center space-x-2 px-3 py-1.5 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition text-sm"
                 >
-                  <LogOut className="h-4 w-4 text-[hsl(220,10%,65%)]" />
-                  <span className="text-[hsl(220,10%,65%)]">Logout</span>
+                  <LogOut className="h-4 w-4" />
+                  <span>Logout</span>
                 </button>
               </div>
             </nav>
@@ -179,17 +176,24 @@ function UploadPageContent() {
       <main className="container mx-auto px-6 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Title */}
-          <div className="mb-8">
-            <h2 className="text-4xl font-bold text-[hsl(0,0%,98%)] mb-2">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <h2 className="text-4xl font-bold text-slate-100 mb-2">
               Upload Audio Files
             </h2>
-            <p className="text-[hsl(220,10%,65%)]">
-              Drag and drop your audio files or click to browse
+            <p className="text-slate-400">
+              Drag and drop your audio files or click to browse. Batch upload up to 100 files at once.
             </p>
-          </div>
+          </motion.div>
 
           {/* Drop Zone */}
-          <div
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
@@ -198,17 +202,21 @@ function UploadPageContent() {
               isDragging ? 'scale-105' : ''
             }`}
           >
-            <div className={`absolute inset-0 rounded-2xl opacity-20 transition blur-2xl ${
-              isDragging
-                ? 'bg-gradient-to-r from-[hsl(180,95%,55%)] to-[hsl(220,90%,60%)] opacity-40'
-                : 'bg-gradient-to-r from-[hsl(220,90%,60%)] to-[hsl(270,85%,65%)]'
-            }`}></div>
-            
-            <div className={`relative backdrop-blur-md bg-white/5 border-2 border-dashed rounded-2xl p-12 transition ${
-              isDragging
-                ? 'border-[hsl(180,95%,55%)] bg-white/10'
-                : 'border-white/20 group-hover:border-[hsl(220,90%,60%)]/50'
-            }`}>
+            <div
+              className={`absolute inset-0 rounded-2xl opacity-20 transition blur-2xl ${
+                isDragging
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-500 opacity-40'
+                  : 'bg-gradient-to-r from-cyan-500 to-blue-500'
+              }`}
+            ></div>
+
+            <div
+              className={`relative backdrop-blur-md bg-slate-800/30 border-2 border-dashed rounded-2xl p-12 transition ${
+                isDragging
+                  ? 'border-cyan-400 bg-slate-800/50'
+                  : 'border-slate-600 group-hover:border-cyan-500/50'
+              }`}
+            >
               <input
                 ref={fileInputRef}
                 type="file"
@@ -217,116 +225,133 @@ function UploadPageContent() {
                 onChange={handleFileInput}
                 className="hidden"
               />
-              
+
               <div className="text-center">
-                <div className="inline-flex items-center justify-center h-20 w-20 rounded-full bg-gradient-to-br from-[hsl(220,90%,60%)] to-[hsl(270,85%,65%)] mb-6">
+                <div className="inline-flex items-center justify-center h-20 w-20 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 mb-6">
                   <Upload className="h-10 w-10 text-white" />
                 </div>
-                
-                <h3 className="text-2xl font-bold text-[hsl(0,0%,98%)] mb-2">
+
+                <h3 className="text-2xl font-bold text-slate-100 mb-2">
                   {isDragging ? 'Drop files here' : 'Upload your audio files'}
                 </h3>
-                
-                <p className="text-[hsl(220,10%,65%)] mb-4">
+
+                <p className="text-slate-400 mb-4">
                   Drag and drop files or click to browse
                 </p>
-                
-                <p className="text-sm text-[hsl(220,10%,65%)]">
-                  Supported formats: MP3, WAV, FLAC, AIFF, OGG (Max 100MB)
+
+                <p className="text-sm text-slate-500">
+                  Supported: MP3, WAV, FLAC, AIFF, OGG (Max 100MB per file)
                 </p>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Uploaded Files List */}
           {files.length > 0 && (
-            <div className="mt-8">
-              <h3 className="text-2xl font-bold text-[hsl(0,0%,98%)] mb-4">
-                Uploaded Files ({files.length})
-              </h3>
-              
-              <div className="space-y-3">
-                {files.map((uploadedFile) => (
-                  <div
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="mt-8"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-slate-100">Queue ({files.length})</h3>
+                <div className="flex items-center space-x-2 text-sm text-slate-400">
+                  <HardDrive className="h-4 w-4" />
+                  <span>
+                    {(
+                      files.reduce((acc, f) => acc + f.file.size, 0) / (1024 * 1024)
+                    ).toFixed(1)}{' '}
+                    MB total
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                {files.map((uploadedFile, index) => (
+                  <motion.div
                     key={uploadedFile.id}
-                    className="relative backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-4 hover:border-[hsl(220,90%,60%)]/30 transition"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="relative backdrop-blur-sm bg-slate-800/30 border border-slate-700/50 rounded-lg p-4 hover:border-cyan-500/30 transition group"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-3 flex-1 min-w-0">
-                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-[hsl(220,90%,60%)] to-[hsl(270,85%,65%)] flex items-center justify-center flex-shrink-0">
+                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center flex-shrink-0">
                           <File className="h-5 w-5 text-white" />
                         </div>
-                        
+
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-[hsl(0,0%,98%)] truncate">
+                          <p className="font-medium text-slate-200 truncate">
                             {uploadedFile.file.name}
                           </p>
-                          <p className="text-sm text-[hsl(220,10%,65%)]">
+                          <p className="text-sm text-slate-500">
                             {formatFileSize(uploadedFile.file.size)}
                           </p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center space-x-3">
                         {uploadedFile.status === 'uploading' && (
-                          <span className="text-sm text-[hsl(220,90%,60%)]">
+                          <span className="text-sm text-cyan-400 font-medium min-w-fit">
                             {uploadedFile.progress}%
                           </span>
                         )}
-                        
+
                         {uploadedFile.status === 'completed' && (
-                          <CheckCircle className="h-5 w-5 text-[hsl(180,95%,55%)]" />
+                          <CheckCircle className="h-5 w-5 text-green-400" />
                         )}
-                        
+
                         {uploadedFile.status === 'error' && (
-                          <AlertCircle className="h-5 w-5 text-[hsl(320,90%,60%)]" />
+                          <AlertCircle className="h-5 w-5 text-red-400" />
                         )}
-                        
+
                         <button
                           onClick={() => removeFile(uploadedFile.id)}
-                          className="h-8 w-8 rounded-lg bg-white/5 border border-white/10 hover:border-[hsl(320,90%,60%)]/50 hover:bg-[hsl(320,90%,60%)]/10 flex items-center justify-center transition"
+                          className="h-8 w-8 rounded-lg bg-slate-700/30 border border-slate-600 hover:border-red-500/50 hover:bg-red-500/10 flex items-center justify-center transition opacity-0 group-hover:opacity-100"
                         >
-                          <X className="h-4 w-4 text-[hsl(220,10%,65%)] hover:text-[hsl(320,90%,60%)]" />
+                          <X className="h-4 w-4 text-slate-400 hover:text-red-400" />
                         </button>
                       </div>
                     </div>
-                    
+
                     {/* Progress Bar */}
                     {uploadedFile.status === 'uploading' && (
-                      <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-[hsl(220,90%,60%)] to-[hsl(270,85%,65%)] transition-all duration-300"
-                          style={{ width: `${uploadedFile.progress}%` }}
-                        ></div>
+                      <div className="h-1 bg-slate-700/50 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${uploadedFile.progress}%` }}
+                          className="h-full bg-gradient-to-r from-cyan-500 to-blue-500"
+                          transition={{ duration: 0.3 }}
+                        />
                       </div>
                     )}
-                    
+
                     {uploadedFile.status === 'error' && uploadedFile.error && (
-                      <p className="text-sm text-[hsl(320,90%,60%)] mt-2">
-                        {uploadedFile.error}
-                      </p>
+                      <p className="text-sm text-red-400 mt-2">{uploadedFile.error}</p>
                     )}
-                  </div>
+                  </motion.div>
                 ))}
               </div>
-              
+
               {/* Actions */}
               <div className="flex justify-end space-x-4 mt-6">
                 <button
                   onClick={() => setFiles([])}
-                  className="px-6 py-3 rounded-lg backdrop-blur-sm bg-white/5 border border-white/10 hover:border-white/20 text-[hsl(0,0%,98%)] font-medium transition"
+                  className="px-6 py-3 rounded-lg backdrop-blur-sm bg-slate-800/30 border border-slate-700 hover:border-slate-600 text-slate-300 font-medium transition"
                 >
                   Clear All
                 </button>
-                
+
                 <Link
                   href="/library"
-                  className="px-6 py-3 rounded-lg bg-gradient-to-r from-[hsl(220,90%,60%)] to-[hsl(270,85%,65%)] text-white font-medium hover:shadow-lg hover:shadow-[hsl(220,90%,60%)]/50 transition inline-block"
+                  className="px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-medium hover:shadow-lg hover:shadow-cyan-500/50 transition inline-block"
                 >
                   View Library
                 </Link>
               </div>
-            </div>
+            </motion.div>
           )}
         </div>
       </main>

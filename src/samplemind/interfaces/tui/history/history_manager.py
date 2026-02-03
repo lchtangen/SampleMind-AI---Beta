@@ -50,7 +50,7 @@ class HistoryEntry:
 class HistoryManager:
     """Manages operation history for undo/redo"""
 
-    def __init__(self, max_history: int = 100):
+    def __init__(self, max_history: int = 100) -> None:
         """
         Initialize history manager
 

@@ -70,7 +70,7 @@ class LibraryStats:
     average_file_size: float = 0.0
     average_duration: float = 0.0
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.file_formats is None:
             self.file_formats = defaultdict(int)
 
@@ -97,7 +97,7 @@ class LibraryBrowser:
     AUDIO_FORMATS = {".wav", ".mp3", ".flac", ".ogg", ".aac", ".m4a", ".aiff", ".wv"}
     DUPLICATE_CHECK_SIZE = 8192  # Read first 8KB for fast checking
 
-    def __init__(self, root_path: Optional[str] = None):
+    def __init__(self, root_path: Optional[str] = None) -> None:
         """
         Initialize library browser
 

@@ -44,7 +44,7 @@ class DatabaseBackup:
     Supports: Local filesystem, AWS S3, Google Cloud Storage
     """
     
-    def __init__(self, config: BackupConfig):
+    def __init__(self, config: BackupConfig) -> None:
         self.config = config
         logger.info(f"Backup system initialized: dir={config.backup_dir}")
     

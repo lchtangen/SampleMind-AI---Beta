@@ -279,12 +279,12 @@ class ErrorHandling:
         self.on_error = on_error
         self.suppress = suppress
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         """Enter context."""
         logger.debug(f"Starting operation: {self.operation}")
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """Exit context and handle errors."""
         if exc_type is None:
             logger.debug(f"Operation completed: {self.operation}")

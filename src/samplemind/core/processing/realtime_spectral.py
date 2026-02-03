@@ -212,7 +212,7 @@ class RealtimeSpectral:
 class PitchDetector:
     """Efficient pitch detection for real-time use"""
 
-    def __init__(self, sample_rate: int):
+    def __init__(self, sample_rate: int) -> None:
         self.sample_rate = sample_rate
         self.min_freq = 50.0  # Minimum detectable frequency (Hz)
         self.max_freq = 4000.0  # Maximum detectable frequency (Hz)
@@ -306,7 +306,7 @@ class PitchDetector:
 class SpectrumAnalyzer:
     """Higher-level spectrum analysis with multiple features"""
 
-    def __init__(self, sample_rate: int = 44100):
+    def __init__(self, sample_rate: int = 44100) -> None:
         self.sample_rate = sample_rate
         self.spectral = RealtimeSpectral(sample_rate)
 

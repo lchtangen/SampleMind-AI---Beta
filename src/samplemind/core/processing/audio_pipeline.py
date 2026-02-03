@@ -54,7 +54,7 @@ class AudioPipeline:
     operations in a pipeline fashion.
     """
     
-    def __init__(self, target_sr: int = 44100, mono: bool = True):
+    def __init__(self, target_sr: int = 44100, mono: bool = True) -> None:
         """
         Initialize the audio pipeline.
         

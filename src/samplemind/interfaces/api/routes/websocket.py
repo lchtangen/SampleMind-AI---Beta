@@ -18,7 +18,7 @@ class ConnectionManager:
     Attributes:
         active_connections: Dictionary mapping client IDs to WebSocket instances
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self.active_connections: Dict[str, WebSocket] = {}
     
     async def connect(self, client_id: str, websocket: WebSocket):
@@ -26,7 +26,7 @@ class ConnectionManager:
         self.active_connections[client_id] = websocket
         logger.info(f"Client {client_id} connected")
     
-    def disconnect(self, client_id: str):
+    def disconnect(self, client_id: str) -> None:
         """Disconnect a client and remove from active connections.
         
         Args:

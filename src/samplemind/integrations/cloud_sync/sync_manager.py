@@ -38,7 +38,7 @@ class SyncEvent:
 class OfflineQueue:
     """Manages offline operation queue"""
 
-    def __init__(self, max_size: int = 1000):
+    def __init__(self, max_size: int = 1000) -> None:
         self.queue: List[SyncEvent] = []
         self.max_size = max_size
 

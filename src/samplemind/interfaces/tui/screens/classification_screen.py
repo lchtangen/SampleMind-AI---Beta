@@ -86,7 +86,7 @@ class ClassificationScreen(Screen):
     total_files: reactive[int] = reactive(0)
     confidence_threshold: reactive[float] = reactive(0.60)
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize classification screen."""
         super().__init__()
         self.audio_files: List[str] = []

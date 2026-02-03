@@ -35,7 +35,7 @@ class ComparisonResult:
 class ComparisonEngine:
     """Engine for comparing audio analyses"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize comparison engine"""
         self.comparisons: List[ComparisonResult] = []
 

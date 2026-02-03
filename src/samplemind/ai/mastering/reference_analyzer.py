@@ -28,7 +28,7 @@ class MasteringProfile:
 class ReferenceAnalyzer:
     """Analyze reference tracks to extract mastering parameters."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize reference analyzer."""
         self.sample_rate = 44100
 

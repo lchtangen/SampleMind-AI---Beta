@@ -102,7 +102,7 @@ class GenerationManager:
     - AI providers (Gemini/Ollama) for intelligent suggestions
     """
 
-    def __init__(self, library_path: Optional[Path] = None):
+    def __init__(self, library_path: Optional[Path] = None) -> None:
         self.library_path = library_path
         self._neural_engine = None
         self._stem_engine = None

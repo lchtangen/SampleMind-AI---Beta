@@ -65,12 +65,12 @@ class DistributedAudioProcessor:
         # Initialize feature extractor with monitoring
         self.extractor = AdvancedFeatureExtractor(use_cache=use_cache)
     
-    def __enter__(self):
+    def __enter__(self) -> None:
         """Context manager entry."""
         self.start()
         return self
     
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """Context manager exit."""
         self.stop()
     

@@ -181,7 +181,7 @@ class FavoritesManager:
     - Collection export/import
     """
 
-    def __init__(self, storage_dir: str = ".samplemind/collections"):
+    def __init__(self, storage_dir: str = ".samplemind/collections") -> None:
         """
         Initialize favorites manager.
 

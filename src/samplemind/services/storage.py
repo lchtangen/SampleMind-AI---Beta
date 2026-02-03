@@ -51,7 +51,7 @@ class StorageProvider(abc.ABC):
 class LocalStorageProvider(StorageProvider):
     """Local filesystem 'cloud' storage (for testing/dev)"""
 
-    def __init__(self, root_dir: Path):
+    def __init__(self, root_dir: Path) -> None:
         self.root_dir = Path(root_dir).resolve()
         self.root_dir.mkdir(parents=True, exist_ok=True)
 
@@ -116,7 +116,7 @@ class LocalStorageProvider(StorageProvider):
 class MockS3StorageProvider(StorageProvider):
     """Mock S3 Provider (Skeleton)"""
 
-    def __init__(self, bucket_name: str, region: str = "us-east-1"):
+    def __init__(self, bucket_name: str, region: str = "us-east-1") -> None:
         self.bucket = bucket_name
         self.region = region
         logger.info(f"Initialized Mock S3 Provider: {bucket_name}")
@@ -147,7 +147,7 @@ class S3StorageProvider(StorageProvider):
     Requires: boto3, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
     """
 
-    def __init__(self, bucket_name: str, region: str = "us-east-1"):
+    def __init__(self, bucket_name: str, region: str = "us-east-1") -> None:
         try:
             import boto3
             from botocore.exceptions import ClientError

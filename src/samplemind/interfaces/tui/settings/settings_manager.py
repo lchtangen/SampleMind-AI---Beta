@@ -22,7 +22,7 @@ class SettingsManager:
     # Available export formats
     EXPORT_FORMATS = ["JSON", "CSV", "YAML", "Markdown"]
 
-    def __init__(self, user_id: Optional[str] = None):
+    def __init__(self, user_id: Optional[str] = None) -> None:
         """Initialize settings manager"""
         self.user_id = user_id or "default_user"
 

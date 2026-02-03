@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
 import {
   Search,
   Filter,
@@ -11,9 +13,19 @@ import {
   Play,
   Loader2,
   ChevronDown,
+  Music,
+  LogOut,
+  User,
+  Upload as UploadIcon,
+  ArrowLeft,
 } from 'lucide-react';
 import { useAudio } from '@/hooks/useAudio';
+import { useAuthContext } from '@/contexts/AuthContext';
+import { useNotification } from '@/contexts/NotificationContext';
+import { useRouter } from 'next/navigation';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { LibraryGridSkeleton } from '@/components/ui/SkeletonLoaders';
 
 interface AudioFile {
   file_id: string;
@@ -51,7 +63,10 @@ const formatDuration = (seconds: number): string => {
   return `${minutes}:${secs.toString().padStart(2, '0')}`;
 };
 
-export default function LibraryPage() {
+function LibraryPageContent() {
+  const router = useRouter();
+  const { user, logout } = useAuthContext();
+  const { addNotification } = useNotification();
   const { listAudio, deleteAudio } = useAudio();
   const [audioFiles, setAudioFiles] = useState<AudioFile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -136,22 +151,106 @@ export default function LibraryPage() {
   };
 
   if (loading && audioFiles.length === 0) {
-    return <LoadingSpinner />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-950 to-black">
+        <header className="border-b border-slate-700/50 backdrop-blur-md bg-slate-900/50">
+          <div className="container mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <Link href="/" className="flex items-center space-x-3">
+                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                  <span className="text-white font-bold text-xl">SM</span>
+                </div>
+                <h1 className="text-2xl font-bold text-slate-100">SampleMind AI</h1>
+              </Link>
+            </div>
+          </div>
+        </header>
+        <main className="container mx-auto px-6 py-8">
+          <LibraryGridSkeleton count={12} />
+        </main>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Library</h1>
-          <p className="text-slate-400">
-            {filteredFiles.length} sample{filteredFiles.length !== 1 ? 's' : ''}
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-950 to-black">
+      {/* Header */}
+      <header className="border-b border-slate-700/50 backdrop-blur-md bg-slate-900/50">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center space-x-3">
+              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                <span className="text-white font-bold text-xl">SM</span>
+              </div>
+              <h1 className="text-2xl font-bold text-slate-100">SampleMind AI</h1>
+            </Link>
+
+            <nav className="flex items-center space-x-6">
+              <Link href="/dashboard" className="text-slate-400 hover:text-slate-300 transition">
+                Dashboard
+              </Link>
+              <Link href="/upload" className="text-slate-400 hover:text-slate-300 transition">
+                Upload
+              </Link>
+              <Link href="/library" className="text-cyan-400 font-medium">
+                Library
+              </Link>
+
+              <div className="flex items-center space-x-3 ml-6 pl-6 border-l border-slate-700/50">
+                <div className="flex items-center space-x-2">
+                  <User className="h-4 w-4 text-slate-400" />
+                  <span className="text-slate-400 text-sm">{user?.email}</span>
+                </div>
+                <button
+                  onClick={async () => {
+                    await logout();
+                    addNotification('success', 'Logged out successfully');
+                    router.push('/');
+                  }}
+                  className="flex items-center space-x-2 px-3 py-1.5 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition text-sm"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            </nav>
+          </div>
         </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-6 py-8">
+        <div className="max-w-7xl">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-4xl font-bold text-slate-100 mb-2">Library</h2>
+                <p className="text-slate-400">
+                  {filteredFiles.length} sample{filteredFiles.length !== 1 ? 's' : ''} • {audioFiles.length} total
+                </p>
+              </div>
+              <Link
+                href="/upload"
+                className="flex items-center space-x-2 px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-medium hover:shadow-lg hover:shadow-cyan-500/50 transition"
+              >
+                <UploadIcon className="h-5 w-5" />
+                <span>Upload More</span>
+              </Link>
+            </div>
+          </motion.div>
 
         {/* Controls */}
-        <div className="mb-8 space-y-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8 space-y-4"
+        >
           {/* Top Bar */}
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             {/* Search */}
@@ -159,34 +258,36 @@ export default function LibraryPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search samples..."
+                placeholder="Search samples... (Cmd+K)"
                 value={filters.search}
                 onChange={(e) => {
                   setFilters({ ...filters, search: e.target.value });
                   setPage(1);
                 }}
-                className="w-full pl-10 pr-4 py-2 rounded-lg bg-slate-700/50 border border-slate-600 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-slate-800/30 border border-slate-700/50 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 transition-colors"
               />
             </div>
 
             {/* View Toggle */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 bg-slate-800/30 border border-slate-700/50 rounded-lg p-1">
               <button
                 onClick={() => setFilters({ ...filters, viewMode: 'grid' })}
-                className={`p-2 rounded-lg transition-colors ${
+                title="Grid view"
+                className={`p-2 rounded transition-all ${
                   filters.viewMode === 'grid'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-slate-700/50 text-slate-400 hover:text-white'
+                    ? 'bg-cyan-500/20 text-cyan-400'
+                    : 'text-slate-400 hover:text-slate-300'
                 }`}
               >
                 <Grid3x3 className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setFilters({ ...filters, viewMode: 'list' })}
-                className={`p-2 rounded-lg transition-colors ${
+                title="List view"
+                className={`p-2 rounded transition-all ${
                   filters.viewMode === 'list'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-slate-700/50 text-slate-400 hover:text-white'
+                    ? 'bg-cyan-500/20 text-cyan-400'
+                    : 'text-slate-400 hover:text-slate-300'
                 }`}
               >
                 <List className="w-5 h-5" />
@@ -196,7 +297,7 @@ export default function LibraryPage() {
             {/* Filter Button */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-700/50 border border-slate-600 text-slate-300 hover:text-white hover:border-slate-500 transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-800/30 border border-slate-700/50 text-slate-300 hover:text-white hover:border-cyan-500/50 transition-colors"
             >
               <Filter className="w-4 h-4" />
               Filters
@@ -206,20 +307,23 @@ export default function LibraryPage() {
 
           {/* Filter Panel */}
           {showFilters && (
-            <div className="p-4 rounded-lg bg-slate-800/50 backdrop-blur border border-slate-700/50 space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="p-4 rounded-lg bg-slate-800/30 backdrop-blur border border-slate-700/50 space-y-4"
+            >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Status Filter */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Status
-                  </label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Status</label>
                   <select
                     value={filters.status}
                     onChange={(e) => {
                       setFilters({ ...filters, status: e.target.value as any });
                       setPage(1);
                     }}
-                    className="w-full px-3 py-2 rounded-lg bg-slate-700/50 border border-slate-600 text-white focus:outline-none focus:border-blue-500/50"
+                    className="w-full px-3 py-2 rounded-lg bg-slate-700/30 border border-slate-700/50 text-white focus:outline-none focus:border-cyan-500/50 transition-colors"
                   >
                     <option value="all">All Files</option>
                     <option value="analyzed">Analyzed</option>
@@ -230,15 +334,13 @@ export default function LibraryPage() {
 
                 {/* Sort By */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Sort By
-                  </label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Sort By</label>
                   <select
                     value={filters.sortBy}
                     onChange={(e) => {
                       setFilters({ ...filters, sortBy: e.target.value as any });
                     }}
-                    className="w-full px-3 py-2 rounded-lg bg-slate-700/50 border border-slate-600 text-white focus:outline-none focus:border-blue-500/50"
+                    className="w-full px-3 py-2 rounded-lg bg-slate-700/30 border border-slate-700/50 text-white focus:outline-none focus:border-cyan-500/50 transition-colors"
                   >
                     <option value="recent">Most Recent</option>
                     <option value="name">Name (A-Z)</option>
@@ -247,74 +349,98 @@ export default function LibraryPage() {
                   </select>
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
 
         {/* Empty State */}
         {filteredFiles.length === 0 ? (
-          <div className="text-center py-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-12"
+          >
+            <Music className="h-16 w-16 mx-auto mb-4 text-slate-600" />
             <p className="text-slate-400 mb-4">
               {audioFiles.length === 0
                 ? 'No samples yet. Upload one to get started!'
                 : 'No samples match your filters.'}
             </p>
-          </div>
+            {audioFiles.length === 0 && (
+              <Link
+                href="/upload"
+                className="inline-flex items-center space-x-2 px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-medium hover:shadow-lg hover:shadow-cyan-500/50 transition"
+              >
+                <UploadIcon className="h-5 w-5" />
+                <span>Upload Your First Track</span>
+              </Link>
+            )}
+          </motion.div>
         ) : (
           <>
             {/* Grid View */}
             {filters.viewMode === 'grid' ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filteredFiles.map((file) => (
-                  <div
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ staggerChildren: 0.05 }}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+              >
+                {filteredFiles.map((file, index) => (
+                  <motion.div
                     key={file.file_id}
-                    className="group relative rounded-lg bg-slate-800/50 backdrop-blur border border-slate-700/50 hover:border-slate-600 transition-all duration-300 overflow-hidden hover:shadow-lg hover:shadow-blue-500/10"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="group relative rounded-lg bg-slate-800/30 backdrop-blur border border-slate-700/50 hover:border-cyan-500/50 transition-all duration-300 overflow-hidden hover:shadow-lg hover:shadow-cyan-500/10"
                   >
                     {/* Background gradient on hover */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                     <div className="relative p-4 h-full flex flex-col">
                       {/* File Icon & Status */}
                       <div className="mb-4">
-                        <div className="w-12 h-12 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 group-hover:bg-blue-500/20 transition-colors mb-3">
-                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M9 3h6v6h6v12H3V3h6zm0-2H3a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V9l-8-8z" />
-                          </svg>
+                        <div className="w-12 h-12 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:bg-cyan-500/20 transition-colors mb-3">
+                          <Music className="w-6 h-6" />
                         </div>
 
                         {file.status && (
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
-                            file.status === 'analyzed'
-                              ? 'bg-green-500/10 text-green-300'
-                              : file.status === 'processing'
-                              ? 'bg-blue-500/10 text-blue-300'
-                              : 'bg-red-500/10 text-red-300'
-                          }`}>
-                            {file.status === 'processing' && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}
+                          <span
+                            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+                              file.status === 'analyzed'
+                                ? 'bg-green-500/10 text-green-400'
+                                : file.status === 'processing'
+                                ? 'bg-cyan-500/10 text-cyan-400'
+                                : 'bg-red-500/10 text-red-400'
+                            }`}
+                          >
+                            {file.status === 'processing' && (
+                              <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                            )}
                             {file.status.charAt(0).toUpperCase() + file.status.slice(1)}
                           </span>
                         )}
                       </div>
 
                       {/* File Info */}
-                      <h3 className="text-sm font-semibold text-white mb-2 line-clamp-2 group-hover:text-blue-400 transition-colors">
+                      <h3 className="text-sm font-semibold text-slate-200 mb-2 line-clamp-2 group-hover:text-cyan-400 transition-colors">
                         {file.filename}
                       </h3>
 
-                      <p className="text-xs text-slate-500 mb-4 flex-1">
+                      <p className="text-xs text-slate-500 mb-4 flex-1 space-y-1">
                         <div>{formatFileSize(file.file_size)}</div>
                         <div>{formatDuration(file.duration)}</div>
                       </p>
 
                       {/* Actions */}
-                      <div className="flex gap-2 pt-4 border-t border-slate-700">
-                        <button className="flex-1 flex items-center justify-center gap-1 px-2 py-2 rounded text-xs text-blue-400 hover:bg-blue-500/10 transition-colors">
+                      <div className="flex gap-2 pt-4 border-t border-slate-700/50">
+                        <button className="flex-1 flex items-center justify-center gap-1 px-2 py-2 rounded text-xs text-cyan-400 hover:bg-cyan-500/10 transition-colors">
                           <Play className="w-3 h-3" />
                           Play
                         </button>
-                        <button className="flex-1 flex items-center justify-center gap-1 px-2 py-2 rounded text-xs text-slate-400 hover:bg-slate-700 transition-colors">
+                        <button className="flex-1 flex items-center justify-center gap-1 px-2 py-2 rounded text-xs text-slate-400 hover:bg-slate-700/50 transition-colors">
                           <Download className="w-3 h-3" />
-                          Download
+                          Save
                         </button>
                         <button
                           onClick={() => handleDelete(file.file_id)}
@@ -329,15 +455,19 @@ export default function LibraryPage() {
                         </button>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             ) : (
               /* List View */
-              <div className="rounded-lg bg-slate-800/50 backdrop-blur border border-slate-700/50 overflow-hidden">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="rounded-lg bg-slate-800/30 backdrop-blur border border-slate-700/50 overflow-hidden"
+              >
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="border-b border-slate-700 bg-slate-900/50">
+                    <thead className="border-b border-slate-700/50 bg-slate-900/30">
                       <tr>
                         <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
                           Filename
@@ -359,10 +489,16 @@ export default function LibraryPage() {
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-700">
-                      {filteredFiles.map((file) => (
-                        <tr key={file.file_id} className="hover:bg-slate-700/20 transition-colors">
-                          <td className="px-6 py-4 text-sm text-white font-medium truncate">
+                    <tbody className="divide-y divide-slate-700/30">
+                      {filteredFiles.map((file, index) => (
+                        <motion.tr
+                          key={file.file_id}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: index * 0.05 }}
+                          className="hover:bg-slate-700/10 transition-colors"
+                        >
+                          <td className="px-6 py-4 text-sm text-slate-200 font-medium truncate">
                             {file.filename}
                           </td>
                           <td className="px-6 py-4 text-sm text-slate-400">
@@ -373,14 +509,17 @@ export default function LibraryPage() {
                           </td>
                           <td className="px-6 py-4 text-sm">
                             {file.status && (
-                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
-                                file.status === 'analyzed'
-                                  ? 'bg-green-500/10 text-green-300'
-                                  : file.status === 'processing'
-                                  ? 'bg-blue-500/10 text-blue-300'
-                                  : 'bg-red-500/10 text-red-300'
-                              }`}>
-                                {file.status.charAt(0).toUpperCase() + file.status.slice(1)}
+                              <span
+                                className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+                                  file.status === 'analyzed'
+                                    ? 'bg-green-500/10 text-green-400'
+                                    : file.status === 'processing'
+                                    ? 'bg-cyan-500/10 text-cyan-400'
+                                    : 'bg-red-500/10 text-red-400'
+                                }`}
+                              >
+                                {file.status.charAt(0).toUpperCase() +
+                                  file.status.slice(1)}
                               </span>
                             )}
                           </td>
@@ -389,10 +528,10 @@ export default function LibraryPage() {
                           </td>
                           <td className="px-6 py-4 text-right text-sm">
                             <div className="flex gap-2 justify-end">
-                              <button className="p-1 text-slate-400 hover:text-blue-400 transition-colors">
+                              <button className="p-1 text-slate-400 hover:text-cyan-400 transition-colors">
                                 <Play className="w-4 h-4" />
                               </button>
-                              <button className="p-1 text-slate-400 hover:text-blue-400 transition-colors">
+                              <button className="p-1 text-slate-400 hover:text-cyan-400 transition-colors">
                                 <Download className="w-4 h-4" />
                               </button>
                               <button
@@ -408,19 +547,24 @@ export default function LibraryPage() {
                               </button>
                             </div>
                           </td>
-                        </tr>
+                        </motion.tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-              </div>
+              </motion.div>
             )}
           </>
         )}
 
         {/* Pagination */}
         {audioFiles.length > 0 && (
-          <div className="mt-8 flex justify-between items-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mt-8 flex justify-between items-center"
+          >
             <p className="text-sm text-slate-400">
               Page {page} • Showing {filteredFiles.length} of {audioFiles.length}
             </p>
@@ -428,20 +572,29 @@ export default function LibraryPage() {
               <button
                 onClick={() => setPage(Math.max(1, page - 1))}
                 disabled={page === 1}
-                className="px-4 py-2 rounded-lg border border-slate-600 text-slate-300 hover:text-white disabled:opacity-50 transition-colors"
+                className="px-4 py-2 rounded-lg border border-slate-700/50 text-slate-300 hover:text-white hover:border-cyan-500/50 disabled:opacity-50 transition-colors"
               >
                 Previous
               </button>
               <button
                 onClick={() => setPage(page + 1)}
-                className="px-4 py-2 rounded-lg border border-slate-600 text-slate-300 hover:text-white transition-colors"
+                className="px-4 py-2 rounded-lg border border-slate-700/50 text-slate-300 hover:text-white hover:border-cyan-500/50 transition-colors"
               >
                 Next
               </button>
             </div>
-          </div>
+          </motion.div>
         )}
-      </div>
+        </div>
+      </main>
     </div>
+  );
+}
+
+export default function LibraryPage() {
+  return (
+    <ProtectedRoute>
+      <LibraryPageContent />
+    </ProtectedRoute>
   );
 }

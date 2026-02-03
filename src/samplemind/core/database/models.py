@@ -59,7 +59,7 @@ class User(Base):
         Index('idx_users_created', 'created_at'),
     )
     
-    def __repr__(self):
+    def __repr__(self) -> None:
         return f"<User(id={self.id}, email={self.email}, role={self.role})>"
 
 

@@ -64,7 +64,7 @@ class OAuthUser(BaseModel):
 class OAuthService:
     """Service for OAuth authentication"""
     
-    def __init__(self, provider: OAuthProvider, config: OAuthConfig):
+    def __init__(self, provider: OAuthProvider, config: OAuthConfig) -> None:
         self.provider = provider
         self.config = config
         self.provider_config = OAUTH_PROVIDERS[provider]

@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class PluginManager:
     """Manages plugin discovery and lifecycle"""
 
-    def __init__(self, plugin_dir: Optional[str] = None):
+    def __init__(self, plugin_dir: Optional[str] = None) -> None:
         """
         Initialize plugin manager
 
@@ -229,7 +229,7 @@ class PluginManager:
 
         plugin = self.plugins[plugin_name]
 
-        def plugin_hook_callback(*args, **kwargs):
+        def plugin_hook_callback(*args, **kwargs) -> None:
             """Callback wrapper for plugin hooks"""
             return plugin.on_hook(hook_name, *args, **kwargs)
 

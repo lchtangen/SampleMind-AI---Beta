@@ -45,7 +45,7 @@ class WorkflowTemplate:
 class WorkflowAssistant:
     """Smart workflow assistant"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize workflow assistant"""
         self.usage_patterns: Dict[Tuple[str, str], UsagePattern] = {}
         self.sample_usage_history: List[Tuple[str, datetime]] = []

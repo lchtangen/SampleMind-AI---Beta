@@ -54,7 +54,7 @@ class LogicProSampleInfo:
     compatibility_rating: float = 0.0  # 0-100%
     tags: List[str] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.tags is None:
             self.tags = []
 
@@ -73,7 +73,7 @@ class LogicProAUPlugin:
     PARAM_BROWSER_SYNC = 2
     PARAM_BPM_SYNC = 3
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Logic Pro AU plugin"""
         self.is_loaded = False
         self.sample_library: Dict[str, LogicProSampleInfo] = {}

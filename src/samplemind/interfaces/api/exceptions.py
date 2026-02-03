@@ -25,7 +25,7 @@ class SampleMindException(Exception):
 class FileValidationError(SampleMindException):
     """File validation failed"""
     
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None) -> None:
         super().__init__(
             message=message,
             status_code=400,
@@ -37,7 +37,7 @@ class FileValidationError(SampleMindException):
 class AudioProcessingError(SampleMindException):
     """Audio processing failed"""
     
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None) -> None:
         super().__init__(
             message=message,
             status_code=500,
@@ -49,7 +49,7 @@ class AudioProcessingError(SampleMindException):
 class AIProviderError(SampleMindException):
     """AI provider request failed"""
     
-    def __init__(self, message: str, provider: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, provider: str, details: Optional[Dict[str, Any]] = None) -> None:
         details = details or {}
         details["provider"] = provider
         super().__init__(
@@ -63,7 +63,7 @@ class AIProviderError(SampleMindException):
 class ResourceNotFoundError(SampleMindException):
     """Requested resource not found"""
     
-    def __init__(self, resource_type: str, resource_id: str):
+    def __init__(self, resource_type: str, resource_id: str) -> None:
         super().__init__(
             message=f"{resource_type} not found",
             status_code=404,
@@ -75,7 +75,7 @@ class ResourceNotFoundError(SampleMindException):
 class RateLimitError(SampleMindException):
     """Rate limit exceeded"""
     
-    def __init__(self, retry_after: Optional[int] = None):
+    def __init__(self, retry_after: Optional[int] = None) -> None:
         details = {}
         if retry_after:
             details["retry_after"] = retry_after
@@ -91,7 +91,7 @@ class RateLimitError(SampleMindException):
 class StorageError(SampleMindException):
     """File storage operation failed"""
     
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None) -> None:
         super().__init__(
             message=message,
             status_code=500,

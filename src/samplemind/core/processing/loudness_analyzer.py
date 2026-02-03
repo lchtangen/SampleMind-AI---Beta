@@ -124,7 +124,7 @@ class LoudnessAnalysis:
 class LoudnessAnalyzer:
     """Analyzes audio loudness using ITU-R BS.1770-4 standard"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.sample_rate = 44100
         self.gate_threshold = -70.0  # LUFS below which audio is gated out
 

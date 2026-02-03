@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class TUIDatabase:
     """High-level database interface for TUI screens"""
 
-    def __init__(self, user_id: Optional[str] = None):
+    def __init__(self, user_id: Optional[str] = None) -> None:
         """Initialize TUI database with optional user ID"""
         self.user_id = user_id or "default_user"
         self._settings: Optional[UserSettings] = None

@@ -39,7 +39,7 @@ class FLStudioPreset:
 class FLStudioIntegration:
     """Integration with FL Studio for preset generation"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize FL Studio integration"""
         self.presets: Dict[str, FLStudioPreset] = {}
         self.export_path: Optional[Path] = None
