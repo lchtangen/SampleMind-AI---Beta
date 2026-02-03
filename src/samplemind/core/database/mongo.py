@@ -193,6 +193,7 @@ class User(Document):
     preferences: Dict[str, Any] = Field(default_factory=dict)
 
     class Settings:
+        """MongoDB collection settings"""
         name = "users"
         indexes = [
             "user_id",
@@ -219,6 +220,7 @@ class AudioCollection(Document):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
     class Settings:
+        """MongoDB collection settings"""
         name = "audio_collections"
         indexes = [
             "collection_id",
@@ -241,6 +243,7 @@ class APIKey(Document):
     last_used: Optional[datetime] = None
 
     class Settings:
+        """MongoDB collection settings"""
         name = "api_keys"
         indexes = [
             "key_id",

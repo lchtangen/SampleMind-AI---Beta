@@ -62,7 +62,7 @@ class RecentFile:
             else:
                 days = delta.days
                 return f"{days}d ago"
-        except:
+        except Exception:
             return "unknown"
 
     @property

@@ -2,12 +2,12 @@
 
 **Generated:** 1770105079.2611232
 
-**Total Issues:** 428
+**Total Issues:** 422
 
 ## Issues by Severity
 
 - **Critical:** 0
-- **High:** 43
+- **High:** 37
 - **Medium:** 385
 - **Low:** 0
 
@@ -398,12 +398,6 @@
 - **Suggestion:** Add type hints for all parameters and return values
 
 ### redis_cache.py:358
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'decorator' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### redis_cache.py:358
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'decorator' missing type hints for: return type
@@ -470,12 +464,6 @@
 - **Suggestion:** Add type hints for all parameters and return values
 
 ### redis_client.py:173
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'decorator' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
-
-### redis_client.py:173
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'decorator' missing type hints for: return type, parameter 'func'
@@ -486,12 +474,6 @@
 - **Category:** type_hints
 - **Message:** Function 'optimized_query' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
-
-### query_optimizer.py:354
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Function 'decorator' missing docstring
-- **Suggestion:** Add comprehensive docstring with Args, Returns, Raises
 
 ### query_optimizer.py:354
 - **Severity:** medium
@@ -541,43 +523,25 @@
 - **Message:** Function 'receive_checkin' missing type hints for: return type, parameter 'dbapi_conn', parameter 'connection_record'
 - **Suggestion:** Add type hints for all parameters and return values
 
-### mongo.py:296
+### mongo.py:299
 - **Severity:** medium
 - **Category:** type_hints
 - **Message:** Function 'get_database' missing type hints for: return type
 - **Suggestion:** Add type hints for all parameters and return values
 
-### mongo.py:98
+### mongo.py:195
 - **Severity:** high
 - **Category:** docstring
 - **Message:** Class 'Settings' missing docstring
 - **Suggestion:** Add class docstring describing purpose and usage
 
-### mongo.py:118
+### mongo.py:221
 - **Severity:** high
 - **Category:** docstring
 - **Message:** Class 'Settings' missing docstring
 - **Suggestion:** Add class docstring describing purpose and usage
 
-### mongo.py:157
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'Settings' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
-
-### mongo.py:192
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'Settings' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
-
-### mongo.py:218
-- **Severity:** high
-- **Category:** docstring
-- **Message:** Class 'Settings' missing docstring
-- **Suggestion:** Add class docstring describing purpose and usage
-
-### mongo.py:240
+### mongo.py:243
 - **Severity:** high
 - **Category:** docstring
 - **Message:** Class 'Settings' missing docstring
