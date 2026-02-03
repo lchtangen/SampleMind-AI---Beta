@@ -4,6 +4,7 @@ from typing import Dict
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 import json
 import logging
+import asyncio
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -63,3 +64,52 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
             })
     except WebSocketDisconnect:
         manager.disconnect(client_id)
+
+
+
+@router.websocket("/ws/progress/{job_id}")
+async def progress_websocket(websocket: WebSocket, job_id: str):
+    """
+    WebSocket endpoint for real-time batch job progress updates
+    
+    Sends progress updates every second while job is processing
+    """
+    await manager.connect(job_id, websocket)
+    
+    try:
+        # Import here to avoid circular dependency
+        from .batch import active_jobs
+        
+        while True:
+            if job_id not in active_jobs:
+                await websocket.send_json({
+                    "error": "Job not found",
+                    "job_id": job_id
+                })
+                break
+            
+            job = active_jobs[job_id]
+            
+            # Send progress update
+            await websocket.send_json({
+                "job_id": job_id,
+                "status": job.status,
+                "progress": job.progress_percent,
+                "processed": job.processed_files,
+                "total": job.total_files,
+                "errors": len(job.errors)
+            })
+            
+            # Stop if job is completed or failed
+            if job.status in ["completed", "failed"]:
+                break
+            
+            # Wait before next update
+            await asyncio.sleep(1)
+            
+    except WebSocketDisconnect:
+        manager.disconnect(job_id)
+        logger.info(f"Client {job_id} disconnected")
+    except Exception as e:
+        logger.error(f"WebSocket error for {job_id}: {e}")
+        manager.disconnect(job_id)

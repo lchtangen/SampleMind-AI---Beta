@@ -51,11 +51,14 @@ from .commands import (
     analyze,
     audio,
     daw,
+    effects,
     groove,
     layering,
     library,
     mastering,
     metadata,
+    midi,
+    pack,
     recent,
     reporting,
     similarity,
@@ -218,6 +221,9 @@ def register_command_groups():
 
     # Register Phase 13 Advanced Features
     app.add_typer(stems.app, name="stems", help="🎼 AI Stem Separation - Split audio into stems")
+    app.add_typer(midi.app, name="midi", help="🎼 MIDI Extraction - Convert audio to MIDI")
+    app.add_typer(pack.app, name="pack", help="📦 Sample Pack Creator - Organize professional packs")
+    app.add_typer(effects.app, name="effects", help="🎛️  Audio Effects - Professional effects & presets")
 
 
 # Register command groups at module load

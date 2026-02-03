@@ -35,6 +35,9 @@ from . import layering    # Phase 10: Sample Layering & Phase Analysis
 from . import groove      # Phase 10: Groove Template Extraction
 from . import recent      # Phase 10: Quick Access to Recent Files
 from . import stems       # Phase 13: AI Stem Separation
+from . import midi        # Phase 13: MIDI Extraction
+from . import pack        # Phase 13: Sample Pack Creator
+from . import effects     # Phase 13: Audio Effects & Presets
 
 __all__ = [
     "analyze",          # 40 commands ✅
@@ -53,4 +56,7 @@ __all__ = [
     "groove",           # Groove extraction ✅ (Phase 10)
     "recent",           # Recent files ✅ (Phase 10)
     "stems",            # AI Stem Separation ✅ (Phase 13)
+    "midi",             # MIDI Extraction ✅ (Phase 13)
+    "pack",             # Sample Pack Creator ✅ (Phase 13)
+    "effects",          # Audio Effects & Presets ✅ (Phase 13)
 ]
