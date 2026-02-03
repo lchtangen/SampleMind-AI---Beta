@@ -122,7 +122,7 @@ class RedisCache:
             # Try to unpickle, fallback to JSON
             try:
                 return pickle.loads(data)
-            except:
+            except (pickle.UnpicklingError, TypeError):
                 return json.loads(data)
                 
         except RedisError as e:
@@ -158,7 +158,7 @@ class RedisCache:
             # Serialize value
             try:
                 data = pickle.dumps(value)
-            except:
+            except (pickle.PicklingError, TypeError):
                 data = json.dumps(value).encode()
             
             # Set with options

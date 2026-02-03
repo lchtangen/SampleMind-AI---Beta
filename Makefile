@@ -74,3 +74,51 @@ clean: ## Clean temporary files
 
 doctor: ## Check system health
 	$(PYTHON) -m src.core.utils.doctor
+
+# ============================================================================
+# BETA RELEASE QUALITY TARGETS
+# ============================================================================
+
+polish: ## Run comprehensive code polish analysis
+	@echo "✨ Analyzing code quality for beta release..."
+	$(PYTHON) scripts/polish_codebase.py
+
+polish-fix: ## Auto-fix code quality issues
+	@echo "🔧 Auto-fixing code quality issues..."
+	$(PYTHON) -m black src/ tests/
+	$(PYTHON) -m isort src/ tests/
+	$(PYTHON) -m ruff check --fix src/ tests/
+
+test-cov: ## Run tests with detailed coverage report
+	@echo "📊 Running tests with coverage analysis..."
+	$(PYTHON) -m pytest tests/ -v \
+		--cov=src \
+		--cov-report=html \
+		--cov-report=term-missing \
+		--cov-report=json
+	@echo "✅ Coverage report generated in htmlcov/"
+
+test-unit: ## Run only unit tests
+	@echo "🧪 Running unit tests..."
+	$(PYTHON) -m pytest tests/unit/ -v
+
+test-integration: ## Run only integration tests
+	@echo "🔗 Running integration tests..."
+	$(PYTHON) -m pytest tests/integration/ -v
+
+test-fast: ## Run fast tests only
+	@echo "⚡ Running fast tests..."
+	$(PYTHON) -m pytest tests/ -v -m "not slow"
+
+typecheck: ## Run type checking with mypy
+	@echo "🔍 Running type checker..."
+	$(PYTHON) -m mypy src/ --show-error-codes
+
+validate: polish test-cov typecheck security ## Full validation for beta release
+	@echo "✅ Full validation complete!"
+
+pre-commit: format lint test-fast ## Run pre-commit checks
+	@echo "✅ Pre-commit checks passed!"
+
+pre-release: validate ## Prepare for beta release
+	@echo "🚀 Beta release preparation complete!"

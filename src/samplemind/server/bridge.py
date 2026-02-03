@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class BridgeMessage:
+    """Message format for DAW bridge communication"""
     action: str
     payload: dict
     source: str = "Client"
@@ -35,7 +36,8 @@ class DAWBridgeServer:
             websocket
         )
 
-    def disconnect(self, websocket: WebSocket):
+    def disconnect(self, websocket: WebSocket) -> None:
+        """Disconnect a client from the bridge"""
         if websocket in self.active_connections:
             self.active_connections.remove(websocket)
         logger.info(f"Client disconnected. Active connections: {len(self.active_connections)}")

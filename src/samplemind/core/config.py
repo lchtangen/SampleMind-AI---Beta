@@ -355,6 +355,7 @@ class Settings(BaseSettings):
         return configs.get(provider, {})
     
     class Config:
+        """Pydantic configuration for Settings model"""
         env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = False
