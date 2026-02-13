@@ -91,6 +91,10 @@ prisma/migrations/
 # Audio samples
 test_audio_samples/
 
+# Test session data
+.test_sessions/
+.test_favorites/
+
 # Ignore nested Git repositories
 samplemind-ai/samplemind-ai/
 
