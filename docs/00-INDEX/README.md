@@ -8,6 +8,7 @@ Welcome to the SampleMind-AI project documentation hub. This section provides th
 - **[MASTER_PHASE_INDEX.md](./MASTER_PHASE_INDEX.md)** - Complete overview of all 10 phases with objectives and deliverables
 - **[PHASE_STATUS_DASHBOARD.md](./PHASE_STATUS_DASHBOARD.md)** - Real-time status tracking for each phase
 - **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - Quick links and common task finder
+- **[WORKSPACE_ORGANIZATION.md](../WORKSPACE_ORGANIZATION.md)** - ⭐ NEW: Workspace organization guide for beta release
 
 ### 📂 Project Structure
 
