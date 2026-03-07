@@ -1,329 +1,252 @@
-# 🎯 SampleMind AI v6 - Current Status
+# 🎯 SampleMind AI — Current Status
 
-**Last Updated:** 2025-01-04 01:10 UTC  
-**Version:** 0.5.0  
-**Progress:** 50% Complete
-
-## 🎉 What's Working Right Now
-
-### ✅ Backend (100% Complete)
-1. **FastAPI Server** - Running on port 8000
-   - 20+ REST API endpoints
-   - WebSocket support
-   - Auto-generated docs at `/api/docs`
-   
-2. **Authentication System** - Fully functional
-   - User registration
-   - JWT login with access/refresh tokens
-   - Protected routes
-   - OAuth2 compliant
-
-3. **Database Layer** - All operational
-   - MongoDB for metadata
-   - Redis for caching/sessions
-   - ChromaDB for vector search
-   
-4. **Background Tasks** - Celery working
-   - Audio analysis tasks
-   - Batch processing
-   - Progress tracking
-   - Flower monitoring UI on port 5555
-
-### ✅ Frontend (70% Complete)
-1. **Next.js App** - Running on port 3000
-   - Landing page with features
-   - Login page
-   - Register page
-   - Dashboard with user stats
-   
-2. **API Integration** - Fully functional
-   - Axios client with auto token refresh
-   - Zustand state management
-   - Toast notifications
-
-## 🚀 Quick Test Instructions
-
-### Test the Full Stack
-
-1. **Start Backend Services:**
-```bash
-cd /home/lchta/Projects/samplemind-ai-v6
-
-# Start databases
-docker-compose up -d
-
-# Start API
-./start_api.sh &
-
-# Start Celery worker
-./start_celery_worker.sh &
-
-# Start Flower (optional)
-./start_flower.sh &
-```
-
-2. **Start Frontend:**
-```bash
-cd frontend/web
-npm run dev
-```
-
-3. **Test the Flow:**
-   - Open http://localhost:3000
-   - Click "Get Started" or "Sign Up"
-   - Register a new account:
-     - Email: `test@samplemind.ai`
-     - Username: `testuser`
-     - Password: `TestPass123`
-   - You'll be auto-logged in and redirected to dashboard
-   - See your user stats (uploads: 0, analyses: 0)
-   - Logout and login again to test token persistence
-
-### Test API Directly
-
-```bash
-# Health check
-curl http://localhost:8000/api/v1/health
-
-# Register user
-curl -X POST http://localhost:8000/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"api@test.com","username":"apiuser","password":"ApiPass123"}'
-
-# Login
-curl -X POST http://localhost:8000/api/v1/auth/login \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "username=apiuser&password=ApiPass123"
-
-# Get API docs
-open http://localhost:8000/api/docs
-```
-
-## 📂 Project Structure
-
-```
-samplemind-ai-v6/
-├── src/samplemind/              ✅ Complete
-│   ├── core/
-│   │   ├── auth/                ✅ JWT authentication
-│   │   ├── database/            ✅ MongoDB, Redis, ChromaDB
-│   │   ├── engine/              ✅ Audio processing
-│   │   └── tasks/               ✅ Celery tasks
-│   ├── integrations/            ✅ AI providers
-│   └── interfaces/api/          ✅ FastAPI routes
-├── frontend/web/                🚧 70% Complete
-│   ├── app/
-│   │   ├── page.tsx             ✅ Landing page
-│   │   ├── login/page.tsx       ✅ Login
-│   │   ├── register/page.tsx    ✅ Register
-│   │   ├── dashboard/page.tsx   ✅ Dashboard
-│   │   ├── upload/              ⏳ Planned
-│   │   └── analyze/             ⏳ Planned
-│   ├── lib/
-│   │   ├── api.ts               ✅ API client
-│   │   └── utils.ts             ✅ Utilities
-│   └── store/
-│       └── useAuthStore.ts      ✅ State management
-└── data/                        ✅ Auto-created
-    ├── uploads/
-    ├── analysis/
-    └── chroma/
-```
-
-## 🎯 What Works End-to-End
-
-### User Registration & Login Flow
-1. User visits homepage → Clicks "Get Started"
-2. Fills registration form → Submits
-3. Backend validates → Creates user in MongoDB
-4. Backend issues JWT tokens → Frontend stores in localStorage
-5. User redirected to dashboard → Sees their profile
-6. User can logout → Tokens cleared
-7. User can login again → New tokens issued
-8. Tokens auto-refresh on 401 errors
-
-### API Authentication Flow
-1. API request sent without token → 401 error
-2. Frontend intercepts → Tries refresh token
-3. If refresh successful → Retries original request
-4. If refresh fails → Redirects to login
-5. All subsequent requests include Bearer token
-
-## 🛠 Working Features
-
-### Authentication ✅
-- ✅ User registration with validation
-- ✅ Email/username uniqueness check
-- ✅ Password strength validation (8+ chars, uppercase, lowercase, digit)
-- ✅ Bcrypt password hashing
-- ✅ JWT access tokens (30 min)
-- ✅ JWT refresh tokens (7 days)
-- ✅ Auto token refresh
-- ✅ Protected routes
-- ✅ User profile retrieval
-- ✅ Logout
-
-### Database ✅
-- ✅ MongoDB user storage
-- ✅ MongoDB audio files collection
-- ✅ MongoDB analyses collection
-- ✅ MongoDB batch jobs collection
-- ✅ Redis caching
-- ✅ Redis rate limiting
-- ✅ ChromaDB vector storage
-- ✅ Connection pooling
-- ✅ Health checks
-
-### Background Tasks ✅
-- ✅ Celery worker running
-- ✅ Audio analysis tasks
-- ✅ Batch processing
-- ✅ Progress tracking (0-100%)
-- ✅ Task status monitoring
-- ✅ Worker status API
-- ✅ Queue statistics
-- ✅ Flower monitoring UI
-- ✅ Automatic retries
-
-### Frontend ✅
-- ✅ Landing page
-- ✅ Login form
-- ✅ Register form
-- ✅ Dashboard with stats
-- ✅ Navigation
-- ✅ Toast notifications
-- ✅ Loading states
-- ✅ Error handling
-- ✅ Responsive design
-
-## 🔧 Services Running
-
-When fully started, you'll have:
-
-| Service | Port | URL | Status |
-|---------|------|-----|--------|
-| Frontend | 3000 | http://localhost:3000 | ✅ Ready |
-| API | 8000 | http://localhost:8000 | ✅ Ready |
-| API Docs | 8000 | http://localhost:8000/api/docs | ✅ Ready |
-| Flower | 5555 | http://localhost:5555 | ✅ Ready |
-| MongoDB | 27017 | localhost:27017 | ✅ Ready |
-| Redis | 6379 | localhost:6379 | ✅ Ready |
-| ChromaDB | 8002 | localhost:8002 | ✅ Ready |
-
-## 📊 Database State
-
-### MongoDB Collections
-- `users` - User accounts (with indexes)
-- `audio_files` - Uploaded audio metadata
-- `analyses` - Analysis results
-- `batch_jobs` - Batch processing jobs
-
-### Redis Keys
-- `access_token_*` - JWT tokens (if session-based)
-- `rate_limit_*` - Rate limiting counters
-- `cache_*` - Cached API responses
-- Celery task queue data
-
-### ChromaDB Collections
-- `audio_embeddings` - 128-dimensional vectors for similarity
-
-## 🎨 UI Pages
-
-### Available Now ✅
-- **/** - Landing page with features
-- **/login** - Login form
-- **/register** - Registration form
-- **/dashboard** - User dashboard with stats
-
-### Coming Soon ⏳
-- **/upload** - Audio file upload with drag-and-drop
-- **/analyze/[id]** - Analysis results with AI insights
-- **/library** - Audio file library with search
-- **/settings** - User settings and preferences
-
-## 🐛 Known Issues
-
-None critical! The system is stable and ready for development.
-
-### Minor Notes:
-- Upload page not yet implemented (API endpoint exists)
-- Analysis page not yet implemented (API endpoint exists)
-- No actual audio files to analyze yet (need test samples)
-- Email verification not implemented (is_verified always false)
-
-## 📝 Testing Credentials
-
-For testing, create any account:
-- Email: `anything@example.com`
-- Username: `anyusername` (3-50 chars, alphanumeric + underscore)
-- Password: Must be 8+ chars with uppercase, lowercase, and digit
-
-Example:
-- Email: `producer@samplemind.ai`
-- Username: `beatmaker`
-- Password: `MusicPro2025!`
-
-## 🚀 Next Steps
-
-### Immediate (Can be done now)
-1. **Upload Page** - Drag-and-drop file upload UI
-2. **Analysis Page** - Display task progress and results
-3. **Library Page** - Browse uploaded files
-
-### Short-term
-4. **Audio Player** - Play uploaded audio files
-5. **Waveform Visualizer** - Visual audio representation
-6. **Search & Filters** - Find files by tags, date, etc.
-
-### Medium-term
-7. **Electron Desktop App** - Native desktop version
-8. **CI/CD Pipeline** - Automated testing and deployment
-9. **Testing Suite** - Unit, integration, and E2E tests
-
-## 📚 Documentation Files
-
-All documentation is comprehensive and up-to-date:
-
-- `PROJECT_SUMMARY.md` - Complete project overview
-- `TASK_1_COMPLETE.md` - Backend API (263 lines)
-- `TASKS_1_2_COMPLETE.md` - Backend + Database (482 lines)
-- `TASK_3_COMPLETE.md` - Authentication (368 lines)
-- `TASK_4_COMPLETE.md` - Background tasks (437 lines)
-- `TASK_5_FOUNDATION_COMPLETE.md` - Frontend (475 lines)
-- `AUTH_QUICKSTART.md` - Auth quick reference (161 lines)
-- `CELERY_QUICKSTART.md` - Celery quick reference (320 lines)
-- `CURRENT_STATUS.md` - This file
-
-Total: **2,500+ lines of documentation!**
-
-## 🎯 Success Metrics
-
-✅ **5/10 major tasks complete (50%)**
-✅ **Production-ready backend**
-✅ **Secure authentication system**
-✅ **Full database integration**
-✅ **Background task processing**
-✅ **Modern frontend foundation**
-✅ **Comprehensive documentation**
-
-## 🎉 Achievement Unlocked!
-
-You now have a **fully functional, production-ready backend** with a **modern frontend foundation**. The system is:
-
-- ✅ Scalable (Celery workers)
-- ✅ Secure (JWT auth, bcrypt)
-- ✅ Fast (async everything)
-- ✅ Monitored (Flower, health checks)
-- ✅ Documented (2,500+ lines)
-- ✅ Modern (Next.js 14, Python 3.12)
-
-**Ready for deployment and continued development!** 🚀
+**Last Updated:** 2026-03-07 12:55:53  
+**Version:** `2.1.0-beta` → migrating to `3.0.0`  
+**Active Phase:** Phase 15 — v3.0 Migration & Next-Level Upgrade  
+**Overall Progress:** Phase 14 Complete ✅ | Phase 15 In Progress 🚀
 
 ---
 
-**Questions or issues?** Check the documentation files or run:
-```bash
-./start_api.sh && cd frontend/web && npm run dev
+## 📊 Phase Completion Summary
+
+| Phase | Name | Status |
+|-------|------|--------|
+| 1–10 | Foundation, CLI, Audio Engine, DB, Auth, TUI | ✅ Complete |
+| 11 | Performance Optimization + CLI Polish | ✅ Complete |
+| 12 | UX Polish, Accessibility, Performance Tuning | ✅ Complete |
+| 13 | Effects CLI, DAW Plugins (FL Studio/Ableton), VST3 | ✅ Complete |
+| 14 | Analytics (PostHog), GitHub Setup, Community Launch | ✅ Complete |
+| **15** | **v3.0 Migration — AI Models, Deps, Architecture Upgrade** | 🚀 **Started 2026-03-07** |
+
+---
+
+## ✅ What's Fully Working (as of Phase 14)
+
+### Core Audio Engine
+- LibROSA-based analysis: BPM, key, MFCC, chroma, spectral features
+- Advanced audio loader with multi-format support (WAV, MP3, FLAC, OGG, AAC)
+- Batch processing with progress tracking
+- Multi-level caching (memory + disk + ChromaDB vector)
+- Analysis levels: BASIC, STANDARD, DETAILED, PROFESSIONAL
+- Similarity search via ChromaDB embeddings
+
+### CLI Interface (`src/samplemind/interfaces/cli/menu.py`)
+- Full interactive menu with Rich/Typer (~2255 lines)
+- All major commands: analyze, batch, search, effects, library, compare
+- Effects chain CLI (Phase 13) — reverb, EQ, compression, saturation
+- Shell completions: bash, zsh, fish
+- Plugin management via `plugins/installer.py`
+- Cross-platform: Linux, macOS, Windows
+
+### TUI Interface (`src/samplemind/interfaces/tui/`)
+- Textual-based, 11 implemented screens
+- Screens: Main, Analyze, Batch, Results, Favorites, Settings, Comparison, Search, Tagging, Performance, Library
+- Integrations: FL Studio, audio playback, AI coach, performance monitor, library browser, plugin manager, keyboard shortcuts, session management
+
+### DAW Plugins
+- **FL Studio:** Python wrapper + C++ native plugin (`plugins/fl_studio/cpp/`)
+- **Ableton Live:** REST backend + JS bridge (`plugins/ableton/`)
+- **Plugin Installer:** Cross-DAW setup (`plugins/installer.py`, `scripts/install-plugins.sh`)
+- **VST3 Bridge:** C++ wrapper with Python embedding
+
+### API Layer (FastAPI)
+- 20+ REST endpoints
+- WebSocket support
+- JWT authentication (access + refresh tokens)
+- Auto-generated docs at `/api/docs`
+- MongoDB (Motor/Beanie), Redis, ChromaDB integration
+
+### Analytics & Monitoring (Phase 14)
+- PostHog analytics integration
+- GitHub Actions CI/CD pipeline
+- Performance metrics dashboard
+- Cross-platform verification suite
+
+### Documentation
+- 60+ documentation files across 5 organized directories
+- CLI reference (62K — most comprehensive)
+- API documentation (24K)
+- Phase completion reports (11–14)
+- Business strategy docs
+- Technical implementation guides
+
+---
+
+## 🚀 Phase 15 — v3.0 Migration (Started 2026-03-07)
+
+### Priority 0 — Foundation (This Week)
+- [ ] Upgrade `CLAUDE.md` to v3.0 context ✅ Done
+- [ ] Update `CURRENT_STATUS.md` ✅ Done (this file)
+- [ ] Upgrade `pyproject.toml` dependencies to 2026 versions ⏳
+- [ ] Create `V3_MIGRATION_CHECKLIST.md` ✅ Done
+- [ ] Create `SESSION_START_GUIDE.md` ✅ Done
+
+### Priority 1 — AI Models & Providers (Week 1)
+- [ ] Upgrade `anthropic` `^0.7.0` → `^0.40.0` (Claude 3.7 Sonnet)
+- [ ] Upgrade `openai` `^1.3.0` → `^1.58.0` (o3, Agents SDK, Audio API)
+- [ ] Upgrade `google-generativeai` `^0.3.0` → `^0.8.0` (Gemini 2.0 Flash)
+- [ ] Update `SampleMindAIManager` for new provider APIs
+- [ ] Add `claude-3-7-sonnet-20250219` as primary model
+- [ ] Add `gemini-2.0-flash` as fast model
+
+### Priority 2 — Audio Engine Upgrades (Week 1-2)
+- [ ] Upgrade `torch` `^2.1.0` → `^2.5.0`
+- [ ] Upgrade `transformers` `^4.35.0` → `^4.47.0`
+- [ ] Re-enable `basic-pitch = "^0.4.0"` (MIDI transcription)
+- [ ] Add `demucs = "^4.0.0"` (htdemucs 6-stem separation)
+- [ ] Add `pedalboard = "^0.9.0"` (Spotify audio effects)
+- [ ] Integrate `microsoft/BEATs` audio classifier
+- [ ] Integrate `openai/whisper-large-v3` for transcription
+- [ ] Add `pyaudio` for real-time audio I/O
+
+### Priority 3 — Multi-Agent Architecture (Week 2)
+- [ ] Add `langgraph = "^0.2.0"` for agent orchestration
+- [ ] Add `langchain-core = "^0.3.0"` for agent tooling
+- [ ] Design `AgentOrchestrator` class in `src/samplemind/integrations/agents/`
+- [ ] Implement specialized agents: AnalysisAgent, RecommendationAgent, MixingAgent
+- [ ] Build agent routing layer in `SampleMindAIManager`
+
+### Priority 4 — TUI v3 (Week 2-3)
+- [ ] Upgrade `textual` `^0.44.0` → `^0.87.0`
+- [ ] Update all TUI screens for new Textual API
+- [ ] Add new screens: AgentChatScreen, WaveformScreen, MixingBoardScreen
+- [ ] Implement proper design system with CSS variables
+- [ ] Add animated waveform widget
+- [ ] Add real-time spectrum analyzer widget
+- [ ] Dark/light theme polish
+- [ ] WCAG 2.1 AA compliance audit
+
+### Priority 5 — Web UI Foundation (Week 3-4)
+- [ ] Initialize `apps/web/` with Next.js 15 + React 19
+- [ ] Set up Tailwind CSS v4 + shadcn/ui
+- [ ] Implement Zustand v5 + TanStack Query v5
+- [ ] Build landing page with feature showcase
+- [ ] Build audio upload + analysis page
+- [ ] Build sample library browser
+- [ ] Integrate Wavesurfer.js v7 for waveform display
+- [ ] API client generation from FastAPI OpenAPI spec
+
+### Priority 6 — DAW Plugin v2 (Week 4+)
+- [ ] JUCE-based VST3 native plugin
+- [ ] Improved FL Studio real-time sync
+- [ ] Ableton MIDI clip generation from analysis
+- [ ] Logic Pro integration planning
+- [ ] AU (Audio Unit) plugin for macOS
+
+### Priority 7 — Platform & Infrastructure (Ongoing)
+- [ ] Upgrade test coverage from 30% → 80%+
+- [ ] Add `opentelemetry` distributed tracing
+- [ ] Cloud storage integration (S3/GCS)
+- [ ] Sample marketplace MVP
+- [ ] User accounts + cloud sync
+- [ ] Docker multi-stage build optimization
+- [ ] GitHub Actions: full CI/CD with test gates
+
+---
+
+## 🔧 Services & Infrastructure
+
+| Service | Port | Status | Notes |
+|---------|------|--------|-------|
+| CLI (primary product) | — | ✅ Working | `python main.py` |
+| TUI | — | ✅ Working | `python -m src.samplemind.interfaces.tui.main` |
+| FastAPI Server | 8000 | ✅ Working | `make dev` |
+| API Docs | 8000/api/docs | ✅ Auto-generated | Swagger UI |
+| MongoDB | 27017 | ✅ Docker | `docker-compose up -d` |
+| Redis | 6379 | ✅ Docker | Session + cache |
+| ChromaDB | 8002 | ✅ Docker | Vector search |
+| Celery Worker | — | ✅ Working | Batch jobs |
+| Flower Monitor | 5555 | ✅ Working | Task monitoring |
+| Ollama | 11434 | ✅ Working | Offline AI models |
+
+---
+
+## 📁 Project Structure (Actual)
+
+```
+SampleMind-AI---Beta/
+├── src/samplemind/
+│   ├── __init__.py              ✅ Lazy imports, version
+│   ├── core/
+│   │   ├── engine/
+│   │   │   └── audio_engine.py  ✅ Main audio processing
+│   │   ├── loader.py            ✅ AdvancedAudioLoader
+│   │   ├── library/
+│   │   │   └── pack_creator.py  ✅ Sample pack creation
+│   │   └── database/
+│   │       └── chroma.py        ✅ ChromaDB manager
+│   ├── integrations/
+│   │   ├── ai_manager.py        ✅ Multi-provider AI routing
+│   │   └── daw/
+│   │       ├── fl_studio_plugin.py   ✅ FL Studio
+│   │       └── __init__.py          ✅ DAW exports
+│   ├── interfaces/
+│   │   ├── cli/
+│   │   │   ├── menu.py          ✅ Main CLI (~2255 lines)
+│   │   │   └── commands/
+│   │   │       └── effects.py   ✅ Effects CLI (Phase 13)
+│   │   ├── tui/
+│   │   │   ├── app.py           ✅ Textual app
+│   │   │   ├── main.py          ✅ Entry point
+│   │   │   └── screens/         ✅ 11 screens
+│   │   └── __init__.py          ⚠️ Stub (1 line)
+│   └── utils/                   ✅ Utilities
+├── plugins/
+│   ├── fl_studio_plugin.py      ✅ FL Studio Python wrapper
+│   ├── fl_studio/
+│   │   ├── cpp/
+│   │   │   ├── samplemind_wrapper.h    ✅ C++ header
+│   │   │   └── samplemind_wrapper.cpp  ✅ C++ impl (486 lines)
+│   │   └── CMakeLists.txt       ✅ Build config
+│   ├── ableton/
+│   │   ├── python_backend.py    ✅ REST backend
+│   │   └── communication.js     ✅ JS bridge
+│   └── installer.py             ✅ Cross-DAW installer
+├── tests/
+│   ├── unit/                    ✅ 81 tests (~30% coverage)
+│   └── integration/             ⚠️ Needs expansion
+├── docs/                        ✅ 60+ documentation files
+├── completions/                 ✅ bash, zsh, fish
+├── scripts/                     ✅ Setup + launch scripts
+├── config/                      ✅ Configuration files
+├── data/                        ✅ Sample data + databases
+├── pyproject.toml               ⚠️ Needs major dep upgrade
+├── CLAUDE.md                    ✅ Updated 2026-03-07
+└── main.py                      ✅ CLI entry point
 ```
 
-**Happy coding!** 🎵
+---
+
+## 📐 Key Metrics
+
+| Metric | Current | Target (v3.0) |
+|--------|---------|---------------|
+| Python version | 3.11+ | 3.11–3.12 |
+| Test coverage | ~30% | 80%+ |
+| CLI commands | 20+ | 30+ |
+| TUI screens | 11 | 15+ |
+| AI providers | 4 (OpenAI, Anthropic, Google, Ollama) | 6+ |
+| DAW plugins | 2 (FL Studio, Ableton) | 4 (+ Logic, Standalone VST3) |
+| API endpoints | 20+ | 40+ |
+| Documentation files | 60+ | 80+ |
+| Dep versions current | ❌ Outdated | ✅ 2026 latest |
+
+---
+
+## 🐛 Known Issues (Active)
+
+| # | Issue | Severity | Fix |
+|---|-------|----------|-----|
+| 1 | `anthropic` 33 versions behind | 🔴 Critical | Upgrade to ^0.40.0 |
+| 2 | `openai` missing Agents SDK | 🔴 Critical | Upgrade to ^1.58.0 |
+| 3 | `scipy` monkey-patch in `__init__.py` | 🟡 Medium | Upgrade scipy to ^1.14 |
+| 4 | `basic-pitch` commented out | 🟡 Medium | Re-enable + upgrade |
+| 5 | `numpy` capped `<2.0.0` | 🟡 Medium | Upgrade to `>=2.0.0` |
+| 6 | `interfaces/__init__.py` is a stub | 🟡 Medium | Implement properly |
+| 7 | Test coverage only 30% | 🟠 High | Add tests for core engine |
+| 8 | No Web UI | 🟠 High | Phase 15 priority |
+| 9 | CLI startup ~2s (target <1s) | 🟡 Medium | Lazy import optimization |
+
+---
+
+*Updated by Copilot Agent on 2026-03-07 12:55:53. Update this file at the end of each coding session.*
