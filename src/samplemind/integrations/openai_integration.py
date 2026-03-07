@@ -29,10 +29,12 @@ logger = logging.getLogger(__name__)
 
 class OpenAIModel(Enum):
     """Available OpenAI models for music production — v3.0"""
-    GPT_4O = "gpt-4o"              # PRIMARY
-    GPT_4O_MINI = "gpt-4o-mini"   # fast/cheap secondary
-    GPT_4_TURBO = "gpt-4-turbo"   # high context
-    GPT_4 = "gpt-4"               # legacy fallback
+    GPT_4O = "gpt-4o"                                   # PRIMARY
+    GPT_4O_MINI = "gpt-4o-mini"                         # fast/cheap secondary
+    GPT_4_TURBO = "gpt-4-turbo"                         # high context
+    GPT_4 = "gpt-4"                                     # legacy fallback
+    GPT_4O_AUDIO_PREVIEW = "gpt-4o-audio-preview"       # audio file submission
+    GPT_4O_REALTIME_PREVIEW = "gpt-4o-realtime-preview" # real-time audio
 
 
 class MusicAnalysisType(Enum):
@@ -458,6 +460,73 @@ class OpenAIMusicProducer:
         
         return processed_results
     
+    async def submit_audio_file(
+        self,
+        file_path: Path,
+        analysis_prompt: str,
+        model: Optional[OpenAIModel] = None,
+    ) -> OpenAIMusicAnalysis:
+        """
+        Submit an audio file directly to GPT-4o Audio Preview for analysis.
+
+        The file is base64-encoded and sent as an ``input_audio`` content block.
+        Supports WAV and MP3 formats only (OpenAI requirement).
+
+        Args:
+            file_path: Path to the audio file (WAV or MP3).
+            analysis_prompt: Instruction prompt for the model.
+            model: Model to use (defaults to GPT_4O_AUDIO_PREVIEW).
+
+        Returns:
+            OpenAIMusicAnalysis with the model's response.
+        """
+        start_time = time.time()
+        model = model or OpenAIModel.GPT_4O_AUDIO_PREVIEW
+        suffix = Path(file_path).suffix.lstrip(".").lower()
+        if suffix not in ("wav", "mp3"):
+            raise ValueError(f"Audio file must be WAV or MP3, got: .{suffix}")
+
+        with open(file_path, "rb") as f:
+            audio_b64 = base64.b64encode(f.read()).decode("utf-8")
+
+        try:
+            response = await self.async_client.chat.completions.create(
+                model=model.value,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "input_audio",
+                                "input_audio": {"data": audio_b64, "format": suffix},
+                            },
+                            {"type": "text", "text": analysis_prompt},
+                        ],
+                    }
+                ],
+                max_tokens=4000,
+            )
+            content = response.choices[0].message.content or ""
+            tokens_used = response.usage.total_tokens if response.usage else 0
+            processing_time = time.time() - start_time
+            self._update_usage_stats(tokens_used, processing_time)
+            logger.info(
+                f"Audio file submitted to {model.value}: {tokens_used} tokens, "
+                f"{processing_time:.2f}s"
+            )
+            return OpenAIMusicAnalysis(
+                analysis_type=MusicAnalysisType.COMPREHENSIVE_ANALYSIS,
+                model_used=model.value,
+                summary=content[:500],
+                detailed_analysis={"raw_response": content},
+                tokens_used=tokens_used,
+                processing_time=processing_time,
+                confidence_score=0.9,
+            )
+        except Exception as e:
+            logger.error(f"Audio file submission failed: {e}")
+            raise
+
     def get_usage_stats(self) -> Dict[str, Any]:
         """Get usage statistics and performance metrics"""
         return {

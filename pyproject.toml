@@ -60,6 +60,10 @@ openai = "^1.58.0"
 anthropic = "^0.40.0"
 ollama = "^0.3.0"
 google-genai = "^0.8.0"
+faster-whisper = "^1.1.0"   # Faster Whisper speech-to-text
+openai-agents = "^0.0.5"    # OpenAI Agents SDK
+langgraph = "^0.2.0"        # LangGraph for workflow graphs
+langchain-core = "^0.3.0"   # LangChain core abstractions
 
 # Audio Analysis & Processing Extensions
 mido = "^1.3.0" # MIDI file I/O

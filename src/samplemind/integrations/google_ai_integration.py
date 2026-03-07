@@ -42,6 +42,7 @@ logger = logging.getLogger(__name__)
 class GeminiModel(Enum):
     """Available Gemini models for music production — v3.0"""
     GEMINI_2_0_FLASH = "gemini-2.0-flash"                         # PRIMARY — fast, multimodal
+    GEMINI_2_0_FLASH_EXP = "gemini-2.0-flash-exp"                 # experimental variant
     GEMINI_2_0_FLASH_THINKING = "gemini-2.0-flash-thinking-exp"   # reasoning
     GEMINI_1_5_PRO = "gemini-1.5-pro"                             # high context fallback
     GEMINI_1_5_FLASH = "gemini-1.5-flash"                         # legacy fast

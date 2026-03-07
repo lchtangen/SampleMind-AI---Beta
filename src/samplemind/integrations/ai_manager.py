@@ -75,7 +75,7 @@ class AIProviderConfig:
     max_requests_per_minute: int = 60
     cost_per_token: float = 0.0001
     features: List[str] = field(default_factory=list)
-    
+
     # Performance tracking
     total_requests: int = 0
     total_tokens: int = 0
@@ -91,30 +91,30 @@ class UnifiedAnalysisResult:
     analysis_type: AnalysisType
     model_used: str
     timestamp: float = field(default_factory=time.time)
-    
+
     # Core Analysis
     summary: str = ""
     detailed_analysis: Dict[str, Any] = field(default_factory=dict)
-    
+
     # Production Insights
     production_tips: List[str] = field(default_factory=list)
     fl_studio_recommendations: List[str] = field(default_factory=list)
     effect_suggestions: List[Dict[str, Any]] = field(default_factory=list)
-    
+
     # Creative Suggestions
     creative_ideas: List[str] = field(default_factory=list)
     arrangement_suggestions: List[str] = field(default_factory=list)
-    
+
     # Technical Analysis
     harmonic_analysis: Dict[str, Any] = field(default_factory=dict)
     rhythmic_analysis: Dict[str, Any] = field(default_factory=dict)
     spectral_analysis: Dict[str, Any] = field(default_factory=dict)
-    
+
     # Scores and Ratings
     creativity_score: float = 0.0
     production_quality_score: float = 0.0
     commercial_potential_score: float = 0.0
-    
+
     # Metadata
     tokens_used: int = 0
     processing_time: float = 0.0
@@ -139,64 +139,64 @@ ANALYSIS_ROUTING = {
 
 class AILoadBalancer:
     """Intelligent load balancing across AI providers"""
-    
+
     def __init__(self, providers: List[AIProviderConfig]) -> None:
         self.providers = {p.provider: p for p in providers}
         self.request_counts = {p.provider: 0 for p in providers}
         self.last_request_time = {p.provider: 0 for p in providers}
-    
+
     def select_provider(
-        self, 
+        self,
         analysis_type: AnalysisType,
         preferred_provider: Optional[AIProvider] = None
     ) -> AIProvider:
         """Select the best provider for a request"""
-        
+
         # If specific provider requested and available, use it
         if preferred_provider and preferred_provider in self.providers:
             if self.providers[preferred_provider].enabled:
                 logger.info(f"🎯 Using preferred provider: {preferred_provider.value}")
                 return preferred_provider
-        
+
         # Check intelligent routing for analysis type
         if analysis_type in ANALYSIS_ROUTING:
             preferred = ANALYSIS_ROUTING[analysis_type]
             if preferred in self.providers and self.providers[preferred].enabled:
                 logger.info(f"🎯 Routing {analysis_type.value} to specialist: {preferred.value}")
                 return preferred
-        
+
         # Filter available providers
         available_providers = [
-            p for p in self.providers.values() 
+            p for p in self.providers.values()
             if p.enabled and self._check_rate_limit(p)
         ]
-        
+
         if not available_providers:
             raise RuntimeError("No AI providers available")
-        
+
         # Sort by priority, then by performance
         available_providers.sort(key=lambda p: (
             p.priority,
             -p.success_rate,
             p.avg_response_time
         ))
-        
+
         selected = available_providers[0]
         self._update_request_count(selected.provider)
-        
+
         return selected.provider
-    
+
     def _check_rate_limit(self, provider: AIProviderConfig) -> bool:
         """Check if provider is within rate limits"""
         current_time = time.time()
         time_since_last = current_time - self.last_request_time[provider.provider]
-        
+
         # Reset count if more than a minute has passed
         if time_since_last > 60:
             self.request_counts[provider.provider] = 0
-        
+
         return self.request_counts[provider.provider] < provider.max_requests_per_minute
-    
+
     def _update_request_count(self, provider: AIProvider) -> None:
         """Update request count for rate limiting"""
         self.request_counts[provider] += 1
@@ -206,17 +206,17 @@ class AILoadBalancer:
 class SampleMindAIManager:
     """
     Unified AI Manager for SampleMind AI v6
-    
+
     Manages multiple AI providers with intelligent routing, automatic failover,
     cost optimization, and performance monitoring.
     """
-    
+
     def __init__(self, config_path: Optional[Path] = None) -> None:
         self.config_path = config_path or Path.home() / ".samplemind" / "config" / "ai_config.json"
         self.providers: Dict[AIProvider, Any] = {}  # Will hold actual provider instances
         self.provider_configs: Dict[AIProvider, AIProviderConfig] = {}
         self.load_balancer: Optional[AILoadBalancer] = None
-        
+
         # Performance tracking
         self.global_stats = {
             'total_requests': 0,
@@ -226,31 +226,31 @@ class SampleMindAIManager:
             'provider_usage': {},
             'error_count': 0
         }
-        
+
         # Initialize from config or environment
         self._initialize_providers()
-        
+
         logger.info(f"🤖 SampleMind AI Manager initialized with {len(self.providers)} providers")
-    
+
     def _initialize_providers(self) -> None:
         """Initialize AI providers from config or environment"""
-        
+
         # Try to load from config file first
         if self.config_path.exists():
             self._load_from_config()
         else:
             # Initialize from environment variables
             self._initialize_from_env()
-        
+
         # Create load balancer
         if self.provider_configs:
             self.load_balancer = AILoadBalancer(list(self.provider_configs.values()))
-    
+
     def _initialize_from_env(self) -> None:
         """Initialize providers from environment variables"""
         from dotenv import load_dotenv
         load_dotenv()
-        
+
         # Anthropic Setup — PRIMARY PROVIDER (Priority 1)
         anthropic_key = os.getenv('ANTHROPIC_API_KEY')
         if anthropic_key and ANTHROPIC_AVAILABLE:
@@ -338,21 +338,21 @@ class SampleMindAIManager:
 
         except Exception as e:
             logger.warning(f"Ollama not available: {e}")
-        
+
         # Save configuration
         self._save_config()
-    
+
     def _load_from_config(self) -> None:
         """Load provider configurations from JSON file"""
         try:
             with open(self.config_path, 'r') as f:
                 config_data = json.load(f)
-            
+
             for provider_data in config_data.get('providers', []):
                 provider = AIProvider(provider_data['provider'])
                 config = AIProviderConfig(**provider_data)
                 self.provider_configs[provider] = config
-                
+
                 # Initialize actual provider instance
                 match provider:
                     case AIProvider.OPENAI:
@@ -370,18 +370,18 @@ class SampleMindAIManager:
                             self.providers[provider] = OllamaMusicProducer()
                         except Exception:
                             pass
-            
+
             logger.info(f"📁 Loaded configuration for {len(self.provider_configs)} providers")
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to load config: {e}")
             self._initialize_from_env()
-    
+
     def _save_config(self) -> None:
         """Save current configuration to JSON file"""
         try:
             self.config_path.parent.mkdir(parents=True, exist_ok=True)
-            
+
             config_data = {
                 'providers': [
                     {
@@ -396,28 +396,28 @@ class SampleMindAIManager:
                     for config in self.provider_configs.values()
                 ]
             }
-            
+
             with open(self.config_path, 'w') as f:
                 json.dump(config_data, f, indent=2)
-            
+
             logger.info(f"💾 Configuration saved to {self.config_path}")
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to save config: {e}")
-    
+
     def get_available_providers(self) -> List[AIProvider]:
         """Get list of available AI providers"""
         return list(self.providers.keys())
-    
+
     def get_global_stats(self) -> Dict[str, Any]:
         """Get global statistics"""
         return self.global_stats.copy()
-    
+
     async def close(self):
         """Close all provider connections"""
         logger.info("Closing AI provider connections...")
         # Cleanup code here if needed
-    
+
     async def analyze_music(
         self,
         audio_features: Dict[str, Any],
@@ -428,43 +428,43 @@ class SampleMindAIManager:
     ) -> UnifiedAnalysisResult:
         """
         Perform music analysis with intelligent provider selection
-        
+
         Args:
             audio_features: Audio features from audio engine
             analysis_type: Type of analysis to perform
             preferred_provider: Preferred AI provider (optional)
             user_context: Additional context for analysis
             enable_fallback: Whether to try backup providers on failure
-            
+
         Returns:
             UnifiedAnalysisResult with comprehensive analysis
         """
         start_time = time.time()
-        
+
         if not self.load_balancer:
             raise RuntimeError("No AI providers configured")
-        
+
         # Select provider
         selected_provider = self.load_balancer.select_provider(analysis_type, preferred_provider)
-        
+
         try:
             # Perform analysis with selected provider
             result = await self._analyze_with_provider(
                 selected_provider, audio_features, analysis_type, user_context
             )
-            
+
             # Update success metrics
-            self._update_provider_stats(selected_provider, result.tokens_used, 
+            self._update_provider_stats(selected_provider, result.tokens_used,
                                       result.processing_time, True)
-            
+
             return result
-            
+
         except Exception as e:
             logger.error(f"❌ Analysis failed with {selected_provider.value}: {e}")
-            
+
             # Update failure metrics
             self._update_provider_stats(selected_provider, 0, time.time() - start_time, False)
-            
+
             # Try fallback if enabled
             if enable_fallback:
                 for provider in self.providers:
@@ -480,10 +480,83 @@ class SampleMindAIManager:
                         except Exception as fallback_error:
                             logger.error(f"❌ Fallback failed with {provider.value}: {fallback_error}")
                             continue
-            
+
             # All providers failed
             raise RuntimeError(f"All AI providers failed. Last error: {e}")
-    
+
+    async def analyze_with_audio_file(
+        self,
+        audio_path: Path,
+        analysis_prompt: str = "Provide a comprehensive music analysis.",
+        preferred_provider: Optional[AIProvider] = None,
+        enable_fallback: bool = True,
+    ) -> "UnifiedAnalysisResult":
+        """
+        Submit an audio file directly to a provider's native audio API.
+
+        Routes to the best-suited provider:
+          - Anthropic (Files API — highest quality)
+          - OpenAI    (gpt-4o-audio-preview)
+          - Falls back to text-based analysis if no audio API is available
+
+        Args:
+            audio_path: Path to the audio file (WAV, MP3, FLAC, OGG)
+            analysis_prompt: Prompt to send alongside the audio file
+            preferred_provider: Override automatic provider selection
+            enable_fallback: Whether to try additional providers on failure
+
+        Returns:
+            UnifiedAnalysisResult with analysis returned by the native audio API
+        """
+        audio_path = Path(audio_path)
+        if not audio_path.exists():
+            raise FileNotFoundError(f"Audio file not found: {audio_path}")
+
+        start_time = time.time()
+
+        # Providers that support native audio file submission (priority order)
+        audio_capable = [
+            p for p in [AIProvider.ANTHROPIC, AIProvider.OPENAI]
+            if p in self.providers
+        ]
+
+        if preferred_provider and preferred_provider in self.providers:
+            candidates = [preferred_provider] + [
+                p for p in audio_capable if p != preferred_provider
+            ]
+        else:
+            candidates = audio_capable or list(self.providers.keys())
+
+        last_error: Optional[Exception] = None
+        for provider in candidates:
+            try:
+                logger.info(f"🎵 Submitting audio file to {provider.value} native API")
+                result = await self._execute_provider_analysis(
+                    provider,
+                    {},
+                    AnalysisType.COMPREHENSIVE_ANALYSIS,
+                    {"analysis_prompt": analysis_prompt},
+                    audio_path=audio_path,
+                )
+                self._update_provider_stats(
+                    provider, result.tokens_used, result.processing_time, True
+                )
+                return result
+            except Exception as e:
+                logger.error(
+                    f"❌ Audio file submission failed with {provider.value}: {e}"
+                )
+                self._update_provider_stats(
+                    provider, 0, time.time() - start_time, False
+                )
+                last_error = e
+                if not enable_fallback:
+                    raise
+
+        raise RuntimeError(
+            f"Audio file submission failed with all providers. Last error: {last_error}"
+        )
+
     async def _analyze_with_provider(
         self,
         provider: AIProvider,
@@ -491,7 +564,8 @@ class SampleMindAIManager:
         analysis_type: AnalysisType,
         user_context: Optional[Dict[str, Any]],
         max_retries: int = 3,
-        base_delay: float = 1.0
+        base_delay: float = 1.0,
+        audio_path: Optional[Path] = None,
     ) -> UnifiedAnalysisResult:
         """
         Perform analysis with specific provider, with exponential backoff retry.
@@ -503,12 +577,14 @@ class SampleMindAIManager:
             user_context: Optional context
             max_retries: Maximum retry attempts (default 3)
             base_delay: Base delay in seconds for exponential backoff
+            audio_path: Optional audio file path for native audio API submission
         """
         last_error = None
         for attempt in range(max_retries):
             try:
                 return await self._execute_provider_analysis(
-                    provider, audio_features, analysis_type, user_context
+                    provider, audio_features, analysis_type, user_context,
+                    audio_path=audio_path,
                 )
             except Exception as e:
                 last_error = e
@@ -530,9 +606,34 @@ class SampleMindAIManager:
         provider: AIProvider,
         audio_features: Dict[str, Any],
         analysis_type: AnalysisType,
-        user_context: Optional[Dict[str, Any]]
+        user_context: Optional[Dict[str, Any]],
+        audio_path: Optional[Path] = None,
     ) -> UnifiedAnalysisResult:
         """Execute analysis with a specific provider (single attempt)"""
+
+        # Native audio-file submission path
+        if audio_path is not None:
+            prompt = (
+                (user_context or {}).get(
+                    "analysis_prompt",
+                    "Provide a comprehensive music analysis.",
+                )
+            )
+            if provider == AIProvider.ANTHROPIC and ANTHROPIC_AVAILABLE:
+                result = await self.providers[provider].submit_audio_via_files_api(
+                    audio_path, prompt
+                )
+                return self._convert_anthropic_result(result)
+            if provider == AIProvider.OPENAI:
+                result = await self.providers[provider].submit_audio_file(
+                    audio_path, prompt
+                )
+                return self._convert_openai_result(result)
+            # No audio API available for this provider — fall through to text path
+            logger.warning(
+                f"Provider {provider.value} has no native audio API; "
+                "falling back to text-based analysis."
+            )
 
         match provider:
             case AIProvider.OPENAI:
@@ -580,7 +681,7 @@ class SampleMindAIManager:
 
             case _:
                 raise ValueError(f"Provider {provider} not supported or available")
-    
+
     def _convert_to_openai_type(self, analysis_type: AnalysisType) -> OpenAIMusicAnalysisType:
         """Convert unified analysis type to OpenAI type"""
         mapping = {
@@ -592,7 +693,7 @@ class SampleMindAIManager:
             AnalysisType.MIXING_MASTERING: OpenAIMusicAnalysisType.MIXING_MASTERING,
         }
         return mapping.get(analysis_type, OpenAIMusicAnalysisType.COMPREHENSIVE_ANALYSIS)
-    
+
     def _convert_to_google_type(self, analysis_type: AnalysisType) -> Any:
         """Convert unified analysis type to Google AI type"""
         if not GOOGLE_AI_AVAILABLE:
@@ -609,7 +710,7 @@ class SampleMindAIManager:
             AnalysisType.MIXING_MASTERING: GoogleMusicAnalysisType.MIXING_MASTERING_TIPS,
         }
         return mapping.get(analysis_type, GoogleMusicAnalysisType.COMPREHENSIVE_ANALYSIS)
-    
+
     def _convert_to_anthropic_type(self, analysis_type: AnalysisType) -> AnthropicAnalysisType:
         """Convert unified analysis type to Anthropic type"""
         if not ANTHROPIC_AVAILABLE:
@@ -625,7 +726,7 @@ class SampleMindAIManager:
             AnalysisType.COMPREHENSIVE_ANALYSIS: AnthropicAnalysisType.COMPREHENSIVE_ANALYSIS,
         }
         return mapping.get(analysis_type, AnthropicAnalysisType.COMPREHENSIVE_ANALYSIS)
-    
+
     def _convert_openai_result(self, openai_result: OpenAIMusicAnalysis) -> UnifiedAnalysisResult:
         """Convert OpenAI result to unified format"""
         return UnifiedAnalysisResult(
@@ -651,7 +752,7 @@ class SampleMindAIManager:
             confidence_score=openai_result.confidence_score,
             cost_estimate=openai_result.tokens_used * self.provider_configs[AIProvider.OPENAI].cost_per_token
         )
-    
+
     def _convert_ollama_result(self, result: Any) -> UnifiedAnalysisResult:
         """Convert Ollama result to unified format"""
         return UnifiedAnalysisResult(
@@ -713,7 +814,7 @@ class SampleMindAIManager:
             cost_estimate=(google_result.token_usage.get('total_token_count', 0) if google_result.token_usage else 0) *
                          self.provider_configs[AIProvider.GOOGLE_AI].cost_per_token
         )
-    
+
     def _convert_anthropic_result(self, anthropic_result: AnthropicMusicAnalysis) -> UnifiedAnalysisResult:
         """Convert Anthropic result to unified format"""
         if not ANTHROPIC_AVAILABLE:
@@ -746,20 +847,20 @@ class SampleMindAIManager:
             confidence_score=anthropic_result.confidence_score,
             cost_estimate=anthropic_result.tokens_used * self.provider_configs[AIProvider.ANTHROPIC].cost_per_token
         )
-    
+
     def _update_provider_stats(
-        self, 
-        provider: AIProvider, 
-        tokens_used: int, 
-        response_time: float, 
+        self,
+        provider: AIProvider,
+        tokens_used: int,
+        response_time: float,
         success: bool
     ) -> None:
         """Update provider performance statistics"""
         config = self.provider_configs[provider]
-        
+
         config.total_requests += 1
         config.total_tokens += tokens_used
-        
+
         # Update running average response time
         prev_avg = config.avg_response_time
         prev_count = config.total_requests - 1
@@ -767,23 +868,23 @@ class SampleMindAIManager:
             config.avg_response_time = (prev_avg * prev_count + response_time) / config.total_requests
         else:
             config.avg_response_time = response_time
-        
+
         # Update success rate
         if success:
             config.success_rate = (config.success_rate * prev_count + 1.0) / config.total_requests
         else:
             config.success_rate = (config.success_rate * prev_count) / config.total_requests
             self.global_stats['error_count'] += 1
-        
+
         # Update global stats
         self.global_stats['total_requests'] += 1
         self.global_stats['total_tokens'] += tokens_used
         self.global_stats['total_cost'] += tokens_used * config.cost_per_token
-        
+
         if provider.value not in self.global_stats['provider_usage']:
             self.global_stats['provider_usage'][provider.value] = 0
         self.global_stats['provider_usage'][provider.value] += 1
-    
+
     def get_provider_status(self) -> Dict[str, Any]:
         """Get status of all providers"""
         status = {}
@@ -799,7 +900,7 @@ class SampleMindAIManager:
                 'estimated_cost': config.total_tokens * config.cost_per_token
             }
         return status
-    
+
     def get_global_stats(self) -> Dict[str, Any]:
         """Get global usage statistics"""
         return {
@@ -807,21 +908,21 @@ class SampleMindAIManager:
             'providers_configured': len(self.providers),
             'providers_enabled': sum(1 for c in self.provider_configs.values() if c.enabled)
         }
-    
+
     def set_provider_enabled(self, provider: AIProvider, enabled: bool) -> None:
         """Enable or disable a provider"""
         if provider in self.provider_configs:
             self.provider_configs[provider].enabled = enabled
             logger.info(f"🔧 Provider {provider.value} {'enabled' if enabled else 'disabled'}")
             self._save_config()
-    
+
     def set_provider_priority(self, provider: AIProvider, priority: int) -> None:
         """Set provider priority (lower = higher priority)"""
         if provider in self.provider_configs:
             self.provider_configs[provider].priority = priority
             logger.info(f"🔧 Provider {provider.value} priority set to {priority}")
             self._save_config()
-    
+
     async def close(self):
         """Clean up all provider connections"""
         for provider in self.providers.values():
@@ -842,7 +943,7 @@ if __name__ == "__main__":
         try:
             # Create AI manager
             ai_manager = SampleMindAIManager()
-            
+
             # Example audio features
             sample_features = {
                 'tempo': 128.0,
@@ -853,25 +954,25 @@ if __name__ == "__main__":
                 'spectral_centroid': [2500.0] * 100,
                 'rms_energy': [0.5] * 100
             }
-            
+
             # Perform analysis
             result = await ai_manager.analyze_music(
                 sample_features,
                 AnalysisType.FL_STUDIO_OPTIMIZATION
             )
-            
+
             print(f"✅ Analysis complete with {result.provider.value}")
             print(f"🎯 Summary: {result.summary[:100]}...")
-            
+
             # Get statistics
             stats = ai_manager.get_global_stats()
             print(f"📊 Global Stats: {stats}")
-            
+
             await ai_manager.close()
-            
+
         except Exception as e:
             logger.error(f"❌ Example failed: {e}")
-    
+
     # Run example
     # asyncio.run(example_usage())
     logger.info("🤖 AI Manager Module Ready!")

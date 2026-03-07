@@ -6,5 +6,13 @@ and optional ML-based approaches for offline-first capability.
 
 from .auto_tagger import AutoTagger
 from .classifier import AIClassifier, ClassificationResult
+from .cnn_classifier import CNNAudioClassifier, CNNClassificationResult, MUSIC_CLASSES
 
-__all__ = ["AIClassifier", "ClassificationResult", "AutoTagger"]
+__all__ = [
+    "AIClassifier",
+    "ClassificationResult",
+    "AutoTagger",
+    "CNNAudioClassifier",
+    "CNNClassificationResult",
+    "MUSIC_CLASSES",
+]

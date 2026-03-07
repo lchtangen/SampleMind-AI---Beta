@@ -1,225 +1,238 @@
-# 🚀 SampleMind AI — Session Start Guide
+# SampleMind AI — Session Start Guide
 
-> Read this at the start of every Claude Code / Copilot / Codex session.  
-> **Phase:** 15 — v3.0 Migration | **Date started:** 2026-03-07
+> Read this at the start of every Claude Code / Copilot / Codex session.
+> **Phase:** 15 — v3.0 Migration | **Last Updated:** 2026-03-07
 
 ---
 
-## ⚡ 3-Step Session Startup
+## 3-Step Session Startup
 
 ```bash
-# 1. Go to project
-cd ~/Projects/SampleMind-AI---Beta   # adjust path if needed
-
-# 2. Pull latest
+cd ~/Projects/SampleMind-AI---Beta
 git pull
-
-# 3. Activate environment
 source .venv/bin/activate
 ```
 
-Then check what's next:
+Then check current state:
+
 ```bash
-# In Claude Code:
-/read CLAUDE.md
+# Claude Code — read in this order:
+/read docs/active/INDEX.md
 /read docs/02-ROADMAPS/CURRENT_STATUS.md
 /read docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md
 ```
 
 ---
 
-## 🎯 What We're Building
-
-**SampleMind AI** is a music production AI platform with:
-- 🖥️ **CLI** (primary product) — Terminal interface for sample analysis, effects, library management
-- 🎨 **TUI** — Beautiful terminal UI built with Textual framework
-- 🌐 **Web UI** (Phase 15) — Next.js 15 + React 19 web platform
-- 🤖 **Multi-Agent AI** — Claude 3.7, Gemini 2.0, GPT-4o, Ollama (offline)
-- 🎵 **DAW Plugins** — FL Studio, Ableton, VST3 (JUCE)
-
-**Current focus:** Upgrading from v2.0-beta to v3.0 — modern AI models, new audio tools, web UI, multi-agent architecture.
-
----
-
-## 🗂️ Project State (2026-03-07)
+## Current Project State (2026-03-07 — Session 3 complete)
 
 | Area | Status | Notes |
 |------|--------|-------|
-| CLI | ✅ Working | `python main.py` |
-| TUI (11 screens) | ✅ Working | Needs Textual upgrade |
-| FastAPI server | ✅ Working | localhost:8000 |
-| FL Studio plugin | ✅ Working | C++ + Python |
-| Ableton plugin | ✅ Working | REST + JS |
-| AI providers | ⚠️ Outdated | Deps 2+ years old |
-| Web UI | ❌ Not started | Phase 15 priority |
-| Multi-agent | ❌ Not started | Phase 15 priority |
-| Test coverage | ⚠️ 30% | Target: 80% |
+| CLI (primary product) | ✅ Working | `python main.py` |
+| TUI — 13 screens | ✅ Working | Needs Textual ^0.87 screen migration |
+| FastAPI server | ✅ Working | `make dev` → localhost:8000 |
+| FL Studio plugin | ✅ Working | C++ JUCE + Python wrapper |
+| Ableton plugin | ✅ Working | REST backend + JS bridge |
+| Anthropic Claude | ✅ Upgraded | `^0.40.0`, Claude 3.7 Sonnet, extended thinking |
+| Google Gemini | ✅ Upgraded | `google-genai ^0.8.0`, Gemini 2.0 Flash |
+| OpenAI | ✅ Upgraded | `^1.58.0`, GPT-4o default |
+| Ollama (offline) | ✅ New | qwen2.5:7b, phi3:mini, gemma2:2b, <100ms |
+| pyproject.toml | ✅ v3.0 | All dep targets applied — needs `poetry install` |
+| Web UI | ❌ Not started | Phase 15 P2 — Next.js 15 |
+| LangGraph agents | ⏳ Dep added | Integration pending |
+| Test coverage | ⚠️ ~30% | 120+ tests, target 80% |
 
 ---
 
-## 🔴 Current P0 Tasks (Week 1: Mar 7–14)
+## Next Actions by Priority
 
-These are the most urgent items. Pick one and complete it:
+### This Session First: Install the Updated Dependencies
 
-1. **Upgrade `anthropic` → `^0.40.0`** — update pyproject.toml + ai_manager.py
-2. **Upgrade `openai` → `^1.58.0`** — update pyproject.toml + ai_manager.py  
-3. **Upgrade `google-generativeai` → `^0.8.0`** — migrate to new google.genai SDK
-4. **Upgrade `textual` → `^0.87.0`** — fix all breaking API changes in TUI
-5. **Remove `numpy <2.0.0` cap** — needed for torch 2.5+ and transformers 4.47+
-6. **Fix scipy monkey-patch** in `src/samplemind/__init__.py`
-7. **Re-enable `basic-pitch`** in pyproject.toml (currently commented out)
-8. **Add `demucs ^4.0.0`** for source separation
-9. **Add `pedalboard ^0.9.0`** for Spotify audio effects
+```bash
+source .venv/bin/activate
+make upgrade-deps   # poetry update — install all v3.0 deps
+make test           # verify nothing broke
+```
+
+### P0 Remaining (1 item)
+
+- [ ] **P0-008** — Remove scipy monkey-patch from `src/samplemind/__init__.py`
+  - Only do this AFTER `poetry install` completes and `librosa ^0.11.0` imports cleanly
+  - Delete lines 24–33 in `__init__.py`
+
+### P1 Next Priorities
+
+- [ ] **P1-TUI** — Migrate 13 Textual screens to `^0.87.0` API
+  - Guide: `docs/active/ui-ux/TUI_V3_UPGRADE_NOTES.md`
+  - Guide: `docs/04-TECHNICAL-IMPLEMENTATION/guides/TEXTUAL_MIGRATION.md`
+- [ ] **P1-011** — Integrate `demucs` into `audio_engine.py` (dep is installed, needs code)
+- [ ] **P1-012** — Integrate `pedalboard` effects into CLI + API
+- [ ] **P1-016** — Wire `faster-whisper` for local audio transcription
+
+### P2 Next
+
+- [ ] Scaffold `apps/web/` — `cd apps && npx create-next-app@latest web`
+- [ ] Reference: `docs/active/features/WEB_UI_SPEC.md`
 
 ---
 
-## 🛠️ Recommended Session Workflows
+## Session Workflows
 
-### Workflow A — Dependency Upgrade Session
+### Workflow A — Install & Verify Dependencies
+
 ```bash
-# 1. Read current pyproject.toml
-cat pyproject.toml
-
-# 2. Upgrade one dependency at a time
-poetry add anthropic@^0.40.0
-
-# 3. Run tests to check nothing broke
-make test
-
-# 4. Fix any import/API changes in source files
-# 5. Commit: git commit -m "feat(phase15): upgrade anthropic to ^0.40.0"
+source .venv/bin/activate
+make upgrade-deps               # poetry update
+python -c "import samplemind; print(samplemind.__version__)"
+python -c "from anthropic import AsyncAnthropic; print('anthropic ok')"
+python -c "from google import genai; print('google-genai ok')"
+python -c "import librosa; print(librosa.__version__)"  # should be 0.11.x
+make test-unit
 ```
 
-### Workflow B — Feature Implementation Session
-```bash
-# 1. Read the target file
-cat src/samplemind/integrations/ai_manager.py
+### Workflow B — TUI Screen Migration (Textual ^0.87)
 
-# 2. Implement the feature (Claude Code is best for large files)
-# 3. Write tests in tests/unit/
-# 4. make quality && make test
-# 5. Commit
+```bash
+# 1. Read the migration guide
+/read docs/active/ui-ux/TUI_V3_UPGRADE_NOTES.md
+/read docs/04-TECHNICAL-IMPLEMENTATION/guides/TEXTUAL_MIGRATION.md
+
+# 2. Read + update one screen at a time
+/read src/samplemind/interfaces/tui/screens/main_screen.py
+
+# 3. Test TUI launches without errors
+python -m samplemind.interfaces.tui.main
+
+# 4. Run TUI-specific tests
+make test-unit -- tests/unit/tui/
 ```
 
-### Workflow C — TUI Development Session
+### Workflow C — Demucs Integration
+
 ```bash
-# 1. Launch TUI to see current state
-python -m src.samplemind.interfaces.tui.main
+# 1. Read audio engine
+/read src/samplemind/core/engine/audio_engine.py
 
-# 2. Read the screen you're working on
-cat src/samplemind/interfaces/tui/screens/analyze_screen.py
+# 2. Add StemSeparation class using demucs
+# 3. Add API endpoint: POST /api/v1/audio/separate
+# 4. Write tests in tests/unit/core/
 
-# 3. Make changes, preview with Ctrl+C to restart
-# 4. Test with make test -- tests/unit/tui/
+make test-unit
 ```
 
-### Workflow D — Web UI Session (Phase 15)
+### Workflow D — Web UI Scaffold
+
 ```bash
-# Only after apps/web/ is initialized:
-cd apps/web
-npm install
-npm run dev   # Next.js dev server → localhost:3000
+# Requires: Node.js 20+
+/read docs/active/features/WEB_UI_SPEC.md
+cd apps
+npx create-next-app@latest web --typescript --tailwind --app
+cd web && npm install
+npm run dev  # → localhost:3000
+```
+
+### Workflow E — Agent Architecture
+
+```bash
+# LangGraph + openai-agents are in pyproject.toml
+# Target location:
+mkdir -p src/samplemind/integrations/agents/
+/read docs/active/architecture/V3_ARCHITECTURE_DECISIONS.md
 ```
 
 ---
 
-## 🤖 AI Tool Routing Guide
+## AI Tool Routing
 
-| What you're doing | Best tool | Why |
-|-------------------|-----------|-----|
-| Refactor a 2000+ line file | Claude Code | Largest context window |
-| Implement new feature across 5+ files | Claude Code | Full codebase awareness |
-| Quick function completion | Copilot (VSCode) | In-editor, fast |
-| Write boilerplate (new component) | Codex (terminal) | `codex "create a Textual Screen"` |
-| Research dependency versions | Any + web | `poetry search` or PyPI |
+| Task | Best Tool | Notes |
+|------|-----------|-------|
+| Refactor large files (2000+ lines) | Claude Code | Largest context window |
+| Multi-file feature across 5+ files | Claude Code | Full codebase awareness |
+| Quick function completion | Copilot (VSCode) | Fast in-editor suggestions |
+| New React component boilerplate | Copilot | Strong on TypeScript/TSX |
 | Write 20+ unit tests | Claude Code | Best test quality |
-| Generate TypeScript types | Copilot | In VSCode TS files |
-| Create a GitHub PR | Copilot (GitHub) | `@copilot` on issues |
+| Generate TypeScript types from API | Copilot | Strong on TS inference |
+| Research PyPI versions | Any + web | `poetry search` or pypi.org |
+| Create GitHub PRs from issues | Copilot (GitHub) | `@copilot` on issue |
 
 ---
 
-## 🏗️ Architecture Quick Reference
+## Architecture Quick Reference
 
 ```
 src/samplemind/
-├── __init__.py           ← lazy imports (has scipy workaround — fix in Phase 15)
+├── __init__.py              lazy imports (scipy patch — REMOVE after librosa ^0.11 install)
 ├── core/
-│   ├── engine/
-│   │   └── audio_engine.py   ← THE main audio analysis file
-│   ├── loader.py             ← AdvancedAudioLoader (multi-format)
-│   ├── library/
-│   │   └── pack_creator.py   ← sample pack creation
-│   └── database/
-│       └── chroma.py         ← ChromaDB vector search
+│   ├── engine/audio_engine.py   ← BPM, key, MFCC, stems, spectral
+│   ├── loader.py                ← AdvancedAudioLoader (WAV/MP3/FLAC/OGG/AAC)
+│   ├── database/chroma.py       ← ChromaDB vector similarity
+│   └── library/pack_creator.py  ← sample pack creation
 ├── integrations/
-│   ├── ai_manager.py         ← multi-provider AI (NEEDS UPGRADE)
-│   └── daw/
-│       └── fl_studio_plugin.py
+│   ├── ai_manager.py            ← multi-provider routing (v3.0 routing table)
+│   ├── anthropic_integration.py ← Claude 3.7 Sonnet + extended thinking
+│   ├── google_ai_integration.py ← Gemini 2.0 Flash (google-genai SDK)
+│   ├── openai_integration.py    ← GPT-4o
+│   └── ollama_integration.py    ← Offline Ollama provider (NEW)
 ├── interfaces/
-│   ├── cli/
-│   │   ├── menu.py           ← main CLI (~2255 lines, Rich + Typer)
-│   │   └── commands/
-│   │       └── effects.py    ← Effects CLI (Phase 13)
-│   └── tui/
-│       ├── app.py            ← Textual app root
-│       ├── main.py           ← entry point
-│       └── screens/          ← 11 screens (all working)
+│   ├── cli/menu.py              ← main CLI, ~2255 lines
+│   ├── tui/                     ← 13 screens (Textual migration needed)
+│   ├── api/                     ← FastAPI router layer
+│   └── server/                  ← FastAPI server entrypoint (NOT interfaces.api.main)
+└── services/                    ← business logic
+
+plugins/                         ← DAW plugins (FL Studio, Ableton)
+apps/web/                        ← Next.js 15 (to be created)
 ```
 
 ---
 
-## ✅ Session End Checklist
-
-Before you stop working, do this:
+## Session End Checklist
 
 ```bash
-# 1. Run quality checks
-make quality
+# 1. Quality checks
+make quality          # ruff + mypy + bandit
 
-# 2. Run tests
-make test
+# 2. Tests
+make test-unit
 
-# 3. Update status doc
-# Edit docs/02-ROADMAPS/CURRENT_STATUS.md
-# Add what you completed, update progress table
+# 3. Update status
+# Edit: docs/02-ROADMAPS/CURRENT_STATUS.md
+# Edit: docs/active/roadmap/PHASE_15_PROGRESS.md
+# Edit: docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md — tick off completed items
 
-# 4. Update checklist
-# Edit docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md
-# Tick off completed items, update progress %
-
-# 5. Commit everything
-git add -A
+# 4. Commit and push
+git add <changed files>
 git commit -m "feat(phase15): <describe what you did>"
 git push origin main
 ```
 
 ---
 
-## 📞 Ports & Services Reference
+## Service Ports Reference
 
-| Service | Port | Start command |
-|---------|------|---------------|
+| Service | Port | Command |
+|---------|------|---------|
 | FastAPI | 8000 | `make dev` |
 | Next.js | 3000 | `cd apps/web && npm run dev` |
 | MongoDB | 27017 | `docker-compose up -d mongodb` |
 | Redis | 6379 | `docker-compose up -d redis` |
 | ChromaDB | 8002 | `docker-compose up -d chromadb` |
-| Celery Flower | 5555 | `./start_flower.sh` |
+| Celery Flower | 5555 | `./scripts/start-flower.sh` |
 | Ollama | 11434 | `scripts/launch-ollama-api.sh` |
 
 ---
 
-## 🐛 Known Issues Quick Reference
+## Known Issues
 
-| Issue | Workaround | Fix in |
-|-------|------------|--------|
-| `anthropic` SDK outdated | Don't use streaming | P0 upgrade |
-| `scipy` import at top-level | Existing monkey-patch | P0 fix |
-| `basic-pitch` commented out | Can't do MIDI transcription | P0 re-enable |
-| CLI startup ~2s | Use `--no-banner` flag | P1 lazy imports |
-| TUI Textual v0.44 | Some CSS broken | P1 upgrade |
-| No web UI | Use CLI/TUI | Phase 15 |
+| Issue | Status | Resolution |
+|-------|--------|-----------|
+| scipy monkey-patch in `__init__.py` | ⏳ Keep for now | Remove after `librosa ^0.11.0` installed |
+| Textual screens not on ^0.87 API | ⏳ P1-TUI | Migrate screens — see TUI_V3_UPGRADE_NOTES.md |
+| `demucs`/`pedalboard` in pyproject but not integrated | ⏳ P1 | Wire into audio_engine.py + API |
+| CLI startup ~2s | ⏳ Medium | Further lazy import optimization |
+| Test coverage 30% | ⏳ P5 | Target 80% — write tests alongside each feature |
+| Web UI not built | ⏳ P2 | Scaffold Next.js 15 in apps/web/ |
 
 ---
 
-*SESSION_START_GUIDE.md v1.0 — Created 2026-03-07. Update as the project evolves.*
+*SESSION_START_GUIDE.md v2.0 — Updated 2026-03-07 (Session 3). Reflects P0+P1 migration complete.*

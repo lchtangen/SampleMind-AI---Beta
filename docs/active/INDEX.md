@@ -1,34 +1,52 @@
 # SampleMind AI — Active Workspace Index
 
 > **AI Agent Entry Point** — Read this file first to orient yourself in the codebase.
-> Last Updated: 2026-03-07 | Active Phase: 15 — v3.0 Migration | Version: 2.1.0-beta → 3.0.0
+> **Last Updated:** 2026-03-07 (Session 3 complete) | **Phase:** 15 — v3.0 Migration
+> **Version:** 2.1.0-beta → 3.0.0 | **Branch:** `main`
 
 ---
 
 ## What Is This Project?
 
-SampleMind AI is a CLI-first, offline-capable music production AI tool for audio analysis,
-sample management, stem separation, MIDI transcription, and AI-powered recommendations.
+SampleMind AI is a **CLI-first, offline-capable music production AI** for audio analysis,
+sample management, stem separation, MIDI transcription, and AI-powered production coaching.
 
-**Primary interfaces:** CLI (main product), TUI (Textual), FastAPI REST, Next.js 15 web UI (Phase 15)
-**AI providers:** Claude 3.7 Sonnet (primary), Gemini 2.0 Flash, GPT-4o, Ollama (offline)
-**Audio stack:** librosa, demucs v4, basic-pitch, pedalboard (Spotify), Microsoft BEATs
+**Primary interfaces:** CLI (main product), TUI (Textual ^0.87), FastAPI REST, Next.js 15 web UI (building)
+**AI stack:** Claude 3.7 Sonnet (primary) · Gemini 2.0 Flash (fast) · GPT-4o (agents) · Ollama (offline <100ms)
+**Audio stack:** librosa ^0.11, demucs ^4.0 (stems), basic-pitch ^0.4 (MIDI), pedalboard ^0.9 (effects), faster-whisper ^1.1
 
 ---
 
-## Active Phase 15 — Where To Start
+## Phase 15 Progress — What's Done vs. Next
 
-| Task | Read This First |
-|------|----------------|
-| What is the current state? | [CURRENT_STATUS.md](../../docs/02-ROADMAPS/CURRENT_STATUS.md) |
-| What needs to be done next? | [V3_MIGRATION_CHECKLIST.md](../../docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md) |
-| Session-by-session progress log | [roadmap/PHASE_15_PROGRESS.md](roadmap/PHASE_15_PROGRESS.md) |
-| Full 100-point upgrade roadmap | [roadmap/V3_100_KEYPOINTS.md](roadmap/V3_100_KEYPOINTS.md) |
-| Architecture decisions (ADRs) | [architecture/V3_ARCHITECTURE_DECISIONS.md](architecture/V3_ARCHITECTURE_DECISIONS.md) |
-| Dependency upgrade status | [devops/DEPENDENCY_UPGRADE_STATUS.md](devops/DEPENDENCY_UPGRADE_STATUS.md) |
-| AI provider upgrade log | [models/AI_PROVIDER_UPGRADE_LOG.md](models/AI_PROVIDER_UPGRADE_LOG.md) |
-| TUI v3 upgrade notes | [ui-ux/TUI_V3_UPGRADE_NOTES.md](ui-ux/TUI_V3_UPGRADE_NOTES.md) |
-| Web UI spec (Phase 15) | [features/WEB_UI_SPEC.md](features/WEB_UI_SPEC.md) |
+### ✅ P0 + P1 Complete (Session 3 — 2026-03-07)
+
+All AI provider SDKs migrated, pyproject.toml fully upgraded:
+
+| Area | Done |
+|------|------|
+| `anthropic ^0.40.0` | Claude 3.7 Sonnet + extended thinking |
+| `google-genai ^0.8.0` | Gemini 2.0 Flash, new Client API (full rewrite) |
+| `openai ^1.58.0` | GPT-4o default, gpt-5 removed |
+| `ollama ^0.3.0` | NEW offline provider (qwen2.5, phi3, gemma2) |
+| AI routing | Anthropic=PRIMARY, Ollama=INSTANT, QUICK_ANALYSIS → Ollama |
+| All dep upgrades | numpy >=2.0, scipy ^1.14, librosa ^0.11, torch ^2.5, textual ^0.87 |
+| New deps added | demucs, pedalboard, basic-pitch, faster-whisper, langgraph, langchain-core, openai-agents |
+| Tests | 120+ tests (added test_anthropic, test_ollama, rewrote test_google, updated test_ai_manager) |
+| Docs cleanup | 73 files archived, docs/active/ created, 8 root docs updated |
+
+### Current Active Priorities
+
+| Priority | Task | Status |
+|----------|------|--------|
+| P0-008 | Remove scipy monkey-patch | ⏳ After `poetry install` + `librosa ^0.11` verified |
+| P1-TUI | Migrate 13 TUI screens to Textual ^0.87 | ⏳ Next |
+| P1-011 | Integrate `demucs` into audio_engine.py | ⏳ Next |
+| P2 | Scaffold `apps/web/` — Next.js 15 | ⏳ Next |
+| P3 | LangGraph multi-agent architecture | ⏳ Deps added, integration pending |
+| P5-001 | Test coverage 30% → 50% → 80% | ⏳ Ongoing |
+
+**First action this session:** `source .venv/bin/activate && make upgrade-deps`
 
 ---
 
@@ -36,35 +54,34 @@ sample management, stem separation, MIDI transcription, and AI-powered recommend
 
 ```
 src/samplemind/
-├── interfaces/
-│   ├── cli/menu.py                    # Main CLI (~2255 lines) — primary product
-│   ├── cli/commands/effects.py        # Effects chain CLI
-│   ├── tui/app.py                     # Textual TUI app
-│   ├── tui/screens/                   # 13 TUI screens (verified on disk):
-│   │   # main, analyze, batch, results, favorites, settings, comparison,
-│   │   # search, tagging, performance, library, chain, classification
-│   └── api/                           # FastAPI router layer
-├── server/                            # FastAPI server entrypoint
+├── __init__.py                        — lazy imports (scipy monkey-patch: remove after librosa ^0.11 install)
 ├── core/
-│   ├── engine/audio_engine.py         # Audio analysis (BPM, key, MFCC, stems)
-│   ├── loader.py                      # AdvancedAudioLoader
-│   ├── database/chroma.py             # ChromaDB vector search
-│   └── library/pack_creator.py        # Sample pack creation
+│   ├── engine/audio_engine.py         — main audio processing (BPM, key, MFCC, stems)
+│   ├── loader.py                      — AdvancedAudioLoader (multi-format)
+│   ├── database/chroma.py             — ChromaDB vector search
+│   └── library/pack_creator.py        — sample pack creation
 ├── integrations/
-│   ├── ai_manager.py                  # Multi-provider AI routing (CRITICAL)
-│   └── daw/fl_studio_plugin.py        # FL Studio integration
-├── ai/                                # AI utilities
-└── services/                          # Business logic services
+│   ├── ai_manager.py                  — multi-provider routing (UPDATED v3.0)
+│   ├── anthropic_integration.py       — Claude 3.7 Sonnet + extended thinking (UPDATED)
+│   ├── google_ai_integration.py       — Gemini 2.0 Flash / google-genai SDK (UPDATED)
+│   ├── openai_integration.py          — GPT-4o (UPDATED)
+│   ├── ollama_integration.py          — Offline Ollama provider (NEW)
+│   └── daw/fl_studio_plugin.py        — FL Studio integration
+├── interfaces/
+│   ├── cli/menu.py                    — main CLI (~2255 lines, Rich + Typer)
+│   ├── cli/commands/effects.py        — Effects chain CLI
+│   ├── tui/app.py                     — Textual TUI app (needs ^0.87 migration)
+│   ├── tui/screens/                   — 13 screens (needs ^0.87 migration)
+│   ├── api/                           — FastAPI router layer
+│   └── server/                        — FastAPI server entrypoint
+├── ai/                                — AI utilities and helpers
+└── services/                          — business logic services
 
-plugins/
-├── fl_studio_plugin.py                # FL Studio Python wrapper
-├── fl_studio/cpp/                     # C++ native plugin (JUCE)
-├── ableton/                           # Ableton REST backend + JS bridge
-└── installer.py                       # Cross-DAW installer
-
-main.py                                # CLI entry point
-pyproject.toml                         # Dependencies (NEEDS v3.0 upgrade)
+main.py                                — CLI entry point
+pyproject.toml                         — ALL deps now at v3.0 targets
 ```
+
+> **Note:** API path is `src/samplemind/interfaces/api/` and `src/samplemind/server/` — NOT `src/samplemind/api/`
 
 ---
 
@@ -72,116 +89,134 @@ pyproject.toml                         # Dependencies (NEEDS v3.0 upgrade)
 
 ```
 docs/
-├── active/                            # <-- YOU ARE HERE: V3 working documents
-│   ├── INDEX.md                       # This file — master AI navigation hub
+├── active/                            ← V3 WORKING WORKSPACE (you are here)
+│   ├── INDEX.md                       ← This file — master AI navigation hub
 │   ├── architecture/
-│   │   └── V3_ARCHITECTURE_DECISIONS.md   # ADRs for v3.0 decisions
+│   │   └── V3_ARCHITECTURE_DECISIONS.md
 │   ├── devops/
-│   │   └── DEPENDENCY_UPGRADE_STATUS.md   # Tracks all dep upgrades
+│   │   └── DEPENDENCY_UPGRADE_STATUS.md  ← Updated: all P0/P1 done
 │   ├── features/
-│   │   └── WEB_UI_SPEC.md                 # Next.js 15 web UI specification
+│   │   └── WEB_UI_SPEC.md             ← Next.js 15 spec
 │   ├── models/
-│   │   └── AI_PROVIDER_UPGRADE_LOG.md     # Claude/OpenAI/Gemini upgrade log
+│   │   └── AI_PROVIDER_UPGRADE_LOG.md ← Updated: all 4 providers done
 │   ├── roadmap/
-│   │   ├── PHASE_15_PROGRESS.md           # Session-by-session log (update each session)
-│   │   └── V3_100_KEYPOINTS.md            # Full 100-point v3.0 upgrade plan
+│   │   ├── PHASE_15_PROGRESS.md       ← Session-by-session log (update each session)
+│   │   └── V3_100_KEYPOINTS.md
 │   └── ui-ux/
-│       └── TUI_V3_UPGRADE_NOTES.md        # Textual ^0.87 migration notes
+│       └── TUI_V3_UPGRADE_NOTES.md    ← Textual ^0.87 migration guide
 │
-├── 02-ROADMAPS/                       # Authoritative status + checklist
-│   ├── CURRENT_STATUS.md              # Real-time project status (update every session)
-│   ├── V3_MIGRATION_CHECKLIST.md      # 100-item P0/P1/P2 checklist (tick off as done)
-│   └── README.md                      # Roadmap navigation
+├── ARCHITECTURE.md                    ← V3 architecture reference (new)
+├── DEVELOPMENT.md                     ← Developer quick reference (new)
 │
-├── 04-TECHNICAL-IMPLEMENTATION/       # User guides + reference + technical docs
-│   ├── guides/                        # Installation, platform, AI setup guides
-│   │   ├── AI_INTEGRATION_SETUP.md    # AI provider configuration (v3.0 updated)
-│   │   ├── TEXTUAL_MIGRATION.md       # TUI v0.87 migration guide
-│   │   ├── INSTALLATION_GUIDE.md      # Main install guide
-│   │   └── PLUGIN_INSTALLATION_GUIDE.md  # DAW plugin install
-│   ├── reference/
-│   │   └── DEVELOPMENT.md             # Development reference
+├── 02-ROADMAPS/
+│   ├── CURRENT_STATUS.md              ← Real-time project status (update every session)
+│   ├── V3_MIGRATION_CHECKLIST.md      ← Updated: P0 75% done, P1 48% done
+│   └── README.md
+│
+├── 04-TECHNICAL-IMPLEMENTATION/
+│   ├── guides/                        ← Installation, platform, AI, DAW guides
+│   │   ├── INSTALLATION_GUIDE.md
+│   │   ├── AI_INTEGRATION_SETUP.md
+│   │   ├── TEXTUAL_MIGRATION.md       ← Textual ^0.87 migration guide
+│   │   └── PLUGIN_INSTALLATION_GUIDE.md
 │   └── technical/
-│       ├── audio_processing.md        # Audio pipeline deep dive
-│       └── OPTIMIZATION_GUIDE.md      # Performance optimization
+│       └── audio_processing.md
 │
-├── 00-INDEX/                          # Phase index and status dashboard
-│   ├── MASTER_PHASE_INDEX.md          # All phases 1-15 documented
-│   └── PHASE_STATUS_DASHBOARD.md      # Phase completion status
+├── 00-INDEX/
+│   ├── MASTER_PHASE_INDEX.md
+│   └── PHASE_STATUS_DASHBOARD.md      ← Updated: Phase 15 P0/P1 done
 │
-├── 01-PHASES/15-PHASE-15-IN-PROGRESS/ # Active phase directory
-│   └── README.md                      # Phase 15 entry point
+├── 01-PHASES/15-PHASE-15-IN-PROGRESS/ ← Active phase directory
 │
-├── API_DOCUMENTATION.md               # Full FastAPI reference (24K)
-├── CLI_REFERENCE.md                   # Full CLI command reference (62K)
-├── SESSION_START_GUIDE.md             # Session startup checklist
-└── README.md                          # Docs home page
+├── CLI_REFERENCE.md                   ← Full CLI reference (62K)
+├── API_DOCUMENTATION.md               ← Full API reference (24K)
+├── SESSION_START_GUIDE.md             ← Updated session startup guide
+└── _archive/                          ← Read-only: 73+ archived docs
 ```
 
 ---
 
-## Phase 15 — Priority Queue
+## Task Routing — What to Read
 
-### P0 — Critical (unblocks everything)
-- [ ] Upgrade `anthropic ^0.7.0` → `^0.40.0` (Claude 3.7 Sonnet + extended thinking)
-- [ ] Upgrade `openai ^1.3.0` → `^1.58.0` (GPT-4o + Agents SDK)
-- [ ] Rename `google-generativeai` → `google-genai ^0.8.0` (Gemini 2.0 Flash)
-- [ ] Remove `numpy <2.0.0` cap; upgrade numpy, scipy, torch together
-- [ ] Re-enable `basic-pitch = "^0.4.0"` in pyproject.toml
-- [ ] Upgrade `textual ^0.44.0` → `^0.87.0` + fix breaking TUI changes
-
-### P1 — Core upgrades (Week 2)
-- [ ] Add `demucs ^4.0.0` — 6-stem source separation (htdemucs_6s)
-- [ ] Add `pedalboard ^0.9.0` — Spotify professional audio effects
-- [ ] Implement multi-agent architecture with LangGraph
-- [ ] Build 3 new TUI screens: AgentChatScreen, WaveformScreen, MixingBoardScreen
-
-### P2 — New features (Week 3-4)
-- [ ] Scaffold `apps/web/` — Next.js 15 + React 19 + Tailwind v4
-- [ ] FastAPI → TypeScript client generation from OpenAPI spec
-- [ ] Upgrade test coverage 30% → 80%+
+| Scenario | Read These |
+|----------|-----------|
+| Working on audio analysis | `core/engine/audio_engine.py` + `technical/audio_processing.md` |
+| Working on AI integration | `integrations/ai_manager.py` + `active/models/AI_PROVIDER_UPGRADE_LOG.md` |
+| Working on CLI | `interfaces/cli/menu.py` + `CLI_REFERENCE.md` |
+| Working on TUI | `interfaces/tui/` + `active/ui-ux/TUI_V3_UPGRADE_NOTES.md` + `guides/TEXTUAL_MIGRATION.md` |
+| Working on API | `interfaces/api/` + `server/` + `API_DOCUMENTATION.md` |
+| Working on agents | `integrations/` + `active/architecture/V3_ARCHITECTURE_DECISIONS.md` |
+| Working on DAW plugins | `plugins/` + `guides/PLUGIN_INSTALLATION_GUIDE.md` |
+| Upgrading dependencies | `pyproject.toml` + `active/devops/DEPENDENCY_UPGRADE_STATUS.md` |
+| Planning next work | `02-ROADMAPS/V3_MIGRATION_CHECKLIST.md` + `active/roadmap/PHASE_15_PROGRESS.md` |
+| Starting a new session | `SESSION_START_GUIDE.md` + `02-ROADMAPS/CURRENT_STATUS.md` |
 
 ---
 
-## Common Tasks — What To Read
+## AI SDK Patterns (v3.0 — use these, never the old patterns)
 
-| Scenario | Files to read |
-|----------|--------------|
-| Working on audio analysis | `src/samplemind/core/engine/audio_engine.py` + `docs/04-TECHNICAL-IMPLEMENTATION/technical/audio_processing.md` |
-| Working on AI integration | `src/samplemind/integrations/ai_manager.py` + `docs/active/models/AI_PROVIDER_UPGRADE_LOG.md` |
-| Working on CLI | `src/samplemind/interfaces/cli/menu.py` + `docs/CLI_REFERENCE.md` |
-| Working on TUI | `src/samplemind/interfaces/tui/app.py` + `docs/active/ui-ux/TUI_V3_UPGRADE_NOTES.md` |
-| Working on API | `src/samplemind/api/` + `docs/API_DOCUMENTATION.md` |
-| Working on DAW plugins | `plugins/` + `docs/04-TECHNICAL-IMPLEMENTATION/guides/PLUGIN_INSTALLATION_GUIDE.md` |
-| Upgrading dependencies | `pyproject.toml` + `docs/active/devops/DEPENDENCY_UPGRADE_STATUS.md` |
-| Understanding architecture | `docs/active/architecture/V3_ARCHITECTURE_DECISIONS.md` + `docs/04-TECHNICAL-IMPLEMENTATION/technical/` |
-| Starting a new session | `docs/SESSION_START_GUIDE.md` + `docs/02-ROADMAPS/CURRENT_STATUS.md` |
-| Planning next task | `docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md` + `docs/active/roadmap/PHASE_15_PROGRESS.md` |
+```python
+# Anthropic ^0.40.0 — extended thinking for claude-3-7-sonnet
+from anthropic import AsyncAnthropic
+client = AsyncAnthropic(api_key=key)
+response = await client.messages.create(
+    model="claude-3-7-sonnet-20250219",
+    max_tokens=8096,
+    thinking={"type": "enabled", "budget_tokens": 5000},
+    messages=[{"role": "user", "content": prompt}],
+    # NOTE: DO NOT include temperature with extended thinking
+)
+
+# Google google-genai ^0.8.0 — NEVER use google-generativeai
+from google import genai
+from google.genai import types as genai_types
+client = genai.Client(api_key=key)
+response = await client.aio.models.generate_content(
+    model="gemini-2.0-flash",
+    contents=prompt,
+    config=genai_types.GenerateContentConfig(temperature=0.7),
+)
+
+# OpenAI ^1.58.0 — gpt-4o only (gpt-5 does NOT exist)
+from openai import AsyncOpenAI
+client = AsyncOpenAI(api_key=key)
+
+# Ollama ^0.3.0 — offline, no API key
+import ollama
+client = ollama.AsyncClient(host="http://localhost:11434")
+response = await client.chat(model="qwen2.5:7b-instruct", messages=[...])
+text = response["message"]["content"]
+```
 
 ---
 
-## Critical Rules (Do Not Violate)
+## Critical Rules
 
-1. Never call `scipy` functions at module import time (`src/samplemind/__init__.py` monkey-patch)
-2. Never use `asyncio.run()` inside Textual event handlers — use `async def`
-3. Never block `main.py` event loop — audio I/O must be in `ThreadPoolExecutor`
-4. Run `make quality` before every commit (`ruff + mypy + bandit`)
-5. Update `docs/02-ROADMAPS/CURRENT_STATUS.md` and `docs/active/roadmap/PHASE_15_PROGRESS.md` at session end
+1. **Never** use `google-generativeai` — package is `google-genai`, import is `from google import genai`
+2. **Never** reference `gpt-5` — it does not exist
+3. **Never** set `temperature` when using extended thinking (claude-3-7-sonnet)
+4. **Never** call `genai.configure(api_key=...)` — use `genai.Client(api_key=...)` instead
+5. **Never** use `asyncio.run()` inside Textual event handlers
+6. **Always** run `make quality` before committing (`ruff + mypy + bandit`)
+7. **Always** update `CURRENT_STATUS.md` and `PHASE_15_PROGRESS.md` at session end
+8. **Keep** the scipy monkey-patch in `__init__.py` until librosa ^0.11.0 is installed and tested
 
 ---
 
 ## Service Ports
 
-| Service | Port | Run Command |
-|---------|------|-------------|
+| Service | Port | Command |
+|---------|------|---------|
 | CLI | — | `python main.py` |
+| TUI | — | `python -m samplemind.interfaces.tui.main` |
 | FastAPI | 8000 | `make dev` |
-| MongoDB | 27017 | `docker-compose up -d` |
-| Redis | 6379 | `docker-compose up -d` |
-| ChromaDB | 8002 | `docker-compose up -d` |
+| Next.js web | 3000 | `cd apps/web && npm run dev` |
+| MongoDB | 27017 | `docker-compose up -d mongodb` |
+| Redis | 6379 | `docker-compose up -d redis` |
+| ChromaDB | 8002 | `docker-compose up -d chromadb` |
 | Ollama | 11434 | `scripts/launch-ollama-api.sh` |
 
 ---
 
-*This file is the master navigation hub for Claude Code, GitHub Copilot, and all AI agents.*
-*Update when adding new active working documents or changing the directory structure.*
+*Master navigation hub for Claude Code, GitHub Copilot, and all AI agents.*
+*Update at the end of each session when adding new documents or completing major milestones.*
