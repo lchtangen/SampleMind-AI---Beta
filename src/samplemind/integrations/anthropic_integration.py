@@ -54,31 +54,31 @@ class AnthropicAnalysisType(Enum):
 @dataclass
 class AnthropicMusicAnalysis:
     """Result from Claude music analysis"""
-    
+
     # Core Analysis
     summary: str
     detailed_analysis: str
-    
+
     # Production Coaching
     production_tips: List[str] = field(default_factory=list)
     technique_explanations: List[Dict[str, str]] = field(default_factory=list)
     workflow_optimizations: List[str] = field(default_factory=list)
-    
+
     # Creative Suggestions
     creative_ideas: List[str] = field(default_factory=list)
     arrangement_suggestions: List[str] = field(default_factory=list)
     genre_fusion_ideas: List[str] = field(default_factory=list)
-    
+
     # FL Studio Specific
     fl_studio_recommendations: List[str] = field(default_factory=list)
     plugin_chains: List[Dict[str, Any]] = field(default_factory=list)
     mixer_setup: Dict[str, Any] = field(default_factory=dict)
-    
+
     # Music Theory
     harmonic_analysis: Dict[str, Any] = field(default_factory=dict)
     modal_analysis: List[str] = field(default_factory=list)
     chord_progressions: List[str] = field(default_factory=list)
-    
+
     # Metadata
     model_used: ClaudeModel = ClaudeModel.CLAUDE_3_7_SONNET
     tokens_used: int = 0
@@ -90,14 +90,14 @@ class AnthropicMusicAnalysis:
 class AnthropicMusicProducer:
     """
     Claude-powered music production assistant
-    
+
     Specializes in:
     - Production coaching with detailed explanations
     - Creative suggestions and arrangement ideas
     - FL Studio optimization and workflow tips
     - Deep music theory analysis
     """
-    
+
     def __init__(
         self,
         api_key: Optional[str] = None,
@@ -107,7 +107,7 @@ class AnthropicMusicProducer:
     ):
         """
         Initialize Anthropic Music Producer
-        
+
         Args:
             api_key: Anthropic API key (if None, uses ANTHROPIC_API_KEY env var)
             default_model: Claude model to use
@@ -119,13 +119,13 @@ class AnthropicMusicProducer:
                 "Anthropic package not installed. "
                 "Install with: pip install anthropic"
             )
-        
+
         self.client = Anthropic(api_key=api_key)
         self.async_client = AsyncAnthropic(api_key=api_key)
         self.default_model = default_model
         self.max_tokens = max_tokens
         self.temperature = temperature
-        
+
         # Performance tracking
         self.stats = {
             'total_analyses': 0,
@@ -135,9 +135,9 @@ class AnthropicMusicProducer:
             'success_count': 0,
             'error_count': 0
         }
-        
+
         logger.info(f"✅ Anthropic Music Producer initialized with {default_model.value}")
-    
+
     async def analyze_music_comprehensive(
         self,
         audio_features: Dict[str, Any],
@@ -146,17 +146,17 @@ class AnthropicMusicProducer:
     ) -> AnthropicMusicAnalysis:
         """
         Perform comprehensive music analysis with Claude
-        
+
         Args:
             audio_features: Audio features from audio engine
             analysis_type: Type of analysis to perform
             user_context: Additional user context
-            
+
         Returns:
             AnthropicMusicAnalysis with detailed insights
         """
         start_time = time.time()
-        
+
         try:
             # Build specialized prompt based on analysis type
             prompt = self._build_prompt(audio_features, analysis_type, user_context)
@@ -176,29 +176,29 @@ class AnthropicMusicProducer:
 
             # Call Claude API
             response = await self.async_client.messages.create(**params)
-            
+
             # Parse response
             result = self._parse_response(response, analysis_type)
-            
+
             # Update statistics
             processing_time = time.time() - start_time
             result.processing_time = processing_time
             result.tokens_used = response.usage.input_tokens + response.usage.output_tokens
-            
+
             self._update_stats(result.tokens_used, processing_time, success=True)
-            
+
             logger.info(
                 f"✅ Claude analysis complete: {result.tokens_used} tokens, "
                 f"{processing_time:.2f}s"
             )
-            
+
             return result
-            
+
         except Exception as e:
             logger.error(f"❌ Claude analysis failed: {e}")
             self._update_stats(0, time.time() - start_time, success=False)
             raise
-    
+
     def _build_prompt(
         self,
         audio_features: Dict[str, Any],
@@ -206,14 +206,14 @@ class AnthropicMusicProducer:
         user_context: Optional[Dict[str, Any]]
     ) -> str:
         """Build specialized prompt for Claude based on analysis type"""
-        
+
         # Extract key audio features
         tempo = audio_features.get('tempo', 'Unknown')
         key = audio_features.get('key', 'Unknown')
         mode = audio_features.get('mode', 'Unknown')
         energy = audio_features.get('energy', 'Unknown')
         duration = audio_features.get('duration', 'Unknown')
-        
+
         # Base context
         base_context = f"""You are an expert music producer and audio engineer with deep knowledge of:
 - Music production techniques and workflow optimization
@@ -230,10 +230,10 @@ Analyze the following audio track:
 - Energy Level: {energy}
 - Duration: {duration}s
 """
-        
+
         if user_context:
             base_context += f"\n**User Context:** {json.dumps(user_context, indent=2)}\n"
-        
+
         # Add specialized prompts based on analysis type
         if analysis_type == AnthropicAnalysisType.PRODUCTION_COACHING:
             specific_prompt = """
@@ -249,7 +249,7 @@ Provide detailed production coaching covering:
 
 Be specific, educational, and encouraging. Use analogies and examples.
 """
-        
+
         elif analysis_type == AnthropicAnalysisType.CREATIVE_SUGGESTIONS:
             specific_prompt = """
 **Task: Creative Suggestions**
@@ -264,7 +264,7 @@ Provide innovative creative suggestions:
 
 Think outside the box. Suggest unique, inspiring ideas.
 """
-        
+
         elif analysis_type == AnthropicAnalysisType.FL_STUDIO_OPTIMIZATION:
             specific_prompt = """
 **Task: FL Studio Optimization**
@@ -280,7 +280,7 @@ Provide FL Studio-specific recommendations:
 
 Be specific to FL Studio 21+. Include practical, implementable steps.
 """
-        
+
         elif analysis_type == AnthropicAnalysisType.MUSIC_THEORY_ANALYSIS:
             specific_prompt = """
 **Task: Music Theory Analysis**
@@ -296,7 +296,7 @@ Provide deep music theory analysis:
 
 Be thorough and educational. Explain complex concepts clearly.
 """
-        
+
         elif analysis_type == AnthropicAnalysisType.MIXING_MASTERING:
             specific_prompt = """
 **Task: Mixing & Mastering Analysis**
@@ -312,7 +312,7 @@ Provide mixing and mastering guidance:
 
 Provide specific frequency ranges, ratio settings, and processing tips.
 """
-        
+
         else:  # COMPREHENSIVE_ANALYSIS or default
             specific_prompt = """
 **Task: Comprehensive Music Analysis**
@@ -329,7 +329,7 @@ Provide a thorough analysis covering:
 
 Be comprehensive, insightful, and constructive.
 """
-        
+
         # Format output structure
         output_format = """
 **Output Format:**
@@ -345,19 +345,19 @@ Provide your response as a structured JSON object with these keys:
     "confidence_score": 0.0-1.0
 }
 """
-        
+
         return base_context + specific_prompt + output_format
-    
+
     def _parse_response(
         self,
         response: Any,
         analysis_type: AnthropicAnalysisType
     ) -> AnthropicMusicAnalysis:
         """Parse Claude API response into structured analysis"""
-        
+
         # Extract text content
         content = response.content[0].text
-        
+
         try:
             # Try to parse as JSON
             if "{" in content and "}" in content:
@@ -370,7 +370,7 @@ Provide your response as a structured JSON object with these keys:
                     json_start = content.find("```") + 3
                     json_end = content.find("```", json_start)
                     content = content[json_start:json_end].strip()
-                
+
                 data = json.loads(content)
             else:
                 # Fallback: treat entire response as summary
@@ -378,14 +378,14 @@ Provide your response as a structured JSON object with these keys:
                     "summary": content[:500],
                     "detailed_analysis": content
                 }
-        
+
         except json.JSONDecodeError:
             logger.warning("Failed to parse JSON response, using fallback format")
             data = {
                 "summary": content[:500],
                 "detailed_analysis": content
             }
-        
+
         # Build structured result
         return AnthropicMusicAnalysis(
             summary=data.get("summary", ""),
@@ -405,20 +405,20 @@ Provide your response as a structured JSON object with these keys:
             model_used=self.default_model,
             confidence_score=data.get("confidence_score", 0.85)
         )
-    
+
     def _update_stats(self, tokens_used: int, processing_time: float, success: bool) -> None:
         """Update performance statistics"""
         self.stats['total_analyses'] += 1
-        
+
         if success:
             self.stats['success_count'] += 1
             self.stats['total_tokens_used'] += tokens_used
-            
+
             # Calculate cost (Claude 3.7 Sonnet pricing)
             # Input: $3/MTok, Output: $15/MTok (approximate average: $9/MTok)
             cost = (tokens_used / 1000) * 0.009
             self.stats['total_cost'] += cost
-            
+
             # Update average response time
             prev_avg = self.stats['avg_response_time']
             count = self.stats['success_count']
@@ -427,7 +427,7 @@ Provide your response as a structured JSON object with these keys:
             )
         else:
             self.stats['error_count'] += 1
-    
+
     def get_performance_stats(self) -> Dict[str, Any]:
         """Get performance statistics"""
         return {
@@ -445,7 +445,7 @@ Provide your response as a structured JSON object with these keys:
                 if self.stats['success_count'] > 0 else 0.0
             )
         }
-    
+
     async def submit_audio_via_files_api(
         self,
         file_path: Path,
@@ -532,12 +532,12 @@ async def analyze_with_claude(
 ) -> AnthropicMusicAnalysis:
     """
     Quick analysis with Claude
-    
+
     Args:
         audio_features: Audio features dictionary
         api_key: Anthropic API key (optional)
         analysis_type: Type of analysis
-        
+
     Returns:
         AnthropicMusicAnalysis result
     """

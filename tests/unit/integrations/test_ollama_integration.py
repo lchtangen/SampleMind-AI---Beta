@@ -27,25 +27,24 @@ from samplemind.integrations.ollama_integration import (
 def mock_ollama_client():
     """Mock ollama.AsyncClient with a standard successful response"""
     with patch("ollama.AsyncClient") as mock_cls:
+        # ollama ^0.4.0: responses are typed objects, not plain dicts
         instance = AsyncMock()
-        instance.chat.return_value = {
-            "message": {
-                "content": (
-                    "Great electronic track with driving energy.\n"
-                    "1. Add sidechain compression to the kick\n"
-                    "2. Cut the low end below 80Hz\n"
-                    "3. Try a short reverb on the snare\n"
-                    "4. Layer atmospheric pads in the background\n"
-                    "5. Automate the filter cutoff for movement"
-                )
-            }
-        }
-        instance.list.return_value = {
-            "models": [
-                {"name": "qwen2.5:7b-instruct"},
-                {"name": "phi3:mini"},
-            ]
-        }
+        chat_response = MagicMock()
+        chat_response.message.content = (
+            "Great electronic track with driving energy.\n"
+            "1. Add sidechain compression to the kick\n"
+            "2. Cut the low end below 80Hz\n"
+            "3. Try a short reverb on the snare\n"
+            "4. Layer atmospheric pads in the background\n"
+            "5. Automate the filter cutoff for movement"
+        )
+        instance.chat.return_value = chat_response
+
+        m1, m2 = MagicMock(), MagicMock()
+        m1.model, m2.model = "qwen2.5:7b-instruct", "phi3:mini"
+        list_response = MagicMock()
+        list_response.models = [m1, m2]
+        instance.list.return_value = list_response
         mock_cls.return_value = instance
         yield instance
 
@@ -183,9 +182,11 @@ class TestCheckAvailability:
 
     @pytest.mark.asyncio
     async def test_returns_false_when_model_not_in_list(self, producer):
-        producer._client.list = AsyncMock(return_value={
-            "models": [{"name": "phi3:mini"}]
-        })
+        m = MagicMock()
+        m.model = "phi3:mini"
+        lr = MagicMock()
+        lr.models = [m]
+        producer._client.list = AsyncMock(return_value=lr)
         # default model is qwen2.5:7b-instruct, not in list
         result = await producer.check_availability()
         assert result is False
@@ -198,7 +199,9 @@ class TestCheckAvailability:
 
     @pytest.mark.asyncio
     async def test_returns_false_on_empty_model_list(self, producer):
-        producer._client.list = AsyncMock(return_value={"models": []})
+        lr = MagicMock()
+        lr.models = []
+        producer._client.list = AsyncMock(return_value=lr)
         result = await producer.check_availability()
         assert result is False
 

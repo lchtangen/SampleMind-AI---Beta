@@ -72,13 +72,13 @@ class AdvancedMusicAnalysis:
     timestamp: float = field(default_factory=time.time)
     processing_time: float = 0.0
     confidence_score: float = 0.0
-    
+
     # Core Analysis
     detailed_description: str = ""
     musical_summary: str = ""
     technical_analysis: str = ""
     creative_interpretation: str = ""
-    
+
     # Genre & Style Analysis
     primary_genre: str = ""
     secondary_genres: List[str] = field(default_factory=list)
@@ -87,7 +87,7 @@ class AdvancedMusicAnalysis:
     subgenre_classification: str = ""
     era_period: str = ""
     regional_style: str = ""
-    
+
     # Mood & Emotional Analysis
     primary_mood: str = ""
     emotional_descriptors: List[str] = field(default_factory=list)
@@ -96,7 +96,7 @@ class AdvancedMusicAnalysis:
     valence_score: float = 0.0  # -1 to 1 (negative to positive)
     arousal_score: float = 0.0  # 0 to 1 (calm to energetic)
     emotional_journey: List[str] = field(default_factory=list)
-    
+
     # Music Theory Analysis
     harmonic_analysis: str = ""
     rhythmic_analysis: str = ""
@@ -106,21 +106,21 @@ class AdvancedMusicAnalysis:
     scale_modes: List[str] = field(default_factory=list)
     time_signature_analysis: str = ""
     complexity_score: float = 0.0
-    
+
     # Production Analysis
     mix_quality_assessment: str = ""
     frequency_balance: str = ""
     dynamic_range_analysis: str = ""
     stereo_field_analysis: str = ""
     production_techniques: List[str] = field(default_factory=list)
-    
+
     # Creative Suggestions
     creative_applications: List[str] = field(default_factory=list)
     arrangement_ideas: List[str] = field(default_factory=list)
     instrumentation_suggestions: List[str] = field(default_factory=list)
     remix_potential: List[str] = field(default_factory=list)
     collaboration_ideas: List[str] = field(default_factory=list)
-    
+
     # FL Studio Integration
     fl_plugin_recommendations: List[str] = field(default_factory=list)
     fl_preset_suggestions: List[str] = field(default_factory=list)
@@ -128,30 +128,30 @@ class AdvancedMusicAnalysis:
     fl_mixer_routing: Dict[str, Any] = field(default_factory=dict)
     fl_automation_ideas: List[str] = field(default_factory=list)
     fl_workflow_tips: List[str] = field(default_factory=list)
-    
+
     # Professional Insights
     commercial_potential: str = ""
     target_audience: List[str] = field(default_factory=list)
     playlist_placement: List[str] = field(default_factory=list)
     sync_licensing_potential: str = ""
     radio_airplay_assessment: str = ""
-    
+
     # Similarity & Recommendations
     similar_artists: List[str] = field(default_factory=list)
     similar_tracks: List[str] = field(default_factory=list)
     recommended_samples: List[str] = field(default_factory=list)
     complementary_tracks: List[str] = field(default_factory=list)
-    
+
     # Tags and Metadata
     ai_generated_tags: List[str] = field(default_factory=list)
     production_tags: List[str] = field(default_factory=list)
     mood_tags: List[str] = field(default_factory=list)
     genre_tags: List[str] = field(default_factory=list)
-    
+
     # Raw AI Response
     raw_response: str = ""
     token_usage: Dict[str, int] = field(default_factory=dict)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization"""
         result = {}
@@ -165,7 +165,7 @@ class AdvancedMusicAnalysis:
 
 class AdvancedPromptEngine:
     """Ultra-sophisticated prompt engineering for music AI"""
-    
+
     @staticmethod
     def create_comprehensive_analysis_prompt(audio_features: Dict[str, Any]) -> str:
         """Create the ultimate music analysis prompt"""
@@ -174,7 +174,7 @@ class AdvancedPromptEngine:
 
 You are the world's leading AI music production expert, combining the knowledge of:
 - Grammy-winning producers and engineers
-- Music theory professors from Berklee and Juilliard  
+- Music theory professors from Berklee and Juilliard
 - Billboard chart analysts and A&R executives
 - Electronic music pioneers and classical composers
 - FL Studio and Ableton Live power users
@@ -471,7 +471,7 @@ class GoogleAIMusicProducer:
     def total_analyses(self) -> int:
         """Alias for analysis_count for backwards compatibility"""
         return self.analysis_count
-    
+
     async def analyze_music_comprehensive(
         self,
         audio_features: Dict[str, Any],
@@ -481,25 +481,25 @@ class GoogleAIMusicProducer:
     ) -> AdvancedMusicAnalysis:
         """
         Ultimate comprehensive music analysis using Google's most advanced AI
-        
+
         Args:
             audio_features: Complete audio feature set from AudioEngine
             analysis_type: Type of analysis to perform
             model: Specific Gemini model to use
             custom_prompt: Custom analysis prompt
-            
+
         Returns:
             AdvancedMusicAnalysis with comprehensive insights
         """
         start_time = time.time()
         model = model or self.default_model
-        
+
         # Check cache
         cache_key = self._generate_cache_key(audio_features, analysis_type, model)
         if self.analysis_cache and cache_key in self.analysis_cache:
             logger.info(f"📦 Cache hit for {analysis_type.value}")
             return self.analysis_cache[cache_key]
-        
+
         try:
             # Generate appropriate prompt
             if custom_prompt:
@@ -534,26 +534,26 @@ class GoogleAIMusicProducer:
                 contents=prompt,
                 config=config,
             )
-            
+
             # Process response
             processing_time = time.time() - start_time
             analysis_result = self._process_ai_response(
-                response, 
-                analysis_type, 
-                model, 
+                response,
+                analysis_type,
+                model,
                 processing_time
             )
-            
+
             # Update performance metrics
             self._update_performance_metrics(response, processing_time)
-            
+
             # Cache result
             if self.analysis_cache:
                 self.analysis_cache[cache_key] = analysis_result
-            
+
             logger.info(f"✅ Analysis complete: {analysis_type.value} ({processing_time:.2f}s)")
             return analysis_result
-            
+
         except Exception as e:
             logger.error(f"❌ Google AI analysis failed: {e}")
             # Return error analysis
@@ -564,7 +564,7 @@ class GoogleAIMusicProducer:
                 processing_time=time.time() - start_time,
                 raw_response=str(e)
             )
-    
+
     async def real_time_production_coaching(
         self,
         audio_features: Dict[str, Any],
@@ -575,13 +575,13 @@ class GoogleAIMusicProducer:
         prompt = AdvancedPromptEngine.create_real_time_coaching_prompt(
             audio_features, user_question
         )
-        
+
         return await self.analyze_music_comprehensive(
             audio_features,
             MusicAnalysisType.REAL_TIME_COACHING,
             custom_prompt=prompt
         )
-    
+
     async def generate_lyrics(
         self,
         audio_features: Dict[str, Any],
@@ -592,13 +592,13 @@ class GoogleAIMusicProducer:
         prompt = AdvancedPromptEngine.create_lyric_composition_prompt(
             audio_features, theme
         )
-        
+
         return await self.analyze_music_comprehensive(
             audio_features,
             MusicAnalysisType.LYRIC_COMPOSITION,
             custom_prompt=prompt
         )
-    
+
     async def batch_analyze_tracks(
         self,
         audio_features_list: List[Dict[str, Any]],
@@ -606,16 +606,16 @@ class GoogleAIMusicProducer:
     ) -> List[AdvancedMusicAnalysis]:
         """Batch analyze multiple tracks with parallel processing"""
         logger.info(f"🔄 Starting batch analysis of {len(audio_features_list)} tracks")
-        
+
         # Create analysis tasks
         tasks = []
         for i, features in enumerate(audio_features_list):
             task = self.analyze_music_comprehensive(features, analysis_type)
             tasks.append(task)
-        
+
         # Execute in parallel
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        
+
         # Process results
         processed_results = []
         for i, result in enumerate(results):
@@ -629,13 +629,13 @@ class GoogleAIMusicProducer:
                 processed_results.append(error_result)
             else:
                 processed_results.append(result)
-        
+
         logger.info(f"✅ Batch analysis complete: {len(processed_results)} results")
         return processed_results
-    
+
     def _get_analysis_prompt(
-        self, 
-        audio_features: Dict[str, Any], 
+        self,
+        audio_features: Dict[str, Any],
         analysis_type: MusicAnalysisType
     ) -> str:
         """Get appropriate prompt for analysis type"""
@@ -643,13 +643,13 @@ class GoogleAIMusicProducer:
             MusicAnalysisType.COMPREHENSIVE_ANALYSIS: AdvancedPromptEngine.create_comprehensive_analysis_prompt,
             # Add more prompt mappings as needed
         }
-        
+
         if analysis_type in prompt_map:
             return prompt_map[analysis_type](audio_features)
         else:
             # Default to comprehensive analysis
             return AdvancedPromptEngine.create_comprehensive_analysis_prompt(audio_features)
-    
+
     def _process_ai_response(
         self,
         response: Any,
@@ -661,14 +661,14 @@ class GoogleAIMusicProducer:
         try:
             # Extract response text — new SDK: response.text
             response_text = response.text if hasattr(response, 'text') else str(response)
-            
+
             # Parse JSON response
             try:
                 parsed_data = json.loads(response_text)
             except json.JSONDecodeError:
                 logger.warning("⚠️ Failed to parse JSON, using raw response")
                 parsed_data = {"raw_analysis": response_text}
-            
+
             # Extract token usage from new SDK response
             token_count = 0
             if hasattr(response, 'usage_metadata') and response.usage_metadata:
@@ -682,12 +682,12 @@ class GoogleAIMusicProducer:
                 raw_response=response_text,
                 token_usage={'total_token_count': token_count},
             )
-            
+
             # Map parsed data to analysis fields
             self._map_response_to_analysis(analysis, parsed_data)
-            
+
             return analysis
-            
+
         except Exception as e:
             logger.error(f"❌ Error processing AI response: {e}")
             return AdvancedMusicAnalysis(
@@ -697,21 +697,21 @@ class GoogleAIMusicProducer:
                 detailed_description=f"Processing error: {str(e)}",
                 raw_response=str(response)
             )
-    
+
     def _map_response_to_analysis(
-        self, 
-        analysis: AdvancedMusicAnalysis, 
+        self,
+        analysis: AdvancedMusicAnalysis,
         parsed_data: Dict[str, Any]
     ) -> None:
         """Map parsed JSON response to analysis object fields"""
-        
+
         # Comprehensive analysis mapping
         if 'comprehensive_analysis' in parsed_data:
             comp = parsed_data['comprehensive_analysis']
             analysis.detailed_description = comp.get('detailed_description', '')
             analysis.technical_analysis = comp.get('technical_summary', '')
             analysis.creative_interpretation = comp.get('creative_interpretation', '')
-        
+
         # Genre classification
         if 'genre_classification' in parsed_data:
             genre = parsed_data['genre_classification']
@@ -721,7 +721,7 @@ class GoogleAIMusicProducer:
             analysis.style_influences = genre.get('style_influences', [])
             analysis.era_period = genre.get('era_period', '')
             analysis.regional_style = genre.get('regional_style', '')
-        
+
         # Emotional analysis
         if 'emotional_analysis' in parsed_data:
             emotion = parsed_data['emotional_analysis']
@@ -731,7 +731,7 @@ class GoogleAIMusicProducer:
             analysis.arousal_score = emotion.get('arousal_score', 0.0)
             analysis.emotional_intensity = emotion.get('emotional_intensity', 0.0)
             analysis.emotional_journey = emotion.get('emotional_journey', [])
-        
+
         # Music theory
         if 'music_theory' in parsed_data:
             theory = parsed_data['music_theory']
@@ -741,7 +741,7 @@ class GoogleAIMusicProducer:
             analysis.rhythmic_analysis = theory.get('rhythmic_analysis', '')
             analysis.structural_analysis = theory.get('structural_analysis', '')
             analysis.complexity_score = theory.get('complexity_score', 0.0)
-        
+
         # FL Studio integration
         if 'fl_studio_integration' in parsed_data:
             fl = parsed_data['fl_studio_integration']
@@ -750,7 +750,7 @@ class GoogleAIMusicProducer:
             analysis.fl_mixer_routing = fl.get('mixer_routing', {})
             analysis.fl_automation_ideas = fl.get('automation_ideas', [])
             analysis.fl_workflow_tips = fl.get('workflow_tips', [])
-        
+
         # Creative suggestions
         if 'creative_suggestions' in parsed_data:
             creative = parsed_data['creative_suggestions']
@@ -758,7 +758,7 @@ class GoogleAIMusicProducer:
             analysis.remix_potential = creative.get('remix_potential', [])
             analysis.instrumentation_suggestions = creative.get('instrumentation', [])
             analysis.collaboration_ideas = creative.get('collaboration_ideas', [])
-        
+
         # Commercial assessment
         if 'commercial_assessment' in parsed_data:
             commercial = parsed_data['commercial_assessment']
@@ -766,7 +766,7 @@ class GoogleAIMusicProducer:
             analysis.target_audience = commercial.get('target_audience', [])
             analysis.playlist_placement = commercial.get('playlist_placement', [])
             analysis.sync_licensing_potential = commercial.get('sync_potential', '')
-        
+
         # Similarity recommendations
         if 'similarity_recommendations' in parsed_data:
             similarity = parsed_data['similarity_recommendations']
@@ -774,7 +774,7 @@ class GoogleAIMusicProducer:
             analysis.similar_tracks = similarity.get('similar_tracks', [])
             analysis.recommended_samples = similarity.get('recommended_samples', [])
             analysis.complementary_tracks = similarity.get('complementary_tracks', [])
-        
+
         # AI tags
         if 'ai_tags' in parsed_data:
             tags = parsed_data['ai_tags']
@@ -782,11 +782,11 @@ class GoogleAIMusicProducer:
             analysis.mood_tags = tags.get('mood_tags', [])
             analysis.genre_tags = tags.get('genre_tags', [])
             analysis.ai_generated_tags = (
-                tags.get('production_tags', []) + 
-                tags.get('mood_tags', []) + 
+                tags.get('production_tags', []) +
+                tags.get('mood_tags', []) +
                 tags.get('genre_tags', [])
             )
-    
+
     def _generate_cache_key(
         self,
         audio_features: Dict[str, Any],
@@ -802,10 +802,10 @@ class GoogleAIMusicProducer:
             'analysis_type': analysis_type.value,
             'model': model.value
         }
-        
+
         cache_string = json.dumps(key_data, sort_keys=True)
         return hashlib.md5(cache_string.encode()).hexdigest()
-    
+
     def _update_performance_metrics(self, response: Any, processing_time: float) -> None:
         """Update performance tracking metrics"""
         self.analysis_count += 1
@@ -820,7 +820,7 @@ class GoogleAIMusicProducer:
         if response is not None and hasattr(response, 'usage_metadata') and response.usage_metadata:
             tokens = getattr(response.usage_metadata, 'total_token_count', 0)
             self.total_tokens_used += tokens
-    
+
     def get_performance_stats(self) -> Dict[str, Any]:
         """Get comprehensive performance statistics"""
         return {
@@ -831,23 +831,23 @@ class GoogleAIMusicProducer:
             'model_used': self.default_model.value,
             'cost_estimate_usd': self._estimate_cost()
         }
-    
+
     def _estimate_cost(self) -> float:
         """Estimate API usage cost"""
         # Gemini 2.5 Pro pricing: $2.50 input / $15.00 output per 1M tokens
         # Rough estimate assuming 70% input, 30% output
         input_tokens = int(self.total_tokens_used * 0.7)
         output_tokens = int(self.total_tokens_used * 0.3)
-        
+
         cost = (input_tokens / 1_000_000 * 2.50) + (output_tokens / 1_000_000 * 15.00)
         return round(cost, 4)
-    
+
     def clear_cache(self) -> None:
         """Clear analysis cache"""
         if self.analysis_cache:
             self.analysis_cache.clear()
         logger.info("🧹 Google AI analysis cache cleared")
-    
+
     def shutdown(self) -> None:
         """Shutdown the AI producer"""
         self.executor.shutdown(wait=True)
@@ -861,7 +861,7 @@ if __name__ == "__main__":
         try:
             # Initialize the AI producer
             ai_producer = GoogleAIMusicProducer()
-            
+
             # Mock audio features for testing
             test_features = {
                 'duration': 180.5,
@@ -878,37 +878,37 @@ if __name__ == "__main__":
                 'chroma_features': np.random.rand(12, 100),
                 'mfccs': np.random.rand(13, 100)
             }
-            
+
             logger.info("🎵 Testing Google AI Music Production System...")
-            
+
             # Test comprehensive analysis
             analysis = await ai_producer.analyze_music_comprehensive(
                 test_features,
                 MusicAnalysisType.COMPREHENSIVE_ANALYSIS
             )
-            
+
             logger.info(f"🎯 Genre: {analysis.primary_genre}")
             logger.info(f"😊 Mood: {analysis.primary_mood}")
             logger.info(f"🎛️ FL Plugins: {analysis.fl_plugin_recommendations}")
             logger.info(f"💡 Creative Ideas: {analysis.arrangement_ideas}")
-            
+
             # Test real-time coaching
             coaching = await ai_producer.real_time_production_coaching(
                 test_features,
                 "How can I make this track sound more professional?"
             )
-            
+
             logger.info(f"🎓 Coaching Response: {coaching.detailed_description}")
-            
+
             # Show performance stats
             stats = ai_producer.get_performance_stats()
             logger.info(f"📊 Performance Stats: {stats}")
-            
+
         except Exception as e:
             logger.error(f"❌ Test failed: {e}")
         finally:
             if 'ai_producer' in locals():
                 ai_producer.shutdown()
-    
+
     # Run the test
     asyncio.run(test_google_ai_music_producer())

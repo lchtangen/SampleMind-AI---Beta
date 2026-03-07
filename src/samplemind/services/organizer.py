@@ -2,18 +2,16 @@ import logging
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Union
 
 logger = logging.getLogger(__name__)
 
-@dataclass
 @dataclass
 class OrganizationResult:
     """Result of a file organization operation"""
     source: Path
     destination: Path
     success: bool
-    error: Optional[str] = None
+    error: str | None = None
     action: str = "move"  # move, copy, skip
 
 class OrganizationEngine:
@@ -28,9 +26,9 @@ class OrganizationEngine:
     async def organize_file(
         self,
         file_path: Path,
-        metadata: Dict,
+        metadata: dict,
         pattern: str = "{genre}/{bpm}/{key}/{filename}",
-        root_dir: Optional[Path] = None,
+        root_dir: Path | None = None,
         strategy: str = "move"
     ) -> OrganizationResult:
         """
@@ -74,7 +72,7 @@ class OrganizationEngine:
             logger.error(f"Error organizing file {file_path}: {e}")
             return OrganizationResult(file_path, Path(""), False, str(e), strategy)
 
-    def _generate_path(self, metadata: Dict, pattern: str, original_filename: str) -> Path:
+    def _generate_path(self, metadata: dict, pattern: str, original_filename: str) -> Path:
         """
         Generate the destination path based on metadata and pattern.
         """

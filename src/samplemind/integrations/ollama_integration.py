@@ -96,7 +96,7 @@ class OllamaMusicProducer:
                 messages=[{"role": "user", "content": prompt}],
                 options={"temperature": 0.7, "num_predict": 1024},
             )
-            text = response["message"]["content"]
+            text = response.message.content  # ollama ^0.4.0: typed object, not dict
             result = self._parse_response(text)
             result.processing_time = time.time() - start_time
             result.model_used = self.default_model
@@ -169,7 +169,7 @@ class OllamaMusicProducer:
                 messages=[{"role": "user", "content": prompt}],
                 options={"temperature": 0.7, "num_predict": 1500},
             )
-            text = response["message"]["content"]
+            text = response.message.content  # ollama ^0.4.0: typed object, not dict
             result = self._parse_response(text)
             result.processing_time = time.time() - start_time
             result.model_used = self.default_model
@@ -186,7 +186,7 @@ class OllamaMusicProducer:
         """Check if Ollama is running and the configured model is available."""
         try:
             models = await self._client.list()
-            available = [m["name"] for m in models.get("models", [])]
+            available = [m.model for m in models.models]  # ollama ^0.4.0: typed ListResponse
             return self.default_model.value in available
         except Exception:
             return False

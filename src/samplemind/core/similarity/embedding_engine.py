@@ -9,11 +9,13 @@ The embeddings capture:
 - Dynamic range and energy
 """
 
-import logging
 import hashlib
+import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Callable
+from typing import Any
+
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -28,9 +30,9 @@ class AudioEmbedding:
     file_id: str                    # Unique identifier (usually file hash)
     file_path: Path                 # Original file path
     embedding: np.ndarray           # Fixed-size embedding vector
-    metadata: Dict[str, Any] = field(default_factory=dict)  # Extracted features for filtering
+    metadata: dict[str, Any] = field(default_factory=dict)  # Extracted features for filtering
 
-    def to_list(self) -> List[float]:
+    def to_list(self) -> list[float]:
         """Convert embedding to list for ChromaDB"""
         return self.embedding.tolist()
 
@@ -71,6 +73,7 @@ class AudioEmbeddingEngine:
         self,
         file_path: Path,
         include_metadata: bool = True,
+        use_music2vec: bool = False,
     ) -> AudioEmbedding:
         """
         Generate embedding for a single audio file.
@@ -78,10 +81,18 @@ class AudioEmbeddingEngine:
         Args:
             file_path: Path to audio file
             include_metadata: Include feature metadata for filtering
+            use_music2vec: If True, use MusicEmbedder (music2vec 768-dim)
+                           instead of the default 128-dim feature vector.
+                           Requires ``samplemind.ai.embeddings.music_embedder``
+                           to be available.
 
         Returns:
             AudioEmbedding containing the embedding vector and metadata
         """
+        # --- Optional 768-dim music2vec path --------------------------------
+        if use_music2vec:
+            return self._generate_music2vec_embedding(file_path, include_metadata)
+
         import librosa
 
         file_path = Path(file_path).expanduser().resolve()
@@ -234,9 +245,9 @@ class AudioEmbeddingEngine:
 
     def generate_embeddings_batch(
         self,
-        file_paths: List[Path],
-        progress_callback: Optional[Callable[[int, int, str], None]] = None,
-    ) -> List[AudioEmbedding]:
+        file_paths: list[Path],
+        progress_callback: Callable[[int, int, str], None] | None = None,
+    ) -> list[AudioEmbedding]:
         """
         Generate embeddings for multiple audio files.
 
@@ -292,3 +303,53 @@ class AudioEmbeddingEngine:
             for chunk in iter(lambda: f.read(8192), b''):
                 sha256.update(chunk)
         return sha256.hexdigest()[:16]  # Use first 16 chars for brevity
+
+    def _generate_music2vec_embedding(
+        self,
+        file_path: Path,
+        include_metadata: bool,
+    ) -> AudioEmbedding:
+        """
+        Generate a 768-dimensional embedding via MusicEmbedder (music2vec).
+
+        Lazy-imports ``samplemind.ai.embeddings.music_embedder.MusicEmbedder``
+        so that the base class never hard-depends on torch/transformers unless
+        the caller explicitly requests 768-dim embeddings.
+
+        Args:
+            file_path: Path to audio file
+            include_metadata: Include feature metadata for filtering
+
+        Returns:
+            AudioEmbedding with a 768-dimensional vector
+
+        Raises:
+            ImportError: if MusicEmbedder is not available
+        """
+        from samplemind.ai.embeddings.music_embedder import (
+            MusicEmbedder,  # type: ignore[import]
+        )
+
+        file_path = Path(file_path).expanduser().resolve()
+        if not file_path.exists():
+            raise FileNotFoundError(f"Audio file not found: {file_path}")
+
+        file_id = self._compute_file_hash(file_path)
+        embedder = MusicEmbedder()
+        embedding_vector = embedder.embed(file_path)  # → np.ndarray shape (768,)
+
+        metadata: dict = {}
+        if include_metadata:
+            metadata = {
+                "file_name": file_path.name,
+                "file_path": str(file_path),
+                "embedding_dim": 768,
+                "model": "music2vec",
+            }
+
+        return AudioEmbedding(
+            file_id=file_id,
+            file_path=file_path,
+            embedding=embedding_vector.astype(np.float32),
+            metadata=metadata,
+        )

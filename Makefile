@@ -13,7 +13,7 @@ help: ## Show this help message
 
 setup: ## Setup development environment
 	@echo "Setting up SampleMind AI development environment..."
-	python3.11 -m venv $(VENV)
+	python3 -m venv $(VENV)
 	$(PIP) install --upgrade pip
 	$(PIP) install poetry
 	$(VENV)/bin/poetry install
