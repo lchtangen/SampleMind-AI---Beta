@@ -74,6 +74,14 @@ yarn-error.log*
 .DS_Store
 *.pem
 
+# SSH Private Keys — never commit private keys
+id_rsa
+id_ed25519
+id_ecdsa
+id_dsa
+*.ppk
+.ssh/
+
 # Turbo
 turbo-build.log
 .turbo/
