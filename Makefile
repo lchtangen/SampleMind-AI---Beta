@@ -1,5 +1,5 @@
 # SampleMind AI v6 - Development Automation
-.PHONY: help setup dev test lint format typecheck security docs clean deploy fix-auth
+.PHONY: help setup dev test lint format typecheck security docs clean deploy fix-auth fix-email rewrite-emails rewrite-emails-dry
 
 # Python virtual environment
 VENV = .venv
@@ -26,6 +26,17 @@ fix-auth: ## Fix SSH credential issues blocking git push (interactive)
 
 fix-auth-https: ## Switch git remote from SSH to HTTPS (non-interactive, recommended)
 	@bash scripts/setup/fix-git-auth.sh --https
+
+fix-email: ## Configure git to use noreply email for future commits in this repo
+	@git config --local user.email "194328900+lchtangen@users.noreply.github.com"
+	@git config --local user.name "Lars Tangen"
+	@echo "✅ Git configured: future commits will use 194328900+lchtangen@users.noreply.github.com"
+
+rewrite-emails: ## Rewrite ALL past commits to use noreply email (requires force push after)
+	@bash scripts/setup/rewrite-commit-emails.sh
+
+rewrite-emails-dry: ## Preview what rewrite-emails would change (no modifications)
+	@bash scripts/setup/rewrite-commit-emails.sh --dry-run
 
 install-models: ## Download and install AI models
 	@echo "🤖 Installing AI models..."

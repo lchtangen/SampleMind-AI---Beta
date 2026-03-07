@@ -1,0 +1,17 @@
+# .mailmap — Canonical author identity for all SampleMind AI commits
+#
+# Git uses this file to rewrite author/committer display in `git log`,
+# `git shortlog`, `git blame`, and on GitHub's commit pages — without
+# touching the underlying commit objects.
+#
+# Format: Canonical Name <canonical@email> [Old Name] <old@email>
+#
+# All variants of the owner's email are mapped to the correct GitHub
+# noreply address: 194328900+lchtangen@users.noreply.github.com
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Local macOS hostname email (git auto-detected when user.email not set)
+Lars Tangen <194328900+lchtangen@users.noreply.github.com> Lars Christian Tangen <lchtangen@Larss-MacBook-Pro.local>
+
+# Noreply without numeric ID prefix (older GitHub commits)
+Lars Tangen <194328900+lchtangen@users.noreply.github.com> Lars Tangen <lchtangen@users.noreply.github.com>
