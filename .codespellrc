@@ -1,0 +1,12 @@
+[codespell]
+# Ignore technical terms, brand names, and acronyms that are not typos:
+# - ALS: Ableton Live Set file format extension
+# - SOM: Serviceable Obtainable Market (business acronym)
+# - Maschine: Native Instruments Maschine (product name)
+# - COO: Chief Operating Officer
+# - LOD/lod: Level of Detail (3D graphics term and variable name)
+# - EHR: Electronic Health Records
+# - OT: Operational Transform (collaborative editing algorithm)
+# - iTerm: iTerm2, a macOS terminal application
+# - Proces: intentional ASCII-art truncation of "Processing"
+ignore-words-list = als,som,maschine,coo,lod,ehr,ot,iterm,proces

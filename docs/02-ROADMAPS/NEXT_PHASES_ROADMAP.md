@@ -936,7 +936,7 @@ Build ML infrastructure for personalized recommendations, fingerprinting, simila
 #### 2. Audio Fingerprinting
 **Shazam-like algorithm**
 - Identify samples with 95%+ accuracy
-- Find re-used samples
+- Find reused samples
 - Detect covers/remixes
 - Copyright detection
 
