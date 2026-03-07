@@ -1,742 +1,460 @@
 # CLAUDE.md
 
-Comprehensive guidance for Claude Code when working with SampleMind AI codebase. This document covers architecture, development workflow, and UI/UX best practices for both CLI and web interfaces.
+Comprehensive guidance for Claude Code when working with the SampleMind AI codebase (v3.0 migration, started 2026-03-07).
 
-## Development Commands
+> **Current date:** 2026-03-07 | **Active phase:** Phase 15 — v3.0 Upgrade & Migration | **Repo:** `lchtangen/SampleMind-AI---Beta`
 
-### CLI Development (Primary Focus)
-- `source .venv/bin/activate && python main.py` - Run CLI application (main product)
-- `make setup` - Complete development environment setup (creates .venv, installs dependencies)
-- `make install-models` - Download offline AI models (phi3:mini, qwen2.5:7b-instruct, gemma2:2b for Ollama)
-- `scripts/launch-ollama-api.sh` - Launch Ollama API server for offline-first inference
-- `scripts/setup/quick_start.sh` - Quick project startup with all CLI dependencies
+---
 
-### API and Services
-- `make dev` - Start development server (uvicorn on localhost:8000)
-- `make dev-full` - Start full development stack with Docker services
-- `make setup-db` - Start development databases (MongoDB, Redis, ChromaDB via Docker)
+## ⚡ Quick Start (60 Seconds)
 
-### Testing and Quality
-- `make test` - Run all tests with coverage (`pytest tests/ -v --cov=src --cov-report=term-missing`)
-- `make lint` - Run linters (`ruff check .` and `mypy src/`)
-- `make format` - Format code (`black .` and `isort .`)
-- `make security` - Run security checks (`bandit -r src/` and `safety check`)
-- `make quality` - Run all quality checks (lint + security)
+```bash
+dcd ~/Projects/SampleMind-AI---Beta   # or wherever you cloned it
+git pull                              # always pull first
+source .venv/bin/activate             # activate venv
+python main.py                        # run CLI
+```
 
-### Docker and Deployment
-- `make build` - Build Docker image
-- `docker-compose up -d` - Start all services in containers
-- `make clean` - Clean temporary files and caches
+**If `.venv` doesn't exist:**
+```bash
+make setup                            # creates venv + installs all deps
+make install-models                   # downloads Ollama offline models
+```
 
-## UI/UX Development Guidelines
+**To run the full stack:**
+```bash
+docker-compose up -d                  # databases (MongoDB, Redis, ChromaDB)
+make dev                              # FastAPI server → localhost:8000
+```
 
-### Terminal UI (CLI/TUI) - Textual Framework
+---
 
-#### Core Principles
-- **User-First Design**: Keyboard-first navigation with mouse support as enhancement
-- **Performance**: <50ms response time for UI interactions (keyboard input, animations)
-- **Accessibility**: Support keyboard navigation, screen readers, high contrast themes
-- **Consistency**: Unified color palette, typography, spacing across all screens
-- **Feedback**: Clear visual feedback for every user action (highlights, animations, status)
+## 🧠 Architecture At-a-Glance
 
-#### Textual Component Development
+```
+SampleMind AI — CLI-First, Offline-Capable Music Production AI
+├── CLI (PRIMARY)     src/samplemind/interfaces/cli/menu.py       ← main product
+├── TUI               src/samplemind/interfaces/tui/app.py        ← Textual-based
+├── API               src/samplemind/api/ (FastAPI)               ← Phase 4+
+├── Web UI            apps/web/ (Next.js 15)                      ← Phase 15
+│
+├── AI Layer          src/samplemind/integrations/ai_manager.py
+│   ├── Claude 3.7 Sonnet (Anthropic) ← primary, best analysis
+│   ├── Gemini 2.0 Flash (Google)     ← fast, streaming
+│   ├── GPT-4o (OpenAI)               ← fallback + Agents SDK
+│   └── Ollama (local)                ← offline: phi3, qwen2.5, gemma2
+│
+├── Audio Engine      src/samplemind/core/engine/audio_engine.py
+│   ├── librosa       ← BPM, key, MFCC, chroma, spectral
+│   ├── demucs v4     ← 6-stem source separation (htdemucs)
+│   ├── basic-pitch   ← MIDI transcription from audio
+│   ├── pedalboard    ← Spotify audio effects engine
+│   └── BEATs         ← Microsoft audio classifier (transformers)
+│
+├── Vector DB         src/samplemind/core/database/chroma.py      ← ChromaDB
+├── DAW Plugins       plugins/                                     ← FL Studio, Ableton
+└── Data              MongoDB (Motor) + Redis + ChromaDB
+```
+
+---
+
+## 📁 Key File Locations
+
+| What | Where |
+|------|-------|
+| CLI entry point | `main.py` |
+| Main CLI menu | `src/samplemind/interfaces/cli/menu.py` |
+| Effects CLI | `src/samplemind/interfaces/cli/commands/effects.py` |
+| TUI app | `src/samplemind/interfaces/tui/app.py` |
+| TUI screens | `src/samplemind/interfaces/tui/screens/` |
+| Audio engine | `src/samplemind/core/engine/audio_engine.py` |
+| Audio loader | `src/samplemind/core/loader.py` |
+| AI manager | `src/samplemind/integrations/ai_manager.py` |
+| DAW plugins | `plugins/fl_studio_plugin.py`, `plugins/ableton/` |
+| ChromaDB | `src/samplemind/core/database/chroma.py` |
+| Project config | `pyproject.toml` |
+| Dependencies | `pyproject.toml → [tool.poetry.dependencies]` |
+| All docs | `docs/` (60+ files) |
+| Test suite | `tests/unit/` (81 tests, ~30% coverage) |
+
+---
+
+## 🛠️ Development Commands
+
+### CLI (Primary)
+```bash
+source .venv/bin/activate && python main.py   # run CLI
+make setup                                     # full setup
+make install-models                            # download Ollama models
+scripts/launch-ollama-api.sh                   # start Ollama server (port 11434)
+scripts/setup/quick_start.sh                   # one-command startup
+```
+
+### API + Services
+```bash
+make dev                  # FastAPI → localhost:8000
+make dev-full             # full stack with Docker
+make setup-db             # MongoDB + Redis + ChromaDB (Docker)
+docker-compose up -d      # all Docker services
+```
+
+### Testing & Quality
+```bash
+make test       # pytest tests/ -v --cov=src --cov-report=term-missing
+make lint       # ruff check . && mypy src/
+make format     # black . && isort .
+make security   # bandit -r src/ && safety check
+make quality    # lint + security (run before every commit)
+```
+
+### Build & Deploy
+```bash
+make build              # build Docker image
+docker-compose up -d    # start all services
+make clean              # clean tmp files + caches
+```
+
+---
+
+## 🤖 AI Providers — v3.0 Stack (2026)
+
+### Model Selection Guide
+| Task | Use | Why |
+|------|-----|-----|
+| Deep audio analysis + reasoning | `claude-3-7-sonnet-20250219` | Extended thinking, best accuracy |
+| Fast streaming responses | `gemini-2.0-flash-exp` | Low latency, multimodal |
+| Agent workflows | `gpt-4o` + OpenAI Agents SDK | Tool use, complex pipelines |
+| Offline / no internet | Ollama `qwen2.5:7b-instruct` | <100ms local inference |
+| Embeddings | `text-embedding-3-large` | Best semantic search quality |
+| Audio transcription | `whisper-large-v3` | Local, highest accuracy |
+
+### AI Manager Pattern
 ```python
-# Location: src/samplemind/interfaces/tui/components/
+# src/samplemind/integrations/ai_manager.py
+manager = SampleMindAIManager()
+result = await manager.analyze_audio(
+    audio_path="sample.wav",
+    model="claude-3-7-sonnet-20250219",   # or "gemini-2.0-flash-exp", "auto"
+    analysis_level="PROFESSIONAL"
+)
+```
 
+### Current Dependency Versions (MUST upgrade in Phase 15)
+| Package | Current | Target v3.0 | Priority |
+|---------|---------|-------------|----------|
+| `anthropic` | `^0.7.0` | `^0.40.0` | 🔴 Critical |
+| `openai` | `^1.3.0` | `^1.58.0` | 🔴 Critical |
+| `google-generativeai` | `^0.3.0` | `^0.8.0` | 🔴 Critical |
+| `textual` | `^0.44.0` | `^0.87.0` | 🔴 Critical |
+| `torch` | `^2.1.0` | `^2.5.0` | 🟠 High |
+| `transformers` | `^4.35.0` | `^4.47.0` | 🟠 High |
+| `numpy` | `<2.0.0` cap | `>=2.0.0` | 🟠 High |
+| `scipy` | `^1.11.0` | `^1.14.0` | 🟡 Medium |
+| `librosa` | `^0.10.1` | `^0.11.0` | 🟡 Medium |
+
+---
+
+## 🎵 Audio Processing — v3.0 Stack
+
+### Core Libraries
+```python
+import librosa          # BPM, key, MFCC, chroma, spectral features
+import soundfile as sf  # read/write audio files (WAV, FLAC, OGG)
+import numpy as np      # signal processing arrays
+from scipy import signal  # filtering, FFT
+```
+
+### New v3.0 Audio Tools (to integrate)
+```python
+# MIDI transcription from audio
+from basic_pitch import predict  # basic-pitch ^0.4.0
+
+# Source separation (6 stems: drums, bass, vocals, piano, guitar, other)
+import demucs  # demucs ^4.0.0, model: htdemucs_6s
+
+# Professional audio effects (Spotify's pedalboard)
+from pedalboard import Pedalboard, Reverb, Compressor, LowShelfFilter
+import pedalboard.io as pio
+
+# Microsoft BEATs audio classifier (via transformers)
+from transformers import AutoProcessor, ASTForAudioClassification
+# model: "microsoft/BEATs-iter3-AS2M"
+
+# Real-time audio I/O
+import pyaudio  # for microphone input + playback
+```
+
+### Analysis Levels
+```python
+# Use in audio_engine.py AnalysisLevel enum:
+BASIC       # BPM, key, duration — <0.5s
+STANDARD    # + MFCC, chroma, spectral — <1s
+DETAILED    # + harmonic/percussive separation — <2s
+PROFESSIONAL # + AI analysis, BEATs classification, embeddings — <5s
+```
+
+---
+
+## 🖥️ TUI Development (Textual v0.87+)
+
+### TUI Screens (implemented)
+| Screen | File | Status |
+|--------|------|--------|
+| Main Menu | `screens/main_screen.py` | ✅ |
+| Analyze | `screens/analyze_screen.py` | ✅ |
+| Batch Process | `screens/batch_screen.py` | ✅ |
+| Results | `screens/results_screen.py` | ✅ |
+| Favorites | `screens/favorites_screen.py` | ✅ |
+| Settings | `screens/settings_screen.py` | ✅ |
+| Comparison | `screens/comparison_screen.py` | ✅ |
+| Search | `screens/search_screen.py` | ✅ |
+| Tagging | `screens/tagging_screen.py` | ✅ |
+| Performance | `screens/performance_screen.py` | ✅ |
+| Library | `screens/library_screen.py` | ✅ |
+
+### TUI v3.0 New Screens (Phase 15)
+- `AgentChatScreen` — multi-agent conversation UI
+- `WaveformScreen` — interactive waveform viewer
+- `MixingBoardScreen` — real-time effects and EQ
+
+### Textual Best Practices
+```python
 # ✅ DO:
-- Inherit from `Screen` or `Widget` appropriately
-- Use `watch_` methods for reactive state changes
-- Compose widgets for reusability (small, focused components)
-- Implement `compose()` for layout, `render()` for styling
-- Use `call_later()` for async operations to avoid blocking UI
-- Leverage CSS for styling (stored in .css files alongside components)
-- Add loading states and progress indicators
-- Validate user input in real-time with visual feedback
+from textual.app import App, ComposeResult
+from textual.screen import Screen
+from textual.widgets import Button, Label, Input, DataTable
 
-# ❌ DON'T:
-- Block the event loop with long-running operations
-- Use blocking I/O in render methods
-- Mix CSS in Python code
-- Create monolithic mega-components
-- Ignore keyboard navigation
+class AnalyzeScreen(Screen):
+    BINDINGS = [("escape", "pop_screen", "Back"), ("q", "quit", "Quit")]
+
+    def compose(self) -> ComposeResult:
+        yield Header()
+        yield Input(placeholder="Path to audio file...")
+        yield Footer()
+
+    async def on_button_pressed(self, event: Button.Pressed) -> None:
+        # Never block — always use async/await
+        result = await self.app.analyze_audio(self.path_input.value)
+        self.notify(f"✓ Analysis complete: {result.bpm} BPM")
+
+# ❌ NEVER:
+# - Use time.sleep() in any event handler
+# - Call blocking I/O (os.listdir) in compose() or render()
+# - Mix CSS in Python files (use *.tcss files)
+# - Create components >200 lines (split into sub-widgets)
 ```
 
-#### Theme and Styling
-- **Color System**: 12 built-in themes available (`make dev` to test)
-- **Design Tokens**: Define colors, spacing, typography in `tui/theme/` directory
-- **CSS Files**: Each component should have corresponding `.css` file for styling
-- **Accessibility**: Ensure 4.5:1 contrast ratio for all text, test in high-contrast mode
-- **Dark/Light**: Themes support both dark (primary) and light modes
+---
 
-#### Testing Terminal UI Components
+## 🔌 DAW Plugin Architecture
+
+### FL Studio Integration
+```
+plugins/fl_studio_plugin.py       Python wrapper (high-level)
+plugins/fl_studio/cpp/            C++ native plugin
+  ├── samplemind_wrapper.h        JUCE-based header
+  └── samplemind_wrapper.cpp      Implementation (486 lines)
+plugins/fl_studio/CMakeLists.txt  Build configuration
+```
+
+### Ableton Live Integration
+```
+plugins/ableton/
+  ├── python_backend.py    FastAPI backend for M4L device
+  └── communication.js     Max for Live JS bridge
+```
+
+### VST3 / DAW Plugin Build
 ```bash
-# Test interactive behavior
-python -m pytest tests/unit/tui/ -v --capture=no
-
-# Test on different terminals
-# Test in: gnome-terminal, kitty, alacritty, iterm2, Windows Terminal
-
-# Visual regression testing
-# Run manually and compare with previous screenshots
+cd plugins/fl_studio/
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . --config Release
 ```
 
-#### Common Patterns
-- **Modal Dialogs**: Use `Screen` with `BINDINGS` for modal behavior
-- **Input Validation**: Show inline errors below input fields
-- **Loading States**: Use spinners and progress bars (`LoadingIndicator`, `ProgressBar`)
-- **Command Palette**: Tab-completion for common actions
-- **Status Bar**: Always visible footer with current state/help text
-- **Breadcrumbs**: Show navigation hierarchy for nested screens
+---
 
-### Web UI (React/Next.js) - `apps/web/`
+## 🌐 Web UI Architecture (Phase 15)
 
-#### Core Architecture
-- **Framework**: Next.js 14+ with React 18+
-- **Styling**: Tailwind CSS for utility-first styling
-- **State Management**: React hooks + Context API (avoid Redux unless needed)
-- **API Integration**: Fetch from FastAPI backend (localhost:8000/api/v1/)
-- **Deployment**: Vercel or self-hosted via Docker
-
-#### Component Structure
+### Stack (to be implemented)
 ```
-apps/web/src/
-├── components/          # Reusable components
-│   ├── audio/          # Audio-specific components
-│   ├── common/         # Button, Input, Modal, etc.
-│   ├── layouts/        # Page layouts
-│   └── features/       # Feature-specific components
-├── hooks/              # Custom React hooks
-├── utils/              # Utility functions
-├── styles/             # Global CSS, Tailwind config
-├── app/                # Next.js app router pages
-└── lib/                # Library code (API clients, formatters)
+apps/web/
+├── src/
+│   ├── app/              Next.js 15 App Router
+│   ├── components/
+│   │   ├── audio/        AudioUpload, WaveformViewer, AnalysisCard
+│   │   ├── library/      SampleBrowser, TagFilter, SearchBar
+│   │   ├── effects/      EffectsChain, EQVisualizer
+│   │   └── ui/           shadcn/ui components
+│   ├── hooks/            useAudioAnalysis, useLibrary, usePlayback
+│   ├── stores/           Zustand v5 state stores
+│   └── lib/
+│       └── api/          TypeScript API client (generated from OpenAPI)
+├── package.json          Next.js 15, React 19, Tailwind v4
+└── tailwind.config.ts    SampleMind design tokens
 ```
 
-#### React Development Best Practices
-- **Components**: Prefer functional components with hooks
-- **State Management**:
-  - Local state for simple UI state (useState)
-  - Context API for global state (theme, auth, workspace)
-  - Server state via API (audio files, analysis results)
-- **Performance**:
-  - Use React.memo for expensive components
-  - Lazy load routes with React.lazy + Suspense
-  - Optimize images with Next.js Image component
-  - Code split by route automatically
-- **Accessibility**:
-  - Use semantic HTML (buttons, links, forms)
-  - Include proper ARIA labels
-  - Test with keyboard navigation
-  - Ensure 4.5:1 contrast ratios
-
-#### Styling Strategy
-- **Tailwind CSS**: Primary styling approach
-- **CSS Modules**: For component-scoped styles if needed
-- **Global CSS**: In `styles/globals.css` only
-- **Design System**: Extend Tailwind config in `tailwind.config.ts`
-  ```typescript
-  // Define design tokens: colors, spacing, typography, shadows
-  ```
-- **Dark Mode**: Built-in support via Tailwind dark mode
-- **Responsive**: Mobile-first approach (sm, md, lg, xl breakpoints)
-
-#### Form Handling
+### API Integration Pattern
 ```typescript
-// ✅ Use React Hook Form for complex forms
-import { useForm } from 'react-hook-form'
+// Always use the typed API client:
+import { samplemindApi } from '@/lib/api'
 
-// API validation errors → display on form fields
-// Real-time validation with debouncing
-// Submission loading state
+const result = await samplemindApi.audio.analyze({
+  file: audioFile,
+  level: 'PROFESSIONAL',
+  model: 'claude-3-7-sonnet-20250219'
+})
 ```
 
-#### API Integration
-```typescript
-// Location: apps/web/src/lib/api/
+---
 
-// Create typed API client
-interface AudioAnalysisResult { /* ... */ }
+## 🚦 Performance Targets
 
-async function analyzeAudio(file: File): Promise<AudioAnalysisResult> {
-  const formData = new FormData()
-  formData.append('file', file)
+| Operation | Target | Current | Status |
+|-----------|--------|---------|--------|
+| CLI startup | <1s | ~2s | ⚠️ Needs lazy imports |
+| Keyboard response (TUI) | <50ms | ~50ms | ✅ OK |
+| Audio analysis (BASIC) | <0.5s | ~0.5s | ✅ OK |
+| Audio analysis (PROFESSIONAL) | <5s | ~3–8s | ⚠️ Variable |
+| Ollama inference | <100ms | ~80ms | ✅ OK |
+| Vector similarity search | <200ms | ~150ms | ✅ OK |
+| API response (simple) | <100ms | ~80ms | ✅ OK |
+| Web FCP (target) | <1s | Not built | ⏳ Phase 15 |
 
-  const response = await fetch('/api/v1/audio/analyze', {
-    method: 'POST',
-    body: formData,
-  })
+---
 
-  return response.json()
-}
+## 🤖 AI Tool Setup for v3.0 Work
 
-// Use in components with proper error handling & loading states
-```
+### Which Tool For What Task
 
-#### Testing Web Components
+| Task | Use | Command/Note |
+|------|-----|---------|
+| Refactor/rewrite large files | **Claude Code** | Best at large-context edits |
+| Multi-file feature implementation | **Claude Code** | Whole-codebase awareness |
+| Quick code completions | **GitHub Copilot** | In VSCode, auto-suggest |
+| Generate boilerplate | **Codex** (terminal) | `codex "create FastAPI endpoint"` |
+| Create PRs from issues | **Copilot** (GitHub) | Use `@copilot` on issues |
+| Dependency research | Any + web search | Check PyPI for latest versions |
+| Test writing | **Claude Code** | Write tests for specific functions |
+| Documentation | **Claude Code** | Best markdown quality |
+
+### Claude Code Session Tips
 ```bash
-# Unit tests
-npm run test -- components/
+# Start Claude Code in project root:
+cd ~/Projects/SampleMind-AI---Beta
+claude
 
-# E2E tests
-npm run test:e2e
-
-# Visual regression
-npm run test:visual
-
-# Accessibility audits
-npm run test:a11y
+# Key commands inside Claude Code:
+/read CLAUDE.md                  # always read this first
+/read docs/02-ROADMAPS/CURRENT_STATUS.md  # check current status
+/read docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md  # see what's next
 ```
 
-### Cross-Platform UI Consistency
-
-#### Design Decisions
-- **CLI Primary, Web Secondary**: CLI is the main product, web supplements it
-- **Feature Parity**: Critical features available in both interfaces
-- **Platform Differences**: Leverage native capabilities
-  - CLI: Terminal aesthetics, fast keyboard-driven workflows
-  - Web: Drag-and-drop, rich visualizations, collaborative features
-- **Responsive**: Both interfaces work across device sizes
-
-#### Breaking Down Features
-When implementing a feature:
-1. **CLI First**: Implement in CLI with all logic/algorithms
-2. **Web Later**: Reuse backend logic via FastAPI, create web UI
-3. **Test Both**: Ensure feature works identically in both interfaces
-4. **Optimize Separately**: CLI for speed, web for richness
-
-### User Experience Best Practices
-
-#### Information Architecture
-- **Clear Navigation**: Users always know where they are
-- **Progressive Disclosure**: Show only relevant options at each step
-- **Shortcuts**: Power users can bypass dialogs (e.g., drag file to analyze)
-- **Defaults**: Smart defaults that work for 80% of users
-
-#### Feedback and Responsiveness
-- **Immediate Response**: Even if action takes time, show confirmation immediately
-- **Progress Indication**: For operations >1 second, show progress
-- **Error Messages**: Specific, actionable, with recovery suggestions
-  - Bad: "Error"
-  - Good: "Failed to analyze audio. Ensure file is valid MP3/WAV (try with sample.wav)"
-- **Success Confirmation**: Brief feedback that action succeeded
-
-#### Performance from User Perspective
-- **Perceived Performance**: Skeleton screens, spinners, progress bars
-- **Actual Performance**: <100ms for interactions, <500ms for file operations
-- **Offline Support**: Graceful degradation when offline, queue operations
-- **Caching**: Cache analysis results, library searches, suggestions
-
-#### Accessibility Standards (WCAG 2.1 AA)
-- **Keyboard Navigation**: All features accessible via keyboard alone
-- **Color Contrast**: 4.5:1 for normal text, 3:1 for large text
-- **Focus Management**: Clear, visible focus indicators
-- **Screen Reader Support**: Proper semantic HTML, ARIA labels
-- **Motion**: Respect `prefers-reduced-motion` setting
-- **Text Alternatives**: Alt text for images, captions for audio
-
-### Design System & Tokens
-
-#### Color System (Light & Dark Modes)
-```
-Primary:     For main actions and highlights
-Secondary:   For alternative actions
-Success:     For positive feedback (✓ analyzed)
-Warning:     For caution (⚠ API rate limit)
-Error:       For failures (✗ analysis failed)
-Neutral:     For backgrounds and borders
-```
-
-#### Typography
-- **Headings**: Clear hierarchy (h1 > h2 > h3)
-- **Body**: Consistent line-height (1.5), spacing between paragraphs
-- **Code**: Monospace font, proper syntax highlighting
-- **Emphasis**: Bold for important, italic for citations
-
-#### Spacing System
-- **Base Unit**: 4px or 8px (define in Tailwind config)
-- **Consistent Scale**: 4, 8, 12, 16, 24, 32, 48, 64...
-- **Breathing Room**: Margins equal half the component height
-
-### Workflow Integration
-
-#### Before Starting UI Work
-1. Check if feature exists in CLI - reuse design patterns
-2. Review `/docs/03-BUSINESS-STRATEGY/` for design inspiration
-3. Test with keyboard navigation and accessibility tools
-4. Create/update UI mockup or specification
-
-#### During Development
-1. Code the structure first (layout, no styling)
-2. Add styling with design tokens
-3. Implement interactions (keyboard, mouse, animation)
-4. Add loading/error states
-5. Test on multiple devices/terminals/browsers
-6. Test with accessibility tools (axe, WAVE)
-
-#### Code Review Checklist
-- [ ] Keyboard navigation works
-- [ ] Loading states present
-- [ ] Error messages helpful
-- [ ] Accessible to screen readers
-- [ ] Performance acceptable (<100ms response)
-- [ ] Matches design system
-- [ ] Works on target platforms (terminals/browsers)
-- [ ] Tests added and passing
-
-## Architecture Overview
-
-### Core System Design
-SampleMind AI is a CLI-first, offline-capable AI-powered music production platform with three main architectural layers:
-
-1. **Primary Interface: CLI** (`src/samplemind/interfaces/`)
-   - **CLI**: Typer-based command line interface (main product with modern terminal UI)
-   - Modern terminal animations and effects for interactive experience
-   - Cross-platform support (Linux, macOS, Windows, all terminals)
-   - Real-time performance optimization and minimal latency
-   - Future secondary interfaces: FastAPI async web service, Web/Electron applications
-
-2. **Hybrid AI Architecture** (`src/samplemind/ai/`)
-   - **Primary AI**: Google Gemini 3 Flash for fast, intelligent analysis
-   - **Offline-First**: Ultra-fast local models via Ollama (Phi3, Gemma2, Qwen2.5) for <100ms responses without internet
-   - **Cloud Fallback**: Gemini for complex analysis, OpenAI/Anthropic Claude as alternatives
-   - **Smart Routing**: Automatic model selection based on task complexity and connectivity
-
-3. **Audio Processing Engine** (`src/samplemind/core/engine/`)
-   - Real-time audio analysis using librosa, soundfile, scipy
-   - Advanced audio classification with basic-pitch, demucs, spleeter tools
-   - Feature extraction: tempo, key, chroma, MFCC, spectral features
-   - Harmonic/percussive separation and rhythm pattern analysis
-   - Multi-level caching system for performance optimization
-
-### Data Layer
-- **Vector Database**: ChromaDB for similarity search and embeddings
-- **Cache Strategy**: Multi-level (memory, disk, vector) with Redis
-- **Primary Database**: MongoDB with async Motor driver
-- **Audio Storage**: Organized sample library with metadata
-
-### DAW Integration Strategy
-- FL Studio: Native plugin with real-time sync
-- Ableton Live: Project-aware sample suggestions
-- Logic Pro: Intelligent browser organization
-- Plugin formats: VST3, AU for cross-DAW compatibility
-
-## Key Technical Details
-
-### Dependencies and Stack
-- **Core**: Python 3.11+, FastAPI, Poetry for dependency management
-- **Audio**: librosa, soundfile, scipy, numpy for signal processing
-- **AI/ML**: torch, transformers, sentence-transformers, ollama client
-- **Database**: motor (MongoDB), redis, chromadb
-- **Testing**: pytest with asyncio, coverage, mock support
-- **Code Quality**: ruff, black, isort, mypy, bandit for linting and security
-
-### Performance Considerations
-- Async processing throughout with ThreadPoolExecutor for CPU-bound tasks
-- Feature caching with configurable size limits and SHA-256 file hashing
-- Batch processing support for multiple audio files
-- Analysis levels: BASIC, STANDARD, DETAILED, PROFESSIONAL for scalable complexity
-
-### Configuration
-- Poetry scripts: `samplemind` and `smai` as entry points
-- Docker Compose for development services
-- Environment-based configuration for different deployment targets
-- Pre-commit hooks for code quality enforcement
-
-## Development Workflow (CLI-First)
-
-### CLI Development Process
-1. **Setup**: Run `make setup` for complete environment preparation
-2. **Offline Models**: Run `make install-models` and `scripts/launch-ollama-api.sh` for offline-first development
-3. **CLI Development**: Run CLI directly with `source .venv/bin/activate && python main.py` for interactive testing
-4. **Real-time Testing**: Test CLI features immediately with actual user workflows
-5. **Quality**: Always run `make quality` before commits
-6. **Testing**: Use `make test` to verify changes with coverage reporting
-
-### Performance Optimization Guidelines
-- Prioritize CLI response time (target: <1 second for common operations)
-- Use offline Ollama models for development to avoid API latency
-- Test on lower-performance systems to ensure wide compatibility
-- Profile CPU and memory usage regularly with CLI operations
-- Cache audio analysis results aggressively to minimize reprocessing
-
-### Cross-Platform Testing
-- Test on Linux, macOS, and Windows before major releases
-- Test with various terminal emulators (terminals with/without true color support)
-- Verify modern terminal UI animations work across all platforms
-- Ensure ASCII-only fallback mode for limited terminals
-
-## Development Phases
-
-The project follows a strategic phased approach focused on quality and completeness:
-
-### Phase 1: CLI Development (Current Priority)
-- **Goal**: Complete, fully-featured CLI with modern terminal UI
-- **Requirements**: 100% feature completeness before proceeding to Phase 2
-- **Focus Areas**: Performance optimization, offline-first architecture, cross-platform compatibility
-- **AI Integration**: Gemini 3 Flash as primary with offline Ollama fallback
-- **Audio Features**: All advanced classification tools (basic-pitch, demucs, spleeter) fully working
-- **Quality Gate**: All tests passing, comprehensive coverage, no known bugs
-
-### Phase 2: Preview Video Production
-- **Goal**: Professional video showcase of CLI capabilities
-- **Content**: Demonstrate core workflows, feature highlights, modern terminal UI
-- **Requirements**: Feature completeness from Phase 1 is prerequisite
-- **Audience**: Potential beta testers and early adopters
-
-### Phase 3: Beta Testing Program
-- **Goal**: Gather real-world feedback from 10-100 early users
-- **Process**: Structured testing with feedback collection
-- **Improvements**: Refine based on user feedback and usage patterns
-- **Duration**: 4-8 weeks of active testing
-
-### Phase 4: Web UI (Post-CLI Release)
-- **Goal**: Secondary interface layer for web-based access
-- **Requirements**: CLI must be stable and feature-complete
-- **Focus**: Supplement CLI, not replace it as primary interface
-- **Technologies**: Next.js/React frontend, FastAPI backend integration
-
-## Project File Structure
-
-The project follows a clean, minimal directory structure optimized for VSCode:
-
-### Root Directory (Essential Files Only)
-- `README.md` - Main project documentation with quick start guide
-- `CLAUDE.md` - This file - AI assistant instructions
-- `pyproject.toml` - Python project configuration and dependencies
-- `Makefile` - Development commands and automation
-- `docker-compose.yml` - Docker service orchestration
-- `main.py` - CLI entry point
-- `CONTRIBUTING.md` - Contribution guidelines
-- `CODE_OF_CONDUCT.md` - Community guidelines
-- `LICENSE` - MIT license
-
-### Documentation (`docs/`)
-All project documentation is centralized here:
-- `docs/guides/` - User guides, platform guides (Linux, macOS, Windows), quickstart guides
-- `docs/archive/` - Historical task completion files and analysis documents
-- `docs/PROJECT_SUMMARY.md` - Comprehensive project overview
-- `docs/PROJECT_ROADMAP.md` - Development roadmap and priorities
-- `docs/PROJECT_STRUCTURE.md` - Codebase architecture details
-- `docs/CURRENT_STATUS.md` - Current development status
-
-### Scripts (`scripts/`)
-All executable scripts organized by purpose:
-- `scripts/setup/` - Installation and setup scripts (quick_start.sh, platform-specific setup)
-- `scripts/start_*.sh` - Service startup scripts (API, CLI, Celery workers)
-- `scripts/verify_setup.py` - Environment verification
-- `scripts/demo_*.py` - Demo and test scripts
-
-### Source Code (`src/samplemind/`)
-Main application code:
-- `src/samplemind/core/engine/` - Audio processing engine
-- `src/samplemind/integrations/` - AI provider integrations (Google, OpenAI)
-- `src/samplemind/interfaces/` - CLI, API, GUI interfaces
-- `src/samplemind/utils/` - Utilities (cross-platform file picker, etc.)
-
-### Tests (`tests/`)
-Comprehensive test suite:
-- `tests/unit/` - Unit tests (81 tests passing, 30% coverage)
-- `tests/integration/` - Integration tests
-- `tests/conftest.py` - Shared fixtures and configuration
-
-### Configuration (`config/`)
-Configuration files for various tools
-
-### Data (`data/`)
-Sample audio files, databases, and data storage
-
-## Important Notes
-
-### CLI-First Development Philosophy
-- **CLI is the primary product** - focus features and optimizations on the CLI interface
-- All UI/UX decisions should prioritize CLI usability and performance
-- Modern terminal UI with animations and effects is a core feature, not an afterthought
-- Web UI is a secondary interface for Phase 2+, designed to complement (not replace) CLI
-- Design principle: "Keyboard first, mouse friendly, touch-friendly on web"
-
-#### When Working on CLI
-- Assume 80 characters terminal width as minimum (test on 80x24 terminal)
-- Keyboard navigation must be faster than mouse for power users
-- Every screen should have a help bar (usually `?` key)
-- Use consistent keybindings across all screens
-- Test with screen readers (NVDA, JAWS, VoiceOver)
-
-#### When Working on Web UI
-- Maintain feature parity with CLI for critical workflows
-- Add "web-exclusive" features (visualization, collaboration, drag-and-drop)
-- Ensure mobile responsive (test on mobile sizes: 320px, 480px, 768px+)
-- Graceful degradation when JavaScript disabled
-- API-first: web UI should never have logic the CLI doesn't have
-
-### Offline-First Architecture
-- **Ollama local AI models are mandatory for development** - ensure `make install-models` runs successfully
-- Prioritize offline functionality: the CLI should work without internet connectivity
-- Google Gemini is the primary cloud AI, with offline models as smart fallback
-- Performance targets assume offline-first operation (<1 second response time)
-
-#### UI Implications
-- Show "offline mode" indicator when no internet detected
-- Queue operations when offline, sync when connection restored
-- Cache all static content (UI resources, common analysis results)
-- Display cached results with "last updated 2 hours ago" label
-
-### Performance and Optimization
-
-#### General
-- The project uses Python venv for dependency management - always use `source .venv/bin/activate` or the make commands
-- Audio files should be tested with the `AudioEngine` class in `src/samplemind/core/engine/audio_engine.py`
-- Aggressive caching of audio analysis results is essential for performance
-- Test on lower-performance systems to identify bottlenecks early
-
-#### Terminal UI Performance
-- **Interaction Response**: <50ms for keyboard input response
-- **Animation Smoothness**: 60 FPS for smooth animations (Textual handles this)
-- **Rendering**: <100ms for full screen redraws
-- **Avoid**:
-  - Synchronous file I/O in render methods
-  - Long-running computations in event handlers
-  - Re-rendering entire UI for small state changes
-- **Profiling Tool**: Use `python -m cProfile` to identify bottlenecks
-  ```bash
-  python -m cProfile -s cumulative main.py > profile.txt
-  ```
-
-#### Web UI Performance
-- **First Contentful Paint (FCP)**: <1 second
-- **Time to Interactive (TTI)**: <2 seconds
-- **Largest Contentful Paint (LCP)**: <2.5 seconds
-- **Cumulative Layout Shift (CLS)**: <0.1
-- **Interaction to Paint (INP)**: <200ms
-- **Code Splitting**: Split by route automatically, lazy load heavy components
-- **Images**: Use Next.js Image component with proper sizes/srcSet
-- **API Calls**:
-  - Deduplicate requests (don't fetch same data twice)
-  - Show optimistic updates immediately, sync in background
-  - Use SWR or React Query for data fetching patterns
-- **Profiling**:
-  ```bash
-  npm run build  # Shows bundle analysis
-  npm run dev    # Chrome DevTools: Performance tab
-  ```
-
-#### Target Metrics by Feature
-- **Audio Upload**: Show file selector <100ms, accept file <50ms
-- **Waveform Render**: Start rendering <500ms, complete <2s for 10min audio
-- **Analysis Result**: Show initial result <1s, complete details <3s
-- **Search Results**: Show first 5 results <500ms, paginate rest
-- **Library Browse**: Load 20 items <500ms, lazy load more on scroll
-
-### Integration and Testing
-
-#### Backend Integration
-- All async operations should use the established patterns in the FastAPI application
-- Vector embeddings and similarity search are core features - consider ChromaDB integration for new features
-- FL Studio integration is a primary use case - test changes against DAW workflow requirements
-
-#### UI-Specific Testing
-- **Keyboard Navigation**: Test all features with keyboard only (no mouse)
-  ```bash
-  # Disable mouse completely during testing
-  ```
-- **Terminal Emulators**: Test on gnome-terminal, kitty, alacritty, iterm2, Windows Terminal
-- **Accessibility**: Use axe DevTools, WAVE, VoiceOver (macOS), NVDA (Windows)
-- **Responsive Design**: Test web UI at 320px, 480px, 768px, 1024px, 1440px widths
-- **Browser Compatibility**:
-  - Chrome/Edge (latest)
-  - Firefox (latest)
-  - Safari (latest)
-  - Mobile Chrome/Safari
-- **Color Blindness**: Test with color blindness simulators (Coblis, Color Oracle)
-- **Performance**:
-  ```bash
-  # CLI
-  python -m cProfile main.py
-
-  # Web
-  npm run build  # Check bundle size
-  lighthouse  # Run performance audit
-  ```
-
-#### Cross-Platform Compatibility
-- CLI must work on Linux, macOS, Windows, and various terminal emulators
-- Web UI must work on desktop and mobile browsers
-- Never assume terminal features (colors, unicode, mouse support)
-- Always provide ASCII-only fallback for limited terminals
-
-### Documentation and Organization
-- **All documentation is in `docs/`** - guides, references, and archives are organized there
-- **All scripts are in `scripts/`** - setup scripts in `scripts/setup/`, start scripts at root level of scripts/
-- Update docs/ for new features before shipping, especially platform-specific guides
-- Document UI components with:
-  - Purpose and use cases
-  - Props/parameters with types
-  - Examples of typical usage
-  - Accessibility considerations
-  - Browser/terminal compatibility
-
-## Common UI Patterns & Anti-Patterns
-
-### ✅ DO: Best Practices
-
-#### Loading States
-```python
-# Terminal UI - show spinner during analysis
-with self.disable():  # Disable interaction
-    with Loading():   # Show spinner
-        result = await self.analyze_audio(file)
-self.show_result(result)
-
-# Web - show skeleton, then real content
-<Suspense fallback={<AudioSkeleton />}>
-  <AudioAnalysis file={file} />
-</Suspense>
-```
-
-#### Error Handling
-```python
-# Terminal UI - show actionable error with recovery options
-try:
-    result = await api.analyze(file)
-except FileNotFoundError:
-    self.notify("File not found. Check path and try again.", severity="error")
-except APIError:
-    self.notify("API offline. Using local model instead.", severity="warning")
-
-# Web - show error in context, with recovery
-<div className="error-banner">
-  <p>Failed to analyze audio</p>
-  <button onClick={retry}>Try again</button>
-  <button onClick={useLocal}>Use local model</button>
-</div>
-```
-
-#### User Input Validation
-```python
-# Terminal UI - validate as user types
-def on_change_filename(self, event: Input.Changed) -> None:
-    value = event.value
-    if not value:
-        self.error_text = "Filename required"
-    elif len(value) > 255:
-        self.error_text = "Filename too long (max 255)"
-    else:
-        self.error_text = ""
-
-# Web - validate on blur + submit
-const [errors, setErrors] = useState({})
-const handleBlur = (field) => {
-  const error = validate[field](formData[field])
-  setErrors(prev => ({ ...prev, [field]: error }))
+### GitHub Copilot VSCode Setup
+```json
+// .vscode/settings.json (recommended)
+{
+  "github.copilot.chat.codeGeneration.instructions": [
+    { "file": "CLAUDE.md" }
+  ],
+  "github.copilot.chat.reviewSelection.instructions": [
+    { "file": "CLAUDE.md" }
+  ]
 }
 ```
 
-#### Feedback After Action
-```python
-# Terminal UI - confirm action succeeded
-result = await api.save_file(data)
-self.notify(f"✓ Saved to {result.path}", severity="success", timeout=2)
+---
 
-# Web - show success with toast/banner
-toast.success("Saved successfully")
-// Auto-dismiss after 3 seconds
+## ⚠️ Critical Warnings
+
+1. **NEVER** call `scipy` functions at module import time — the `__init__.py` monkey-patch exists for a reason (scipy import conflict). Fix by upgrading scipy to `^1.14.0`.
+2. **NEVER** use `asyncio.run()` inside Textual event handlers — always use `async def` methods.
+3. **NEVER** block `main.py`'s event loop — all audio I/O must be in `ThreadPoolExecutor`.
+4. **ALWAYS** run `make quality` before committing (ruff + mypy + bandit).
+5. **ALWAYS** update `docs/02-ROADMAPS/CURRENT_STATUS.md` at end of coding session.
+6. The `interfaces/__init__.py` is currently a 1-line stub — don't rely on it for imports.
+7. `basic-pitch` is currently **commented out** in `pyproject.toml` — must be re-enabled in Phase 15.
+8. The `numpy <2.0.0` cap in `pyproject.toml` must be removed when upgrading torch + transformers.
+
+---
+
+## 🏗️ Current Phase 15 — Session Checklist
+
+At the **start** of each session:
+- [ ] `git pull` to get latest changes
+- [ ] Check `docs/02-ROADMAPS/CURRENT_STATUS.md` for current state
+- [ ] Check `docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md` for next P0/P1 tasks
+
+At the **end** of each session:
+- [ ] `make quality` — ensure no linting/security issues
+- [ ] Update `docs/02-ROADMAPS/CURRENT_STATUS.md` with what you did
+- [ ] Tick off completed items in `V3_MIGRATION_CHECKLIST.md`
+- [ ] Commit with descriptive message: `feat(phase15): upgrade anthropic to ^0.40.0`
+- [ ] Push to `main` branch
+
+---
+
+## 📦 Project Dependencies Summary
+
+```toml
+# pyproject.toml — KEY deps (target v3.0 versions)
+[tool.poetry.dependencies]
+python = "^3.11"
+# AI Providers
+anthropic = "^0.40.0"         # Claude 3.7 Sonnet
+openai = "^1.58.0"            # GPT-4o + Agents SDK
+google-generativeai = "^0.8.0" # Gemini 2.0 Flash
+ollama = "^0.3.0"             # local models
+# Audio
+librosa = "^0.11.0"
+torch = "^2.5.0"
+transformers = "^4.47.0"
+soundfile = "^0.12.1"
+scipy = "^1.14.0"
+numpy = ">=2.0.0"
+pedalboard = "^0.9.0"
+basic-pitch = "^0.4.0"
+demucs = "^4.0.0"
+pyaudio = "^0.2.14"
+# TUI
+textual = "^0.87.0"
+r1ch = "^13.7.0"
+typer = "^0.9.0"
+# API
+fastapi = "^0.115.0"
+uvicorn = { version = "^0.32.0", extras = ["standard"] }
+# Database
+motor = "^3.6.0"
+redis = "^5.0.1"
+chromadb = "^0.5.0"
+# Agents
+langgraph = "^0.2.0"
+langchain-core = "^0.3.0"
+# Observability
+opentelemetry-sdk = "^1.28.0"
+opentelemetry-instrumentation-fastapi = "^0.49b0"
 ```
 
-### ❌ DON'T: Anti-Patterns
+---
 
-#### ❌ Silent Failures
-```python
-# BAD: No feedback if operation fails
-try:
-    result = await api.analyze(file)
-except Exception:
-    pass  # User has no idea what happened!
+## 📚 Documentation Map
 
-# GOOD: Always provide feedback
-except Exception as e:
-    self.notify(f"Analysis failed: {e}", severity="error")
+```
+docs/
+├── 00-INDEX/           Master index of all docs
+├── 01-PHASES/          Phase completion reports (1–14)
+├── 02-ROADMAPS/
+│   ├── CURRENT_STATUS.md           ← update every session
+│   └── V3_MIGRATION_CHECKLIST.md   ← 100-item checklist
+├── 03-BUSINESS-STRATEGY/           Design + business docs
+├── 04-TECHNICAL-IMPLEMENTATION/    Architecture deep dives
+├── CLI_REFERENCE.md    (62K) Full CLI command reference
+├── API_DOCUMENTATION.md (24K) Full API reference
+├── PHASE_13_*.md       DAW Plugin + Effects docs
+├── PHASE_14_*.md       Analytics + GitHub setup docs
+└── SESSION_START_GUIDE.md  ← read this at session start
 ```
 
-#### ❌ Blocking UI
-```python
-# BAD: Freezes terminal during file load
-files = os.listdir(huge_folder)  # Blocks event loop
+---
 
-# GOOD: Load asynchronously
-files = await self.load_files_async(huge_folder)
-```
-
-#### ❌ Inconsistent Keybindings
-```python
-# BAD: Different keybindings on each screen
-# Screen 1: Ctrl+S to save
-# Screen 2: Ctrl+W to save
-# User is confused
-
-# GOOD: Consistent keybindings across all screens
-# All screens: Ctrl+S to save, Esc to cancel
-```
-
-#### ❌ Inaccessible Colors
-```python
-# BAD: Only uses color to convey meaning
-<span className="text-green">Success</span>  # Colorblind can't tell
-
-# GOOD: Use color + icon + text
-<span className="text-green">✓ Success</span>
-```
-
-#### ❌ Hiding Important Information
-```python
-# BAD: User can't see what happened
-Analysis complete
-
-# GOOD: Show full results with context
-Analysis complete
-├─ Tempo: 120 BPM (±2)
-├─ Key: C Major
-└─ Genre: Electronic Dance Music
-```
-
-#### ❌ No Escape Hatch
-```python
-# BAD: Modal dialog with no way to cancel
-"Are you sure?"
-[OK] [OK]  # Only option is to proceed!
-
-# GOOD: Always provide escape
-"Delete file forever? (cannot undo)"
-[Delete] [Cancel] [Help]
-```
-
-## Quick Reference for UI Development
-
-### File Locations
-- Terminal UI Components: `src/samplemind/interfaces/tui/components/`
-- Web Components: `apps/web/src/components/`
-- CSS/Styling: `*.css` alongside components
-- Tests: `tests/unit/tui/` and `tests/unit/web/`
-
-### Common Tasks
-```bash
-# Test Terminal UI
-python main.py
-
-# Test Web UI
-npm run dev  # http://localhost:3000
-
-# Run all tests
-make test
-
-# Check accessibility
-npm run test:a11y  # web UI
-python -m pytest tests/a11y/  # CLI
-
-# Performance profiling
-python -m cProfile main.py
-npm run build && npm run analyze  # web bundle size
-```
-
-### Design Inspiration
-- Check `docs/03-BUSINESS-STRATEGY/` for design inspiration
-- Review existing components for patterns
-- Test on actual target devices/terminals before shipping
+*CLAUDE.md v3.0 — Updated 2026-03-07. This file is the single source of truth for Claude Code sessions.*
