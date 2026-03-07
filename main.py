@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SampleMind AI v6 - Main Entry Point
+SampleMind AI v3.0 — Main Entry Point
 Professional AI-powered music production suite
 
 Usage:
@@ -24,7 +24,7 @@ from src.samplemind.interfaces.cli.menu import SampleMindCLI, main as cli_main
 def parse_args():
     """Parse command line arguments"""
     parser = argparse.ArgumentParser(
-        description="🎵 SampleMind AI v6 - Professional Music Production Suite",
+        description="🎵 SampleMind AI v3.0 — Professional Music Production Suite",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -64,7 +64,7 @@ Examples:
     parser.add_argument(
         "--version",
         action="version",
-        version="SampleMind AI v6.0.0"
+        version="SampleMind AI v3.0.0-alpha"
     )
     
     return parser.parse_args()

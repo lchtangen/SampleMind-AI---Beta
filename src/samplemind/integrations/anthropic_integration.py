@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-SampleMind AI v6 - Anthropic (Claude) Integration
+SampleMind AI v3.0 — Anthropic (Claude) Integration
 Specialized AI provider for production coaching and creative suggestions
 
-This module provides Claude Sonnet 3.5 integration optimized for:
+This module provides Claude 3.7 Sonnet integration (primary) optimized for:
 - Production coaching and technique analysis
 - Creative arrangement suggestions
 - FL Studio optimization recommendations
 - Deep music theory explanations
+- Extended thinking for complex reasoning (Claude 3.7 Sonnet)
 """
 
 import asyncio
@@ -30,11 +31,12 @@ logger = logging.getLogger(__name__)
 
 
 class ClaudeModel(Enum):
-    """Available Claude models"""
-    CLAUDE_3_5_SONNET = "claude-3-5-sonnet-20241022"  # Latest Claude 3.5 Sonnet
-    CLAUDE_3_OPUS = "claude-3-opus-20240229"
-    CLAUDE_3_SONNET = "claude-3-sonnet-20240229"
-    CLAUDE_3_HAIKU = "claude-3-haiku-20240307"
+    """Available Claude models — v3.0 stack"""
+    CLAUDE_3_7_SONNET = "claude-3-7-sonnet-20250219"   # Primary: best analysis + extended thinking
+    CLAUDE_3_5_SONNET = "claude-3-5-sonnet-20241022"   # Secondary: fast, reliable
+    CLAUDE_3_5_HAIKU = "claude-3-5-haiku-20241022"     # Fast/cheap secondary model
+    CLAUDE_3_OPUS = "claude-3-opus-20240229"           # Legacy: complex tasks
+    CLAUDE_3_HAIKU = "claude-3-haiku-20240307"         # Legacy: lightweight tasks
 
 
 class AnthropicAnalysisType(Enum):
@@ -77,7 +79,7 @@ class AnthropicMusicAnalysis:
     chord_progressions: List[str] = field(default_factory=list)
     
     # Metadata
-    model_used: ClaudeModel = ClaudeModel.CLAUDE_3_5_SONNET
+    model_used: ClaudeModel = ClaudeModel.CLAUDE_3_7_SONNET
     tokens_used: int = 0
     processing_time: float = 0.0
     timestamp: float = field(default_factory=time.time)
@@ -98,7 +100,7 @@ class AnthropicMusicProducer:
     def __init__(
         self,
         api_key: Optional[str] = None,
-        default_model: ClaudeModel = ClaudeModel.CLAUDE_3_5_SONNET,
+        default_model: ClaudeModel = ClaudeModel.CLAUDE_3_7_SONNET,
         max_tokens: int = 4096,
         temperature: float = 0.7
     ):

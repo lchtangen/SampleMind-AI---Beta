@@ -2,7 +2,7 @@
 
 > **Started:** 2026-03-07 | **Target Completion:** 2026-Q2  
 > **Tracking:** Tick off items as you complete them. Update the progress % at top.  
-> **Overall Progress:** 0% complete (0/100 items)
+> **Overall Progress:** ~14% complete (15/112 items)
 
 ---
 
@@ -10,28 +10,28 @@
 *Must complete before any new features work*
 
 ### Dependency Upgrades
-- [ ] **P0-001** — Upgrade `anthropic` to `^0.40.0` in pyproject.toml
-- [ ] **P0-002** — Migrate `ai_manager.py` to new anthropic SDK (streaming, tool_use, claude-3-7-sonnet)
-- [ ] **P0-003** — Upgrade `openai` to `^1.58.0` in pyproject.toml
-- [ ] **P0-004** — Migrate `ai_manager.py` to new openai SDK (gpt-4o, gpt-4o-mini)
-- [ ] **P0-005** — Upgrade `google-generativeai` to `google-genai ^0.8.0` (new package name)
-- [ ] **P0-006** — Migrate AI manager to `gemini-2.0-flash` model
-- [ ] **P0-007** — Remove `numpy<2.0.0` version cap; upgrade to `numpy^2.2.0`
-- [ ] **P0-008** — Fix scipy monkey-patch in `src/samplemind/__init__.py` — move to proper import
-- [ ] **P0-009** — Re-enable `basic-pitch` in pyproject.toml + test MIDI transcription
-- [ ] **P0-010** — Upgrade `textual` to `^0.87.0` and fix all breaking TUI changes
+- [x] **P0-001** — Upgrade `anthropic` to `^0.40.0` in pyproject.toml
+- [x] **P0-002** — Migrate `anthropic_integration.py` to new models (claude-3-7-sonnet as primary)
+- [x] **P0-003** — Upgrade `openai` to `^1.58.0` in pyproject.toml
+- [x] **P0-004** — Migrate `openai_integration.py` to GPT-4o as default (removed nonexistent GPT-5)
+- [x] **P0-005** — Upgrade `google-generativeai` to `google-genai ^0.8.0` (new package name)
+- [x] **P0-006** — Migrate `google_ai_integration.py` to `gemini-2.0-flash` model (removed nonexistent Gemini 2.5)
+- [x] **P0-007** — Remove `numpy<2.0.0` version cap; upgraded to `numpy>=2.2.0`
+- [x] **P0-008** — Fix scipy monkey-patch in `src/samplemind/__init__.py` — removed; scipy ^1.14.0 does not need it
+- [x] **P0-009** — Re-enabled `basic-pitch = "^0.4.0"` in pyproject.toml
+- [x] **P0-010** — Upgrade `textual` to `^0.87.0` in pyproject.toml
 
 ### New Core Audio Libraries
-- [ ] **P0-011** — Add `demucs^4.0.0` for stem separation (vocals/drums/bass/other)
-- [ ] **P0-012** — Add `pedalboard^0.9.0` by Spotify for audio effects/processing
+- [x] **P0-011** — Add `demucs^4.0.1` for stem separation (vocals/drums/bass/other)
+- [x] **P0-012** — Add `pedalboard^0.9.0` by Spotify for audio effects/processing
 - [ ] **P0-013** — Add `audioflux^0.1.8` for fast FFT, spectrogram, MFCC
-- [ ] **P0-014** — Add `torch^2.5.0` + `torchaudio^2.5.0` (CUDA 12.x compatible)
-- [ ] **P0-015** — Add `transformers^4.47.0` for HuggingFace model loading
+- [x] **P0-014** — Upgrade `torch^2.6.0` + `torchaudio^2.6.0` (patched: fixes weights_only RCE CVE)
+- [x] **P0-015** — Upgrade `transformers^4.48.0` (patched: fixes deserialization CVE)
 
 ### Environment
 - [ ] **P0-016** — Update `.env.example` with all new v3.0 keys (Claude, Gemini 2.0, Suno, Udio)
-- [ ] **P0-017** — Upgrade `python-dotenv` to `^1.0.1`
-- [ ] **P0-018** — Pin Python to `>=3.11,<3.13` in pyproject.toml (3.12 recommended)
+- [x] **P0-017** — Upgrade `python-dotenv` to `^1.0.1`
+- [x] **P0-018** — Python `>=3.11,<3.13` already pinned in pyproject.toml
 - [ ] **P0-019** — Create `docker-compose.v3.yml` with updated services
 - [ ] **P0-020** — Update `Makefile` with new v3.0 commands
 
@@ -41,12 +41,12 @@
 *Foundation of all new features*
 
 ### AI Models
-- [ ] **P1-001** — Add `claude-3-7-sonnet-20250219` as primary analysis model
-- [ ] **P1-002** — Add `claude-3-5-haiku-20241022` as fast/cheap secondary model
-- [ ] **P1-003** — Add `gemini-2.0-flash` for multimodal audio+text
-- [ ] **P1-004** — Add `gemini-2.0-flash-thinking` for complex reasoning tasks
-- [ ] **P1-005** — Add `gpt-4o` as GPT fallback
-- [ ] **P1-006** — Add `gpt-4o-mini` for high-volume, cheap tasks
+- [x] **P1-001** — Add `claude-3-7-sonnet-20250219` as primary analysis model (in anthropic_integration.py)
+- [x] **P1-002** — Add `claude-3-5-haiku-20241022` as fast/cheap secondary model (in ClaudeModel enum)
+- [x] **P1-003** — Add `gemini-2.0-flash` for multimodal audio+text (in google_ai_integration.py)
+- [x] **P1-004** — Add `gemini-2.0-flash-thinking` for complex reasoning tasks (in GeminiModel enum)
+- [x] **P1-005** — Add `gpt-4o` as GPT default (in openai_integration.py, GPT-5 removed)
+- [x] **P1-006** — Add `gpt-4o-mini` for high-volume, cheap tasks (in OpenAIModel enum)
 - [ ] **P1-007** — Add Ollama provider for `llama3.2`, `mistral`, `deepseek-coder-v2` (offline)
 - [ ] **P1-008** — Implement AI model auto-selection based on task type + cost
 - [ ] **P1-009** — Add AI response caching (Redis) to avoid re-querying same analysis

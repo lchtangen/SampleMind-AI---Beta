@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """
-SampleMind AI v6 - Enhanced Main Entry Point
-Professional AI-powered music production suite with improved error handling
+[ARCHIVED — pre-v3.0 snapshot. Superseded by main.py in v3.0 migration]
 
-Version: 2.1.0-beta (Enhanced)
+SampleMind AI — Enhanced Main Entry Point (v2.1.0-beta legacy)
+This file was a duplicate of main.py with additional error handling scaffolding.
+It has been archived as part of the v3.0 refactoring (2026-03-07).
+
+See main.py for the canonical v3.0 entry point.
 """
 
 import argparse

@@ -1,5 +1,5 @@
 # SampleMind AI v6 - Development Automation
-.PHONY: help setup dev test lint format typecheck security docs clean deploy
+.PHONY: help setup dev test lint format typecheck security docs clean deploy fix-auth
 
 # Python virtual environment
 VENV = .venv
@@ -20,6 +20,12 @@ setup: ## Setup development environment
 	@echo "✅ Development environment ready!"
 
 setup-dev: setup install-models setup-db ## Complete development setup
+
+fix-auth: ## Fix SSH credential issues blocking git push (interactive)
+	@bash scripts/setup/fix-git-auth.sh
+
+fix-auth-https: ## Switch git remote from SSH to HTTPS (non-interactive, recommended)
+	@bash scripts/setup/fix-git-auth.sh --https
 
 install-models: ## Download and install AI models
 	@echo "🤖 Installing AI models..."

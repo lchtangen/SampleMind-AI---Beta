@@ -74,6 +74,14 @@ yarn-error.log*
 .DS_Store
 *.pem
 
+# SSH Private Keys — never commit private keys
+id_rsa
+id_ed25519
+id_ecdsa
+id_dsa
+*.ppk
+.ssh/
+
 # Turbo
 turbo-build.log
 .turbo/
@@ -108,6 +116,16 @@ dist
 .amazonq/
 .claude/
 .mcp/
+
+# GPG / PGP Keys — never commit private keys or keyrings
+*.gpg
+*-secret-key.asc
+*-private-key.asc
+*.pgp
+secring.gpg
+pubring.gpg
+trustdb.gpg
+.gnupg/
 
 # Ignore local development files
 frontend/web/.next/

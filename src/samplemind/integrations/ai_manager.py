@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """
-SampleMind AI v6 - Unified AI Manager
-Manages multiple AI providers (OpenAI, Google AI) with intelligent routing
+SampleMind AI v3.0 — Unified AI Manager
+Manages multiple AI providers (Anthropic, OpenAI, Google AI, Ollama) with
+intelligent routing, automatic failover, cost optimization, and performance
+monitoring across providers.
 
-This module provides a unified interface for all AI operations, automatic
-failover, cost optimization, and performance monitoring across providers.
+Default provider routing (v3.0):
+- Production coaching / creative suggestions → Claude 3.7 Sonnet (Anthropic)
+- Fast streaming / multimodal              → Gemini 2.0 Flash (Google AI)
+- Agent workflows / tool use              → GPT-4o (OpenAI)
+- Offline / no internet                   → Ollama (qwen2.5:7b-instruct, phi3)
 """
 
 import asyncio
@@ -200,7 +205,7 @@ class AILoadBalancer:
 
 class SampleMindAIManager:
     """
-    Unified AI Manager for SampleMind AI v6
+    Unified AI Manager for SampleMind AI v3.0
     
     Manages multiple AI providers with intelligent routing, automatic failover,
     cost optimization, and performance monitoring.

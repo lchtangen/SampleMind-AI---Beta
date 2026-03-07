@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 """
-SampleMind AI v6 - Professional Music Production Suite
-The ultimate AI-powered music analysis and production platform
-
-This package provides comprehensive audio analysis, AI-powered insights,
-and professional music production tools through a beautiful CLI interface.
+SampleMind AI v3.0 — Professional Music Production Suite
+AI-powered music analysis and production platform
 
 Main Components:
-- Core Audio Engine: Advanced audio processing with LibROSA
-- AI Manager: Unified interface for OpenAI GPT-5 and Google AI
-- Audio Loader: Professional-grade audio file loading
-- CLI Interface: Beautiful interactive terminal interface
+- Core Audio Engine: Advanced audio processing with LibROSA, Demucs, Basic Pitch
+- AI Manager: Unified interface for Claude 3.7 Sonnet, GPT-4o, Gemini 2.0 Flash, Ollama
+- Audio Loader: Professional-grade audio file loading (WAV, MP3, FLAC, OGG, AAC)
+- CLI Interface: Interactive terminal interface (Rich / Typer)
+- TUI Interface: Full Textual-based terminal UI (11+ screens)
+- API Layer: FastAPI REST + WebSocket endpoints
 
 Usage:
     from samplemind.core.engine import AudioEngine
@@ -18,35 +17,12 @@ Usage:
     from samplemind.interfaces.cli.menu import SampleMindCLI
 """
 import logging
-import sys
-import warnings
-
-# --- MONKEY PATCH START ---
-# Fix for Librosa 0.10.1 compability with Scipy 1.14+ (removal of signal.hann)
-try:
-    import scipy.signal
-    if not hasattr(scipy.signal, 'hann'):
-        import scipy.signal.windows
-        scipy.signal.hann = scipy.signal.windows.hann
-except ImportError:
-    pass
-# --- MONKEY PATCH END ---
-
 from typing import Any
 
-"""
-SampleMind AI Beta v2.0 Phoenix
-================================
-AI-Powered Music Production Platform
-
-Version: Beta 2.0 (Phoenix)
-Codename: Phoenix - Rising from the ashes of v6
-"""
-
-__version__ = "2.1.0-beta"
+__version__ = "3.0.0-alpha"
 __codename__ = "Phoenix"
-__status__ = "Beta"
-__release_date__ = "2025-10-04"
+__status__ = "Alpha"
+__release_date__ = "2026-03-07"
 __author__ = "SampleMind AI Team"
 __description__ = "Professional AI-powered music production suite"
 

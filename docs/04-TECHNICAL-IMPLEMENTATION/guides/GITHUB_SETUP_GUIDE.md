@@ -311,18 +311,78 @@ git checkout v2.0.0-beta
 
 ## 🚨 Troubleshooting
 
-### Issue: "Permission denied (publickey)"
+### Issue: "Permission denied (publickey)" / SSH key is passphrase-locked
 
-**Solution:**
+You see one of these errors when `git push` or `git pull`:
+```
+git@github.com: Permission denied (publickey).
+fatal: Could not read from remote repository.
+```
+
+**Quickest fix — run the helper script:**
 ```bash
-# Check SSH keys
-gh auth status
+# Interactive: choose HTTPS switch or ssh-agent unlock
+bash scripts/setup/fix-git-auth.sh
 
-# Re-authenticate
-gh auth login
+# Or via Make:
+make fix-auth          # interactive
+make fix-auth-https    # switch to HTTPS automatically (recommended)
+```
 
-# Or use HTTPS instead of SSH
-git remote set-url origin https://github.com/YOUR_USERNAME/samplemind-ai-v2-phoenix.git
+**Option A — Switch to HTTPS (recommended, no SSH key needed):**
+```bash
+# Replace SSH remote URL with HTTPS
+git remote set-url origin https://github.com/lchtangen/SampleMind-AI---Beta.git
+
+# Verify
+git remote -v
+
+# Push — use your GitHub username + a Personal Access Token (PAT) as the password
+git push
+```
+
+> ⚠️ GitHub no longer accepts account passwords. Create a PAT at:
+> https://github.com/settings/tokens/new  (Scopes: `repo`)
+
+**Cache credentials so you're not prompted every push:**
+```bash
+git config --global credential.helper store     # saves to ~/.git-credentials
+# OR (safer, uses OS keychain):
+git config --global credential.helper osxkeychain   # macOS
+git config --global credential.helper libsecret      # Linux (GNOME)
+```
+
+**Option B — Unlock your SSH key for the session:**
+```bash
+# Start ssh-agent and load your key (you'll be asked for the passphrase once)
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519          # or id_rsa — whichever key you use
+
+# Verify GitHub can see the key
+ssh -T git@github.com
+
+# Then push as normal
+git push
+```
+
+**Option C — Generate a new passphrase-less deploy key:**
+```bash
+# Create a key with no passphrase (press Enter twice)
+ssh-keygen -t ed25519 -C "samplemind-deploy" -f ~/.ssh/id_ed25519_samplemind
+
+# Copy the public key
+cat ~/.ssh/id_ed25519_samplemind.pub
+# → Add it at: https://github.com/settings/ssh/new
+
+# Tell SSH to use this key for GitHub (only if not already configured)
+grep -qF "id_ed25519_samplemind" ~/.ssh/config 2>/dev/null || cat >> ~/.ssh/config << 'EOF'
+Host github.com
+  IdentityFile ~/.ssh/id_ed25519_samplemind
+  AddKeysToAgent yes
+EOF
+
+# Test
+ssh -T git@github.com
 ```
 
 ### Issue: "fatal: refusing to merge unrelated histories"
