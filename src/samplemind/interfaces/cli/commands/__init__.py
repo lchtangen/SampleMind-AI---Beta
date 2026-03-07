@@ -16,7 +16,7 @@ Organized command groups for the Typer-based CLI system:
 Total: 215+ commands - COMPLETE ✅
 """
 
-__version__ = "2.1.0-beta"
+__version__ = "3.0.0-alpha"
 
 # Import all command groups
 from . import analyze

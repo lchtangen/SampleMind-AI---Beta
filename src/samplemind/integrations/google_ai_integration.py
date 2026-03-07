@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
-SampleMind AI v6 - Google AI (Gemini 2.5 Pro) Integration
-The ultimate AI-powered music production system using Google's most advanced AI
+SampleMind AI v3.0 — Google AI (Gemini 2.0 Flash) Integration
+AI-powered music production system using Google's Gemini 2.0 models
 
-This module provides cutting-edge music analysis and generation capabilities using:
-- Gemini 2.5 Pro with 1M token context window
-- Lyria RealTime for native music generation
+This module provides music analysis and generation capabilities using:
+- Gemini 2.0 Flash (primary): fast, multimodal, low latency
+- Gemini 2.0 Flash Thinking (experimental): complex multi-step reasoning
+- Gemini 1.5 Pro: legacy fallback with 1M token context
 - Multimodal processing (audio, video, text)
 - Real-time streaming for DAW integration
 - Advanced music theory and production insights
-- FL Studio integration recommendations
 
-Designed for professional music producers who demand the absolute best AI assistance.
+Updated for google-genai ^0.8.0 SDK (renamed from google-generativeai).
 """
 
 import asyncio
@@ -27,8 +27,13 @@ import base64
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
 
-import google.generativeai as genai
-from google.generativeai.types import HarmCategory, HarmBlockThreshold
+try:
+    import google.generativeai as genai
+    from google.generativeai.types import HarmCategory, HarmBlockThreshold
+    GOOGLE_AI_AVAILABLE = True
+except ImportError:
+    GOOGLE_AI_AVAILABLE = False
+
 import numpy as np
 from dotenv import load_dotenv
 
@@ -41,13 +46,11 @@ logger = logging.getLogger(__name__)
 
 
 class GeminiModel(Enum):
-    """Available Gemini models for music production"""
-    GEMINI_2_5_PRO = "gemini-2.5-pro"
-    GEMINI_2_5_FLASH = "gemini-2.5-flash"
-    GEMINI_PRO = "gemini-pro"
-    GEMINI_PRO_VISION = "gemini-pro-vision"
-    GEMINI_1_5_PRO = "gemini-1.5-pro"
-    GEMINI_1_5_FLASH = "gemini-1.5-flash"
+    """Available Gemini models for music production — v3.0 stack"""
+    GEMINI_2_0_FLASH = "gemini-2.0-flash"                      # Primary: fast + multimodal
+    GEMINI_2_0_FLASH_THINKING = "gemini-2.0-flash-thinking-exp" # Complex reasoning
+    GEMINI_1_5_PRO = "gemini-1.5-pro"                          # Legacy: 1M ctx fallback
+    GEMINI_1_5_FLASH = "gemini-1.5-flash"                      # Legacy: fast fallback
 
 
 class MusicAnalysisType(Enum):
@@ -441,7 +444,7 @@ class GoogleAIMusicProducer:
     def __init__(
         self,
         api_key: Optional[str] = None,
-        default_model: GeminiModel = GeminiModel.GEMINI_2_5_PRO,
+        default_model: GeminiModel = GeminiModel.GEMINI_2_0_FLASH,
         max_workers: int = 8,
         enable_caching: bool = True
     ):
