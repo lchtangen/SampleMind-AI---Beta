@@ -15,28 +15,28 @@ authors = ["SampleMind Team <team@samplemind.ai>"]
 readme = "README.md"
 license = "MIT"
 homepage = "https://samplemind.ai"
-repository = "https://github.com/samplemind/samplemind-ai-v6"
+repository = "https://github.com/lchtangen/SampleMind-AI---Beta"
 documentation = "https://docs.samplemind.ai"
 keywords = ["music", "ai", "audio", "samples", "production", "ml", "daw"]
 classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Developers",
-    "Intended Audience :: End Users/Desktop",
-    "Topic :: Multimedia :: Sound/Audio :: Analysis",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Operating System :: OS Independent",
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Intended Audience :: End Users/Desktop",
+  "Topic :: Multimedia :: Sound/Audio :: Analysis",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: OS Independent",
 ]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.13"
 # Core dependencies
 fastapi = "^0.115.0"
-uvicorn = {extras = ["standard"], version = "^0.32.0"}
-pydantic = {extras = ["email"], version = "^2.5.0"}
+uvicorn = { extras = ["standard"], version = "^0.32.0" }
+pydantic = { extras = ["email"], version = "^2.5.0" }
 pydantic-settings = "^2.1.0"
 
 # Audio processing
@@ -52,8 +52,8 @@ demucs = "^4.0.0"
 pedalboard = "^0.9.0"
 
 # AI and ML
-torch = {version = "^2.5.0", source = "pytorch"}
-torchaudio = {version = "^2.5.0", source = "pytorch"}
+torch = { version = "^2.5.0", source = "pytorch" }
+torchaudio = { version = "^2.5.0", source = "pytorch" }
 transformers = "^4.47.0"
 sentence-transformers = "^2.2.2"
 openai = "^1.58.0"
@@ -62,10 +62,10 @@ ollama = "^0.3.0"
 google-genai = "^0.8.0"
 
 # Audio Analysis & Processing Extensions
-mido = "^1.3.0"  # MIDI file I/O
+mido = "^1.3.0" # MIDI file I/O
 
 # Database
-motor = "^3.6.0"  # MongoDB async driver
+motor = "^3.6.0"    # MongoDB async driver
 beanie = "^1.23.0"
 redis = "^5.0.1"
 chromadb = "^0.6.0"
@@ -77,16 +77,16 @@ python-multipart = "^0.0.6"
 websockets = "^12.0"
 
 # Authentication
-python-jose = {extras = ["cryptography"], version = "^3.3.0"}
-passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-jose = { extras = ["cryptography"], version = "^3.3.0" }
+passlib = { extras = ["bcrypt"], version = "^1.7.4" }
 
 # CLI & TUI
 click = "^8.1.7"
 rich = "^13.7.0"
 typer = "^0.9.0"
 questionary = "^2.0.1"
-textual = "^0.44.0"  # Modern TUI framework
-textual-plotext = "^0.2.0"  # Plotting for TUI
+textual = "^0.87.0"        # Modern TUI framework
+textual-plotext = "^0.2.0" # Plotting for TUI
 
 # Utilities
 psutil = "^5.9.0"
@@ -118,7 +118,7 @@ ruff = "^0.4.0"
 black = "^23.11.0"
 isort = "^5.12.0"
 mypy = "^1.7.1"
-bandit = {extras = ["toml"], version = "^1.7.5"}
+bandit = { extras = ["toml"], version = "^1.7.5" }
 safety = "^2.3.5"
 
 # Development tools

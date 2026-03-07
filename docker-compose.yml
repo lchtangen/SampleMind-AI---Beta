@@ -1,5 +1,12 @@
 version: '3.8'
 
+# SampleMind AI v3.0 — Docker Compose Stack
+# Services: FastAPI (8000), ChromaDB (8002), Ollama (11434), MongoDB (27017), Redis (6379)
+# Monitoring: Prometheus (9090), Grafana (3000)
+#
+# Quick start: docker-compose up -d
+# API server entrypoint: samplemind.server.main:app (src/samplemind/server/)
+
 services:
   samplemind-api:
     build:
@@ -13,8 +20,8 @@ services:
       - MONGODB_URL=mongodb://mongodb:27017/samplemind
       - REDIS_URL=redis://redis:6379/0
       - OLLAMA_HOST=http://ollama:11434
-      - CHROMA_HOST=chromadb
-      - CHROMA_PORT=8000
+      - CHROMADB_HOST=chromadb
+      - CHROMADB_PORT=8000
     volumes:
       - ./src:/app/src:cached
       - ./data:/data

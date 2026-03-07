@@ -8,9 +8,11 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Version](https://img.shields.io/badge/version-2.1.0--beta-orange.svg)](CHANGELOG.md)
 [![Phase 15](https://img.shields.io/badge/phase-15%20v3.0%20migration-blueviolet.svg)](docs/02-ROADMAPS/CURRENT_STATUS.md)
+[![Tests](https://img.shields.io/badge/tests-120%2B-brightgreen.svg)](tests/)
+[![AI Providers](https://img.shields.io/badge/AI_providers-4%20(Claude%20%7C%20Gemini%20%7C%20GPT--4o%20%7C%20Ollama)-blue.svg)](docs/active/models/AI_PROVIDER_UPGRADE_LOG.md)
 
-> **⚡ Phase 15 — v3.0 Migration in Progress**
-> Upgrading all AI providers, audio libraries, and adding a Next.js 15 web UI.
+> **⚡ Phase 15 — v3.0 Migration: P0+P1 Complete**
+> All AI provider SDKs upgraded (Claude 3.7 Sonnet, Gemini 2.0 Flash, GPT-4o, Ollama). Next: Textual ^0.87 TUI migration + Next.js 15 web UI.
 > See [`docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md`](docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md) for the full plan.
 
 ---
@@ -193,22 +195,22 @@ SampleMind-AI---Beta/
 
 ### Audio Processing
 
-- **librosa 0.10.1** — Audio analysis and feature extraction (→ 0.11.0 in Phase 15)
-- **soundfile** — Audio file I/O (WAV, FLAC, OGG, MP3, AAC)
-- **scipy** — Signal processing algorithms (→ 1.14.0 in Phase 15)
-- **numpy** — Numerical computations (→ ≥2.0.0 in Phase 15)
-- **numba** — JIT compilation for performance
-- **demucs** — 6-stem source separation (adding in Phase 15)
-- **pedalboard** — Spotify professional audio effects (adding in Phase 15)
-- **basic-pitch** — MIDI transcription from audio (re-enabling in Phase 15)
+- **librosa ^0.11.0** — Audio analysis and feature extraction
+- **soundfile ^0.12.1** — Audio file I/O (WAV, FLAC, OGG, MP3, AAC)
+- **scipy ^1.14.0** — Signal processing algorithms
+- **numpy >=2.0.0** — Numerical computations
+- **numba >=0.59.0** — JIT compilation for performance
+- **demucs ^4.0.0** — 6-stem source separation (htdemucs_6s)
+- **pedalboard ^0.9.0** — Spotify professional audio effects
+- **basic-pitch ^0.4.0** — MIDI transcription from audio
 
 ### AI/ML Stack
 
-- **Anthropic Claude 3.7 Sonnet** — Primary deep analysis + extended thinking (→ ^0.40.0 in Phase 15)
-- **Google Gemini 2.0 Flash** — Fast streaming + multimodal (→ google-genai ^0.8.0 in Phase 15)
-- **OpenAI GPT-4o** — Agent workflows + Agents SDK (→ ^1.58.0 in Phase 15)
-- **Ollama** — Local AI models: qwen2.5:7b-instruct, phi3, gemma2 (offline, <100ms)
-- **PyTorch 2.1+** — Deep learning framework (→ 2.5.0 in Phase 15)
+- **Anthropic Claude 3.7 Sonnet** — Primary deep analysis + extended thinking (`anthropic ^0.40.0`)
+- **Google Gemini 2.0 Flash** — Fast streaming + multimodal (`google-genai ^0.8.0`)
+- **OpenAI GPT-4o** — Agent workflows + Agents SDK (`openai ^1.58.0`)
+- **Ollama ^0.3.0** — Local AI models: qwen2.5:7b-instruct, phi3:mini, gemma2:2b (offline, <100ms)
+- **PyTorch ^2.5.0** — Deep learning framework
 - **sentence-transformers** — Semantic embedding generation
 
 ### Databases
@@ -219,8 +221,8 @@ SampleMind-AI---Beta/
 
 ### Development & Quality
 
-- **pytest** - Testing framework (81 passing tests)
-- **ruff** - Fast Python linter
+- **pytest ^8.0.0** - Testing framework (120+ passing tests)
+- **ruff ^0.4.0** - Fast Python linter
 - **black** - Code formatter
 - **mypy** - Static type checking
 - **pre-commit** - Git hooks for code quality
@@ -290,20 +292,22 @@ curl -X POST "http://localhost:8000/api/v1/audio/analyze" \
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| Audio Engine | ✅ Stable | librosa-based: BPM, key, MFCC, chroma, spectral |
-| AI Manager | ✅ Stable | Multi-provider routing: Claude, Gemini, GPT, Ollama |
-| Anthropic Claude Integration | ⚠️ Outdated | SDK v0.7.0 → upgrading to v0.40.0 in Phase 15 |
-| Google Gemini Integration | ⚠️ Outdated | SDK v0.3.0 → upgrading to google-genai v0.8.0 in Phase 15 |
-| OpenAI Integration | ⚠️ Outdated | SDK v1.3.0 → upgrading to v1.58.0 in Phase 15 |
+| Audio Engine | ✅ Stable | librosa ^0.11.0: BPM, key, MFCC, chroma, spectral |
+| AI Manager | ✅ Updated | Multi-provider routing: Claude, Gemini, GPT-4o, Ollama — v3.0 routing |
+| Anthropic Claude Integration | ✅ Updated | SDK ^0.40.0, Claude 3.7 Sonnet default, extended thinking |
+| Google Gemini Integration | ✅ Updated | google-genai ^0.8.0, Gemini 2.0 Flash, new Client API |
+| OpenAI Integration | ✅ Updated | SDK ^1.58.0, GPT-4o default, gpt-5 removed |
+| Ollama Integration | ✅ New | Offline provider — qwen2.5:7b, phi3:mini, gemma2:2b, <100ms |
 | CLI Interface | ✅ Active | ~2255 lines, 20+ commands, 12 themes, Rich/Typer |
-| TUI Interface | ✅ Beta | Textual v0.44 — 13 screens (→ v0.87 in Phase 15) |
+| TUI Interface | ✅ Beta | Textual ^0.44 — 13 screens (upgrade to ^0.87 in Phase 15 P4) |
 | REST API | ✅ Scaffolded | FastAPI at `src/samplemind/interfaces/api/` + `server/` |
 | DAW Plugins | ✅ Working | FL Studio (Python + C++ JUCE), Ableton (REST + JS) |
-| Web Frontend | 🚀 Phase 15 | Next.js 15 + React 19 — in progress |
-| Stem Separation | 🚀 Phase 15 | demucs v4 htdemucs_6s — adding in Phase 15 |
-| MIDI Transcription | 🚀 Phase 15 | basic-pitch — re-enabling in Phase 15 |
+| Stem Separation | ✅ Dependency added | demucs ^4.0.0 in pyproject.toml — integration in progress |
+| MIDI Transcription | ✅ Re-enabled | basic-pitch ^0.4.0 re-enabled in pyproject.toml |
+| Audio Effects | ✅ Dependency added | pedalboard ^0.9.0 in pyproject.toml — integration in progress |
+| Web Frontend | 🚀 Phase 15 P5 | Next.js 15 + React 19 — scaffolding next |
 
-**Overall Test Suite:** 81 tests passing | ~30% coverage | Target: 80% in Phase 15
+**Overall Test Suite:** 120+ tests | ~30% coverage | Target: 80% in Phase 15
 
 ---
 
@@ -373,11 +377,12 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ## 🌟 Project Highlights
 
 - ✅ **Phases 1-14 Complete** — Solid foundation with full CLI, TUI, DAW plugins, analytics
-- 🚀 **Phase 15 Active** — v3.0 migration: new AI models, audio libs, Next.js web UI
-- 🎯 **20+ CLI Commands** — Comprehensive command-line interface
-- 🤖 **4 AI Providers** — Claude, Gemini, GPT-4o, Ollama (offline <100ms)
+- ✅ **Phase 15 P0+P1 Done** — All AI SDKs upgraded, Ollama offline provider added, routing overhauled
+- 🎯 **20+ CLI Commands** — Comprehensive command-line interface with 12 themes
+- 🤖 **4 AI Providers** — Claude 3.7 Sonnet (primary), Gemini 2.0 Flash, GPT-4o, Ollama (<100ms offline)
 - 🖥️ **13 TUI Screens** — Full-featured terminal UI with Textual
 - 🎹 **DAW Integration** — FL Studio (Python + C++ JUCE) + Ableton Live
+- 🎛️ **Audio Suite** — demucs stem separation, pedalboard effects, basic-pitch MIDI transcription
 - 🌐 **Cross-Platform** — Linux, macOS, Windows support
 
 ---

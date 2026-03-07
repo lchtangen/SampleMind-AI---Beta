@@ -1,4 +1,4 @@
-# 🤝 Contributing to SampleMind AI v6
+# 🤝 Contributing to SampleMind AI
 
 Thank you for your interest in contributing to SampleMind AI! This document provides guidelines and information for contributors.
 
@@ -15,9 +15,9 @@ Thank you for your interest in contributing to SampleMind AI! This document prov
 
 1. **Fork and Clone**
    ```bash
-   git clone https://github.com/YOUR-USERNAME/samplemind-ai-v6.git
-   cd samplemind-ai-v6
-   git remote add upstream https://github.com/samplemind/samplemind-ai-v6.git
+   git clone https://github.com/YOUR-USERNAME/SampleMind-AI---Beta.git
+   cd SampleMind-AI---Beta
+   git remote add upstream https://github.com/lchtangen/SampleMind-AI---Beta.git
    ```
 
 2. **Environment Setup**
@@ -158,7 +158,7 @@ What you expected to happen.
 **Environment**
 - OS: [e.g., macOS 14.1]
 - Python: [e.g., 3.11.5]
-- SampleMind Version: [e.g., 6.0.0]
+- SampleMind Version: [e.g., 2.1.0-beta]
 ```
 
 ### Feature Requests
@@ -179,7 +179,7 @@ How do you envision this working?
 ### Communication Channels
 
 - **Discord**: [SampleMind Community](https://discord.gg/samplemind)
-- **GitHub Discussions**: [Project Discussions](https://github.com/samplemind/samplemind-ai-v6/discussions)
+- **GitHub Discussions**: [Project Discussions](https://github.com/lchtangen/SampleMind-AI---Beta/discussions)
 
 ### Recognition
 

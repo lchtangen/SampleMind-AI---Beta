@@ -1,4 +1,4 @@
-# Changelog - SampleMind AI
+# Changelog — SampleMind AI
 
 All notable changes to this project will be documented in this file.
 
@@ -7,414 +7,208 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.1.0-beta] - 2026-01-19
+## [Unreleased] — v3.0.0
 
-### ✨ Added
+### In Progress (Phase 15)
 
-#### Testing Infrastructure (TIER 1.1)
-- **Comprehensive Test Suite:** 130+ automated tests covering all CLI functionality
-  - `tests/unit/cli/test_analyze_commands.py` (40+ tests for audio analysis)
-  - `tests/unit/cli/test_library_commands.py` (25+ tests for library operations)
-  - `tests/unit/cli/test_ai_commands.py` (15+ tests for AI features)
-  - `tests/unit/cli/test_cli_error_handling.py` (30+ tests for error scenarios)
-  - `tests/unit/cli/test_output_formats.py` (20+ tests for output formats)
-- Enhanced `pytest.ini` with CLI-specific markers and configurations
-- Enhanced `conftest.py` with CLI-specific fixtures (typer_runner, cli_app, etc.)
-- Test documentation in `tests/unit/cli/README.md`
-- Performance benchmarking support
-- CI/CD ready with GitHub Actions workflow
-
-#### Error Handling & Logging System (TIER 1.2)
-- **Custom Exception Hierarchy** (`src/samplemind/exceptions.py`)
-  - 20+ exception types: AudioFileError, AIServiceError, DatabaseError, CacheError, etc.
-  - User-friendly error messages and actionable suggestions
-  - Error codes for tracking and logging
-  - Context information for debugging
-- **Structured Logging** (`src/samplemind/utils/logging_config.py`)
-  - Loguru integration with 3 output formats (console, file, JSON)
-  - Automatic log rotation (10MB per file, 7-day retention)
-  - ZIP compression for archived logs
-  - 6 specialized loggers (CLI, Audio, AI, Database, Cache)
-  - Configurable log levels
-- **Request Tracing** (`src/samplemind/utils/log_context.py`)
-  - Context variables for async-safe request tracking
-  - Request ID generation and propagation
-  - Command and user ID tracking
-  - Operation timing and performance metrics
-  - @with_logging decorator for automatic logging
-- **Error Handler** (`src/samplemind/utils/error_handler.py`)
-  - @handle_errors decorator for automatic exception management
-  - ErrorHandling context manager
-  - User-friendly error display
-  - Graceful Ctrl+C handling
-  - Async and sync support
-- **Health Check Commands** (`src/samplemind/interfaces/cli/health.py`)
-  - `samplemind health:check` - Comprehensive system diagnostics
-  - `samplemind health:status` - Current system status
-  - `samplemind health:logs` - Display recent logs
-  - `samplemind health:cache` - Cache statistics
-  - `samplemind health:disk` - Disk space information
-- **Debug & Diagnostics** (`src/samplemind/interfaces/cli/debug.py`)
-  - `samplemind debug:info` - Environment information
-  - `samplemind debug:diagnose` - Diagnose audio files
-  - `samplemind debug:config` - Show configuration
-  - `samplemind debug:test` - Run diagnostic tests
-  - `samplemind debug:trace` - Enable debug tracing
-
-#### Shell Completion Scripts (TIER 2)
-- **Bash Completion** (`completions/bash/samplemind.bash`)
-  - Function-based completion for bash 3.2+
-  - 200+ command completion
-  - File path and directory argument completion
-  - Option/flag completion
-  - Nested subcommand hierarchy support
-- **Zsh Completion** (`completions/zsh/_samplemind`)
-  - Descriptive completion with help text
-  - Compatible with oh-my-zsh and vanilla zsh
-  - Rich command descriptions in completion menu
-  - Proper escaping for special characters
-- **Fish Completion** (`completions/fish/samplemind.fish`)
-  - Declarative completion style (Fish-native)
-  - Condition-based subcommand discovery
-  - Integrated file/directory completion
-  - Smart context awareness
-- **PowerShell Completion** (`completions/powershell/samplemind.ps1`)
-  - Register-ArgumentCompleter integration
-  - Cross-platform support (Windows, macOS, Linux via pwsh)
-  - Rich CompletionResult objects
-  - Intelligent context-aware suggestions
-- **Installation Guide** (`SHELL_COMPLETION_GUIDE.md`)
-  - Step-by-step installation for all 4 shells
-  - Multiple installation methods (system-wide, user, inline)
-  - Platform-specific guidance
-  - Troubleshooting section
-  - Auto-installer script included
-  - Performance benchmarks
-
-#### Modern Interactive Menu System (TIER 3)
-- **Modern Menu** (`src/samplemind/interfaces/cli/modern_menu.py`)
-  - Arrow key navigation (↑↓) with vim support (j/k)
-  - Questionary integration for interactive selection
-  - 12 customizable themes
-  - Full keyboard shortcut support
-  - Multi-level menu hierarchy (3+ levels)
-  - Breadcrumb navigation
-  - Real-time search and filtering
-  - 60+ menu items covering all operations
-  - 200+ commands integrated and accessible
-  - Status bar with keyboard shortcuts help
-  - Theme-aware styling throughout
-  - Async/await support
-  - Graceful fallback to numbered menu
-- **Menu Configuration & State** (`src/samplemind/interfaces/cli/menu_config.py`)
-  - MenuPreferences dataclass with 12 configuration options
-  - MenuConfigManager for persistent configuration
-  - MenuStateManager for runtime state management
-  - JSON-based configuration file (`~/.samplemind/config/menu_preferences.json`)
-  - Import/export preferences functionality
-  - Theme selection persistence
-  - Custom shortcut registration
-  - Remember last menu option
-- **Theme System** (12 Built-in Themes)
-  - Dark (default) - Professional dark mode
-  - Light - Bright and accessible
-  - Cyberpunk - Neon aesthetic
-  - Synthwave - 80s retro
-  - Gruvbox - Warm retro colors
-  - Dracula - Popular dark theme
-  - Nord - Arctic color palette
-  - Monokai - Classic editor theme
-  - Solarized Dark - Eye-friendly dark
-  - Solarized Light - Eye-friendly light
-  - Tokyo Night - Modern dark with purple accents
-  - One Dark - Atom-inspired theme
-- **Keyboard Shortcuts**
-  - Navigation: ↑↓ (or vim j/k)
-  - Selection: Enter or Space
-  - Back/Previous: Esc, Backspace, or h
-  - Quit: q or Ctrl+C
-  - Search: /
-  - Help: ?
-  - Theme toggle: t
-  - Settings: s
-  - Quick jumps: a (analyze), l (library), i (AI), etc.
-
-#### Documentation Updates
-- `RELEASE_NOTES_v2.1.0-beta.md` - Comprehensive release notes
-- `CHANGELOG.md` - This file
-- `PHASE_10_TIER1_COMPLETION_SUMMARY.md` - TIER 1 summary
-- `PHASE_10_TIER2_COMPLETION_SUMMARY.md` - TIER 2 summary
-- `PHASE_10_TIER3_COMPLETION_SUMMARY.md` - TIER 3 summary
-- `PHASE_10_CURRENT_STATUS.md` - Current status dashboard
-- `PHASE_10_PROGRESS_REPORT.md` - Overall progress report
-
-### 🔧 Changed
-
-#### Infrastructure
-- Enhanced pytest configuration with CLI-specific markers
-- Improved test fixture organization in conftest.py
-- Updated logging configuration for better visibility
-- Improved error message formatting
-
-#### Menu System
-- Replaced basic numbered menu with modern interactive interface
-- Improved command discoverability through search
-- Enhanced visual feedback with themes and status bar
-
-#### Error Handling
-- More descriptive error messages for all failure scenarios
-- Added actionable suggestions to all error types
-- Improved error context for debugging
-
-### 🐛 Fixed
-
-- Fixed potential race conditions in async error handling
-- Improved menu state management for nested navigation
-- Better handling of missing questionary dependency
-- More graceful handling of terminal size changes
-- Better error messages for configuration issues
-
-### 🚀 Improved
-
-#### Performance
-- Optimized error handling path (minimal allocations)
-- Lazy-loaded questionary for faster startup
-- Efficient menu filtering with caching
-- Memory-efficient logging with automatic rotation
-
-#### User Experience
-- Cleaner error messages without technical jargon
-- Helpful error suggestions for all scenarios
-- Visual feedback for all operations
-- Consistent styling across all themes
-- Intuitive keyboard navigation
-
-#### Developer Experience
-- Comprehensive test suite for easy testing
-- Clear code structure for easy understanding
-- Detailed error context for easy debugging
-- Health checks for easy troubleshooting
-- Well-documented patterns for easy extension
-
-### 📊 Statistics
-
-- **130+ Tests:** Comprehensive test coverage across all CLI commands
-- **20+ Exception Types:** Complete error handling coverage
-- **6 Logging Modules:** Structured logging with multiple outputs
-- **4 Shell Completions:** Native completion for bash, zsh, fish, PowerShell
-- **12 Themes:** Fully customizable terminal appearance
-- **200+ Commands:** All commands accessible from menu
-- **11,850+ Lines:** Total code added in Phase 10 TIER 1-3
-- **23 New Files:** Complete infrastructure expansion
+- Textual ^0.87.0 TUI migration (13 existing screens + 3 new: AgentChat, Waveform, MixingBoard)
+- Next.js 15 + React 19 web UI scaffold (`apps/web/`)
+- LangGraph ^0.2.0 multi-agent orchestration
+- scipy monkey-patch removal (after librosa ^0.11.0 install verification)
+- Test coverage expansion: 30% → 80%+ target
+- OpenTelemetry distributed tracing
 
 ---
 
-## [2.0.0-beta] - 2025-11-XX
+## [2.1.0-beta] — Phase 15 Sessions 1–3 (2026-03-07)
 
-### ✨ Added
+### Added
 
-- Professional music production AI platform
-- Core audio analysis engine with 40+ analysis types
-- AI-powered tagging and classification (Google Gemini 3 Flash)
-- TUI (Text User Interface) with Textual framework
-- CLI (Command Line Interface) with Typer framework
-- Sample library management and organization
-- Batch processing capabilities
-- Multi-format audio support (WAV, MP3, FLAC, OGG, M4A, AIFF)
-- Vector similarity search with ChromaDB
-- Redis caching system
-- MongoDB database integration
-- Comprehensive documentation
+#### AI Providers — Full v3.0 Migration (Phase 15 Session 3)
 
-### 🔧 Changed
+- **Ollama offline provider** (`src/samplemind/integrations/ollama_integration.py`) — NEW
+  - `OllamaModel` enum: `qwen2.5:7b-instruct` (default), `phi3:mini`, `gemma2:2b`
+  - `OllamaMusicProducer` class with async `analyze_music_comprehensive()` and `check_availability()`
+  - Plain-text response parsing (Ollama returns prose, not JSON)
+  - No API key required — needs `ollama serve` running
+  - `OLLAMA_HOST` env var for custom host (default `http://localhost:11434`)
+- **Claude 3.7 Sonnet extended thinking** — `anthropic_integration.py` updated
+  - `CLAUDE_3_7_SONNET = "claude-3-7-sonnet-20250219"` added as primary model
+  - Extended thinking enabled: `thinking={"type": "enabled", "budget_tokens": 5000}` for 3.7 Sonnet
+  - `max_tokens` raised to 8096; `temperature` correctly omitted for extended thinking
+- **Gemini 2.0 Flash** — `google_ai_integration.py` fully migrated to `google-genai` SDK
+  - `GEMINI_2_0_FLASH = "gemini-2.0-flash"` as primary model
+  - New `Client(api_key=...)` pattern replacing `genai.configure()`
+  - Async `client.aio.models.generate_content()` replacing `GenerativeModel().generate_content()`
+  - `GenerateContentConfig` with `SafetySetting` objects
+  - Token usage from `response.usage_metadata.total_token_count`
+- **GPT-4o default** — `openai_integration.py` cleaned up
+  - Removed non-existent `GPT_5 = "gpt-5"` from `OpenAIModel` enum
+  - `GPT_4O` set as default model
+- **Ollama routing in AI manager** (`ai_manager.py`)
+  - `OLLAMA` added to `AIProvider` enum
+  - `QUICK_ANALYSIS` routed to Ollama (offline/instant)
+  - `COMPREHENSIVE_ANALYSIS` and `HARMONIC_ANALYSIS` moved from Google → Anthropic (Claude primary)
+  - Provider priority corrected: Anthropic=1 (PRIMARY), Google=2 (FAST), OpenAI=3 (FALLBACK), Ollama=0 (INSTANT)
+  - `_convert_ollama_result()` method added
 
-- Initial release of v2.0.0-beta
-- Refined architecture after Phase 1-9 implementation
+#### Dependencies — All v3.0 Targets Applied (pyproject.toml)
 
-### 🐛 Fixed
+| Package | Before | After |
+|---------|--------|-------|
+| `anthropic` | `^0.7.0` | `^0.40.0` |
+| `openai` | `^1.3.0` | `^1.58.0` |
+| `google-generativeai` | `^0.3.0` | `google-genai ^0.8.0` (renamed) |
+| `ollama` | `^0.1.7` | `^0.3.0` |
+| `librosa` | `0.10.1` (pinned) | `^0.11.0` |
+| `scipy` | `^1.11.4` | `^1.14.0` |
+| `numpy` | `>=1.26,<2.0.0` | `>=2.0.0,<3.0.0` |
+| `torch` / `torchaudio` | `^2.1.0` | `^2.5.0` |
+| `transformers` | `^4.35.0` | `^4.47.0` |
+| `textual` | `^0.44.0` | `^0.87.0` |
+| `fastapi` | `^0.104.1` | `^0.115.0` |
+| `uvicorn` | `^0.24.0` | `^0.32.0` |
+| `motor` | `^3.3.1` | `^3.6.0` |
+| `chromadb` | `>=0.5.0` | `^0.6.0` |
+| `pytest` | `^7.4.3` | `^8.0.0` |
+| `pytest-asyncio` | `^0.21.1` | `^0.23.0` |
+| `ruff` | `^0.1.6` | `^0.4.0` |
+| `basic-pitch` | commented out | `^0.4.0` (re-enabled) |
+| `demucs` | absent | `^4.0.0` (added) |
+| `pedalboard` | absent | `^0.9.0` (added) |
 
-- N/A (Initial release)
+#### Tests — New and Rewritten
 
----
+- `tests/unit/integrations/test_anthropic_integration.py` — NEW (120+ lines, 8 test classes)
+  - Extended thinking param assertions (present for 3.7 Sonnet, absent for Haiku)
+  - Temperature param assertions (absent for 3.7 Sonnet, present for others)
+- `tests/unit/integrations/test_ollama_integration.py` — NEW (180+ lines, 8 test classes)
+  - Mock `ollama.AsyncClient`, availability checks, response parsing
+- `tests/unit/integrations/test_google_ai_integration.py` — REWRITTEN
+  - Removed `pytest.skip()` gate (tests now always run)
+  - Updated for `google-genai` SDK: `Client()`, `aio.models.generate_content()`
+- `tests/unit/integrations/test_openai_integration.py` — UPDATED
+  - Removed `pytest.skip()` gate
+  - Removed `GPT_5` assertions, added `test_gpt5_does_not_exist()`
+  - Fixed `get_stats()` → `get_usage_stats()`
+- `tests/unit/integrations/test_ai_manager.py` — UPDATED
+  - `TestAnalysisRoutingTable`: COMPREHENSIVE/HARMONIC → ANTHROPIC, QUICK_ANALYSIS → OLLAMA
+  - `TestOllamaProvider`: enum value, `_convert_ollama_result()`
+  - Provider priority: Anthropic=1 (was Google=1)
 
-## [1.x.x] - Pre-release (Phases 1-9)
+#### Documentation Reorganization (Phase 15 Sessions 1–2)
 
-### Summary
+- `docs/active/` — NEW working directory for V3 migration
+  - `INDEX.md` — AI agent entry point
+  - `architecture/V3_ARCHITECTURE_DECISIONS.md` — ADRs
+  - `devops/DEPENDENCY_UPGRADE_STATUS.md` — upgrade tracking
+  - `features/WEB_UI_SPEC.md` — Next.js 15 spec
+  - `models/AI_PROVIDER_UPGRADE_LOG.md` — per-provider migration log
+  - `roadmap/PHASE_15_PROGRESS.md` — session log
+  - `ui-ux/TUI_V3_UPGRADE_NOTES.md` — Textual ^0.87 migration guide
+- 73 outdated files archived to `docs/_archive/` and `_archive/`
+- Phase directories renamed: `15-PHASE-15-COMPLETED` → `15-OLD-SEMANTIC-SEARCH-COMPLETED`
+- TUI screen count corrected: 11 → **13** (chain_screen.py + classification_screen.py were undocumented)
 
-Phases 1-9 established the complete foundation for SampleMind AI:
-- Phase 1: Core Architecture & Foundation
-- Phase 2: Feature Implementation & Validation
-- Phase 3: UI/UX Refinement & Pages
-- Phase 4: Advanced Features & AI Integration
-- Phase 5: Integration & Optimization
-- Phase 6: Performance Tuning
-- Phase 7: Stability & Testing
-- Phase 8: Documentation
-- Phase 9: Production Readiness
+### Fixed
 
----
+- `Makefile`: `setup` target now uses `poetry install` (was `pip install -r requirements.txt` — file doesn't exist)
+- `Makefile`: `dev` target now uses correct server path `src.samplemind.server.main:app`
+- `Dockerfile`: `CMD` now uses correct path `samplemind.server.main:app`
+- `pyproject.toml` scripts entry: `src.interfaces.cli.main:app` → `samplemind.interfaces.cli.menu:main`
+- All "v6" legacy strings removed from `main.py`, `__init__.py`, `interfaces/__init__.py`, `tui/app.py`
+- API docs corrected: `src/samplemind/api/` does NOT exist — actual path is `interfaces/api/` + `server/`
+- `pytest.ini`: removed `--cov-fail-under=80` (coverage is ~30%; gate would fail every run)
+- `.pre-commit-config.yaml`: ruff hook updated from `v0.1.8` → `v0.4.10`
+- `.gitignore`: removed triplicate entries
+- `CONTRIBUTING.md`: removed all "v6" references, updated clone URLs, bug template version
+- Dead files removed: `finder_dialog.py`, `modern_file_picker.py`, stale test files, 20+ root-level reports
 
-## Unreleased - Future Plans
+### Changed
 
-### Phase 11 (v2.2.0)
-- Advanced AI/ML features
-- Collaboration capabilities
-- Mobile companion app
-- Enhanced integrations
-
-### Phase 12 (v2.3.0)
-- Enterprise features
-- Advanced analytics
-- DAW integration (FL Studio, Ableton, Logic Pro, VST3)
-- Additional plugins and extensions
-
-### Phase 13 (v3.0.0)
-- Production ecosystem
-- Enterprise compliance
-- Extended platform support
-- Advanced monitoring and observability
-
----
-
-## Version Comparison
-
-### v2.0.0-beta vs v2.1.0-beta
-
-| Feature | v2.0.0-beta | v2.1.0-beta |
-|---------|------------|------------|
-| Testing | Basic | 130+ tests ✅ |
-| Error Handling | Simple | 20+ exceptions ✅ |
-| Shell Completion | None | 4 shells ✅ |
-| Menu System | Numbered (0-9) | Modern interactive ✅ |
-| Themes | None | 12 themes ✅ |
-| Logging | Basic | Structured ✅ |
-| Health Checks | None | 5 commands ✅ |
-| Debug Tools | None | 5 commands ✅ |
-| Documentation | Good | Comprehensive ✅ |
-
----
-
-## Backward Compatibility
-
-v2.1.0-beta maintains **100% backward compatibility** with v2.0.0-beta:
-- All existing CLI commands work unchanged
-- All existing API endpoints work unchanged
-- All existing configuration files are compatible
-- Migration is safe with no breaking changes
-
----
-
-## Migration Guide
-
-### From v2.0.0-beta to v2.1.0-beta
-
-No breaking changes - simply update:
-
-```bash
-# Pull latest changes
-git pull origin main
-
-# Update environment
-make setup
-
-# Optionally install shell completions
-./scripts/install-completions.sh
-
-# Test it works
-samplemind health:check
-```
-
-### Backup Your Data
-
-Before updating (optional):
-```bash
-# Backup configuration
-cp ~/.samplemind/config/menu_preferences.json ~/backup_menu_preferences.json
-
-# Backup logs
-cp -r ~/.samplemind/logs ~/backup_logs/
-```
+- AI provider routing: Anthropic is now unambiguously PRIMARY (priority 1) — was incorrectly set to Google
+- `.env.example`: provider ordering updated to reflect 4-tier architecture (Ollama → Anthropic → Google → OpenAI)
+- `GeminiModel` enum: `GEMINI_2_0_FLASH` added as primary, deprecated models removed
+- `ClaudeModel` enum: `CLAUDE_3_7_SONNET` and `CLAUDE_3_5_HAIKU` added
 
 ---
 
-## Release Strategy
+## [2.1.0-beta] — Phase 10–14 (2025-11-XX to 2026-01-19)
 
-### Version Format
-- **Major (2.x):** Major features or breaking changes
-- **Minor (.1):** New features, no breaking changes
-- **Patch (.0-beta):** Bug fixes and improvements
+### Phase 14 — Analytics, GitHub, Community Launch
 
-### Release Cycle
-- **Beta Releases:** Frequent (testing new features)
-- **Stable Releases:** Every 4-8 weeks
-- **Long-term Support (LTS):** Every 2-3 versions
+- PostHog analytics integration
+- GitHub Actions CI/CD pipeline
+- Cross-platform verification suite
 
-### Support Period
-- **Beta:** Until next minor/major release
-- **Stable:** 6 months of critical fixes
-- **LTS:** 12 months of all fixes
+### Phase 13 — Effects CLI, DAW Plugins, VST3
 
----
+- Effects chain CLI (reverb, EQ, compression, saturation) — `interfaces/cli/commands/effects.py`
+- FL Studio plugin: Python wrapper + C++ native (JUCE, 486 lines) — `plugins/fl_studio/cpp/`
+- Ableton Live: REST backend + Max for Live JS bridge — `plugins/ableton/`
+- Cross-DAW plugin installer — `plugins/installer.py`
+- VST3 C++ bridge with Python embedding
 
-## Known Issues
+### Phase 12 — UX Polish, Accessibility, Performance
 
-### v2.1.0-beta
-1. **Questionary on Windows PowerShell:** May require `Set-ExecutionPolicy RemoteSigned`
-2. **Fish shell special characters:** File paths with spaces need quotes
-3. **Log rotation size:** Currently fixed at 10MB (will be configurable in v2.2)
+- WCAG 2.1 accessibility audit
+- CLI startup optimization (lazy imports)
+- Theme system refinement
 
-### Workarounds
-- PowerShell: Run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
-- Fish: Use quotes around paths: `samplemind analyze:full "my path/sample.wav"`
-- Logs: Can be manually rotated or cleared from `~/.samplemind/logs/`
+### Phase 11 — Performance Optimization, CLI Polish
 
----
+- Multi-level caching: memory + disk + ChromaDB vector
+- CLI performance profiling and optimization
+- Shell completions: bash, zsh, fish, PowerShell
 
-## Deprecations
+### Phase 10 — Modern Menu, Shell Completions, Error Handling
 
-### Deprecated in v2.1.0-beta
-- None (no breaking changes)
-
-### Planned Deprecations for v2.2.0
-- Legacy numbered menu (new menu will become default)
-- Old configuration format (migration to new format)
+- Modern interactive CLI menu with 12 themes and arrow-key navigation
+- Questionary integration for interactive selection
+- 200+ commands accessible from unified menu
+- `src/samplemind/exceptions.py`: 20+ custom exception types
+- Structured logging with loguru (3 output formats, auto-rotation)
+- Health check commands: `samplemind health:check`, `health:status`, `health:logs`
+- Shell completions for bash, zsh, fish, PowerShell
+- 130+ automated tests across CLI, audio, AI, error handling, output formats
 
 ---
 
-## Contributing
+## [2.0.0-beta] — Phases 1–9 Foundation (2025-10-04)
 
-### How to Contribute
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests: `make test`
-5. Commit with clear message
-6. Push and create pull request
-
-### Code Quality
-- All tests must pass: `pytest tests/ -v`
-- Code must be formatted: `black src/`
-- Type hints required: `mypy src/`
-- Linting required: `ruff check src/`
+- Core audio engine: LibROSA-based BPM, key, MFCC, chroma, spectral analysis
+- Advanced audio loader: WAV, MP3, FLAC, OGG, AAC, AIFF support
+- AI manager: multi-provider routing (Anthropic, Google, OpenAI, Ollama)
+- ChromaDB vector similarity search and embeddings
+- MongoDB (Motor) + Redis database layer
+- FastAPI async REST API with JWT authentication and WebSocket support
+- Textual TUI framework integration (initial screens)
+- CLI interface (Typer + Rich)
+- Sample pack creation and library management
+- Docker Compose stack: MongoDB, Redis, ChromaDB, Ollama, Prometheus, Grafana
 
 ---
 
-## Support & Contact
+## Version History Summary
 
-### Getting Help
-- Check documentation in `./docs/`
-- Run `samplemind health:check`
-- Check logs in `~/.samplemind/logs/`
-- File GitHub issue with details
-
-### Report Issues
-- [GitHub Issues](https://github.com/lchtangen/SampleMind-AI---Beta/issues)
-- Include: OS version, Python version, error message
-- Include: Output of `samplemind debug:info`
-- Include: Recent logs from `~/.samplemind/logs/`
+| Version | Phase | Date | Highlights |
+|---------|-------|------|------------|
+| 2.1.0-beta P15 | 15 | 2026-03-07 | AI SDK v3.0, Ollama, routing overhaul, 120+ tests |
+| 2.1.0-beta | 10–14 | 2025-11 – 2026-01 | Menu, shell completions, DAW plugins, analytics |
+| 2.0.0-beta | 1–9 | 2025-10-04 | Core engine, CLI, TUI, API, vector DB |
 
 ---
 
-*Last Updated: January 19, 2026*
-*SampleMind AI Changelog*
-*Version 2.1.0-beta*
+## Known Issues (Current)
+
+| # | Issue | Severity | Status |
+|---|-------|----------|--------|
+| 1 | `textual ^0.87.0` migration — 13 screens need API updates | 🔴 Critical | In progress (Phase 15 P4) |
+| 2 | Test coverage at ~30% (target 80%) | 🟠 High | In progress |
+| 3 | scipy monkey-patch in `__init__.py` | 🟡 Medium | Remove after librosa ^0.11.0 verified installed |
+| 4 | Web UI not yet built | 🟠 High | Phase 15 P5 |
+| 5 | CLI startup ~2s (target <1s) | 🟡 Medium | Lazy import optimization needed |
+
+---
+
+*Last updated: 2026-03-07 — Phase 15 Session 3 complete*

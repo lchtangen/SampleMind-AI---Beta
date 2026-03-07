@@ -52,18 +52,16 @@ htmlcov/
 *.sqlite
 *.sqlite3
 backend/samplemind.db
+data/
+uploads/
+backups/
 
-# Node.js
+# Node.js / Next.js
 node_modules/
 .pnp
 .pnp.js
-
-# Next.js
 .next/
 out/
-
-# Production
-build
 
 # Debug
 npm-debug.log*
@@ -71,17 +69,16 @@ yarn-debug.log*
 yarn-error.log*
 
 # Local development
-.DS_Store
 *.pem
+Thumbs.db
+.Trash-*
 
 # Turbo
 turbo-build.log
 .turbo/
 
-# Local Netlify folder
+# Deployment
 .netlify
-
-# Vercel
 .vercel
 
 # Prisma
@@ -90,63 +87,47 @@ prisma/migrations/
 
 # Audio samples
 test_audio_samples/
+*.wav
+!tests/fixtures/*.wav
 
 # Ignore nested Git repositories
 samplemind-ai/samplemind-ai/
 
-# Ignore package manager files
+# Package manager lock files (generated)
 yarn.lock
 package-lock.json
 pnpm-lock.yaml
 
-# Ignore build artifacts
-.next
-out
+# Build artifacts
 dist
+build
 
 # AI Assistant Configurations (keep private)
 .amazonq/
 .claude/
 .mcp/
 
-# Ignore local development files
+# Frontend build dirs
 frontend/web/.next/
 frontend/web/out/
 frontend/web/dist/
 frontend/web/.turbo/
 frontend/web/.vercel
 
-# Database
-*.db
-*.sqlite
-*.sqlite3
-data/
-uploads/
-backups/
-
 # Docker
 docker-compose.override.yml
 
-# Temporary files
+# Temporary / debug scripts
+scripts/debug_*.py
+scripts/verify_*.py
+scripts/create_test_audio.py
 *.tmp
 *.temp
 .cache/
 
-# OS
-Thumbs.db
-.Trash-*
-
-# Project specific
+# Project runtime caches
 .aliases.local
 sm-control.local.sh
-.env.local
-node_modules
-.semantic_cache/
-.test_favorites/
-.test_sessions/
-.semantic_cache/
-.test_favorites/
-.test_sessions/
 .semantic_cache/
 .test_favorites/
 .test_sessions/
