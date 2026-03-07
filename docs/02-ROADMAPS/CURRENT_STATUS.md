@@ -1,8 +1,8 @@
 # 🎯 SampleMind AI — Current Status
 
-**Last Updated:** 2026-03-07 12:55:53  
-**Version:** `2.1.0-beta` → migrating to `3.0.0`  
-**Active Phase:** Phase 15 — v3.0 Migration & Next-Level Upgrade  
+**Last Updated:** 2026-03-07 (Session 3 — P0+P1 migration: all AI providers, deps, version strings, tests)
+**Version:** `2.1.0-beta` → migrating to `3.0.0`
+**Active Phase:** Phase 15 — v3.0 Migration & Next-Level Upgrade
 **Overall Progress:** Phase 14 Complete ✅ | Phase 15 In Progress 🚀
 
 ---
@@ -39,8 +39,8 @@
 - Cross-platform: Linux, macOS, Windows
 
 ### TUI Interface (`src/samplemind/interfaces/tui/`)
-- Textual-based, 11 implemented screens
-- Screens: Main, Analyze, Batch, Results, Favorites, Settings, Comparison, Search, Tagging, Performance, Library
+- Textual-based, **13 implemented screens** (verified on disk)
+- Screens: Main, Analyze, Batch, Results, Favorites, Settings, Comparison, Search, Tagging, Performance, Library, Effects Chain (`chain_screen.py`), Classification (`classification_screen.py`)
 - Integrations: FL Studio, audio playback, AI coach, performance monitor, library browser, plugin manager, keyboard shortcuts, session management
 
 ### DAW Plugins
@@ -50,11 +50,11 @@
 - **VST3 Bridge:** C++ wrapper with Python embedding
 
 ### API Layer (FastAPI)
-- 20+ REST endpoints
-- WebSocket support
-- JWT authentication (access + refresh tokens)
-- Auto-generated docs at `/api/docs`
-- MongoDB (Motor/Beanie), Redis, ChromaDB integration
+- Router layer: `src/samplemind/interfaces/api/`
+- Server entrypoint: `src/samplemind/server/`
+- **Note:** `src/samplemind/api/` does NOT exist — docs that reference this path are wrong
+- JWT authentication, WebSocket support, auto-generated docs at `/api/docs`
+- MongoDB (Motor ^3.3.1 / Beanie), Redis, ChromaDB integration
 
 ### Analytics & Monitoring (Phase 14)
 - PostHog analytics integration
@@ -237,15 +237,23 @@ SampleMind-AI---Beta/
 
 | # | Issue | Severity | Fix |
 |---|-------|----------|-----|
-| 1 | `anthropic` 33 versions behind | 🔴 Critical | Upgrade to ^0.40.0 |
-| 2 | `openai` missing Agents SDK | 🔴 Critical | Upgrade to ^1.58.0 |
-| 3 | `scipy` monkey-patch in `__init__.py` | 🟡 Medium | Upgrade scipy to ^1.14 |
-| 4 | `basic-pitch` commented out | 🟡 Medium | Re-enable + upgrade |
-| 5 | `numpy` capped `<2.0.0` | 🟡 Medium | Upgrade to `>=2.0.0` |
-| 6 | `interfaces/__init__.py` is a stub | 🟡 Medium | Implement properly |
-| 7 | Test coverage only 30% | 🟠 High | Add tests for core engine |
-| 8 | No Web UI | 🟠 High | Phase 15 priority |
-| 9 | CLI startup ~2s (target <1s) | 🟡 Medium | Lazy import optimization |
+| 1 | `anthropic ^0.7.0` — 33 versions behind | 🔴 Critical | Upgrade to ^0.40.0 |
+| 2 | `openai ^1.3.0` — missing Agents SDK, gpt-4o | 🔴 Critical | Upgrade to ^1.58.0 |
+| 3 | `google-generativeai ^0.3.0` — deprecated package | 🔴 Critical | Rename to `google-genai ^0.8.0` |
+| 4 | `textual ^0.44.0` — 43 minor versions behind | 🔴 Critical | Upgrade to ^0.87.0 |
+| 5 | `demucs` not in pyproject.toml | 🟠 High | ADD (not upgrade) to pyproject.toml |
+| 6 | `pedalboard` not in pyproject.toml | 🟠 High | ADD (not upgrade) to pyproject.toml |
+| 7 | `basic-pitch` commented out | 🟠 High | Re-enable + upgrade to ^0.4.0 |
+| 8 | `numpy` capped `<2.0.0` | 🟠 High | Upgrade to `>=2.0.0` (with torch+transformers) |
+| 9 | `torch ^2.1.0`, `transformers ^4.35.0` outdated | 🟠 High | Upgrade to ^2.5.0 / ^4.47.0 |
+| 10 | scipy monkey-patch in `__init__.py` | 🟡 Medium | Fix: upgrade librosa to ^0.11.0, then remove patch |
+| 11 | `main.py` still says "v6.0.0" in docstring + --version | 🟡 Medium | Update to "2.1.0-beta" / "3.0.0" |
+| 12 | `interfaces/__init__.py` says "v6" | 🟡 Medium | Update comment, version strings |
+| 13 | `pyproject.toml` scripts entry has wrong path | 🟡 Medium | Fix `src.interfaces.cli.main:app` path |
+| 14 | Test coverage only 30% | 🟠 High | Add tests — target 80% |
+| 15 | No Web UI | 🟠 High | Phase 15: Next.js 15 scaffold |
+| 16 | CLI startup ~2s (target <1s) | 🟡 Medium | Lazy import optimization |
+| 17 | `fastapi ^0.104.1`, `motor ^3.3.1` outdated | 🟡 Medium | Upgrade to ^0.115.0 / ^3.6.0 |
 
 ---
 

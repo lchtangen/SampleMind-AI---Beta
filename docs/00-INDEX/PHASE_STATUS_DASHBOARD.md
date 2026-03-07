@@ -4,13 +4,13 @@ Real-time status tracking for all SampleMind-AI project phases with completion p
 
 ## Project Overview
 
-**Overall Project Status:** 85% COMPLETE
+**Overall Project Status:** Phases 1–14 COMPLETE | Phase 15 IN PROGRESS (0%)
 
 ```
-████████████████████████████░░░░░  85%
+███████████████████████████████░░  93%
 ```
 
-**Current Focus:** Phase 4 Advanced Features & Phase 10 Planning
+**Current Focus:** Phase 15 — v3.0 Migration (dependency upgrades + web UI)
 
 ---
 
@@ -21,13 +21,18 @@ Real-time status tracking for all SampleMind-AI project phases with completion p
 | 1 | Core Architecture | ✅ COMPLETED | 100% | 2025-01-18 | Maintenance mode |
 | 2 | Feature Implementation | ✅ COMPLETED | 100% | 2025-01-18 | Maintenance mode |
 | 3 | UI/UX Refinement | ✅ COMPLETED | 100% | 2025-01-18 | Maintenance mode |
-| 4 | Advanced Features | 🟡 PARTIAL | 60% | 2026-01-19 | Continue sub-phases |
-| 5 | Integration & Optimization | ✅ COMPLETED | 100% | 2025-01-18 | Documentation review |
+| 4 | Advanced Features | ✅ COMPLETED | 100% | 2026-01-19 | Archived |
+| 5 | Integration & Optimization | ✅ COMPLETED | 100% | 2025-01-18 | Maintenance mode |
 | 6 | Performance Tuning | ✅ COMPLETED | 100% | 2025-01-18 | Monitor production |
 | 7 | Stability & Testing | ✅ COMPLETED | 100% | 2025-01-18 | Test suite maintenance |
 | 8 | Documentation | ✅ COMPLETED | 100% | 2025-01-18 | Keep updated |
 | 9 | Production Readiness | ✅ COMPLETED | 100% | 2025-01-18 | Production monitoring |
-| 10 | Next Generation | 📋 PLANNED | 0% | 2026-01-19 | Create planning docs |
+| 10 | Next Generation | ✅ COMPLETED | 100% | 2026-01-19 | Archived |
+| 11 | Performance Optimization | ✅ COMPLETED | 100% | 2026-02-03 | Archived to `_archive/legacy-phases/` |
+| 12 | UX Polish + Accessibility | ✅ COMPLETED | 100% | 2026-02-03 | Archived to `_archive/legacy-phases/` |
+| 13 | Effects CLI + DAW Plugins | ✅ COMPLETED | 100% | 2026-02-03 | `01-PHASES/13-PHASE-13-COMPLETED/` |
+| 14 | Analytics + GitHub CI/CD | ✅ COMPLETED | 100% | 2026-02-03 | `01-PHASES/14-PHASE-14-COMPLETED/` |
+| 15 | v3.0 Migration | 🔄 IN PROGRESS | 0% | 2026-03-07 | Upgrade AI provider SDKs |
 
 ---
 
@@ -218,17 +223,22 @@ Overall:       ███████████████░ (85%)
 
 ---
 
-## Current Sprint Focus
+## Current Sprint Focus — Phase 15 P0 Priorities
 
-### Active Work (Phase 4)
-- **4.2 Advanced Audio:** Processing improvements and feature additions
-- **Strategic Planning:** Business features for Phase 4 sub-phases
+### Active Work (Phase 15)
+- **P0:** Upgrade `anthropic` ^0.7.0 → ^0.40.0 (Claude 3.7 Sonnet + extended thinking)
+- **P0:** Upgrade `openai` ^1.3.0 → ^1.58.0 (Agents SDK + gpt-4o)
+- **P0:** Upgrade `google-generativeai` → `google-genai ^0.8.0` (Gemini 2.0 Flash)
+- **P0:** Upgrade `textual` ^0.44.0 → ^0.87.0 (TUI migration)
 
-### Upcoming Priorities
-1. Complete Phase 4 advanced features
-2. Create Phase 10 planning documentation
-3. Define Phase 11+ strategic direction
-4. Reorganize documentation structure
+### Upcoming (P1)
+1. Upgrade `torch` ^2.1.0 → ^2.5.0 + remove numpy <2.0.0 cap
+2. Upgrade `transformers` ^4.35.0 → ^4.47.0
+3. Re-enable `basic-pitch ^0.4.0` in pyproject.toml
+4. Implement new TUI screens: AgentChatScreen, WaveformScreen, MixingBoardScreen
+
+### P2
+- Scaffold Next.js 15 web UI (`apps/web/`)
 
 ---
 
@@ -298,7 +308,7 @@ Overall:       ███████████████░ (85%)
 
 ---
 
-**Last Updated:** 2026-01-19
+**Last Updated:** 2026-03-07
 **Update Frequency:** Weekly
 **Maintained By:** SampleMind-AI Team
 

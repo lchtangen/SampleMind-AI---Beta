@@ -1,12 +1,17 @@
 # 🎵 SampleMind AI
 
-> **AI-Powered Music Production Platform**  
-> Advanced audio analysis, intelligent sample organization, and creative assistance powered by Google Gemini, Anthropic Claude, OpenAI, and local AI models.
+> **AI-Powered Music Production Platform**
+> Advanced audio analysis, intelligent sample organization, and creative assistance powered by Anthropic Claude, Google Gemini, OpenAI, and local AI models.
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Version](https://img.shields.io/badge/version-2.1.0--beta-orange.svg)](RELEASE_NOTES_v2.1.0-beta.md)
+[![Version](https://img.shields.io/badge/version-2.1.0--beta-orange.svg)](CHANGELOG.md)
+[![Phase 15](https://img.shields.io/badge/phase-15%20v3.0%20migration-blueviolet.svg)](docs/02-ROADMAPS/CURRENT_STATUS.md)
+
+> **⚡ Phase 15 — v3.0 Migration in Progress**
+> Upgrading all AI providers, audio libraries, and adding a Next.js 15 web UI.
+> See [`docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md`](docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md) for the full plan.
 
 ---
 
@@ -78,7 +83,7 @@ All documentation is systematically organized in the `docs/` directory:
 
 - **[📋 Documentation Index](./docs/00-INDEX/README.md)** - Central navigation hub
 - **[📊 Phase Status Dashboard](./docs/00-INDEX/PHASE_STATUS_DASHBOARD.md)** - Real-time project status
-- **[🎯 Quick Reference](./docs/00-INDEX/QUICK_REFERENCE.md)** - Fast access to commands and features
+- **[🎯 Phase Navigation Guide](./docs/00-INDEX/PHASE_NAVIGATION_GUIDE.md)** - Fast access by phase and feature
 - **[📖 Phase Documentation](./docs/01-PHASES/)** - Phases 1-10 (all complete)
 - **[🗺️ Roadmaps](./docs/02-ROADMAPS/)** - Strategic planning and future features
 - **[💼 Business Strategy](./docs/03-BUSINESS-STRATEGY/)** - Business plans and go-to-market strategy
@@ -98,9 +103,9 @@ All documentation is systematically organized in the `docs/` directory:
 | Interface | Status | Best For | Features |
 |-----------|--------|----------|----------|
 | **CLI (Primary)** | ✅ **Recommended** | All users | 200+ commands, modern menu, 12 themes, fast startup |
-| **TUI (Advanced)** | ✅ Available | Power users | 60 FPS animations, mouse support, real-time visualizations |
+| **TUI (Advanced)** | ✅ Available | Power users | 13 screens, mouse support, real-time visualizations |
 | **REST API** | ✅ Available | Integrations | FastAPI-powered async web service |
-| **Web UI** | 🚧 Planned | Future | React/Next.js frontend (Phase 2) |
+| **Web UI** | 🚀 Phase 15 | Future | Next.js 15 + React 19 (in progress) |
 
 ### 🎨 Optional Premium TUI (Textual Framework)
 
@@ -126,10 +131,12 @@ python -m samplemind.interfaces.tui.main
 
 | Provider | Model | Priority | Specialization | Response Time |
 |----------|-------|----------|----------------|---------------|
-| **Local AI** (Ollama) | Phi3, Qwen2.5 | 0 (Instant) | Ultra-fast caching | <100ms |
-| **Google Gemini** | Gemini 2.5 Pro | 1 (Primary) | Audio analysis, genre classification | ~2-3s |
-| **Anthropic Claude** | Claude 3.5 Sonnet | 2 (Specialist) | Production coaching, creative suggestions | ~3-5s |
-| **OpenAI GPT** | GPT-4o | 3 (Fallback) | Emergency backup | ~2-5s |
+| **Local AI** (Ollama) | qwen2.5:7b-instruct | 0 (Instant) | Offline inference, ultra-fast | <100ms |
+| **Anthropic Claude** | Claude 3.7 Sonnet | 1 (Primary) | Deep analysis, extended thinking | ~3-5s |
+| **Google Gemini** | Gemini 2.0 Flash | 2 (Fast) | Streaming, multimodal queries | ~1-2s |
+| **OpenAI GPT** | GPT-4o | 3 (Agents) | Agent workflows, tool use | ~2-5s |
+
+> **Phase 15 target models:** `claude-3-7-sonnet-20250219`, `gemini-2.0-flash`, `gpt-4o` — see [`docs/active/models/AI_PROVIDER_UPGRADE_LOG.md`](docs/active/models/AI_PROVIDER_UPGRADE_LOG.md)
 
 ### Audio Processing Pipeline
 
@@ -145,21 +152,32 @@ python -m samplemind.interfaces.tui.main
 ```
 SampleMind-AI---Beta/
 ├── src/samplemind/         # Main application code
-│   ├── core/               # Audio processing engine
-│   ├── integrations/       # AI provider integrations
-│   ├── interfaces/         # CLI, TUI, API interfaces
-│   └── utils/              # Utilities and helpers
-├── tests/                  # Test suite (81 tests, 30% coverage)
+│   ├── core/               # Audio processing engine + loader + ChromaDB
+│   ├── integrations/       # AI provider manager + DAW integrations
+│   ├── interfaces/         # CLI (primary), TUI (13 screens), API (FastAPI)
+│   ├── server/             # FastAPI server entrypoint
+│   ├── services/           # Business logic services
+│   ├── ai/                 # AI utilities and helpers
+│   └── utils/              # Cross-cutting utilities
+├── plugins/                # DAW plugins
+│   ├── fl_studio_plugin.py # FL Studio Python wrapper
+│   ├── fl_studio/cpp/      # C++ native plugin (JUCE, 486 lines)
+│   ├── ableton/            # Ableton REST backend + JS bridge
+│   └── installer.py        # Cross-DAW installer
+├── tests/                  # Test suite (~30% coverage)
+│   ├── unit/               # 81 unit tests (13 subdirectories)
+│   ├── integration/        # Integration tests
+│   └── fixtures/           # Test audio files
 ├── docs/                   # Documentation hub
-│   ├── 00-INDEX/           # Documentation navigation
-│   ├── 01-PHASES/          # Phase documentation (1-10)
-│   ├── 02-ROADMAPS/        # Strategic roadmaps
-│   ├── 03-BUSINESS-STRATEGY/ # Business planning
-│   └── 04-TECHNICAL-IMPLEMENTATION/ # Technical docs
+│   ├── active/             # V3 migration working documents
+│   ├── 00-INDEX/           # Phase index + status dashboard
+│   ├── 01-PHASES/          # Phase documentation (1-15)
+│   ├── 02-ROADMAPS/        # CURRENT_STATUS.md, V3_MIGRATION_CHECKLIST.md
+│   └── 04-TECHNICAL-IMPLEMENTATION/ # Guides, reference, technical docs
+├── apps/                   # Web applications (Next.js 15 — Phase 15)
 ├── scripts/                # Setup and utility scripts
 ├── config/                 # Configuration files
-├── plugins/                # DAW plugins (future)
-└── apps/                   # Web applications
+└── completions/            # Shell completions (bash, zsh, fish)
 ```
 
 ---
@@ -175,20 +193,23 @@ SampleMind-AI---Beta/
 
 ### Audio Processing
 
-- **librosa 0.10.1** - Audio analysis and feature extraction
-- **soundfile** - Audio file I/O
-- **scipy** - Signal processing algorithms
-- **numpy** - Numerical computations
-- **numba** - JIT compilation for performance
+- **librosa 0.10.1** — Audio analysis and feature extraction (→ 0.11.0 in Phase 15)
+- **soundfile** — Audio file I/O (WAV, FLAC, OGG, MP3, AAC)
+- **scipy** — Signal processing algorithms (→ 1.14.0 in Phase 15)
+- **numpy** — Numerical computations (→ ≥2.0.0 in Phase 15)
+- **numba** — JIT compilation for performance
+- **demucs** — 6-stem source separation (adding in Phase 15)
+- **pedalboard** — Spotify professional audio effects (adding in Phase 15)
+- **basic-pitch** — MIDI transcription from audio (re-enabling in Phase 15)
 
 ### AI/ML Stack
 
-- **Google Gemini 2.5 Pro** - Primary audio analysis and genre classification
-- **Anthropic Claude 3.5 Sonnet** - Production coaching and creative suggestions
-- **OpenAI GPT-4o** - Fallback AI provider
-- **Ollama** - Local AI models (Phi3, Qwen2.5)
-- **PyTorch 2.1+** - Deep learning framework
-- **sentence-transformers** - Semantic embedding generation
+- **Anthropic Claude 3.7 Sonnet** — Primary deep analysis + extended thinking (→ ^0.40.0 in Phase 15)
+- **Google Gemini 2.0 Flash** — Fast streaming + multimodal (→ google-genai ^0.8.0 in Phase 15)
+- **OpenAI GPT-4o** — Agent workflows + Agents SDK (→ ^1.58.0 in Phase 15)
+- **Ollama** — Local AI models: qwen2.5:7b-instruct, phi3, gemma2 (offline, <100ms)
+- **PyTorch 2.1+** — Deep learning framework (→ 2.5.0 in Phase 15)
+- **sentence-transformers** — Semantic embedding generation
 
 ### Databases
 
@@ -267,20 +288,22 @@ curl -X POST "http://localhost:8000/api/v1/audio/analyze" \
 
 ## 📊 Development Status
 
-| Component | Status | Test Coverage | Notes |
-|-----------|--------|---------------|-------|
-| Audio Engine | ✅ Stable | 72% | Core audio processing |
-| AI Manager | ✅ Stable | 76% | Multi-provider AI routing |
-| Google Gemini Integration | ✅ Working | 60% | Primary AI provider |
-| Anthropic Claude Integration | ✅ Working | 65% | Creative specialist |
-| OpenAI Integration | ✅ Working | 65% | Fallback provider |
-| File Picker | ✅ Stable | 59% | Cross-platform file selection |
-| CLI Interface | ✅ Active | - | 200+ commands, 12 themes |
-| TUI Interface | ✅ Beta | - | Textual-based advanced UI |
-| REST API | 🚧 Scaffolded | - | FastAPI async endpoints |
-| Web Frontend | 📋 Planned | - | Next.js/React (Phase 2) |
+| Component | Status | Notes |
+|-----------|--------|-------|
+| Audio Engine | ✅ Stable | librosa-based: BPM, key, MFCC, chroma, spectral |
+| AI Manager | ✅ Stable | Multi-provider routing: Claude, Gemini, GPT, Ollama |
+| Anthropic Claude Integration | ⚠️ Outdated | SDK v0.7.0 → upgrading to v0.40.0 in Phase 15 |
+| Google Gemini Integration | ⚠️ Outdated | SDK v0.3.0 → upgrading to google-genai v0.8.0 in Phase 15 |
+| OpenAI Integration | ⚠️ Outdated | SDK v1.3.0 → upgrading to v1.58.0 in Phase 15 |
+| CLI Interface | ✅ Active | ~2255 lines, 20+ commands, 12 themes, Rich/Typer |
+| TUI Interface | ✅ Beta | Textual v0.44 — 13 screens (→ v0.87 in Phase 15) |
+| REST API | ✅ Scaffolded | FastAPI at `src/samplemind/interfaces/api/` + `server/` |
+| DAW Plugins | ✅ Working | FL Studio (Python + C++ JUCE), Ableton (REST + JS) |
+| Web Frontend | 🚀 Phase 15 | Next.js 15 + React 19 — in progress |
+| Stem Separation | 🚀 Phase 15 | demucs v4 htdemucs_6s — adding in Phase 15 |
+| MIDI Transcription | 🚀 Phase 15 | basic-pitch — re-enabling in Phase 15 |
 
-**Overall Test Suite:** 81 tests passing | 30% coverage
+**Overall Test Suite:** 81 tests passing | ~30% coverage | Target: 80% in Phase 15
 
 ---
 
@@ -340,22 +363,22 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ## 🔗 Links & Resources
 
 - **[Documentation Hub](docs/)** - Complete documentation
-- **[Release Notes](RELEASE_NOTES_v2.1.0-beta.md)** - v2.1.0-beta changelog
-- **[Changelog](CHANGELOG.md)** - Full version history
-- **[Roadmap](docs/02-ROADMAPS/)** - Future development plans
-- **[Quick Action Guide](QUICK_ACTION_GUIDE.md)** - Fast reference for common tasks
+- **[Changelog](CHANGELOG.md)** — Full version history
+- **[Roadmap](docs/02-ROADMAPS/)** — Future development plans
+- **[Phase 15 Migration Plan](docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md)** — v3.0 upgrade checklist
+- **[Current Status](docs/02-ROADMAPS/CURRENT_STATUS.md)** — Real-time project state
 
 ---
 
 ## 🌟 Project Highlights
 
-- ✅ **Phases 1-10 Complete** - All major development phases finished
-- 🎯 **200+ CLI Commands** - Comprehensive command-line interface
-- 🤖 **4 AI Providers** - Flexible hybrid AI architecture
-- ⚡ **<100ms Local AI** - Ultra-fast response times with Ollama
-- 🎨 **12 Color Themes** - Customizable interface styling
-- 📊 **81 Tests Passing** - Reliable, tested codebase
-- 🌐 **Cross-Platform** - Linux, macOS, Windows support
+- ✅ **Phases 1-14 Complete** — Solid foundation with full CLI, TUI, DAW plugins, analytics
+- 🚀 **Phase 15 Active** — v3.0 migration: new AI models, audio libs, Next.js web UI
+- 🎯 **20+ CLI Commands** — Comprehensive command-line interface
+- 🤖 **4 AI Providers** — Claude, Gemini, GPT-4o, Ollama (offline <100ms)
+- 🖥️ **13 TUI Screens** — Full-featured terminal UI with Textual
+- 🎹 **DAW Integration** — FL Studio (Python + C++ JUCE) + Ableton Live
+- 🌐 **Cross-Platform** — Linux, macOS, Windows support
 
 ---
 

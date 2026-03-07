@@ -1,424 +1,325 @@
 #!/usr/bin/env python3
 """
-Unit tests for Google AI integration
+Unit tests for Google AI (Gemini) integration — v3.0
+Tests the google-genai SDK migration. All tests use mocks — no real API calls.
+
+Key changes from old tests:
+- Removed pytest.skip() gate — tests always run
+- Uses google-genai SDK pattern: genai.Client, client.aio.models.generate_content
+- Updated GeminiModel enum: GEMINI_2_0_FLASH is now primary
 """
 
-import os
+import json
 import pytest
-import asyncio
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
+from unittest.mock import AsyncMock, MagicMock, patch
 from pathlib import Path
 import sys
 
-# Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "src"))
 
 from samplemind.integrations.google_ai_integration import (
     GoogleAIMusicProducer,
     MusicAnalysisType,
     AdvancedMusicAnalysis,
-    GeminiModel
+    GeminiModel,
 )
 
 
-if not os.getenv("RUN_AI_INTEGRATION_TESTS"):
-    pytest.skip("Set RUN_AI_INTEGRATION_TESTS=1 to enable Google AI integration tests", allow_module_level=True)
+# ---------------------------------------------------------------------------
+# Fixtures
+# ---------------------------------------------------------------------------
 
+@pytest.fixture
+def mock_genai_response():
+    """Mock google-genai API response"""
+    mock_response = MagicMock()
+    mock_response.text = json.dumps({
+        "comprehensive_analysis": {
+            "detailed_description": "Electronic track with strong beat.",
+            "technical_summary": "Well-produced with clear mix.",
+            "creative_interpretation": "Energetic and forward-moving.",
+        },
+        "genre_classification": {
+            "primary_genre": "Electronic",
+            "secondary_genres": ["House", "Techno"],
+            "confidence": 0.92,
+            "style_influences": ["Chicago House", "Berlin Techno"],
+            "era_period": "2020s",
+            "regional_style": "European",
+        },
+        "emotional_analysis": {
+            "primary_mood": "Energetic",
+            "emotional_descriptors": ["Driving", "Hypnotic"],
+            "valence_score": 0.7,
+            "arousal_score": 0.85,
+            "emotional_intensity": 0.8,
+            "emotional_journey": ["building", "peak", "resolution"],
+        },
+    })
+    mock_response.usage_metadata = MagicMock()
+    mock_response.usage_metadata.total_token_count = 150
+    return mock_response
+
+
+@pytest.fixture
+def producer(mock_genai_response):
+    """GoogleAIMusicProducer with mocked google-genai Client"""
+    with patch("google.genai.Client") as mock_client_cls:
+        mock_client = MagicMock()
+        mock_client.aio = MagicMock()
+        mock_client.aio.models = MagicMock()
+        mock_client.aio.models.generate_content = AsyncMock(
+            return_value=mock_genai_response
+        )
+        mock_client_cls.return_value = mock_client
+        prod = GoogleAIMusicProducer(api_key="test-key")
+        prod.client = mock_client
+        yield prod
+
+
+@pytest.fixture
+def sample_features():
+    return {
+        "duration": 180.0,
+        "tempo": 128.0,
+        "key": "C",
+        "mode": "major",
+        "energy": 0.8,
+    }
+
+
+# ---------------------------------------------------------------------------
+# TestGeminiModel
+# ---------------------------------------------------------------------------
+
+class TestGeminiModel:
+    def test_gemini_2_0_flash_is_primary(self):
+        """GEMINI_2_0_FLASH must be the primary model in v3.0"""
+        assert GeminiModel.GEMINI_2_0_FLASH
+        assert GeminiModel.GEMINI_2_0_FLASH.value == "gemini-2.0-flash"
+
+    def test_default_model_is_gemini_2_0_flash(self):
+        """Default model must be GEMINI_2_0_FLASH for v3.0"""
+        with patch("google.genai.Client"):
+            prod = GoogleAIMusicProducer(api_key="test")
+        assert prod.default_model == GeminiModel.GEMINI_2_0_FLASH
+
+    def test_legacy_models_still_available(self):
+        assert GeminiModel.GEMINI_1_5_PRO
+        assert GeminiModel.GEMINI_1_5_FLASH
+
+    def test_all_model_values_contain_gemini(self):
+        for model in GeminiModel:
+            assert "gemini" in model.value.lower()
+
+
+# ---------------------------------------------------------------------------
+# TestAdvancedMusicAnalysis
+# ---------------------------------------------------------------------------
 
 class TestAdvancedMusicAnalysis:
-    """Test AdvancedMusicAnalysis dataclass"""
-
-    def test_create_result(self):
-        """Test creating analysis result"""
+    def test_create_with_required_fields(self):
         result = AdvancedMusicAnalysis(
-            primary_genre="Electronic",
-            sub_genres=["House", "Techno"],
-            primary_mood="Energetic",
-            mood_tags=["Happy", "Uplifting"],
-            energy_level=8,
-            danceability=9,
-            model_used=GeminiModel.GEMINI_2_5_PRO,
-            processing_time=1.5
+            analysis_type=MusicAnalysisType.COMPREHENSIVE_ANALYSIS,
+            model_used=GeminiModel.GEMINI_2_0_FLASH,
         )
+        assert result.analysis_type == MusicAnalysisType.COMPREHENSIVE_ANALYSIS
+        assert result.model_used == GeminiModel.GEMINI_2_0_FLASH
 
-        assert result.primary_genre == "Electronic"
-        assert len(result.sub_genres) == 2
-        assert result.energy_level == 8
-        assert result.model_used == GeminiModel.GEMINI_2_5_PRO
-        assert result.processing_time == 1.5
-
-    def test_default_values(self):
-        """Test default result values"""
+    def test_default_string_fields_empty(self):
         result = AdvancedMusicAnalysis(
-            model_used=GeminiModel.GEMINI_2_5_PRO,
-            processing_time=0.5
+            analysis_type=MusicAnalysisType.GENRE_CLASSIFICATION,
+            model_used=GeminiModel.GEMINI_2_0_FLASH,
         )
-
         assert result.primary_genre == ""
-        assert result.sub_genres == []
-        assert result.mood_tags == []
-        assert result.energy_level == 0
-        assert result.danceability == 0
+        assert result.primary_mood == ""
+        assert result.secondary_genres == []
 
-
-class TestGoogleAIMusicProducer:
-    """Test GoogleAIMusicProducer main functionality"""
-
-    def test_initialization_with_api_key(self):
-        """Test producer initializes with API key"""
-        producer = GoogleAIMusicProducer(api_key="test_api_key_123")
-
-        assert producer.api_key == "test_api_key_123"
-        assert producer.default_model == GeminiModel.GEMINI_2_5_PRO
-        assert producer.total_analyses == 0
-        assert producer.total_tokens_used == 0
-
-    def test_initialization_with_custom_model(self):
-        """Test producer with custom model"""
-        producer = GoogleAIMusicProducer(
-            api_key="test_key",
-            model=GeminiModel.GEMINI_2_5_FLASH
+    def test_to_dict_returns_serializable(self):
+        result = AdvancedMusicAnalysis(
+            analysis_type=MusicAnalysisType.COMPREHENSIVE_ANALYSIS,
+            model_used=GeminiModel.GEMINI_2_0_FLASH,
+            primary_genre="Electronic",
         )
+        d = result.to_dict()
+        assert isinstance(d, dict)
+        assert d["primary_genre"] == "Electronic"
+        # Enum values should be their string values
+        assert d["model_used"] == "gemini-2.0-flash"
 
-        assert producer.default_model == GeminiModel.GEMINI_2_5_FLASH
 
-    @patch('google.generativeai.configure')
-    @patch('google.generativeai.GenerativeModel')
-    def test_initialization_configures_genai(self, mock_model, mock_configure):
-        """Test that initialization configures Google AI SDK"""
-        producer = GoogleAIMusicProducer(api_key="test_key")
+# ---------------------------------------------------------------------------
+# TestGoogleAIMusicProducerInit
+# ---------------------------------------------------------------------------
 
-        # Should configure with API key
-        mock_configure.assert_called_once_with(api_key="test_key")
+class TestGoogleAIMusicProducerInit:
+    def test_creates_genai_client_not_configure(self):
+        """v3.0 uses genai.Client(), NOT genai.configure()"""
+        with patch("google.genai.Client") as mock_client_cls:
+            mock_client_cls.return_value = MagicMock()
+            prod = GoogleAIMusicProducer(api_key="my-key")
+            mock_client_cls.assert_called_once_with(api_key="my-key")
 
+    def test_no_genai_configure_called(self):
+        """genai.configure() must NOT be called in v3.0"""
+        with patch("google.genai.Client") as mock_client_cls, \
+             patch("google.genai.configure") as mock_configure:
+            mock_client_cls.return_value = MagicMock()
+            GoogleAIMusicProducer(api_key="test")
+            mock_configure.assert_not_called()
+
+    def test_raises_without_api_key(self):
+        import os
+        with patch.dict(os.environ, {}, clear=True):
+            with patch("google.genai.Client"):
+                with pytest.raises(ValueError, match="API key"):
+                    GoogleAIMusicProducer(api_key=None)
+
+    def test_stats_initialized(self):
+        with patch("google.genai.Client") as mock_cls:
+            mock_cls.return_value = MagicMock()
+            prod = GoogleAIMusicProducer(api_key="test")
+        assert prod.analysis_count == 0
+        assert prod.total_tokens_used == 0
+        assert prod.avg_response_time == 0.0
+
+
+# ---------------------------------------------------------------------------
+# TestGenerateContent
+# ---------------------------------------------------------------------------
+
+class TestGenerateContent:
     @pytest.mark.asyncio
-    @patch('google.generativeai.GenerativeModel')
-    async def test_analyze_music_comprehensive_success(self, mock_model_class):
-        """Test successful comprehensive music analysis"""
-        # Mock the Gemini response
-        mock_response = Mock()
-        mock_response.text = """
-        Genre: Electronic Dance Music
-        Sub-genres: Progressive House, Deep House
-        Mood: Energetic and Uplifting
-        Mood Tags: Happy, Euphoric, Driving
-        Energy: 8
-        Danceability: 9
-        BPM: 128
-        Key: C Major
-        """
-
-        mock_model = Mock()
-        mock_model.generate_content_async = AsyncMock(return_value=mock_response)
-        mock_model_class.return_value = mock_model
-
-        producer = GoogleAIMusicProducer(api_key="test_key")
-
-        test_features = {
-            'duration': 180.0,
-            'tempo': 128.0,
-            'key': 'C',
-            'mode': 'major'
-        }
-
-        result = await producer.analyze_music_comprehensive(
-            test_features,
-            MusicAnalysisType.COMPREHENSIVE_ANALYSIS
-        )
-
-        # Verify result structure
-        assert isinstance(result, AdvancedMusicAnalysis)
-        assert result.model_used == GeminiModel.GEMINI_2_5_PRO
-        assert result.processing_time > 0
-
-        # Verify the model was called
-        mock_model.generate_content_async.assert_called_once()
-
-    @pytest.mark.asyncio
-    @patch('google.generativeai.GenerativeModel')
-    async def test_analyze_music_with_creative_suggestions(self, mock_model_class):
-        """Test creative suggestions analysis"""
-        mock_response = Mock()
-        mock_response.text = """
-        Creative Ideas:
-        1. Add a breakdown at 2:00
-        2. Layer vocals with reverb
-        3. Introduce a new synth melody
-
-        FL Studio Plugins:
-        - Serum for main synth
-        - Fruity Reverb 2 for atmosphere
-        - Sidechain Compressor for pumping effect
-        """
-
-        mock_model = Mock()
-        mock_model.generate_content_async = AsyncMock(return_value=mock_response)
-        mock_model_class.return_value = mock_model
-
-        producer = GoogleAIMusicProducer(api_key="test_key")
-
-        result = await producer.analyze_music_comprehensive(
-            {'duration': 200.0},
-            MusicAnalysisType.CREATIVE_PRODUCTION
-        )
+    async def test_uses_aio_models_generate_content(
+        self, producer, sample_features
+    ):
+        """Must call client.aio.models.generate_content (new SDK pattern)"""
+        result = await producer.analyze_music_comprehensive(sample_features)
 
         assert isinstance(result, AdvancedMusicAnalysis)
-        assert len(result.creative_ideas) > 0 or len(result.fl_plugin_recommendations) > 0
+        producer.client.aio.models.generate_content.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch('google.generativeai.GenerativeModel')
-    async def test_analyze_music_handles_api_error(self, mock_model_class):
-        """Test error handling when Gemini API fails"""
-        mock_model = Mock()
-        mock_model.generate_content_async = AsyncMock(
-            side_effect=Exception("API Error: Rate limit exceeded")
-        )
-        mock_model_class.return_value = mock_model
+    async def test_correct_model_name_sent(self, producer, sample_features):
+        await producer.analyze_music_comprehensive(sample_features)
 
-        producer = GoogleAIMusicProducer(api_key="test_key")
+        call_kwargs = producer.client.aio.models.generate_content.call_args.kwargs
+        assert call_kwargs["model"] == GeminiModel.GEMINI_2_0_FLASH.value
 
-        with pytest.raises(Exception) as exc_info:
-            await producer.analyze_music_comprehensive(
-                {'duration': 180.0},
-                MusicAnalysisType.COMPREHENSIVE_ANALYSIS
+    @pytest.mark.asyncio
+    async def test_config_object_passed(self, producer, sample_features):
+        """Config must be passed as genai_types.GenerateContentConfig"""
+        await producer.analyze_music_comprehensive(sample_features)
+
+        call_kwargs = producer.client.aio.models.generate_content.call_args.kwargs
+        assert "config" in call_kwargs
+
+    @pytest.mark.asyncio
+    async def test_prompt_contains_audio_features(self, producer, sample_features):
+        await producer.analyze_music_comprehensive(sample_features)
+
+        call_kwargs = producer.client.aio.models.generate_content.call_args.kwargs
+        prompt = call_kwargs["contents"]
+        assert "128" in prompt   # tempo
+        assert "180" in prompt   # duration
+
+
+# ---------------------------------------------------------------------------
+# TestTokenUsage
+# ---------------------------------------------------------------------------
+
+class TestTokenUsage:
+    @pytest.mark.asyncio
+    async def test_token_count_from_usage_metadata(self, producer, sample_features):
+        """Must read tokens from response.usage_metadata.total_token_count"""
+        result = await producer.analyze_music_comprehensive(sample_features)
+
+        # token_usage dict should be populated from usage_metadata
+        assert result.token_usage.get("total_token_count", -1) == 150
+
+    @pytest.mark.asyncio
+    async def test_performance_metrics_updated(self, producer, sample_features):
+        await producer.analyze_music_comprehensive(sample_features)
+
+        assert producer.analysis_count == 1
+        assert producer.total_tokens_used == 150
+        assert producer.avg_response_time > 0
+
+
+# ---------------------------------------------------------------------------
+# TestSafetySettings
+# ---------------------------------------------------------------------------
+
+class TestSafetySettings:
+    @pytest.mark.asyncio
+    async def test_safety_settings_passed_in_config(self, producer, sample_features):
+        """Safety settings must be passed via config object, not as separate param"""
+        await producer.analyze_music_comprehensive(sample_features)
+
+        call_kwargs = producer.client.aio.models.generate_content.call_args.kwargs
+        config = call_kwargs["config"]
+        # Config should have safety_settings attribute
+        assert hasattr(config, "safety_settings")
+        assert len(config.safety_settings) > 0
+
+
+# ---------------------------------------------------------------------------
+# TestErrorHandling
+# ---------------------------------------------------------------------------
+
+class TestErrorHandling:
+    @pytest.mark.asyncio
+    async def test_api_error_returns_error_analysis(self, sample_features):
+        """On API error, analyze_music_comprehensive should return an error result"""
+        with patch("google.genai.Client") as mock_cls:
+            mock_client = MagicMock()
+            mock_client.aio.models.generate_content = AsyncMock(
+                side_effect=Exception("API rate limit exceeded")
             )
+            mock_cls.return_value = mock_client
+            prod = GoogleAIMusicProducer(api_key="test-key")
 
-        assert "API Error" in str(exc_info.value)
+        result = await prod.analyze_music_comprehensive(sample_features)
 
-    @pytest.mark.asyncio
-    @patch('google.generativeai.GenerativeModel')
-    async def test_multiple_analyses_track_stats(self, mock_model_class):
-        """Test that multiple analyses update statistics"""
-        mock_response = Mock()
-        mock_response.text = "Genre: Electronic"
-
-        mock_model = Mock()
-        mock_model.generate_content_async = AsyncMock(return_value=mock_response)
-        mock_model_class.return_value = mock_model
-
-        producer = GoogleAIMusicProducer(api_key="test_key")
-
-        # Run 3 analyses
-        for _ in range(3):
-            await producer.analyze_music_comprehensive(
-                {'duration': 180.0},
-                MusicAnalysisType.QUICK_ANALYSIS
-            )
-
-        stats = producer.get_performance_stats()
-
-        assert stats['total_analyses'] == 3
-        assert stats['avg_response_time'] > 0
-        assert 'cost_estimate_usd' in stats
-
-    def test_get_performance_stats(self):
-        """Test performance statistics retrieval"""
-        producer = GoogleAIMusicProducer(api_key="test_key")
-
-        stats = producer.get_performance_stats()
-
-        assert 'total_analyses' in stats
-        assert 'avg_response_time' in stats
-        assert 'total_tokens_used' in stats
-        assert 'cost_estimate_usd' in stats
-        assert 'model_used' in stats
-
-        assert stats['total_analyses'] == 0
-        assert stats['avg_response_time'] == 0.0
-
-    def test_shutdown(self):
-        """Test producer shutdown"""
-        producer = GoogleAIMusicProducer(api_key="test_key")
-
-        # Should not raise any exceptions
-        producer.shutdown()
-
-        # Can be called multiple times safely
-        producer.shutdown()
-
-    @pytest.mark.asyncio
-    @patch('google.generativeai.GenerativeModel')
-    async def test_build_analysis_prompt_comprehensive(self, mock_model_class):
-        """Test prompt building for comprehensive analysis"""
-        mock_response = Mock()
-        mock_response.text = "Genre: Test"
-
-        mock_model = Mock()
-        mock_model.generate_content_async = AsyncMock(return_value=mock_response)
-        mock_model_class.return_value = mock_model
-
-        producer = GoogleAIMusicProducer(api_key="test_key")
-
-        features = {
-            'duration': 240.0,
-            'tempo': 140.0,
-            'key': 'A',
-            'mode': 'minor',
-            'spectral_centroid': [2000, 2100, 2050],
-            'energy_level': 7
-        }
-
-        await producer.analyze_music_comprehensive(
-            features,
-            MusicAnalysisType.COMPREHENSIVE_ANALYSIS
-        )
-
-        # Verify the prompt contains feature data
-        call_args = mock_model.generate_content_async.call_args
-        prompt = call_args[0][0]
-
-        assert '240' in prompt  # duration
-        assert '140' in prompt  # tempo
-        assert 'A' in prompt    # key
-        assert 'minor' in prompt  # mode
-
-    @pytest.mark.asyncio
-    @patch('google.generativeai.GenerativeModel')
-    async def test_parse_gemini_response(self, mock_model_class):
-        """Test parsing of Gemini API response"""
-        mock_response = Mock()
-        mock_response.text = """
-        Primary Genre: Electronic Dance Music
-        Sub-Genres: Techno, Minimal
-        Mood: Dark and Atmospheric
-        Mood Tags: Mysterious, Intense, Hypnotic
-        Energy Level: 7/10
-        Danceability: 8/10
-        BPM: 130
-        Key: D Minor
-        Production Quality: Professional
-        Mix Balance: Good
-        """
-
-        mock_model = Mock()
-        mock_model.generate_content_async = AsyncMock(return_value=mock_response)
-        mock_model_class.return_value = mock_model
-
-        producer = GoogleAIMusicProducer(api_key="test_key")
-
-        result = await producer.analyze_music_comprehensive(
-            {'tempo': 130},
-            MusicAnalysisType.COMPREHENSIVE_ANALYSIS
-        )
-
-        # Should parse the structured response
         assert isinstance(result, AdvancedMusicAnalysis)
-        assert result.primary_genre != ""
-        assert result.processing_time > 0
+        assert "failed" in result.detailed_description.lower() or "error" in result.raw_response.lower()
 
+    @pytest.mark.asyncio
+    async def test_empty_features_handled(self, producer):
+        result = await producer.analyze_music_comprehensive({})
+        assert isinstance(result, AdvancedMusicAnalysis)
+
+    @pytest.mark.asyncio
+    async def test_malformed_json_response_handled(self, sample_features):
+        with patch("google.genai.Client") as mock_cls:
+            mock_client = MagicMock()
+            mock_response = MagicMock()
+            mock_response.text = "This is not JSON at all!"
+            mock_response.usage_metadata = None
+            mock_client.aio.models.generate_content = AsyncMock(return_value=mock_response)
+            mock_cls.return_value = mock_client
+            prod = GoogleAIMusicProducer(api_key="test-key")
+
+        result = await prod.analyze_music_comprehensive(sample_features)
+        assert isinstance(result, AdvancedMusicAnalysis)
+
+
+# ---------------------------------------------------------------------------
+# TestMusicAnalysisType
+# ---------------------------------------------------------------------------
 
 class TestMusicAnalysisType:
-    """Test MusicAnalysisType enum"""
-
-    def test_analysis_types_exist(self):
-        """Test all analysis types are defined"""
-        assert MusicAnalysisType.QUICK_ANALYSIS
+    def test_required_types_exist(self):
         assert MusicAnalysisType.COMPREHENSIVE_ANALYSIS
+        assert MusicAnalysisType.GENRE_CLASSIFICATION
         assert MusicAnalysisType.CREATIVE_PRODUCTION
         assert MusicAnalysisType.REAL_TIME_COACHING
         assert MusicAnalysisType.FL_STUDIO_INTEGRATION
 
-    def test_analysis_type_values(self):
-        """Test analysis type string values"""
-        assert MusicAnalysisType.QUICK_ANALYSIS.value == "quick_analysis"
+    def test_type_values_are_strings(self):
         assert MusicAnalysisType.COMPREHENSIVE_ANALYSIS.value == "comprehensive_analysis"
-
-
-class TestGeminiModel:
-    """Test GeminiModel enum"""
-
-    def test_models_exist(self):
-        """Test all models are defined"""
-        assert GeminiModel.GEMINI_2_5_PRO
-        assert GeminiModel.GEMINI_2_5_FLASH
-
-    def test_model_values(self):
-        """Test model string values"""
-        assert "gemini" in GeminiModel.GEMINI_2_5_PRO.value.lower()
-        assert "gemini" in GeminiModel.GEMINI_2_5_FLASH.value.lower()
-
-
-class TestCostEstimation:
-    """Test cost estimation for API usage"""
-
-    @pytest.mark.asyncio
-    @patch('google.generativeai.GenerativeModel')
-    async def test_cost_estimate_calculation(self, mock_model_class):
-        """Test that cost estimates are calculated"""
-        mock_response = Mock()
-        mock_response.text = "Genre: Electronic"
-
-        mock_model = Mock()
-        mock_model.generate_content_async = AsyncMock(return_value=mock_response)
-        mock_model_class.return_value = mock_model
-
-        producer = GoogleAIMusicProducer(api_key="test_key")
-
-        await producer.analyze_music_comprehensive(
-            {'duration': 180.0},
-            MusicAnalysisType.COMPREHENSIVE_ANALYSIS
-        )
-
-        stats = producer.get_performance_stats()
-
-        # Should have some cost estimate (even if minimal)
-        assert 'cost_estimate_usd' in stats
-        assert isinstance(stats['cost_estimate_usd'], (int, float))
-        assert stats['cost_estimate_usd'] >= 0
-
-
-class TestErrorHandling:
-    """Test error handling scenarios"""
-
-    def test_initialization_without_api_key_raises_error(self):
-        """Test that missing API key raises appropriate error"""
-        with pytest.raises((ValueError, TypeError)):
-            GoogleAIMusicProducer(api_key=None)
-
-    @pytest.mark.asyncio
-    @patch('google.generativeai.GenerativeModel')
-    async def test_empty_features_handled(self, mock_model_class):
-        """Test handling of empty feature dictionary"""
-        mock_response = Mock()
-        mock_response.text = "Genre: Unknown"
-
-        mock_model = Mock()
-        mock_model.generate_content_async = AsyncMock(return_value=mock_response)
-        mock_model_class.return_value = mock_model
-
-        producer = GoogleAIMusicProducer(api_key="test_key")
-
-        # Should handle empty features gracefully
-        result = await producer.analyze_music_comprehensive(
-            {},
-            MusicAnalysisType.QUICK_ANALYSIS
-        )
-
-        assert isinstance(result, AdvancedMusicAnalysis)
-
-    @pytest.mark.asyncio
-    @patch('google.generativeai.GenerativeModel')
-    async def test_malformed_response_handled(self, mock_model_class):
-        """Test handling of unexpected API response format"""
-        mock_response = Mock()
-        mock_response.text = "This is not a structured response at all!"
-
-        mock_model = Mock()
-        mock_model.generate_content_async = AsyncMock(return_value=mock_response)
-        mock_model_class.return_value = mock_model
-
-        producer = GoogleAIMusicProducer(api_key="test_key")
-
-        # Should not crash on malformed response
-        result = await producer.analyze_music_comprehensive(
-            {'duration': 180.0},
-            MusicAnalysisType.COMPREHENSIVE_ANALYSIS
-        )
-
-        # Should return a result even if mostly empty
-        assert isinstance(result, AdvancedMusicAnalysis)
+        assert MusicAnalysisType.GENRE_CLASSIFICATION.value == "genre_classification"
 
 
 if __name__ == "__main__":
-    # Run tests
     pytest.main([__file__, "-v", "--tb=short"])

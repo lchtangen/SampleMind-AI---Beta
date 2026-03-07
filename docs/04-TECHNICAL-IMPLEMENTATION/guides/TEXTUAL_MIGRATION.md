@@ -1,10 +1,56 @@
 # Textual TUI Migration Guide
 
-**Status:** Phase 1 - Foundation Complete ✅
-**Date:** January 17, 2026
-**Version:** 1.0.0 (Alpha)
+**Status:** Phase 1 - Foundation Complete ✅ | Phase 15 Upgrade IN PROGRESS
+**Date:** January 17, 2026 (updated 2026-03-07)
+**Version:** 1.0.0 (Alpha) → 3.0 (Phase 15 target)
 
-## Overview
+---
+
+## v3.0 Update: Textual ^0.44 → ^0.87 (Phase 15)
+
+> Working notes: `docs/active/ui-ux/TUI_V3_UPGRADE_NOTES.md`
+
+### Key Breaking Changes
+
+**CSS variable syntax:**
+```css
+/* OLD (^0.44) */
+$primary: blue;
+
+/* NEW (^0.87) */
+--primary: blue;
+```
+
+**Reactive type annotations** (now required):
+```python
+# OLD
+count = reactive(0)
+
+# NEW
+count: reactive[int] = reactive(0)
+```
+
+**`on_mount` stays async** — no change there, but `compose()` must be pure/sync.
+
+### New Phase 15 Screens
+
+| Screen | File | Description |
+|--------|------|-------------|
+| `AgentChatScreen` | `screens/agent_chat_screen.py` | Multi-agent conversation UI |
+| `WaveformScreen` | `screens/waveform_screen.py` | Interactive waveform viewer |
+| `MixingBoardScreen` | `screens/mixing_board_screen.py` | Real-time effects/EQ |
+
+### Migration Order
+
+1. Upgrade textual in `pyproject.toml`: `^0.44.0` → `^0.87.0`
+2. Update CSS files (variable syntax)
+3. Add type annotations to all `reactive()` declarations
+4. Run existing tests: `make test tests/unit/interfaces/`
+5. Implement the 3 new Phase 15 screens
+
+---
+
+## Overview (original — Rich → Textual ^0.44 migration)
 
 SampleMind AI is migrating from a custom Rich-based menu system to the **Textual framework** - a modern Python TUI framework offering world-class terminal UI capabilities.
 

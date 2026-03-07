@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 """
-SampleMind AI v6 - Google AI (Gemini 2.5 Pro) Integration
-The ultimate AI-powered music production system using Google's most advanced AI
+SampleMind AI — Google AI (Gemini) Integration
+Fast streaming AI provider for genre/rhythm classification and analysis
 
-This module provides cutting-edge music analysis and generation capabilities using:
-- Gemini 2.5 Pro with 1M token context window
-- Lyria RealTime for native music generation
-- Multimodal processing (audio, video, text)
+This module uses the google-genai SDK (^0.8.0) — NOT the deprecated
+google-generativeai package. Import as: from google import genai
+
+Provides:
+- Genre classification and rhythm analysis (fast, low latency)
+- Multimodal audio feature processing
 - Real-time streaming for DAW integration
-- Advanced music theory and production insights
 - FL Studio integration recommendations
-
-Designed for professional music producers who demand the absolute best AI assistance.
 """
 
 import asyncio
@@ -27,8 +26,8 @@ import base64
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
 
-import google.generativeai as genai
-from google.generativeai.types import HarmCategory, HarmBlockThreshold
+from google import genai
+from google.genai import types as genai_types
 import numpy as np
 from dotenv import load_dotenv
 
@@ -41,13 +40,11 @@ logger = logging.getLogger(__name__)
 
 
 class GeminiModel(Enum):
-    """Available Gemini models for music production"""
-    GEMINI_2_5_PRO = "gemini-2.5-pro"
-    GEMINI_2_5_FLASH = "gemini-2.5-flash"
-    GEMINI_PRO = "gemini-pro"
-    GEMINI_PRO_VISION = "gemini-pro-vision"
-    GEMINI_1_5_PRO = "gemini-1.5-pro"
-    GEMINI_1_5_FLASH = "gemini-1.5-flash"
+    """Available Gemini models for music production — v3.0"""
+    GEMINI_2_0_FLASH = "gemini-2.0-flash"                         # PRIMARY — fast, multimodal
+    GEMINI_2_0_FLASH_THINKING = "gemini-2.0-flash-thinking-exp"   # reasoning
+    GEMINI_1_5_PRO = "gemini-1.5-pro"                             # high context fallback
+    GEMINI_1_5_FLASH = "gemini-1.5-flash"                         # legacy fast
 
 
 class MusicAnalysisType(Enum):
@@ -436,54 +433,38 @@ Create lyrics that would make this track a potential hit while maintaining artis
 
 
 class GoogleAIMusicProducer:
-    """Ultra-advanced Google AI music production system"""
-    
+    """Google AI music production system — uses google-genai SDK ^0.8.0"""
+
     def __init__(
         self,
         api_key: Optional[str] = None,
-        default_model: GeminiModel = GeminiModel.GEMINI_2_5_PRO,
+        default_model: GeminiModel = GeminiModel.GEMINI_2_0_FLASH,
         max_workers: int = 8,
         enable_caching: bool = True
     ):
-        # Configure API
+        # Configure API — new SDK uses Client instance, not genai.configure()
         self.api_key = api_key or os.getenv('GOOGLE_AI_API_KEY')
         if not self.api_key:
             raise ValueError("Google AI API key is required. Set GOOGLE_AI_API_KEY environment variable.")
-        
-        genai.configure(api_key=self.api_key)
-        
+
+        self.client = genai.Client(api_key=self.api_key)
+
         self.default_model = default_model
         self.max_workers = max_workers
         self.enable_caching = enable_caching
+        self.temperature = 0.7
+        self.max_output_tokens = 8192
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
-        
-        # Initialize models with safety settings
-        self.safety_settings = {
-            HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-        }
-        
-        # Generation config for optimal music analysis
-        self.generation_config = genai.types.GenerationConfig(
-            temperature=0.7,
-            top_p=0.95,
-            top_k=50,
-            max_output_tokens=8192,
-            response_mime_type="application/json"
-        )
-        
+
         # Analysis cache
         self.analysis_cache = {} if enable_caching else None
-        
+
         # Performance tracking
         self.analysis_count = 0
         self.total_tokens_used = 0
         self.avg_response_time = 0.0
 
-        logger.info(f"🤖 Google AI Music Producer initialized with {default_model.value}")
-        logger.info(f"🎵 Advanced music AI capabilities activated!")
+        logger.info(f"Google AI Music Producer initialized with {default_model.value}")
 
     @property
     def total_analyses(self) -> int:
@@ -519,24 +500,38 @@ class GoogleAIMusicProducer:
             return self.analysis_cache[cache_key]
         
         try:
-            # Initialize the model
-            ai_model = genai.GenerativeModel(
-                model_name=model.value,
-                generation_config=self.generation_config,
-                safety_settings=self.safety_settings
-            )
-            
             # Generate appropriate prompt
             if custom_prompt:
                 prompt = custom_prompt
             else:
                 prompt = self._get_analysis_prompt(audio_features, analysis_type)
-            
-            # Generate analysis
-            logger.info(f"🎯 Generating {analysis_type.value} analysis with {model.value}...")
-            response = await asyncio.get_event_loop().run_in_executor(
-                self.executor,
-                lambda: ai_model.generate_content(prompt)
+
+            # Build generation config with safety settings (new SDK pattern)
+            config = genai_types.GenerateContentConfig(
+                temperature=self.temperature,
+                max_output_tokens=self.max_output_tokens,
+                safety_settings=[
+                    genai_types.SafetySetting(
+                        category=genai_types.HarmCategory.HARM_CATEGORY_HARASSMENT,
+                        threshold=genai_types.HarmBlockThreshold.BLOCK_NONE,
+                    ),
+                    genai_types.SafetySetting(
+                        category=genai_types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                        threshold=genai_types.HarmBlockThreshold.BLOCK_NONE,
+                    ),
+                    genai_types.SafetySetting(
+                        category=genai_types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                        threshold=genai_types.HarmBlockThreshold.BLOCK_NONE,
+                    ),
+                ],
+            )
+
+            # Generate analysis — new SDK uses client.aio.models.generate_content
+            logger.info(f"Generating {analysis_type.value} analysis with {model.value}...")
+            response = await self.client.aio.models.generate_content(
+                model=model.value,
+                contents=prompt,
+                config=config,
             )
             
             # Process response
@@ -663,7 +658,7 @@ class GoogleAIMusicProducer:
     ) -> AdvancedMusicAnalysis:
         """Process and structure AI response"""
         try:
-            # Extract response text
+            # Extract response text — new SDK: response.text
             response_text = response.text if hasattr(response, 'text') else str(response)
             
             # Parse JSON response
@@ -673,12 +668,18 @@ class GoogleAIMusicProducer:
                 logger.warning("⚠️ Failed to parse JSON, using raw response")
                 parsed_data = {"raw_analysis": response_text}
             
+            # Extract token usage from new SDK response
+            token_count = 0
+            if hasattr(response, 'usage_metadata') and response.usage_metadata:
+                token_count = getattr(response.usage_metadata, 'total_token_count', 0)
+
             # Create structured analysis result
             analysis = AdvancedMusicAnalysis(
                 analysis_type=analysis_type,
                 model_used=model,
                 processing_time=processing_time,
-                raw_response=response_text
+                raw_response=response_text,
+                token_usage={'total_token_count': token_count},
             )
             
             # Map parsed data to analysis fields
@@ -807,15 +808,15 @@ class GoogleAIMusicProducer:
     def _update_performance_metrics(self, response: Any, processing_time: float) -> None:
         """Update performance tracking metrics"""
         self.analysis_count += 1
-        
+
         # Update average response time
         self.avg_response_time = (
-            (self.avg_response_time * (self.analysis_count - 1) + processing_time) 
+            (self.avg_response_time * (self.analysis_count - 1) + processing_time)
             / self.analysis_count
         )
-        
-        # Track token usage if available
-        if hasattr(response, 'usage_metadata'):
+
+        # Track token usage — new SDK: response.usage_metadata.total_token_count
+        if response is not None and hasattr(response, 'usage_metadata') and response.usage_metadata:
             tokens = getattr(response.usage_metadata, 'total_token_count', 0)
             self.total_tokens_used += tokens
     

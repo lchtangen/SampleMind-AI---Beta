@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """
-SampleMind AI v6 - Unified AI Manager
-Manages multiple AI providers (OpenAI, Google AI) with intelligent routing
+SampleMind AI — Unified AI Manager
+Manages multiple AI providers with intelligent routing
 
-This module provides a unified interface for all AI operations, automatic
-failover, cost optimization, and performance monitoring across providers.
+Provider priority (v3.0):
+  OLLAMA     (priority 0) — instant (<100ms), offline, QUICK_ANALYSIS only
+  ANTHROPIC  (priority 1) — PRIMARY for all deep analysis + coaching
+  GOOGLE_AI  (priority 2) — FAST for genre/rhythm/streaming
+  OPENAI     (priority 3) — AGENTS workflows, fallback
 """
 
 import asyncio
@@ -42,9 +45,10 @@ logger = logging.getLogger(__name__)
 
 class AIProvider(Enum):
     """Supported AI providers"""
-    OPENAI = "openai"
-    GOOGLE_AI = "google_ai"
-    ANTHROPIC = "anthropic"
+    ANTHROPIC = "anthropic"   # PRIMARY
+    GOOGLE_AI = "google_ai"   # FAST
+    OPENAI = "openai"         # AGENTS / FALLBACK
+    OLLAMA = "ollama"         # OFFLINE / INSTANT
 
 
 class AnalysisType(Enum):
@@ -118,17 +122,18 @@ class UnifiedAnalysisResult:
     cost_estimate: float = 0.0
 
 
-# Analysis type routing preferences
+# Analysis type routing preferences — v3.0
 ANALYSIS_ROUTING = {
     AnalysisType.PRODUCTION_COACHING: AIProvider.ANTHROPIC,
     AnalysisType.CREATIVE_SUGGESTIONS: AIProvider.ANTHROPIC,
     AnalysisType.FL_STUDIO_OPTIMIZATION: AIProvider.ANTHROPIC,
     AnalysisType.MIXING_MASTERING: AIProvider.ANTHROPIC,
     AnalysisType.ARRANGEMENT_ADVICE: AIProvider.ANTHROPIC,
+    AnalysisType.COMPREHENSIVE_ANALYSIS: AIProvider.ANTHROPIC,   # was GOOGLE_AI
+    AnalysisType.HARMONIC_ANALYSIS: AIProvider.ANTHROPIC,        # was GOOGLE_AI
     AnalysisType.GENRE_CLASSIFICATION: AIProvider.GOOGLE_AI,
-    AnalysisType.HARMONIC_ANALYSIS: AIProvider.GOOGLE_AI,
     AnalysisType.RHYTHM_ANALYSIS: AIProvider.GOOGLE_AI,
-    AnalysisType.COMPREHENSIVE_ANALYSIS: AIProvider.GOOGLE_AI,
+    AnalysisType.QUICK_ANALYSIS: AIProvider.OLLAMA,              # offline for speed
 }
 
 
@@ -246,29 +251,7 @@ class SampleMindAIManager:
         from dotenv import load_dotenv
         load_dotenv()
         
-        # Google AI Setup - PRIMARY PROVIDER (Priority 1)
-        google_key = os.getenv('GOOGLE_AI_API_KEY')
-        if google_key and GOOGLE_AI_AVAILABLE:
-            try:
-                from .google_ai_integration import GoogleAIMusicProducer
-
-                config = AIProviderConfig(
-                    provider=AIProvider.GOOGLE_AI,
-                    api_key=google_key,
-                    priority=1,  # HIGHEST PRIORITY - Gemini is primary
-                    max_requests_per_minute=60,
-                    cost_per_token=0.000015,  # Gemini pricing (much cheaper than OpenAI)
-                    features=['comprehensive_analysis', 'music_generation', 'creative_suggestions', 'fl_studio_optimization', 'audio_classification']
-                )
-
-                self.provider_configs[AIProvider.GOOGLE_AI] = config
-                self.providers[AIProvider.GOOGLE_AI] = GoogleAIMusicProducer(api_key=google_key)
-                logger.info("✅ Google AI (Gemini) provider initialized as PRIMARY")
-
-            except Exception as e:
-                logger.error(f"❌ Failed to initialize Google AI: {e}")
-
-        # Anthropic Setup - SPECIALIST PROVIDER (Priority 2)
+        # Anthropic Setup — PRIMARY PROVIDER (Priority 1)
         anthropic_key = os.getenv('ANTHROPIC_API_KEY')
         if anthropic_key and ANTHROPIC_AVAILABLE:
             try:
@@ -277,20 +260,44 @@ class SampleMindAIManager:
                 config = AIProviderConfig(
                     provider=AIProvider.ANTHROPIC,
                     api_key=anthropic_key,
-                    priority=2,  # SPECIALIST PRIORITY - Claude for coaching
+                    priority=1,  # HIGHEST PRIORITY — Claude is primary
                     max_requests_per_minute=50,
-                    cost_per_token=0.009,  # Average Claude 3.5 Sonnet pricing
-                    features=['production_coaching', 'creative_suggestions', 'fl_studio_optimization', 'music_theory', 'arrangement_advice']
+                    cost_per_token=0.009,  # Average Claude 3.7 Sonnet pricing
+                    features=['production_coaching', 'creative_suggestions', 'fl_studio_optimization',
+                              'music_theory', 'arrangement_advice', 'comprehensive_analysis']
                 )
 
                 self.provider_configs[AIProvider.ANTHROPIC] = config
                 self.providers[AIProvider.ANTHROPIC] = AnthropicMusicProducer(api_key=anthropic_key)
-                logger.info("✅ Anthropic (Claude) provider initialized as SPECIALIST")
+                logger.info("Anthropic (Claude) provider initialized as PRIMARY")
 
             except Exception as e:
-                logger.error(f"❌ Failed to initialize Anthropic: {e}")
-        
-        # OpenAI Setup - FALLBACK PROVIDER (Priority 3)
+                logger.error(f"Failed to initialize Anthropic: {e}")
+
+        # Google AI Setup — FAST PROVIDER (Priority 2)
+        google_key = os.getenv('GOOGLE_AI_API_KEY')
+        if google_key and GOOGLE_AI_AVAILABLE:
+            try:
+                from .google_ai_integration import GoogleAIMusicProducer
+
+                config = AIProviderConfig(
+                    provider=AIProvider.GOOGLE_AI,
+                    api_key=google_key,
+                    priority=2,  # FAST — genre/rhythm/streaming
+                    max_requests_per_minute=60,
+                    cost_per_token=0.000015,  # Gemini pricing
+                    features=['genre_classification', 'rhythm_analysis', 'audio_classification',
+                              'music_generation', 'creative_suggestions']
+                )
+
+                self.provider_configs[AIProvider.GOOGLE_AI] = config
+                self.providers[AIProvider.GOOGLE_AI] = GoogleAIMusicProducer(api_key=google_key)
+                logger.info("Google AI (Gemini) provider initialized as FAST")
+
+            except Exception as e:
+                logger.error(f"Failed to initialize Google AI: {e}")
+
+        # OpenAI Setup — AGENTS/FALLBACK PROVIDER (Priority 3)
         openai_key = os.getenv('OPENAI_API_KEY')
         if openai_key:
             try:
@@ -299,18 +306,38 @@ class SampleMindAIManager:
                 config = AIProviderConfig(
                     provider=AIProvider.OPENAI,
                     api_key=openai_key,
-                    priority=3,  # LOWEST PRIORITY - OpenAI is fallback
+                    priority=3,  # AGENTS / FALLBACK
                     max_requests_per_minute=60,
-                    cost_per_token=0.00003,  # GPT-5 pricing (estimated)
+                    cost_per_token=0.000005,  # GPT-4o pricing
                     features=['comprehensive_analysis', 'production_coaching', 'fl_studio_optimization']
                 )
 
                 self.provider_configs[AIProvider.OPENAI] = config
                 self.providers[AIProvider.OPENAI] = OpenAIMusicProducer(api_key=openai_key)
-                logger.info("✅ OpenAI provider initialized as FALLBACK")
+                logger.info("OpenAI provider initialized as AGENTS/FALLBACK")
 
             except Exception as e:
-                logger.error(f"❌ Failed to initialize OpenAI: {e}")
+                logger.error(f"Failed to initialize OpenAI: {e}")
+
+        # Ollama Setup — OFFLINE/INSTANT PROVIDER (Priority 0)
+        try:
+            from .ollama_integration import OllamaMusicProducer
+
+            ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+            config = AIProviderConfig(
+                provider=AIProvider.OLLAMA,
+                api_key="",  # no API key needed
+                priority=0,  # INSTANT but limited — only used when explicitly routed
+                max_requests_per_minute=1000,
+                cost_per_token=0.0,
+                features=["quick_analysis", "offline"],
+            )
+            self.provider_configs[AIProvider.OLLAMA] = config
+            self.providers[AIProvider.OLLAMA] = OllamaMusicProducer(host=ollama_host)
+            logger.info("Ollama provider initialized (offline)")
+
+        except Exception as e:
+            logger.warning(f"Ollama not available: {e}")
         
         # Save configuration
         self._save_config()
@@ -336,6 +363,12 @@ class SampleMindAIManager:
                 elif provider == AIProvider.ANTHROPIC and ANTHROPIC_AVAILABLE:
                     from .anthropic_integration import AnthropicMusicProducer
                     self.providers[provider] = AnthropicMusicProducer(api_key=config.api_key)
+                elif provider == AIProvider.OLLAMA:
+                    try:
+                        from .ollama_integration import OllamaMusicProducer
+                        self.providers[provider] = OllamaMusicProducer()
+                    except Exception:
+                        pass
             
             logger.info(f"📁 Loaded configuration for {len(self.provider_configs)} providers")
             
@@ -527,15 +560,22 @@ class SampleMindAIManager:
         elif provider == AIProvider.ANTHROPIC and ANTHROPIC_AVAILABLE:
             # Convert to Anthropic analysis type
             anthropic_type = self._convert_to_anthropic_type(analysis_type)
-            
+
             # Get Claude analysis
             anthropic_result = await self.providers[provider].analyze_music_comprehensive(
                 audio_features, anthropic_type, user_context=user_context
             )
-            
+
             # Convert to unified result
             return self._convert_anthropic_result(anthropic_result)
-        
+
+        elif provider == AIProvider.OLLAMA:
+            from .ollama_integration import OllamaMusicProducer
+            ollama_result = await self.providers[provider].analyze_music_comprehensive(
+                audio_features, user_context
+            )
+            return self._convert_ollama_result(ollama_result)
+
         else:
             raise ValueError(f"Provider {provider} not supported or available")
     
@@ -610,6 +650,21 @@ class SampleMindAIManager:
             cost_estimate=openai_result.tokens_used * self.provider_configs[AIProvider.OPENAI].cost_per_token
         )
     
+    def _convert_ollama_result(self, result: Any) -> UnifiedAnalysisResult:
+        """Convert Ollama result to unified format"""
+        return UnifiedAnalysisResult(
+            provider=AIProvider.OLLAMA,
+            analysis_type=AnalysisType.QUICK_ANALYSIS,
+            model_used=result.model_used.value,
+            timestamp=result.timestamp,
+            summary=result.summary,
+            production_tips=result.production_tips,
+            creative_ideas=result.creative_ideas,
+            processing_time=result.processing_time,
+            confidence_score=result.confidence_score,
+            cost_estimate=0.0,
+        )
+
     def _convert_google_result(self, google_result: Any) -> UnifiedAnalysisResult:
         """Convert Google AI result to unified format"""
         if not GOOGLE_AI_AVAILABLE:

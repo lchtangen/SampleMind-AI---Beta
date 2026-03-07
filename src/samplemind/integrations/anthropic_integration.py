@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-SampleMind AI v6 - Anthropic (Claude) Integration
-Specialized AI provider for production coaching and creative suggestions
+SampleMind AI — Anthropic (Claude) Integration
+Primary AI provider for production coaching and creative suggestions
 
-This module provides Claude Sonnet 3.5 integration optimized for:
-- Production coaching and technique analysis
+This module provides Claude 3.7 Sonnet integration optimized for:
+- Production coaching and technique analysis (with extended thinking)
 - Creative arrangement suggestions
 - FL Studio optimization recommendations
 - Deep music theory explanations
@@ -30,11 +30,12 @@ logger = logging.getLogger(__name__)
 
 
 class ClaudeModel(Enum):
-    """Available Claude models"""
-    CLAUDE_3_5_SONNET = "claude-3-5-sonnet-20241022"  # Latest Claude 3.5 Sonnet
-    CLAUDE_3_OPUS = "claude-3-opus-20240229"
-    CLAUDE_3_SONNET = "claude-3-sonnet-20240229"
-    CLAUDE_3_HAIKU = "claude-3-haiku-20240307"
+    """Available Claude models — v3.0"""
+    CLAUDE_3_7_SONNET = "claude-3-7-sonnet-20250219"   # PRIMARY — extended thinking
+    CLAUDE_3_5_SONNET = "claude-3-5-sonnet-20241022"   # previous primary
+    CLAUDE_3_5_HAIKU = "claude-3-5-haiku-20241022"     # fast/cheap secondary
+    CLAUDE_3_OPUS = "claude-3-opus-20240229"            # legacy
+    CLAUDE_3_HAIKU = "claude-3-haiku-20240307"          # legacy
 
 
 class AnthropicAnalysisType(Enum):
@@ -77,7 +78,7 @@ class AnthropicMusicAnalysis:
     chord_progressions: List[str] = field(default_factory=list)
     
     # Metadata
-    model_used: ClaudeModel = ClaudeModel.CLAUDE_3_5_SONNET
+    model_used: ClaudeModel = ClaudeModel.CLAUDE_3_7_SONNET
     tokens_used: int = 0
     processing_time: float = 0.0
     timestamp: float = field(default_factory=time.time)
@@ -98,9 +99,9 @@ class AnthropicMusicProducer:
     def __init__(
         self,
         api_key: Optional[str] = None,
-        default_model: ClaudeModel = ClaudeModel.CLAUDE_3_5_SONNET,
-        max_tokens: int = 4096,
-        temperature: float = 0.7
+        default_model: ClaudeModel = ClaudeModel.CLAUDE_3_7_SONNET,
+        max_tokens: int = 8096,
+        temperature: float = 1.0
     ):
         """
         Initialize Anthropic Music Producer
@@ -157,19 +158,22 @@ class AnthropicMusicProducer:
         try:
             # Build specialized prompt based on analysis type
             prompt = self._build_prompt(audio_features, analysis_type, user_context)
-            
+
+            # Build params — extended thinking for CLAUDE_3_7_SONNET
+            params: dict = {
+                "model": self.default_model.value,
+                "max_tokens": self.max_tokens,
+                "messages": [{"role": "user", "content": prompt}],
+            }
+
+            if self.default_model == ClaudeModel.CLAUDE_3_7_SONNET:
+                # Extended thinking requires temperature=1 — do not pass temperature param
+                params["thinking"] = {"type": "enabled", "budget_tokens": 5000}
+            else:
+                params["temperature"] = self.temperature
+
             # Call Claude API
-            response = await self.async_client.messages.create(
-                model=self.default_model.value,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ]
-            )
+            response = await self.async_client.messages.create(**params)
             
             # Parse response
             result = self._parse_response(response, analysis_type)
@@ -408,7 +412,7 @@ Provide your response as a structured JSON object with these keys:
             self.stats['success_count'] += 1
             self.stats['total_tokens_used'] += tokens_used
             
-            # Calculate cost (Claude 3.5 Sonnet pricing)
+            # Calculate cost (Claude 3.7 Sonnet pricing)
             # Input: $3/MTok, Output: $15/MTok (approximate average: $9/MTok)
             cost = (tokens_used / 1000) * 0.009
             self.stats['total_cost'] += cost

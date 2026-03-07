@@ -64,7 +64,7 @@ class SampleMindTUI(App):
         ("q", "quit_app", "Quit"),
     ]
 
-    TITLE = "🎵 SampleMind AI v6 - Professional Music Production Suite"
+    TITLE = "🎵 SampleMind AI — Professional Music Production Suite"
     SUB_TITLE = "Modern Terminal UI with Offline-First Architecture"
 
     def on_mount(self) -> None:

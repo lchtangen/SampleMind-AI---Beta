@@ -1,6 +1,9 @@
 # 🤖 AI INTEGRATION SETUP GUIDE
 
-## Complete Setup for Gemini and Claude AI APIs
+## Complete Setup for Gemini, Claude, and OpenAI APIs
+
+> **v3.0 Update (2026-03-07):** SDK versions and model IDs updated for Phase 15. See
+> [v3.0 SDK Migration Notes](#v30-sdk-migration-notes) section below.
 
 ### Table of Contents
 1. [Overview](#overview)
@@ -10,20 +13,24 @@
 5. [Hybrid AI Architecture](#hybrid-ai-architecture)
 6. [Testing AI Features](#testing-ai-features)
 7. [Best Practices](#best-practices)
+8. [v3.0 SDK Migration Notes](#v30-sdk-migration-notes)
 
 ---
 
 ## 🎯 Overview
 
-### AI in SampleMind
+### AI in SampleMind (v3.0 Stack)
 
 SampleMind uses multiple AI models for different tasks:
 
-| Model | Provider | Best For | Cost |
-|-------|----------|----------|------|
-| **Gemini 3 Flash** | Google | Fast analysis, suggestions | $0.075/1M tokens |
-| **Claude 3.5 Sonnet** | Anthropic | Complex reasoning, coaching | $3/1M tokens |
-| **Phi3/Qwen2.5** | Ollama (Local) | Offline mode, no cost | Free |
+| Model | Provider | SDK | Best For | Cost (approx) |
+|-------|----------|-----|----------|---------------|
+| **claude-3-7-sonnet-20250219** | Anthropic | `anthropic ^0.40.0` | Deep analysis, extended thinking | $3/1M tokens |
+| **gemini-2.0-flash** | Google | `google-genai ^0.8.0` | Fast streaming responses | $0.075/1M tokens |
+| **gpt-4o** | OpenAI | `openai ^1.58.0` | Agent workflows, tool use | $5/1M tokens |
+| **qwen2.5:7b-instruct** | Ollama (Local) | `ollama ^0.3.0` | Offline mode, no cost | Free |
+
+> **Package rename:** `google-generativeai` → `google-genai` (Phase 15 migration task)
 
 ### Hybrid Architecture
 
@@ -764,3 +771,81 @@ else:
 - [Anthropic Console](https://console.anthropic.com)
 
 Now you're ready to add AI superpowers to SampleMind! 🚀
+
+---
+
+## v3.0 SDK Migration Notes
+
+> Added 2026-03-07 for Phase 15 migration. See also:
+> `docs/active/models/AI_PROVIDER_UPGRADE_LOG.md`
+
+### Anthropic: ^0.7.0 → ^0.40.0
+
+**Breaking changes:**
+```python
+# OLD (^0.7.0)
+import anthropic
+client = anthropic.Anthropic(api_key=...)
+response = client.completions.create(model="claude-3-sonnet-20240229", ...)
+
+# NEW (^0.40.0)
+from anthropic import AsyncAnthropic
+client = AsyncAnthropic(api_key=...)
+response = await client.messages.create(
+    model="claude-3-7-sonnet-20250219",
+    max_tokens=8096,
+    messages=[{"role": "user", "content": "..."}]
+)
+
+# Extended thinking (NEW in ^0.40.0):
+response = await client.messages.create(
+    model="claude-3-7-sonnet-20250219",
+    max_tokens=16000,
+    thinking={"type": "enabled", "budget_tokens": 10000},
+    messages=[{"role": "user", "content": "..."}]
+)
+```
+
+### Google: google-generativeai ^0.3.0 → google-genai ^0.8.0
+
+**Package rename + breaking changes:**
+```python
+# OLD (google-generativeai ^0.3.0)
+import google.generativeai as genai
+genai.configure(api_key=...)
+model = genai.GenerativeModel("gemini-pro")
+response = model.generate_content("...")
+
+# NEW (google-genai ^0.8.0)
+from google import genai
+client = genai.Client(api_key=...)
+response = await client.aio.models.generate_content(
+    model="gemini-2.0-flash",
+    contents="..."
+)
+```
+
+**pyproject.toml change:**
+```toml
+# Remove:
+google-generativeai = "^0.3.0"
+# Add:
+google-genai = "^0.8.0"
+```
+
+### OpenAI: ^1.3.0 → ^1.58.0
+
+**Key additions (not breaking):**
+```python
+# Agents SDK (new in ^1.58.0):
+from openai import AsyncOpenAI
+from openai.agents import Agent, Runner
+
+client = AsyncOpenAI(api_key=...)
+
+# Standard messages API unchanged:
+response = await client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "..."}]
+)
+```

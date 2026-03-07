@@ -29,12 +29,12 @@ class TestAIProviderConfig:
     def test_create_config(self):
         """Test creating provider configuration"""
         config = AIProviderConfig(
-            provider=AIProvider.GOOGLE_AI,
+            provider=AIProvider.ANTHROPIC,
             api_key="test_key",
             priority=1
         )
 
-        assert config.provider == AIProvider.GOOGLE_AI
+        assert config.provider == AIProvider.ANTHROPIC
         assert config.api_key == "test_key"
         assert config.priority == 1
         assert config.enabled == True
@@ -57,9 +57,9 @@ class TestAILoadBalancer:
     """Test AI load balancing logic"""
 
     def test_select_provider_by_priority(self):
-        """Test provider selection based on priority"""
+        """Test provider selection based on priority — Anthropic is priority 1"""
         provider1 = AIProviderConfig(
-            provider=AIProvider.GOOGLE_AI,
+            provider=AIProvider.ANTHROPIC,
             api_key="key1",
             priority=1
         )
@@ -72,7 +72,7 @@ class TestAILoadBalancer:
         balancer = AILoadBalancer([provider1, provider2])
         selected = balancer.select_provider(AnalysisType.COMPREHENSIVE_ANALYSIS)
 
-        assert selected == AIProvider.GOOGLE_AI
+        assert selected == AIProvider.ANTHROPIC
 
     def test_select_preferred_provider(self):
         """Test explicit provider preference"""
@@ -175,7 +175,7 @@ class TestSampleMindAIManager:
 
     @pytest.mark.asyncio
     async def test_analyze_music_mock(self, ai_manager):
-        """Test music analysis with mocked AI response"""
+        """Test music analysis with mocked AI response — primary is Anthropic"""
         # Mock audio features
         test_features = {
             'duration': 180.0,
@@ -187,11 +187,11 @@ class TestSampleMindAIManager:
 
         # Mock the AI provider
         with patch.object(ai_manager, '_analyze_with_provider') as mock_analyze:
-            # Create mock result
+            # Create mock result — Anthropic is primary
             mock_result = UnifiedAnalysisResult(
-                provider=AIProvider.GOOGLE_AI,
+                provider=AIProvider.ANTHROPIC,
                 analysis_type=AnalysisType.COMPREHENSIVE_ANALYSIS,
-                model_used="gemini-2.5-pro",
+                model_used="claude-3-7-sonnet-20250219",
                 summary="Test analysis summary",
                 processing_time=1.0
             )
@@ -204,7 +204,7 @@ class TestSampleMindAIManager:
             )
 
             assert result is not None
-            assert result.provider == AIProvider.GOOGLE_AI
+            assert result.provider == AIProvider.ANTHROPIC
             assert result.summary == "Test analysis summary"
 
     @pytest.mark.asyncio
@@ -217,13 +217,13 @@ class TestSampleMindAIManager:
             mock_success = UnifiedAnalysisResult(
                 provider=AIProvider.OPENAI,
                 analysis_type=AnalysisType.COMPREHENSIVE_ANALYSIS,
-                model_used="gpt-5",
+                model_used="gpt-4o",
                 summary="Fallback successful"
             )
 
             mock_analyze.side_effect = [
                 Exception("Primary failed"),
-                mock_success
+                mock_success,
             ]
 
             # Should succeed with fallback
@@ -286,7 +286,7 @@ class TestUnifiedAnalysisResult:
         result = UnifiedAnalysisResult(
             provider=AIProvider.OPENAI,
             analysis_type=AnalysisType.QUICK_ANALYSIS,
-            model_used="gpt-5"
+            model_used="gpt-4o"
         )
 
         assert result.summary == ""
@@ -294,6 +294,71 @@ class TestUnifiedAnalysisResult:
         assert result.confidence_score == 0.0
         assert isinstance(result.production_tips, list)
         assert isinstance(result.creative_ideas, list)
+
+
+class TestAnalysisRoutingTable:
+    """Test that analysis types route to correct providers — v3.0"""
+
+    def test_comprehensive_routes_to_anthropic(self):
+        """COMPREHENSIVE_ANALYSIS must route to Anthropic (was Google in old code)"""
+        from samplemind.integrations.ai_manager import ANALYSIS_ROUTING
+        assert ANALYSIS_ROUTING[AnalysisType.COMPREHENSIVE_ANALYSIS] == AIProvider.ANTHROPIC
+
+    def test_harmonic_routes_to_anthropic(self):
+        """HARMONIC_ANALYSIS must route to Anthropic (was Google in old code)"""
+        from samplemind.integrations.ai_manager import ANALYSIS_ROUTING
+        assert ANALYSIS_ROUTING[AnalysisType.HARMONIC_ANALYSIS] == AIProvider.ANTHROPIC
+
+    def test_production_coaching_routes_to_anthropic(self):
+        from samplemind.integrations.ai_manager import ANALYSIS_ROUTING
+        assert ANALYSIS_ROUTING[AnalysisType.PRODUCTION_COACHING] == AIProvider.ANTHROPIC
+
+    def test_genre_routes_to_google(self):
+        from samplemind.integrations.ai_manager import ANALYSIS_ROUTING
+        assert ANALYSIS_ROUTING[AnalysisType.GENRE_CLASSIFICATION] == AIProvider.GOOGLE_AI
+
+    def test_rhythm_routes_to_google(self):
+        from samplemind.integrations.ai_manager import ANALYSIS_ROUTING
+        assert ANALYSIS_ROUTING[AnalysisType.RHYTHM_ANALYSIS] == AIProvider.GOOGLE_AI
+
+    def test_quick_analysis_routes_to_ollama(self):
+        """QUICK_ANALYSIS must route to Ollama for offline speed"""
+        from samplemind.integrations.ai_manager import ANALYSIS_ROUTING
+        assert ANALYSIS_ROUTING[AnalysisType.QUICK_ANALYSIS] == AIProvider.OLLAMA
+
+
+class TestOllamaProvider:
+    """Test Ollama provider in the AI manager"""
+
+    def test_ollama_in_ai_provider_enum(self):
+        """AIProvider enum must include OLLAMA"""
+        assert AIProvider.OLLAMA
+        assert AIProvider.OLLAMA.value == "ollama"
+
+    def test_ollama_convert_result(self):
+        """_convert_ollama_result must return valid UnifiedAnalysisResult"""
+        manager = SampleMindAIManager.__new__(SampleMindAIManager)
+        manager.providers = {}
+        manager.provider_configs = {}
+
+        from samplemind.integrations.ollama_integration import OllamaMusicAnalysis, OllamaModel
+        mock_result = OllamaMusicAnalysis(
+            summary="Quick analysis done",
+            production_tips=["tip1", "tip2"],
+            creative_ideas=["idea1"],
+            model_used=OllamaModel.QWEN_2_5_7B,
+            processing_time=0.05,
+            confidence_score=0.5,
+        )
+
+        unified = manager._convert_ollama_result(mock_result)
+
+        assert isinstance(unified, UnifiedAnalysisResult)
+        assert unified.provider == AIProvider.OLLAMA
+        assert unified.analysis_type == AnalysisType.QUICK_ANALYSIS
+        assert unified.summary == "Quick analysis done"
+        assert unified.cost_estimate == 0.0
+        assert unified.processing_time == 0.05
 
 
 if __name__ == "__main__":

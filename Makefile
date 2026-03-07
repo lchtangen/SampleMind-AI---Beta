@@ -1,4 +1,4 @@
-# SampleMind AI v6 - Development Automation
+# SampleMind AI — Development Automation
 .PHONY: help setup dev test lint format typecheck security docs clean deploy
 
 # Python virtual environment
@@ -7,17 +7,17 @@ PYTHON = $(VENV)/bin/python
 PIP = $(VENV)/bin/pip
 
 help: ## Show this help message
-	@echo "SampleMind AI v6 - Development Commands"
-	@echo "======================================"
+	@echo "SampleMind AI — Development Commands"
+	@echo "====================================="
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 setup: ## Setup development environment
-	@echo "🚀 Setting up SampleMind AI development environment..."
+	@echo "Setting up SampleMind AI development environment..."
 	python3.11 -m venv $(VENV)
 	$(PIP) install --upgrade pip
-	$(PIP) install -r requirements.txt
-	$(PIP) install -r requirements-dev.txt
-	@echo "✅ Development environment ready!"
+	$(PIP) install poetry
+	$(VENV)/bin/poetry install
+	@echo "Development environment ready!"
 
 setup-dev: setup install-models setup-db ## Complete development setup
 
@@ -34,8 +34,15 @@ setup-db: ## Setup development databases
 	@echo "✅ Databases ready!"
 
 dev: ## Start development server
-	@echo "🚀 Starting SampleMind AI development server..."
-	$(PYTHON) -m uvicorn src.interfaces.api.fastapi_app:app --reload --host 0.0.0.0 --port 8000
+	@echo "Starting SampleMind AI development server..."
+	$(PYTHON) -m uvicorn src.samplemind.server.main:app --reload --host 0.0.0.0 --port 8000
+
+upgrade-deps: ## Upgrade all dependencies to v3.0 targets
+	$(VENV)/bin/poetry update
+	@echo "Dependencies upgraded. Run 'make test' to verify."
+
+install-dev: ## Install dev dependencies
+	$(VENV)/bin/poetry install --with dev
 
 dev-full: ## Start full development stack
 	docker-compose up -d

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-SampleMind AI v6 - OpenAI Integration Module
-Advanced music production AI using OpenAI GPT-4o
+SampleMind AI — OpenAI Integration Module
+Agent workflows and fallback music production AI using OpenAI GPT-4o
 
-This module provides comprehensive music analysis, production coaching,
-and creative assistance powered by OpenAI's most advanced models.
+This module provides music analysis, production coaching, and agent workflows
+powered by OpenAI's GPT-4o model. Used as Priority 3 (agents/fallback).
 """
 
 import asyncio
@@ -28,12 +28,11 @@ logger = logging.getLogger(__name__)
 
 
 class OpenAIModel(Enum):
-    """Available OpenAI models for music production"""
-    GPT_5 = "gpt-5"
-    GPT_4O = "gpt-4o"
-    GPT_4O_MINI = "gpt-4o-mini"
-    GPT_4_TURBO = "gpt-4-turbo"
-    GPT_4 = "gpt-4"
+    """Available OpenAI models for music production — v3.0"""
+    GPT_4O = "gpt-4o"              # PRIMARY
+    GPT_4O_MINI = "gpt-4o-mini"   # fast/cheap secondary
+    GPT_4_TURBO = "gpt-4-turbo"   # high context
+    GPT_4 = "gpt-4"               # legacy fallback
 
 
 class MusicAnalysisType(Enum):
@@ -257,7 +256,7 @@ class OpenAIMusicProducer:
     def __init__(
         self,
         api_key: str,
-        default_model: OpenAIModel = OpenAIModel.GPT_5,
+        default_model: OpenAIModel = OpenAIModel.GPT_4O,
         max_retries: int = 3,
         timeout: float = 30.0
     ):
@@ -337,11 +336,7 @@ class OpenAIMusicProducer:
                 "response_format": {"type": "json_object"}
             }
             
-            # Use correct parameter based on model
-            if model == OpenAIModel.GPT_5:
-                completion_kwargs["max_completion_tokens"] = 4000
-            else:
-                completion_kwargs["max_tokens"] = 4000
+            completion_kwargs["max_tokens"] = 4000
             
             response = await self.async_client.chat.completions.create(**completion_kwargs)
             

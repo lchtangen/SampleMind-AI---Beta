@@ -2,16 +2,24 @@
 
 Central repository for all project roadmaps, strategic vision, and planning documents.
 
-## Roadmap Categories
+## Active Documents (Phase 15)
 
-### Current & Next Phases
+> **Start at [../active/INDEX.md](../active/INDEX.md)** — master navigation hub for all active V3 docs.
 
-Detailed planning for current and upcoming phases:
+### Status & Planning
+- **[CURRENT_STATUS.md](./CURRENT_STATUS.md)** — Project status snapshot (update every session)
+- **[V3_MIGRATION_CHECKLIST.md](./V3_MIGRATION_CHECKLIST.md)** — 100-item P0/P1/P2 v3.0 checklist
 
-- **[PROJECT_ROADMAP.md](./PROJECT_ROADMAP.md)** - Complete project roadmap overview
-- **[NEXT_PHASES_ROADMAP.md](./NEXT_PHASES_ROADMAP.md)** - Detailed Phase 10+ planning
-- **[CURRENT_STATUS.md](./CURRENT_STATUS.md)** - Current project status snapshot
-- **[V6_FEATURE_INTEGRATION_MASTER_PLAN.md](./V6_FEATURE_INTEGRATION_MASTER_PLAN.md)** - V6 feature integration planning
+### V3 Working Documents (`active/`)
+- **[../active/roadmap/PHASE_15_PROGRESS.md](../active/roadmap/PHASE_15_PROGRESS.md)** — Session-by-session log
+- **[../active/roadmap/V3_100_KEYPOINTS.md](../active/roadmap/V3_100_KEYPOINTS.md)** — Full 100-point upgrade plan
+- **[../active/architecture/V3_ARCHITECTURE_DECISIONS.md](../active/architecture/V3_ARCHITECTURE_DECISIONS.md)** — ADRs
+- **[../active/devops/DEPENDENCY_UPGRADE_STATUS.md](../active/devops/DEPENDENCY_UPGRADE_STATUS.md)** — Dep upgrade tracker
+- **[../01-PHASES/15-PHASE-15-IN-PROGRESS/README.md](../01-PHASES/15-PHASE-15-IN-PROGRESS/README.md)** — Phase 15 entry
+
+> Note: PROJECT_ROADMAP.md, NEXT_PHASES_ROADMAP.md, and V6_FEATURE_INTEGRATION_MASTER_PLAN.md
+> have been archived to `_archive/legacy-roadmaps/` as they predate the v3.0 migration.
+> SAMPLEMIND_V3_UPGRADE_ROADMAP_100_KEYPOINTS.md has been moved to `active/roadmap/V3_100_KEYPOINTS.md`.
 
 ### Strategic Vision
 
@@ -33,20 +41,19 @@ Historical roadmap documents for reference:
 
 ## Quick Navigation
 
-### For Current Planning
-1. Start with [PROJECT_ROADMAP.md](./PROJECT_ROADMAP.md)
-2. Check [NEXT_PHASES_ROADMAP.md](./NEXT_PHASES_ROADMAP.md) for upcoming phases
-3. Review [CURRENT_STATUS.md](./CURRENT_STATUS.md) for current progress
+### For Current Planning (Phase 15)
+1. Read [../active/INDEX.md](../active/INDEX.md) — full active workspace overview
+2. Check [CURRENT_STATUS.md](./CURRENT_STATUS.md) for current progress
+3. Review [V3_MIGRATION_CHECKLIST.md](./V3_MIGRATION_CHECKLIST.md) for next P0/P1 tasks
+4. Update [../active/roadmap/PHASE_15_PROGRESS.md](../active/roadmap/PHASE_15_PROGRESS.md) at session end
 
 ### For Strategic Planning
 1. Review [STRATEGIC_VISION_2025-2030.md](./strategic/STRATEGIC_VISION_2025-2030.md)
 2. Consider implications from [STRATEGIC_VISION_2025-2035.md](./strategic/STRATEGIC_VISION_2025-2035.md)
-3. Align with [PROJECT_ROADMAP.md](./PROJECT_ROADMAP.md)
 
 ### For Feature Planning
-1. Check [V6_FEATURE_INTEGRATION_MASTER_PLAN.md](./V6_FEATURE_INTEGRATION_MASTER_PLAN.md)
-2. Review [NEXT_PHASES_ROADMAP.md](./NEXT_PHASES_ROADMAP.md) for features
-3. See phase documentation in [../01-PHASES/](../01-PHASES/) for implementation details
+1. Check [../active/roadmap/V3_100_KEYPOINTS.md](../active/roadmap/V3_100_KEYPOINTS.md) — v3.0 upgrade plan
+2. See phase documentation in [../01-PHASES/](../01-PHASES/) for implementation details
 
 ## Roadmap Overview
 

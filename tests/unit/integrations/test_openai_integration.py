@@ -21,24 +21,22 @@ from samplemind.integrations.openai_integration import (
 )
 
 
-if not os.getenv("RUN_AI_INTEGRATION_TESTS"):
-    pytest.skip("Set RUN_AI_INTEGRATION_TESTS=1 to enable OpenAI integration tests", allow_module_level=True)
-
-
 class TestOpenAIModel:
     """Test OpenAIModel enum"""
 
     def test_models_exist(self):
         """Test all models are defined"""
-        assert OpenAIModel.GPT_5
         assert OpenAIModel.GPT_4O
         assert OpenAIModel.GPT_4O_MINI
         assert OpenAIModel.GPT_4_TURBO
         assert OpenAIModel.GPT_4
 
+    def test_gpt5_does_not_exist(self):
+        """GPT-5 does not exist — must not be in the enum"""
+        assert not hasattr(OpenAIModel, "GPT_5")
+
     def test_model_values(self):
         """Test model string values"""
-        assert OpenAIModel.GPT_5.value == "gpt-5"
         assert OpenAIModel.GPT_4O.value == "gpt-4o"
         assert OpenAIModel.GPT_4O_MINI.value == "gpt-4o-mini"
 
@@ -101,7 +99,7 @@ class TestOpenAIMusicProducer:
         producer = OpenAIMusicProducer(api_key="test_api_key_123")
 
         assert producer.api_key == "test_api_key_123"
-        assert producer.default_model == OpenAIModel.GPT_5
+        assert producer.default_model == OpenAIModel.GPT_4O
         assert producer.max_retries == 3
         assert producer.timeout == 30.0
 
@@ -276,7 +274,7 @@ class TestOpenAIMusicProducer:
         assert result2 is not None
 
         # Stats should show cache hit
-        stats = producer.get_stats()
+        stats = producer.get_usage_stats()
         assert stats['cache_hits'] >= 0
 
     @patch('openai.OpenAI')
@@ -285,7 +283,7 @@ class TestOpenAIMusicProducer:
         """Test statistics retrieval"""
         producer = OpenAIMusicProducer(api_key="test_key")
 
-        stats = producer.get_stats()
+        stats = producer.get_usage_stats()
 
         assert 'total_requests' in stats
         assert 'total_tokens' in stats

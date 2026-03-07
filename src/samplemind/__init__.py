@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SampleMind AI v6 - Professional Music Production Suite
+SampleMind AI — Professional Music Production Suite
 The ultimate AI-powered music analysis and production platform
 
 This package provides comprehensive audio analysis, AI-powered insights,
@@ -8,7 +8,7 @@ and professional music production tools through a beautiful CLI interface.
 
 Main Components:
 - Core Audio Engine: Advanced audio processing with LibROSA
-- AI Manager: Unified interface for OpenAI GPT-5 and Google AI
+- AI Manager: Unified interface for Claude, Gemini, GPT-4o, and Ollama
 - Audio Loader: Professional-grade audio file loading
 - CLI Interface: Beautiful interactive terminal interface
 
@@ -40,7 +40,7 @@ SampleMind AI Beta v2.0 Phoenix
 AI-Powered Music Production Platform
 
 Version: Beta 2.0 (Phoenix)
-Codename: Phoenix - Rising from the ashes of v6
+Codename: Phoenix
 """
 
 __version__ = "2.1.0-beta"

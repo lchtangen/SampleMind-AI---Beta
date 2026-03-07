@@ -1,149 +1,91 @@
-# SampleMind AI - Technical Documentation
+# SampleMind AI — Documentation
 
-**Version:** 2.0 Beta | **Last Updated:** January 17, 2026
-
----
-
-## 📚 Documentation Index
-
-Welcome to the SampleMind AI technical documentation. Choose your path below:
-
-### 🚀 Getting Started
-- **[QUICKSTART.md](../QUICKSTART.md)** - 5-minute quick start guide
-- **[GETTING_STARTED.md](../GETTING_STARTED.md)** - Detailed setup instructions
-- **[CLI_DEVELOPMENT_CHECKLIST.md](../CLI_DEVELOPMENT_CHECKLIST.md)** - Phase 1 feature tracking
-
-### 📖 User Guides
-Complete guides for different platforms and workflows:
-- [guides/README.md](guides/README.md) - All user guides and platform-specific instructions
-  - [guides/USER_GUIDE.md](guides/USER_GUIDE.md) - Comprehensive CLI user guide
-  - [guides/INSTALLATION_GUIDE.md](guides/INSTALLATION_GUIDE.md) - Installation instructions
-  - [guides/LINUX_GUIDE.md](guides/LINUX_GUIDE.md) - Linux setup guide
-  - [guides/MACOS_GUIDE.md](guides/MACOS_GUIDE.md) - macOS setup guide
-  - [guides/WINDOWS_GUIDE.md](guides/WINDOWS_GUIDE.md) - Windows setup guide
-
-### 🔧 Technical Documentation
-Architecture, APIs, and technical details:
-- [technical/README.md](technical/README.md) - Technical documentation index
-  - [technical/OPTIMIZATION_GUIDE.md](technical/OPTIMIZATION_GUIDE.md) - Performance optimization
-  - [technical/PERFORMANCE.md](technical/PERFORMANCE.md) - Performance metrics
-  - [technical/CROSS_PLATFORM_FILE_PICKER.md](technical/CROSS_PLATFORM_FILE_PICKER.md) - File picker implementation
-
-### 🎯 Core Documentation (Root)
-Essential documentation files in the root directory:
-
-| File | Purpose | Audience |
-|------|---------|----------|
-| [../README.md](../README.md) | Project overview | Everyone |
-| [../CLAUDE.md](../CLAUDE.md) | AI assistant instructions | Developers |
-| [../ARCHITECTURE.md](../ARCHITECTURE.md) | System architecture | Architects/Developers |
-| [../API_REFERENCE.md](../API_REFERENCE.md) | API endpoints | Backend developers |
-| [../DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md) | Database design | DBAs/Developers |
-| [../DEVELOPMENT.md](../DEVELOPMENT.md) | Development setup | Developers |
-| [../DEPLOY.md](../DEPLOY.md) | Deployment guide | DevOps/System admins |
-| [../CHANGELOG.md](../CHANGELOG.md) | Version history | Everyone |
-| [../RELEASE_NOTES.md](../RELEASE_NOTES.md) | v2.0 release notes | Everyone |
-| [../SECURITY.md](../SECURITY.md) | Security policies | Security/Developers |
-| [../TROUBLESHOOTING.md](../TROUBLESHOOTING.md) | Troubleshooting guide | Users/Support |
-| [../CONTRIBUTING.md](../CONTRIBUTING.md) | Contribution guidelines | Contributors |
-| [../CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) | Community guidelines | Everyone |
-
-### 📋 Reference Documentation
-Quick references and guides:
-- [reference/README.md](reference/README.md) - Reference documentation index
-  - [reference/QUICK_REFERENCE.md](reference/QUICK_REFERENCE.md) - Command quick reference
-
-### 📦 Strategic Documents
-- [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) - Comprehensive project overview
-- [PROJECT_ROADMAP.md](PROJECT_ROADMAP.md) - Development roadmap and priorities
-- [CURRENT_STATUS.md](CURRENT_STATUS.md) - Current development status
-- [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) - Codebase structure details
-
-### 🗄️ Archive
-Historical documentation and completed phase reports:
-- [archive/](archive/) - Archive of historical documents (40+ files)
-  - Phase reports, analysis documents, progress updates
+**Version:** 3.0 (migrating) | **Active Phase:** 15 — v3.0 Migration | **Last Updated:** 2026-03-07
 
 ---
 
-## 🎯 Quick Navigation by Role
+## AI Agents — Start Here
 
-### 👤 End Users
-1. Start with: [../QUICKSTART.md](../QUICKSTART.md)
-2. Setup guide: Choose your platform
-   - [guides/LINUX_GUIDE.md](guides/LINUX_GUIDE.md)
-   - [guides/MACOS_GUIDE.md](guides/MACOS_GUIDE.md)
-   - [guides/WINDOWS_GUIDE.md](guides/WINDOWS_GUIDE.md)
-3. Reference: [guides/USER_GUIDE.md](guides/USER_GUIDE.md)
-4. Help: [../TROUBLESHOOTING.md](../TROUBLESHOOTING.md)
+> **[active/INDEX.md](active/INDEX.md)** — Master navigation hub for Claude Code, GitHub Copilot,
+> and all AI agents. Contains active document map, priority queue, key file paths, and task routing.
 
-### 👨‍💻 Developers
-1. Setup: [../GETTING_STARTED.md](../GETTING_STARTED.md)
-2. Architecture: [../ARCHITECTURE.md](../ARCHITECTURE.md)
-3. Development: [../DEVELOPMENT.md](../DEVELOPMENT.md)
-4. API: [../API_REFERENCE.md](../API_REFERENCE.md)
-5. Database: [../DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md)
-6. Phase 1 Tracking: [../CLI_DEVELOPMENT_CHECKLIST.md](../CLI_DEVELOPMENT_CHECKLIST.md)
-
-### 🏗️ Architects
-1. System design: [../ARCHITECTURE.md](../ARCHITECTURE.md)
-2. Roadmap: [PROJECT_ROADMAP.md](PROJECT_ROADMAP.md)
-3. Project summary: [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)
-4. Technical docs: [technical/README.md](technical/README.md)
-
-### 🚀 DevOps/SysAdmins
-1. Deployment: [../DEPLOY.md](../DEPLOY.md)
-2. Performance: [technical/PERFORMANCE.md](technical/PERFORMANCE.md)
-3. Database: [../DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md)
-
-### 🔐 Security Team
-1. Security policies: [../SECURITY.md](../SECURITY.md)
-2. Architecture: [../ARCHITECTURE.md](../ARCHITECTURE.md)
-
-### 📝 Contributors
-1. Contributing: [../CONTRIBUTING.md](../CONTRIBUTING.md)
-2. Code of Conduct: [../CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md)
-3. Architecture: [../ARCHITECTURE.md](../ARCHITECTURE.md)
-4. Development: [../DEVELOPMENT.md](../DEVELOPMENT.md)
+- **[.claude/CLAUDE.md](../.claude/CLAUDE.md)** — Full Claude Code project instructions
+- **[../.github/copilot-instructions.md](../.github/copilot-instructions.md)** — GitHub Copilot auto-loaded context
 
 ---
 
-## 📊 Documentation Statistics
+## Active V3 Working Documents
 
-- **Total Documentation Files:** 50+
-- **Core Root Docs:** 15 essential files
-- **User Guides:** 10+ platform and workflow guides
-- **Technical Docs:** Advanced technical references
-- **Archive:** 40+ historical documents
+All V3 working documents live in `active/`. This is the primary workspace for Phase 15.
 
----
-
-## 🔗 Related Files
-
-**Main Strategic Documents:** See [DOCUMENTS/README.md](../DOCUMENTS/README.md)
-- **MASTER_CLI_DEVELOPMENT_GUIDE.md** - 500+ line comprehensive CLI development guide
-- Strategic document series (01-10_SampleMind_*.md)
-
----
-
-## 📌 Important Links
-
-- **Project Homepage:** [../README.md](../README.md)
-- **GitHub Repository:** See root README
-- **Issue Tracker:** See GitHub repository
-- **Discussion Forums:** See GitHub repository
+| Document | Purpose |
+|----------|---------|
+| [active/INDEX.md](active/INDEX.md) | Master navigation hub — read first |
+| [active/roadmap/PHASE_15_PROGRESS.md](active/roadmap/PHASE_15_PROGRESS.md) | Session-by-session progress log |
+| [active/roadmap/V3_100_KEYPOINTS.md](active/roadmap/V3_100_KEYPOINTS.md) | Full 100-point v3.0 upgrade plan |
+| [active/architecture/V3_ARCHITECTURE_DECISIONS.md](active/architecture/V3_ARCHITECTURE_DECISIONS.md) | ADRs for all v3.0 decisions |
+| [active/devops/DEPENDENCY_UPGRADE_STATUS.md](active/devops/DEPENDENCY_UPGRADE_STATUS.md) | Dependency upgrade tracking |
+| [active/models/AI_PROVIDER_UPGRADE_LOG.md](active/models/AI_PROVIDER_UPGRADE_LOG.md) | AI provider upgrade log |
+| [active/ui-ux/TUI_V3_UPGRADE_NOTES.md](active/ui-ux/TUI_V3_UPGRADE_NOTES.md) | Textual ^0.87 migration notes |
+| [active/features/WEB_UI_SPEC.md](active/features/WEB_UI_SPEC.md) | Next.js 15 web UI specification |
 
 ---
 
-## 🆘 Need Help?
+## Status & Roadmap
 
-1. **Quick Question?** Check [../TROUBLESHOOTING.md](../TROUBLESHOOTING.md)
-2. **Setup Issue?** See platform-specific guide in [guides/](guides/)
-3. **Feature Question?** Read [guides/USER_GUIDE.md](guides/USER_GUIDE.md)
-4. **Development Help?** Check [../DEVELOPMENT.md](../DEVELOPMENT.md)
-5. **Architecture Question?** Review [../ARCHITECTURE.md](../ARCHITECTURE.md)
+| Document | Purpose | Update Frequency |
+|----------|---------|-----------------|
+| [02-ROADMAPS/CURRENT_STATUS.md](02-ROADMAPS/CURRENT_STATUS.md) | Real-time project status | Every session |
+| [02-ROADMAPS/V3_MIGRATION_CHECKLIST.md](02-ROADMAPS/V3_MIGRATION_CHECKLIST.md) | 100-item P0/P1/P2 checklist | Tick off as done |
+| [SESSION_START_GUIDE.md](SESSION_START_GUIDE.md) | Session startup checklist | Reference |
+| [00-INDEX/PHASE_STATUS_DASHBOARD.md](00-INDEX/PHASE_STATUS_DASHBOARD.md) | Phase 1–15 status dashboard | Per phase |
 
 ---
 
-**Last Updated:** January 17, 2026
-**Maintained By:** SampleMind AI Team
+## Reference Documentation
+
+| Document | Purpose | Size |
+|----------|---------|------|
+| [CLI_REFERENCE.md](CLI_REFERENCE.md) | Full CLI command reference | 62K |
+| [API_DOCUMENTATION.md](API_DOCUMENTATION.md) | Full FastAPI endpoint reference | 24K |
+| [ERROR_HANDLING_GUIDE.md](ERROR_HANDLING_GUIDE.md) | Error handling patterns | — |
+| [ALIASES_REFERENCE.md](ALIASES_REFERENCE.md) | Shell aliases | — |
+
+---
+
+## Technical Guides
+
+All guides are in `04-TECHNICAL-IMPLEMENTATION/guides/`:
+
+- [guides/INSTALLATION_GUIDE.md](04-TECHNICAL-IMPLEMENTATION/guides/INSTALLATION_GUIDE.md) — Main install
+- [guides/AI_INTEGRATION_SETUP.md](04-TECHNICAL-IMPLEMENTATION/guides/AI_INTEGRATION_SETUP.md) — AI providers (v3.0)
+- [guides/TEXTUAL_MIGRATION.md](04-TECHNICAL-IMPLEMENTATION/guides/TEXTUAL_MIGRATION.md) — TUI ^0.87 migration
+- [guides/PLUGIN_INSTALLATION_GUIDE.md](04-TECHNICAL-IMPLEMENTATION/guides/PLUGIN_INSTALLATION_GUIDE.md) — DAW plugins
+- [guides/USER_GUIDE.md](04-TECHNICAL-IMPLEMENTATION/guides/USER_GUIDE.md) — CLI user guide
+- [guides/LINUX_GUIDE.md](04-TECHNICAL-IMPLEMENTATION/guides/LINUX_GUIDE.md) / [MACOS_GUIDE.md](04-TECHNICAL-IMPLEMENTATION/guides/MACOS_GUIDE.md) / [WINDOWS_GUIDE.md](04-TECHNICAL-IMPLEMENTATION/guides/WINDOWS_GUIDE.md) — Platform guides
+
+Technical deep dives in `04-TECHNICAL-IMPLEMENTATION/technical/`:
+
+- [technical/audio_processing.md](04-TECHNICAL-IMPLEMENTATION/technical/audio_processing.md) — Audio pipeline
+- [technical/OPTIMIZATION_GUIDE.md](04-TECHNICAL-IMPLEMENTATION/technical/OPTIMIZATION_GUIDE.md) — Performance
+
+---
+
+## Phase History
+
+- [00-INDEX/MASTER_PHASE_INDEX.md](00-INDEX/MASTER_PHASE_INDEX.md) — All phases 1–15 documented
+- [01-PHASES/](01-PHASES/) — Phase-by-phase completion reports
+- [01-PHASES/15-PHASE-15-IN-PROGRESS/](01-PHASES/15-PHASE-15-IN-PROGRESS/) — Active phase 15
+
+---
+
+## Archive
+
+Historical docs (73+ files) — read-only reference:
+- [_archive/legacy-phases/](_archive/legacy-phases/) — Phase 11–14 completion reports
+- [_archive/legacy-notes/](_archive/legacy-notes/) — Session logs, v2 beta guides
+- [_archive/legacy-roadmaps/](_archive/legacy-roadmaps/) — Outdated roadmap versions
+
+---
+
+**Last Updated:** 2026-03-07 | **Maintained By:** SampleMind AI Team

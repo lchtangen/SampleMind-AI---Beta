@@ -7,7 +7,7 @@ Welcome to the SampleMind-AI project documentation hub. This section provides th
 ### 📋 Master Guides
 - **[MASTER_PHASE_INDEX.md](./MASTER_PHASE_INDEX.md)** - Complete overview of all 10 phases with objectives and deliverables
 - **[PHASE_STATUS_DASHBOARD.md](./PHASE_STATUS_DASHBOARD.md)** - Real-time status tracking for each phase
-- **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - Quick links and common task finder
+- **[PHASE_NAVIGATION_GUIDE.md](./PHASE_NAVIGATION_GUIDE.md)** - Quick links and common task finder
 
 ### 📂 Project Structure
 
@@ -89,7 +89,7 @@ For the latest documentation updates, refer to:
 ## Help & Support
 
 ### Finding What You Need
-- Use [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) for a keyword search
+- Use [PHASE_NAVIGATION_GUIDE.md](./PHASE_NAVIGATION_GUIDE.md) for a keyword search
 - Check [MASTER_PHASE_INDEX.md](./MASTER_PHASE_INDEX.md) for phase details
 - Review [PHASE_STATUS_DASHBOARD.md](./PHASE_STATUS_DASHBOARD.md) for project status
 
@@ -100,7 +100,7 @@ docs/
 │   ├── README.md
 │   ├── MASTER_PHASE_INDEX.md
 │   ├── PHASE_STATUS_DASHBOARD.md
-│   └── QUICK_REFERENCE.md
+│   └── PHASE_NAVIGATION_GUIDE.md
 │
 ├── 01-PHASES/
 │   ├── 01-PHASE-01-COMPLETED/
