@@ -109,6 +109,16 @@ dist
 .claude/
 .mcp/
 
+# GPG / PGP Keys — never commit private keys or keyrings
+*.gpg
+*-secret-key.asc
+*-private-key.asc
+*.pgp
+secring.gpg
+pubring.gpg
+trustdb.gpg
+.gnupg/
+
 # Ignore local development files
 frontend/web/.next/
 frontend/web/out/
