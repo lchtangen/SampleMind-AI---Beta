@@ -147,3 +147,6 @@ node_modules
 .semantic_cache/
 .test_favorites/
 .test_sessions/
+.semantic_cache/
+.test_favorites/
+.test_sessions/
