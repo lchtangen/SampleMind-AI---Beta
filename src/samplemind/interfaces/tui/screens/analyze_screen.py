@@ -7,6 +7,7 @@ import asyncio
 import os
 from pathlib import Path
 
+from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import Header, Footer, Button, Static, Input, ProgressBar
 from textual.containers import Container, Vertical, Horizontal
@@ -93,8 +94,8 @@ class AnalyzeScreen(Screen):
     is_analyzing: reactive[bool] = reactive(False)
     progress_value: reactive[float] = reactive(0.0)
 
-    def compose(self):
-        """Compose the analyze screen layout"""
+    def compose(self) -> ComposeResult:
+        """Compose the analyze screen layout""
         yield Header(show_clock=True)
 
         with Vertical(id="analyze_container"):

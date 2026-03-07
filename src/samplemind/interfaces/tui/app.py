@@ -42,7 +42,7 @@ from .session import get_session_manager
 class SampleMindTUI(App):
     """Main SampleMind TUI Application"""
 
-    CSS = """
+    DEFAULT_CSS = """
     Screen {
         layout: vertical;
         background: $surface;

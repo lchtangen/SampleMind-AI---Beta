@@ -6,6 +6,7 @@ Multi-file tagging with categories and AI suggestions
 import asyncio
 from typing import List, Dict, Optional, Set
 
+from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import Header, Footer, Button, Static, Input, DataTable, Label
 from textual.containers import Vertical, Horizontal, Container
@@ -94,8 +95,8 @@ class TaggingScreen(Screen):
         self.available_tags: List[str] = []
         self.current_category = "instrument"
 
-    def compose(self):
-        """Compose the tagging screen layout"""
+    def compose(self) -> ComposeResult:
+        """Compose the tagging screen layout""
         yield Header(show_clock=True)
 
         with Vertical(id="tagging_container"):

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Run unit tests only (no database required)
 
-cd /home/lchta/Projects/samplemind-ai-v6
+cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 source .venv/bin/activate
 
 export PYTHONPATH=$(pwd):$PYTHONPATH

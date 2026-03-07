@@ -4,6 +4,7 @@ Display and manage favorite analyses
 """
 
 import asyncio
+from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import Header, Footer, Button, Static, DataTable
 from textual.containers import Vertical, Horizontal
@@ -66,8 +67,8 @@ class FavoritesScreen(Screen):
 
     is_loading: reactive[bool] = reactive(False)
 
-    def compose(self):
-        """Compose the favorites screen layout"""
+    def compose(self) -> ComposeResult:
+        """Compose the favorites screen layout""
         yield Header(show_clock=True)
 
         with Vertical(id="favorites_container"):

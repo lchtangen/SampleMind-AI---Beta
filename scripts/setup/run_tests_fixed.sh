@@ -1,7 +1,7 @@
 #!/bin/bash
 # Quick test runner with proper PYTHONPATH
 
-cd /home/lchta/Projects/samplemind-ai-v6
+cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 source .venv/bin/activate
 
 export PYTHONPATH=$(pwd):$PYTHONPATH

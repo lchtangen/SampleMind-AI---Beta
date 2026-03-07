@@ -8,6 +8,7 @@ from typing import Any
 
 from rich.panel import Panel
 from rich.text import Text
+from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.reactive import reactive
 from textual.screen import Screen
@@ -88,8 +89,8 @@ class SearchScreen(Screen):
         self.sample_data = sample_data or []
         self.search_results: list[dict[str, Any]] = []
 
-    def compose(self):
-        """Compose the search screen layout"""
+    def compose(self) -> ComposeResult:
+        """Compose the search screen layout""
         yield Header(show_clock=True)
 
         with Vertical(id="search_container"):

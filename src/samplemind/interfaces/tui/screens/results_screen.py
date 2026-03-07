@@ -9,6 +9,7 @@ import os
 from datetime import datetime
 from typing import Optional, List
 
+from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import Header, Footer, Button, Static, Tabs, TabPane
 from textual.containers import Vertical, Horizontal, Container
@@ -95,8 +96,8 @@ class ResultsScreen(Screen):
         self.waveform_widget: Optional[WaveformWidget] = None
         self.spectral_widget: Optional[SpectralViz] = None
 
-    def compose(self):
-        """Compose the results display layout"""
+    def compose(self) -> ComposeResult:
+        """Compose the results display layout""
         yield Header(show_clock=True)
 
         with Vertical(id="results_container"):

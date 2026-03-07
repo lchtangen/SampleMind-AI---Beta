@@ -10,6 +10,7 @@ from typing import Dict, List, Optional
 
 from rich.panel import Panel
 from rich.text import Text
+from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Container, Horizontal, Vertical
 from textual.reactive import reactive
@@ -93,8 +94,8 @@ class ClassificationScreen(Screen):
         self.classification_results: Dict[str, Dict] = {}
         self.cancel_requested = False
 
-    def compose(self):
-        """Compose the classification screen layout."""
+    def compose(self) -> ComposeResult:
+        """Compose the classification screen layout.""
         yield Header(show_clock=True)
 
         with Vertical(id="classification_container"):

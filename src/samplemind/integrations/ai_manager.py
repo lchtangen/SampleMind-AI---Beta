@@ -354,21 +354,22 @@ class SampleMindAIManager:
                 self.provider_configs[provider] = config
                 
                 # Initialize actual provider instance
-                if provider == AIProvider.OPENAI:
-                    from .openai_integration import OpenAIMusicProducer
-                    self.providers[provider] = OpenAIMusicProducer(api_key=config.api_key)
-                elif provider == AIProvider.GOOGLE_AI and GOOGLE_AI_AVAILABLE:
-                    from .google_ai_integration import GoogleAIMusicProducer
-                    self.providers[provider] = GoogleAIMusicProducer(api_key=config.api_key)
-                elif provider == AIProvider.ANTHROPIC and ANTHROPIC_AVAILABLE:
-                    from .anthropic_integration import AnthropicMusicProducer
-                    self.providers[provider] = AnthropicMusicProducer(api_key=config.api_key)
-                elif provider == AIProvider.OLLAMA:
-                    try:
-                        from .ollama_integration import OllamaMusicProducer
-                        self.providers[provider] = OllamaMusicProducer()
-                    except Exception:
-                        pass
+                match provider:
+                    case AIProvider.OPENAI:
+                        from .openai_integration import OpenAIMusicProducer
+                        self.providers[provider] = OpenAIMusicProducer(api_key=config.api_key)
+                    case AIProvider.GOOGLE_AI if GOOGLE_AI_AVAILABLE:
+                        from .google_ai_integration import GoogleAIMusicProducer
+                        self.providers[provider] = GoogleAIMusicProducer(api_key=config.api_key)
+                    case AIProvider.ANTHROPIC if ANTHROPIC_AVAILABLE:
+                        from .anthropic_integration import AnthropicMusicProducer
+                        self.providers[provider] = AnthropicMusicProducer(api_key=config.api_key)
+                    case AIProvider.OLLAMA:
+                        try:
+                            from .ollama_integration import OllamaMusicProducer
+                            self.providers[provider] = OllamaMusicProducer()
+                        except Exception:
+                            pass
             
             logger.info(f"📁 Loaded configuration for {len(self.provider_configs)} providers")
             
@@ -533,51 +534,52 @@ class SampleMindAIManager:
     ) -> UnifiedAnalysisResult:
         """Execute analysis with a specific provider (single attempt)"""
 
-        if provider == AIProvider.OPENAI:
-            # Convert to OpenAI analysis type
-            openai_type = self._convert_to_openai_type(analysis_type)
-            
-            # Get OpenAI analysis
-            openai_result = await self.providers[provider].analyze_music_comprehensive(
-                audio_features, openai_type, user_context=user_context
-            )
-            
-            # Convert to unified result
-            return self._convert_openai_result(openai_result)
-            
-        elif provider == AIProvider.GOOGLE_AI and GOOGLE_AI_AVAILABLE:
-            # Convert to Google AI analysis type
-            google_type = self._convert_to_google_type(analysis_type)
-            
-            # Get Google AI analysis
-            google_result = await self.providers[provider].analyze_music_comprehensive(
-                audio_features, google_type, custom_prompt=None
-            )
-            
-            # Convert to unified result
-            return self._convert_google_result(google_result)
-        
-        elif provider == AIProvider.ANTHROPIC and ANTHROPIC_AVAILABLE:
-            # Convert to Anthropic analysis type
-            anthropic_type = self._convert_to_anthropic_type(analysis_type)
+        match provider:
+            case AIProvider.OPENAI:
+                # Convert to OpenAI analysis type
+                openai_type = self._convert_to_openai_type(analysis_type)
 
-            # Get Claude analysis
-            anthropic_result = await self.providers[provider].analyze_music_comprehensive(
-                audio_features, anthropic_type, user_context=user_context
-            )
+                # Get OpenAI analysis
+                openai_result = await self.providers[provider].analyze_music_comprehensive(
+                    audio_features, openai_type, user_context=user_context
+                )
 
-            # Convert to unified result
-            return self._convert_anthropic_result(anthropic_result)
+                # Convert to unified result
+                return self._convert_openai_result(openai_result)
 
-        elif provider == AIProvider.OLLAMA:
-            from .ollama_integration import OllamaMusicProducer
-            ollama_result = await self.providers[provider].analyze_music_comprehensive(
-                audio_features, user_context
-            )
-            return self._convert_ollama_result(ollama_result)
+            case AIProvider.GOOGLE_AI if GOOGLE_AI_AVAILABLE:
+                # Convert to Google AI analysis type
+                google_type = self._convert_to_google_type(analysis_type)
 
-        else:
-            raise ValueError(f"Provider {provider} not supported or available")
+                # Get Google AI analysis
+                google_result = await self.providers[provider].analyze_music_comprehensive(
+                    audio_features, google_type, custom_prompt=None
+                )
+
+                # Convert to unified result
+                return self._convert_google_result(google_result)
+
+            case AIProvider.ANTHROPIC if ANTHROPIC_AVAILABLE:
+                # Convert to Anthropic analysis type
+                anthropic_type = self._convert_to_anthropic_type(analysis_type)
+
+                # Get Claude analysis
+                anthropic_result = await self.providers[provider].analyze_music_comprehensive(
+                    audio_features, anthropic_type, user_context=user_context
+                )
+
+                # Convert to unified result
+                return self._convert_anthropic_result(anthropic_result)
+
+            case AIProvider.OLLAMA:
+                from .ollama_integration import OllamaMusicProducer
+                ollama_result = await self.providers[provider].analyze_music_comprehensive(
+                    audio_features, user_context
+                )
+                return self._convert_ollama_result(ollama_result)
+
+            case _:
+                raise ValueError(f"Provider {provider} not supported or available")
     
     def _convert_to_openai_type(self, analysis_type: AnalysisType) -> OpenAIMusicAnalysisType:
         """Convert unified analysis type to OpenAI type"""

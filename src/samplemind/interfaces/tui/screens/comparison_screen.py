@@ -6,6 +6,7 @@ Side-by-side comparison of multiple audio analyses
 import asyncio
 from typing import List, Dict, Optional, Any
 from dataclasses import dataclass
+from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import Header, Footer, Button, Static, DataTable
 from textual.containers import Vertical, Horizontal
@@ -265,8 +266,8 @@ class ComparisonScreen(Screen):
         self.comparison_engine = ComparisonEngine()
         self.comparison_results: List[ComparisonResult] = []
 
-    def compose(self):
-        """Compose the comparison screen layout"""
+    def compose(self) -> ComposeResult:
+        """Compose the comparison screen layout""
         yield Header(show_clock=True)
 
         with Vertical(id="comparison_container"):

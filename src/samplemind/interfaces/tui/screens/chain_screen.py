@@ -5,6 +5,7 @@ Chain Recommender Screen (Phase 14 Integration)
 import asyncio
 from pathlib import Path
 
+from textual.app import ComposeResult
 from textual.containers import Horizontal, ScrollableContainer, Vertical
 from textual.screen import Screen
 from textual.widgets import Button, Footer, Header, Input, Label, Static
@@ -51,7 +52,7 @@ class ChainScreen(Screen):
         self.seed_path: Path | None = None
         self.chain_result = None
 
-    def compose(self):
+    def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
 
         with Vertical(id="controls"):

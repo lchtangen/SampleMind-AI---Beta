@@ -3,6 +3,7 @@ Main Screen for SampleMind TUI
 Entry point with menu and navigation
 """
 
+from textual.app import ComposeResult
 from textual.containers import Vertical
 from textual.screen import Screen
 from textual.widgets import Footer, Header
@@ -52,8 +53,8 @@ class MainScreen(Screen):
         ("c", "chain", "Chain Recommender"),
     ]
 
-    def compose(self):
-        """Compose the main screen layout"""
+    def compose(self) -> ComposeResult:
+        """Compose the main screen layout""
         yield Header(show_clock=True)
 
         with Vertical(id="main_container"):

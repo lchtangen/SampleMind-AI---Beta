@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 from typing import List
 
+from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import Header, Footer, Button, Static, Input, DataTable
 from textual.containers import Container, Vertical, Horizontal
@@ -91,8 +92,8 @@ class BatchScreen(Screen):
         self.results = []
         self.cancel_requested = False
 
-    def compose(self):
-        """Compose the batch screen layout"""
+    def compose(self) -> ComposeResult:
+        """Compose the batch screen layout""
         yield Header(show_clock=True)
 
         with Vertical(id="batch_container"):
@@ -613,7 +614,7 @@ class BatchScreen(Screen):
 
             def pop_with_handler() -> None:
                 """Handle screen pop with confirmation result.
-                
+
                 Calls the confirmation callback with the dialog result
                 before popping the screen.
                 """

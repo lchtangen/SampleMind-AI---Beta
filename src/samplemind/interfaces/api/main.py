@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SampleMind AI v6 - FastAPI Application
+SampleMind AI v3.0 - FastAPI Application
 Main entry point for the REST API backend
 """
 

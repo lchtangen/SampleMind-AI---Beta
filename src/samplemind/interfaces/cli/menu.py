@@ -1120,22 +1120,23 @@ class SampleMindCLI:
 
         choice = Prompt.ask("💡 Select tip category", choices=["0", "1", "2", "3", "4", "5", "6", "7"])
 
-        if choice == "0":
-            return
-        elif choice == "1":
-            self._show_mixing_tips()
-        elif choice == "2":
-            self._show_arrangement_tips()
-        elif choice == "3":
-            self._show_mastering_tips()
-        elif choice == "4":
-            self._show_sound_design_tips()
-        elif choice == "5":
-            self._show_workflow_tips()
-        elif choice == "6":
-            await self._show_genre_specific_tips()
-        elif choice == "7":
-            await self._show_ai_coaching()
+        match choice:
+            case "0":
+                return
+            case "1":
+                self._show_mixing_tips()
+            case "2":
+                self._show_arrangement_tips()
+            case "3":
+                self._show_mastering_tips()
+            case "4":
+                self._show_sound_design_tips()
+            case "5":
+                self._show_workflow_tips()
+            case "6":
+                await self._show_genre_specific_tips()
+            case "7":
+                await self._show_ai_coaching()
 
     def _show_mixing_tips(self) -> None:
         """Display mixing fundamentals"""
@@ -2207,39 +2208,40 @@ class SampleMindCLI:
 
                 choice = Prompt.ask("\n🎵 Select option", choices=["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "a", "B", "b", "C", "c", "D", "d", "E", "e", "F", "f"])
 
-                if choice == "0":
-                    console.print("\n[bold blue]👋 Thank you for using SampleMind AI v6![/bold blue]")
-                    break
-                elif choice == "1":
-                    await self.run_single_analysis()
-                elif choice == "2":
-                    await self.run_batch_processing()
-                elif choice == "3":
-                    await self.run_multiple_files_analysis()
-                elif choice == "4":
-                    self.scan_and_preview()
-                elif choice == "5":
-                    await self.show_configuration_menu()
-                elif choice == "6":
-                    self.show_system_status()
-                elif choice == "7":
-                    await self.show_ai_provider_settings()
-                elif choice == "8":
-                    await self.show_production_tips()
-                elif choice == "9":
-                    await self.show_fl_studio_integration()
-                elif choice.upper() == "A":
-                    self.show_session_analytics()
-                elif choice.upper() == "B":
-                    self.run_audio_effects()
-                elif choice.upper() == "C":
-                    self.run_midi_conversion()
-                elif choice.upper() == "D":
-                    self.run_pack_creation()
-                elif choice.upper() == "E":
-                    self.run_chain_recommender()
-                elif choice.upper() == "F":
-                    self.run_semantic_search()
+                match choice.upper():
+                    case "0":
+                        console.print("\n[bold blue]👋 Thank you for using SampleMind AI v3.0![/bold blue]")
+                        break
+                    case "1":
+                        await self.run_single_analysis()
+                    case "2":
+                        await self.run_batch_processing()
+                    case "3":
+                        await self.run_multiple_files_analysis()
+                    case "4":
+                        self.scan_and_preview()
+                    case "5":
+                        await self.show_configuration_menu()
+                    case "6":
+                        self.show_system_status()
+                    case "7":
+                        await self.show_ai_provider_settings()
+                    case "8":
+                        await self.show_production_tips()
+                    case "9":
+                        await self.show_fl_studio_integration()
+                    case "A":
+                        self.show_session_analytics()
+                    case "B":
+                        self.run_audio_effects()
+                    case "C":
+                        self.run_midi_conversion()
+                    case "D":
+                        self.run_pack_creation()
+                    case "E":
+                        self.run_chain_recommender()
+                    case "F":
+                        self.run_semantic_search()
 
                 # Pause before showing menu again
                 if choice != "0":

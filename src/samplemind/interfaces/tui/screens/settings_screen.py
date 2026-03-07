@@ -4,8 +4,9 @@ Configure application preferences and settings
 """
 
 import asyncio
+from textual.app import ComposeResult
 from textual.screen import Screen
-from textual.widgets import Header, Footer, Button, Static, Select, Checkbox, Input, Label
+from textual.widgets import Header, Footer, Button, Static, Select, Input, Label
 from textual.containers import Vertical, Horizontal, Container
 from textual.reactive import reactive
 
@@ -85,8 +86,8 @@ class SettingsScreen(Screen):
     current_tab: reactive[str] = reactive("general")
     is_saving: reactive[bool] = reactive(False)
 
-    def compose(self):
-        """Compose the settings screen layout"""
+    def compose(self) -> ComposeResult:
+        """Compose the settings screen layout""
         yield Header(show_clock=True)
 
         with Vertical(id="settings_container"):
