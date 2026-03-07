@@ -566,12 +566,12 @@ samplemind --version
 python3 plugins/installer.py --install-all
 ```
 
-See [PLUGIN_INSTALLATION_GUIDE.md](../PLUGIN_INSTALLATION_GUIDE.md) for details.
+See [PLUGIN_INSTALLATION_GUIDE.md](../04-TECHNICAL-IMPLEMENTATION/guides/PLUGIN_INSTALLATION_GUIDE.md) for details.
 
 ## 📚 Documentation
 
 - [User Guide](../README.md)
-- [Installation Guide](../PLUGIN_INSTALLATION_GUIDE.md)
+- [Installation Guide](../04-TECHNICAL-IMPLEMENTATION/guides/PLUGIN_INSTALLATION_GUIDE.md)
 - [API Reference](../API_REFERENCE.md)
 - [Troubleshooting](../TROUBLESHOOTING.md)
 - [CLI Command Reference](../CLI_REFERENCE.md)

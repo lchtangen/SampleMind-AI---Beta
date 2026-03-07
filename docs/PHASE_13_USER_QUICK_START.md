@@ -438,7 +438,7 @@ samplemind <command> --help            # Any command help
 ### Documentation
 - Full guide: Read `README.md`
 - Command reference: Read `CLI_REFERENCE.md`
-- Plugins: Read `PLUGIN_INSTALLATION_GUIDE.md`
+- Plugins: Read `04-TECHNICAL-IMPLEMENTATION/guides/PLUGIN_INSTALLATION_GUIDE.md`
 
 ### Community
 - Issues: https://github.com/samplemind/samplemind-ai/issues
