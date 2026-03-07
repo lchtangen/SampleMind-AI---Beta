@@ -141,3 +141,6 @@ Thumbs.db
 sm-control.local.sh
 .env.local
 node_modules
+.semantic_cache/
+.test_favorites/
+.test_sessions/
