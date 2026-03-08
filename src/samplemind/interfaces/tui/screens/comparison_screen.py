@@ -1,423 +1,160 @@
-"""
-Audio Comparison Screen for SampleMind TUI
-Side-by-side comparison of multiple audio analyses
-"""
+"""Comparison Screen for SampleMind TUI v3.0"""
 
-import asyncio
-from typing import List, Dict, Optional, Any
-from dataclasses import dataclass
+from __future__ import annotations
+
+from typing import Any
+
+from textual import on, work
 from textual.app import ComposeResult
+from textual.binding import Binding
+from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
-from textual.widgets import Header, Footer, Button, Static, DataTable
-from textual.containers import Vertical, Horizontal
-from textual.reactive import reactive
-
-from rich.panel import Panel
-from rich.text import Text
-from rich.table import Table
-from rich.console import Console
-
-from samplemind.core.engine.audio_engine import AudioFeatures
-from samplemind.interfaces.tui.widgets.dialogs import ErrorDialog, InfoDialog
-
-
-@dataclass
-class ComparisonResult:
-    """Result of comparing two analyses"""
-    property_name: str
-    value_1: Any
-    value_2: Any
-    difference: Optional[float] = None
-    percentage_diff: Optional[float] = None
-    match: bool = False
-    similar: bool = False  # Within 5% for numeric values
-
-
-class ComparisonEngine:
-    """Engine for comparing audio analyses"""
-
-    def __init__(self) -> None:
-        """Initialize comparison engine"""
-        self.comparisons: List[ComparisonResult] = []
-
-    def calculate_similarity(
-        self, features1: AudioFeatures, features2: AudioFeatures
-    ) -> float:
-        """
-        Calculate similarity score between two analyses (0-100%)
-
-        Args:
-            features1: First audio features
-            features2: Second audio features
-
-        Returns:
-            Similarity percentage (0-100)
-        """
-        if not features1 or not features2:
-            return 0.0
-
-        # Properties to compare
-        properties = [
-            "tempo",
-            "key",
-            "mode",
-            "time_signature",
-            "spectral_centroid",
-            "spectral_bandwidth",
-            "zero_crossing_rate",
-            "rms_energy",
-        ]
-
-        matches = 0
-        compared = 0
-
-        for prop in properties:
-            val1 = getattr(features1, prop, None)
-            val2 = getattr(features2, prop, None)
-
-            if val1 is None or val2 is None:
-                continue
-
-            compared += 1
-
-            if isinstance(val1, str):
-                # Exact match for strings
-                if val1 == val2:
-                    matches += 1
-            elif isinstance(val1, (int, float)):
-                # Within 5% for numeric values
-                if val1 == 0 and val2 == 0:
-                    matches += 1
-                elif val1 != 0:
-                    percent_diff = abs((val2 - val1) / val1) * 100
-                    if percent_diff <= 5:
-                        matches += 1
-
-        if compared == 0:
-            return 0.0
-
-        return (matches / compared) * 100
-
-    def compare_features(
-        self, features1: AudioFeatures, features2: AudioFeatures
-    ) -> List[ComparisonResult]:
-        """
-        Compare two feature sets and return detailed comparison
-
-        Args:
-            features1: First audio features
-            features2: Second audio features
-
-        Returns:
-            List of comparison results
-        """
-        self.comparisons = []
-
-        # Basic properties
-        basic_props = [
-            ("Tempo (BPM)", "tempo"),
-            ("Key", "key"),
-            ("Mode", "mode"),
-            ("Duration (s)", "duration"),
-            ("Sample Rate (Hz)", "sample_rate"),
-            ("Channels", "channels"),
-            ("Bit Depth", "bit_depth"),
-        ]
-
-        # Spectral properties
-        spectral_props = [
-            ("Spectral Centroid (Hz)", "spectral_centroid"),
-            ("Spectral Bandwidth (Hz)", "spectral_bandwidth"),
-            ("Spectral Rolloff (Hz)", "spectral_rolloff"),
-            ("Zero Crossing Rate", "zero_crossing_rate"),
-            ("RMS Energy", "rms_energy"),
-        ]
-
-        # Process basic properties
-        for display_name, prop in basic_props:
-            val1 = getattr(features1, prop, None)
-            val2 = getattr(features2, prop, None)
-
-            if val1 is not None and val2 is not None:
-                result = self._create_comparison(display_name, val1, val2)
-                self.comparisons.append(result)
-
-        # Process spectral properties
-        for display_name, prop in spectral_props:
-            val1 = getattr(features1, prop, None)
-            val2 = getattr(features2, prop, None)
-
-            if val1 is not None and val2 is not None:
-                result = self._create_comparison(display_name, val1, val2)
-                self.comparisons.append(result)
-
-        return self.comparisons
-
-    def _create_comparison(
-        self, name: str, val1: Any, val2: Any
-    ) -> ComparisonResult:
-        """Create a comparison result for two values"""
-        match = val1 == val2
-        similar = False
-        difference = None
-        percentage_diff = None
-
-        if isinstance(val1, (int, float)) and isinstance(val2, (int, float)):
-            difference = val2 - val1
-            if val1 != 0:
-                percentage_diff = (difference / val1) * 100
-                similar = abs(percentage_diff) <= 5
-
-        return ComparisonResult(
-            property_name=name,
-            value_1=val1,
-            value_2=val2,
-            difference=difference,
-            percentage_diff=percentage_diff,
-            match=match,
-            similar=similar,
-        )
-
-    def get_comparison_summary(self) -> Dict[str, Any]:
-        """Get summary statistics of comparison"""
-        if not self.comparisons:
-            return {}
-
-        numeric_comps = [
-            c for c in self.comparisons if c.difference is not None
-        ]
-        string_comps = [c for c in self.comparisons if c.difference is None]
-
-        matches = sum(1 for c in self.comparisons if c.match)
-        similar = sum(1 for c in numeric_comps if c.similar)
-
-        avg_percent_diff = 0.0
-        if numeric_comps:
-            avg_percent_diff = sum(
-                abs(c.percentage_diff) for c in numeric_comps if c.percentage_diff
-            ) / len(numeric_comps)
-
-        return {
-            "total_properties": len(self.comparisons),
-            "exact_matches": matches,
-            "similar_values": similar,
-            "string_properties": len(string_comps),
-            "numeric_properties": len(numeric_comps),
-            "average_percent_difference": round(avg_percent_diff, 2),
-        }
+from textual.widgets import (
+    Button,
+    DataTable,
+    Footer,
+    Header,
+    Input,
+    Label,
+    RichLog,
+)
 
 
 class ComparisonScreen(Screen):
-    """Screen for comparing multiple audio analyses"""
-
-    DEFAULT_CSS = """
-    ComparisonScreen {
-        layout: vertical;
-    }
-
-    #comparison_container {
-        width: 1fr;
-        height: 1fr;
-        padding: 1 2;
-    }
-
-    #comparison_table {
-        width: 1fr;
-        height: 1fr;
-        border: solid $accent;
-        margin-bottom: 1;
-    }
-
-    #stats_area {
-        width: 1fr;
-        height: auto;
-        border: solid $success;
-        padding: 1;
-        margin-bottom: 1;
-    }
-
-    #button_area {
-        width: 1fr;
-        height: auto;
-        margin-top: 1;
-    }
-    """
+    """Side-by-side comparison of two audio samples."""
 
     BINDINGS = [
-        ("escape", "back", "Back"),
-        ("e", "export_comparison", "Export"),
-        ("r", "refresh", "Refresh"),
+        Binding("escape", "action_back", "Back"),
+        Binding("ctrl+r", "run_comparison", "Compare"),
     ]
 
-    is_loading: reactive[bool] = reactive(False)
-
-    def __init__(
-        self,
-        features_list: List[tuple],  # List of (name, AudioFeatures) tuples
-    ):
-        """
-        Initialize comparison screen
-
-        Args:
-            features_list: List of (file_name, AudioFeatures) tuples to compare
-        """
-        super().__init__()
-        self.features_list = features_list
-        self.comparison_engine = ComparisonEngine()
-        self.comparison_results: List[ComparisonResult] = []
+    DEFAULT_CSS = """
+    ComparisonScreen { layout: vertical; }
+    #comp_body { height: 1fr; padding: 1 2; }
+    .screen-title { color: $primary; text-style: bold; height: 1; margin-bottom: 1; }
+    .file-row { height: auto; margin-bottom: 1; }
+    .file-row Label { min-width: 10; content-align: center middle; height: 1; }
+    .file-row Input { width: 1fr; }
+    .file-row Button { min-width: 12; margin-left: 1; }
+    #comp_table { height: 1fr; }
+    #log_area { height: 4; }
+    #btn_row { height: 3; margin-top: 1; }
+    #btn_row Button { margin-right: 1; }
+    """
 
     def compose(self) -> ComposeResult:
-        """Compose the comparison screen layout""
         yield Header(show_clock=True)
-
-        with Vertical(id="comparison_container"):
-            yield Static(self._render_title(), id="comparison_title")
-
-            yield Static("Loading comparison...", id="stats_area")
-
-            # Comparison table
-            table = DataTable(id="comparison_table")
-            table.add_columns("Property", "File 1", "File 2", "Difference", "Status")
-            yield table
-
-            # Button area
-            with Horizontal(id="button_area"):
-                yield Button("📤 Export", id="export_btn", variant="success")
-                yield Button("🔄 Refresh", id="refresh_btn", variant="primary")
-                yield Button("⬅️  Back", id="back_btn", variant="warning")
-
+        with Vertical(id="comp_body"):
+            yield Label("Compare Two Audio Samples", classes="screen-title")
+            with Horizontal(classes="file-row"):
+                yield Label("Sample A:")
+                yield Input(placeholder="Path to first audio file...", id="path_a")
+                yield Button("Browse A", id="btn_browse_a", variant="primary")
+            with Horizontal(classes="file-row"):
+                yield Label("Sample B:")
+                yield Input(placeholder="Path to second audio file...", id="path_b")
+                yield Button("Browse B", id="btn_browse_b", variant="primary")
+            with Horizontal(id="btn_row"):
+                yield Button("Compare", id="btn_compare", variant="success")
+                yield Button("Back", id="btn_back", variant="warning")
+            yield DataTable(zebra_stripes=True, id="comp_table")
+            yield RichLog(highlight=True, id="log_area", wrap=True)
         yield Footer()
 
-    def _render_title(self) -> Panel:
-        """Render screen title with file names"""
-        file_names = [name for name, _ in self.features_list]
-        title = f"🔍 Comparison: {' vs '.join(file_names)}"
-        subtitle = f"Comparing {len(self.features_list)} audio files"
-
-        content = Text(f"{title}\n{subtitle}", style="bold cyan")
-        return Panel(content, border_style="green", padding=(0, 1))
-
     def on_mount(self) -> None:
-        """Initialize the comparison screen"""
-        self.title = "SampleMind - Audio Comparison"
-        asyncio.create_task(self._load_comparison())
+        table = self.query_one("#comp_table", DataTable)
+        table.add_columns("Feature", "Sample A", "Sample B", "Delta")
+        self.query_one("#path_a", Input).focus()
 
-    async def _load_comparison(self) -> None:
-        """Load and display comparison"""
-        try:
-            self.is_loading = True
+    @on(Button.Pressed, "#btn_browse_a")
+    def on_browse_a(self, _: Button.Pressed) -> None:
+        self._browse("#path_a")
 
-            if len(self.features_list) < 2:
-                self.app.push_screen(
-                    ErrorDialog("Error", "At least 2 files are required for comparison")
-                )
-                return
+    @on(Button.Pressed, "#btn_browse_b")
+    def on_browse_b(self, _: Button.Pressed) -> None:
+        self._browse("#path_b")
 
-            # Compare all against the first one
-            features1_name, features1 = self.features_list[0]
-            features2_name, features2 = self.features_list[1]
+    @on(Button.Pressed, "#btn_compare")
+    def on_compare(self, _: Button.Pressed) -> None:
+        self.action_run_comparison()
 
-            # Calculate comparison
-            self.comparison_results = self.comparison_engine.compare_features(
-                features1, features2
-            )
-
-            # Get summary
-            summary = self.comparison_engine.get_comparison_summary()
-
-            # Update stats
-            stats_text = (
-                f"Similarity: {self.comparison_engine.calculate_similarity(features1, features2):.1f}% | "
-                f"Exact Matches: {summary.get('exact_matches', 0)} | "
-                f"Similar: {summary.get('similar_values', 0)} | "
-                f"Avg Diff: {summary.get('average_percent_difference', 0):.1f}%"
-            )
-            stats_area = self.query_one("#stats_area")
-            stats_area.update(Panel(stats_text, border_style="blue", padding=(0, 1)))
-
-            # Populate table
-            table = self.query_one("#comparison_table", DataTable)
-
-            for result in self.comparison_results:
-                status = "✓" if result.match else ("~" if result.similar else "✗")
-                status_style = (
-                    "green" if result.match else "yellow" if result.similar else "red"
-                )
-
-                # Format values
-                val1_str = self._format_value(result.value_1)
-                val2_str = self._format_value(result.value_2)
-                diff_str = self._format_difference(
-                    result.difference, result.percentage_diff
-                )
-
-                table.add_row(
-                    result.property_name,
-                    val1_str,
-                    val2_str,
-                    diff_str,
-                    Text(status, style=f"bold {status_style}"),
-                )
-
-            self.notify(
-                f"✅ Compared {len(self.comparison_results)} properties",
-                severity="information",
-            )
-
-        except Exception as e:
-            self.app.push_screen(
-                ErrorDialog("Error", f"Failed to load comparison: {e}")
-            )
-        finally:
-            self.is_loading = False
-
-    @staticmethod
-    def _format_value(value: Any) -> str:
-        """Format a value for display"""
-        if isinstance(value, float):
-            return f"{value:.2f}"
-        elif isinstance(value, list):
-            return f"[{len(value)} items]"
-        else:
-            return str(value)
-
-    @staticmethod
-    def _format_difference(
-        difference: Optional[float], percentage: Optional[float]
-    ) -> str:
-        """Format difference for display"""
-        if difference is None:
-            return "-"
-        if percentage is None:
-            return f"{difference:+.2f}"
-        return f"{difference:+.2f} ({percentage:+.1f}%)"
-
-    def on_button_pressed(self, event) -> None:
-        """Handle button presses"""
-        button_id = event.button.id
-
-        if button_id == "back_btn":
-            self.action_back()
-        elif button_id == "export_btn":
-            asyncio.create_task(self._export_comparison())
-        elif button_id == "refresh_btn":
-            asyncio.create_task(self._load_comparison())
-
-    async def _export_comparison(self) -> None:
-        """Export comparison to file"""
-        try:
-            self.notify("📤 Export functionality coming soon!", severity="information")
-        except Exception as e:
-            self.app.push_screen(ErrorDialog("Error", f"Failed to export: {e}"))
-
-    def action_back(self) -> None:
-        """Go back to previous screen"""
+    @on(Button.Pressed, "#btn_back")
+    def on_back(self, _: Button.Pressed) -> None:
         self.app.pop_screen()
 
-    def action_export_comparison(self) -> None:
-        """Keyboard shortcut to export"""
-        asyncio.create_task(self._export_comparison())
+    def _browse(self, target_id: str) -> None:
+        try:
+            from samplemind.utils.file_picker import CrossPlatformFilePicker
 
-    def action_refresh(self) -> None:
-        """Keyboard shortcut to refresh"""
-        asyncio.create_task(self._load_comparison())
+            picker = CrossPlatformFilePicker()
+            selected = picker.choose_file(
+                file_types=["wav", "mp3", "flac", "m4a", "ogg"],
+            )
+            if selected:
+                self.query_one(target_id, Input).value = str(selected)
+        except Exception as exc:
+            self.notify(f"File picker unavailable: {exc}", severity="warning")
+
+    @work(exclusive=True, thread=True)
+    def _compare(self, path_a: str, path_b: str) -> None:
+        import asyncio
+
+        try:
+            from samplemind.core.engine.audio_engine import AnalysisLevel
+            from samplemind.interfaces.tui.audio_engine_bridge import get_tui_engine
+
+            engine = get_tui_engine()
+            level = AnalysisLevel.DETAILED
+            self.app.call_from_thread(self._log, "[cyan]Analyzing sample A...[/]")
+            loop = asyncio.new_event_loop()
+            feat_a = loop.run_until_complete(engine.analyze_file(path_a, None, level))
+            self.app.call_from_thread(self._log, "[cyan]Analyzing sample B...[/]")
+            feat_b = loop.run_until_complete(engine.analyze_file(path_b, None, level))
+            loop.close()
+            self.app.call_from_thread(self._populate_comparison, feat_a, feat_b)
+        except Exception as exc:
+            self.app.call_from_thread(self._log, f"[red]Comparison error: {exc}[/]")
+
+    def _populate_comparison(self, feat_a: Any, feat_b: Any) -> None:
+        table = self.query_one("#comp_table", DataTable)
+        table.clear()
+        attrs = [
+            "tempo",
+            "key",
+            "loudness",
+            "spectral_centroid",
+            "duration",
+            "genre",
+            "zero_crossing_rate",
+            "mood",
+        ]
+        for attr in attrs:
+            val_a = getattr(feat_a, attr, "-") if feat_a else "-"
+            val_b = getattr(feat_b, attr, "-") if feat_b else "-"
+            if isinstance(val_a, float) and isinstance(val_b, float):
+                delta = f"{val_b - val_a:+.2f}"
+                val_a_s = f"{val_a:.2f}"
+                val_b_s = f"{val_b:.2f}"
+            else:
+                delta = "" if str(val_a) == str(val_b) else "differs"
+                val_a_s = str(val_a)
+                val_b_s = str(val_b)
+            table.add_row(attr.replace("_", " ").title(), val_a_s, val_b_s, delta)
+        self._log("[green]Comparison complete![/]")
+
+    def _log(self, msg: str) -> None:
+        try:
+            self.query_one("#log_area", RichLog).write(msg)
+        except Exception:
+            pass
+
+    def action_run_comparison(self) -> None:
+        path_a = self.query_one("#path_a", Input).value.strip()
+        path_b = self.query_one("#path_b", Input).value.strip()
+        if not path_a or not path_b:
+            self.notify("Enter both file paths first", severity="warning")
+            return
+        self._compare(path_a, path_b)
+
+    def action_back(self) -> None:
+        self.app.pop_screen()

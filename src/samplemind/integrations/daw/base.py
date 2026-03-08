@@ -14,6 +14,7 @@ from enum import Enum
 
 class DAWType(str, Enum):
     """Supported DAW types"""
+
     FL_STUDIO = "fl_studio"
     ABLETON = "ableton"
     LOGIC_PRO = "logic_pro"
@@ -23,6 +24,7 @@ class DAWType(str, Enum):
 @dataclass
 class DAWProject:
     """Information about the current DAW project"""
+
     name: str
     path: Optional[str] = None
     tempo: float = 120.0
@@ -34,6 +36,7 @@ class DAWProject:
 @dataclass
 class DAWChannel:
     """Representation of a mixer channel"""
+
     index: int
     name: str
     type: str = "audio"  # audio, instrument, aux, master

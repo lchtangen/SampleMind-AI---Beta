@@ -31,7 +31,9 @@ class SemanticCache:
     - Memory limits: Automatic eviction of least-used entries
     """
 
-    def __init__(self, max_embeddings: int = 10000, cache_dir: str = ".semantic_cache") -> None:
+    def __init__(
+        self, max_embeddings: int = 10000, cache_dir: str = ".semantic_cache"
+    ) -> None:
         """
         Initialize semantic cache.
 
@@ -75,13 +77,18 @@ class SemanticCache:
             SHA256 hash of file content
         """
         try:
-            with open(audio_path, 'rb') as f:
+            with open(audio_path, "rb") as f:
                 return hashlib.sha256(f.read()).hexdigest()
         except Exception as e:
             logger.warning(f"Failed to hash audio file {audio_path}: {e}")
             return hashlib.sha256(str(audio_path).encode()).hexdigest()
 
-    def _hash_query(self, query_text: str, n_results: int = 5, metadata_filter: Optional[Dict] = None) -> str:
+    def _hash_query(
+        self,
+        query_text: str,
+        n_results: int = 5,
+        metadata_filter: Optional[Dict] = None,
+    ) -> str:
         """
         Generate deterministic hash for semantic query.
 
@@ -96,7 +103,7 @@ class SemanticCache:
         key_data = {
             "query": query_text,
             "n_results": n_results,
-            "filter": metadata_filter
+            "filter": metadata_filter,
         }
         key_str = json.dumps(key_data, sort_keys=True)
         return hashlib.sha256(key_str.encode()).hexdigest()
@@ -174,7 +181,7 @@ class SemanticCache:
         query_text: str,
         n_results: int = 5,
         metadata_filter: Optional[Dict] = None,
-        ttl: int = 3600
+        ttl: int = 3600,
     ) -> Optional[List[Dict]]:
         """
         Get cached semantic search results.
@@ -195,6 +202,7 @@ class SemanticCache:
 
             # Check TTL
             import time
+
             if time.time() - timestamp > ttl:
                 del self.query_cache[query_hash]
                 self.query_misses += 1
@@ -213,7 +221,7 @@ class SemanticCache:
         query_text: str,
         results: List[Dict],
         n_results: int = 5,
-        metadata_filter: Optional[Dict] = None
+        metadata_filter: Optional[Dict] = None,
     ) -> bool:
         """
         Cache semantic search results.
@@ -229,6 +237,7 @@ class SemanticCache:
         """
         try:
             import time
+
             query_hash = self._hash_query(query_text, n_results, metadata_filter)
             self.query_cache[query_hash] = (results, time.time())
             logger.debug(f"Cached query result: {query_text}")
@@ -244,8 +253,7 @@ class SemanticCache:
 
         # Find least accessed embedding
         min_key = min(
-            self.embeddings_cache.keys(),
-            key=lambda k: self.access_count.get(k, 0)
+            self.embeddings_cache.keys(), key=lambda k: self.access_count.get(k, 0)
         )
 
         del self.embeddings_cache[min_key]
@@ -266,9 +274,11 @@ class SemanticCache:
                 self.query_hits / query_total if query_total > 0 else 0.0
             ),
             "overall_hit_ratio": (
-                (self.embedding_hits + self.query_hits) /
-                (embedding_total + query_total) if (embedding_total + query_total) > 0 else 0.0
-            )
+                (self.embedding_hits + self.query_hits)
+                / (embedding_total + query_total)
+                if (embedding_total + query_total) > 0
+                else 0.0
+            ),
         }
 
     def get_stats(self) -> Dict[str, Any]:
@@ -282,7 +292,7 @@ class SemanticCache:
             "cached_embeddings": len(self.embeddings_cache),
             "max_embeddings": self.max_embeddings,
             "cached_queries": len(self.query_cache),
-            "cache_dir": str(self.cache_dir.absolute())
+            "cache_dir": str(self.cache_dir.absolute()),
         }
 
     def clear(self) -> None:
@@ -318,6 +328,7 @@ def get_semantic_cache() -> SemanticCache:
 
 # Cached wrappers for neural and semantic operations
 
+
 async def cached_embedding(neural_extractor, audio_path: str) -> List[float]:
     """
     Generate embedding with caching.
@@ -350,7 +361,7 @@ async def cached_query(
     query_text: str,
     n_results: int = 5,
     metadata_filter: Optional[Dict] = None,
-    ttl: int = 3600
+    ttl: int = 3600,
 ) -> List[Dict]:
     """
     Perform semantic search with caching.
@@ -368,28 +379,34 @@ async def cached_query(
     cache = get_semantic_cache()
 
     # Try to get from cache
-    cached = await cache.get_query_result(
-        query_text, n_results, metadata_filter, ttl
-    )
+    cached = await cache.get_query_result(query_text, n_results, metadata_filter, ttl)
     if cached is not None:
         return cached
 
     # Execute query
     results = chroma_collection.query(
-        query_texts=[query_text],
-        n_results=n_results,
-        where=metadata_filter
+        query_texts=[query_text], n_results=n_results, where=metadata_filter
     )
 
     # Format results
     formatted_results = []
-    if results and results['ids'] and len(results['ids']) > 0:
-        for i, sample_id in enumerate(results['ids'][0]):
-            formatted_results.append({
-                'id': sample_id,
-                'distance': results.get('distances', [[]])[0][i] if i < len(results.get('distances', [[]])[0]) else 0,
-                'metadata': results['metadatas'][0][i] if i < len(results['metadatas'][0]) else {}
-            })
+    if results and results["ids"] and len(results["ids"]) > 0:
+        for i, sample_id in enumerate(results["ids"][0]):
+            formatted_results.append(
+                {
+                    "id": sample_id,
+                    "distance": (
+                        results.get("distances", [[]])[0][i]
+                        if i < len(results.get("distances", [[]])[0])
+                        else 0
+                    ),
+                    "metadata": (
+                        results["metadatas"][0][i]
+                        if i < len(results["metadatas"][0])
+                        else {}
+                    ),
+                }
+            )
 
     # Cache result
     await cache.set_query_result(

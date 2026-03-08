@@ -1,490 +1,198 @@
-"""
-Analyze Screen for SampleMind TUI
-Single file analysis with progress tracking and AudioEngine integration
-"""
+"""Analyze Screen for SampleMind TUI v3.0"""
 
-import asyncio
+from __future__ import annotations
+
 import os
 from pathlib import Path
 
+from textual import on, work
 from textual.app import ComposeResult
+from textual.binding import Binding
+from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
-from textual.widgets import Header, Footer, Button, Static, Input, ProgressBar
-from textual.containers import Container, Vertical, Horizontal
-from textual.reactive import reactive
-
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
-from rich.panel import Panel
-from rich.text import Text
-from rich.table import Table
-
-from samplemind.interfaces.tui.audio_engine_bridge import get_tui_engine
-from samplemind.core.engine.audio_engine import AnalysisLevel
-from samplemind.utils.file_picker import CrossPlatformFilePicker
-from samplemind.interfaces.tui.widgets.dialogs import (
-    ErrorDialog,
-    InfoDialog,
-    LoadingDialog,
-    WarningDialog,
+from textual.widgets import (
+    Button,
+    Collapsible,
+    Footer,
+    Header,
+    Input,
+    Label,
+    ProgressBar,
+    RadioButton,
+    RadioSet,
+    RichLog,
 )
-from samplemind.interfaces.tui.screens.results_screen import ResultsScreen
+
+from ..widgets.dialogs import ErrorDialog
+
+_VALID_EXT = {".wav", ".mp3", ".flac", ".m4a", ".ogg", ".aiff", ".opus"}
+_LEVELS: list[tuple[str, str]] = [
+    ("basic", "BASIC - BPM+Key only (~0.5s)"),
+    ("standard", "STANDARD - +MFCC+Chroma (~1.5s)"),
+    ("detailed", "DETAILED - +Harmonic/Percussive (~2.5s)"),
+    ("professional", "PROFESSIONAL - +AI analysis (~4s)"),
+]
 
 
 class AnalyzeScreen(Screen):
-    """Screen for analyzing single audio files with AudioEngine integration"""
-
-    DEFAULT_CSS = """
-    AnalyzeScreen {
-        layout: vertical;
-    }
-
-    #analyze_container {
-        width: 1fr;
-        height: 1fr;
-        padding: 1 2;
-    }
-
-    #file_input {
-        width: 1fr;
-        height: 3;
-        margin-bottom: 1;
-    }
-
-    #level_selector {
-        width: 1fr;
-        height: 3;
-        margin-bottom: 1;
-    }
-
-    #button_area {
-        width: 1fr;
-        height: auto;
-        margin-top: 1;
-        margin-bottom: 1;
-    }
-
-    #progress_area {
-        width: 1fr;
-        height: 3;
-        border: solid $success;
-        padding: 1;
-        margin-bottom: 1;
-        display: none;
-    }
-
-    #progress_area.active {
-        display: block;
-    }
-
-    #results_area {
-        width: 1fr;
-        height: 1fr;
-        border: solid $accent;
-        padding: 1;
-        overflow: auto;
-    }
-    """
+    """Single-file audio analysis with RichLog streaming and @work background."""
 
     BINDINGS = [
-        ("escape", "back", "Back"),
-        ("enter", "analyze_file", "Analyze"),
+        Binding("escape", "action_back", "Back"),
+        Binding("ctrl+r", "start_analysis", "Analyze"),
     ]
 
-    file_path: reactive[str] = reactive("")
-    is_analyzing: reactive[bool] = reactive(False)
-    progress_value: reactive[float] = reactive(0.0)
+    DEFAULT_CSS = """
+    AnalyzeScreen { layout: vertical; }
+    #analyze_body { height: 1fr; padding: 1 2; }
+    .screen-title { color: $primary; text-style: bold; height: 1; margin-bottom: 1; }
+    #file_row { height: 3; margin-bottom: 1; }
+    #file_row Input { width: 1fr; margin-bottom: 0; }
+    #file_row Button { min-width: 12; margin-left: 1; }
+    #btn_row { height: auto; margin: 1 0; }
+    #btn_row Button { margin-right: 1; }
+    #progress_bar { margin-bottom: 1; }
+    #log_out { height: 1fr; }
+    """
 
     def compose(self) -> ComposeResult:
-        """Compose the analyze screen layout""
         yield Header(show_clock=True)
-
-        with Vertical(id="analyze_container"):
-            yield Static(
-                self._render_title(),
-                id="analyze_title"
-            )
-
-            yield Input(
-                placeholder="Enter audio file path (WAV, MP3, FLAC, M4A, OGG)...",
-                id="file_input"
-            )
-
-            yield Static(
-                self._render_level_selector(),
-                id="level_selector"
-            )
-
-            with Horizontal(id="button_area"):
-                yield Button("📁 Browse", id="browse_btn", variant="primary")
-                yield Button("🎵 Analyze", id="analyze_btn", variant="success")
-                yield Button("⬅️  Back", id="back_btn", variant="warning")
-
-            yield Static(
-                self._render_progress(),
-                id="progress_area"
-            )
-
-            yield Static(
-                self._render_placeholder(),
-                id="results_area"
-            )
-
+        with Vertical(id="analyze_body"):
+            yield Label("Analyze Single Audio File", classes="screen-title")
+            with Horizontal(id="file_row"):
+                yield Input(
+                    placeholder="Audio file path (WAV, MP3, FLAC, M4A, OGG, AIFF)...",
+                    id="file_input",
+                )
+                yield Button("Browse", id="btn_browse", variant="primary")
+            with Collapsible(title="Analysis Options", collapsed=True):
+                with RadioSet(id="level_set"):
+                    for value, label in _LEVELS:
+                        yield RadioButton(label, id=f"lev_{value}")
+            with Horizontal(id="btn_row"):
+                yield Button("Analyze", id="btn_analyze", variant="success")
+                yield Button("Back", id="btn_back", variant="warning")
+            yield ProgressBar(total=100, id="progress_bar", show_eta=False)
+            yield RichLog(highlight=True, markup=True, id="log_out", wrap=True)
         yield Footer()
 
-    def _render_title(self) -> Panel:
-        """Render screen title"""
-        title = Text("🎯 Analyze Single Audio File", style="bold cyan")
-        return Panel(title, border_style="green", padding=(0, 1))
-
-    def _render_level_selector(self) -> Panel:
-        """Render analysis level selector"""
-        levels = "📊 Analysis Level: [B]ASIC (0.5s) | [S]TANDARD (1.5s) | [D]ETAILED (2.5s) | [P]ROFESSIONAL (3.5s)"
-        text = Text(levels, style="dim yellow")
-        return Panel(text, border_style="yellow", padding=(0, 1))
-
-    def _render_progress(self) -> Panel:
-        """Render progress panel"""
-        progress_text = Text(
-            "Analyzing audio file...",
-            style="bold green"
-        )
-        return Panel(progress_text, border_style="green", padding=(0, 1))
-
-    def _render_placeholder(self) -> Panel:
-        """Render placeholder for results"""
-        text = Text(
-            "📊 Analysis results will appear here\n\n"
-            "Supported formats: WAV, MP3, FLAC, M4A, OGG, AIFF\n"
-            "Features extracted: tempo, key, spectral analysis, MFCC, and more",
-            style="dim"
-        )
-        return Panel(text, border_style="blue", padding=(1, 2))
-
     def on_mount(self) -> None:
-        """Initialize the analyze screen"""
-        self.title = "SampleMind - Analyze"
-        self.tui_engine = get_tui_engine()
-        self.file_picker = CrossPlatformFilePicker()
-        self.analysis_level = AnalysisLevel.STANDARD
-
-        file_input = self.query_one("#file_input", Input)
-        file_input.focus()
-
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Handle button presses"""
-        button_id = event.button.id
-
-        if button_id == "browse_btn":
-            self.action_browse_file()
-        elif button_id == "analyze_btn":
-            self.action_analyze_file()
-        elif button_id == "back_btn":
-            self.action_back()
-
-    def action_browse_file(self) -> None:
-        """Open cross-platform file browser with comprehensive error handling"""
+        self._level = "STANDARD"
         try:
-            selected_file = self.file_picker.choose_file(
-                file_types=[
-                    ("Audio files", ["*.wav", "*.mp3", "*.flac", "*.m4a", "*.ogg", "*.aiff"]),
-                    ("All files", ["*.*"])
-                ],
-                title="Select Audio File"
-            )
+            self.query_one("#lev_standard", RadioButton).value = True
+        except Exception:
+            pass
+        self.query_one("#file_input", Input).focus()
 
-            if selected_file:
-                # Validate the selected file
-                file_path = Path(selected_file)
+    @on(RadioSet.Changed, "#level_set")
+    def on_level_changed(self, event: RadioSet.Changed) -> None:
+        if event.pressed and event.pressed.id:
+            self._level = event.pressed.id.replace("lev_", "").upper()
 
-                if not file_path.exists():
-                    self.app.push_screen(
-                        ErrorDialog(
-                            "File Not Found",
-                            f"The selected file no longer exists:\n\n{selected_file}\n\n"
-                            "The file may have been moved or deleted."
-                        )
-                    )
-                    return
-
-                if not file_path.is_file():
-                    self.app.push_screen(
-                        ErrorDialog(
-                            "Not a File",
-                            f"The path is a directory, not a file:\n\n{selected_file}"
-                        )
-                    )
-                    return
-
-                if not os.access(selected_file, os.R_OK):
-                    self.app.push_screen(
-                        ErrorDialog(
-                            "File Not Readable",
-                            f"Permission denied reading file:\n\n{selected_file}\n\n"
-                            "Please check file permissions."
-                        )
-                    )
-                    return
-
-                # Update input field
-                file_input = self.query_one("#file_input", Input)
-                file_input.value = selected_file
-
-                # Show success notification with file info
-                file_size = self._format_size(os.path.getsize(selected_file))
-                self.notify(
-                    f"✅ Selected: {os.path.basename(selected_file)} ({file_size})",
-                    severity="information"
-                )
-
-        except PermissionError:
-            self.app.push_screen(
-                ErrorDialog(
-                    "Permission Denied",
-                    "You don't have permission to access the file picker.\n\n"
-                    "Please check your system permissions."
-                )
-            )
-        except Exception as e:
-            error_msg = str(e)
-            if "cancelled" in error_msg.lower() or "cancel" in error_msg.lower():
-                # User cancelled file picker, don't show error
-                return
-
-            self.app.push_screen(
-                ErrorDialog(
-                    "File Selection Error",
-                    f"Error selecting file:\n\n{error_msg}"
-                )
-            )
-
-    @staticmethod
-    def _format_size(size_bytes: int) -> str:
-        """Format bytes to human-readable size"""
-        for unit in ["B", "KB", "MB", "GB"]:
-            if size_bytes < 1024:
-                return f"{size_bytes:.1f} {unit}"
-            size_bytes /= 1024
-        return f"{size_bytes:.1f} TB"
-
-    async def action_analyze_file(self) -> None:
-        """Start file analysis with AudioEngine and comprehensive error handling"""
-        file_input = self.query_one("#file_input", Input)
-        file_path = file_input.value.strip()
-
-        # Validate input
-        if not file_path:
-            self.app.push_screen(
-                ErrorDialog(
-                    "No File Selected",
-                    "Please enter or select an audio file path to analyze."
-                )
-            )
-            return
-
-        file = Path(file_path)
-
-        # Validate file exists
-        if not file.exists():
-            self.app.push_screen(
-                ErrorDialog(
-                    "File Not Found",
-                    f"The file does not exist:\n\n{file_path}"
-                )
-            )
-            return
-
-        # Validate file is not a directory
-        if file.is_dir():
-            self.app.push_screen(
-                ErrorDialog(
-                    "Invalid File",
-                    f"The path is a directory, not a file:\n\n{file_path}\n\n"
-                    "Please select an audio file."
-                )
-            )
-            return
-
-        # Validate file extension
-        valid_extensions = {".wav", ".mp3", ".flac", ".m4a", ".ogg", ".aiff"}
-        if file.suffix.lower() not in valid_extensions:
-            self.app.push_screen(
-                WarningDialog(
-                    "Unsupported Audio Format",
-                    f"File extension: {file.suffix}\n\n"
-                    "Supported formats: WAV, MP3, FLAC, M4A, OGG, AIFF\n\n"
-                    "Analysis may fail for unsupported formats."
-                )
-            )
-
-        # Validate file is readable
+    @on(Button.Pressed, "#btn_browse")
+    def on_browse(self, _: Button.Pressed) -> None:
         try:
-            if not os.access(file_path, os.R_OK):
-                self.app.push_screen(
-                    ErrorDialog(
-                        "File Not Readable",
-                        f"Permission denied reading file:\n\n{file_path}\n\n"
-                        "Please check file permissions."
-                    )
-                )
-                return
-        except Exception as e:
+            from samplemind.utils.file_picker import CrossPlatformFilePicker
+
+            picker = CrossPlatformFilePicker()
+            selected = picker.choose_file(
+                file_types=["wav", "mp3", "flac", "m4a", "ogg", "aiff"],
+                title="Select Audio File",
+            )
+            if selected:
+                self.query_one("#file_input", Input).value = str(selected)
+        except Exception as exc:
+            self.notify(f"File picker unavailable: {exc}", severity="warning")
+
+    @on(Button.Pressed, "#btn_analyze")
+    async def on_analyze(self, _: Button.Pressed) -> None:
+        await self._validate_and_run()
+
+    @on(Button.Pressed, "#btn_back")
+    def on_back(self, _: Button.Pressed) -> None:
+        self.app.pop_screen()
+
+    @on(Input.Submitted, "#file_input")
+    async def on_path_submitted(self, _: Input.Submitted) -> None:
+        await self._validate_and_run()
+
+    async def _validate_and_run(self) -> None:
+        path_str = self.query_one("#file_input", Input).value.strip()
+        if not path_str:
+            self.app.push_screen(ErrorDialog("No File", "Enter a file path first."))
+            return
+        p = Path(path_str)
+        if not p.exists():
             self.app.push_screen(
-                ErrorDialog(
-                    "File Access Error",
-                    f"Error checking file permissions:\n\n{str(e)}"
-                )
+                ErrorDialog("Not Found", f"File not found: {path_str}")
             )
             return
+        if not p.is_file():
+            self.app.push_screen(
+                ErrorDialog("Not a File", f"Path is a directory: {path_str}")
+            )
+            return
+        if not os.access(path_str, os.R_OK):
+            self.app.push_screen(
+                ErrorDialog("Permission", "Cannot read file - check permissions.")
+            )
+            return
+        self._run_analysis(path_str)
 
-        # Show progress area and disable buttons
-        self.is_analyzing = True
-        progress_area = self.query_one("#progress_area", Static)
-        progress_area.remove_class("-hidden")
-
-        buttons = self.query("Button")
-        for btn in buttons:
-            btn.disabled = True
+    @work(exclusive=True, thread=True)
+    def _run_analysis(self, file_path: str) -> None:
+        import asyncio
 
         try:
-            # Update progress area with loading indicator
-            progress_area.update(Panel(
-                Text("Analyzing audio file...", style="bold green"),
-                border_style="green",
-                padding=(0, 1)
-            ))
+            from samplemind.core.engine.audio_engine import AnalysisLevel
+            from samplemind.interfaces.tui.audio_engine_bridge import get_tui_engine
 
-            # Analyze with progress callback
-            features = await self.tui_engine.analyze_file(
-                file_path,
-                self._handle_progress,
-                self.analysis_level
+            engine = get_tui_engine()
+            level = getattr(AnalysisLevel, self._level, AnalysisLevel.STANDARD)
+            self.app.call_from_thread(self._set_busy, True)
+            self.app.call_from_thread(
+                self._log, f"[cyan]Starting {self._level} analysis...[/]"
             )
-
-            # Display results in new screen
-            self.app.push_screen(
-                ResultsScreen(features, file_path)
+            loop = asyncio.new_event_loop()
+            features = loop.run_until_complete(
+                engine.analyze_file(file_path, self._progress_cb, level)
             )
+            loop.close()
+            self.app.call_from_thread(self._log, "[green]Analysis complete![/]")
+            self.app.call_from_thread(self._push_results, features, file_path)
+        except Exception as exc:
+            self.app.call_from_thread(self._log, f"[red]Error: {exc}[/]")
+            self.app.call_from_thread(self._set_busy, False)
 
-            # Show success notification
-            self.notify(
-                f"✅ Analysis complete: {file.name}",
-                severity="information"
-            )
+    def _progress_cb(self, pct: float) -> None:
+        self.app.call_from_thread(self._set_progress, int(pct * 100))
 
-        except FileNotFoundError as e:
-            self.app.push_screen(
-                ErrorDialog(
-                    "File Not Found During Analysis",
-                    f"The audio file was not found:\n\n{file_path}\n\n"
-                    "The file may have been moved or deleted."
-                )
-            )
-        except ValueError as e:
-            error_msg = str(e)
-            if "audio" in error_msg.lower() or "format" in error_msg.lower():
-                self.app.push_screen(
-                    ErrorDialog(
-                        "Invalid Audio File",
-                        f"The file is not a valid audio file:\n\n{error_msg}\n\n"
-                        "Please check the file format."
-                    )
-                )
-            else:
-                self.app.push_screen(
-                    ErrorDialog(
-                        "Audio Analysis Error",
-                        f"Error processing audio file:\n\n{error_msg}"
-                    )
-                )
-        except Exception as e:
-            error_msg = str(e)
-            self.app.push_screen(
-                ErrorDialog(
-                    "Unexpected Error",
-                    f"An unexpected error occurred during analysis:\n\n{error_msg}\n\n"
-                    "Please check the file and try again."
-                )
-            )
-        finally:
-            # Hide progress area and re-enable buttons
-            self.is_analyzing = False
-            progress_area.add_class("-hidden")
+    def _set_busy(self, busy: bool) -> None:
+        for btn in self.query("Button"):
+            btn.disabled = busy
 
-            for btn in buttons:
-                btn.disabled = False
+    def _set_progress(self, pct: int) -> None:
+        try:
+            self.query_one("#progress_bar", ProgressBar).progress = float(pct)
+        except Exception:
+            pass
 
-    def _handle_progress(self, progress: float) -> None:
-        """Handle progress updates from AudioEngine"""
-        self.progress_value = progress
-        progress_area = self.query_one("#progress_area", Static)
-        progress_text = f"Analyzing... {progress * 100:.0f}%"
-        progress_area.update(Panel(
-            Text(progress_text, style="bold green"),
-            border_style="green",
-            padding=(0, 1)
-        ))
+    def _log(self, msg: str) -> None:
+        try:
+            self.query_one("#log_out", RichLog).write(msg)
+        except Exception:
+            pass
 
-    def _display_results(self, features) -> None:
-        """Display analysis results in beautiful table format"""
-        # Format features for display
-        formatted = self.tui_engine.format_features_for_display(features)
+    def _push_results(self, features: object, file_path: str) -> None:
+        self._set_busy(False)
+        from .results_screen import ResultsScreen
 
-        # Create results table
-        table = Table(title=f"✓ Analysis: {os.path.basename(features.file_path)}")
-        table.add_column("Property", style="cyan", width=25)
-        table.add_column("Value", style="green")
-
-        for key, value in formatted.items():
-            table.add_row(key, str(value))
-
-        # Update results area
-        results_area = self.query_one("#results_area", Static)
-        results_area.update(table)
-
-    def on_key(self, event) -> None:
-        """Handle keyboard shortcuts for analysis levels with enhanced feedback"""
-        if self.is_analyzing:
-            return
-
-        level_info = {
-            "b": (
-                AnalysisLevel.BASIC,
-                "Basic Analysis (Fastest)",
-                "Fast analysis optimized for quick feedback.\n"
-                "Suitable for quick previews and real-time performance.\n"
-                "Est. time: ~0.5 seconds per file"
-            ),
-            "s": (
-                AnalysisLevel.STANDARD,
-                "Standard Analysis (Balanced)",
-                "Balanced analysis with good detail and speed.\n"
-                "Recommended for most use cases and batch processing.\n"
-                "Est. time: ~1.5 seconds per file"
-            ),
-            "d": (
-                AnalysisLevel.DETAILED,
-                "Detailed Analysis (Thorough)",
-                "Comprehensive analysis with maximum feature extraction.\n"
-                "Includes harmonic/percussive separation and advanced features.\n"
-                "Est. time: ~2.5 seconds per file"
-            ),
-            "p": (
-                AnalysisLevel.PROFESSIONAL,
-                "Professional Analysis (Comprehensive)",
-                "Complete professional analysis with all available features.\n"
-                "Maximum detail and accuracy for production-critical analysis.\n"
-                "Est. time: ~3.5 seconds per file"
-            )
-        }
-
-        if event.key in level_info:
-            level, title, description = level_info[event.key]
-            self.analysis_level = level
-
-            self.app.push_screen(
-                InfoDialog(title, description)
-            )
+        self.app.push_screen(ResultsScreen(features, file_path))
 
     def action_back(self) -> None:
-        """Return to main screen"""
         self.app.pop_screen()
+
+    def action_start_analysis(self) -> None:
+        import asyncio
+
+        asyncio.get_event_loop().create_task(self._validate_and_run())

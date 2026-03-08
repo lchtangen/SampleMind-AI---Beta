@@ -5,14 +5,17 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class OrganizationResult:
     """Result of a file organization operation"""
+
     source: Path
     destination: Path
     success: bool
     error: str | None = None
     action: str = "move"  # move, copy, skip
+
 
 class OrganizationEngine:
     """
@@ -22,14 +25,13 @@ class OrganizationEngine:
     def __init__(self, dry_run: bool = False) -> None:
         self.dry_run = dry_run
 
-
     async def organize_file(
         self,
         file_path: Path,
         metadata: dict,
         pattern: str = "{genre}/{bpm}/{key}/{filename}",
         root_dir: Path | None = None,
-        strategy: str = "move"
+        strategy: str = "move",
     ) -> OrganizationResult:
         """
         Organize a single file based on its metadata and a pattern.
@@ -37,7 +39,9 @@ class OrganizationEngine:
         try:
             file_path = Path(file_path).resolve()
             if not file_path.exists():
-                return OrganizationResult(file_path, Path(""), False, "Source file does not exist", strategy)
+                return OrganizationResult(
+                    file_path, Path(""), False, "Source file does not exist", strategy
+                )
 
             # Determine root directory if not provided
             target_root = root_dir if root_dir else file_path.parent
@@ -64,7 +68,13 @@ class OrganizationEngine:
                     shutil.copy2(str(file_path), str(destination))
                 logger.info(f"Copied {file_path} to {destination}")
             else:
-                return OrganizationResult(file_path, destination, False, f"Unknown strategy: {strategy}", strategy)
+                return OrganizationResult(
+                    file_path,
+                    destination,
+                    False,
+                    f"Unknown strategy: {strategy}",
+                    strategy,
+                )
 
             return OrganizationResult(file_path, destination, True, action=strategy)
 
@@ -72,7 +82,9 @@ class OrganizationEngine:
             logger.error(f"Error organizing file {file_path}: {e}")
             return OrganizationResult(file_path, Path(""), False, str(e), strategy)
 
-    def _generate_path(self, metadata: dict, pattern: str, original_filename: str) -> Path:
+    def _generate_path(
+        self, metadata: dict, pattern: str, original_filename: str
+    ) -> Path:
         """
         Generate the destination path based on metadata and pattern.
         """
@@ -83,8 +95,8 @@ class OrganizationEngine:
             "key": metadata.get("key", "Unknown_Key"),
             "artist": metadata.get("artist", "Unknown_Artist"),
             "album": metadata.get("album", "Unknown_Album"),
-            "type": metadata.get("type", "Samples"), # Loop, OneShot, etc.
-            "filename": original_filename
+            "type": metadata.get("type", "Samples"),  # Loop, OneShot, etc.
+            "filename": original_filename,
         }
 
         # Sanitize values to be filesystem safe

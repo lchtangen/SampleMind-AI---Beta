@@ -25,24 +25,27 @@ import typer
 logger = logging.getLogger(__name__)
 console = Console()
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 # ============================================================================
 # ERROR SEVERITY LEVELS
 # ============================================================================
 
+
 class ErrorSeverity(Enum):
     """Error severity classification"""
-    INFO = "ℹ️"          # Informational, non-critical
-    WARNING = "⚠️"       # Warning, operation completed with issues
-    ERROR = "❌"         # Error, operation failed
-    CRITICAL = "🔴"      # Critical, system cannot continue
+
+    INFO = "ℹ️"  # Informational, non-critical
+    WARNING = "⚠️"  # Warning, operation completed with issues
+    ERROR = "❌"  # Error, operation failed
+    CRITICAL = "🔴"  # Critical, system cannot continue
 
 
 # ============================================================================
 # ERROR CATEGORIES
 # ============================================================================
+
 
 class ErrorCategory(Enum):
     """Error categorization for better UX"""
@@ -86,6 +89,7 @@ class ErrorCategory(Enum):
 # CUSTOM EXCEPTION CLASSES
 # ============================================================================
 
+
 class SampleMindError(Exception):
     """Base exception for all SampleMind errors"""
 
@@ -96,7 +100,7 @@ class SampleMindError(Exception):
         severity: ErrorSeverity = ErrorSeverity.ERROR,
         context: Optional[str] = None,
         suggestions: Optional[List[str]] = None,
-        recovery_options: Optional[Dict[str, Callable]] = None
+        recovery_options: Optional[Dict[str, Callable]] = None,
     ):
         self.message = message
         self.category = category
@@ -110,11 +114,13 @@ class SampleMindError(Exception):
 class AudioFileError(SampleMindError):
     """Error loading or processing audio file"""
 
-    def __init__(self, message: str, file_path: Optional[Path] = None, **kwargs) -> None:
-        kwargs['category'] = ErrorCategory.FILE_NOT_FOUND
-        kwargs['severity'] = ErrorSeverity.ERROR
+    def __init__(
+        self, message: str, file_path: Optional[Path] = None, **kwargs
+    ) -> None:
+        kwargs["category"] = ErrorCategory.FILE_NOT_FOUND
+        kwargs["severity"] = ErrorSeverity.ERROR
         if file_path:
-            kwargs['context'] = f"File: {file_path}"
+            kwargs["context"] = f"File: {file_path}"
         super().__init__(message, **kwargs)
 
 
@@ -122,8 +128,8 @@ class AnalysisError(SampleMindError):
     """Error during audio analysis"""
 
     def __init__(self, message: str, **kwargs) -> None:
-        kwargs['category'] = kwargs.get('category', ErrorCategory.ANALYSIS_FAILED)
-        kwargs['severity'] = kwargs.get('severity', ErrorSeverity.ERROR)
+        kwargs["category"] = kwargs.get("category", ErrorCategory.ANALYSIS_FAILED)
+        kwargs["severity"] = kwargs.get("severity", ErrorSeverity.ERROR)
         super().__init__(message, **kwargs)
 
 
@@ -131,8 +137,10 @@ class AIServiceError(SampleMindError):
     """Error with AI services"""
 
     def __init__(self, message: str, **kwargs) -> None:
-        kwargs['category'] = kwargs.get('category', ErrorCategory.AI_SERVICE_UNAVAILABLE)
-        kwargs['severity'] = kwargs.get('severity', ErrorSeverity.ERROR)
+        kwargs["category"] = kwargs.get(
+            "category", ErrorCategory.AI_SERVICE_UNAVAILABLE
+        )
+        kwargs["severity"] = kwargs.get("severity", ErrorSeverity.ERROR)
         super().__init__(message, **kwargs)
 
 
@@ -140,8 +148,8 @@ class ValidationError(SampleMindError):
     """Error validating user input"""
 
     def __init__(self, message: str, **kwargs) -> None:
-        kwargs['category'] = kwargs.get('category', ErrorCategory.INVALID_INPUT)
-        kwargs['severity'] = kwargs.get('severity', ErrorSeverity.ERROR)
+        kwargs["category"] = kwargs.get("category", ErrorCategory.INVALID_INPUT)
+        kwargs["severity"] = kwargs.get("severity", ErrorSeverity.ERROR)
         super().__init__(message, **kwargs)
 
 
@@ -149,14 +157,15 @@ class ResourceError(SampleMindError):
     """Error with system resources"""
 
     def __init__(self, message: str, **kwargs) -> None:
-        kwargs['category'] = kwargs.get('category', ErrorCategory.UNKNOWN)
-        kwargs['severity'] = kwargs.get('severity', ErrorSeverity.ERROR)
+        kwargs["category"] = kwargs.get("category", ErrorCategory.UNKNOWN)
+        kwargs["severity"] = kwargs.get("severity", ErrorSeverity.ERROR)
         super().__init__(message, **kwargs)
 
 
 # ============================================================================
 # ERROR RECOVERY STRATEGIES
 # ============================================================================
+
 
 class ErrorRecoveryStrategy:
     """Base class for error recovery strategies"""
@@ -182,7 +191,7 @@ class FileNotFoundRecovery(ErrorRecoveryStrategy):
 
     def get_suggestions(self) -> List[str]:
         """Get recovery suggestions for file not found errors.
-        
+
         Returns:
             List of actionable suggestions for the user
         """
@@ -195,7 +204,7 @@ class FileNotFoundRecovery(ErrorRecoveryStrategy):
 
     def get_recovery_options(self) -> Dict[str, Callable]:
         """Get interactive recovery options for file not found errors.
-        
+
         Returns:
             Dictionary mapping option names to recovery functions
         """
@@ -203,7 +212,7 @@ class FileNotFoundRecovery(ErrorRecoveryStrategy):
 
         def pick_file():
             """Launch file picker to select audio file.
-            
+
             Returns:
                 Selected file path or None if cancelled
             """
@@ -224,7 +233,7 @@ class InsufficientMemoryRecovery(ErrorRecoveryStrategy):
 
     def get_suggestions(self) -> List[str]:
         """Get recovery suggestions for memory errors.
-        
+
         Returns:
             List of actionable suggestions for the user
         """
@@ -239,6 +248,7 @@ class InsufficientMemoryRecovery(ErrorRecoveryStrategy):
         """Try to recover by clearing caches"""
         try:
             import gc
+
             gc.collect()
             console.print("[yellow]⚠[/yellow] Cleared memory caches, retrying...")
             return True
@@ -251,7 +261,7 @@ class APIErrorRecovery(ErrorRecoveryStrategy):
 
     def get_suggestions(self) -> List[str]:
         """Get recovery suggestions for API/network errors.
-        
+
         Returns:
             List of actionable suggestions for the user
         """
@@ -265,7 +275,7 @@ class APIErrorRecovery(ErrorRecoveryStrategy):
 
     def get_recovery_options(self) -> Dict[str, Callable]:
         """Get interactive recovery options for API errors.
-        
+
         Returns:
             Dictionary mapping option names to recovery functions
         """
@@ -279,6 +289,7 @@ class APIErrorRecovery(ErrorRecoveryStrategy):
 # ============================================================================
 # ERROR RECOVERY FACTORY
 # ============================================================================
+
 
 def get_recovery_strategy(error: SampleMindError) -> ErrorRecoveryStrategy:
     """Get appropriate recovery strategy for error"""
@@ -301,6 +312,7 @@ def get_recovery_strategy(error: SampleMindError) -> ErrorRecoveryStrategy:
 # ERROR DISPLAY AND HANDLING
 # ============================================================================
 
+
 def display_error(error: SampleMindError, verbose: bool = False) -> None:
     """Display error with context and suggestions"""
 
@@ -310,35 +322,37 @@ def display_error(error: SampleMindError, verbose: bool = False) -> None:
     if error.context:
         error_msg += f"\n\n[dim]{error.context}[/dim]"
 
-    console.print(Panel(
-        error_msg,
-        title="[bold red]Error[/bold red]",
-        border_style="red",
-        expand=False
-    ))
+    console.print(
+        Panel(
+            error_msg,
+            title="[bold red]Error[/bold red]",
+            border_style="red",
+            expand=False,
+        )
+    )
 
     # Display suggestions
     if error.suggestions:
         suggestions_text = "\n".join(
-            f"  • {suggestion}"
-            for suggestion in error.suggestions
+            f"  • {suggestion}" for suggestion in error.suggestions
         )
-        console.print(Panel(
-            suggestions_text,
-            title="[bold yellow]Suggestions[/bold yellow]",
-            border_style="yellow",
-            expand=False
-        ))
+        console.print(
+            Panel(
+                suggestions_text,
+                title="[bold yellow]Suggestions[/bold yellow]",
+                border_style="yellow",
+                expand=False,
+            )
+        )
 
     # Display traceback in verbose mode
-    if verbose and hasattr(error, '__traceback__'):
+    if verbose and hasattr(error, "__traceback__"):
         console.print("[dim]Traceback:[/dim]")
-        console.print(Syntax(
-            traceback.format_exc(),
-            "python",
-            theme="monokai",
-            line_numbers=False
-        ))
+        console.print(
+            Syntax(
+                traceback.format_exc(), "python", theme="monokai", line_numbers=False
+            )
+        )
 
 
 def handle_error_interactive(error: SampleMindError) -> Optional[Any]:
@@ -389,10 +403,9 @@ def handle_error_interactive(error: SampleMindError) -> Optional[Any]:
 # ERROR DECORATORS
 # ============================================================================
 
+
 def with_error_recovery(
-    interactive: bool = True,
-    verbose: bool = False,
-    exit_on_error: bool = True
+    interactive: bool = True, verbose: bool = False, exit_on_error: bool = True
 ):
     """Decorator to add error recovery to commands
 
@@ -401,26 +414,28 @@ def with_error_recovery(
         verbose: Show detailed error information
         exit_on_error: Exit program on error (default) or continue
     """
+
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         """Decorator function that wraps the target function with error handling.
-        
+
         Args:
             func: Function to wrap with error handling
-            
+
         Returns:
             Wrapped function with error handling
         """
+
         @wraps(func)
         def wrapper(*args, **kwargs) -> T:
             """Wrapper function that executes the target function with error handling.
-            
+
             Args:
                 *args: Positional arguments for the wrapped function
                 **kwargs: Keyword arguments for the wrapped function
-                
+
             Returns:
                 Result from the wrapped function
-                
+
             Raises:
                 SystemExit: If error occurs and exit_on_error is True
             """
@@ -451,7 +466,7 @@ def with_error_recovery(
                 error = SampleMindError(
                     message=str(e),
                     category=ErrorCategory.UNKNOWN,
-                    severity=ErrorSeverity.ERROR
+                    severity=ErrorSeverity.ERROR,
                 )
 
                 if interactive:
@@ -463,12 +478,14 @@ def with_error_recovery(
                     raise typer.Exit(code=1)
 
         return wrapper
+
     return decorator
 
 
 # ============================================================================
 # CONTEXT MANAGERS FOR ERROR HANDLING
 # ============================================================================
+
 
 class ErrorContext:
     """Context manager for graceful error handling"""
@@ -477,7 +494,7 @@ class ErrorContext:
         self,
         operation: str,
         recovery_options: Optional[Dict[str, Callable]] = None,
-        fallback_value: Any = None
+        fallback_value: Any = None,
     ):
         self.operation = operation
         self.recovery_options = recovery_options or {}
@@ -503,7 +520,7 @@ class ErrorContext:
             error = SampleMindError(
                 message=str(exc_val),
                 context=f"Operation: {self.operation}",
-                category=ErrorCategory.UNKNOWN
+                category=ErrorCategory.UNKNOWN,
             )
             display_error(error)
 
@@ -519,6 +536,7 @@ class ErrorContext:
 # ERROR HELPERS
 # ============================================================================
 
+
 def ensure_file_exists(file_path: Path) -> Path:
     """Ensure file exists, raise error if not"""
     if not file_path.exists():
@@ -528,15 +546,15 @@ def ensure_file_exists(file_path: Path) -> Path:
             suggestions=[
                 f"Check path: {file_path}",
                 "Use --interactive to browse files",
-                "Verify file has read permissions"
-            ]
+                "Verify file has read permissions",
+            ],
         )
     return file_path
 
 
 def ensure_audio_format(file_path: Path) -> Path:
     """Ensure file is valid audio format"""
-    valid_formats = {'.wav', '.mp3', '.flac', '.aiff', '.ogg', '.m4a'}
+    valid_formats = {".wav", ".mp3", ".flac", ".aiff", ".ogg", ".m4a"}
 
     if file_path.suffix.lower() not in valid_formats:
         raise AudioFileError(
@@ -546,7 +564,7 @@ def ensure_audio_format(file_path: Path) -> Path:
             suggestions=[
                 f"Supported formats: {', '.join(valid_formats)}",
                 "Convert file using: ffmpeg -i input.{old} output.wav",
-            ]
+            ],
         )
     return file_path
 
@@ -556,18 +574,16 @@ def ensure_readable(file_path: Path) -> Path:
     try:
         if not file_path.is_file():
             raise AudioFileError(
-                message=f"Not a file: {file_path}",
-                file_path=file_path
+                message=f"Not a file: {file_path}", file_path=file_path
             )
 
         if not file_path.stat().st_size > 0:
             raise AudioFileError(
-                message=f"File is empty: {file_path}",
-                file_path=file_path
+                message=f"File is empty: {file_path}", file_path=file_path
             )
 
         # Try opening
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             f.read(1024)
 
         return file_path
@@ -580,7 +596,7 @@ def ensure_readable(file_path: Path) -> Path:
             suggestions=[
                 "Check file permissions (chmod +r file.wav)",
                 "Run with appropriate privileges if needed",
-            ]
+            ],
         )
     except Exception as e:
         raise AudioFileError(
@@ -590,14 +606,15 @@ def ensure_readable(file_path: Path) -> Path:
             suggestions=[
                 "File may be corrupted",
                 "Try opening with audio player to verify",
-                "Try converting: ffmpeg -i input.mp3 -c copy output.mp3"
-            ]
+                "Try converting: ffmpeg -i input.mp3 -c copy output.mp3",
+            ],
         )
 
 
 # ============================================================================
 # ERROR DIAGNOSTICS
 # ============================================================================
+
 
 def diagnose_system() -> Dict[str, Any]:
     """Diagnose system capabilities"""
@@ -639,14 +656,13 @@ def display_diagnostics() -> None:
 # GRACEFUL DEGRADATION
 # ============================================================================
 
+
 class GracefulDegradation:
     """Handle missing features gracefully"""
 
     @staticmethod
     def with_fallback(
-        primary_func: Callable,
-        fallback_func: Callable,
-        error_message: str = ""
+        primary_func: Callable, fallback_func: Callable, error_message: str = ""
     ) -> Any:
         """Try primary function, fall back to secondary"""
         try:
@@ -659,10 +675,7 @@ class GracefulDegradation:
             return fallback_func()
 
     @staticmethod
-    def optional_feature(
-        feature_func: Callable,
-        feature_name: str
-    ) -> Optional[Any]:
+    def optional_feature(feature_func: Callable, feature_name: str) -> Optional[Any]:
         """Try optional feature, continue if unavailable"""
         try:
             return feature_func()
@@ -676,13 +689,14 @@ class GracefulDegradation:
 # SETUP ERROR LOGGING
 # ============================================================================
 
+
 def setup_error_logging(log_file: Optional[Path] = None) -> None:
     """Setup comprehensive error logging"""
 
     if log_file:
         handler = logging.FileHandler(log_file)
-        handler.setFormatter(logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        ))
+        handler.setFormatter(
+            logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        )
         logger.addHandler(handler)
         logger.setLevel(logging.DEBUG)

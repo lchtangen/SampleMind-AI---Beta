@@ -18,6 +18,7 @@ _database = None
 
 class AudioFile(Document):
     """Audio file metadata model"""
+
     file_id: str = Field(..., unique=True, index=True)
     filename: str
     file_path: str
@@ -33,6 +34,7 @@ class AudioFile(Document):
 
     class Settings:
         """MongoDB collection settings"""
+
         name = "audio_files"
         indexes = [
             "file_id",
@@ -43,6 +45,7 @@ class AudioFile(Document):
 
 class Analysis(Document):
     """Audio analysis results model"""
+
     analysis_id: str = Field(..., unique=True, index=True)
     file_id: str = Field(..., index=True)
     user_id: Optional[str] = None
@@ -73,6 +76,7 @@ class Analysis(Document):
 
     class Settings:
         """MongoDB collection settings"""
+
         name = "analyses"
         indexes = [
             "analysis_id",
@@ -84,6 +88,7 @@ class Analysis(Document):
 
 class BatchJob(Document):
     """Batch processing job model"""
+
     batch_id: str = Field(..., unique=True, index=True)
     user_id: Optional[str] = None
     status: str  # pending, processing, completed, failed
@@ -97,6 +102,7 @@ class BatchJob(Document):
 
     class Settings:
         """MongoDB collection settings"""
+
         name = "batch_jobs"
         indexes = [
             "batch_id",
@@ -108,6 +114,7 @@ class BatchJob(Document):
 
 class Favorite(Document):
     """User favorite analysis model"""
+
     favorite_id: str = Field(..., unique=True, index=True)
     user_id: Optional[str] = None
     analysis_id: str = Field(..., index=True)
@@ -118,6 +125,7 @@ class Favorite(Document):
 
     class Settings:
         """MongoDB collection settings"""
+
         name = "favorites"
         indexes = [
             "favorite_id",
@@ -129,6 +137,7 @@ class Favorite(Document):
 
 class UserSettings(Document):
     """User settings and preferences model"""
+
     settings_id: str = Field(..., unique=True, index=True)
     user_id: Optional[str] = None
 
@@ -158,6 +167,7 @@ class UserSettings(Document):
 
     class Settings:
         """MongoDB collection settings"""
+
         name = "user_settings"
         indexes = [
             "settings_id",
@@ -168,6 +178,7 @@ class UserSettings(Document):
 
 class User(Document):
     """User model (for future authentication)"""
+
     user_id: str = Field(..., unique=True, index=True)
     email: str = Field(..., unique=True, index=True)
     username: str = Field(..., unique=True, index=True)
@@ -194,6 +205,7 @@ class User(Document):
 
     class Settings:
         """MongoDB collection settings"""
+
         name = "users"
         indexes = [
             "user_id",
@@ -204,6 +216,7 @@ class User(Document):
 
 class AudioCollection(Document):
     """Audio collection/playlist model"""
+
     collection_id: str = Field(..., unique=True, index=True)
     user_id: str = Field(..., index=True)
     name: str
@@ -221,6 +234,7 @@ class AudioCollection(Document):
 
     class Settings:
         """MongoDB collection settings"""
+
         name = "audio_collections"
         indexes = [
             "collection_id",
@@ -231,6 +245,7 @@ class AudioCollection(Document):
 
 class APIKey(Document):
     """API key model for external access"""
+
     key_id: str = Field(..., unique=True, index=True)
     user_id: str = Field(..., index=True)
     name: str
@@ -244,6 +259,7 @@ class APIKey(Document):
 
     class Settings:
         """MongoDB collection settings"""
+
         name = "api_keys"
         indexes = [
             "key_id",
@@ -268,14 +284,23 @@ async def init_mongodb(mongodb_url: str, database_name: str = "samplemind"):
         )
 
         # Test connection
-        await _mongo_client.admin.command('ping')
+        await _mongo_client.admin.command("ping")
 
         _database = _mongo_client[database_name]
 
         # Initialize Beanie with document models
         await init_beanie(
             database=_database,
-            document_models=[AudioFile, Analysis, BatchJob, User, APIKey, Favorite, UserSettings, AudioCollection]
+            document_models=[
+                AudioFile,
+                Analysis,
+                BatchJob,
+                User,
+                APIKey,
+                Favorite,
+                UserSettings,
+                AudioCollection,
+            ],
         )
 
         logger.info("✅ MongoDB connected and Beanie initialized")
@@ -310,7 +335,7 @@ async def health_check() -> bool:
     """Check MongoDB connection health"""
     try:
         if _mongo_client:
-            await _mongo_client.admin.command('ping')
+            await _mongo_client.admin.command("ping")
             return True
     except Exception:
         pass

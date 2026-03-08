@@ -32,7 +32,9 @@ class TestForensicsAnalyzer:
 
         assert compression.probability > 0.5
         assert len(compression.indicators) > 0
-        assert "8:1" in compression.estimated_ratio or "4:1" in compression.estimated_ratio
+        assert (
+            "8:1" in compression.estimated_ratio or "4:1" in compression.estimated_ratio
+        )
 
     def test_compression_detection_uncompressed(self, analyzer):
         """Test detection of uncompressed audio"""
@@ -73,11 +75,13 @@ class TestForensicsAnalyzer:
     def test_edit_detection_silence(self, analyzer):
         """Test edit detection with silent gap"""
         # Create signal with silent gap (edit point)
-        audio = np.concatenate([
-            0.5 * np.sin(2 * np.pi * 440 * np.arange(22050) / 44100),
-            np.zeros(4410),  # 100ms silence
-            0.5 * np.sin(2 * np.pi * 440 * np.arange(22050) / 44100),
-        ])
+        audio = np.concatenate(
+            [
+                0.5 * np.sin(2 * np.pi * 440 * np.arange(22050) / 44100),
+                np.zeros(4410),  # 100ms silence
+                0.5 * np.sin(2 * np.pi * 440 * np.arange(22050) / 44100),
+            ]
+        )
 
         edits = analyzer._detect_edits(audio, 44100)
 
@@ -89,9 +93,11 @@ class TestForensicsAnalyzer:
         # Good quality audio - create multi-component signal with good DR
         t = np.arange(44100) / 44100
         # Mix sine waves with varying amplitude for better dynamic range
-        audio = (0.5 * np.sin(2 * np.pi * 440 * t) +
-                 0.3 * np.sin(2 * np.pi * 880 * t) +
-                 0.2 * np.sin(2 * np.pi * 220 * t))
+        audio = (
+            0.5 * np.sin(2 * np.pi * 440 * t)
+            + 0.3 * np.sin(2 * np.pi * 880 * t)
+            + 0.2 * np.sin(2 * np.pi * 220 * t)
+        )
         audio = audio / np.max(np.abs(audio))  # Normalize to -1 to 1
 
         compression = analyzer._analyze_compression(audio)
@@ -154,7 +160,10 @@ class TestForensicsAnalyzer:
 
     def test_global_instance(self):
         """Test global analyzer instance"""
-        from samplemind.core.processing.forensics_analyzer import init_analyzer, get_analyzer
+        from samplemind.core.processing.forensics_analyzer import (
+            init_analyzer,
+            get_analyzer,
+        )
 
         analyzer1 = init_analyzer()
         analyzer2 = get_analyzer()

@@ -33,40 +33,30 @@ Examples:
   python main.py batch ./music_folder     # Process directory
   python main.py --setup-openai          # Setup OpenAI API
   python main.py --setup-google          # Setup Google AI API
-        """
+        """,
     )
-    
+
     parser.add_argument(
         "command",
         nargs="?",
         choices=["analyze", "batch", "scan", "status"],
-        help="Command to execute"
+        help="Command to execute",
     )
-    
+
+    parser.add_argument("path", nargs="?", help="File or directory path")
+
     parser.add_argument(
-        "path",
-        nargs="?",
-        help="File or directory path"
+        "--setup-openai", action="store_true", help="Run OpenAI API setup"
     )
-    
+
     parser.add_argument(
-        "--setup-openai",
-        action="store_true",
-        help="Run OpenAI API setup"
+        "--setup-google", action="store_true", help="Run Google AI API setup"
     )
-    
+
     parser.add_argument(
-        "--setup-google",
-        action="store_true",
-        help="Run Google AI API setup"
+        "--version", action="version", version="SampleMind AI 2.1.0-beta"
     )
-    
-    parser.add_argument(
-        "--version",
-        action="version",
-        version="SampleMind AI 2.1.0-beta"
-    )
-    
+
     return parser.parse_args()
 
 
@@ -77,51 +67,52 @@ async def quick_analyze(file_path: str):
     from src.samplemind.integrations.ai_manager import SampleMindAIManager, AnalysisType
     from rich.console import Console
     from rich.progress import Progress, SpinnerColumn, TextColumn
-    
+
     console = Console()
     file_path = Path(file_path)
-    
+
     if not file_path.exists():
         console.print(f"[bold red]❌ File not found: {file_path}[/bold red]")
         return
-    
+
     try:
         console.print(f"[bold blue]🎵 Analyzing: {file_path.name}[/bold blue]")
-        
+
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
-            console=console
+            console=console,
         ) as progress:
-            
+
             # Initialize components
             progress.add_task("Initializing...", total=None)
             audio_engine = AudioEngine()
             audio_loader = AdvancedAudioLoader()
             ai_manager = SampleMindAIManager()
-            
+
             # Process file
             progress.add_task("Loading audio...", total=None)
             loaded_audio = audio_loader.load_audio(file_path)
-            
+
             progress.add_task("Extracting features...", total=None)
             features = audio_engine.analyze_audio(file_path)
-            
+
             progress.add_task("AI analysis...", total=None)
             ai_result = await ai_manager.analyze_music(
-                features.to_dict(),
-                AnalysisType.COMPREHENSIVE_ANALYSIS
+                features.to_dict(), AnalysisType.COMPREHENSIVE_ANALYSIS
             )
-        
+
         # Display quick results
         console.print(f"\n[bold green]✅ Analysis Complete[/bold green]")
-        console.print(f"[cyan]Duration:[/cyan] {loaded_audio.get_duration_seconds():.2f}s")
+        console.print(
+            f"[cyan]Duration:[/cyan] {loaded_audio.get_duration_seconds():.2f}s"
+        )
         console.print(f"[cyan]Tempo:[/cyan] {features.tempo:.1f} BPM")
         console.print(f"[cyan]Key:[/cyan] {features.key} {features.mode}")
         console.print(f"[cyan]Provider:[/cyan] {ai_result.provider.value}")
         console.print(f"\n[bold blue]🤖 AI Summary:[/bold blue]")
         console.print(ai_result.summary)
-        
+
     except Exception as e:
         console.print(f"[bold red]❌ Analysis failed: {e}[/bold red]")
 
@@ -130,14 +121,14 @@ def run_setup_script(script_name: str):
     """Run setup script"""
     import subprocess
     from rich.console import Console
-    
+
     console = Console()
     script_path = Path(__file__).parent / script_name
-    
+
     if not script_path.exists():
         console.print(f"[bold red]❌ Setup script not found: {script_path}[/bold red]")
         return
-    
+
     try:
         console.print(f"[bold blue]🚀 Running {script_name}...[/bold blue]")
         subprocess.run(["bash", str(script_path)], check=True)
@@ -148,21 +139,21 @@ def run_setup_script(script_name: str):
 async def main():
     """Main entry point"""
     args = parse_args()
-    
+
     # Handle setup commands
     if args.setup_openai:
         run_setup_script("setup_openai_api.sh")
         return
-    
+
     if args.setup_google:
         run_setup_script("setup_google_ai_api.sh")
         return
-    
+
     # Handle quick commands
     if args.command == "analyze" and args.path:
         await quick_analyze(args.path)
         return
-    
+
     # For other commands or no command, start interactive CLI
     await cli_main()
 

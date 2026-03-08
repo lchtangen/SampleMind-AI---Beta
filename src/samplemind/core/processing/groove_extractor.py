@@ -21,9 +21,11 @@ logger = logging.getLogger(__name__)
 # GROOVE TEMPLATE DATA
 # ============================================================================
 
+
 @dataclass
 class GrooveTemplate:
     """Extracted groove template"""
+
     name: str
     tempo_bpm: float
     time_signature: str
@@ -64,6 +66,7 @@ class GrooveTemplate:
 # GROOVE EXTRACTOR ENGINE
 # ============================================================================
 
+
 class GrooveExtractor:
     """Extracts groove templates from audio"""
 
@@ -100,7 +103,9 @@ class GrooveExtractor:
         onsets = self._detect_onsets(audio, sample_rate)
 
         # 2. Calculate timing deviations
-        note_timings, timing_deviation = self._analyze_timing_deviation(onsets, sample_rate)
+        note_timings, timing_deviation = self._analyze_timing_deviation(
+            onsets, sample_rate
+        )
 
         # 3. Analyze velocity/amplitude patterns
         velocity_pattern = self._analyze_velocity_pattern(audio, onsets, sample_rate)
@@ -136,13 +141,15 @@ class GrooveExtractor:
         # Energy-based onset detection
         window_size = int(0.01 * sample_rate)  # 10ms windows
 
-        energy = np.array([
-            np.sum(audio[i:i+window_size]**2)
-            for i in range(0, len(audio)-window_size, window_size)
-        ])
+        energy = np.array(
+            [
+                np.sum(audio[i : i + window_size] ** 2)
+                for i in range(0, len(audio) - window_size, window_size)
+            ]
+        )
 
         # Smooth energy
-        energy_smooth = np.convolve(energy, np.hanning(5)/5, mode='same')
+        energy_smooth = np.convolve(energy, np.hanning(5) / 5, mode="same")
 
         # Find peaks
         diff = np.diff(energy_smooth)
@@ -172,10 +179,12 @@ class GrooveExtractor:
         # Convert to milliseconds and percentage
         deviations_ms = deviations / sample_rate * 1000
 
-        timing_deviation = np.sqrt(np.mean(deviations_ms ** 2))  # RMS
+        timing_deviation = np.sqrt(np.mean(deviations_ms**2))  # RMS
 
         # Normalize to -100 to +100ms range
-        note_timings = (deviations_ms / np.max(np.abs(deviations_ms) + 1e-10) * 50).tolist()
+        note_timings = (
+            deviations_ms / np.max(np.abs(deviations_ms) + 1e-10) * 50
+        ).tolist()
 
         return note_timings, float(timing_deviation)
 
@@ -214,8 +223,8 @@ class GrooveExtractor:
         # Swing creates alternating early/late timing
         swing_pattern = []
 
-        for i in range(0, len(note_timings)-1, 2):
-            swing_pattern.append(note_timings[i] - note_timings[i+1])
+        for i in range(0, len(note_timings) - 1, 2):
+            swing_pattern.append(note_timings[i] - note_timings[i + 1])
 
         if not swing_pattern:
             return 50.0
@@ -228,7 +237,9 @@ class GrooveExtractor:
 
         return float(np.clip(swing_percent, 0, 100))
 
-    def _classify_groove_type(self, swing_amount: float, timing_deviation: float) -> str:
+    def _classify_groove_type(
+        self, swing_amount: float, timing_deviation: float
+    ) -> str:
         """Classify groove type based on characteristics"""
         if swing_amount > 65:
             if swing_amount > 80:
@@ -262,6 +273,7 @@ class GrooveExtractor:
 # GROOVE APPLICATION
 # ============================================================================
 
+
 class GrooveApplicator:
     """Applies groove template to MIDI or audio"""
 
@@ -280,21 +292,31 @@ class GrooveApplicator:
         modified_notes = []
 
         for i, note in enumerate(midi_notes):
-            timing_offset = groove.note_timings[i % len(groove.note_timings)] if groove.note_timings else 0
+            timing_offset = (
+                groove.note_timings[i % len(groove.note_timings)]
+                if groove.note_timings
+                else 0
+            )
 
             # Apply timing offset
-            note['time'] += timing_offset / 1000  # Convert ms to seconds
+            note["time"] += timing_offset / 1000  # Convert ms to seconds
 
             # Apply velocity pattern
-            velocity_scale = groove.velocity_pattern[i % len(groove.velocity_pattern)] / 100 if groove.velocity_pattern else 1.0
-            note['velocity'] = int(note.get('velocity', 100) * velocity_scale)
+            velocity_scale = (
+                groove.velocity_pattern[i % len(groove.velocity_pattern)] / 100
+                if groove.velocity_pattern
+                else 1.0
+            )
+            note["velocity"] = int(note.get("velocity", 100) * velocity_scale)
 
             modified_notes.append(note)
 
         return modified_notes
 
     @staticmethod
-    def apply_to_audio_timing(audio: np.ndarray, groove: GrooveTemplate, sr: int) -> np.ndarray:
+    def apply_to_audio_timing(
+        audio: np.ndarray, groove: GrooveTemplate, sr: int
+    ) -> np.ndarray:
         """Apply groove timing shifts to audio (time-stretching)"""
         # This would require advanced resampling
         # Simplified version: just return original audio

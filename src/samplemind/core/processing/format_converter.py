@@ -132,7 +132,9 @@ class AudioFormatConverter:
 
         # Choose backend
         if dst_fmt in _PYDUB_FORMATS or src_fmt in _PYDUB_FORMATS:
-            return self._convert_pydub(source, destination, result, quality, target_sr, normalize_loudness)
+            return self._convert_pydub(
+                source, destination, result, quality, target_sr, normalize_loudness
+            )
 
         # Primary: pedalboard
         pedalboard_result = self._convert_pedalboard(
@@ -143,7 +145,9 @@ class AudioFormatConverter:
 
         # Fallback: pydub
         logger.info(f"pedalboard failed, trying pydub for {source.name}")
-        return self._convert_pydub(source, destination, result, quality, target_sr, normalize_loudness)
+        return self._convert_pydub(
+            source, destination, result, quality, target_sr, normalize_loudness
+        )
 
     async def convert_async(
         self,
@@ -171,7 +175,9 @@ class AudioFormatConverter:
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(
             _EXECUTOR,
-            lambda: self.convert(source, destination, quality, sample_rate, normalize_loudness),
+            lambda: self.convert(
+                source, destination, quality, sample_rate, normalize_loudness
+            ),
         )
 
     # ------------------------------------------------------------------
@@ -307,7 +313,7 @@ def _normalize_to_lufs(
         pass
 
     # RMS fallback
-    rms = float(np.sqrt(np.mean(audio ** 2)))
+    rms = float(np.sqrt(np.mean(audio**2)))
     if rms > 1e-9:
         target_rms = 10.0 ** (target_lufs / 20.0)
         gain = target_rms / rms

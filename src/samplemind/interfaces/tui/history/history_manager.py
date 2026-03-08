@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 class OperationType(Enum):
     """Types of operations that can be undone"""
+
     ANALYSIS = "analysis"
     TAG_ADD = "tag_add"
     TAG_REMOVE = "tag_remove"
@@ -30,6 +31,7 @@ class OperationType(Enum):
 @dataclass
 class HistoryEntry:
     """Single history entry for undo/redo"""
+
     operation_type: OperationType
     timestamp: str
     description: str
@@ -189,9 +191,7 @@ class HistoryManager:
         self, operation_type: OperationType, limit: int = 20
     ) -> List[HistoryEntry]:
         """Get history entries of specific type"""
-        entries = [
-            e for e in self.history if e.operation_type == operation_type
-        ]
+        entries = [e for e in self.history if e.operation_type == operation_type]
         return entries[-limit:] if limit else entries
 
     def get_current_state(self) -> Optional[HistoryEntry]:

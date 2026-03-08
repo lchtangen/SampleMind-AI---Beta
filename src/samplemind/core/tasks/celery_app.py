@@ -19,7 +19,7 @@ celery_app = Celery(
     backend=CELERY_RESULT_BACKEND,
     include=[
         "samplemind.core.tasks.audio_tasks",
-    ]
+    ],
 )
 
 # Celery configuration
@@ -30,18 +30,15 @@ celery_app.conf.update(
     result_serializer="json",
     timezone="UTC",
     enable_utc=True,
-    
     # Task execution settings
     task_track_started=True,
     task_time_limit=3600,  # 1 hour hard limit
     task_soft_time_limit=3000,  # 50 minutes soft limit
     task_acks_late=True,
     worker_prefetch_multiplier=1,
-    
     # Result backend settings
     result_expires=3600 * 24,  # Results expire after 24 hours
     result_extended=True,
-    
     # Task routing
     task_default_queue="default",
     task_queues=(
@@ -53,26 +50,23 @@ celery_app.conf.update(
     task_routes={
         "samplemind.core.tasks.audio_tasks.process_audio_analysis": {
             "queue": "audio_processing",
-            "routing_key": "audio.process"
+            "routing_key": "audio.process",
         },
         "samplemind.core.tasks.audio_tasks.batch_process_audio_files": {
             "queue": "audio_processing",
-            "routing_key": "audio.process"
+            "routing_key": "audio.process",
         },
         "samplemind.core.tasks.audio_tasks.generate_audio_embeddings": {
             "queue": "embeddings",
-            "routing_key": "embeddings.generate"
+            "routing_key": "embeddings.generate",
         },
     },
-    
     # Monitoring and logging
     worker_send_task_events=True,
     task_send_sent_event=True,
-    
     # Performance settings
     broker_connection_retry_on_startup=True,
     broker_pool_limit=10,
-    
     # Beat schedule (for periodic tasks)
     beat_schedule={
         "cleanup-old-results": {

@@ -1,0 +1,48 @@
+/* SampleMind Dark Theme — Signature palette
+ * Primary:    #00F5FF  Electric Teal
+ * Accent:     #A8FF3E  Lime Green
+ * Background: #1A0A2E  Deep Purple
+ * Surface:    #241040  Mid Purple
+ * Error:      #FF007F  Hot Pink
+ * Warning:    #FFD700  Gold
+ *
+ * Applied via Textual Theme object: name="samplemind-dark"
+ * This file serves as color documentation and can be loaded as an
+ * additional CSS_PATH override if fine-grained widget overrides are needed.
+ */
+
+/* SampleMind branding overrides */
+Header {
+    background: #1A0A2E;
+    color: #00F5FF;
+    border-bottom: solid #00F5FF 30%;
+}
+
+Footer {
+    background: #120822;
+    color: #00F5FF 70%;
+}
+
+/* Highlight selected rows with teal tint */
+DataTable > .datatable--cursor {
+    background: #00F5FF 40%;
+    color: #1A0A2E;
+}
+
+/* Accent lime for buttons in success state */
+Button.-success {
+    background: #A8FF3E 80%;
+    color: #1A0A2E;
+}
+
+/* Hot pink error highlight */
+Button.-error {
+    background: #FF007F 80%;
+    color: #FFFFFF;
+}
+
+/* Electric teal primary buttons */
+Button.-primary {
+    background: #00F5FF 90%;
+    color: #1A0A2E;
+}

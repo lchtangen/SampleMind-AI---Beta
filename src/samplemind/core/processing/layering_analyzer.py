@@ -24,9 +24,11 @@ logger = logging.getLogger(__name__)
 # LAYERING ANALYSIS RESULTS
 # ============================================================================
 
+
 @dataclass
 class FrequencyMask:
     """Represents a frequency masking issue"""
+
     frequency_hz: float
     min_freq: float
     max_freq: float
@@ -44,6 +46,7 @@ class FrequencyMask:
 @dataclass
 class LayeringAnalysis:
     """Results from sample layering analysis"""
+
     # Compatibility metrics
     compatibility_score: float  # 0-10
     can_layer: bool
@@ -88,6 +91,7 @@ class LayeringAnalysis:
 # LAYERING ANALYZER ENGINE
 # ============================================================================
 
+
 class LayeringAnalyzer:
     """Analyzes compatibility of samples for layering"""
 
@@ -127,7 +131,9 @@ class LayeringAnalyzer:
         has_masking = len(frequency_masks) > 0
 
         # 3. Transient analysis
-        transient_offset, transient_conflict = self._analyze_transients(audio1, audio2, sample_rate)
+        transient_offset, transient_conflict = self._analyze_transients(
+            audio1, audio2, sample_rate
+        )
         transient_status = "conflict" if transient_conflict else "aligned"
 
         # 4. Loudness analysis
@@ -168,7 +174,9 @@ class LayeringAnalyzer:
     # ANALYSIS METHODS
     # ========================================================================
 
-    def _calculate_phase_correlation(self, audio1: np.ndarray, audio2: np.ndarray) -> float:
+    def _calculate_phase_correlation(
+        self, audio1: np.ndarray, audio2: np.ndarray
+    ) -> float:
         """Calculate phase correlation between two signals"""
         # Normalize
         audio1 = audio1 / (np.max(np.abs(audio1)) + 1e-10)
@@ -181,8 +189,8 @@ class LayeringAnalyzer:
 
         # Cross-correlation
         cross_product = np.mean(audio1 * audio2)
-        auto1 = np.sqrt(np.mean(audio1 ** 2))
-        auto2 = np.sqrt(np.mean(audio2 ** 2))
+        auto1 = np.sqrt(np.mean(audio1**2))
+        auto2 = np.sqrt(np.mean(audio2**2))
 
         correlation = cross_product / (auto1 * auto2 + 1e-10)
 
@@ -265,10 +273,12 @@ class LayeringAnalyzer:
 
         def get_onsets(audio):
             """Detect onsets in audio signal"""
-            energy = np.array([
-                np.sum(audio[i:i+window_size]**2)
-                for i in range(0, len(audio)-window_size, window_size)
-            ])
+            energy = np.array(
+                [
+                    np.sum(audio[i : i + window_size] ** 2)
+                    for i in range(0, len(audio) - window_size, window_size)
+                ]
+            )
 
             # Find significant energy jumps
             diff = np.diff(energy)
@@ -293,8 +303,8 @@ class LayeringAnalyzer:
         audio2: np.ndarray,
     ) -> Tuple[float, float]:
         """Analyze loudness relationship"""
-        rms1 = np.sqrt(np.mean(audio1 ** 2))
-        rms2 = np.sqrt(np.mean(audio2 ** 2))
+        rms1 = np.sqrt(np.mean(audio1**2))
+        rms2 = np.sqrt(np.mean(audio2**2))
 
         # Difference in dB
         loudness_diff = 20 * np.log10((rms1 / rms2) + 1e-10)
@@ -387,7 +397,9 @@ class LayeringAnalyzer:
 
         # Positive feedback
         if not recommendations:
-            recommendations.append("✅ Great compatibility! These samples layer well together.")
+            recommendations.append(
+                "✅ Great compatibility! These samples layer well together."
+            )
 
         return recommendations
 

@@ -17,7 +17,16 @@ class SettingsManager:
     ANALYSIS_LEVELS = ["BASIC", "STANDARD", "DETAILED", "PROFESSIONAL"]
 
     # Available themes
-    THEMES = ["dark", "light", "cyberpunk", "synthwave", "gruvbox", "dracula", "nord", "monokai"]
+    THEMES = [
+        "dark",
+        "light",
+        "cyberpunk",
+        "synthwave",
+        "gruvbox",
+        "dracula",
+        "nord",
+        "monokai",
+    ]
 
     # Available export formats
     EXPORT_FORMATS = ["JSON", "CSV", "YAML", "Markdown"]

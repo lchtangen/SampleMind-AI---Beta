@@ -1,0 +1,50 @@
+/* SampleMind Light Theme
+ * Primary:    #0088AA  Teal Blue
+ * Accent:     #007755  Forest Green
+ * Background: #F5F5F5  Off-White
+ * Surface:    #FFFFFF  White
+ * Error:      #CC002B  Deep Red
+ * Warning:    #FF9500  Orange
+ *
+ * Applied via Textual Theme object: name="samplemind-light"
+ */
+
+Header {
+    background: #0088AA;
+    color: #FFFFFF;
+}
+
+Footer {
+    background: #E0EEF2;
+    color: #0088AA;
+}
+
+DataTable > .datatable--cursor {
+    background: #0088AA 30%;
+    color: #000000;
+}
+
+Button.-primary {
+    background: #0088AA;
+    color: #FFFFFF;
+}
+
+Button.-success {
+    background: #007755;
+    color: #FFFFFF;
+}
+
+Button.-error {
+    background: #CC002B;
+    color: #FFFFFF;
+}
+
+Input {
+    border: tall #0088AA;
+    background: #FFFFFF;
+}
+
+RichLog {
+    background: #FAFAFA;
+    border: solid #D0D8E0;
+}

@@ -7,12 +7,14 @@ from datetime import datetime
 
 class BatchUploadRequest(BaseModel):
     """Batch upload configuration"""
+
     analysis_level: str = Field("standard", description="Analysis level for all files")
     include_ai: bool = Field(True, description="Include AI analysis")
 
 
 class BatchFileStatus(BaseModel):
     """Status of a single file in batch"""
+
     file_id: str
     filename: str
     status: str = Field(description="Status: pending, processing, completed, failed")
@@ -23,8 +25,11 @@ class BatchFileStatus(BaseModel):
 
 class BatchStatusResponse(BaseModel):
     """Batch processing status"""
+
     batch_id: str
-    status: str = Field(description="Overall status: pending, processing, completed, failed")
+    status: str = Field(
+        description="Overall status: pending, processing, completed, failed"
+    )
     total_files: int
     completed: int
     failed: int

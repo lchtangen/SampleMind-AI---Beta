@@ -88,7 +88,7 @@ class TestStemSeparationResults:
             result = StemSeparationResult(
                 output_directory=output_dir,
                 stems=stems,
-                command=["python", "-m", "demucs"]
+                command=["python", "-m", "demucs"],
             )
 
             assert result.output_directory == output_dir
@@ -112,7 +112,7 @@ class TestBatchProcessing:
         ]
 
         # Test that method exists and accepts parameters
-        assert hasattr(engine, 'batch_separate')
+        assert hasattr(engine, "batch_separate")
         assert callable(engine.batch_separate)
 
     def test_batch_separate_sync_wrapper(self):
@@ -120,7 +120,7 @@ class TestBatchProcessing:
         engine = StemSeparationEngine.from_quality(StemQuality.FAST)
 
         # Test that method exists
-        assert hasattr(engine, 'batch_separate_sync')
+        assert hasattr(engine, "batch_separate_sync")
         assert callable(engine.batch_separate_sync)
 
 
@@ -161,10 +161,10 @@ class TestQualityPresets:
         from samplemind.core.processing.stem_separation import QUALITY_PRESETS
 
         for quality, config in QUALITY_PRESETS.items():
-            assert hasattr(config, 'model')
-            assert hasattr(config, 'shifts')
-            assert hasattr(config, 'overlap')
-            assert hasattr(config, 'description')
+            assert hasattr(config, "model")
+            assert hasattr(config, "shifts")
+            assert hasattr(config, "overlap")
+            assert hasattr(config, "description")
             assert config.model in ["mdx", "mdx_extra", "mdx_q"]
             assert config.shifts >= 1
             assert 0 <= config.overlap <= 1
@@ -187,12 +187,13 @@ class TestPerformanceBenchmarks:
     def test_batch_concurrent_limit(self):
         """Test that batch processing respects concurrency limits"""
         engine = StemSeparationEngine()
-        assert hasattr(engine, 'batch_separate')
+        assert hasattr(engine, "batch_separate")
 
         # Verify method signature includes max_concurrent parameter
         import inspect
+
         sig = inspect.signature(engine.batch_separate)
-        assert 'max_concurrent' in sig.parameters
+        assert "max_concurrent" in sig.parameters
 
 
 class TestCommandParsing:
@@ -225,6 +226,7 @@ def test_backend_enum():
 # ============================================================================
 # Integration Tests (require actual audio and demucs installation)
 # ============================================================================
+
 
 @pytest.mark.integration
 class TestStemSeparationIntegration:

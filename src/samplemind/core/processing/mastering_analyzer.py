@@ -29,9 +29,11 @@ logger = logging.getLogger(__name__)
 # MASTERING ANALYSIS RESULTS
 # ============================================================================
 
+
 @dataclass
 class MasteringAnalysis:
     """Comprehensive mastering analysis"""
+
     # Loudness metrics
     loudness: LoudnessAnalysis
     target_platform: str
@@ -73,6 +75,7 @@ class MasteringAnalysis:
 # ============================================================================
 # MASTERING ANALYZER ENGINE
 # ============================================================================
+
 
 class MasteringAnalyzer:
     """Comprehensive mastering analysis engine"""
@@ -157,7 +160,7 @@ class MasteringAnalyzer:
         freqs = np.fft.rfftfreq(len(audio_mono), 1 / sample_rate)
 
         # Frequency bands (in dB relative to total)
-        total_power = np.sum(fft ** 2)
+        total_power = np.sum(fft**2)
 
         # Sub-bass (20-60 Hz)
         sub_mask = (freqs >= 20) & (freqs < 60)
@@ -212,8 +215,8 @@ class MasteringAnalyzer:
         mid = (left + right) / 2
         side = (left - right) / 2
 
-        mid_power = np.mean(mid ** 2)
-        side_power = np.mean(side ** 2)
+        mid_power = np.mean(mid**2)
+        side_power = np.mean(side**2)
         total_power = mid_power + side_power
 
         if total_power == 0:
@@ -223,8 +226,8 @@ class MasteringAnalyzer:
 
         # 2. Phase correlation
         cross_product = np.mean(left * right)
-        left_power = np.sqrt(np.mean(left ** 2))
-        right_power = np.sqrt(np.mean(right ** 2))
+        left_power = np.sqrt(np.mean(left**2))
+        right_power = np.sqrt(np.mean(right**2))
 
         if left_power == 0 or right_power == 0:
             phase_correlation = 1.0
@@ -234,8 +237,8 @@ class MasteringAnalyzer:
             )
 
         # 3. Center energy (mid channel energy percentage)
-        mid_power = np.mean(mid ** 2)
-        total_power = np.mean(left ** 2) + np.mean(right ** 2)
+        mid_power = np.mean(mid**2)
+        total_power = np.mean(left**2) + np.mean(right**2)
 
         if total_power == 0:
             center_energy = 50.0
@@ -347,8 +350,10 @@ class MasteringAnalyzer:
     ) -> Dict[str, float]:
         """Compare to reference metrics"""
         return {
-            "loudness_difference": analysis.loudness.integrated_loudness - reference_loudness,
-            "loudness_ratio": 10 ** ((analysis.loudness.integrated_loudness - reference_loudness) / 20),
+            "loudness_difference": analysis.loudness.integrated_loudness
+            - reference_loudness,
+            "loudness_ratio": 10
+            ** ((analysis.loudness.integrated_loudness - reference_loudness) / 20),
         }
 
     def get_mastering_grade(self, analysis: MasteringAnalysis) -> str:

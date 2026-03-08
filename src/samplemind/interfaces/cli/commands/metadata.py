@@ -29,6 +29,7 @@ console = utils.console
 # SECTION 1: METADATA VIEWING (8 commands)
 # ============================================================================
 
+
 @app.command("show")
 @utils.with_error_handling
 def meta_show(
@@ -128,7 +129,9 @@ def meta_diff(
 ) -> None:
     """Compare metadata between two files"""
     try:
-        table = Table(title="Metadata Comparison", show_header=True, header_style="bold cyan")
+        table = Table(
+            title="Metadata Comparison", show_header=True, header_style="bold cyan"
+        )
         table.add_column("Field", style="cyan")
         table.add_column(file1.name, style="yellow")
         table.add_column(file2.name, style="yellow")
@@ -165,6 +168,7 @@ def meta_validate(
 # ============================================================================
 # SECTION 2: METADATA EDITING (8 commands)
 # ============================================================================
+
 
 @app.command("edit")
 @utils.with_error_handling
@@ -254,7 +258,9 @@ def meta_copy(
         with utils.ProgressTracker("Copying metadata"):
             pass
 
-        console.print(f"[green]✓ Metadata copied from {source.name} to {destination.name}[/green]")
+        console.print(
+            f"[green]✓ Metadata copied from {source.name} to {destination.name}[/green]"
+        )
 
     except Exception as e:
         utils.handle_error(e, "meta:copy")
@@ -285,6 +291,7 @@ def meta_clear(
 # ============================================================================
 # SECTION 3: BATCH OPERATIONS (10 commands)
 # ============================================================================
+
 
 @app.command("batch:tag")
 @utils.with_error_handling
@@ -387,7 +394,9 @@ def meta_batch_clear(
     """Batch clear metadata from all files"""
     try:
         files = utils.get_audio_files(folder)
-        if not confirm and not typer.confirm(f"Clear metadata from {len(files)} files?"):
+        if not confirm and not typer.confirm(
+            f"Clear metadata from {len(files)} files?"
+        ):
             return
 
         with utils.ProgressTracker("Clearing"):
@@ -440,6 +449,7 @@ def meta_batch_standardize(
 # SECTION 4: RECOVERY & SNAPSHOTS (4 commands)
 # ============================================================================
 
+
 @app.command("recover")
 @utils.with_error_handling
 def meta_recover(
@@ -465,7 +475,9 @@ def meta_snapshot():
         with utils.ProgressTracker("Creating snapshot"):
             pass
 
-        console.print("[green]✓ Snapshot created: metadata_snapshot_2025-01-19_10-30[/green]")
+        console.print(
+            "[green]✓ Snapshot created: metadata_snapshot_2025-01-19_10-30[/green]"
+        )
 
     except Exception as e:
         utils.handle_error(e, "meta:snapshot")
@@ -477,7 +489,9 @@ def meta_snapshot():
 def meta_snapshot_list():
     """List available snapshots"""
     try:
-        table = Table(title="Available Snapshots", show_header=True, header_style="bold cyan")
+        table = Table(
+            title="Available Snapshots", show_header=True, header_style="bold cyan"
+        )
         table.add_column("Snapshot", style="cyan")
         table.add_column("Created", style="green")
         table.add_column("Size")

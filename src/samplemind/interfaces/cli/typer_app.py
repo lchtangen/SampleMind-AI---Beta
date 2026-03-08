@@ -69,6 +69,7 @@ from .commands import (
 # MAIN APP CALLBACKS
 # ============================================================================
 
+
 @app.callback()
 def main_callback(
     version: bool = typer.Option(
@@ -88,6 +89,7 @@ def main_callback(
 # TOP-LEVEL COMMANDS
 # ============================================================================
 
+
 @app.command()
 def interactive():
     """Start interactive menu mode (modern interface)"""
@@ -101,9 +103,12 @@ def interactive():
         menu = ModernMenu()
         asyncio.run(menu.run())
     except ImportError:
-        console.print("[yellow]⚠️  Modern menu not available, falling back to classic menu[/yellow]")
+        console.print(
+            "[yellow]⚠️  Modern menu not available, falling back to classic menu[/yellow]"
+        )
         try:
             from .menu import main as cli_main
+
             asyncio.run(cli_main())
         except Exception as e:
             console.print(f"[red]❌ Error starting menu: {e}[/red]")
@@ -138,20 +143,14 @@ def status():
         table.add_row(
             "Audio Engine",
             "✅ Ready",
-            f"Cache: {audio_engine.get_performance_stats()['cache_size']} entries"
+            f"Cache: {audio_engine.get_performance_stats()['cache_size']} entries",
         )
 
         table.add_row(
-            "AI Manager",
-            "✅ Ready",
-            f"Primary: {ai_manager.primary_provider}"
+            "AI Manager", "✅ Ready", f"Primary: {ai_manager.primary_provider}"
         )
 
-        table.add_row(
-            "Database",
-            "✅ Connected",
-            "MongoDB/Redis"
-        )
+        table.add_row("Database", "✅ Connected", "MongoDB/Redis")
 
         console.print(table)
 
@@ -162,7 +161,8 @@ def status():
 @app.command()
 def version():
     """Show version information"""
-    console.print("""
+    console.print(
+        """
 [bold cyan]SampleMind AI v2.1.0-beta[/bold cyan]
 [dim]Professional Audio Analysis & Library Management[/dim]
 
@@ -185,41 +185,77 @@ def version():
 
 [bold]Repository:[/bold]
   https://github.com/your-org/samplemind-ai
-    """)
+    """
+    )
 
 
 # ============================================================================
 # COMMAND GROUP REGISTRATION
 # ============================================================================
 
+
 def register_command_groups():
     """Register all command groups with the main app"""
 
     # Register command groups - Core (215+ original)
-    app.add_typer(analyze.app, name="analyze", help="🎵 Audio analysis & feature extraction (40 commands)")
-    app.add_typer(library.app, name="library", help="📁 Sample library management (50 commands)")
+    app.add_typer(
+        analyze.app,
+        name="analyze",
+        help="🎵 Audio analysis & feature extraction (40 commands)",
+    )
+    app.add_typer(
+        library.app, name="library", help="📁 Sample library management (50 commands)"
+    )
     app.add_typer(ai.app, name="ai", help="🤖 AI-powered features (30 commands)")
     app.add_typer(sync.app, name="sync", help="☁️  Sync & Cloud")
-    app.add_typer(metadata.app, name="meta", help="📝 Metadata operations (30 commands)")
-    app.add_typer(audio.app, name="audio", help="🎙️  Audio processing & conversion (25 commands)")
-    app.add_typer(visualization.app, name="viz", help="📊 Visualizations & charts (15 commands)")
-    app.add_typer(reporting.app, name="report", help="📋 Reports & data export (10 commands)")
-    app.add_typer(similarity.app, name="similar", help="🔍 Sample similarity search (5 commands)")
-    app.add_typer(theory.app, name="theory", help="🎼 Music theory analysis (4 commands)")
+    app.add_typer(
+        metadata.app, name="meta", help="📝 Metadata operations (30 commands)"
+    )
+    app.add_typer(
+        audio.app, name="audio", help="🎙️  Audio processing & conversion (25 commands)"
+    )
+    app.add_typer(
+        visualization.app, name="viz", help="📊 Visualizations & charts (15 commands)"
+    )
+    app.add_typer(
+        reporting.app, name="report", help="📋 Reports & data export (10 commands)"
+    )
+    app.add_typer(
+        similarity.app, name="similar", help="🔍 Sample similarity search (5 commands)"
+    )
+    app.add_typer(
+        theory.app, name="theory", help="🎼 Music theory analysis (4 commands)"
+    )
     app.add_typer(daw.app, name="daw", help="🎹 DAW integration (4 commands)")
 
     # Register Phase 10+ Premium Features
     app.add_typer(tagging.app, name="tag", help="🏷️  AI-powered sample tagging")
-    app.add_typer(mastering.app, name="mastering", help="🎚️  Professional mastering assistant")
-    app.add_typer(layering.app, name="layer", help="🔀 Sample layering & phase analysis")
+    app.add_typer(
+        mastering.app, name="mastering", help="🎚️  Professional mastering assistant"
+    )
+    app.add_typer(
+        layering.app, name="layer", help="🔀 Sample layering & phase analysis"
+    )
     app.add_typer(groove.app, name="groove", help="🎵 Groove template extraction")
     app.add_typer(recent.app, name="recent", help="📁 Quick access to recent files")
 
     # Register Phase 13 Advanced Features
-    app.add_typer(stems.app, name="stems", help="🎼 AI Stem Separation - Split audio into stems")
-    app.add_typer(midi.app, name="midi", help="🎼 MIDI Extraction - Convert audio to MIDI")
-    app.add_typer(pack.app, name="pack", help="📦 Sample Pack Creator - Organize professional packs")
-    app.add_typer(effects.app, name="effects", help="🎛️  Audio Effects - Professional effects & presets")
+    app.add_typer(
+        stems.app, name="stems", help="🎼 AI Stem Separation - Split audio into stems"
+    )
+    app.add_typer(
+        midi.app, name="midi", help="🎼 MIDI Extraction - Convert audio to MIDI"
+    )
+    app.add_typer(
+        pack.app,
+        name="pack",
+        help="📦 Sample Pack Creator - Organize professional packs",
+    )
+    app.add_typer(
+        effects.app,
+        name="effects",
+        help="🎛️  Audio Effects - Professional effects & presets",
+    )
 
 
 # Register command groups at module load
@@ -230,9 +266,11 @@ register_command_groups()
 # UTILITIES & HELPERS
 # ============================================================================
 
+
 def create_progress_spinner(description: str = "Processing"):
     """Create a styled progress spinner"""
     from rich.progress import Progress, SpinnerColumn, TextColumn
+
     return Progress(
         SpinnerColumn(),
         TextColumn(f"[progress.description]{description}[/progress.description]"),
@@ -247,7 +285,9 @@ async def run_command_async(async_func, *args, **kwargs) -> None:
 
 def handle_command_error(error: Exception, context: str = ""):
     """Standardized error handling"""
-    console.print(f"[bold red]❌ Error{' in ' + context if context else ''}:[/bold red] {error}")
+    console.print(
+        f"[bold red]❌ Error{' in ' + context if context else ''}:[/bold red] {error}"
+    )
     console.print("[dim]Use --help for command usage[/dim]")
     raise typer.Exit(code=1)
 
@@ -255,6 +295,7 @@ def handle_command_error(error: Exception, context: str = ""):
 # ============================================================================
 # SHELL COMPLETION SETUP
 # ============================================================================
+
 
 @app.command()
 def completion(
@@ -281,12 +322,13 @@ def completion(
         raise typer.Exit(1)
 
     console.print(f"[dim]Add the following to your .{shell}rc:[/dim]\n")
-    console.print(f"eval \"$(_SAMPLEMIND_COMPLETE={shell.upper()}_SOURCE samplemind)\"")
+    console.print(f'eval "$(_SAMPLEMIND_COMPLETE={shell.upper()}_SOURCE samplemind)"')
 
 
 # ============================================================================
 # HELP & DOCUMENTATION
 # ============================================================================
+
 
 @app.command()
 def help():
@@ -367,6 +409,7 @@ def help():
 # ============================================================================
 # PLUGIN DISCOVERY
 # ============================================================================
+
 
 @app.command()
 def list_commands():

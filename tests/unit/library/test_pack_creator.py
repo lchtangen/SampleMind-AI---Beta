@@ -27,9 +27,7 @@ class TestPackCreator:
 
     def test_pack_metadata(self):
         metadata = PackMetadata(
-            name="Test Pack",
-            author="Test Author",
-            description="Test Description"
+            name="Test Pack", author="Test Author", description="Test Description"
         )
         assert metadata.name == "Test Pack"
         assert metadata.author == "Test Author"
@@ -60,9 +58,7 @@ class TestPackCreator:
 
         creator = SamplePackCreator()
         pack = creator.create_pack(
-            name="Drum Pack",
-            template=PackTemplate.DRUMS,
-            author="Tester"
+            name="Drum Pack", template=PackTemplate.DRUMS, author="Tester"
         )
 
         assert pack.name == "Drum Pack"
@@ -88,12 +84,12 @@ class TestPackCreator:
         # Mock string split for subtype
         mock_sf.info.return_value.subtype_info = "PCM_24"
 
-        mock_audio = np.zeros((2, 88200)) # 2 sec stereo
+        mock_audio = np.zeros((2, 88200))  # 2 sec stereo
         mock_librosa.load.return_value = (mock_audio, 44100)
         mock_librosa.onset.onset_strength.return_value = np.zeros(100)
         mock_librosa.feature.tempo.return_value = [120.0]
 
-        with patch.dict(sys.modules, {'librosa': mock_librosa, 'soundfile': mock_sf}):
+        with patch.dict(sys.modules, {"librosa": mock_librosa, "soundfile": mock_sf}):
             # Setup dummy SamplePack
             pack_dir = MagicMock()
             pack = SamplePack("Test", pack_dir, PackTemplate.CUSTOM, MagicMock())
@@ -118,8 +114,11 @@ class TestPackCreator:
         # Turn off real analysis
         pack._analyze_sample = Mock()
         pack._analyze_sample.return_value = SampleInfo(
-            filename="test.wav", duration_seconds=1.0,
-            sample_rate=44100, bit_depth=16, channels=2
+            filename="test.wav",
+            duration_seconds=1.0,
+            sample_rate=44100,
+            bit_depth=16,
+            channels=2,
         )
 
         # The code calls file_path = Path(file_path)
@@ -148,8 +147,11 @@ class TestPackCreator:
         pack = SamplePack("Test", pack_dir, PackTemplate.CUSTOM, MagicMock())
         pack._analyze_sample = Mock()
         pack._analyze_sample.return_value = SampleInfo(
-            filename="kick.wav", duration_seconds=1.0,
-            sample_rate=44100, bit_depth=16, channels=2
+            filename="kick.wav",
+            duration_seconds=1.0,
+            sample_rate=44100,
+            bit_depth=16,
+            channels=2,
         )
 
         # Setup source folder mock
@@ -157,8 +159,10 @@ class TestPackCreator:
         mock_source_obj.exists.return_value = True
 
         # Files found in glob
-        file1 = MagicMock(); file1.name = "kick.wav"
-        file2 = MagicMock(); file2.name = "snare.wav"
+        file1 = MagicMock()
+        file1.name = "kick.wav"
+        file2 = MagicMock()
+        file2.name = "snare.wav"
 
         # glob side effects for different extensions
         mock_source_obj.glob.side_effect = [[file1, file2], [], [], [], []]

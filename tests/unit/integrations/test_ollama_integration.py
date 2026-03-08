@@ -23,6 +23,7 @@ from samplemind.integrations.ollama_integration import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def mock_ollama_client():
     """Mock ollama.AsyncClient with a standard successful response"""
@@ -71,6 +72,7 @@ def sample_features():
 # TestOllamaModel
 # ---------------------------------------------------------------------------
 
+
 class TestOllamaModel:
     def test_qwen_model_exists(self):
         assert OllamaModel.QWEN_2_5_7B
@@ -93,6 +95,7 @@ class TestOllamaModel:
 # ---------------------------------------------------------------------------
 # TestOllamaMusicProducer — Init
 # ---------------------------------------------------------------------------
+
 
 class TestOllamaMusicProducerInit:
     def test_reads_ollama_host_env(self, monkeypatch):
@@ -123,6 +126,7 @@ class TestOllamaMusicProducerInit:
 # ---------------------------------------------------------------------------
 # TestAnalyzeMusic
 # ---------------------------------------------------------------------------
+
 
 class TestAnalyzeMusic:
     @pytest.mark.asyncio
@@ -157,7 +161,9 @@ class TestAnalyzeMusic:
         assert result.model_used == OllamaModel.QWEN_2_5_7B
 
     @pytest.mark.asyncio
-    async def test_chat_called_with_correct_model(self, producer, mock_ollama_client, sample_features):
+    async def test_chat_called_with_correct_model(
+        self, producer, mock_ollama_client, sample_features
+    ):
         await producer.analyze_music_comprehensive(sample_features)
         mock_ollama_client.chat.assert_called_once()
         call_kwargs = mock_ollama_client.chat.call_args.kwargs
@@ -165,7 +171,9 @@ class TestAnalyzeMusic:
 
     @pytest.mark.asyncio
     async def test_api_error_propagates(self, producer, sample_features):
-        producer._client.chat = AsyncMock(side_effect=ConnectionError("Ollama not running"))
+        producer._client.chat = AsyncMock(
+            side_effect=ConnectionError("Ollama not running")
+        )
         with pytest.raises(ConnectionError):
             await producer.analyze_music_comprehensive(sample_features)
 
@@ -173,6 +181,7 @@ class TestAnalyzeMusic:
 # ---------------------------------------------------------------------------
 # TestCheckAvailability
 # ---------------------------------------------------------------------------
+
 
 class TestCheckAvailability:
     @pytest.mark.asyncio
@@ -210,6 +219,7 @@ class TestCheckAvailability:
 # TestPromptBuilding
 # ---------------------------------------------------------------------------
 
+
 class TestPromptBuilding:
     def test_tempo_in_prompt(self, producer, sample_features):
         prompt = producer._build_prompt(sample_features, None)
@@ -236,6 +246,7 @@ class TestPromptBuilding:
 # ---------------------------------------------------------------------------
 # TestResponseParsing
 # ---------------------------------------------------------------------------
+
 
 class TestResponseParsing:
     def test_first_line_is_summary(self, producer):
@@ -271,6 +282,7 @@ class TestResponseParsing:
 # ---------------------------------------------------------------------------
 # TestOllamaMusicAnalysis
 # ---------------------------------------------------------------------------
+
 
 class TestOllamaMusicAnalysis:
     def test_default_confidence_is_conservative(self):

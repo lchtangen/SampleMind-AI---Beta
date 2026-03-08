@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 class SessionStatus(Enum):
     """Session status states"""
+
     ACTIVE = "active"
     PAUSED = "paused"
     COMPLETED = "completed"
@@ -40,7 +41,7 @@ class AnalysisResult:
         features: Optional[Dict] = None,
         analysis_level: str = "standard",
         duration: float = 0.0,
-        timestamp: Optional[str] = None
+        timestamp: Optional[str] = None,
     ):
         self.file_id = file_id
         self.filename = filename
@@ -59,7 +60,7 @@ class AnalysisResult:
             "features": self.features,
             "analysis_level": self.analysis_level,
             "duration": self.duration,
-            "timestamp": self.timestamp
+            "timestamp": self.timestamp,
         }
 
     @classmethod
@@ -72,7 +73,7 @@ class AnalysisResult:
             features=data.get("features", {}),
             analysis_level=data.get("analysis_level", "standard"),
             duration=data.get("duration", 0.0),
-            timestamp=data.get("timestamp")
+            timestamp=data.get("timestamp"),
         )
 
 
@@ -84,7 +85,7 @@ class Session:
         session_id: Optional[str] = None,
         name: str = "Untitled Session",
         description: str = "",
-        created_at: Optional[str] = None
+        created_at: Optional[str] = None,
     ):
         self.session_id = session_id or str(uuid.uuid4())[:8]
         self.name = name
@@ -158,11 +159,7 @@ class Session:
     def get_statistics(self) -> Dict[str, Any]:
         """Get session statistics"""
         if not self.results:
-            return {
-                "total_files": 0,
-                "total_duration": 0.0,
-                "average_duration": 0.0
-            }
+            return {"total_files": 0, "total_duration": 0.0, "average_duration": 0.0}
 
         durations = [r.duration for r in self.results.values()]
         total_duration = sum(durations)
@@ -170,10 +167,12 @@ class Session:
         return {
             "total_files": len(self.results),
             "total_duration": total_duration,
-            "average_duration": total_duration / len(self.results) if self.results else 0.0,
+            "average_duration": (
+                total_duration / len(self.results) if self.results else 0.0
+            ),
             "min_duration": min(durations) if durations else 0.0,
             "max_duration": max(durations) if durations else 0.0,
-            "results_by_level": self._count_by_level()
+            "results_by_level": self._count_by_level(),
         }
 
     def _count_by_level(self) -> Dict[str, int]:
@@ -196,7 +195,7 @@ class Session:
             "results": [r.to_dict() for r in self.results.values()],
             "notes": self.notes,
             "tags": self.tags,
-            "metadata": self.metadata
+            "metadata": self.metadata,
         }
 
     @classmethod
@@ -206,7 +205,7 @@ class Session:
             session_id=data.get("session_id"),
             name=data.get("name", "Untitled"),
             description=data.get("description", ""),
-            created_at=data.get("created_at")
+            created_at=data.get("created_at"),
         )
 
         session.modified_at = data.get("modified_at", datetime.now().isoformat())
@@ -251,10 +250,7 @@ class SessionManager:
         logger.info(f"Session manager initialized at {self.storage_dir.absolute()}")
 
     def create_session(
-        self,
-        name: str,
-        description: str = "",
-        metadata: Optional[Dict] = None
+        self, name: str, description: str = "", metadata: Optional[Dict] = None
     ) -> Session:
         """
         Create a new session.
@@ -281,9 +277,7 @@ class SessionManager:
         return self.sessions.get(session_id)
 
     def list_sessions(
-        self,
-        status: Optional[SessionStatus] = None,
-        limit: int = 20
+        self, status: Optional[SessionStatus] = None, limit: int = 20
     ) -> List[Session]:
         """
         List sessions.
@@ -376,10 +370,7 @@ class SessionManager:
         return True
 
     def search_sessions(
-        self,
-        query: str,
-        search_results: bool = True,
-        search_notes: bool = True
+        self, query: str, search_results: bool = True, search_notes: bool = True
     ) -> List[Session]:
         """
         Search sessions by name, description, notes, or results.
@@ -397,7 +388,10 @@ class SessionManager:
 
         for session in self.sessions.values():
             # Search name and description
-            if query_lower in session.name.lower() or query_lower in session.description.lower():
+            if (
+                query_lower in session.name.lower()
+                or query_lower in session.description.lower()
+            ):
                 results.append(session)
                 continue
 

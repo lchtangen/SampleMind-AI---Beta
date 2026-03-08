@@ -29,33 +29,36 @@ from samplemind.integrations.google_ai_integration import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def mock_genai_response():
     """Mock google-genai API response"""
     mock_response = MagicMock()
-    mock_response.text = json.dumps({
-        "comprehensive_analysis": {
-            "detailed_description": "Electronic track with strong beat.",
-            "technical_summary": "Well-produced with clear mix.",
-            "creative_interpretation": "Energetic and forward-moving.",
-        },
-        "genre_classification": {
-            "primary_genre": "Electronic",
-            "secondary_genres": ["House", "Techno"],
-            "confidence": 0.92,
-            "style_influences": ["Chicago House", "Berlin Techno"],
-            "era_period": "2020s",
-            "regional_style": "European",
-        },
-        "emotional_analysis": {
-            "primary_mood": "Energetic",
-            "emotional_descriptors": ["Driving", "Hypnotic"],
-            "valence_score": 0.7,
-            "arousal_score": 0.85,
-            "emotional_intensity": 0.8,
-            "emotional_journey": ["building", "peak", "resolution"],
-        },
-    })
+    mock_response.text = json.dumps(
+        {
+            "comprehensive_analysis": {
+                "detailed_description": "Electronic track with strong beat.",
+                "technical_summary": "Well-produced with clear mix.",
+                "creative_interpretation": "Energetic and forward-moving.",
+            },
+            "genre_classification": {
+                "primary_genre": "Electronic",
+                "secondary_genres": ["House", "Techno"],
+                "confidence": 0.92,
+                "style_influences": ["Chicago House", "Berlin Techno"],
+                "era_period": "2020s",
+                "regional_style": "European",
+            },
+            "emotional_analysis": {
+                "primary_mood": "Energetic",
+                "emotional_descriptors": ["Driving", "Hypnotic"],
+                "valence_score": 0.7,
+                "arousal_score": 0.85,
+                "emotional_intensity": 0.8,
+                "emotional_journey": ["building", "peak", "resolution"],
+            },
+        }
+    )
     mock_response.usage_metadata = MagicMock()
     mock_response.usage_metadata.total_token_count = 150
     return mock_response
@@ -92,6 +95,7 @@ def sample_features():
 # TestGeminiModel
 # ---------------------------------------------------------------------------
 
+
 class TestGeminiModel:
     def test_gemini_2_0_flash_is_primary(self):
         """GEMINI_2_0_FLASH must be the primary model in v3.0"""
@@ -116,6 +120,7 @@ class TestGeminiModel:
 # ---------------------------------------------------------------------------
 # TestAdvancedMusicAnalysis
 # ---------------------------------------------------------------------------
+
 
 class TestAdvancedMusicAnalysis:
     def test_create_with_required_fields(self):
@@ -152,6 +157,7 @@ class TestAdvancedMusicAnalysis:
 # TestGoogleAIMusicProducerInit
 # ---------------------------------------------------------------------------
 
+
 class TestGoogleAIMusicProducerInit:
     def test_creates_genai_client_not_configure(self):
         """v3.0 uses genai.Client(), NOT genai.configure()"""
@@ -162,14 +168,17 @@ class TestGoogleAIMusicProducerInit:
 
     def test_no_genai_configure_called(self):
         """genai.configure() must NOT be called in v3.0"""
-        with patch("google.genai.Client") as mock_client_cls, \
-             patch("google.genai.configure") as mock_configure:
+        with (
+            patch("google.genai.Client") as mock_client_cls,
+            patch("google.genai.configure") as mock_configure,
+        ):
             mock_client_cls.return_value = MagicMock()
             GoogleAIMusicProducer(api_key="test")
             mock_configure.assert_not_called()
 
     def test_raises_without_api_key(self):
         import os
+
         with patch.dict(os.environ, {}, clear=True):
             with patch("google.genai.Client"):
                 with pytest.raises(ValueError, match="API key"):
@@ -188,11 +197,10 @@ class TestGoogleAIMusicProducerInit:
 # TestGenerateContent
 # ---------------------------------------------------------------------------
 
+
 class TestGenerateContent:
     @pytest.mark.asyncio
-    async def test_uses_aio_models_generate_content(
-        self, producer, sample_features
-    ):
+    async def test_uses_aio_models_generate_content(self, producer, sample_features):
         """Must call client.aio.models.generate_content (new SDK pattern)"""
         result = await producer.analyze_music_comprehensive(sample_features)
 
@@ -220,13 +228,14 @@ class TestGenerateContent:
 
         call_kwargs = producer.client.aio.models.generate_content.call_args.kwargs
         prompt = call_kwargs["contents"]
-        assert "128" in prompt   # tempo
-        assert "180" in prompt   # duration
+        assert "128" in prompt  # tempo
+        assert "180" in prompt  # duration
 
 
 # ---------------------------------------------------------------------------
 # TestTokenUsage
 # ---------------------------------------------------------------------------
+
 
 class TestTokenUsage:
     @pytest.mark.asyncio
@@ -250,6 +259,7 @@ class TestTokenUsage:
 # TestSafetySettings
 # ---------------------------------------------------------------------------
 
+
 class TestSafetySettings:
     @pytest.mark.asyncio
     async def test_safety_settings_passed_in_config(self, producer, sample_features):
@@ -267,6 +277,7 @@ class TestSafetySettings:
 # TestErrorHandling
 # ---------------------------------------------------------------------------
 
+
 class TestErrorHandling:
     @pytest.mark.asyncio
     async def test_api_error_returns_error_analysis(self, sample_features):
@@ -282,7 +293,10 @@ class TestErrorHandling:
         result = await prod.analyze_music_comprehensive(sample_features)
 
         assert isinstance(result, AdvancedMusicAnalysis)
-        assert "failed" in result.detailed_description.lower() or "error" in result.raw_response.lower()
+        assert (
+            "failed" in result.detailed_description.lower()
+            or "error" in result.raw_response.lower()
+        )
 
     @pytest.mark.asyncio
     async def test_empty_features_handled(self, producer):
@@ -296,7 +310,9 @@ class TestErrorHandling:
             mock_response = MagicMock()
             mock_response.text = "This is not JSON at all!"
             mock_response.usage_metadata = None
-            mock_client.aio.models.generate_content = AsyncMock(return_value=mock_response)
+            mock_client.aio.models.generate_content = AsyncMock(
+                return_value=mock_response
+            )
             mock_cls.return_value = mock_client
             prod = GoogleAIMusicProducer(api_key="test-key")
 
@@ -308,6 +324,7 @@ class TestErrorHandling:
 # TestMusicAnalysisType
 # ---------------------------------------------------------------------------
 
+
 class TestMusicAnalysisType:
     def test_required_types_exist(self):
         assert MusicAnalysisType.COMPREHENSIVE_ANALYSIS
@@ -317,7 +334,9 @@ class TestMusicAnalysisType:
         assert MusicAnalysisType.FL_STUDIO_INTEGRATION
 
     def test_type_values_are_strings(self):
-        assert MusicAnalysisType.COMPREHENSIVE_ANALYSIS.value == "comprehensive_analysis"
+        assert (
+            MusicAnalysisType.COMPREHENSIVE_ANALYSIS.value == "comprehensive_analysis"
+        )
         assert MusicAnalysisType.GENRE_CLASSIFICATION.value == "genre_classification"
 
 

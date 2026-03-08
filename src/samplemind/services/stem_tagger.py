@@ -189,8 +189,10 @@ class StemTagger:
             # demucs.separate.main() is the CLI entry point
             # Run programmatically to avoid a subprocess
             args = [
-                "--model", self.model_name,
-                "--out", str(tmp),
+                "--model",
+                self.model_name,
+                "--out",
+                str(tmp),
                 "--mp3",
                 str(path),
             ]
@@ -217,6 +219,7 @@ class StemTagger:
                         persistent = Path(tempfile.mkdtemp(prefix=f"stem_{stem_name}_"))
                         dest = persistent / candidate.name
                         import shutil
+
                         shutil.copy2(candidate, dest)
                         stems[stem_name] = dest
                         break
@@ -238,24 +241,18 @@ class StemTagger:
         analysis = StemAnalysis(stem_name=stem_name, stem_path=str(stem_path))
 
         # Run all analyzers concurrently
-        rhythmic_task = asyncio.create_task(
-            RhythmicAnalyzer().analyze_file(stem_path)
-        )
-        harmonic_task = asyncio.create_task(
-            HarmonicAnalyzer().analyze_file(stem_path)
-        )
-        timbral_task = asyncio.create_task(
-            TimbralAnalyzer().analyze_file(stem_path)
-        )
-        quality_task = asyncio.create_task(
-            AudioQualityScorer().score_file(stem_path)
-        )
-        genre_task = asyncio.create_task(
-            GenreClassifier().classify_file(stem_path)
-        )
+        rhythmic_task = asyncio.create_task(RhythmicAnalyzer().analyze_file(stem_path))
+        harmonic_task = asyncio.create_task(HarmonicAnalyzer().analyze_file(stem_path))
+        timbral_task = asyncio.create_task(TimbralAnalyzer().analyze_file(stem_path))
+        quality_task = asyncio.create_task(AudioQualityScorer().score_file(stem_path))
+        genre_task = asyncio.create_task(GenreClassifier().classify_file(stem_path))
 
         rhythmic, harmonic, timbral, quality, genre = await asyncio.gather(
-            rhythmic_task, harmonic_task, timbral_task, quality_task, genre_task,
+            rhythmic_task,
+            harmonic_task,
+            timbral_task,
+            quality_task,
+            genre_task,
             return_exceptions=True,
         )
 
@@ -341,7 +338,9 @@ class StemTagger:
         try:
             import motor.motor_asyncio as motor
 
-            client = motor.AsyncIOMotorClient(self.mongo_uri, serverSelectionTimeoutMS=3000)
+            client = motor.AsyncIOMotorClient(
+                self.mongo_uri, serverSelectionTimeoutMS=3000
+            )
             db = client[self.db_name]
             collection = db[self.collection_name]
 

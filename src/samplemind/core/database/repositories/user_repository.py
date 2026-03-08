@@ -16,7 +16,7 @@ class UserRepository:
         hashed_password: str,
         is_active: bool = True,
         is_verified: bool = False,
-        created_at: Optional[datetime] = None
+        created_at: Optional[datetime] = None,
     ) -> User:
         """Create new user"""
         user = User(
@@ -26,7 +26,7 @@ class UserRepository:
             hashed_password=hashed_password,
             is_active=is_active,
             is_verified=is_verified,
-            created_at=created_at or datetime.utcnow()
+            created_at=created_at or datetime.utcnow(),
         )
         await user.insert()
         return user
@@ -76,7 +76,9 @@ class UserRepository:
         return user
 
     @staticmethod
-    async def increment_usage(user_id: str, analyses: int = 0, uploads: int = 0) -> Optional[User]:
+    async def increment_usage(
+        user_id: str, analyses: int = 0, uploads: int = 0
+    ) -> Optional[User]:
         """Increment user usage counters"""
         user = await User.find_one(User.user_id == user_id)
         if user:

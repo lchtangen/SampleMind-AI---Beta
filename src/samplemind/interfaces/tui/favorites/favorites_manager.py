@@ -76,23 +76,27 @@ class FavoritesManager:
             logger.error(f"❌ Failed to get favorites: {e}")
             return []
 
-    async def get_favorites_as_rows(
-        self, limit: int = 50
-    ) -> List[Dict[str, Any]]:
+    async def get_favorites_as_rows(self, limit: int = 50) -> List[Dict[str, Any]]:
         """Get favorites as rows for DataTable"""
         try:
             favorites = await self.get_all_favorites(limit)
             rows = []
             for idx, fav in enumerate(favorites, 1):
-                rows.append({
-                    "id": fav.favorite_id,
-                    "index": str(idx),
-                    "file_name": fav.file_name,
-                    "analysis_id": fav.analysis_id[:8] + "..." if len(fav.analysis_id) > 11 else fav.analysis_id,
-                    "rating": "⭐" * fav.rating if fav.rating > 0 else "Unrated",
-                    "notes": fav.notes or "-",
-                    "added": fav.added_at.strftime("%Y-%m-%d"),
-                })
+                rows.append(
+                    {
+                        "id": fav.favorite_id,
+                        "index": str(idx),
+                        "file_name": fav.file_name,
+                        "analysis_id": (
+                            fav.analysis_id[:8] + "..."
+                            if len(fav.analysis_id) > 11
+                            else fav.analysis_id
+                        ),
+                        "rating": "⭐" * fav.rating if fav.rating > 0 else "Unrated",
+                        "notes": fav.notes or "-",
+                        "added": fav.added_at.strftime("%Y-%m-%d"),
+                    }
+                )
             return rows
         except Exception as e:
             logger.error(f"❌ Failed to get favorites as rows: {e}")

@@ -38,7 +38,9 @@ class TestTaggingWorkflow:
         self.temp_dir = tempfile.mkdtemp()
 
         # Initialize ChromaDB for search tests
-        chroma_db.init_chromadb(persist_directory="./data/chroma_test", collection_name="test_tags")
+        chroma_db.init_chromadb(
+            persist_directory="./data/chroma_test", collection_name="test_tags"
+        )
 
         # Create test audio
         sr = 44100
@@ -47,9 +49,9 @@ class TestTaggingWorkflow:
 
         # Electronic sound: higher frequency content, steady rhythm
         audio = 0.5 * (
-            np.sin(2 * np.pi * 440 * t) +  # Synth bass
-            0.3 * np.sin(2 * np.pi * 1200 * t) +  # Mid synth
-            0.2 * np.sin(2 * np.pi * 5000 * t)  # High synth
+            np.sin(2 * np.pi * 440 * t)  # Synth bass
+            + 0.3 * np.sin(2 * np.pi * 1200 * t)  # Mid synth
+            + 0.2 * np.sin(2 * np.pi * 5000 * t)  # High synth
         ).astype(np.float32)
 
         self.test_audio_path = Path(self.temp_dir) / "electronic_sample.wav"
@@ -65,6 +67,7 @@ class TestTaggingWorkflow:
             pass
 
         import shutil
+
         try:
             shutil.rmtree(self.temp_dir)
         except:
@@ -74,23 +77,21 @@ class TestTaggingWorkflow:
         """Test generating tags from audio analysis"""
         # Step 1: Analyze audio
         features = self.audio_engine.analyze_audio(
-            self.test_audio_path,
-            level=AnalysisLevel.STANDARD
+            self.test_audio_path, level=AnalysisLevel.STANDARD
         )
 
         # Step 2: Generate tags
         tags = self.tagger.tag_from_features(features.to_dict())
 
         assert len(tags) > 0
-        assert all(hasattr(t, 'tag') for t in tags)
-        assert all(hasattr(t, 'confidence') for t in tags)
+        assert all(hasattr(t, "tag") for t in tags)
+        assert all(hasattr(t, "confidence") for t in tags)
         assert all(0 <= t.confidence <= 1 for t in tags)
 
     def test_tag_vocabulary_integrity(self):
         """Test that all generated tags are in vocabulary"""
         features = self.audio_engine.analyze_audio(
-            self.test_audio_path,
-            level=AnalysisLevel.STANDARD
+            self.test_audio_path, level=AnalysisLevel.STANDARD
         )
 
         tags = self.tagger.tag_from_features(features.to_dict())
@@ -105,8 +106,7 @@ class TestTaggingWorkflow:
     def test_high_confidence_tag_filtering(self):
         """Test filtering tags by confidence threshold"""
         features = self.audio_engine.analyze_audio(
-            self.test_audio_path,
-            level=AnalysisLevel.STANDARD
+            self.test_audio_path, level=AnalysisLevel.STANDARD
         )
 
         tags = self.tagger.tag_from_features(features.to_dict())
@@ -148,6 +148,7 @@ class TestMasteringWorkflow:
         yield
 
         import shutil
+
         try:
             shutil.rmtree(self.temp_dir)
         except:
@@ -158,9 +159,9 @@ class TestMasteringWorkflow:
         analysis = self.loudness_analyzer.analyze_loudness(self.test_audio, 44100)
 
         assert analysis is not None
-        assert hasattr(analysis, 'integrated_loudness')
-        assert hasattr(analysis, 'true_peak')
-        assert hasattr(analysis, 'loudness_range')
+        assert hasattr(analysis, "integrated_loudness")
+        assert hasattr(analysis, "true_peak")
+        assert hasattr(analysis, "loudness_range")
 
         # LUFS should be negative
         assert analysis.integrated_loudness < 0
@@ -176,10 +177,10 @@ class TestMasteringWorkflow:
 
             assert analysis is not None
             assert analysis.target_platform == platform
-            assert hasattr(analysis, 'loudness_analysis')
-            assert hasattr(analysis, 'spectral_balance')
-            assert hasattr(analysis, 'stereo_width')
-            assert hasattr(analysis, 'phase_correlation')
+            assert hasattr(analysis, "loudness_analysis")
+            assert hasattr(analysis, "spectral_balance")
+            assert hasattr(analysis, "stereo_width")
+            assert hasattr(analysis, "phase_correlation")
 
     def test_mastering_recommendations(self):
         """Test that mastering analysis generates actionable recommendations"""
@@ -216,34 +217,40 @@ class TestLayeringWorkflow:
 
         # Sample 2: Snappy high-mid percussion
         self.perc_audio = (
-            0.4 * np.sin(2 * np.pi * 2000 * t) * np.exp(-3 * t) +  # Pitched decay
-            0.2 * np.random.randn(len(t)).astype(np.float32)  # Noise
+            0.4 * np.sin(2 * np.pi * 2000 * t) * np.exp(-3 * t)  # Pitched decay
+            + 0.2 * np.random.randn(len(t)).astype(np.float32)  # Noise
         ).astype(np.float32)
 
     def test_layering_compatibility_analysis(self):
         """Test compatibility analysis between two samples"""
-        analysis = self.layering_analyzer.analyze(self.bass_audio, self.perc_audio, 44100)
+        analysis = self.layering_analyzer.analyze(
+            self.bass_audio, self.perc_audio, 44100
+        )
 
         assert analysis is not None
-        assert hasattr(analysis, 'compatibility_score')
-        assert hasattr(analysis, 'can_layer')
+        assert hasattr(analysis, "compatibility_score")
+        assert hasattr(analysis, "can_layer")
         assert 0 <= analysis.compatibility_score <= 10
 
     def test_phase_analysis(self):
         """Test phase correlation analysis"""
-        analysis = self.layering_analyzer.analyze(self.bass_audio, self.perc_audio, 44100)
+        analysis = self.layering_analyzer.analyze(
+            self.bass_audio, self.perc_audio, 44100
+        )
 
-        assert hasattr(analysis, 'phase_correlation')
+        assert hasattr(analysis, "phase_correlation")
         assert -1 <= analysis.phase_correlation <= 1
-        assert hasattr(analysis, 'phase_status')
+        assert hasattr(analysis, "phase_status")
         assert analysis.phase_status in ["in-phase", "phase-cancellation", "orthogonal"]
 
     def test_frequency_masking_detection(self):
         """Test frequency masking detection"""
-        analysis = self.layering_analyzer.analyze(self.bass_audio, self.perc_audio, 44100)
+        analysis = self.layering_analyzer.analyze(
+            self.bass_audio, self.perc_audio, 44100
+        )
 
-        assert hasattr(analysis, 'loudness_difference_db')
-        assert hasattr(analysis, 'loudness_ratio')
+        assert hasattr(analysis, "loudness_difference_db")
+        assert hasattr(analysis, "loudness_ratio")
         assert isinstance(analysis.loudness_difference_db, float)
         assert isinstance(analysis.loudness_ratio, float)
 
@@ -251,12 +258,16 @@ class TestLayeringWorkflow:
         """Test detection of problematic layer combinations"""
         # Create two samples that are too similar (problematic layering)
         sample1 = 0.5 * np.sin(2 * np.pi * 440 * np.linspace(0, 1, 44100))
-        sample2 = 0.5 * np.sin(2 * np.pi * 440 * np.linspace(0, 1, 44100)) + 0.01  # Nearly identical
+        sample2 = (
+            0.5 * np.sin(2 * np.pi * 440 * np.linspace(0, 1, 44100)) + 0.01
+        )  # Nearly identical
 
-        analysis = self.layering_analyzer.analyze(sample1.astype(np.float32), sample2.astype(np.float32), 44100)
+        analysis = self.layering_analyzer.analyze(
+            sample1.astype(np.float32), sample2.astype(np.float32), 44100
+        )
 
         # Should detect phase issues
-        assert hasattr(analysis, 'phase_correlation')
+        assert hasattr(analysis, "phase_correlation")
 
 
 class TestGrooveWorkflow:
@@ -284,7 +295,7 @@ class TestGrooveWorkflow:
             kick_len = int(0.1 * sr)  # 100ms kick
             if kick_pos + kick_len < len(audio):
                 kick_envelope = np.hanning(kick_len)
-                audio[kick_pos:kick_pos+kick_len] += 0.8 * kick_envelope
+                audio[kick_pos : kick_pos + kick_len] += 0.8 * kick_envelope
 
         self.test_audio = audio.astype(np.float32)
         self.test_audio_path = Path(self.temp_dir) / "groove_sample.wav"
@@ -293,6 +304,7 @@ class TestGrooveWorkflow:
         yield
 
         import shutil
+
         try:
             shutil.rmtree(self.temp_dir)
         except:
@@ -304,29 +316,35 @@ class TestGrooveWorkflow:
 
         assert groove is not None
         assert groove.name == "test_groove"
-        assert hasattr(groove, 'tempo_bpm')
-        assert hasattr(groove, 'swing_amount')
-        assert hasattr(groove, 'groove_type')
+        assert hasattr(groove, "tempo_bpm")
+        assert hasattr(groove, "swing_amount")
+        assert hasattr(groove, "groove_type")
         assert groove.tempo_bpm > 0
 
     def test_groove_type_classification(self):
         """Test groove type classification"""
         groove = self.groove_extractor.extract(self.test_audio, 44100)
 
-        assert hasattr(groove, 'groove_type')
-        assert groove.groove_type in ["straight", "swing", "shuffle", "jdilla", "groovy"]
+        assert hasattr(groove, "groove_type")
+        assert groove.groove_type in [
+            "straight",
+            "swing",
+            "shuffle",
+            "jdilla",
+            "groovy",
+        ]
 
     def test_groove_properties(self):
         """Test groove property analysis"""
         groove = self.groove_extractor.extract(self.test_audio, 44100)
 
-        assert hasattr(groove, 'swing_amount')
+        assert hasattr(groove, "swing_amount")
         assert 0 <= groove.swing_amount <= 100
 
-        assert hasattr(groove, 'timing_deviation_ms')
+        assert hasattr(groove, "timing_deviation_ms")
         assert groove.timing_deviation_ms >= 0
 
-        assert hasattr(groove, 'velocity_pattern')
+        assert hasattr(groove, "velocity_pattern")
         assert isinstance(groove.velocity_pattern, (list, np.ndarray))
 
 
@@ -348,9 +366,9 @@ class TestMultiFeatureWorkflow:
         t = np.linspace(0, duration, sr * duration)
 
         audio = 0.4 * (
-            np.sin(2 * np.pi * 100 * t) +
-            0.5 * np.sin(2 * np.pi * 440 * t) +
-            0.3 * np.sin(2 * np.pi * 1200 * t)
+            np.sin(2 * np.pi * 100 * t)
+            + 0.5 * np.sin(2 * np.pi * 440 * t)
+            + 0.3 * np.sin(2 * np.pi * 1200 * t)
         ).astype(np.float32)
 
         self.test_audio_path = Path(self.temp_dir) / "electronic.wav"
@@ -364,6 +382,7 @@ class TestMultiFeatureWorkflow:
         yield
 
         import shutil
+
         try:
             shutil.rmtree(self.temp_dir)
         except:
@@ -373,8 +392,7 @@ class TestMultiFeatureWorkflow:
         """Test analyzing audio, then tagging and mastering"""
         # Step 1: Analyze
         features = self.audio_engine.analyze_audio(
-            self.test_audio_path,
-            level=AnalysisLevel.STANDARD
+            self.test_audio_path, level=AnalysisLevel.STANDARD
         )
 
         # Step 2: Tag

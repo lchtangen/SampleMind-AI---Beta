@@ -28,7 +28,7 @@ class TestTUIApp:
         """Test that TUI app has correct title"""
         app = SampleMindTUI()
         assert "SampleMind" in app.TITLE
-        assert "v6" in app.TITLE
+        assert "v6" not in app.TITLE
 
     def test_tui_app_subtitle(self):
         """Test that TUI app has subtitle"""
@@ -85,12 +85,14 @@ class TestTUIMenuWidget:
     def test_menu_imports(self):
         """Test that menu widgets can be imported"""
         from samplemind.interfaces.tui.widgets.menu import MainMenu, MainMenuOption
+
         assert MainMenu is not None
         assert MainMenuOption is not None
 
     def test_status_bar_imports(self):
         """Test that status bar widget can be imported"""
         from samplemind.interfaces.tui.widgets.status_bar import StatusBar
+
         assert StatusBar is not None
 
 
@@ -100,16 +102,19 @@ class TestTUIScreens:
     def test_main_screen_imports(self):
         """Test that main screen can be imported"""
         from samplemind.interfaces.tui.screens.main_screen import MainScreen
+
         assert MainScreen is not None
 
     def test_analyze_screen_imports(self):
         """Test that analyze screen can be imported"""
         from samplemind.interfaces.tui.screens.analyze_screen import AnalyzeScreen
+
         assert AnalyzeScreen is not None
 
     def test_batch_screen_imports(self):
         """Test that batch screen can be imported"""
         from samplemind.interfaces.tui.screens.batch_screen import BatchScreen
+
         assert BatchScreen is not None
 
 

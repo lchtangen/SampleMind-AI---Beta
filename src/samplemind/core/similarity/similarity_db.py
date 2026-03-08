@@ -23,6 +23,7 @@ DEFAULT_PERSIST_DIR = "./data/similarity"
 @dataclass
 class SimilarityResult:
     """Result from a similarity search query"""
+
     file_id: str
     file_path: str
     similarity: float  # 0.0 to 1.0
@@ -77,7 +78,7 @@ class SimilarityDatabase:
                 settings=Settings(
                     anonymized_telemetry=False,
                     allow_reset=True,
-                )
+                ),
             )
 
             # Get or create collection
@@ -86,7 +87,7 @@ class SimilarityDatabase:
                 metadata={
                     "description": "SampleMind audio sample embeddings",
                     "embedding_dim": EMBEDDING_DIM,
-                }
+                },
             )
 
             logger.info(
@@ -128,7 +129,7 @@ class SimilarityDatabase:
 
         # Check if already indexed
         existing = self.collection.get(ids=[embedding.file_id])
-        if existing['ids']:
+        if existing["ids"]:
             # Update existing
             self.collection.update(
                 ids=[embedding.file_id],
@@ -170,11 +171,11 @@ class SimilarityDatabase:
         if not folder.is_dir():
             raise NotADirectoryError(f"Not a directory: {folder}")
 
-        extensions = extensions or ['.wav', '.mp3', '.flac', '.aiff', '.m4a', '.ogg']
+        extensions = extensions or [".wav", ".mp3", ".flac", ".aiff", ".m4a", ".ogg"]
 
         # Find all audio files
         if recursive:
-            files = [f for f in folder.rglob('*') if f.suffix.lower() in extensions]
+            files = [f for f in folder.rglob("*") if f.suffix.lower() in extensions]
         else:
             files = [f for f in folder.iterdir() if f.suffix.lower() in extensions]
 
@@ -235,10 +236,10 @@ class SimilarityDatabase:
 
         # Convert to SimilarityResult objects
         similar_files = []
-        if results['ids'] and results['ids'][0]:
-            for i, file_id in enumerate(results['ids'][0]):
-                distance = results['distances'][0][i] if results['distances'] else 0
-                metadata = results['metadatas'][0][i] if results['metadatas'] else {}
+        if results["ids"] and results["ids"][0]:
+            for i, file_id in enumerate(results["ids"][0]):
+                distance = results["distances"][0][i] if results["distances"] else 0
+                metadata = results["metadatas"][0][i] if results["metadatas"] else {}
 
                 # Convert distance to similarity (ChromaDB uses L2 distance by default)
                 # For normalized vectors, L2 distance ranges from 0 to 2
@@ -246,12 +247,14 @@ class SimilarityDatabase:
                 similarity = max(0.0, min(1.0, 1.0 - (distance / 2)))
 
                 if similarity >= min_similarity:
-                    similar_files.append(SimilarityResult(
-                        file_id=file_id,
-                        file_path=metadata.get('file_path', 'Unknown'),
-                        similarity=similarity,
-                        metadata=metadata,
-                    ))
+                    similar_files.append(
+                        SimilarityResult(
+                            file_id=file_id,
+                            file_path=metadata.get("file_path", "Unknown"),
+                            similarity=similarity,
+                            metadata=metadata,
+                        )
+                    )
 
         # Sort by similarity descending
         similar_files.sort(key=lambda x: x.similarity, reverse=True)
@@ -281,34 +284,36 @@ class SimilarityDatabase:
             include=["embeddings"],
         )
 
-        if not result['embeddings']:
+        if not result["embeddings"]:
             raise ValueError(f"File ID not found: {file_id}")
 
         # Query for similar
         results = self.collection.query(
-            query_embeddings=[result['embeddings'][0]],
+            query_embeddings=[result["embeddings"][0]],
             n_results=n_results + 1,  # +1 to exclude the query itself
             include=["metadatas", "distances"],
         )
 
         similar_files = []
-        if results['ids'] and results['ids'][0]:
-            for i, fid in enumerate(results['ids'][0]):
+        if results["ids"] and results["ids"][0]:
+            for i, fid in enumerate(results["ids"][0]):
                 if fid == file_id:  # Skip the query file itself
                     continue
 
-                distance = results['distances'][0][i] if results['distances'] else 0
-                metadata = results['metadatas'][0][i] if results['metadatas'] else {}
+                distance = results["distances"][0][i] if results["distances"] else 0
+                metadata = results["metadatas"][0][i] if results["metadatas"] else {}
 
                 similarity = max(0.0, min(1.0, 1.0 - (distance / 2)))
 
                 if similarity >= min_similarity:
-                    similar_files.append(SimilarityResult(
-                        file_id=fid,
-                        file_path=metadata.get('file_path', 'Unknown'),
-                        similarity=similarity,
-                        metadata=metadata,
-                    ))
+                    similar_files.append(
+                        SimilarityResult(
+                            file_id=fid,
+                            file_path=metadata.get("file_path", "Unknown"),
+                            similarity=similarity,
+                            metadata=metadata,
+                        )
+                    )
 
         return similar_files[:n_results]
 

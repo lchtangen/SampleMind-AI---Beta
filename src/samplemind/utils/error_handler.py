@@ -130,6 +130,7 @@ def handle_errors(
 
     def decorator(func: Callable) -> Callable:
         """Decorator wrapper for error handling"""
+
         @wraps(func)
         async def async_wrapper(*args, **kwargs) -> Any:
             """Async wrapper with error handling"""

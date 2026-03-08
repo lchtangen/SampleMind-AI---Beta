@@ -23,6 +23,7 @@ from dataclasses import dataclass
 try:
     import questionary
     from questionary import Choice, prompt
+
     QUESTIONARY_AVAILABLE = True
 except ImportError:
     QUESTIONARY_AVAILABLE = False
@@ -49,6 +50,7 @@ console = Console()
 
 class MenuTheme(Enum):
     """Available themes for the menu system"""
+
     DARK = "dark"
     LIGHT = "light"
     CYBERPUNK = "cyberpunk"
@@ -65,6 +67,7 @@ class MenuTheme(Enum):
 
 class MenuActionType(Enum):
     """Types of menu actions"""
+
     COMMAND = "command"  # Execute a CLI command
     SUBMENU = "submenu"  # Navigate to submenu
     FUNCTION = "function"  # Call a Python function
@@ -74,6 +77,7 @@ class MenuActionType(Enum):
 @dataclass
 class MenuItem:
     """Represents a single menu item"""
+
     label: str
     description: str
     icon: str
@@ -95,7 +99,7 @@ class ThemeManager:
             "success": "green",
             "warning": "yellow",
             "error": "red",
-            "border": "blue"
+            "border": "blue",
         },
         MenuTheme.CYBERPUNK: {
             "primary": "magenta",
@@ -104,7 +108,7 @@ class ThemeManager:
             "success": "bright_cyan",
             "warning": "yellow",
             "error": "bright_red",
-            "border": "magenta"
+            "border": "magenta",
         },
         MenuTheme.SYNTHWAVE: {
             "primary": "magenta",
@@ -113,7 +117,7 @@ class ThemeManager:
             "success": "bright_green",
             "warning": "bright_yellow",
             "error": "bright_red",
-            "border": "magenta"
+            "border": "magenta",
         },
         MenuTheme.GRUVBOX: {
             "primary": "color(172)",  # Orange
@@ -122,7 +126,7 @@ class ThemeManager:
             "success": "color(142)",  # Green
             "warning": "color(221)",  # Yellow
             "error": "color(167)",  # Red
-            "border": "color(172)"  # Orange
+            "border": "color(172)",  # Orange
         },
         MenuTheme.DRACULA: {
             "primary": "bright_magenta",
@@ -131,7 +135,7 @@ class ThemeManager:
             "success": "bright_green",
             "warning": "bright_yellow",
             "error": "bright_red",
-            "border": "bright_magenta"
+            "border": "bright_magenta",
         },
         MenuTheme.NORD: {
             "primary": "bright_blue",
@@ -140,53 +144,53 @@ class ThemeManager:
             "success": "color(163)",  # Nord green
             "warning": "color(214)",  # Nord yellow
             "error": "color(191)",  # Nord red
-            "border": "bright_blue"
+            "border": "bright_blue",
         },
         MenuTheme.MONOKAI: {
             "primary": "color(141)",  # Purple
             "highlight": "bright_white",
-            "accent": "color(81)",   # Cyan
+            "accent": "color(81)",  # Cyan
             "success": "color(148)",  # Green
             "warning": "color(185)",  # Yellow
-            "error": "color(197)",    # Red
-            "border": "color(141)"    # Purple
+            "error": "color(197)",  # Red
+            "border": "color(141)",  # Purple
         },
         MenuTheme.SOLARIZED_DARK: {
-            "primary": "color(33)",   # Blue
+            "primary": "color(33)",  # Blue
             "highlight": "bright_white",
-            "accent": "color(37)",    # Cyan
-            "success": "color(64)",   # Green
+            "accent": "color(37)",  # Cyan
+            "success": "color(64)",  # Green
             "warning": "color(136)",  # Yellow
-            "error": "color(160)",    # Red
-            "border": "color(33)"     # Blue
+            "error": "color(160)",  # Red
+            "border": "color(33)",  # Blue
         },
         MenuTheme.SOLARIZED_LIGHT: {
-            "primary": "color(33)",   # Blue
+            "primary": "color(33)",  # Blue
             "highlight": "black",
-            "accent": "color(37)",    # Cyan
-            "success": "color(64)",   # Green
+            "accent": "color(37)",  # Cyan
+            "success": "color(64)",  # Green
             "warning": "color(136)",  # Yellow
-            "error": "color(160)",    # Red
-            "border": "color(33)"     # Blue
+            "error": "color(160)",  # Red
+            "border": "color(33)",  # Blue
         },
         MenuTheme.TOKYO_NIGHT: {
             "primary": "color(168)",  # Purple
             "highlight": "bright_white",
-            "accent": "color(117)",   # Blue
+            "accent": "color(117)",  # Blue
             "success": "color(158)",  # Green
             "warning": "color(214)",  # Yellow
-            "error": "color(214)",    # Red/Orange
-            "border": "color(168)"    # Purple
+            "error": "color(214)",  # Red/Orange
+            "border": "color(168)",  # Purple
         },
         MenuTheme.ONE_DARK: {
             "primary": "color(109)",  # Blue
             "highlight": "bright_white",
-            "accent": "color(108)",   # Green
+            "accent": "color(108)",  # Green
             "success": "color(108)",  # Green
             "warning": "color(180)",  # Yellow
-            "error": "color(174)",    # Red
-            "border": "color(109)"    # Blue
-        }
+            "error": "color(174)",  # Red
+            "border": "color(109)",  # Blue
+        },
     }
 
     def __init__(self, theme: MenuTheme = MenuTheme.DARK) -> None:
@@ -197,7 +201,9 @@ class ThemeManager:
         """Switch to a different theme"""
         self.current_theme = theme
         self.colors = self.THEMES[theme]
-        console.print(f"\n[{self.colors['success']}]✨ Theme changed to {theme.value}[/{self.colors['success']}]")
+        console.print(
+            f"\n[{self.colors['success']}]✨ Theme changed to {theme.value}[/{self.colors['success']}]"
+        )
 
     def get_color(self, color_type: str) -> str:
         """Get color for a specific element type"""
@@ -216,15 +222,15 @@ class KeyboardShortcuts:
     """Manages keyboard shortcuts for menu navigation"""
 
     SHORTCUTS = {
-        "up": ["↑", "k"],              # Move up (vim-style)
-        "down": ["↓", "j"],            # Move down (vim-style)
-        "select": ["Enter", " "],      # Select item
+        "up": ["↑", "k"],  # Move up (vim-style)
+        "down": ["↓", "j"],  # Move down (vim-style)
+        "select": ["Enter", " "],  # Select item
         "back": ["Esc", "Backspace", "h"],  # Go back/previous
-        "quit": ["q", "Ctrl+C"],       # Quit application
-        "search": ["/"],               # Start search
-        "help": ["?"],                 # Show help
-        "theme": ["t"],                # Toggle theme
-        "settings": ["s"],             # Settings menu
+        "quit": ["q", "Ctrl+C"],  # Quit application
+        "search": ["/"],  # Start search
+        "help": ["?"],  # Show help
+        "theme": ["t"],  # Toggle theme
+        "settings": ["s"],  # Settings menu
     }
 
     def __init__(self) -> None:
@@ -291,7 +297,7 @@ class ModernMenu:
                     action_type=MenuActionType.SUBMENU,
                     action="analyze",
                     shortcut="a",
-                    help_text="Analyze audio files with advanced feature extraction"
+                    help_text="Analyze audio files with advanced feature extraction",
                 ),
                 MenuItem(
                     label="📁 Library Management",
@@ -300,7 +306,7 @@ class ModernMenu:
                     action_type=MenuActionType.SUBMENU,
                     action="library",
                     shortcut="l",
-                    help_text="Scan, organize, and manage audio samples"
+                    help_text="Scan, organize, and manage audio samples",
                 ),
                 MenuItem(
                     label="🤖 AI Features",
@@ -309,7 +315,7 @@ class ModernMenu:
                     action_type=MenuActionType.SUBMENU,
                     action="ai",
                     shortcut="i",
-                    help_text="Leverage AI for advanced sample analysis"
+                    help_text="Leverage AI for advanced sample analysis",
                 ),
                 MenuItem(
                     label="⚙️  Settings",
@@ -318,7 +324,7 @@ class ModernMenu:
                     action_type=MenuActionType.SUBMENU,
                     action="settings",
                     shortcut="s",
-                    help_text="Configure themes, providers, and preferences"
+                    help_text="Configure themes, providers, and preferences",
                 ),
                 MenuItem(
                     label="🔧 System Status",
@@ -327,7 +333,7 @@ class ModernMenu:
                     action_type=MenuActionType.SUBMENU,
                     action="system",
                     shortcut="y",
-                    help_text="View system health and diagnostics"
+                    help_text="View system health and diagnostics",
                 ),
                 MenuItem(
                     label="❓ Help",
@@ -336,7 +342,7 @@ class ModernMenu:
                     action_type=MenuActionType.SUBMENU,
                     action="help",
                     shortcut="?",
-                    help_text="View help and documentation"
+                    help_text="View help and documentation",
                 ),
                 MenuItem(
                     label="🚪 Exit",
@@ -344,10 +350,9 @@ class ModernMenu:
                     icon="🚪",
                     action_type=MenuActionType.QUIT,
                     shortcut="q",
-                    help_text="Exit application"
+                    help_text="Exit application",
                 ),
             ],
-
             "analyze": [
                 MenuItem(
                     label="⚡ Quick Analysis",
@@ -355,7 +360,7 @@ class ModernMenu:
                     icon="⚡",
                     action_type=MenuActionType.COMMAND,
                     action="samplemind analyze:quick",
-                    help_text="<5 second response time"
+                    help_text="<5 second response time",
                 ),
                 MenuItem(
                     label="📊 Standard Analysis",
@@ -363,7 +368,7 @@ class ModernMenu:
                     icon="📊",
                     action_type=MenuActionType.COMMAND,
                     action="samplemind analyze:standard",
-                    help_text="Full feature extraction (~30s)"
+                    help_text="Full feature extraction (~30s)",
                 ),
                 MenuItem(
                     label="🔬 Professional Analysis",
@@ -371,7 +376,7 @@ class ModernMenu:
                     icon="🔬",
                     action_type=MenuActionType.COMMAND,
                     action="samplemind analyze:professional",
-                    help_text="All advanced features (~2 minutes)"
+                    help_text="All advanced features (~2 minutes)",
                 ),
                 MenuItem(
                     label="📈 Batch Processing",
@@ -379,7 +384,7 @@ class ModernMenu:
                     icon="📈",
                     action_type=MenuActionType.SUBMENU,
                     action="batch",
-                    help_text="Process folder of audio files"
+                    help_text="Process folder of audio files",
                 ),
                 MenuItem(
                     label="🎵 Feature Detection",
@@ -387,252 +392,245 @@ class ModernMenu:
                     icon="🎵",
                     action_type=MenuActionType.SUBMENU,
                     action="features",
-                    help_text="BPM, key, mood, genre detection"
+                    help_text="BPM, key, mood, genre detection",
                 ),
             ],
-
             "features": [
                 MenuItem(
                     label="🎶 BPM Detection",
                     description="Detect tempo/BPM",
                     icon="🎶",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind analyze:bpm"
+                    action="samplemind analyze:bpm",
                 ),
                 MenuItem(
                     label="🎼 Key Detection",
                     description="Detect musical key",
                     icon="🎼",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind analyze:key"
+                    action="samplemind analyze:key",
                 ),
                 MenuItem(
                     label="😊 Mood Analysis",
                     description="Analyze emotional mood",
                     icon="😊",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind analyze:mood"
+                    action="samplemind analyze:mood",
                 ),
                 MenuItem(
                     label="🎸 Genre Classification",
                     description="Classify musical genre",
                     icon="🎸",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind analyze:genre"
+                    action="samplemind analyze:genre",
                 ),
                 MenuItem(
                     label="🎤 Vocal Detection",
                     description="Detect vocal presence",
                     icon="🎤",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind analyze:vocal"
+                    action="samplemind analyze:vocal",
                 ),
                 MenuItem(
                     label="🥁 Instrument Recognition",
                     description="Identify instruments",
                     icon="🥁",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind analyze:instrument"
+                    action="samplemind analyze:instrument",
                 ),
                 MenuItem(
                     label="⚡ Energy Level",
                     description="Detect energy intensity",
                     icon="⚡",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind analyze:energy"
+                    action="samplemind analyze:energy",
                 ),
                 MenuItem(
                     label="📊 Quality Scoring",
                     description="Score audio quality",
                     icon="📊",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind analyze:quality"
+                    action="samplemind analyze:quality",
                 ),
             ],
-
             "batch": [
                 MenuItem(
                     label="📁 Batch Analyze Folder",
                     description="Analyze all files in folder",
                     icon="📁",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind batch:analyze"
+                    action="samplemind batch:analyze",
                 ),
                 MenuItem(
                     label="🏷️  Batch Tagging",
                     description="Tag multiple files",
                     icon="🏷️",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind batch:tag"
+                    action="samplemind batch:tag",
                 ),
                 MenuItem(
                     label="🎯 Batch Classification",
                     description="Classify multiple files",
                     icon="🎯",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind batch:classify"
+                    action="samplemind batch:classify",
                 ),
                 MenuItem(
                     label="💾 Batch Export",
                     description="Export multiple analyses",
                     icon="💾",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind batch:export"
+                    action="samplemind batch:export",
                 ),
             ],
-
             "library": [
                 MenuItem(
                     label="🔍 Scan & Index",
                     description="Scan folder and build index",
                     icon="🔍",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind library:scan"
+                    action="samplemind library:scan",
                 ),
                 MenuItem(
                     label="📚 Organize Library",
                     description="Auto-organize by metadata",
                     icon="📚",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind library:organize"
+                    action="samplemind library:organize",
                 ),
                 MenuItem(
                     label="🔎 Search Library",
                     description="Full-text search",
                     icon="🔎",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind library:search"
+                    action="samplemind library:search",
                 ),
                 MenuItem(
                     label="🎚️  Filter Library",
                     description="Filter by BPM, key, genre",
                     icon="🎚️",
                     action_type=MenuActionType.SUBMENU,
-                    action="library_filters"
+                    action="library_filters",
                 ),
                 MenuItem(
                     label="🔗 Find Similar",
                     description="Find similar samples",
                     icon="🔗",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind library:find-similar"
+                    action="samplemind library:find-similar",
                 ),
                 MenuItem(
                     label="🧹 Cleanup",
                     description="Remove broken/duplicate files",
                     icon="🧹",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind library:cleanup"
+                    action="samplemind library:cleanup",
                 ),
             ],
-
             "library_filters": [
                 MenuItem(
                     label="🎶 Filter by BPM",
                     description="Find samples by BPM range",
                     icon="🎶",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind library:filter:bpm"
+                    action="samplemind library:filter:bpm",
                 ),
                 MenuItem(
                     label="🎼 Filter by Key",
                     description="Find samples by key",
                     icon="🎼",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind library:filter:key"
+                    action="samplemind library:filter:key",
                 ),
                 MenuItem(
                     label="🎸 Filter by Genre",
                     description="Find samples by genre",
                     icon="🎸",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind library:filter:genre"
+                    action="samplemind library:filter:genre",
                 ),
                 MenuItem(
                     label="🏷️  Filter by Tag",
                     description="Find samples by custom tag",
                     icon="🏷️",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind library:filter:tag"
+                    action="samplemind library:filter:tag",
                 ),
             ],
-
             "ai": [
                 MenuItem(
                     label="🤖 AI Analysis",
                     description="AI-powered music analysis",
                     icon="🤖",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind ai:analyze"
+                    action="samplemind ai:analyze",
                 ),
                 MenuItem(
                     label="🏷️  AI Auto-Tagging",
                     description="AI-generated tags and metadata",
                     icon="🏷️",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind ai:tag"
+                    action="samplemind ai:tag",
                 ),
                 MenuItem(
                     label="💡 Sample Suggestions",
                     description="AI-powered sample recommendations",
                     icon="💡",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind ai:suggest"
+                    action="samplemind ai:suggest",
                 ),
                 MenuItem(
                     label="🎓 Production Coach",
                     description="AI production guidance",
                     icon="🎓",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind ai:coach"
+                    action="samplemind ai:coach",
                 ),
                 MenuItem(
                     label="🔧 AI Provider Settings",
                     description="Configure AI provider (Gemini, OpenAI, etc)",
                     icon="🔧",
                     action_type=MenuActionType.SUBMENU,
-                    action="ai_settings"
+                    action="ai_settings",
                 ),
             ],
-
             "ai_settings": [
                 MenuItem(
                     label="🏢 Provider Selection",
                     description="Choose AI provider (gemini/openai/ollama)",
                     icon="🏢",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind ai:provider"
+                    action="samplemind ai:provider",
                 ),
                 MenuItem(
                     label="🔑 Configure API Key",
                     description="Set API key for provider",
                     icon="🔑",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind ai:key"
+                    action="samplemind ai:key",
                 ),
                 MenuItem(
                     label="🤖 Select Model",
                     description="Choose specific AI model",
                     icon="🤖",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind ai:model"
+                    action="samplemind ai:model",
                 ),
                 MenuItem(
                     label="🧪 Test Connection",
                     description="Test AI provider connection",
                     icon="🧪",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind ai:test"
+                    action="samplemind ai:test",
                 ),
                 MenuItem(
                     label="📱 Offline Mode",
                     description="Enable offline-first local models",
                     icon="📱",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind ai:offline"
+                    action="samplemind ai:offline",
                 ),
             ],
-
             "settings": [
                 MenuItem(
                     label="🎨 Theme Selection",
@@ -640,118 +638,116 @@ class ModernMenu:
                     icon="🎨",
                     action_type=MenuActionType.FUNCTION,
                     action=self.show_theme_selector,
-                    help_text="Dark, Cyberpunk, Synthwave, Dracula, Nord, Monokai, etc."
+                    help_text="Dark, Cyberpunk, Synthwave, Dracula, Nord, Monokai, etc.",
                 ),
                 MenuItem(
                     label="⌨️  Keyboard Settings",
                     description="Configure keyboard shortcuts",
                     icon="⌨️",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind config:set"
+                    action="samplemind config:set",
                 ),
                 MenuItem(
                     label="🔊 Audio Settings",
                     description="Audio engine configuration",
                     icon="🔊",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind config:show"
+                    action="samplemind config:show",
                 ),
                 MenuItem(
                     label="📊 Display Preferences",
                     description="Configure output format",
                     icon="📊",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind config:get"
+                    action="samplemind config:get",
                 ),
                 MenuItem(
                     label="🤖 AI Provider",
                     description="Configure AI services",
                     icon="🤖",
                     action_type=MenuActionType.SUBMENU,
-                    action="ai_settings"
+                    action="ai_settings",
                 ),
             ],
-
             "system": [
                 MenuItem(
                     label="💊 Health Check",
                     description="Comprehensive system diagnostics",
                     icon="💊",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind health:check"
+                    action="samplemind health:check",
                 ),
                 MenuItem(
                     label="📊 System Status",
                     description="Current system status",
                     icon="📊",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind health:status"
+                    action="samplemind health:status",
                 ),
                 MenuItem(
                     label="📋 Recent Logs",
                     description="Display recent system logs",
                     icon="📋",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind health:logs"
+                    action="samplemind health:logs",
                 ),
                 MenuItem(
                     label="💾 Cache Statistics",
                     description="View cache usage statistics",
                     icon="💾",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind health:cache"
+                    action="samplemind health:cache",
                 ),
                 MenuItem(
                     label="💿 Disk Space",
                     description="Check disk space information",
                     icon="💿",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind health:disk"
+                    action="samplemind health:disk",
                 ),
                 MenuItem(
                     label="🔍 Diagnostics",
                     description="Run diagnostic tests",
                     icon="🔍",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind debug:test"
+                    action="samplemind debug:test",
                 ),
             ],
-
             "help": [
                 MenuItem(
                     label="📖 Getting Started",
                     description="Quick start guide",
                     icon="📖",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind help"
+                    action="samplemind help",
                 ),
                 MenuItem(
                     label="⌨️  Keyboard Shortcuts",
                     description="Show all keyboard shortcuts",
                     icon="⌨️",
                     action_type=MenuActionType.FUNCTION,
-                    action=self.show_shortcuts_help
+                    action=self.show_shortcuts_help,
                 ),
                 MenuItem(
                     label="🎯 Command Reference",
                     description="View all 200+ commands",
                     icon="🎯",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind help"
+                    action="samplemind help",
                 ),
                 MenuItem(
                     label="🐛 Troubleshooting",
                     description="Common issues and solutions",
                     icon="🐛",
                     action_type=MenuActionType.COMMAND,
-                    action="samplemind debug:diagnose"
+                    action="samplemind debug:diagnose",
                 ),
                 MenuItem(
                     label="📞 About",
                     description="About SampleMind AI",
                     icon="📞",
                     action_type=MenuActionType.FUNCTION,
-                    action=self.show_about
+                    action=self.show_about,
                 ),
             ],
         }
@@ -766,7 +762,7 @@ class ModernMenu:
         panel = Panel(
             f"[{self.theme_manager.get_color('primary')}]Select Theme[/{self.theme_manager.get_color('primary')}]",
             border_style=self.theme_manager.get_color("primary"),
-            padding=(1, 2)
+            padding=(1, 2),
         )
         console.print(panel)
 
@@ -781,10 +777,7 @@ class ModernMenu:
         console.print(table)
 
         if QUESTIONARY_AVAILABLE:
-            selected = questionary.select(
-                "Choose a theme:",
-                choices=theme_names
-            ).ask()
+            selected = questionary.select("Choose a theme:", choices=theme_names).ask()
 
             if selected:
                 self.theme_manager.set_theme(MenuTheme(selected))
@@ -794,7 +787,9 @@ class ModernMenu:
         console.clear()
 
         shortcuts_table = Table(title="⌨️  Keyboard Shortcuts")
-        shortcuts_table.add_column("Action", style=self.theme_manager.get_color("primary"))
+        shortcuts_table.add_column(
+            "Action", style=self.theme_manager.get_color("primary")
+        )
         shortcuts_table.add_column("Keys", style=self.theme_manager.get_color("accent"))
 
         for action, keys in self.shortcuts.SHORTCUTS.items():
@@ -833,7 +828,7 @@ License: MIT
             about_text,
             title="[bold]About SampleMind AI[/bold]",
             border_style=self.theme_manager.get_color("primary"),
-            padding=(1, 2)
+            padding=(1, 2),
         )
         console.print(panel)
         input("\nPress Enter to continue...")
@@ -851,7 +846,7 @@ License: MIT
         panel = Panel(
             banner_text,
             border_style=self.theme_manager.get_color("border"),
-            padding=(0, 0)
+            padding=(0, 0),
         )
         console.print(panel)
 
@@ -871,7 +866,9 @@ License: MIT
             try:
                 if item.action_type == MenuActionType.COMMAND:
                     # Execute command
-                    console.print(f"\n[{self.theme_manager.get_color('accent')}]Executing: {item.action}[/{self.theme_manager.get_color('accent')}]")
+                    console.print(
+                        f"\n[{self.theme_manager.get_color('accent')}]Executing: {item.action}[/{self.theme_manager.get_color('accent')}]"
+                    )
                     os.system(item.action)
 
                 elif item.action_type == MenuActionType.SUBMENU:
@@ -894,7 +891,9 @@ License: MIT
                 input(f"\n[dim]Press Enter to continue...[/dim]")
 
             except Exception as e:
-                console.print(f"\n[{self.theme_manager.get_color('error')}]Error: {e}[/{self.theme_manager.get_color('error')}]")
+                console.print(
+                    f"\n[{self.theme_manager.get_color('error')}]Error: {e}[/{self.theme_manager.get_color('error')}]"
+                )
                 input("\nPress Enter to continue...")
 
         return None
@@ -916,24 +915,31 @@ License: MIT
         # Prepare choices for questionary
         choices = [
             Choice(
-                f"{item.icon} {item.label}",
-                value=i,
-                short=f"{item.icon} {item.label}"
+                f"{item.icon} {item.label}", value=i, short=f"{item.icon} {item.label}"
             )
             for i, item in enumerate(menu_items)
         ]
 
-        console.print(f"\n[{self.theme_manager.get_color('primary')}]Select an option:[/{self.theme_manager.get_color('primary')}]\n")
+        console.print(
+            f"\n[{self.theme_manager.get_color('primary')}]Select an option:[/{self.theme_manager.get_color('primary')}]\n"
+        )
 
         if QUESTIONARY_AVAILABLE:
             # Use questionary for interactive selection
-            selected_index = await asyncio.to_thread(
-                questionary.select,
-                "Choose option",
-                choices=[Choice(f"{item.icon} {item.label}", value=i) for i, item in enumerate(menu_items)],
-                qmark="→",
-                pointer="◆"
-            ).ask_async if hasattr(questionary.select, 'ask_async') else None
+            selected_index = (
+                await asyncio.to_thread(
+                    questionary.select,
+                    "Choose option",
+                    choices=[
+                        Choice(f"{item.icon} {item.label}", value=i)
+                        for i, item in enumerate(menu_items)
+                    ],
+                    qmark="→",
+                    pointer="◆",
+                ).ask_async
+                if hasattr(questionary.select, "ask_async")
+                else None
+            )
 
             if selected_index is not None:
                 result = await self.handle_menu_action(menu_items[selected_index])
@@ -962,12 +968,18 @@ License: MIT
         try:
             result = await self.run_menu("main")
             if result == "quit":
-                console.print(f"\n[{self.theme_manager.get_color('success')}]👋 Thank you for using SampleMind AI![/{self.theme_manager.get_color('success')}]")
+                console.print(
+                    f"\n[{self.theme_manager.get_color('success')}]👋 Thank you for using SampleMind AI![/{self.theme_manager.get_color('success')}]"
+                )
 
         except KeyboardInterrupt:
-            console.print(f"\n[{self.theme_manager.get_color('warning')}]👋 Goodbye![/{self.theme_manager.get_color('warning')}]")
+            console.print(
+                f"\n[{self.theme_manager.get_color('warning')}]👋 Goodbye![/{self.theme_manager.get_color('warning')}]"
+            )
         except Exception as e:
-            console.print(f"\n[{self.theme_manager.get_color('error')}]Error: {e}[/{self.theme_manager.get_color('error')}]")
+            console.print(
+                f"\n[{self.theme_manager.get_color('error')}]Error: {e}[/{self.theme_manager.get_color('error')}]"
+            )
 
 
 async def main():

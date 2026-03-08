@@ -48,7 +48,7 @@ class SampleMindError(Exception):
         user_message: Optional[str] = None,
         suggestion: Optional[str] = None,
         error_code: Optional[str] = None,
-        **context
+        **context,
     ):
         super().__init__(message)
         self.message = message
@@ -78,6 +78,7 @@ class SampleMindError(Exception):
 
 class AudioFileError(SampleMindError):
     """Base exception for audio file-related errors."""
+
     pass
 
 
@@ -113,7 +114,8 @@ class CorruptedAudioError(AudioFileError):
 
     def __init__(self, file_path: Path, reason: Optional[str] = None) -> None:
         super().__init__(
-            message=f"Corrupted audio file: {file_path}" + (f" ({reason})" if reason else ""),
+            message=f"Corrupted audio file: {file_path}"
+            + (f" ({reason})" if reason else ""),
             user_message=f"Audio file appears to be corrupted: {file_path.name}",
             suggestion="Try re-downloading or re-exporting the file. If the issue persists, the file may be permanently damaged.",
             error_code="CORRUPTED_AUDIO",
@@ -157,6 +159,7 @@ class AudioProcessingError(AudioFileError):
 
 class AIServiceError(SampleMindError):
     """Base exception for AI service-related errors."""
+
     pass
 
 
@@ -317,7 +320,9 @@ class InvalidConfigurationError(ConfigurationError):
             config_key=key,
         )
         self.user_message = f"Invalid value for setting '{key}': {reason}"
-        self.suggestion = f"Update the configuration: samplemind config:set {key} <valid_value>"
+        self.suggestion = (
+            f"Update the configuration: samplemind config:set {key} <valid_value>"
+        )
 
 
 class MissingConfigurationError(ConfigurationError):
@@ -381,6 +386,7 @@ class InvalidRangeError(ValidationError):
 
 class ResourceError(SampleMindError):
     """Base exception for resource-related errors."""
+
     pass
 
 

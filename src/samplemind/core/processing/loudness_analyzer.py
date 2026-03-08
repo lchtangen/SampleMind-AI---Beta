@@ -32,43 +32,43 @@ PLATFORM_TARGETS = {
         "integrated_loudness": -14.0,
         "true_peak": -1.0,
         "loudness_range": 11.0,
-        "description": "Spotify Streaming Audio Standard"
+        "description": "Spotify Streaming Audio Standard",
     },
     "apple-music": {
         "integrated_loudness": -16.0,
         "true_peak": -1.0,
         "loudness_range": 8.0,
-        "description": "Apple Music/iTunes"
+        "description": "Apple Music/iTunes",
     },
     "youtube": {
         "integrated_loudness": -13.0,
         "true_peak": -1.0,
         "loudness_range": 10.0,
-        "description": "YouTube Music/Video"
+        "description": "YouTube Music/Video",
     },
     "soundcloud": {
         "integrated_loudness": -10.0,  # Range: -8 to -13
         "true_peak": 0.0,
         "loudness_range": 10.0,
-        "description": "SoundCloud"
+        "description": "SoundCloud",
     },
     "cd": {
         "integrated_loudness": -9.0,
         "true_peak": 0.0,
         "loudness_range": 12.0,
-        "description": "CD/Commercial Release"
+        "description": "CD/Commercial Release",
     },
     "broadcast": {
         "integrated_loudness": -23.0,
         "true_peak": -1.0,
         "loudness_range": 8.0,
-        "description": "Broadcast (EBU R128)"
+        "description": "Broadcast (EBU R128)",
     },
     "streaming": {
         "integrated_loudness": -14.0,
         "true_peak": -1.0,
         "loudness_range": 10.0,
-        "description": "Average Streaming Platform"
+        "description": "Average Streaming Platform",
     },
 }
 
@@ -76,9 +76,11 @@ PLATFORM_TARGETS = {
 # LOUDNESS ANALYSIS RESULTS
 # ============================================================================
 
+
 @dataclass
 class LoudnessAnalysis:
     """Results from loudness analysis"""
+
     integrated_loudness: float  # LUFS
     short_term_loudness: float  # LUFS (last 3 seconds)
     momentary_loudness: float  # LUFS (last 400ms)
@@ -100,7 +102,9 @@ class LoudnessAnalysis:
         """Calculate difference from target LUFS"""
         return self.integrated_loudness - target_loudness
 
-    def needs_gain_adjustment(self, target_loudness: float, threshold: float = 0.1) -> bool:
+    def needs_gain_adjustment(
+        self, target_loudness: float, threshold: float = 0.1
+    ) -> bool:
         """Check if gain adjustment needed (beyond threshold)"""
         diff = abs(self.difference_from_target(target_loudness))
         return diff > threshold
@@ -120,6 +124,7 @@ class LoudnessAnalysis:
 # ============================================================================
 # LOUDNESS ANALYZER ENGINE
 # ============================================================================
+
 
 class LoudnessAnalyzer:
     """Analyzes audio loudness using ITU-R BS.1770-4 standard"""
@@ -182,16 +187,18 @@ class LoudnessAnalyzer:
         # Full implementation would use K-weighting filter
 
         # Gate audio at -70 LUFS threshold
-        rms = np.sqrt(np.mean(audio ** 2, axis=0))
+        rms = np.sqrt(np.mean(audio**2, axis=0))
         rms_db = 20 * np.log10(rms + 1e-10)
 
         # Calculate loudness in LUFS
         # Reference: -23 LUFS = 1 Pa (1 Pa RMS = 0 dBFS in digital audio)
-        loudness = -0.691 + 10 * np.log10(np.mean(rms ** 2) + 1e-10)
+        loudness = -0.691 + 10 * np.log10(np.mean(rms**2) + 1e-10)
 
         return float(loudness)
 
-    def _calculate_short_term_loudness(self, audio: np.ndarray, duration: float = 3.0) -> float:
+    def _calculate_short_term_loudness(
+        self, audio: np.ndarray, duration: float = 3.0
+    ) -> float:
         """Calculate short-term loudness (last 3 seconds)"""
         samples = int(duration * self.sample_rate)
         if len(audio) < samples:
@@ -199,12 +206,14 @@ class LoudnessAnalyzer:
         else:
             window = audio[-samples:]
 
-        rms = np.sqrt(np.mean(window ** 2, axis=0))
-        loudness = -0.691 + 10 * np.log10(np.mean(rms ** 2) + 1e-10)
+        rms = np.sqrt(np.mean(window**2, axis=0))
+        loudness = -0.691 + 10 * np.log10(np.mean(rms**2) + 1e-10)
 
         return float(loudness)
 
-    def _calculate_momentary_loudness(self, audio: np.ndarray, duration: float = 0.4) -> float:
+    def _calculate_momentary_loudness(
+        self, audio: np.ndarray, duration: float = 0.4
+    ) -> float:
         """Calculate momentary loudness (last 400ms)"""
         samples = int(duration * self.sample_rate)
         if len(audio) < samples:
@@ -212,8 +221,8 @@ class LoudnessAnalyzer:
         else:
             window = audio[-samples:]
 
-        rms = np.sqrt(np.mean(window ** 2, axis=0))
-        loudness = -0.691 + 10 * np.log10(np.mean(rms ** 2) + 1e-10)
+        rms = np.sqrt(np.mean(window**2, axis=0))
+        loudness = -0.691 + 10 * np.log10(np.mean(rms**2) + 1e-10)
 
         return float(loudness)
 
@@ -231,12 +240,12 @@ class LoudnessAnalyzer:
         loudness_values = []
 
         for i in range(0, len(audio), block_samples):
-            block = audio[i:i + block_samples]
+            block = audio[i : i + block_samples]
             if len(block) < block_samples // 2:
                 continue
 
-            rms = np.sqrt(np.mean(block ** 2, axis=0))
-            loudness = -0.691 + 10 * np.log10(np.mean(rms ** 2) + 1e-10)
+            rms = np.sqrt(np.mean(block**2, axis=0))
+            loudness = -0.691 + 10 * np.log10(np.mean(rms**2) + 1e-10)
             loudness_values.append(loudness)
 
         if not loudness_values:
@@ -254,7 +263,7 @@ class LoudnessAnalyzer:
     def _calculate_dynamic_range(self, audio: np.ndarray) -> float:
         """Calculate dynamic range (crest factor in dB)"""
         peak = np.max(np.abs(audio))
-        rms = np.sqrt(np.mean(audio ** 2))
+        rms = np.sqrt(np.mean(audio**2))
 
         if rms == 0:
             return 0.0
@@ -333,12 +342,12 @@ class LoudnessAnalyzer:
             "difference": round(analysis.difference_from_target(target_loudness), 2),
             "needs_adjustment": analysis.needs_gain_adjustment(target_loudness),
             "gain_adjustment_db": round(
-                self.get_gain_adjustment(
-                    analysis.integrated_loudness,
-                    target_loudness
-                ), 2
+                self.get_gain_adjustment(analysis.integrated_loudness, target_loudness),
+                2,
             ),
-            "true_peak_status": "OK" if analysis.true_peak <= target["true_peak"] else "EXCEEDS",
+            "true_peak_status": (
+                "OK" if analysis.true_peak <= target["true_peak"] else "EXCEEDS"
+            ),
             "true_peak_headroom": round(target["true_peak"] - analysis.true_peak, 2),
             "limiter_threshold": round(
                 self.get_limiter_threshold(analysis.true_peak, target["true_peak"]), 2
@@ -354,6 +363,7 @@ class LoudnessAnalyzer:
 # ============================================================================
 # CONVENIENCE FUNCTIONS
 # ============================================================================
+
 
 def analyze_audio_loudness(
     audio: np.ndarray,

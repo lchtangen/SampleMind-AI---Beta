@@ -14,7 +14,10 @@ from .storage import FileMetadata, StorageProvider
 
 logger = logging.getLogger(__name__)
 
-def calculate_file_hash(file_path: Path, algorithm: str = "sha256", chunk_size: int = 65536) -> str:
+
+def calculate_file_hash(
+    file_path: Path, algorithm: str = "sha256", chunk_size: int = 65536
+) -> str:
     """
     Calculate a fast hash of a local file.
     """
@@ -28,7 +31,10 @@ def calculate_file_hash(file_path: Path, algorithm: str = "sha256", chunk_size: 
         logger.error(f"Failed to calculate hash for {file_path}: {e}")
         return ""
 
-def files_differ(local_path: Path, remote_metadata: Optional[FileMetadata], use_hash: bool = False) -> bool:
+
+def files_differ(
+    local_path: Path, remote_metadata: Optional[FileMetadata], use_hash: bool = False
+) -> bool:
     """
     Check if local file differs from remote version.
 
@@ -45,7 +51,7 @@ def files_differ(local_path: Path, remote_metadata: Optional[FileMetadata], use_
         local_stat = local_path.stat()
     except OSError:
         # If local file disappeared or is inaccessible
-        return True # Treat as "needs sync/action"
+        return True  # Treat as "needs sync/action"
 
     # 1. Size check (Fastest)
     if local_stat.st_size != remote_metadata["size"]:
@@ -65,6 +71,7 @@ def files_differ(local_path: Path, remote_metadata: Optional[FileMetadata], use_
 
     return False
 
+
 class SyncManager:
     """
     Manages synchronization tasks.
@@ -82,7 +89,9 @@ class SyncManager:
         logger.info(f"Sync enabled for user {user_id}")
         return True
 
-    async def sync_library(self, library_path: Path, direction: str = "both") -> Dict[str, int]:
+    async def sync_library(
+        self, library_path: Path, direction: str = "both"
+    ) -> Dict[str, int]:
         """
         Sync local library with storage.
 
@@ -104,7 +113,9 @@ class SyncManager:
             # Fetch remote state once for optimization
             # In a real heavy production system, we'd use pagination or differencing
             remote_files_list = await self.storage.list_files("library")
-            remote_files_set = set(remote_files_list) # e.g., {'library/subdir/file.wav'}
+            remote_files_set = set(
+                remote_files_list
+            )  # e.g., {'library/subdir/file.wav'}
 
             # 1. Sync Up (Upload)
             if direction in ["up", "both"]:
@@ -112,7 +123,9 @@ class SyncManager:
 
             # 2. Sync Down (Download)
             if direction in ["down", "both"]:
-                stats["downloaded"] = await self._sync_down(library_path, remote_files_list)
+                stats["downloaded"] = await self._sync_down(
+                    library_path, remote_files_list
+                )
 
         except Exception as e:
             logger.error(f"Sync failed: {e}")
@@ -128,7 +141,9 @@ class SyncManager:
 
         # Walk through directory
         for file_path in cwd.rglob("*"):
-            if file_path.is_file() and not file_path.name.startswith("."): # Ignore hidden files
+            if file_path.is_file() and not file_path.name.startswith(
+                "."
+            ):  # Ignore hidden files
                 try:
                     rel_path = file_path.relative_to(root)
                     remote_path = f"library/{rel_path}"
@@ -153,7 +168,7 @@ class SyncManager:
         for remote_path in remote_files:
             # remote_path looks like "library/subfolder/file.wav"
             if not remote_path.startswith("library/"):
-                 continue
+                continue
 
             try:
                 # Determine relative path from "library/"
@@ -176,9 +191,9 @@ class SyncManager:
                 if success:
                     count += 1
                     # Hydrate Analysis if JSON
-                    if local_dest.suffix == ".json" and local_dest.name.count('.') >= 2:
+                    if local_dest.suffix == ".json" and local_dest.name.count(".") >= 2:
                         # e.g. .wav.json
-                         await self._hydrate_analysis(local_dest)
+                        await self._hydrate_analysis(local_dest)
 
             except Exception as e:
                 logger.error(f"Failed to download {remote_path}: {e}")
@@ -198,37 +213,34 @@ class SyncManager:
             # Ideally we'd use dependency injection, but for now specific imports
             from samplemind.core.engine.audio_engine import AudioFeatures
 
-            with open(json_path, 'r') as f:
+            with open(json_path, "r") as f:
                 data = json.load(f)
 
             if "neural_embedding" in data and data["neural_embedding"]:
-                 # Extract original filename
-                 # loop.wav.json -> loop.wav
-                 original_filename = json_path.stem
+                # Extract original filename
+                # loop.wav.json -> loop.wav
+                original_filename = json_path.stem
 
-                 # Prepare metadata
-                 # file_id usually is filename or hash. Let's use filename as simple ID for now
-                 # In real app, we might need more robust ID system
-                 file_id = original_filename
+                # Prepare metadata
+                # file_id usually is filename or hash. Let's use filename as simple ID for now
+                # In real app, we might need more robust ID system
+                file_id = original_filename
 
-                 features = AudioFeatures.from_dict(data)
+                features = AudioFeatures.from_dict(data)
 
-                 meta = {
+                meta = {
                     "filename": original_filename,
                     "analysis_id": f"sync_{int(features.analysis_timestamp)}",
                     "tempo": float(features.tempo) if features.tempo else 0.0,
                     "key": str(features.key),
                     "mode": str(features.mode),
-                    "duration": float(features.duration)
-                 }
+                    "duration": float(features.duration),
+                }
 
-                 await add_embedding(
-                    file_id=file_id,
-                    embedding=features.neural_embedding,
-                    metadata=meta
-                 )
-                 logger.info(f"✨ Hydrated analysis for {original_filename} from sync")
+                await add_embedding(
+                    file_id=file_id, embedding=features.neural_embedding, metadata=meta
+                )
+                logger.info(f"✨ Hydrated analysis for {original_filename} from sync")
 
         except Exception as e:
             logger.warning(f"Failed to hydrate analysis from {json_path}: {e}")
-

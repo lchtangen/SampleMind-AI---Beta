@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 class MetricType(Enum):
     """Performance metric types"""
+
     CPU = "cpu"
     MEMORY = "memory"
     CACHE_HIT = "cache_hit"
@@ -31,6 +32,7 @@ class MetricType(Enum):
 @dataclass
 class PerformanceMetric:
     """Single performance metric"""
+
     metric_type: MetricType
     timestamp: datetime = field(default_factory=datetime.now)
     value: float = 0.0
@@ -43,6 +45,7 @@ class PerformanceMetric:
 @dataclass
 class PerformanceStats:
     """Aggregated performance statistics"""
+
     avg_cpu: float = 0.0
     max_cpu: float = 0.0
     avg_memory: float = 0.0
@@ -205,7 +208,9 @@ class PerformanceMonitor:
 
         # Analysis time stats
         if self.analysis_times:
-            stats.avg_analysis_time = sum(self.analysis_times) / len(self.analysis_times)
+            stats.avg_analysis_time = sum(self.analysis_times) / len(
+                self.analysis_times
+            )
             stats.max_analysis_time = max(self.analysis_times)
 
         # Thread count

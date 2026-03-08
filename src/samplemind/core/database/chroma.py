@@ -37,13 +37,14 @@ _query_cache_misses = 0
 def _cache_embedding_hash(embedding: List[float]) -> str:
     """Generate hash for embedding vector."""
     import json
-    embedding_str = json.dumps(embedding, separators=(',', ':'))
+
+    embedding_str = json.dumps(embedding, separators=(",", ":"))
     return hashlib.sha256(embedding_str.encode()).hexdigest()[:16]
 
 
 def init_chromadb(
     persist_directory: str = "./data/chroma",
-    collection_name: str = _settings.chroma_collection
+    collection_name: str = _settings.chroma_collection,
 ) -> None:
     """Initialize ChromaDB client"""
     global _chroma_client, _collection
@@ -67,7 +68,7 @@ def init_chromadb(
         # Get or create collection
         _collection = _chroma_client.get_or_create_collection(
             name=collection_name,
-            metadata={"description": "Audio sample embeddings for similarity search"}
+            metadata={"description": "Audio sample embeddings for similarity search"},
         )
 
         logger.info(f"✅ ChromaDB initialized with {_collection.count()} embeddings")
@@ -93,18 +94,14 @@ def get_collection() -> Any:
 
 
 async def add_embedding(
-    file_id: str,
-    embedding: List[float],
-    metadata: Optional[Dict[str, Any]] = None
+    file_id: str, embedding: List[float], metadata: Optional[Dict[str, Any]] = None
 ) -> bool:
     """Add audio embedding to ChromaDB"""
     try:
         collection = get_collection()
 
         collection.add(
-            ids=[file_id],
-            embeddings=[embedding],
-            metadatas=[metadata or {}]
+            ids=[file_id], embeddings=[embedding], metadatas=[metadata or {}]
         )
 
         logger.debug(f"Added embedding for file: {file_id}")
@@ -119,7 +116,7 @@ async def query_similar(
     embedding: List[float],
     n_results: int = 10,
     where: Optional[Dict[str, Any]] = None,
-    use_cache: bool = True
+    use_cache: bool = True,
 ) -> Dict[str, Any]:
     """
     Query similar audio samples with caching support.
@@ -139,6 +136,7 @@ async def query_similar(
     cache_key = None
     if use_cache and where is None:  # Only cache queries without filters
         import json
+
         embedding_hash = _cache_embedding_hash(embedding)
         cache_key = f"query:{embedding_hash}:n{n_results}"
 
@@ -148,9 +146,12 @@ async def query_similar(
 
             # Check TTL (3600 seconds = 1 hour)
             import time
+
             if time.time() - timestamp < 3600:
                 _query_cache_hits += 1
-                logger.debug(f"Query cache hit (cached {len(cached_result.get('ids', []))} results)")
+                logger.debug(
+                    f"Query cache hit (cached {len(cached_result.get('ids', []))} results)"
+                )
                 return cached_result
             else:
                 # Expired, remove from cache
@@ -162,20 +163,19 @@ async def query_similar(
         collection = get_collection()
 
         results = collection.query(
-            query_embeddings=[embedding],
-            n_results=n_results,
-            where=where
+            query_embeddings=[embedding], n_results=n_results, where=where
         )
 
         result = {
             "ids": results["ids"][0] if results["ids"] else [],
             "distances": results["distances"][0] if results["distances"] else [],
-            "metadatas": results["metadatas"][0] if results["metadatas"] else []
+            "metadatas": results["metadatas"][0] if results["metadatas"] else [],
         }
 
         # Cache result
         if use_cache and cache_key is not None:
             import time
+
             _query_cache[cache_key] = (result, time.time())
             logger.debug(f"Cached query result ({len(result.get('ids', []))} items)")
 
@@ -205,7 +205,7 @@ async def get_collection_stats() -> Dict[str, Any]:
         return {
             "count": collection.count(),
             "name": collection.name,
-            "metadata": collection.metadata
+            "metadata": collection.metadata,
         }
     except Exception as e:
         logger.error(f"Failed to get stats: {e}")
@@ -217,16 +217,14 @@ def get_query_cache_stats() -> Dict[str, Any]:
     global _query_cache, _query_cache_hits, _query_cache_misses
 
     total_requests = _query_cache_hits + _query_cache_misses
-    hit_rate = (
-        (_query_cache_hits / total_requests * 100) if total_requests > 0 else 0.0
-    )
+    hit_rate = (_query_cache_hits / total_requests * 100) if total_requests > 0 else 0.0
 
     return {
         "hits": _query_cache_hits,
         "misses": _query_cache_misses,
         "hit_rate_percent": round(hit_rate, 2),
         "cached_queries": len(_query_cache),
-        "total_requests": total_requests
+        "total_requests": total_requests,
     }
 
 
@@ -247,10 +245,7 @@ def invalidate_query_cache_for_embedding(embedding: List[float]) -> None:
     global _query_cache
 
     embedding_hash = _cache_embedding_hash(embedding)
-    keys_to_delete = [
-        key for key in _query_cache.keys()
-        if embedding_hash in key
-    ]
+    keys_to_delete = [key for key in _query_cache.keys() if embedding_hash in key]
 
     for key in keys_to_delete:
         del _query_cache[key]

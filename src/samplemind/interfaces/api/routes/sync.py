@@ -30,19 +30,19 @@ async def enable_cloud_sync(current_user=Depends(get_current_active_user)):
         if not sync_manager:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Cloud sync service not available"
+                detail="Cloud sync service not available",
             )
 
         success = await sync_manager.enable_sync(current_user.user_id)
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to enable cloud sync"
+                detail="Failed to enable cloud sync",
             )
 
         return {
             "message": "Cloud sync enabled successfully",
-            "user_id": current_user.user_id
+            "user_id": current_user.user_id,
         }
 
     except HTTPException:
@@ -51,7 +51,7 @@ async def enable_cloud_sync(current_user=Depends(get_current_active_user)):
         logger.error(f"Failed to enable cloud sync: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to enable cloud sync"
+            detail="Failed to enable cloud sync",
         )
 
 
@@ -69,19 +69,19 @@ async def disable_cloud_sync(current_user=Depends(get_current_active_user)):
         if not sync_manager:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Cloud sync service not available"
+                detail="Cloud sync service not available",
             )
 
         success = await sync_manager.disable_sync(current_user.user_id)
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to disable cloud sync"
+                detail="Failed to disable cloud sync",
             )
 
         return {
             "message": "Cloud sync disabled successfully",
-            "user_id": current_user.user_id
+            "user_id": current_user.user_id,
         }
 
     except HTTPException:
@@ -90,7 +90,7 @@ async def disable_cloud_sync(current_user=Depends(get_current_active_user)):
         logger.error(f"Failed to disable cloud sync: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to disable cloud sync"
+            detail="Failed to disable cloud sync",
         )
 
 
@@ -108,7 +108,7 @@ async def get_sync_status(current_user=Depends(get_current_active_user)):
         if not sync_manager:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Cloud sync service not available"
+                detail="Cloud sync service not available",
             )
 
         status_info = sync_manager.get_sync_status(current_user.user_id)
@@ -126,7 +126,7 @@ async def get_sync_status(current_user=Depends(get_current_active_user)):
         logger.error(f"Failed to get sync status: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get sync status"
+            detail="Failed to get sync status",
         )
 
 
@@ -144,7 +144,7 @@ async def sync_now(current_user=Depends(get_current_active_user)):
         if not sync_manager:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Cloud sync service not available"
+                detail="Cloud sync service not available",
             )
 
         result = await sync_manager.sync(current_user.user_id)
@@ -163,7 +163,7 @@ async def sync_now(current_user=Depends(get_current_active_user)):
         logger.error(f"Failed to sync: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to perform sync"
+            detail="Failed to perform sync",
         )
 
 
@@ -174,7 +174,7 @@ async def queue_sync_event(
     action: str,
     data: dict,
     device_id: Optional[str] = None,
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(get_current_active_user),
 ) -> None:
     """
     Queue a sync event (used by client for offline operations)
@@ -195,20 +195,20 @@ async def queue_sync_event(
         if not sync_manager:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Cloud sync service not available"
+                detail="Cloud sync service not available",
             )
 
         # Validate inputs
         if collection not in ["samples", "analyses", "workspaces"]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid collection: {collection}"
+                detail=f"Invalid collection: {collection}",
             )
 
         if action not in ["create", "update", "delete"]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid action: {action}"
+                detail=f"Invalid action: {action}",
             )
 
         # Queue event
@@ -218,13 +218,13 @@ async def queue_sync_event(
             document_id=document_id,
             action=action,
             data=data,
-            device_id=device_id or "unknown"
+            device_id=device_id or "unknown",
         )
 
         if not event:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to queue sync event"
+                detail="Failed to queue sync event",
             )
 
         return {
@@ -241,7 +241,7 @@ async def queue_sync_event(
         logger.error(f"Failed to queue sync event: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to queue sync event"
+            detail="Failed to queue sync event",
         )
 
 
@@ -249,7 +249,7 @@ async def queue_sync_event(
 async def get_remote_changes(
     since: Optional[str] = None,
     limit: int = 100,
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(get_current_active_user),
 ) -> None:
     """
     Get remote changes since specified timestamp
@@ -264,7 +264,7 @@ async def get_remote_changes(
         if not sync_manager:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Cloud sync service not available"
+                detail="Cloud sync service not available",
             )
 
         # Parse since timestamp
@@ -275,7 +275,7 @@ async def get_remote_changes(
             except ValueError:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Invalid timestamp format. Use ISO format (YYYY-MM-DD HH:MM:SS)"
+                    detail="Invalid timestamp format. Use ISO format (YYYY-MM-DD HH:MM:SS)",
                 )
 
         # Fetch changes (placeholder - actual implementation would fetch from cloud)
@@ -294,7 +294,7 @@ async def get_remote_changes(
         logger.error(f"Failed to fetch remote changes: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to fetch remote changes"
+            detail="Failed to fetch remote changes",
         )
 
 
@@ -312,7 +312,7 @@ async def get_sync_stats(current_user=Depends(get_current_active_user)):
         if not sync_manager:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Cloud sync service not available"
+                detail="Cloud sync service not available",
             )
 
         # Get sync status
@@ -332,5 +332,5 @@ async def get_sync_stats(current_user=Depends(get_current_active_user)):
         logger.error(f"Failed to get sync stats: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get sync stats"
+            detail="Failed to get sync stats",
         )

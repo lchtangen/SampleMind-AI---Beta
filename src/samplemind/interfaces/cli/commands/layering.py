@@ -16,6 +16,7 @@ from . import utils
 app = typer.Typer(help="🔀 Sample layering & phase analysis", no_args_is_help=True)
 console = utils.console
 
+
 @app.command("analyze")
 @utils.with_error_handling
 @utils.async_command
@@ -27,12 +28,14 @@ async def analyze_layering(
     try:
         if not file1:
             from samplemind.utils.file_picker import select_audio_file
+
             file1 = select_audio_file(title="Select first sample")
             if not file1:
                 raise typer.Exit(1)
 
         if not file2:
             from samplemind.utils.file_picker import select_audio_file
+
             file2 = select_audio_file(title="Select second sample")
             if not file2:
                 raise typer.Exit(1)
@@ -40,6 +43,7 @@ async def analyze_layering(
         # Load audio
         try:
             import librosa
+
             audio1, sr1 = librosa.load(str(file1), sr=None, mono=True)
             audio2, sr2 = librosa.load(str(file2), sr=None, mono=True)
             sr = sr1
@@ -57,10 +61,17 @@ async def analyze_layering(
         analysis = analyzer.analyze(audio1, audio2, sr)
 
         # Display score
-        grade_color = "green" if analysis.compatibility_score >= 8 else \
-                     "yellow" if analysis.compatibility_score >= 6 else "red"
-        console.print(f"[bold]Compatibility Score: [{grade_color}]{analysis.compatibility_score:.1f}/10[/{grade_color}][/bold]")
-        console.print(f"[bold]Can Layer: {'✅ Yes' if analysis.can_layer else '❌ Not recommended'}[/bold]\n")
+        grade_color = (
+            "green"
+            if analysis.compatibility_score >= 8
+            else "yellow" if analysis.compatibility_score >= 6 else "red"
+        )
+        console.print(
+            f"[bold]Compatibility Score: [{grade_color}]{analysis.compatibility_score:.1f}/10[/{grade_color}][/bold]"
+        )
+        console.print(
+            f"[bold]Can Layer: {'✅ Yes' if analysis.can_layer else '❌ Not recommended'}[/bold]\n"
+        )
 
         # Phase analysis
         console.print("[bold]Phase Relationship:[/bold]")
@@ -75,7 +86,9 @@ async def analyze_layering(
         console.print()
         console.print("[bold]Frequency Masking:[/bold]")
         if analysis.frequency_masks:
-            mask_table = Table(show_header=True, header_style="bold cyan", show_lines=False)
+            mask_table = Table(
+                show_header=True, header_style="bold cyan", show_lines=False
+            )
             mask_table.add_column("Frequency", style="cyan")
             mask_table.add_column("Power Diff", justify="right", style="green")
             mask_table.add_column("Severity", style="yellow")
@@ -83,7 +96,7 @@ async def analyze_layering(
                 mask_table.add_row(
                     f"{mask.frequency_hz:.0f} Hz",
                     f"{mask.power_difference_db:+.1f} dB",
-                    mask.severity.upper()
+                    mask.severity.upper(),
                 )
             console.print(mask_table)
         else:
@@ -93,7 +106,9 @@ async def analyze_layering(
         console.print()
         console.print("[bold]Transient Analysis:[/bold]")
         console.print(f"  Onset Offset: {analysis.transient_offset_ms:.1f} ms")
-        console.print(f"  Conflict: {'⚠️  Yes' if analysis.transient_conflict else '✅ No'}")
+        console.print(
+            f"  Conflict: {'⚠️  Yes' if analysis.transient_conflict else '✅ No'}"
+        )
 
         # Loudness
         console.print()
@@ -110,5 +125,6 @@ async def analyze_layering(
     except utils.CLIError as e:
         utils.handle_error(e, "layer:analyze")
         raise typer.Exit(1)
+
 
 __all__ = ["app"]

@@ -172,7 +172,10 @@ class TestSpectrumAnalyzer:
 
     def test_global_instance(self):
         """Test global analyzer instance"""
-        from samplemind.core.processing.realtime_spectral import init_spectral, get_spectral
+        from samplemind.core.processing.realtime_spectral import (
+            init_spectral,
+            get_spectral,
+        )
 
         spectral1 = init_spectral()
         spectral2 = get_spectral()

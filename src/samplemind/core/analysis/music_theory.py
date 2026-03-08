@@ -31,14 +31,15 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ChordEvent:
     """A detected chord at a specific time"""
-    start_time: float       # Start time in seconds
-    end_time: float         # End time in seconds
-    chord: str              # Full chord name (e.g., "Am7")
-    root: int               # Root pitch class (0-11)
-    root_name: str          # Root note name (e.g., "A")
-    quality: str            # Chord quality (e.g., "minor7")
-    confidence: float       # Detection confidence (0-1)
-    roman_numeral: str = "" # Roman numeral in context of key
+
+    start_time: float  # Start time in seconds
+    end_time: float  # End time in seconds
+    chord: str  # Full chord name (e.g., "Am7")
+    root: int  # Root pitch class (0-11)
+    root_name: str  # Root note name (e.g., "A")
+    quality: str  # Chord quality (e.g., "minor7")
+    confidence: float  # Detection confidence (0-1)
+    roman_numeral: str = ""  # Roman numeral in context of key
 
     @property
     def duration(self) -> float:
@@ -49,23 +50,25 @@ class ChordEvent:
 @dataclass
 class Modulation:
     """A detected key change"""
-    time: float            # Time of modulation in seconds
-    from_key: str          # Previous key (e.g., "C major")
-    to_key: str            # New key (e.g., "G major")
+
+    time: float  # Time of modulation in seconds
+    from_key: str  # Previous key (e.g., "C major")
+    to_key: str  # New key (e.g., "G major")
     pivot_chord: Optional[str] = None  # Pivot chord if detected
 
 
 @dataclass
 class HarmonicAnalysis:
     """Complete harmonic analysis of an audio file"""
-    key: str                           # Detected key (e.g., "C major")
-    key_root: int                      # Key root pitch class
-    key_mode: str                      # "major" or "minor"
-    key_confidence: float              # Key detection confidence
+
+    key: str  # Detected key (e.g., "C major")
+    key_root: int  # Key root pitch class
+    key_mode: str  # "major" or "minor"
+    key_confidence: float  # Key detection confidence
     chord_progression: List[ChordEvent] = field(default_factory=list)
     modulations: List[Modulation] = field(default_factory=list)
-    harmonic_rhythm: float = 0.0       # Average chord changes per bar
-    duration: float = 0.0              # Total duration analyzed
+    harmonic_rhythm: float = 0.0  # Average chord changes per bar
+    duration: float = 0.0  # Total duration analyzed
 
     @property
     def chord_sequence(self) -> List[str]:
@@ -129,9 +132,7 @@ class MusicTheoryAnalyzer:
         duration = len(y) / sr
 
         # Extract chroma features
-        chroma = librosa.feature.chroma_cqt(
-            y=y, sr=sr, hop_length=self.hop_length
-        )
+        chroma = librosa.feature.chroma_cqt(y=y, sr=sr, hop_length=self.hop_length)
 
         # Detect overall key
         chroma_mean = np.mean(chroma, axis=1)
@@ -235,7 +236,15 @@ class MusicTheoryAnalyzer:
         chord_start = 0
 
         # Chord qualities to try (in order of likelihood)
-        qualities = ['major', 'minor', 'dominant7', 'minor7', 'major7', 'diminished', 'sus4']
+        qualities = [
+            "major",
+            "minor",
+            "dominant7",
+            "minor7",
+            "major7",
+            "diminished",
+            "sus4",
+        ]
 
         for frame in range(n_frames):
             # Get chroma vector for this frame
@@ -267,16 +276,18 @@ class MusicTheoryAnalyzer:
                             roman = get_roman_numeral(
                                 prev_root, key_root, key_mode, prev_quality
                             )
-                            chords.append(ChordEvent(
-                                start_time=chord_start * frame_duration,
-                                end_time=frame * frame_duration,
-                                chord=current_chord,
-                                root=prev_root,
-                                root_name=NOTE_NAMES[prev_root],
-                                quality=prev_quality,
-                                confidence=prev_confidence,
-                                roman_numeral=roman,
-                            ))
+                            chords.append(
+                                ChordEvent(
+                                    start_time=chord_start * frame_duration,
+                                    end_time=frame * frame_duration,
+                                    chord=current_chord,
+                                    root=prev_root,
+                                    root_name=NOTE_NAMES[prev_root],
+                                    quality=prev_quality,
+                                    confidence=prev_confidence,
+                                    roman_numeral=roman,
+                                )
+                            )
 
                     # Start new chord
                     current_chord = chord_name
@@ -290,16 +301,18 @@ class MusicTheoryAnalyzer:
             frames_duration = n_frames - chord_start
             if frames_duration >= min_frames:
                 roman = get_roman_numeral(prev_root, key_root, key_mode, prev_quality)
-                chords.append(ChordEvent(
-                    start_time=chord_start * frame_duration,
-                    end_time=n_frames * frame_duration,
-                    chord=current_chord,
-                    root=prev_root,
-                    root_name=NOTE_NAMES[prev_root],
-                    quality=prev_quality,
-                    confidence=prev_confidence,
-                    roman_numeral=roman,
-                ))
+                chords.append(
+                    ChordEvent(
+                        start_time=chord_start * frame_duration,
+                        end_time=n_frames * frame_duration,
+                        chord=current_chord,
+                        root=prev_root,
+                        root_name=NOTE_NAMES[prev_root],
+                        quality=prev_quality,
+                        confidence=prev_confidence,
+                        roman_numeral=roman,
+                    )
+                )
 
         return chords
 
@@ -342,16 +355,20 @@ class MusicTheoryAnalyzer:
             key_root, key_mode, confidence = detect_key_from_chroma(window_chroma)
 
             # Check for modulation (key change with high confidence)
-            if confidence > 0.6 and (key_root != current_key_root or key_mode != current_key_mode):
+            if confidence > 0.6 and (
+                key_root != current_key_root or key_mode != current_key_mode
+            ):
                 time = (start + window_size // 2) * frame_duration
                 from_key = f"{NOTE_NAMES[current_key_root]} {current_key_mode}"
                 to_key = f"{NOTE_NAMES[key_root]} {key_mode}"
 
-                modulations.append(Modulation(
-                    time=time,
-                    from_key=from_key,
-                    to_key=to_key,
-                ))
+                modulations.append(
+                    Modulation(
+                        time=time,
+                        from_key=from_key,
+                        to_key=to_key,
+                    )
+                )
 
                 current_key_root = key_root
                 current_key_mode = key_mode
@@ -369,7 +386,7 @@ class MusicTheoryAnalyzer:
         Returns:
             List of note names in the scale
         """
-        if key_mode == 'major':
+        if key_mode == "major":
             intervals = [0, 2, 4, 5, 7, 9, 11]  # Major scale intervals
         else:
             intervals = [0, 2, 3, 5, 7, 8, 10]  # Natural minor scale intervals

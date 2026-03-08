@@ -1,76 +1,93 @@
-"""
-Status Bar Widget for SampleMind TUI
-Displays session statistics and real-time status information
-"""
+"""Status Bar Widget for SampleMind TUI — Textual ^0.87 (KP 50)"""
 
-from datetime import datetime
-from textual.widget import Widget
+from __future__ import annotations
+
+from textual.app import ComposeResult
 from textual.reactive import reactive
-from rich.text import Text
-from rich.panel import Panel
+from textual.widget import Widget
+from textual.widgets import Label
+from textual.containers import Horizontal
 
 
 class StatusBar(Widget):
-    """Status bar displaying session stats and system information"""
+    """Always-visible status bar with live metrics."""
 
     DEFAULT_CSS = """
     StatusBar {
-        width: 1fr;
-        height: 3;
-        border: solid $accent;
-        padding: 0 1;
-        background: $surface;
+        height: 1;
+        background: $panel;
+        color: $foreground;
+        dock: bottom;
     }
+    StatusBar Horizontal {
+        height: 1;
+        width: 1fr;
+    }
+    StatusBar .status-item {
+        height: 1;
+        min-width: 16;
+        padding: 0 1;
+        border-right: solid $primary 40%;
+    }
+    StatusBar .status-model { color: $primary; text-style: bold; }
+    StatusBar .status-api-online { color: $success; }
+    StatusBar .status-api-offline { color: $error; }
+    StatusBar .status-version { text-style: dim; padding: 0 1; color: $foreground 50%; }
     """
 
-    files_analyzed: reactive[int] = reactive(0)
-    time_elapsed: reactive[int] = reactive(0)
-    ai_provider: reactive[str] = reactive("offline")
-    status_message: reactive[str] = reactive("Ready")
+    active_model: reactive[str] = reactive("Offline")
+    library_count: reactive[int] = reactive(0)
+    api_status: reactive[str] = reactive("offline")
+    last_action: reactive[str] = reactive("Ready")
 
-    def render(self) -> Panel:
-        """Render the status bar with current stats"""
-        # Format time as MM:SS
-        minutes = self.time_elapsed // 60
-        seconds = self.time_elapsed % 60
-        time_str = f"{minutes:02d}:{seconds:02d}"
+    def compose(self) -> ComposeResult:
+        with Horizontal():
+            yield Label(id="model_label", classes="status-item status-model")
+            yield Label(id="library_label", classes="status-item")
+            yield Label(id="action_label", classes="status-item")
+            yield Label(id="api_label", classes="status-item")
+            yield Label("v3.0", classes="status-version")
 
-        # Build status text
-        status_text = Text()
-        status_text.append("📊 Files: ", style="dim cyan")
-        status_text.append(str(self.files_analyzed), style="bold green")
-        status_text.append("  |  ⏱️  Time: ", style="dim cyan")
-        status_text.append(time_str, style="bold yellow")
-        status_text.append("  |  🤖 AI: ", style="dim cyan")
-        status_text.append(self.ai_provider, style="bold magenta")
-        status_text.append("  |  ", style="dim")
-        status_text.append(self.status_message, style="bold blue")
+    def on_mount(self) -> None:
+        self._refresh_all()
 
-        return Panel(
-            status_text,
-            border_style="green",
-            padding=(0, 1)
-        )
+    def watch_active_model(self, model: str) -> None:
+        try:
+            self.query_one("#model_label", Label).update(f"🤖 {model}")
+        except Exception:
+            pass
 
-    def update_files_analyzed(self, count: int) -> None:
-        """Update the files analyzed counter"""
-        self.files_analyzed = count
+    def watch_library_count(self, count: int) -> None:
+        try:
+            self.query_one("#library_label", Label).update(f"📚 {count:,} samples")
+        except Exception:
+            pass
+
+    def watch_last_action(self, action: str) -> None:
+        try:
+            self.query_one("#action_label", Label).update(f"✔ {action}")
+        except Exception:
+            pass
+
+    def watch_api_status(self, status: str) -> None:
+        try:
+            label = self.query_one("#api_label", Label)
+            if status == "online":
+                label.update("● Online")
+                label.remove_class("status-api-offline")
+                label.add_class("status-api-online")
+            else:
+                label.update("● Offline")
+                label.remove_class("status-api-online")
+                label.add_class("status-api-offline")
+        except Exception:
+            pass
 
     def update_status(self, message: str) -> None:
-        """Update the status message"""
-        self.status_message = message
+        self.last_action = message
 
-    def update_ai_provider(self, provider: str) -> None:
-        """Update the current AI provider"""
-        self.ai_provider = provider
-
-    def increment_time(self) -> None:
-        """Increment elapsed time by 1 second"""
-        self.time_elapsed += 1
-
-    def reset(self) -> None:
-        """Reset status bar to initial state"""
-        self.files_analyzed = 0
-        self.time_elapsed = 0
-        self.ai_provider = "offline"
-        self.status_message = "Ready"
+    def _refresh_all(self) -> None:
+        self.watch_active_model(self.active_model)
+        self.watch_library_count(self.library_count)
+        self.watch_last_action(self.last_action)
+        self.watch_api_status(self.api_status)

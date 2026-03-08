@@ -15,7 +15,10 @@ from pathlib import Path
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typer.testing import CliRunner
 
-from samplemind.exceptions import AudioFileError, FileNotFoundError as SampleMindFileNotFoundError
+from samplemind.exceptions import (
+    AudioFileError,
+    FileNotFoundError as SampleMindFileNotFoundError,
+)
 
 
 pytestmark = [pytest.mark.unit, pytest.mark.cli]
@@ -32,18 +35,22 @@ class TestAnalyzeCoreCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
             mock_analyze.return_value = {
-                'duration': 3.0,
-                'tempo': 120.0,
-                'key': 'C',
-                'mode': 'major'
+                "duration": 3.0,
+                "tempo": 120.0,
+                "key": "C",
+                "mode": "major",
             }
 
             result = runner.invoke(app, ["analyze:full", str(audio_file)])
 
         # THEN: Command should succeed
-        assert result.exit_code == 0, f"Exit code: {result.exit_code}, Output: {result.stdout}"
+        assert (
+            result.exit_code == 0
+        ), f"Exit code: {result.exit_code}, Output: {result.stdout}"
 
     def test_analyze_full_missing_file(self, typer_runner):
         """Test analyze:full command with missing file"""
@@ -56,7 +63,9 @@ class TestAnalyzeCoreCommands:
         assert result.exit_code != 0
         assert "not found" in result.stdout.lower() or "error" in result.stdout.lower()
 
-    def test_analyze_full_with_output_option(self, typer_runner, test_audio_samples, temp_directory):
+    def test_analyze_full_with_output_option(
+        self, typer_runner, test_audio_samples, temp_directory
+    ):
         """Test analyze:full with --output file option"""
         from samplemind.interfaces.cli.typer_app import app
 
@@ -64,13 +73,14 @@ class TestAnalyzeCoreCommands:
         audio_file = test_audio_samples["120_c_major"]
         output_file = temp_directory / "analysis_output.json"
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'tempo': 120.0, 'key': 'C'}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"tempo": 120.0, "key": "C"}
 
-            result = runner.invoke(app, [
-                "analyze:full", str(audio_file),
-                "--output", str(output_file)
-            ])
+            result = runner.invoke(
+                app, ["analyze:full", str(audio_file), "--output", str(output_file)]
+            )
 
         assert result.exit_code == 0
 
@@ -81,8 +91,10 @@ class TestAnalyzeCoreCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'tempo': 120.0, 'key': 'C', 'mode': 'major'}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"tempo": 120.0, "key": "C", "mode": "major"}
 
             result = runner.invoke(app, ["analyze:standard", str(audio_file)])
 
@@ -95,8 +107,10 @@ class TestAnalyzeCoreCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'tempo': 120.0}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"tempo": 120.0}
 
             result = runner.invoke(app, ["analyze:basic", str(audio_file)])
 
@@ -109,12 +123,14 @@ class TestAnalyzeCoreCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
             mock_analyze.return_value = {
-                'tempo': 120.0,
-                'key': 'C',
-                'mode': 'major',
-                'forensics': {'peak': 0.95}
+                "tempo": 120.0,
+                "key": "C",
+                "mode": "major",
+                "forensics": {"peak": 0.95},
             }
 
             result = runner.invoke(app, ["analyze:professional", str(audio_file)])
@@ -128,8 +144,10 @@ class TestAnalyzeCoreCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'tempo': 120.0}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"tempo": 120.0}
 
             result = runner.invoke(app, ["analyze:quick", str(audio_file)])
 
@@ -146,8 +164,10 @@ class TestAnalyzeFeatureCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'tempo': 120.0}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"tempo": 120.0}
 
             result = runner.invoke(app, ["analyze:bpm", str(audio_file)])
 
@@ -161,8 +181,10 @@ class TestAnalyzeFeatureCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'key': 'C', 'mode': 'major'}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"key": "C", "mode": "major"}
 
             result = runner.invoke(app, ["analyze:key", str(audio_file)])
 
@@ -175,8 +197,10 @@ class TestAnalyzeFeatureCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'mood': 'uplifting', 'energy': 'high'}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"mood": "uplifting", "energy": "high"}
 
             result = runner.invoke(app, ["analyze:mood", str(audio_file)])
 
@@ -189,8 +213,10 @@ class TestAnalyzeFeatureCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'genre': 'electronic', 'confidence': 0.95}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"genre": "electronic", "confidence": 0.95}
 
             result = runner.invoke(app, ["analyze:genre", str(audio_file)])
 
@@ -203,8 +229,10 @@ class TestAnalyzeFeatureCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'instruments': ['synthesizer', 'drums']}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"instruments": ["synthesizer", "drums"]}
 
             result = runner.invoke(app, ["analyze:instrument", str(audio_file)])
 
@@ -217,8 +245,10 @@ class TestAnalyzeFeatureCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'has_vocals': False}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"has_vocals": False}
 
             result = runner.invoke(app, ["analyze:vocal", str(audio_file)])
 
@@ -231,8 +261,10 @@ class TestAnalyzeFeatureCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'quality_score': 0.92}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"quality_score": 0.92}
 
             result = runner.invoke(app, ["analyze:quality", str(audio_file)])
 
@@ -245,8 +277,10 @@ class TestAnalyzeFeatureCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'energy_level': 'high'}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"energy_level": "high"}
 
             result = runner.invoke(app, ["analyze:energy", str(audio_file)])
 
@@ -263,27 +297,33 @@ class TestAnalyzeAdvancedCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
             mock_analyze.return_value = {
-                'spectral_centroid': 2500.0,
-                'spectral_bandwidth': 1000.0
+                "spectral_centroid": 2500.0,
+                "spectral_bandwidth": 1000.0,
             }
 
             result = runner.invoke(app, ["analyze:spectral", str(audio_file)])
 
         assert result.exit_code == 0
 
-    def test_analyze_harmonic_percussive_separation(self, typer_runner, test_audio_samples):
+    def test_analyze_harmonic_percussive_separation(
+        self, typer_runner, test_audio_samples
+    ):
         """Test analyze:harmonic command - Harmonic/percussive separation"""
         from samplemind.interfaces.cli.typer_app import app
 
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
             mock_analyze.return_value = {
-                'harmonic_ratio': 0.65,
-                'percussive_ratio': 0.35
+                "harmonic_ratio": 0.65,
+                "percussive_ratio": 0.35,
             }
 
             result = runner.invoke(app, ["analyze:harmonic", str(audio_file)])
@@ -297,8 +337,10 @@ class TestAnalyzeAdvancedCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'percussive_ratio': 0.35}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"percussive_ratio": 0.35}
 
             result = runner.invoke(app, ["analyze:percussive", str(audio_file)])
 
@@ -311,8 +353,10 @@ class TestAnalyzeAdvancedCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'mfcc_coefficients': 13}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"mfcc_coefficients": 13}
 
             result = runner.invoke(app, ["analyze:mfcc", str(audio_file)])
 
@@ -325,8 +369,10 @@ class TestAnalyzeAdvancedCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'chroma_coefficients': 12}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"chroma_coefficients": 12}
 
             result = runner.invoke(app, ["analyze:chroma", str(audio_file)])
 
@@ -339,8 +385,10 @@ class TestAnalyzeAdvancedCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'onset_frames': 45}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"onset_frames": 45}
 
             result = runner.invoke(app, ["analyze:onset", str(audio_file)])
 
@@ -353,8 +401,10 @@ class TestAnalyzeAdvancedCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'beat_count': 6}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"beat_count": 6}
 
             result = runner.invoke(app, ["analyze:beats", str(audio_file)])
 
@@ -367,8 +417,10 @@ class TestAnalyzeAdvancedCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'segments': 2}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"segments": 2}
 
             result = runner.invoke(app, ["analyze:segments", str(audio_file)])
 
@@ -385,13 +437,14 @@ class TestAnalyzeOutputFormats:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'tempo': 120.0}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"tempo": 120.0}
 
-            result = runner.invoke(app, [
-                "analyze:full", str(audio_file),
-                "--format", "table"
-            ])
+            result = runner.invoke(
+                app, ["analyze:full", str(audio_file), "--format", "table"]
+            )
 
         assert result.exit_code == 0
 
@@ -402,13 +455,14 @@ class TestAnalyzeOutputFormats:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'tempo': 120.0}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"tempo": 120.0}
 
-            result = runner.invoke(app, [
-                "analyze:full", str(audio_file),
-                "--format", "json"
-            ])
+            result = runner.invoke(
+                app, ["analyze:full", str(audio_file), "--format", "json"]
+            )
 
         assert result.exit_code == 0
 
@@ -419,13 +473,14 @@ class TestAnalyzeOutputFormats:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'tempo': 120.0}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"tempo": 120.0}
 
-            result = runner.invoke(app, [
-                "analyze:full", str(audio_file),
-                "--format", "csv"
-            ])
+            result = runner.invoke(
+                app, ["analyze:full", str(audio_file), "--format", "csv"]
+            )
 
         assert result.exit_code == 0
 
@@ -436,13 +491,14 @@ class TestAnalyzeOutputFormats:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'tempo': 120.0}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"tempo": 120.0}
 
-            result = runner.invoke(app, [
-                "analyze:full", str(audio_file),
-                "--format", "yaml"
-            ])
+            result = runner.invoke(
+                app, ["analyze:full", str(audio_file), "--format", "yaml"]
+            )
 
         assert result.exit_code == 0
 
@@ -468,7 +524,9 @@ class TestAnalyzeErrorHandling:
         test_file = temp_directory / "test.xyz"
         test_file.write_text("not audio data")
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
             mock_analyze.side_effect = Exception("Unsupported format")
 
             result = runner.invoke(app, ["analyze:full", str(test_file)])
@@ -484,7 +542,9 @@ class TestAnalyzeErrorHandling:
         test_file = temp_directory / "corrupted.wav"
         test_file.write_text("corrupted audio data")
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
             mock_analyze.side_effect = Exception("Corrupted audio")
 
             result = runner.invoke(app, ["analyze:full", str(test_file)])
@@ -499,7 +559,9 @@ class TestAnalyzeErrorHandling:
         test_file = temp_directory / "restricted.wav"
         test_file.write_text("audio data")
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
             mock_analyze.side_effect = PermissionError("Permission denied")
 
             result = runner.invoke(app, ["analyze:full", str(test_file)])
@@ -510,20 +572,22 @@ class TestAnalyzeErrorHandling:
 class TestAnalyzeBatchCommands:
     """Test batch analysis commands"""
 
-    def test_batch_analyze_directory(self, typer_runner, test_audio_samples, temp_directory):
+    def test_batch_analyze_directory(
+        self, typer_runner, test_audio_samples, temp_directory
+    ):
         """Test batch:analyze command - Process directory"""
         from samplemind.interfaces.cli.typer_app import app
 
         runner = CliRunner()
 
-        with patch('samplemind.interfaces.cli.commands.utils.batch_analyze_async') as mock_batch:
-            mock_batch.return_value = {
-                'total_files': 2,
-                'processed': 2,
-                'failed': 0
-            }
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.batch_analyze_async"
+        ) as mock_batch:
+            mock_batch.return_value = {"total_files": 2, "processed": 2, "failed": 0}
 
-            result = runner.invoke(app, ["batch:analyze", str(test_audio_samples["120_c_major"].parent)])
+            result = runner.invoke(
+                app, ["batch:analyze", str(test_audio_samples["120_c_major"].parent)]
+            )
 
         assert result.exit_code == 0
 
@@ -533,14 +597,22 @@ class TestAnalyzeBatchCommands:
 
         runner = CliRunner()
 
-        with patch('samplemind.interfaces.cli.commands.utils.batch_analyze_async') as mock_batch:
-            mock_batch.return_value = {'total_files': 1, 'processed': 1, 'failed': 0}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.batch_analyze_async"
+        ) as mock_batch:
+            mock_batch.return_value = {"total_files": 1, "processed": 1, "failed": 0}
 
-            result = runner.invoke(app, [
-                "batch:analyze", str(test_audio_samples["120_c_major"].parent),
-                "--min-bpm", "100",
-                "--max-bpm", "130"
-            ])
+            result = runner.invoke(
+                app,
+                [
+                    "batch:analyze",
+                    str(test_audio_samples["120_c_major"].parent),
+                    "--min-bpm",
+                    "100",
+                    "--max-bpm",
+                    "130",
+                ],
+            )
 
         assert result.exit_code == 0
 
@@ -550,8 +622,10 @@ class TestAnalyzeBatchCommands:
 
         runner = CliRunner()
 
-        with patch('samplemind.interfaces.cli.commands.utils.batch_analyze_async') as mock_batch:
-            mock_batch.return_value = {'total_files': 0, 'processed': 0, 'failed': 0}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.batch_analyze_async"
+        ) as mock_batch:
+            mock_batch.return_value = {"total_files": 0, "processed": 0, "failed": 0}
 
             result = runner.invoke(app, ["batch:analyze", str(temp_directory)])
 
@@ -563,42 +637,44 @@ class TestAnalyzePerformance:
     """Test performance characteristics of analyze commands"""
 
     @pytest.mark.performance
-    def test_analyze_response_time_basic(self, typer_runner, test_audio_samples, performance_timer):
+    def test_analyze_response_time_basic(
+        self, typer_runner, test_audio_samples, performance_timer
+    ):
         """Test that basic analysis completes within performance target (<5s)"""
         from samplemind.interfaces.cli.typer_app import app
 
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {'tempo': 120.0}
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"tempo": 120.0}
 
             result, elapsed = performance_timer.time_operation(
-                runner.invoke,
-                app, ["analyze:basic", str(audio_file)]
+                runner.invoke, app, ["analyze:basic", str(audio_file)]
             )
 
         # Basic analysis should be fast
         assert elapsed < 5.0, f"Basic analysis took {elapsed:.2f}s, target <5s"
 
     @pytest.mark.performance
-    def test_analyze_response_time_standard(self, typer_runner, test_audio_samples, performance_timer):
+    def test_analyze_response_time_standard(
+        self, typer_runner, test_audio_samples, performance_timer
+    ):
         """Test that standard analysis completes within performance target (<10s)"""
         from samplemind.interfaces.cli.typer_app import app
 
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
-            mock_analyze.return_value = {
-                'tempo': 120.0,
-                'key': 'C',
-                'mode': 'major'
-            }
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
+            mock_analyze.return_value = {"tempo": 120.0, "key": "C", "mode": "major"}
 
             result, elapsed = performance_timer.time_operation(
-                runner.invoke,
-                app, ["analyze:standard", str(audio_file)]
+                runner.invoke, app, ["analyze:standard", str(audio_file)]
             )
 
         # Standard analysis should complete quickly

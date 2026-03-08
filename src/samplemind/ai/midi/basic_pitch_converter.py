@@ -33,6 +33,7 @@ def _ensure_basic_pitch() -> bool:
     try:
         from basic_pitch import inference as _inf
         from basic_pitch import note_creation as _nc
+
         _predict = _inf.predict
         _note_creation = _nc
         _BASIC_PITCH_AVAILABLE = True
@@ -47,14 +48,16 @@ def _ensure_basic_pitch() -> bool:
 # Result dataclass
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class DetectedNote:
     """A single detected pitched note."""
-    pitch_midi: int          # MIDI note number (0–127)
-    start_time: float        # seconds
-    end_time: float          # seconds
-    confidence: float        # model raw confidence (0–1)
-    amplitude: float = 0.0   # normalised amplitude
+
+    pitch_midi: int  # MIDI note number (0–127)
+    start_time: float  # seconds
+    end_time: float  # seconds
+    confidence: float  # model raw confidence (0–1)
+    amplitude: float = 0.0  # normalised amplitude
 
 
 @dataclass
@@ -90,6 +93,7 @@ class MidiConversionResult:
 # ---------------------------------------------------------------------------
 # Converter service
 # ---------------------------------------------------------------------------
+
 
 class MidiConverter:
     """
@@ -198,6 +202,7 @@ class MidiConverter:
     ) -> MidiConversionResult:
         """Synchronous wrapper around :meth:`convert`."""
         import asyncio
+
         return asyncio.run(self.convert(audio_path, output_dir))
 
     # ------------------------------------------------------------------

@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class AnalyzedFile:
     """Information about an analyzed file in session"""
+
     path: str
     name: str
     analysis_id: str
@@ -31,6 +32,7 @@ class AnalyzedFile:
 @dataclass
 class SessionSnapshot:
     """Complete session state snapshot"""
+
     session_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     name: str = "Untitled Session"
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
@@ -336,13 +338,17 @@ class SessionManager:
             "total_favorites": len(session.favorite_files),
             "total_pinned": len(session.pinned_files),
             "file_formats": self._count_formats(session.analyzed_files),
-            "total_tags": len(set(tag for f in session.analyzed_files for tag in f.tags)),
+            "total_tags": len(
+                set(tag for f in session.analyzed_files for tag in f.tags)
+            ),
             "session_duration": self._calculate_duration(
                 session.created_at, session.modified_at
             ),
         }
 
-    def export_session(self, session: Optional[SessionSnapshot] = None, file_path: Optional[str] = None) -> bool:
+    def export_session(
+        self, session: Optional[SessionSnapshot] = None, file_path: Optional[str] = None
+    ) -> bool:
         """
         Export session to file
 

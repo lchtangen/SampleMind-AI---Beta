@@ -196,7 +196,9 @@ class VST3Plugin:
             engine = AudioEngine()
 
             # Get analysis mode
-            analysis_mode_val = int(self.parameters[VST3ParameterID.ANALYSIS_MODE.value])
+            analysis_mode_val = int(
+                self.parameters[VST3ParameterID.ANALYSIS_MODE.value]
+            )
             analysis_modes = ["QUICK", "STANDARD", "DETAILED"]
             analysis_mode = analysis_modes[min(analysis_mode_val, 2)]
 
@@ -390,9 +392,7 @@ class VST3Plugin:
             "is_active": self.is_active,
             "samples_loaded": len(self.loaded_samples),
             "web_ui_enabled": self.web_server_running,
-            "parameters": {
-                self.PARAM_NAMES[k]: v for k, v in self.parameters.items()
-            },
+            "parameters": {self.PARAM_NAMES[k]: v for k, v in self.parameters.items()},
         }
 
 

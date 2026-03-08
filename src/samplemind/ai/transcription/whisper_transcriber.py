@@ -34,6 +34,7 @@ def _ensure_faster_whisper() -> bool:
         return True
     try:
         from faster_whisper import WhisperModel as _WM
+
         _WhisperModel = _WM
         _FASTER_WHISPER_AVAILABLE = True
     except ImportError:
@@ -47,9 +48,11 @@ def _ensure_faster_whisper() -> bool:
 # Result dataclass
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class TranscriptionSegment:
     """A single timed transcript segment."""
+
     start: float
     end: float
     text: str
@@ -79,6 +82,7 @@ class TranscriptionResult:
 # Transcriber service
 # ---------------------------------------------------------------------------
 
+
 class WhisperTranscriber:
     """
     Offline audio-to-text transcription using faster-whisper.
@@ -97,8 +101,12 @@ class WhisperTranscriber:
     """
 
     SUPPORTED_MODELS = (
-        "tiny", "base", "small", "medium",
-        "large-v3", "large-v3-turbo",
+        "tiny",
+        "base",
+        "small",
+        "medium",
+        "large-v3",
+        "large-v3-turbo",
     )
 
     def __init__(
@@ -129,6 +137,7 @@ class WhisperTranscriber:
         if device == "auto":
             try:
                 import torch
+
                 self.device = "cuda" if torch.cuda.is_available() else "cpu"
             except ImportError:
                 self.device = "cpu"
@@ -155,7 +164,9 @@ class WhisperTranscriber:
             self.use_mock = True
             return
         try:
-            logger.info(f"Loading faster-whisper model: {self.model_size} on {self.device}")
+            logger.info(
+                f"Loading faster-whisper model: {self.model_size} on {self.device}"
+            )
             self._model = _WhisperModel(
                 self.model_size,
                 device=self.device,
@@ -228,9 +239,8 @@ class WhisperTranscriber:
     ) -> TranscriptionResult:
         """Synchronous wrapper around :meth:`transcribe`."""
         import asyncio
-        return asyncio.run(
-            self.transcribe(audio_path, language, beam_size, vad_filter)
-        )
+
+        return asyncio.run(self.transcribe(audio_path, language, beam_size, vad_filter))
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -282,7 +292,9 @@ class WhisperTranscriber:
             language="en",
             language_probability=1.0,
             segments=[
-                TranscriptionSegment(start=0.0, end=1.0, text="Mock segment", confidence=0.9)
+                TranscriptionSegment(
+                    start=0.0, end=1.0, text="Mock segment", confidence=0.9
+                )
             ],
             model_name=f"mock-{self.model_size}",
             processing_time=time.time() - start_time,

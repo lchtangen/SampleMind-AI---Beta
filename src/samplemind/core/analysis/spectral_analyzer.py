@@ -138,7 +138,9 @@ class SpectralAnalyzer:
 
         # --- Spectral contrast (6 sub-bands) --------------------------------
         contrast = librosa.feature.spectral_contrast(S=D, sr=sr)
-        features.contrast_mean = [float(np.mean(contrast[b])) for b in range(contrast.shape[0])]
+        features.contrast_mean = [
+            float(np.mean(contrast[b])) for b in range(contrast.shape[0])
+        ]
 
         # --- Zero-crossing rate ---------------------------------------------
         zcr = librosa.feature.zero_crossing_rate(y, hop_length=self.hop_length)[0]
@@ -151,7 +153,9 @@ class SpectralAnalyzer:
         features.rms_std = float(np.std(rms))
 
         # --- MFCCs ----------------------------------------------------------
-        mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=self.n_mfcc, hop_length=self.hop_length)
+        mfccs = librosa.feature.mfcc(
+            y=y, sr=sr, n_mfcc=self.n_mfcc, hop_length=self.hop_length
+        )
         features.mfcc_mean = [float(v) for v in np.mean(mfccs, axis=1)]
         features.mfcc_std = [float(v) for v in np.std(mfccs, axis=1)]
 

@@ -1,16 +1,20 @@
-"""TUI Screens - Individual application screens for Textual"""
+"""TUI Screens - Individual application screens for Textual ^0.87"""
 
-from .main_screen import MainScreen
+from .ai_chat_screen import AIChatScreen
 from .analyze_screen import AnalyzeScreen
 from .batch_screen import BatchScreen
-from .results_screen import ResultsScreen
-from .favorites_screen import FavoritesScreen
-from .settings_screen import SettingsScreen
+from .chain_screen import ChainScreen
+from .classification_screen import ClassificationScreen
 from .comparison_screen import ComparisonScreen
-from .search_screen import SearchScreen
-from .tagging_screen import TaggingScreen
-from .performance_screen import PerformanceScreen
+from .favorites_screen import FavoritesScreen
 from .library_screen import LibraryScreen
+from .main_screen import MainScreen
+from .performance_screen import PerformanceScreen
+from .results_screen import ResultsScreen
+from .search_screen import SearchScreen
+from .settings_screen import SettingsScreen
+from .tagging_screen import TaggingScreen
+from .visualizer_screen import VisualizerScreen
 
 __all__ = [
     "MainScreen",
@@ -24,4 +28,8 @@ __all__ = [
     "TaggingScreen",
     "PerformanceScreen",
     "LibraryScreen",
+    "ChainScreen",
+    "ClassificationScreen",
+    "AIChatScreen",
+    "VisualizerScreen",
 ]

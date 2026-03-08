@@ -15,7 +15,10 @@ from samplemind.core.library.pack_creator import (
 )
 from . import utils
 
-app = typer.Typer(help="📦 Sample Pack Creator - Organize samples into professional packs", no_args_is_help=True)
+app = typer.Typer(
+    help="📦 Sample Pack Creator - Organize samples into professional packs",
+    no_args_is_help=True,
+)
 console = utils.console
 
 
@@ -25,15 +28,18 @@ def create_pack(
     name: str = typer.Argument(..., help="Pack name"),
     template: str = typer.Option(
         "custom",
-        "--template", "-t",
-        help="Pack template: custom, drums, melodic, effects, loops"
+        "--template",
+        "-t",
+        help="Pack template: custom, drums, melodic, effects, loops",
     ),
-    author: Optional[str] = typer.Option(None, "--author", "-a", help="Pack author name"),
-    description: Optional[str] = typer.Option(None, "--description", "-d", help="Pack description"),
+    author: Optional[str] = typer.Option(
+        None, "--author", "-a", help="Pack author name"
+    ),
+    description: Optional[str] = typer.Option(
+        None, "--description", "-d", help="Pack description"
+    ),
     output: Optional[Path] = typer.Option(
-        None,
-        "--output", "-o",
-        help="Output directory for pack"
+        None, "--output", "-o", help="Output directory for pack"
     ),
 ) -> None:
     """
@@ -51,7 +57,9 @@ def create_pack(
         template_lower = template.lower()
         valid_templates = [t.value for t in PackTemplate]
         if template_lower not in valid_templates:
-            console.print(f"[red]✗ Invalid template. Use: {', '.join(valid_templates)}[/red]")
+            console.print(
+                f"[red]✗ Invalid template. Use: {', '.join(valid_templates)}[/red]"
+            )
             raise typer.Exit(1)
 
         # Display header
@@ -70,7 +78,7 @@ def create_pack(
             template=PackTemplate[template_lower.upper()],
             author=author or "Unknown",
             description=description or "",
-            output_dir=output
+            output_dir=output,
         )
 
         # Display results
@@ -87,8 +95,12 @@ def create_pack(
 
         console.print(summary_table)
         console.print()
-        console.print(f"[dim]Use: samplemind pack:add <pack_dir> <sample_file> to add samples[/dim]")
-        console.print(f"[dim]Use: samplemind pack:export <pack_dir> to export the pack[/dim]")
+        console.print(
+            f"[dim]Use: samplemind pack:add <pack_dir> <sample_file> to add samples[/dim]"
+        )
+        console.print(
+            f"[dim]Use: samplemind pack:export <pack_dir> to export the pack[/dim]"
+        )
 
     except utils.CLIError as e:
         utils.handle_error(e, "pack:create")
@@ -103,14 +115,10 @@ def create_pack(
 def add_samples(
     pack_dir: Optional[Path] = typer.Argument(None, help="Sample pack directory"),
     source: Optional[Path] = typer.Option(
-        None,
-        "--source", "-s",
-        help="Audio file or folder to add"
+        None, "--source", "-s", help="Audio file or folder to add"
     ),
     organize: bool = typer.Option(
-        True,
-        "--organize",
-        help="Organize samples by template folders"
+        True, "--organize", help="Organize samples by template folders"
     ),
 ) -> None:
     """
@@ -124,6 +132,7 @@ def add_samples(
         # Pack directory selection
         if not pack_dir:
             from samplemind.utils.file_picker import select_folder
+
             pack_dir = select_folder(title="Select sample pack directory")
             if not pack_dir:
                 raise typer.Exit(1)
@@ -136,6 +145,7 @@ def add_samples(
         # Source selection
         if not source:
             from samplemind.utils.file_picker import select_audio_file
+
             source = select_audio_file(title="Select samples to add")
             if not source:
                 raise typer.Exit(1)
@@ -154,10 +164,12 @@ def add_samples(
         metadata_file = pack_dir / "pack.json"
         if metadata_file.exists():
             import json
+
             with open(metadata_file) as f:
                 data = json.load(f)
             # Create metadata from JSON (simplified)
             from samplemind.core.library.pack_creator import PackMetadata
+
             metadata = PackMetadata(**data)
         else:
             metadata = PackMetadata(name=pack_dir.name)
@@ -166,7 +178,7 @@ def add_samples(
             name=pack_dir.name,
             pack_dir=pack_dir,
             template=None,  # Detect from structure
-            metadata=metadata
+            metadata=metadata,
         )
 
         # Add samples
@@ -189,7 +201,9 @@ def add_samples(
 
         # Save metadata
         pack.save_metadata()
-        console.print(f"\n[dim]Pack now contains {pack.metadata.sample_count} samples ({pack.metadata.total_size_mb:.1f} MB)[/dim]")
+        console.print(
+            f"\n[dim]Pack now contains {pack.metadata.sample_count} samples ({pack.metadata.total_size_mb:.1f} MB)[/dim]"
+        )
 
     except utils.CLIError as e:
         utils.handle_error(e, "pack:add")
@@ -204,14 +218,10 @@ def add_samples(
 def export_pack(
     pack_dir: Optional[Path] = typer.Argument(None, help="Sample pack directory"),
     output: Optional[Path] = typer.Option(
-        None,
-        "--output", "-o",
-        help="Output directory for export"
+        None, "--output", "-o", help="Output directory for export"
     ),
     format_type: str = typer.Option(
-        "zip",
-        "--format", "-f",
-        help="Export format: zip, tar, dir"
+        "zip", "--format", "-f", help="Export format: zip, tar, dir"
     ),
 ) -> None:
     """
@@ -226,6 +236,7 @@ def export_pack(
         # Pack directory selection
         if not pack_dir:
             from samplemind.utils.file_picker import select_folder
+
             pack_dir = select_folder(title="Select sample pack directory")
             if not pack_dir:
                 raise typer.Exit(1)
@@ -257,10 +268,7 @@ def export_pack(
             metadata = PackMetadata(name=pack_dir.name)
 
         pack = SamplePack(
-            name=pack_dir.name,
-            pack_dir=pack_dir,
-            template=None,
-            metadata=metadata
+            name=pack_dir.name, pack_dir=pack_dir, template=None, metadata=metadata
         )
 
         # Export
@@ -299,6 +307,7 @@ def pack_info(
         # Pack directory selection
         if not pack_dir:
             from samplemind.utils.file_picker import select_folder
+
             pack_dir = select_folder(title="Select sample pack directory")
             if not pack_dir:
                 raise typer.Exit(1)
@@ -324,10 +333,7 @@ def pack_info(
             metadata = PackMetadata(name=pack_dir.name)
 
         pack = SamplePack(
-            name=pack_dir.name,
-            pack_dir=pack_dir,
-            template=None,
-            metadata=metadata
+            name=pack_dir.name, pack_dir=pack_dir, template=None, metadata=metadata
         )
 
         # Display info
@@ -362,7 +368,7 @@ def pack_info(
                     filename,
                     f"{sample_info.duration_seconds:.2f}",
                     f"{sample_info.file_size_mb:.1f}",
-                    bpm_str
+                    bpm_str,
                 )
 
             console.print(samples_table)
@@ -401,7 +407,7 @@ def list_templates() -> None:
         templates_table.add_row(
             template.value,
             SamplePackCreator.TEMPLATE_STRUCTURE[template]["description"],
-            folders
+            folders,
         )
 
     console.print(templates_table)

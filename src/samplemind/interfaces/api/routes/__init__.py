@@ -14,4 +14,16 @@ from . import (
     websocket,
 )
 
-__all__ = ["health", "audio", "ai", "batch", "websocket", "auth", "settings", "tasks", "sync", "collections", "search"]
+__all__ = [
+    "health",
+    "audio",
+    "ai",
+    "batch",
+    "websocket",
+    "auth",
+    "settings",
+    "tasks",
+    "sync",
+    "collections",
+    "search",
+]

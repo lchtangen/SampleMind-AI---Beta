@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class CacheEntry:
     """Single cache entry with metadata"""
+
     key: str
     value: Any
     created_at: float
@@ -77,7 +78,7 @@ class AdvancedCacheManager:
         redis_cache=None,
         max_memory_mb: int = 512,
         k: int = 2,
-        adaptive_ttl: bool = True
+        adaptive_ttl: bool = True,
     ):
         """
         Initialize advanced cache manager.
@@ -155,7 +156,7 @@ class AdvancedCacheManager:
         key: str,
         value: Any,
         ttl: Optional[int] = None,
-        size_bytes: Optional[int] = None
+        size_bytes: Optional[int] = None,
     ) -> bool:
         """
         Set value in cache with automatic eviction.
@@ -184,7 +185,7 @@ class AdvancedCacheManager:
             created_at=time.time(),
             last_accessed=time.time(),
             ttl=ttl,
-            size_bytes=size_bytes or 0
+            size_bytes=size_bytes or 0,
         )
 
         # Check if we need to evict
@@ -310,45 +311,49 @@ class AdvancedCacheManager:
             "entries": len(self.entries),
             "cache_size_mb": round(cache_size_mb, 2),
             "max_size_mb": self.max_memory_bytes / 1024 / 1024,
-            "memory_utilization": round((cache_size_mb / (self.max_memory_bytes / 1024 / 1024)) * 100, 1)
+            "memory_utilization": round(
+                (cache_size_mb / (self.max_memory_bytes / 1024 / 1024)) * 100, 1
+            ),
         }
 
     def get_top_accessed(self, limit: int = 10) -> List[Dict]:
         """Get most accessed entries"""
         sorted_entries = sorted(
-            self.entries.items(),
-            key=lambda x: x[1].access_count,
-            reverse=True
+            self.entries.items(), key=lambda x: x[1].access_count, reverse=True
         )
 
         result = []
         for key, entry in sorted_entries[:limit]:
-            result.append({
-                "key": key,
-                "access_count": entry.access_count,
-                "size_mb": entry.size_bytes / 1024 / 1024,
-                "age_seconds": time.time() - entry.created_at,
-                "ttl_remaining": max(0, entry.ttl - (time.time() - entry.created_at))
-            })
+            result.append(
+                {
+                    "key": key,
+                    "access_count": entry.access_count,
+                    "size_mb": entry.size_bytes / 1024 / 1024,
+                    "age_seconds": time.time() - entry.created_at,
+                    "ttl_remaining": max(
+                        0, entry.ttl - (time.time() - entry.created_at)
+                    ),
+                }
+            )
 
         return result
 
     def get_oldest_entries(self, limit: int = 10) -> List[Dict]:
         """Get oldest entries (candidates for eviction)"""
-        sorted_entries = sorted(
-            self.entries.items(),
-            key=lambda x: x[1].created_at
-        )
+        sorted_entries = sorted(self.entries.items(), key=lambda x: x[1].created_at)
 
         result = []
         for key, entry in sorted_entries[:limit]:
-            result.append({
-                "key": key,
-                "created_at": entry.created_at,
-                "age_seconds": time.time() - entry.created_at,
-                "access_count": entry.access_count,
-                "lruk_score": (0.7 * entry.get_frequency()) + (0.3 * entry.get_recency())
-            })
+            result.append(
+                {
+                    "key": key,
+                    "created_at": entry.created_at,
+                    "age_seconds": time.time() - entry.created_at,
+                    "access_count": entry.access_count,
+                    "lruk_score": (0.7 * entry.get_frequency())
+                    + (0.3 * entry.get_recency()),
+                }
+            )
 
         return result
 
@@ -363,8 +368,7 @@ class AdvancedCacheManager:
     def cleanup_expired(self) -> int:
         """Remove expired entries"""
         expired_keys = [
-            key for key, entry in self.entries.items()
-            if entry.is_expired()
+            key for key, entry in self.entries.items() if entry.is_expired()
         ]
 
         for key in expired_keys:

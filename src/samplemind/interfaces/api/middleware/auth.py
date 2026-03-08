@@ -7,18 +7,15 @@ from starlette.types import ASGIApp
 
 class SimpleAuthMiddleware(BaseHTTPMiddleware):
     """Simple authentication middleware for development and testing.
-    
+
     Provides basic user identification via X-User-ID header with a default
     fallback user. This is a simplified auth system for development purposes.
-    
+
     Attributes:
         default_user_id: Default user ID when no header is provided
     """
-    def __init__(
-        self,
-        app: ASGIApp,
-        default_user_id: str = "test_user_v6"
-    ):
+
+    def __init__(self, app: ASGIApp, default_user_id: str = "test_user_v6"):
         super().__init__(app)
         self.default_user_id = default_user_id
 

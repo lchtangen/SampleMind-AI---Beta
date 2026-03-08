@@ -51,19 +51,21 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.post("/upload",
-           response_model=AudioUploadResponse,
-           status_code=status.HTTP_201_CREATED,
-           summary="Upload an audio file",
-           description="""
+@router.post(
+    "/upload",
+    response_model=AudioUploadResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Upload an audio file",
+    description="""
            Upload an audio file for processing and analysis.
 
            Supported formats: WAV, MP3, FLAC, AIFF, OGG, M4A
            Max file size: 100MB
-           """)
+           """,
+)
 async def upload_audio(
     file: UploadFile = File(..., description="Audio file to upload"),
-    background_tasks: BackgroundTasks = None
+    background_tasks: BackgroundTasks = None,
 ) -> None:
     """
     Upload an audio file to the server for processing.
@@ -76,10 +78,12 @@ async def upload_audio(
 
     # Validate file type
     if not file.content_type.lower() in [f"audio/{fmt.value}" for fmt in AudioFormat]:
-        logger.warning(f"Upload rejected: Unsupported file type {file.content_type} for file {file.filename}")
+        logger.warning(
+            f"Upload rejected: Unsupported file type {file.content_type} for file {file.filename}"
+        )
         raise FileValidationError(
             f"Unsupported file type: {file.content_type}",
-            details={"allowed_formats": [f"audio/{fmt.value}" for fmt in AudioFormat]}
+            details={"allowed_formats": [f"audio/{fmt.value}" for fmt in AudioFormat]},
         )
 
     # Generate file ID and save path
@@ -92,10 +96,10 @@ async def upload_audio(
     max_size_mb = getattr(settings, "MAX_UPLOAD_SIZE_MB", 100)
 
     if file_size > max_size_mb * 1024 * 1024:
-        logger.warning(f"Upload rejected: File too large ({file_size / 1024 / 1024:.2f}MB) for file {file.filename}")
-        raise FileValidationError(
-            f"File too large. Max size: {max_size_mb}MB"
+        logger.warning(
+            f"Upload rejected: File too large ({file_size / 1024 / 1024:.2f}MB) for file {file.filename}"
         )
+        raise FileValidationError(f"File too large. Max size: {max_size_mb}MB")
 
     # Save file
     file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -105,25 +109,26 @@ async def upload_audio(
     # Process file in background if needed
     if background_tasks:
         background_tasks.add_task(
-            process_uploaded_file,
-            file_path=file_path,
-            file_id=file_id
+            process_uploaded_file, file_path=file_path, file_id=file_id
         )
 
-    logger.info(f"✅ Audio uploaded successfully: {file.filename} (ID: {file_id}, Size: {file_size / 1024 / 1024:.2f}MB)")
+    logger.info(
+        f"✅ Audio uploaded successfully: {file.filename} (ID: {file_id}, Size: {file_size / 1024 / 1024:.2f}MB)"
+    )
 
     return AudioUploadResponse(
         file_id=file_id,
         filename=file.filename,
         file_size=file_size,
-        message="File uploaded successfully"
+        message="File uploaded successfully",
     )
 
 
-@router.post("/process/{file_id}",
-           response_model=AudioProcessResponse,
-           summary="Process an audio file",
-           description="""
+@router.post(
+    "/process/{file_id}",
+    response_model=AudioProcessResponse,
+    summary="Process an audio file",
+    description="""
            Process an uploaded audio file with various audio effects and filters.
 
            Options include:
@@ -132,11 +137,10 @@ async def upload_audio(
            - Normalization and gain control
            - Noise reduction and filtering
            - Silence trimming
-           """)
+           """,
+)
 async def process_audio(
-    file_id: str,
-    request: AudioProcessRequest,
-    background_tasks: BackgroundTasks = None
+    file_id: str, request: AudioProcessRequest, background_tasks: BackgroundTasks = None
 ) -> None:
     """
     Process an audio file with the specified processing pipeline.
@@ -162,21 +166,19 @@ async def process_audio(
             process_audio_file,
             input_path=file_path,
             output_path=output_path,
-            steps=request.steps
+            steps=request.steps,
         )
 
         return AudioProcessResponse(
             file_id=file_id,
             status="processing",
             message="Audio processing started in background",
-            output_path=str(output_path) if request.return_path else None
+            output_path=str(output_path) if request.return_path else None,
         )
     else:
         try:
             result = process_audio_file(
-                input_path=file_path,
-                output_path=output_path,
-                steps=request.steps
+                input_path=file_path, output_path=output_path, steps=request.steps
             )
 
             return AudioProcessResponse(
@@ -185,19 +187,21 @@ async def process_audio(
                 message="Audio processing completed successfully",
                 output_path=str(output_path) if request.return_path else None,
                 processing_time=result.get("processing_time", 0),
-                processing_steps=result.get("steps", [])
+                processing_steps=result.get("steps", []),
             )
         except Exception as e:
             logger.error(f"Audio processing failed: {str(e)}", exc_info=True)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Audio processing failed: {str(e)}"
+                detail=f"Audio processing failed: {str(e)}",
             )
 
-@router.post("/analyze/{file_id}",
-           response_model=AudioAnalysisResponse,
-           summary="Analyze audio features",
-           description="""
+
+@router.post(
+    "/analyze/{file_id}",
+    response_model=AudioAnalysisResponse,
+    summary="Analyze audio features",
+    description="""
            Extract and analyze audio features from an uploaded file.
 
            Features include:
@@ -205,11 +209,12 @@ async def process_audio(
            - Rhythmic analysis (tempo, beats, onsets)
            - Spectral analysis (centroid, bandwidth, rolloff)
            - MFCCs and other advanced features
-           """)
+           """,
+)
 async def analyze_audio(
     file_id: str,
     request: AudioAnalysisRequest = Depends(),
-    background_tasks: BackgroundTasks = None
+    background_tasks: BackgroundTasks = None,
 ) -> None:
     """
     Analyze an audio file and extract various audio features.
@@ -220,7 +225,9 @@ async def analyze_audio(
     - Spectral analysis (centroid, bandwidth, rolloff)
     - MFCCs and other advanced features
     """
-    logger.info(f"Audio analysis started: file_id={file_id}, level={request.analysis_level}")
+    logger.info(
+        f"Audio analysis started: file_id={file_id}, level={request.analysis_level}"
+    )
     settings = get_settings()
 
     # Find file
@@ -237,6 +244,7 @@ async def analyze_audio(
     except Exception:
         # Fallback if app state not initialized (e.g. testing)
         from samplemind.core.engine.audio_engine import AudioEngine
+
         audio_engine = AudioEngine()
 
     from samplemind.core.engine.audio_engine import AnalysisLevel
@@ -247,15 +255,14 @@ async def analyze_audio(
         level_enum = AnalysisLevel.STANDARD
 
     import time
+
     start_time = time.time()
 
     try:
         # 1. Audio Engine Analysis
         # Run in thread pool to avoid blocking async event loop
         features = await asyncio.to_thread(
-            audio_engine.analyze_audio,
-            file_path,
-            analysis_level=level_enum
+            audio_engine.analyze_audio, file_path, analysis_level=level_enum
         )
 
         # 2. Save Semantic Embedding (Phase 4.5)
@@ -271,13 +278,11 @@ async def analyze_audio(
                     "tempo": float(features.tempo) if features.tempo else 0.0,
                     "key": str(features.key),
                     "mode": str(features.mode),
-                    "duration": float(features.duration)
+                    "duration": float(features.duration),
                 }
 
                 await add_embedding(
-                    file_id=file_id,
-                    embedding=features.neural_embedding,
-                    metadata=meta
+                    file_id=file_id, embedding=features.neural_embedding, metadata=meta
                 )
                 logger.info(f"✅ Saved embedding for {file_id} to ChromaDB")
 
@@ -300,11 +305,11 @@ async def analyze_audio(
                     # Or generic analyze method
 
                     # If ai_manager isn't ready, we skip or use mock
-                     if hasattr(ai_manager, "analyze_content"):
+                    if hasattr(ai_manager, "analyze_content"):
                         ai_analysis_result = await ai_manager.analyze_content(
                             content_type="audio_features",
                             content=asdict(features),
-                            prompt="Analyze genre, mood, and style based on these audio features."
+                            prompt="Analyze genre, mood, and style based on these audio features.",
                         )
             except Exception as e:
                 logger.warning(f"AI analysis failed or skipped: {e}")
@@ -322,22 +327,29 @@ async def analyze_audio(
             mode=features.mode,
             time_signature=list(features.time_signature),
             spectral_features={
-                "centroid_mean": sum(features.spectral_centroid)/len(features.spectral_centroid) if features.spectral_centroid else 0,
-                "rolloff_mean": sum(features.spectral_rolloff)/len(features.spectral_rolloff) if features.spectral_rolloff else 0,
+                "centroid_mean": (
+                    sum(features.spectral_centroid) / len(features.spectral_centroid)
+                    if features.spectral_centroid
+                    else 0
+                ),
+                "rolloff_mean": (
+                    sum(features.spectral_rolloff) / len(features.spectral_rolloff)
+                    if features.spectral_rolloff
+                    else 0
+                ),
             },
             ai_analysis=ai_analysis_result,
             analysis_level=request.analysis_level,
             processing_time=processing_time,
-            analyzed_at=datetime.utcnow()
+            analyzed_at=datetime.utcnow(),
         )
 
     except Exception as e:
         logger.error(f"Audio analysis failed for {file_id}: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Audio analysis failed: {str(e)}"
+            detail=f"Audio analysis failed: {str(e)}",
         )
-
 
 
 # Helper functions for background processing
@@ -352,12 +364,13 @@ async def process_uploaded_file(file_path: Path, file_id: str):
         # generate_waveform_preview(file_path, file_id)
 
     except Exception as e:
-        logger.error(f"Background processing failed for {file_id}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Background processing failed for {file_id}: {str(e)}", exc_info=True
+        )
+
 
 def process_audio_file(
-    input_path: Path,
-    output_path: Path,
-    steps: Dict[str, Any]
+    input_path: Path, output_path: Path, steps: Dict[str, Any]
 ) -> Dict[str, Any]:
     """Process an audio file with the given processing steps"""
     start_time = time.time()
@@ -376,19 +389,20 @@ def process_audio_file(
         return {
             "processing_time": time.time() - start_time,
             "output_path": str(output_path),
-            "steps": pipeline.get_processing_history()
+            "steps": pipeline.get_processing_history(),
         }
 
     except Exception as e:
         logger.error(f"Audio processing failed: {str(e)}", exc_info=True)
         raise
 
+
 async def analyze_audio_file(
     file_path: Path,
     file_id: str,
     analysis_level: str = "standard",
     include_ai: bool = False,
-    save_results: bool = True
+    save_results: bool = True,
 ) -> Dict[str, Any]:
     """Analyze an audio file and return features"""
     start_time = time.time()
@@ -428,7 +442,7 @@ async def analyze_audio_file(
             "sample_rate": sr,
             "channels": 1,  # Always mono after processing
             "analysis_level": analysis_level,
-            "processing_time": time.time() - start_time
+            "processing_time": time.time() - start_time,
         }
 
         # AI analysis if requested
@@ -449,16 +463,21 @@ async def analyze_audio_file(
             analysis_file = analysis_dir / f"analysis_{analysis_id}.json"
             with open(analysis_file, "w") as f:
                 import json
-                json.dump({
-                    "analysis_id": analysis_id,
-                    "file_id": file_id,
-                    "filename": file_path.name,
-                    "timestamp": datetime.utcnow().isoformat(),
-                    "processing_time_seconds": time.time() - start_time,
-                    "analysis_level": analysis_level,
-                    "features": features,
-                    "ai_analysis": ai_analysis
-                }, f, indent=2)
+
+                json.dump(
+                    {
+                        "analysis_id": analysis_id,
+                        "file_id": file_id,
+                        "filename": file_path.name,
+                        "timestamp": datetime.utcnow().isoformat(),
+                        "processing_time_seconds": time.time() - start_time,
+                        "analysis_level": analysis_level,
+                        "features": features,
+                        "ai_analysis": ai_analysis,
+                    },
+                    f,
+                    indent=2,
+                )
 
             logger.info(f"Analysis results saved to {analysis_file}")
 
@@ -466,28 +485,33 @@ async def analyze_audio_file(
             "processing_time": time.time() - start_time,
             "features": features,
             "ai_analysis": ai_analysis,
-            "analysis_id": analysis_id if save_results else None
+            "analysis_id": analysis_id if save_results else None,
         }
 
     except Exception as e:
         logger.error(f"Audio analysis failed: {str(e)}", exc_info=True)
         raise
 
-@router.get("/list",
-           response_model=List[AudioFileMetadata],
-           summary="List uploaded audio files",
-           description="""
+
+@router.get(
+    "/list",
+    response_model=List[AudioFileMetadata],
+    summary="List uploaded audio files",
+    description="""
            Get a paginated list of uploaded audio files with metadata.
 
            Returns basic information about each file including:
            - File ID and original filename
            - File size and MIME type
            - Upload timestamp
-           """)
+           """,
+)
 async def list_audio_files(
     page: int = Query(1, ge=1, description="Page number (1-based)"),
     page_size: int = Query(50, ge=1, le=100, description="Number of items per page"),
-    file_type: Optional[str] = Query(None, description="Filter by file type (e.g., 'wav', 'mp3')")
+    file_type: Optional[str] = Query(
+        None, description="Filter by file type (e.g., 'wav', 'mp3')"
+    ),
 ) -> None:
     """
     List all uploaded audio files with pagination and filtering.
@@ -527,14 +551,16 @@ async def list_audio_files(
             # Get file stats
             stat = file_path.stat()
 
-            result.append(AudioFileMetadata(
-                file_id=file_id,
-                filename=original_filename,
-                file_size=stat.st_size,
-                upload_time=datetime.fromtimestamp(stat.st_ctime).isoformat(),
-                mime_type=f"audio/{file_path.suffix[1:].lower()}",
-                duration=get_audio_duration(file_path)
-            ))
+            result.append(
+                AudioFileMetadata(
+                    file_id=file_id,
+                    filename=original_filename,
+                    file_size=stat.st_size,
+                    upload_time=datetime.fromtimestamp(stat.st_ctime).isoformat(),
+                    mime_type=f"audio/{file_path.suffix[1:].lower()}",
+                    duration=get_audio_duration(file_path),
+                )
+            )
         except Exception as e:
             logger.warning(f"Error processing file {file_path}: {str(e)}")
             continue

@@ -1,97 +1,73 @@
-"""
-Main Menu Widget for SampleMind TUI
-Provides a modern interactive menu interface
-"""
+"""Main Menu Widget for SampleMind TUI — Textual ^0.87"""
 
-from rich.align import Align
-from rich.panel import Panel
-from rich.text import Text
-from textual.containers import Vertical
+from __future__ import annotations
+
+from textual import on
+from textual.app import ComposeResult
 from textual.message import Message
-from textual.widgets import Label, Static
+from textual.widget import Widget
+from textual.widgets import ListItem, ListView, Label
+
+MENU_OPTIONS: list[tuple[str, str]] = [
+    ("🎵  Analyze Audio", "analyze"),
+    ("📦  Batch Process", "batch"),
+    ("📚  Library Browser", "library"),
+    ("🔍  Search Samples", "search"),
+    ("🤖  AI Chat", "ai_chat"),
+    ("📊  Visualizer", "visualizer"),
+    ("⭐  Favorites", "favorites"),
+    ("🏷️   Tag Samples", "tagging"),
+    ("🎚️   Effects Chain", "chain"),
+    ("⚙️   Settings", "settings"),
+    ("❌  Quit", "quit"),
+]
+
+
+class MenuSelected(Message):
+    """Posted when a menu option is selected."""
+
+    def __init__(self, action: str) -> None:
+        super().__init__()
+        self.action = action
 
 
 class MainMenuOption(Message):
-    """Custom message for menu selection"""
+    """Deprecated — use MenuSelected instead."""
 
-    def __init__(self, option_id: str, option_label: str) -> None:
+    def __init__(self, option: str) -> None:
         super().__init__()
-        self.option_id = option_id
-        self.option_label = option_label
+        self.option = option
 
 
-class MainMenu(Static):
-    """Main menu widget with 5 core options"""
+class MainMenu(Widget):
+    """Interactive main navigation menu using ListView."""
 
     DEFAULT_CSS = """
     MainMenu {
-        width: 1fr;
-        height: auto;
-        padding: 1 2;
-    }
-
-    MainMenu > Vertical {
-        width: 1fr;
         height: auto;
     }
-
-    MainMenu .menu-option {
-        padding: 1 2;
-        background: $surface;
+    MainMenu ListView {
+        height: auto;
+        border: none;
+        padding: 0 1;
+        background: transparent;
     }
-
-    MainMenu .menu-option:hover {
-        background: $primary;
-        color: $text;
+    MainMenu ListItem {
+        height: 1;
+        padding: 0 1;
     }
-
-    MainMenu .menu-option.focused {
-        background: $accent;
-        color: $panel;
+    MainMenu ListItem.-highlighted {
+        background: $primary 40%;
+        color: $background;
     }
     """
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.menu_items = [
-            ("analyze", "🎯 Analyze Single File"),
-            ("batch", "📁 Batch Process Folder"),
-            ("search", "🔎 Semantic Search"),
-            ("chain", "🔗 Chain Recommender"),
-            ("favorites", "⭐ Favorites"),
-            ("settings", "⚙️  Settings"),
-            ("analytics", "📊 Session Analytics"),
-        ]
-        self.selected_index = 0
+    def compose(self) -> ComposeResult:
+        items = [ListItem(Label(label), name=action) for label, action in MENU_OPTIONS]
+        yield ListView(*items, id="menu_list")
 
-    def compose(self):
-        """Compose the menu layout"""
-        with Vertical():
-            yield Static(
-                self._render_title(),
-                id="menu_title"
-            )
-
-            # Add menu options
-            for idx, (option_id, label) in enumerate(self.menu_items):
-                yield Label(
-                    label,
-                    id=f"menu_{option_id}",
-                    classes="menu-option"
-                )
-
-    def _render_title(self) -> Panel:
-        """Render the menu title"""
-        title = Text("🎵 SampleMind AI v6 - Main Menu", style="bold cyan")
-        subtitle = Text("Press UP/DOWN to navigate, ENTER to select, Q to quit", style="dim")
-
-        content = Text()
-        content.append(title)
-        content.append("\n")
-        content.append(subtitle)
-
-        return Panel(
-            Align.center(content),
-            border_style="green",
-            padding=(1, 2)
-        )
+    @on(ListView.Selected, "#menu_list")
+    def on_menu_selected(self, event: ListView.Selected) -> None:
+        if event.item.name:
+            self.post_message(MenuSelected(event.item.name))
+            self.post_message(MainMenuOption(event.item.name))

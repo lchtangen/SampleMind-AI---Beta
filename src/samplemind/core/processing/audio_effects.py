@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 class EffectType(str, Enum):
     """Supported audio effects"""
+
     EQ = "eq"
     COMPRESSION = "compression"
     LIMITING = "limiting"
@@ -38,9 +39,10 @@ class EffectType(str, Enum):
 @dataclass
 class EQSettings:
     """10-band parametric EQ settings"""
+
     frequencies: List[float] = None  # Hz
-    gains: List[float] = None        # dB
-    q_factors: List[float] = None    # Resonance factor
+    gains: List[float] = None  # dB
+    q_factors: List[float] = None  # Resonance factor
 
     def __post_init__(self):
         if self.frequencies is None:
@@ -55,33 +57,37 @@ class EQSettings:
 @dataclass
 class CompressionSettings:
     """Dynamic compression settings"""
-    ratio: float = 4.0              # Compression ratio (e.g., 4:1)
-    threshold_db: float = -20.0     # Threshold in dB
-    attack_ms: float = 10.0         # Attack time in ms
-    release_ms: float = 100.0       # Release time in ms
-    makeup_gain_db: float = 0.0     # Makeup gain in dB
+
+    ratio: float = 4.0  # Compression ratio (e.g., 4:1)
+    threshold_db: float = -20.0  # Threshold in dB
+    attack_ms: float = 10.0  # Attack time in ms
+    release_ms: float = 100.0  # Release time in ms
+    makeup_gain_db: float = 0.0  # Makeup gain in dB
 
 
 @dataclass
 class DistortionSettings:
     """Distortion/overdrive settings"""
-    drive: float = 1.0              # Drive amount (1.0 = clean, >1.0 = distorted)
-    tone: float = 0.5               # Tone shaping (0-1)
-    output_gain_db: float = 0.0     # Output level
+
+    drive: float = 1.0  # Drive amount (1.0 = clean, >1.0 = distorted)
+    tone: float = 0.5  # Tone shaping (0-1)
+    output_gain_db: float = 0.0  # Output level
 
 
 @dataclass
 class ReverbSettings:
     """Reverb effect settings"""
-    room_size: float = 0.5          # Room size (0-1)
-    damping: float = 0.5            # Damping (0-1)
-    width: float = 1.0              # Stereo width (0-1)
-    dry_wet_mix: float = 0.3        # Dry/wet mix (0-1)
+
+    room_size: float = 0.5  # Room size (0-1)
+    damping: float = 0.5  # Damping (0-1)
+    width: float = 1.0  # Stereo width (0-1)
+    dry_wet_mix: float = 0.3  # Dry/wet mix (0-1)
 
 
 @dataclass
 class EffectChain:
     """Container for multiple effects"""
+
     effects: List[Tuple[EffectType, Dict]] = None
 
     def __post_init__(self):
@@ -154,16 +160,14 @@ class AudioEffectsProcessor:
         Returns:
             EQ-processed audio
         """
-        settings = EQSettings(
-            frequencies=frequencies,
-            gains=gains,
-            q_factors=q_factors
-        )
+        settings = EQSettings(frequencies=frequencies, gains=gains, q_factors=q_factors)
 
         output = audio.copy()
 
         # Apply each band
-        for freq, gain_db, q in zip(settings.frequencies, settings.gains, settings.q_factors):
+        for freq, gain_db, q in zip(
+            settings.frequencies, settings.gains, settings.q_factors
+        ):
             if abs(gain_db) > 0.01:  # Skip if no gain
                 output = self._apply_peaking_filter(output, freq, gain_db, q)
 
@@ -188,16 +192,8 @@ class AudioEffectsProcessor:
         alpha = sin_w0 / (2 * q)
 
         # Peaking filter coefficients
-        b = np.array([
-            1 + alpha * gain_linear,
-            -2 * cos_w0,
-            1 - alpha * gain_linear
-        ])
-        a = np.array([
-            1 + alpha / gain_linear,
-            -2 * cos_w0,
-            1 - alpha / gain_linear
-        ])
+        b = np.array([1 + alpha * gain_linear, -2 * cos_w0, 1 - alpha * gain_linear])
+        a = np.array([1 + alpha / gain_linear, -2 * cos_w0, 1 - alpha / gain_linear])
 
         # Normalize
         b = b / a[0]
@@ -255,7 +251,7 @@ class AudioEffectsProcessor:
                 threshold_linear,
                 attack_samples,
                 release_samples,
-                makeup_gain_linear
+                makeup_gain_linear,
             )
         else:  # Stereo
             output = np.zeros_like(audio)
@@ -266,7 +262,7 @@ class AudioEffectsProcessor:
                     threshold_linear,
                     attack_samples,
                     release_samples,
-                    makeup_gain_linear
+                    makeup_gain_linear,
                 )
 
         logger.info(f"Applied compression: {ratio}:1, threshold: {threshold_db}dB")
@@ -290,16 +286,22 @@ class AudioEffectsProcessor:
         above_threshold = input_level > threshold
 
         # Apply compression ratio where above threshold
-        gain_reduction[above_threshold] = (threshold + (input_level[above_threshold] - threshold) / ratio) / input_level[above_threshold]
+        gain_reduction[above_threshold] = (
+            threshold + (input_level[above_threshold] - threshold) / ratio
+        ) / input_level[above_threshold]
 
         # Apply attack/release envelope
         for i in range(1, len(gain_reduction)):
-            if gain_reduction[i] < gain_reduction[i-1]:  # Attack
+            if gain_reduction[i] < gain_reduction[i - 1]:  # Attack
                 alpha = 1.0 / max(1, attack_samples)
-                gain_reduction[i] = gain_reduction[i-1] * (1 - alpha) + gain_reduction[i] * alpha
+                gain_reduction[i] = (
+                    gain_reduction[i - 1] * (1 - alpha) + gain_reduction[i] * alpha
+                )
             else:  # Release
                 alpha = 1.0 / max(1, release_samples)
-                gain_reduction[i] = gain_reduction[i-1] * (1 - alpha) + gain_reduction[i] * alpha
+                gain_reduction[i] = (
+                    gain_reduction[i - 1] * (1 - alpha) + gain_reduction[i] * alpha
+                )
 
         # Apply compression and makeup gain
         return channel * gain_reduction * makeup_gain
@@ -327,7 +329,7 @@ class AudioEffectsProcessor:
             threshold_db=threshold_db,
             attack_ms=1.0,
             release_ms=release_ms,
-            makeup_gain_db=0.0
+            makeup_gain_db=0.0,
         )
 
     # ========================================================================
@@ -500,7 +502,9 @@ class AudioEffectsProcessor:
         gains = [1, 0, 0, 0, 0, 0, 0, -1, -2, -1]  # dB
         audio = self.apply_eq(audio, gains=gains)
         # Gentle compression for glue
-        audio = self.apply_compression(audio, ratio=2.0, threshold_db=-12, makeup_gain_db=2)
+        audio = self.apply_compression(
+            audio, ratio=2.0, threshold_db=-12, makeup_gain_db=2
+        )
         # Final limiter
         audio = self.apply_limiting(audio, threshold_db=-0.3)
         return audio
@@ -513,7 +517,9 @@ class AudioEffectsProcessor:
         # Saturation for warmth
         audio = self.apply_distortion(audio, drive=1.2, tone=0.3, output_gain_db=-1)
         # Soft compression
-        audio = self.apply_compression(audio, ratio=2.5, threshold_db=-15, makeup_gain_db=1)
+        audio = self.apply_compression(
+            audio, ratio=2.5, threshold_db=-15, makeup_gain_db=1
+        )
         return audio
 
 

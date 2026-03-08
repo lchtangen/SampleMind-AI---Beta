@@ -40,14 +40,21 @@ console = utils.console
 # SECTION 1: LIBRARY MANAGEMENT (15 commands)
 # ============================================================================
 
+
 @app.command("organize")
 @utils.with_error_handling
 def library_organize(
     folder: Optional[Path] = typer.Argument(None, help="Library folder to organize"),
-    by: str = typer.Option("{genre}/{bpm}/{key}/{filename}", "--pattern", "-p", help="Organization pattern"),
-    dry_run: bool = typer.Option(False, "--dry-run", help="Show changes without applying"),
+    by: str = typer.Option(
+        "{genre}/{bpm}/{key}/{filename}", "--pattern", "-p", help="Organization pattern"
+    ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Show changes without applying"
+    ),
     strategy: str = typer.Option("move", "--strategy", "-s", help="move or copy"),
-    interactive: bool = typer.Option(False, "--interactive", "-i", help="Launch folder picker"),
+    interactive: bool = typer.Option(
+        False, "--interactive", "-i", help="Launch folder picker"
+    ),
 ) -> None:
     """Auto-organize library by metadata (BPM, key, genre)"""
     import asyncio
@@ -85,16 +92,22 @@ def library_organize(
                     features = await asyncio.to_thread(audio_engine.analyze_audio, file)
 
                     # 2. Classify (AI Tags)
-                    classification = await asyncio.to_thread(ai_classifier.classify_audio, features)
+                    classification = await asyncio.to_thread(
+                        ai_classifier.classify_audio, features
+                    )
 
                     # 3. Construct Metadata
                     metadata = {
                         "genre": classification.genre or "Uncategorized",
-                        "bpm": f"{int(features.tempo)}" if features.tempo > 0 else "Unknown",
+                        "bpm": (
+                            f"{int(features.tempo)}"
+                            if features.tempo > 0
+                            else "Unknown"
+                        ),
                         "key": features.key or "Unknown",
                         "mood": classification.mood or "Unknown",
                         "instrument": classification.instrument or "Unknown",
-                        "filename": file.name
+                        "filename": file.name,
                     }
 
                     # 4. Organize
@@ -103,12 +116,16 @@ def library_organize(
                         metadata=metadata,
                         pattern=by,
                         root_dir=folder,
-                        strategy=strategy
+                        strategy=strategy,
                     )
 
                     if result.success:
                         success_count += 1
-                        status = "[green]✓[/green]" if not dry_run else "[yellow]DRY[/yellow]"
+                        status = (
+                            "[green]✓[/green]"
+                            if not dry_run
+                            else "[yellow]DRY[/yellow]"
+                        )
                         try:
                             rel_dest = result.destination.relative_to(folder)
                         except ValueError:
@@ -121,9 +138,11 @@ def library_organize(
                         console.print(f"  [red]✗[/red] {file.name}: {result.error}")
 
                 except Exception as e:
-                     console.print(f"  [red]![/red] Failed to process {file.name}: {e}")
+                    console.print(f"  [red]![/red] Failed to process {file.name}: {e}")
 
-        console.print(f"\n[green]✓ Operation complete. {success_count}/{len(files)} files processed.[/green]")
+        console.print(
+            f"\n[green]✓ Operation complete. {success_count}/{len(files)} files processed.[/green]"
+        )
 
     try:
         asyncio.run(_process())
@@ -142,9 +161,17 @@ def library_scan(
 ) -> None:
     """Scan and index all audio files in folder"""
     try:
-        files = utils.get_audio_files(folder) if recursive else [
-            f for f in folder.glob("*") if f.is_file() and f.suffix.lower() in {'.wav', '.mp3', '.flac', '.aiff', '.m4a', '.ogg'}
-        ]
+        files = (
+            utils.get_audio_files(folder)
+            if recursive
+            else [
+                f
+                for f in folder.glob("*")
+                if f.is_file()
+                and f.suffix.lower()
+                in {".wav", ".mp3", ".flac", ".aiff", ".m4a", ".ogg"}
+            ]
+        )
 
         console.print(f"[bold cyan]📁 Library Scan Results[/bold cyan]")
 
@@ -156,8 +183,12 @@ def library_scan(
         table.add_column("Value", style="green")
 
         table.add_row("Total Files", str(len(files)))
-        table.add_row("Total Size", f"{sum(f.stat().st_size for f in files) / 1e9:.2f} GB")
-        table.add_row("Audio Formats", f"{len(set(f.suffix.lower() for f in files))} types")
+        table.add_row(
+            "Total Size", f"{sum(f.stat().st_size for f in files) / 1e9:.2f} GB"
+        )
+        table.add_row(
+            "Audio Formats", f"{len(set(f.suffix.lower() for f in files))} types"
+        )
 
         console.print(table)
 
@@ -173,7 +204,9 @@ def library_scan(
 @utils.with_error_handling
 def library_import(
     folder: Path = typer.Argument(..., help="Folder with audio files"),
-    destination: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--destination", "-d"),
+    destination: Path = typer.Option(
+        Path.home() / "SampleMind" / "Library", "--destination", "-d"
+    ),
     preserve_structure: bool = typer.Option(True, "--preserve/--flatten"),
 ) -> None:
     """Import audio files with metadata preservation"""
@@ -197,7 +230,9 @@ def library_import(
 def library_export(
     folder: Path = typer.Argument(..., help="Library folder"),
     output: Path = typer.Option(Path.cwd() / "library_export", "--output", "-o"),
-    format: str = typer.Option("json", "--format", "-f", help="Export format (json|csv|yaml)"),
+    format: str = typer.Option(
+        "json", "--format", "-f", help="Export format (json|csv|yaml)"
+    ),
 ) -> None:
     """Export library metadata with files"""
     try:
@@ -217,9 +252,15 @@ def library_export(
 @app.command("sync")
 @utils.with_error_handling
 def library_sync(
-    folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder to sync"),
-    direction: str = typer.Option("both", "--direction", help="Sync direction (up|down|both)"),
-    service: str = typer.Option("cloud", "--service", help="Cloud service (cloud|dropbox|gdrive|s3)"),
+    folder: Path = typer.Argument(
+        Path.home() / "SampleMind" / "Library", help="Library folder to sync"
+    ),
+    direction: str = typer.Option(
+        "both", "--direction", help="Sync direction (up|down|both)"
+    ),
+    service: str = typer.Option(
+        "cloud", "--service", help="Cloud service (cloud|dropbox|gdrive|s3)"
+    ),
 ) -> None:
     """Sync library with cloud storage"""
     import asyncio
@@ -233,17 +274,19 @@ def library_sync(
         # Select provider
         provider = None
         if service == "cloud" or service == "local":
-             # Use mock S3/Local "Cloud"
-             # Simulate cloud in .samplemind/cloud_storage
-             cloud_path = Path.home() / ".samplemind" / "cloud_storage"
-             console.print(f"[dim]Using local cloud simulation at {cloud_path}[/dim]")
-             provider = LocalStorageProvider(cloud_path)
+            # Use mock S3/Local "Cloud"
+            # Simulate cloud in .samplemind/cloud_storage
+            cloud_path = Path.home() / ".samplemind" / "cloud_storage"
+            console.print(f"[dim]Using local cloud simulation at {cloud_path}[/dim]")
+            provider = LocalStorageProvider(cloud_path)
         elif service == "s3":
-             provider = MockS3StorageProvider("samplemind-user-bucket")
+            provider = MockS3StorageProvider("samplemind-user-bucket")
         else:
-             console.print(f"[yellow]Service '{service}' not fully implemented, falling back to local simulation[/yellow]")
-             cloud_path = Path.home() / ".samplemind" / "cloud_storage"
-             provider = LocalStorageProvider(cloud_path)
+            console.print(
+                f"[yellow]Service '{service}' not fully implemented, falling back to local simulation[/yellow]"
+            )
+            cloud_path = Path.home() / ".samplemind" / "cloud_storage"
+            provider = LocalStorageProvider(cloud_path)
 
         manager = SyncManager(provider)
         await manager.enable_sync("cli_user")
@@ -252,12 +295,12 @@ def library_sync(
 
         # Using context manager for spinner
         with utils.ProgressTracker(f"Syncing files..."):
-             stats = await manager.sync_library(folder, direction)
+            stats = await manager.sync_library(folder, direction)
 
         console.print(f"\n[bold green]✓ Sync Complete[/bold green]")
         console.print(f"  Uploaded: {stats.get('uploaded', 0)}")
         console.print(f"  Downloaded: {stats.get('downloaded', 0)}")
-        if stats.get('errors', 0) > 0:
+        if stats.get("errors", 0) > 0:
             console.print(f"  [red]Errors: {stats.get('errors')}[/red]")
         else:
             console.print(f"  Errors: 0")
@@ -273,20 +316,27 @@ def library_sync(
 @app.command("stats")
 @utils.with_error_handling
 def library_stats(
-    folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
+    folder: Path = typer.Argument(
+        Path.home() / "SampleMind" / "Library", help="Library folder"
+    ),
 ) -> None:
     """Show library statistics"""
     try:
         files = utils.get_audio_files(folder)
 
-        table = Table(title="Library Statistics", show_header=True, header_style="bold cyan")
+        table = Table(
+            title="Library Statistics", show_header=True, header_style="bold cyan"
+        )
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
 
         total_size = sum(f.stat().st_size for f in files) / 1e9
         table.add_row("Total Samples", str(len(files)))
         table.add_row("Total Size", f"{total_size:.2f} GB")
-        table.add_row("Avg Size", f"{total_size * 1e9 / len(files) / 1e6:.1f} MB" if files else "N/A")
+        table.add_row(
+            "Avg Size",
+            f"{total_size * 1e9 / len(files) / 1e6:.1f} MB" if files else "N/A",
+        )
         table.add_row("Formats", str(len(set(f.suffix.lower() for f in files))))
 
         console.print(table)
@@ -299,7 +349,9 @@ def library_stats(
 @app.command("size")
 @utils.with_error_handling
 def library_size(
-    folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
+    folder: Path = typer.Argument(
+        Path.home() / "SampleMind" / "Library", help="Library folder"
+    ),
 ) -> None:
     """Calculate total library size"""
     try:
@@ -308,7 +360,9 @@ def library_size(
 
         console.print(f"[bold]Library Size Analysis[/bold]")
         console.print(f"[cyan]Location:[/cyan] {folder}")
-        console.print(f"[cyan]Total Size:[/cyan] [bold green]{total_size:.2f} GB[/bold green]")
+        console.print(
+            f"[cyan]Total Size:[/cyan] [bold green]{total_size:.2f} GB[/bold green]"
+        )
         console.print(f"[cyan]Files:[/cyan] {len(files)}")
 
     except Exception as e:
@@ -319,7 +373,9 @@ def library_size(
 @app.command("list")
 @utils.with_error_handling
 def library_list(
-    folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
+    folder: Path = typer.Argument(
+        Path.home() / "SampleMind" / "Library", help="Library folder"
+    ),
     limit: int = typer.Option(20, "--limit", "-l", help="Max files to show"),
     format: str = typer.Option("table", "--format", "-f"),
 ) -> None:
@@ -329,7 +385,11 @@ def library_list(
         files = files[:limit]
 
         if format == "table":
-            table = Table(title=f"Library ({len(files)} files)", show_header=True, header_style="bold cyan")
+            table = Table(
+                title=f"Library ({len(files)} files)",
+                show_header=True,
+                header_style="bold cyan",
+            )
             table.add_column("Name", style="cyan")
             table.add_column("Size", justify="right", style="green")
 
@@ -375,7 +435,9 @@ def library_info(
 @app.command("rebuild")
 @utils.with_error_handling
 def library_rebuild(
-    folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
+    folder: Path = typer.Argument(
+        Path.home() / "SampleMind" / "Library", help="Library folder"
+    ),
 ) -> None:
     """Rebuild library index"""
     try:
@@ -392,7 +454,9 @@ def library_rebuild(
 @app.command("verify")
 @utils.with_error_handling
 def library_verify(
-    folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
+    folder: Path = typer.Argument(
+        Path.home() / "SampleMind" / "Library", help="Library folder"
+    ),
 ) -> None:
     """Verify library integrity"""
     try:
@@ -412,7 +476,9 @@ def library_verify(
 @utils.with_error_handling
 def library_backup(
     destination: Path = typer.Argument(..., help="Backup destination"),
-    folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--source", "-s"),
+    folder: Path = typer.Option(
+        Path.home() / "SampleMind" / "Library", "--source", "-s"
+    ),
 ) -> None:
     """Backup library to destination"""
     try:
@@ -432,7 +498,9 @@ def library_backup(
 @utils.with_error_handling
 def library_restore(
     backup_file: Path = typer.Argument(..., help="Backup file/folder"),
-    destination: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--destination", "-d"),
+    destination: Path = typer.Option(
+        Path.home() / "SampleMind" / "Library", "--destination", "-d"
+    ),
 ) -> None:
     """Restore library from backup"""
     try:
@@ -449,7 +517,9 @@ def library_restore(
 @app.command("update-metadata")
 @utils.with_error_handling
 def library_update_metadata(
-    folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
+    folder: Path = typer.Argument(
+        Path.home() / "SampleMind" / "Library", help="Library folder"
+    ),
 ) -> None:
     """Update all metadata from audio files"""
     try:
@@ -468,7 +538,9 @@ def library_update_metadata(
 @app.command("refresh")
 @utils.with_error_handling
 def library_refresh(
-    folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
+    folder: Path = typer.Argument(
+        Path.home() / "SampleMind" / "Library", help="Library folder"
+    ),
 ) -> None:
     """Refresh library view and caches"""
     try:
@@ -486,11 +558,14 @@ def library_refresh(
 # SECTION 2: SEARCH & FILTER (15 commands)
 # ============================================================================
 
+
 @app.command("search")
 @utils.with_error_handling
 def library_search(
     query: str = typer.Argument(..., help="Search query"),
-    folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
+    folder: Path = typer.Option(
+        Path.home() / "SampleMind" / "Library", "--folder", "-f"
+    ),
     limit: int = typer.Option(20, "--limit", "-l"),
 ) -> None:
     """Full-text search in library"""
@@ -511,7 +586,9 @@ def library_search(
 @utils.with_error_handling
 def library_find(
     pattern: str = typer.Argument(..., help="Regex pattern"),
-    folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
+    folder: Path = typer.Option(
+        Path.home() / "SampleMind" / "Library", "--folder", "-f"
+    ),
 ) -> None:
     """Regex file search in library"""
     try:
@@ -539,7 +616,9 @@ def library_filter_base() -> None:
 def library_filter_bpm(
     min_bpm: float = typer.Argument(..., help="Minimum BPM"),
     max_bpm: float = typer.Argument(None, help="Maximum BPM (optional)"),
-    folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
+    folder: Path = typer.Option(
+        Path.home() / "SampleMind" / "Library", "--folder", "-f"
+    ),
 ) -> None:
     """Filter library by BPM range"""
     try:
@@ -560,7 +639,9 @@ def library_filter_bpm(
 @utils.with_error_handling
 def library_filter_key(
     key: str = typer.Argument(..., help="Musical key (C, Dm, F#, etc.)"),
-    folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
+    folder: Path = typer.Option(
+        Path.home() / "SampleMind" / "Library", "--folder", "-f"
+    ),
 ) -> None:
     """Filter library by musical key"""
     try:
@@ -579,8 +660,12 @@ def library_filter_key(
 @app.command("filter:genre")
 @utils.with_error_handling
 def library_filter_genre(
-    genre: str = typer.Argument(..., help="Genre (techno, house, hiphop, ambient, etc.)"),
-    folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
+    genre: str = typer.Argument(
+        ..., help="Genre (techno, house, hiphop, ambient, etc.)"
+    ),
+    folder: Path = typer.Option(
+        Path.home() / "SampleMind" / "Library", "--folder", "-f"
+    ),
 ) -> None:
     """Filter library by genre"""
     try:
@@ -599,8 +684,12 @@ def library_filter_genre(
 @app.command("filter:mood")
 @utils.with_error_handling
 def library_filter_mood(
-    mood: str = typer.Argument(..., help="Mood (dark, bright, aggressive, mellow, etc.)"),
-    folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
+    mood: str = typer.Argument(
+        ..., help="Mood (dark, bright, aggressive, mellow, etc.)"
+    ),
+    folder: Path = typer.Option(
+        Path.home() / "SampleMind" / "Library", "--folder", "-f"
+    ),
 ) -> None:
     """Filter library by mood"""
     try:
@@ -620,7 +709,9 @@ def library_filter_mood(
 @utils.with_error_handling
 def library_filter_tag(
     tag: str = typer.Argument(..., help="Tag name"),
-    folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
+    folder: Path = typer.Option(
+        Path.home() / "SampleMind" / "Library", "--folder", "-f"
+    ),
 ) -> None:
     """Filter library by tag"""
     try:
@@ -641,7 +732,9 @@ def library_filter_tag(
 def library_filter_duration(
     min_duration: str = typer.Argument(..., help="Min duration (MM:SS)"),
     max_duration: str = typer.Argument(None, help="Max duration (MM:SS)"),
-    folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
+    folder: Path = typer.Option(
+        Path.home() / "SampleMind" / "Library", "--folder", "-f"
+    ),
 ) -> None:
     """Filter library by duration"""
     try:
@@ -661,7 +754,9 @@ def library_filter_duration(
 @utils.with_error_handling
 def library_filter_quality(
     min_quality: float = typer.Argument(..., help="Min quality score (0-100)"),
-    folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
+    folder: Path = typer.Option(
+        Path.home() / "SampleMind" / "Library", "--folder", "-f"
+    ),
 ) -> None:
     """Filter library by quality score"""
     try:
@@ -681,7 +776,9 @@ def library_filter_quality(
 @utils.with_error_handling
 def library_sort(
     by: str = typer.Argument(..., help="Sort by (bpm|key|name|date|quality)"),
-    folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
+    folder: Path = typer.Option(
+        Path.home() / "SampleMind" / "Library", "--folder", "-f"
+    ),
     reverse: bool = typer.Option(False, "--reverse", help="Reverse order"),
 ) -> None:
     """Sort library by criteria"""
@@ -701,16 +798,23 @@ def library_sort(
 @app.command("browse:random")
 @utils.with_error_handling
 def library_browse_random(
-    folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
+    folder: Path = typer.Option(
+        Path.home() / "SampleMind" / "Library", "--folder", "-f"
+    ),
     count: int = typer.Option(10, "--count", "-c"),
 ) -> None:
     """Browse random samples from library"""
     try:
         files = utils.get_audio_files(folder)
         import random
+
         selected = random.sample(files, min(count, len(files)))
 
-        table = Table(title=f"Random Samples ({len(selected)})", show_header=True, header_style="bold cyan")
+        table = Table(
+            title=f"Random Samples ({len(selected)})",
+            show_header=True,
+            header_style="bold cyan",
+        )
         table.add_column("Name", style="cyan")
         for file in selected:
             table.add_row(file.name)
@@ -725,6 +829,7 @@ def library_browse_random(
 # ============================================================================
 # SECTION 3: COLLECTIONS (12 commands)
 # ============================================================================
+
 
 @app.command("collection:create")
 @utils.with_error_handling
@@ -815,7 +920,9 @@ def collection_delete(
     """Delete collection"""
     try:
         if not confirm:
-            console.print(f"[yellow]⚠ This will delete the collection '{name}'[/yellow]")
+            console.print(
+                f"[yellow]⚠ This will delete the collection '{name}'[/yellow]"
+            )
             if not typer.confirm("Continue?"):
                 console.print("[yellow]Cancelled[/yellow]")
                 return
@@ -918,10 +1025,13 @@ def collection_rename(
 # SECTION 4: CLEANUP & MAINTENANCE (8 commands)
 # ============================================================================
 
+
 @app.command("dedupe")
 @utils.with_error_handling
 def library_dedupe(
-    folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
+    folder: Path = typer.Argument(
+        Path.home() / "SampleMind" / "Library", help="Library folder"
+    ),
     remove: bool = typer.Option(False, "--remove", help="Remove duplicates"),
 ) -> None:
     """Find duplicate files in library"""
@@ -942,7 +1052,9 @@ def library_dedupe(
 @app.command("cleanup")
 @utils.with_error_handling
 def library_cleanup(
-    folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
+    folder: Path = typer.Argument(
+        Path.home() / "SampleMind" / "Library", help="Library folder"
+    ),
     remove: bool = typer.Option(False, "--remove", help="Remove broken files"),
 ) -> None:
     """Remove broken/invalid audio files"""
@@ -963,7 +1075,9 @@ def library_cleanup(
 @app.command("orphans")
 @utils.with_error_handling
 def library_orphans(
-    folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
+    folder: Path = typer.Argument(
+        Path.home() / "SampleMind" / "Library", help="Library folder"
+    ),
 ) -> None:
     """Find files without metadata"""
     try:
@@ -983,7 +1097,9 @@ def library_orphans(
 @app.command("unused")
 @utils.with_error_handling
 def library_unused(
-    folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
+    folder: Path = typer.Argument(
+        Path.home() / "SampleMind" / "Library", help="Library folder"
+    ),
 ) -> None:
     """Find unused samples (not in any collection)"""
     try:
@@ -1004,7 +1120,9 @@ def library_unused(
 @utils.with_error_handling
 def library_prune(
     days: int = typer.Argument(90, help="Older than N days"),
-    folder: Path = typer.Option(Path.home() / "SampleMind" / "Library", "--folder", "-f"),
+    folder: Path = typer.Option(
+        Path.home() / "SampleMind" / "Library", "--folder", "-f"
+    ),
     remove: bool = typer.Option(False, "--remove", help="Remove files"),
 ) -> None:
     """Remove files older than N days"""
@@ -1024,7 +1142,9 @@ def library_prune(
 @app.command("optimize")
 @utils.with_error_handling
 def library_optimize(
-    folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
+    folder: Path = typer.Argument(
+        Path.home() / "SampleMind" / "Library", help="Library folder"
+    ),
 ) -> None:
     """Optimize library for performance"""
     try:

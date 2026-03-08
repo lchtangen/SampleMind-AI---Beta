@@ -56,6 +56,7 @@ class PostHogAnalytics:
         if self.api_key:
             try:
                 import posthog
+
                 posthog.api_key = self.api_key
                 posthog.host = self.host
                 posthog.disabled = False
@@ -63,7 +64,9 @@ class PostHogAnalytics:
                 self.enabled = True
                 logger.info(f"✓ PostHog analytics enabled ({self.host})")
             except ImportError:
-                logger.warning("posthog package not installed. Install with: pip install posthog")
+                logger.warning(
+                    "posthog package not installed. Install with: pip install posthog"
+                )
                 self.enabled = False
         else:
             logger.warning("PostHog API key not configured. Analytics disabled.")
@@ -74,7 +77,7 @@ class PostHogAnalytics:
         event_name: str,
         user_id: Optional[str] = None,
         properties: Optional[Dict[str, Any]] = None,
-        **kwargs
+        **kwargs,
     ) -> None:
         """Capture an event with optional properties"""
         if not self.enabled or not self.client:
@@ -87,31 +90,28 @@ class PostHogAnalytics:
 
             if user_id:
                 self.client.capture(
-                    distinct_id=user_id,
-                    event=event_name,
-                    properties=event_properties
+                    distinct_id=user_id, event=event_name, properties=event_properties
                 )
             else:
                 # For anonymous events
                 self.client.capture(
                     distinct_id="anonymous",
                     event=event_name,
-                    properties=event_properties
+                    properties=event_properties,
                 )
         except Exception as e:
             logger.debug(f"Error capturing event '{event_name}': {e}")
 
-    def identify_user(self, user_id: str, properties: Optional[Dict[str, Any]] = None) -> None:
+    def identify_user(
+        self, user_id: str, properties: Optional[Dict[str, Any]] = None
+    ) -> None:
         """Identify a user and set their properties"""
         if not self.enabled or not self.client:
             return
 
         try:
             user_properties = properties or {}
-            self.client.identify(
-                distinct_id=user_id,
-                properties=user_properties
-            )
+            self.client.identify(distinct_id=user_id, properties=user_properties)
         except Exception as e:
             logger.debug(f"Error identifying user '{user_id}': {e}")
 
@@ -121,7 +121,7 @@ class PostHogAnalytics:
         file_size: int,
         duration_seconds: float,
         format: str,
-        **kwargs
+        **kwargs,
     ) -> None:
         """Track audio file upload"""
         self.capture(
@@ -130,15 +130,11 @@ class PostHogAnalytics:
             file_size=file_size,
             duration_seconds=duration_seconds,
             format=format,
-            **kwargs
+            **kwargs,
         )
 
     def track_batch_upload(
-        self,
-        user_id: Optional[str],
-        file_count: int,
-        total_size: int,
-        **kwargs
+        self, user_id: Optional[str], file_count: int, total_size: int, **kwargs
     ) -> None:
         """Track batch upload start"""
         self.capture(
@@ -146,7 +142,7 @@ class PostHogAnalytics:
             user_id=user_id,
             file_count=file_count,
             total_size=total_size,
-            **kwargs
+            **kwargs,
         )
 
     def track_analysis(
@@ -157,7 +153,7 @@ class PostHogAnalytics:
         file_size: int,
         success: bool = True,
         error: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ) -> None:
         """Track audio analysis"""
         event_name = (
@@ -175,11 +171,7 @@ class PostHogAnalytics:
         if error:
             properties["error"] = error
 
-        self.capture(
-            event_name,
-            user_id=user_id,
-            properties={**properties, **kwargs}
-        )
+        self.capture(event_name, user_id=user_id, properties={**properties, **kwargs})
 
     def track_search(
         self,
@@ -187,7 +179,7 @@ class PostHogAnalytics:
         search_type: str,  # 'semantic', 'library', 'similar'
         result_count: int,
         query_time_ms: float,
-        **kwargs
+        **kwargs,
     ) -> None:
         """Track search operation"""
         event_map = {
@@ -203,31 +195,30 @@ class PostHogAnalytics:
             user_id=user_id,
             result_count=result_count,
             query_time_ms=query_time_ms,
-            **kwargs
+            **kwargs,
         )
 
     def track_feature_usage(
-        self,
-        user_id: Optional[str],
-        feature_name: str,
-        **kwargs
+        self, user_id: Optional[str], feature_name: str, **kwargs
     ) -> None:
         """Track feature usage (effect, MIDI generation, etc.)"""
         self.capture(
-            EventType.EFFECT_APPLIED.value if feature_name == "effect"
-            else EventType.MIDI_GENERATED.value if feature_name == "midi"
-            else "feature_used",
+            (
+                EventType.EFFECT_APPLIED.value
+                if feature_name == "effect"
+                else (
+                    EventType.MIDI_GENERATED.value
+                    if feature_name == "midi"
+                    else "feature_used"
+                )
+            ),
             user_id=user_id,
             feature=feature_name,
-            **kwargs
+            **kwargs,
         )
 
     def track_export(
-        self,
-        user_id: Optional[str],
-        export_format: str,
-        file_size: int,
-        **kwargs
+        self, user_id: Optional[str], export_format: str, file_size: int, **kwargs
     ) -> None:
         """Track file export"""
         self.capture(
@@ -235,7 +226,7 @@ class PostHogAnalytics:
             user_id=user_id,
             export_format=export_format,
             file_size=file_size,
-            **kwargs
+            **kwargs,
         )
 
     def flush(self) -> None:
@@ -259,7 +250,9 @@ def get_analytics() -> PostHogAnalytics:
     return _analytics_instance
 
 
-def init_analytics(api_key: Optional[str] = None, host: Optional[str] = None) -> PostHogAnalytics:
+def init_analytics(
+    api_key: Optional[str] = None, host: Optional[str] = None
+) -> PostHogAnalytics:
     """Initialize analytics with custom settings"""
     global _analytics_instance
     _analytics_instance = PostHogAnalytics(api_key=api_key, host=host)

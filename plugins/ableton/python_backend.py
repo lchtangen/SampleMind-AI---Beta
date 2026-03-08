@@ -24,8 +24,7 @@ import uvicorn
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -33,14 +32,17 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # ============================================================================
 
+
 class AnalysisRequest(BaseModel):
     """Audio analysis request"""
+
     file_path: str
     analysis_level: str = "STANDARD"  # BASIC, STANDARD, DETAILED, PROFESSIONAL
 
 
 class AnalysisResult(BaseModel):
     """Audio analysis result"""
+
     tempo_bpm: float
     key: str
     primary_genre: str
@@ -53,6 +55,7 @@ class AnalysisResult(BaseModel):
 
 class ProjectSyncRequest(BaseModel):
     """Project sync recommendation request"""
+
     project_bpm: float
     project_key: str
     limit: int = 10
@@ -60,18 +63,21 @@ class ProjectSyncRequest(BaseModel):
 
 class SimilarSamplesRequest(BaseModel):
     """Similar samples search request"""
+
     file_path: str
     limit: int = 10
 
 
 class MIDIGenerationRequest(BaseModel):
     """MIDI generation request"""
+
     file_path: str
     extraction_type: str  # melody, harmony, drums, bass_line
 
 
 class MIDIGenerationResult(BaseModel):
     """MIDI generation result"""
+
     midi_file_path: str
     notes_count: int
     duration_seconds: float
@@ -80,6 +86,7 @@ class MIDIGenerationResult(BaseModel):
 
 class HealthStatus(BaseModel):
     """Health check status"""
+
     status: str
     version: str
     timestamp: str
@@ -94,7 +101,7 @@ class HealthStatus(BaseModel):
 app = FastAPI(
     title="SampleMind AI - Ableton Live Backend",
     description="REST API for Max for Live integration",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # Add CORS middleware for Max for Live communication
@@ -156,6 +163,7 @@ async def shutdown_event():
 # HEALTH & STATUS ENDPOINTS
 # ============================================================================
 
+
 @app.get("/health", response_model=HealthStatus)
 async def health_check():
     """Check backend health and component status"""
@@ -168,7 +176,7 @@ async def health_check():
             "audio_engine": audio_engine is not None,
             "midi_generator": midi_generator is not None,
             "database": db_manager is not None,
-        }
+        },
     )
 
 
@@ -189,13 +197,14 @@ async def status():
             "project_sync": "/api/project-sync",
             "generate_midi": "/api/generate-midi",
             "health": "/health",
-        }
+        },
     }
 
 
 # ============================================================================
 # AUDIO ANALYSIS ENDPOINTS
 # ============================================================================
+
 
 @app.post("/api/analyze", response_model=AnalysisResult)
 async def analyze_audio(request: AnalysisRequest):
@@ -213,6 +222,7 @@ async def analyze_audio(request: AnalysisRequest):
 
         # Map analysis level string to enum
         from samplemind.core.engine.audio_engine import AnalysisLevel
+
         analysis_level = AnalysisLevel[request.analysis_level]
 
         # Perform analysis
@@ -227,7 +237,7 @@ async def analyze_audio(request: AnalysisRequest):
             energy_level=result.get("energy_level", 0.0),
             confidence_score=result.get("confidence_score", 0.0),
             duration_seconds=result.get("duration_seconds", 0.0),
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
 
     except HTTPException:
@@ -257,28 +267,24 @@ async def analyze_batch(files: List[UploadFile] = File(...)):
                 # Analyze
                 result = audio_engine.analyze_audio(temp_path)
 
-                results.append({
-                    "filename": file.filename,
-                    "analysis": result,
-                    "status": "success"
-                })
+                results.append(
+                    {"filename": file.filename, "analysis": result, "status": "success"}
+                )
 
                 # Clean up temp file
                 temp_path.unlink()
 
             except Exception as e:
                 logger.error(f"Failed to analyze {file.filename}: {e}")
-                results.append({
-                    "filename": file.filename,
-                    "error": str(e),
-                    "status": "failed"
-                })
+                results.append(
+                    {"filename": file.filename, "error": str(e), "status": "failed"}
+                )
 
         return {
             "total_files": len(files),
             "successful": sum(1 for r in results if r["status"] == "success"),
             "failed": sum(1 for r in results if r["status"] == "failed"),
-            "results": results
+            "results": results,
         }
 
     except Exception as e:
@@ -289,6 +295,7 @@ async def analyze_batch(files: List[UploadFile] = File(...)):
 # ============================================================================
 # SIMILARITY & SEARCH ENDPOINTS
 # ============================================================================
+
 
 @app.post("/api/similar")
 async def find_similar_samples(request: SimilarSamplesRequest):
@@ -312,14 +319,16 @@ async def find_similar_samples(request: SimilarSamplesRequest):
             "similar_count": len(results),
             "limit": request.limit,
             "samples": results,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Similarity search failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Similarity search failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Similarity search failed: {str(e)}"
+        )
 
 
 @app.get("/api/search")
@@ -339,7 +348,7 @@ async def search_samples(query: str, limit: int = 10):
             "results_count": len(results),
             "limit": limit,
             "samples": results,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -351,6 +360,7 @@ async def search_samples(query: str, limit: int = 10):
 # PROJECT SYNC ENDPOINTS
 # ============================================================================
 
+
 @app.post("/api/project-sync")
 async def get_project_sync_recommendations(request: ProjectSyncRequest):
     """Get sample recommendations based on project BPM and key"""
@@ -358,13 +368,15 @@ async def get_project_sync_recommendations(request: ProjectSyncRequest):
         raise HTTPException(status_code=503, detail="Database not initialized")
 
     try:
-        logger.info(f"Project sync: BPM={request.project_bpm}, Key={request.project_key}")
+        logger.info(
+            f"Project sync: BPM={request.project_bpm}, Key={request.project_key}"
+        )
 
         # Query for matching BPM/Key
         results = db_manager.find_by_criteria(
             bpm_range=(request.project_bpm - 5, request.project_bpm + 5),
             key=request.project_key,
-            limit=request.limit
+            limit=request.limit,
         )
 
         return {
@@ -372,7 +384,7 @@ async def get_project_sync_recommendations(request: ProjectSyncRequest):
             "project_key": request.project_key,
             "recommendations_count": len(results),
             "samples": results,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -384,8 +396,30 @@ async def get_project_sync_recommendations(request: ProjectSyncRequest):
 async def get_available_keys():
     """Get list of available musical keys in library"""
     keys = [
-        "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
-        "Cm", "C#m", "Dm", "D#m", "Em", "Fm", "F#m", "Gm", "G#m", "Am", "A#m", "Bm"
+        "C",
+        "C#",
+        "D",
+        "D#",
+        "E",
+        "F",
+        "F#",
+        "G",
+        "G#",
+        "A",
+        "A#",
+        "B",
+        "Cm",
+        "C#m",
+        "Dm",
+        "D#m",
+        "Em",
+        "Fm",
+        "F#m",
+        "Gm",
+        "G#m",
+        "Am",
+        "A#m",
+        "Bm",
     ]
     return {"available_keys": keys}
 
@@ -393,6 +427,7 @@ async def get_available_keys():
 # ============================================================================
 # MIDI GENERATION ENDPOINTS
 # ============================================================================
+
 
 @app.post("/api/generate-midi", response_model=MIDIGenerationResult)
 async def generate_midi(request: MIDIGenerationRequest):
@@ -410,8 +445,7 @@ async def generate_midi(request: MIDIGenerationRequest):
 
         # Generate MIDI
         result = midi_generator.extract(
-            str(file_path),
-            extraction_type=request.extraction_type
+            str(file_path), extraction_type=request.extraction_type
         )
 
         # Save MIDI file
@@ -422,7 +456,7 @@ async def generate_midi(request: MIDIGenerationRequest):
             midi_file_path=str(midi_path),
             notes_count=len(result.get("notes", [])),
             duration_seconds=result.get("duration_seconds", 0.0),
-            notes=result.get("notes", [])
+            notes=result.get("notes", []),
         )
 
     except HTTPException:
@@ -437,22 +471,10 @@ async def get_midi_extraction_types():
     """Get available MIDI extraction types"""
     return {
         "extraction_types": [
-            {
-                "type": "melody",
-                "description": "Extract main melody line"
-            },
-            {
-                "type": "harmony",
-                "description": "Extract chord progression"
-            },
-            {
-                "type": "drums",
-                "description": "Extract drum pattern"
-            },
-            {
-                "type": "bass_line",
-                "description": "Extract bass line"
-            }
+            {"type": "melody", "description": "Extract main melody line"},
+            {"type": "harmony", "description": "Extract chord progression"},
+            {"type": "drums", "description": "Extract drum pattern"},
+            {"type": "bass_line", "description": "Extract bass line"},
         ]
     }
 
@@ -460,6 +482,7 @@ async def get_midi_extraction_types():
 # ============================================================================
 # LIBRARY MANAGEMENT ENDPOINTS
 # ============================================================================
+
 
 @app.get("/api/library/stats")
 async def get_library_stats():
@@ -500,29 +523,29 @@ async def add_samples_to_library(files: List[UploadFile] = File(...)):
                     db_manager.add_to_index(
                         file_id=file.filename,
                         file_path=str(library_path),
-                        metadata=analysis
+                        metadata=analysis,
                     )
 
-                results.append({
-                    "filename": file.filename,
-                    "status": "added",
-                    "path": str(library_path)
-                })
+                results.append(
+                    {
+                        "filename": file.filename,
+                        "status": "added",
+                        "path": str(library_path),
+                    }
+                )
 
             except Exception as e:
                 logger.error(f"Failed to add {file.filename}: {e}")
-                results.append({
-                    "filename": file.filename,
-                    "status": "failed",
-                    "error": str(e)
-                })
+                results.append(
+                    {"filename": file.filename, "status": "failed", "error": str(e)}
+                )
 
         return {
             "total_files": len(files),
             "added": sum(1 for r in results if r["status"] == "added"),
             "failed": sum(1 for r in results if r["status"] == "failed"),
             "results": results,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -533,6 +556,7 @@ async def add_samples_to_library(files: List[UploadFile] = File(...)):
 # ============================================================================
 # UTILITY ENDPOINTS
 # ============================================================================
+
 
 @app.get("/api/info")
 async def get_api_info():
@@ -552,7 +576,7 @@ async def get_api_info():
             "generate_midi": "/api/generate-midi",
             "library_stats": "/api/library/stats",
             "library_add": "/api/library/add",
-        }
+        },
     }
 
 
@@ -560,16 +584,12 @@ async def get_api_info():
 # MAIN ENTRY POINT
 # ============================================================================
 
+
 def main():
     """Start the API server"""
     logger.info("Starting SampleMind Ableton Live Backend API...")
 
-    uvicorn.run(
-        app,
-        host="127.0.0.1",
-        port=8001,
-        log_level="info"
-    )
+    uvicorn.run(app, host="127.0.0.1", port=8001, log_level="info")
 
 
 if __name__ == "__main__":

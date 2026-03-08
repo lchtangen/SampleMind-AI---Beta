@@ -1,0 +1,73 @@
+/* Forest Green Theme — Natural dark tones
+ * Primary:    #A8FF3E  Lime Green
+ * Secondary:  #4CAF50  Forest Green
+ * Accent:     #FFC107  Amber
+ * Background: #0A1F0A  Dark Forest
+ * Surface:    #112211  Darker Forest
+ * Error:      #FF5252  Red
+ *
+ * Applied via Textual Theme object: name="forest-green"
+ */
+
+Header {
+    background: #0A1F0A;
+    color: #A8FF3E;
+    border-bottom: solid #4CAF50 40%;
+}
+
+Footer {
+    background: #071407;
+    color: #4CAF50 80%;
+}
+
+DataTable > .datatable--header {
+    background: #112211;
+    color: #A8FF3E;
+}
+
+DataTable > .datatable--cursor {
+    background: #A8FF3E 30%;
+    color: #0A1F0A;
+}
+
+Button.-primary {
+    background: #4CAF50;
+    color: #FFFFFF;
+}
+
+Button.-success {
+    background: #A8FF3E;
+    color: #0A1F0A;
+}
+
+Button.-warning {
+    background: #FFC107;
+    color: #0A1F0A;
+}
+
+Collapsible {
+    border: solid #4CAF50 40%;
+}
+
+CollapsibleTitle {
+    color: #A8FF3E;
+}
+
+Input {
+    border: tall #4CAF50 60%;
+    background: #112211;
+    color: #E8F5E9;
+}
+
+RichLog {
+    background: #0D1A0D;
+    border: solid #1A331A;
+}
+
+Sparkline {
+    color: #A8FF3E;
+}
+
+Digits {
+    color: #A8FF3E;
+}

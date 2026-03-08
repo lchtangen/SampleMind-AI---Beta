@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
     AsyncSession,
     async_sessionmaker,
-    AsyncEngine
+    AsyncEngine,
 )
 from sqlalchemy.pool import QueuePool, NullPool
 from sqlalchemy import event, text
@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class QueryStats:
     """Query performance statistics"""
+
     query: str
     duration_ms: float
     timestamp: datetime
@@ -35,6 +36,7 @@ class QueryStats:
 @dataclass
 class ConnectionPoolStats:
     """Connection pool statistics"""
+
     pool_size: int
     overflow: int
     checked_out: int
@@ -56,7 +58,7 @@ class DatabaseConnectionPool:
     - Pool statistics
     - Slow query logging
     """
-    
+
     def __init__(
         self,
         database_url: str,
@@ -66,11 +68,11 @@ class DatabaseConnectionPool:
         pool_recycle: int = 3600,
         pool_pre_ping: bool = True,
         echo: bool = False,
-        slow_query_threshold_ms: float = 1000.0
+        slow_query_threshold_ms: float = 1000.0,
     ):
         """
         Initialize connection pool
-        
+
         Args:
             database_url: Database connection string
             pool_size: Number of persistent connections
@@ -86,7 +88,7 @@ class DatabaseConnectionPool:
         self.query_stats: list[QueryStats] = []
         self.total_queries = 0
         self.total_query_time_ms = 0.0
-        
+
         # Create async engine with optimized pool settings
         self.engine: AsyncEngine = create_async_engine(
             database_url,
@@ -102,7 +104,7 @@ class DatabaseConnectionPool:
             connect_args={
                 "server_settings": {
                     "application_name": "samplemind_ai",
-                    "jit": "off"  # Disable JIT for faster simple queries
+                    "jit": "off",  # Disable JIT for faster simple queries
                 },
                 "command_timeout": 60,  # Command timeout in seconds
                 "timeout": 10,  # Connection timeout
@@ -111,70 +113,84 @@ class DatabaseConnectionPool:
             execution_options={
                 "isolation_level": "READ COMMITTED",
                 "postgresql_readonly": False,
-                "postgresql_deferrable": False
-            }
+                "postgresql_deferrable": False,
+            },
         )
-        
+
         # Session factory
         self.SessionLocal = async_sessionmaker(
             self.engine,
             class_=AsyncSession,
             expire_on_commit=False,
             autocommit=False,
-            autoflush=False
+            autoflush=False,
         )
-        
+
         # Register event listeners for monitoring
         self._register_event_listeners()
-        
+
         logger.info(
             f"Database pool initialized: size={pool_size}, "
             f"max_overflow={max_overflow}, timeout={pool_timeout}s"
         )
-    
+
     def _register_event_listeners(self) -> None:
         """Register SQLAlchemy event listeners for monitoring"""
-        
+
         @event.listens_for(self.engine.sync_engine, "before_cursor_execute")
-        def before_cursor_execute(conn: Any, cursor: Any, statement: Any, parameters: Any, context: Any, executemany: Any) -> None:
+        def before_cursor_execute(
+            conn: Any,
+            cursor: Any,
+            statement: Any,
+            parameters: Any,
+            context: Any,
+            executemany: Any,
+        ) -> None:
             """Track query start time"""
             conn.info.setdefault("query_start_time", []).append(time.time())
-        
+
         @event.listens_for(self.engine.sync_engine, "after_cursor_execute")
-        def after_cursor_execute(conn: Any, cursor: Any, statement: Any, parameters: Any, context: Any, executemany: Any) -> None:
+        def after_cursor_execute(
+            conn: Any,
+            cursor: Any,
+            statement: Any,
+            parameters: Any,
+            context: Any,
+            executemany: Any,
+        ) -> None:
             """Track query execution time"""
             start_times = conn.info.get("query_start_time", [])
             if start_times:
                 start_time = start_times.pop()
                 duration_ms = (time.time() - start_time) * 1000
-                
+
                 # Update stats
                 self.total_queries += 1
                 self.total_query_time_ms += duration_ms
-                
+
                 # Log slow queries
                 if duration_ms > self.slow_query_threshold_ms:
                     logger.warning(
                         f"Slow query detected: {duration_ms:.2f}ms\n"
                         f"Query: {statement[:200]}"
                     )
-                    
+
                     stat = QueryStats(
                         query=statement[:500],
                         duration_ms=duration_ms,
-                        timestamp=datetime.now()
+                        timestamp=datetime.now(),
                     )
                     self.query_stats.append(stat)
-                    
+
                     # Keep only last 100 slow queries
                     if len(self.query_stats) > 100:
                         self.query_stats = self.query_stats[-100:]
-        
+
         @event.listens_for(self.engine.sync_engine, "connect")
         def receive_connect(dbapi_conn: Any, connection_record: Any) -> None:
             """Configure connection on creation"""
             logger.debug("New database connection established")
-            
+
             # Set session parameters for performance
             cursor = dbapi_conn.cursor()
             cursor.execute("SET random_page_cost = 1.1")  # SSD-optimized
@@ -182,22 +198,24 @@ class DatabaseConnectionPool:
             cursor.execute("SET work_mem = '50MB'")
             cursor.execute("SET maintenance_work_mem = '256MB'")
             cursor.close()
-        
+
         @event.listens_for(self.engine.sync_engine, "checkout")
-        def receive_checkout(dbapi_conn: Any, connection_record: Any, connection_proxy: Any) -> None:
+        def receive_checkout(
+            dbapi_conn: Any, connection_record: Any, connection_proxy: Any
+        ) -> None:
             """Track connection checkout"""
             logger.debug(f"Connection checked out: {id(dbapi_conn)}")
-        
+
         @event.listens_for(self.engine.sync_engine, "checkin")
         def receive_checkin(dbapi_conn: Any, connection_record: Any) -> None:
             """Track connection checkin"""
             logger.debug(f"Connection checked in: {id(dbapi_conn)}")
-    
+
     @asynccontextmanager
     async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
         """
         Get database session with automatic cleanup
-        
+
         Usage:
             async with pool.get_session() as session:
                 result = await session.execute(query)
@@ -212,11 +230,11 @@ class DatabaseConnectionPool:
             raise
         finally:
             await session.close()
-    
+
     async def get_pool_stats(self) -> ConnectionPoolStats:
         """Get current connection pool statistics"""
         pool = self.engine.pool
-        
+
         return ConnectionPoolStats(
             pool_size=pool.size(),
             overflow=pool.overflow(),
@@ -226,90 +244,90 @@ class DatabaseConnectionPool:
             idle_connections=pool.size() - pool.checkedout(),
             queries_executed=self.total_queries,
             avg_query_time_ms=(
-                self.total_query_time_ms / self.total_queries 
-                if self.total_queries > 0 else 0.0
+                self.total_query_time_ms / self.total_queries
+                if self.total_queries > 0
+                else 0.0
             ),
-            slow_queries=self.query_stats[-10:]  # Last 10 slow queries
+            slow_queries=self.query_stats[-10:],  # Last 10 slow queries
         )
-    
+
     async def health_check(self) -> Dict[str, Any]:
         """
         Perform database health check
-        
+
         Returns:
             Health status dictionary
         """
         try:
             start_time = time.time()
-            
+
             async with self.get_session() as session:
                 # Simple query to test connection
                 result = await session.execute(text("SELECT 1"))
                 result.scalar()
-                
+
                 # Check database version
                 version_result = await session.execute(text("SELECT version()"))
                 db_version = version_result.scalar()
-                
+
                 # Check active connections
-                conn_result = await session.execute(text("""
+                conn_result = await session.execute(
+                    text(
+                        """
                     SELECT count(*) 
                     FROM pg_stat_activity 
                     WHERE datname = current_database()
-                """))
+                """
+                    )
+                )
                 active_connections = conn_result.scalar()
-            
+
             response_time_ms = (time.time() - start_time) * 1000
-            
+
             return {
                 "status": "healthy",
                 "response_time_ms": response_time_ms,
                 "database_version": db_version,
                 "active_connections": active_connections,
-                "pool_stats": (await self.get_pool_stats()).__dict__
+                "pool_stats": (await self.get_pool_stats()).__dict__,
             }
-            
+
         except Exception as e:
             logger.error(f"Health check failed: {e}")
-            return {
-                "status": "unhealthy",
-                "error": str(e)
-            }
-    
+            return {"status": "unhealthy", "error": str(e)}
+
     async def optimize_connection(self, session: AsyncSession):
         """Apply connection-level optimizations"""
         # Set optimal parameters for this connection
         await session.execute(text("SET LOCAL enable_seqscan = off"))  # Prefer indexes
         await session.execute(text("SET LOCAL random_page_cost = 1.1"))  # SSD
         await session.execute(text("SET LOCAL effective_io_concurrency = 200"))  # SSD
-    
+
     async def get_slow_queries(self, limit: int = 10) -> list[QueryStats]:
         """Get slowest queries"""
-        return sorted(
-            self.query_stats,
-            key=lambda x: x.duration_ms,
-            reverse=True
-        )[:limit]
-    
+        return sorted(self.query_stats, key=lambda x: x.duration_ms, reverse=True)[
+            :limit
+        ]
+
     async def get_query_analytics(self) -> Dict[str, Any]:
         """Get query performance analytics"""
         if not self.query_stats:
             return {
                 "total_slow_queries": 0,
                 "average_duration_ms": 0.0,
-                "max_duration_ms": 0.0
+                "max_duration_ms": 0.0,
             }
-        
+
         durations = [s.duration_ms for s in self.query_stats]
-        
+
         return {
             "total_slow_queries": len(self.query_stats),
             "average_duration_ms": sum(durations) / len(durations),
             "max_duration_ms": max(durations),
             "min_duration_ms": min(durations),
-            "p95_duration_ms": sorted(durations)[int(len(durations) * 0.95)]
+            "p95_duration_ms": sorted(durations)[int(len(durations) * 0.95)],
         }
-    
+
     async def close(self):
         """Close all connections and cleanup"""
         logger.info("Closing database connection pool")
@@ -330,7 +348,9 @@ async def init_connection_pool(database_url: str, **kwargs) -> DatabaseConnectio
 def get_connection_pool() -> DatabaseConnectionPool:
     """Get global connection pool instance"""
     if _connection_pool is None:
-        raise RuntimeError("Connection pool not initialized. Call init_connection_pool() first")
+        raise RuntimeError(
+            "Connection pool not initialized. Call init_connection_pool() first"
+        )
     return _connection_pool
 
 

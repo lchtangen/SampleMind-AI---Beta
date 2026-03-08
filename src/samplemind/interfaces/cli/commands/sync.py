@@ -22,6 +22,7 @@ app = typer.Typer(
 
 console = utils.console
 
+
 async def get_sync_manager():
     settings = Settings()
 
@@ -74,6 +75,6 @@ async def sync_down(
         stats = await manager.sync_library(library_path, direction="down")
 
     console.print(f"[green]Downloaded: {stats['downloaded']} files[/green]")
-    if stats['downloaded'] > 0:
+    if stats["downloaded"] > 0:
         console.print("[dim]Analysis data hydrated automatically.[/dim]")
     console.print(f"[red]Errors:     {stats['errors']}[/red]")

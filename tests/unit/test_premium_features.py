@@ -16,7 +16,10 @@ from pathlib import Path
 # Import modules to test
 from samplemind.core.tagging.tag_vocabulary import get_vocabulary, TagConfidence
 from samplemind.core.tagging.ai_tagger import AITagger, get_tagger
-from samplemind.core.processing.loudness_analyzer import LoudnessAnalyzer, LoudnessAnalysis
+from samplemind.core.processing.loudness_analyzer import (
+    LoudnessAnalyzer,
+    LoudnessAnalysis,
+)
 from samplemind.core.processing.mastering_analyzer import MasteringAnalyzer
 from samplemind.core.processing.layering_analyzer import LayeringAnalyzer
 from samplemind.core.processing.groove_extractor import GrooveExtractor, GrooveTemplate
@@ -27,6 +30,7 @@ from datetime import datetime
 # ============================================================================
 # TAG VOCABULARY TESTS
 # ============================================================================
+
 
 class TestTagVocabulary:
     """Test tag vocabulary system"""
@@ -66,6 +70,7 @@ class TestTagVocabulary:
 # ============================================================================
 # AI TAGGER TESTS
 # ============================================================================
+
 
 class TestAITagger:
     """Test AI-powered tagging engine"""
@@ -138,6 +143,7 @@ class TestAITagger:
 # LOUDNESS ANALYZER TESTS
 # ============================================================================
 
+
 class TestLoudnessAnalyzer:
     """Test loudness analysis"""
 
@@ -179,6 +185,7 @@ class TestLoudnessAnalyzer:
 # ============================================================================
 # MASTERING ANALYZER TESTS
 # ============================================================================
+
 
 class TestMasteringAnalyzer:
     """Test mastering analysis"""
@@ -227,6 +234,7 @@ class TestMasteringAnalyzer:
 # LAYERING ANALYZER TESTS
 # ============================================================================
 
+
 class TestLayeringAnalyzer:
     """Test sample layering analysis"""
 
@@ -270,6 +278,7 @@ class TestLayeringAnalyzer:
 # GROOVE EXTRACTOR TESTS
 # ============================================================================
 
+
 class TestGrooveExtractor:
     """Test groove extraction"""
 
@@ -284,8 +293,8 @@ class TestGrooveExtractor:
 
         # Simple drum pattern
         kick = np.zeros_like(t)
-        kick[::int(sr*0.5)] = 1  # Kick every 0.5s
-        kick = np.convolve(kick, np.hanning(int(sr*0.05)), mode='same')
+        kick[:: int(sr * 0.5)] = 1  # Kick every 0.5s
+        kick = np.convolve(kick, np.hanning(int(sr * 0.05)), mode="same")
 
         self.audio = kick
         self.sr = sr
@@ -297,7 +306,13 @@ class TestGrooveExtractor:
         assert isinstance(groove, GrooveTemplate)
         assert groove.name == "test_groove"
         assert groove.tempo_bpm > 0
-        assert groove.groove_type in ["straight", "swing", "shuffle", "jdilla", "groovy"]
+        assert groove.groove_type in [
+            "straight",
+            "swing",
+            "shuffle",
+            "jdilla",
+            "groovy",
+        ]
 
     def test_groove_properties(self):
         """Test groove template properties"""
@@ -311,6 +326,7 @@ class TestGrooveExtractor:
 # ============================================================================
 # RECENT FILES TESTS
 # ============================================================================
+
 
 class TestRecentFilesManager:
     """Test recent files tracking"""
@@ -348,6 +364,7 @@ class TestRecentFilesManager:
 # ============================================================================
 # INTEGRATION TESTS
 # ============================================================================
+
 
 class TestIntegration:
     """Integration tests for features working together"""

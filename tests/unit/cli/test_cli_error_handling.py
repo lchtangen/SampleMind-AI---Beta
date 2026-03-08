@@ -43,7 +43,7 @@ class TestFileOperationErrors:
         test_file.write_text("audio data")
 
         # Simulate permission denied
-        with patch('pathlib.Path.open') as mock_open:
+        with patch("pathlib.Path.open") as mock_open:
             mock_open.side_effect = PermissionError("Permission denied")
 
             result = runner.invoke(app, ["analyze:full", str(test_file)])
@@ -51,14 +51,18 @@ class TestFileOperationErrors:
         # Should handle gracefully
         assert result.exit_code != 0
 
-    def test_directory_expected_but_file_provided(self, typer_runner, test_audio_samples):
+    def test_directory_expected_but_file_provided(
+        self, typer_runner, test_audio_samples
+    ):
         """Test command expecting directory when file provided"""
         from samplemind.interfaces.cli.typer_app import app
 
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.batch_analyze_async') as mock_batch:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.batch_analyze_async"
+        ) as mock_batch:
             mock_batch.side_effect = Exception("Expected directory, got file")
 
             result = runner.invoke(app, ["batch:analyze", str(audio_file)])
@@ -74,7 +78,9 @@ class TestFileOperationErrors:
         large_file = temp_directory / "large.wav"
         large_file.write_text("x" * (5 * 1024 * 1024 * 1024))  # 5GB
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
             mock_analyze.side_effect = Exception("File too large")
 
             result = runner.invoke(app, ["analyze:full", str(large_file)])
@@ -94,13 +100,17 @@ class TestAudioFormatErrors:
         test_file = temp_directory / "test.xyz"
         test_file.write_text("not audio data")
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
             mock_analyze.side_effect = Exception("Unsupported format: xyz")
 
             result = runner.invoke(app, ["analyze:full", str(test_file)])
 
         assert result.exit_code != 0
-        assert "unsupported" in result.stdout.lower() or "format" in result.stdout.lower()
+        assert (
+            "unsupported" in result.stdout.lower() or "format" in result.stdout.lower()
+        )
 
     def test_corrupted_audio_file_error(self, typer_runner, temp_directory):
         """Test command with corrupted audio file"""
@@ -110,13 +120,17 @@ class TestAudioFormatErrors:
         test_file = temp_directory / "corrupted.wav"
         test_file.write_text("RIFF corrupted data")
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
             mock_analyze.side_effect = Exception("Corrupted audio file")
 
             result = runner.invoke(app, ["analyze:full", str(test_file)])
 
         assert result.exit_code != 0
-        assert "corrupted" in result.stdout.lower() or "invalid" in result.stdout.lower()
+        assert (
+            "corrupted" in result.stdout.lower() or "invalid" in result.stdout.lower()
+        )
 
     def test_empty_audio_file_error(self, typer_runner, temp_directory):
         """Test command with empty audio file"""
@@ -124,9 +138,11 @@ class TestAudioFormatErrors:
 
         runner = CliRunner()
         test_file = temp_directory / "empty.wav"
-        test_file.write_bytes(b'')
+        test_file.write_bytes(b"")
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
             mock_analyze.side_effect = Exception("Empty audio file")
 
             result = runner.invoke(app, ["analyze:full", str(test_file)])
@@ -140,11 +156,13 @@ class TestAudioFormatErrors:
         runner = CliRunner()
         test_file = temp_directory / "silent.wav"
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
             mock_analyze.return_value = {
-                'duration': 3.0,
-                'rms_energy': 0.0,
-                'warning': 'Audio appears to be silent'
+                "duration": 3.0,
+                "rms_energy": 0.0,
+                "warning": "Audio appears to be silent",
             }
 
             result = runner.invoke(app, ["analyze:full", str(test_file)])
@@ -163,7 +181,9 @@ class TestNetworkAndAPIErrors:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.ai_analyze_async') as mock_ai:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.ai_analyze_async"
+        ) as mock_ai:
             mock_ai.side_effect = TimeoutError("Network request timed out after 30s")
 
             result = runner.invoke(app, ["ai:analyze", str(audio_file)])
@@ -178,7 +198,9 @@ class TestNetworkAndAPIErrors:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.ai_analyze_async') as mock_ai:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.ai_analyze_async"
+        ) as mock_ai:
             mock_ai.side_effect = ConnectionError("Connection refused")
 
             result = runner.invoke(app, ["ai:analyze", str(audio_file)])
@@ -193,7 +215,9 @@ class TestNetworkAndAPIErrors:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.ai_analyze_async') as mock_ai:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.ai_analyze_async"
+        ) as mock_ai:
             mock_ai.side_effect = Exception("Rate limit exceeded (429)")
 
             result = runner.invoke(app, ["ai:analyze", str(audio_file)])
@@ -208,7 +232,9 @@ class TestNetworkAndAPIErrors:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.ai_analyze_async') as mock_ai:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.ai_analyze_async"
+        ) as mock_ai:
             mock_ai.side_effect = Exception("Invalid API key (401)")
 
             result = runner.invoke(app, ["ai:analyze", str(audio_file)])
@@ -223,7 +249,9 @@ class TestNetworkAndAPIErrors:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.ai_analyze_async') as mock_ai:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.ai_analyze_async"
+        ) as mock_ai:
             mock_ai.side_effect = Exception("Server error (500)")
 
             result = runner.invoke(app, ["ai:analyze", str(audio_file)])
@@ -241,8 +269,12 @@ class TestConfigurationErrors:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.ai_analyze_async') as mock_ai:
-            mock_ai.side_effect = Exception("GOOGLE_API_KEY environment variable not set")
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.ai_analyze_async"
+        ) as mock_ai:
+            mock_ai.side_effect = Exception(
+                "GOOGLE_API_KEY environment variable not set"
+            )
 
             result = runner.invoke(app, ["ai:analyze", str(audio_file)])
 
@@ -255,7 +287,7 @@ class TestConfigurationErrors:
 
         runner = CliRunner()
 
-        with patch('samplemind.interfaces.cli.commands.utils.load_config') as mock_load:
+        with patch("samplemind.interfaces.cli.commands.utils.load_config") as mock_load:
             mock_load.side_effect = Exception("Invalid configuration file format")
 
             result = runner.invoke(app, ["ai:test"])
@@ -268,14 +300,14 @@ class TestConfigurationErrors:
 
         runner = CliRunner()
 
-        with patch('samplemind.interfaces.cli.commands.utils.set_setting') as mock_set:
-            mock_set.side_effect = ValueError("Invalid value for cache_size: must be positive integer")
+        with patch("samplemind.interfaces.cli.commands.utils.set_setting") as mock_set:
+            mock_set.side_effect = ValueError(
+                "Invalid value for cache_size: must be positive integer"
+            )
 
-            result = runner.invoke(app, [
-                "config:set",
-                "--key", "cache_size",
-                "--value", "-1"
-            ])
+            result = runner.invoke(
+                app, ["config:set", "--key", "cache_size", "--value", "-1"]
+            )
 
         assert result.exit_code != 0
 
@@ -291,13 +323,14 @@ class TestResourceErrors:
         audio_file = test_audio_samples["120_c_major"]
         output_file = temp_directory / "output.json"
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
             mock_analyze.side_effect = OSError("No space left on device")
 
-            result = runner.invoke(app, [
-                "analyze:full", str(audio_file),
-                "--output", str(output_file)
-            ])
+            result = runner.invoke(
+                app, ["analyze:full", str(audio_file), "--output", str(output_file)]
+            )
 
         assert result.exit_code != 0
         assert "disk" in result.stdout.lower() or "space" in result.stdout.lower()
@@ -309,7 +342,9 @@ class TestResourceErrors:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
             mock_analyze.side_effect = MemoryError("Out of memory")
 
             result = runner.invoke(app, ["analyze:professional", str(audio_file)])
@@ -324,7 +359,9 @@ class TestResourceErrors:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
             mock_analyze.side_effect = Exception("Cache limit exceeded")
 
             result = runner.invoke(app, ["analyze:full", str(audio_file)])
@@ -343,10 +380,9 @@ class TestInputValidationErrors:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        result = runner.invoke(app, [
-            "analyze:full", str(audio_file),
-            "--format", "invalid_format"
-        ])
+        result = runner.invoke(
+            app, ["analyze:full", str(audio_file), "--format", "invalid_format"]
+        )
 
         # Should reject invalid format
         assert result.exit_code != 0 or "invalid" in result.stdout.lower()
@@ -357,11 +393,16 @@ class TestInputValidationErrors:
 
         runner = CliRunner()
 
-        result = runner.invoke(app, [
-            "library:filter:bpm",
-            "--min", "200",
-            "--max", "100"  # min > max is invalid
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "library:filter:bpm",
+                "--min",
+                "200",
+                "--max",
+                "100",  # min > max is invalid
+            ],
+        )
 
         # Should detect invalid range
         assert result.exit_code != 0
@@ -373,11 +414,12 @@ class TestInputValidationErrors:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.find_similar_async') as mock_similar:
-            result = runner.invoke(app, [
-                "library:find-similar", str(audio_file),
-                "--limit", "invalid"
-            ])
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.find_similar_async"
+        ) as mock_similar:
+            result = runner.invoke(
+                app, ["library:find-similar", str(audio_file), "--limit", "invalid"]
+            )
 
         # Should fail on invalid integer
         assert result.exit_code != 0
@@ -415,7 +457,9 @@ class TestKeyboardInterruptHandling:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
             mock_analyze.side_effect = KeyboardInterrupt()
 
             result = runner.invoke(app, ["analyze:full", str(audio_file)])
@@ -429,10 +473,14 @@ class TestKeyboardInterruptHandling:
 
         runner = CliRunner()
 
-        with patch('samplemind.interfaces.cli.commands.utils.batch_analyze_async') as mock_batch:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.batch_analyze_async"
+        ) as mock_batch:
             mock_batch.side_effect = KeyboardInterrupt()
 
-            result = runner.invoke(app, ["batch:analyze", str(test_audio_samples["120_c_major"].parent)])
+            result = runner.invoke(
+                app, ["batch:analyze", str(test_audio_samples["120_c_major"].parent)]
+            )
 
         # Should abort gracefully
         assert result.exit_code == 0 or result.exit_code == 1
@@ -470,13 +518,12 @@ class TestErrorMessageQuality:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.analyze_file_async') as mock_analyze:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.analyze_file_async"
+        ) as mock_analyze:
             mock_analyze.side_effect = Exception("Detailed error")
 
-            result = runner.invoke(app, [
-                "analyze:full", str(audio_file),
-                "--verbose"
-            ])
+            result = runner.invoke(app, ["analyze:full", str(audio_file), "--verbose"])
 
         # Verbose mode may show more details
 
@@ -491,12 +538,14 @@ class TestErrorRecoveryAndRetry:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.ai_analyze_async') as mock_ai:
+        with patch(
+            "samplemind.interfaces.cli.commands.utils.ai_analyze_async"
+        ) as mock_ai:
             # Fail twice, then succeed
             mock_ai.side_effect = [
                 TimeoutError("Timeout"),
                 TimeoutError("Timeout"),
-                {'provider': 'ollama', 'summary': 'Analysis'}
+                {"provider": "ollama", "summary": "Analysis"},
             ]
 
             result = runner.invoke(app, ["ai:analyze", str(audio_file)])

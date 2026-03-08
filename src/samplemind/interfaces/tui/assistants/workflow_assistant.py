@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class UsagePattern:
     """Pattern of sample usage"""
+
     sample_pair: Tuple[str, str]  # (sample1, sample2)
     frequency: int = 0
     last_used: Optional[datetime] = None
@@ -26,6 +27,7 @@ class UsagePattern:
 @dataclass
 class WorkflowSuggestion:
     """Suggested next step in workflow"""
+
     action: str  # "analyze_next", "organize", "export", etc.
     reason: str
     suggested_samples: List[str] = field(default_factory=list)
@@ -35,6 +37,7 @@ class WorkflowSuggestion:
 @dataclass
 class WorkflowTemplate:
     """Template workflow for common tasks"""
+
     name: str
     description: str
     steps: List[Dict[str, Any]]  # Ordered workflow steps
@@ -54,7 +57,9 @@ class WorkflowAssistant:
         self.user_skill_level = "intermediate"
         self.min_pattern_frequency = 3  # Minimum times pair seen
 
-    def learn_sample_usage(self, current_sample: str, previous_samples: List[str]) -> None:
+    def learn_sample_usage(
+        self, current_sample: str, previous_samples: List[str]
+    ) -> None:
         """
         Learn sample pairing patterns
 
@@ -80,7 +85,9 @@ class WorkflowAssistant:
             pattern.co_occurrence_count += 1
             pattern.confidence_score = self._calculate_confidence(pattern)
 
-        logger.debug(f"Learned usage: {current_sample} with {len(previous_samples)} previous samples")
+        logger.debug(
+            f"Learned usage: {current_sample} with {len(previous_samples)} previous samples"
+        )
 
     def get_workflow_suggestions(
         self,
@@ -148,7 +155,9 @@ class WorkflowAssistant:
 
         return suggestions[:3]  # Return top 3
 
-    def suggest_next_samples(self, current_samples: List[str], limit: int = 5) -> List[Tuple[str, float]]:
+    def suggest_next_samples(
+        self, current_samples: List[str], limit: int = 5
+    ) -> List[Tuple[str, float]]:
         """
         Suggest next samples to analyze based on patterns
 
@@ -173,12 +182,12 @@ class WorkflowAssistant:
                         )
 
         # Sort by score
-        sorted_suggestions = sorted(suggestions.items(), key=lambda x: x[1], reverse=True)
+        sorted_suggestions = sorted(
+            suggestions.items(), key=lambda x: x[1], reverse=True
+        )
         return sorted_suggestions[:limit]
 
-    def auto_organize_samples(
-        self, samples: List[str]
-    ) -> Dict[str, List[str]]:
+    def auto_organize_samples(self, samples: List[str]) -> Dict[str, List[str]]:
         """
         Auto-organize samples by detected patterns
 
@@ -227,11 +236,31 @@ class WorkflowAssistant:
                 name="Drum Production",
                 description="Complete drum kit production workflow",
                 steps=[
-                    {"step": 1, "action": "analyze_kick", "description": "Analyze kick drums"},
-                    {"step": 2, "action": "analyze_snare", "description": "Analyze snare"},
-                    {"step": 3, "action": "compare_drums", "description": "Compare drum hits"},
-                    {"step": 4, "action": "tag_drums", "description": "Tag drum elements"},
-                    {"step": 5, "action": "export_drum_kit", "description": "Export drum kit"},
+                    {
+                        "step": 1,
+                        "action": "analyze_kick",
+                        "description": "Analyze kick drums",
+                    },
+                    {
+                        "step": 2,
+                        "action": "analyze_snare",
+                        "description": "Analyze snare",
+                    },
+                    {
+                        "step": 3,
+                        "action": "compare_drums",
+                        "description": "Compare drum hits",
+                    },
+                    {
+                        "step": 4,
+                        "action": "tag_drums",
+                        "description": "Tag drum elements",
+                    },
+                    {
+                        "step": 5,
+                        "action": "export_drum_kit",
+                        "description": "Export drum kit",
+                    },
                 ],
                 tags=["drums", "percussion", "production"],
             ),
@@ -239,11 +268,31 @@ class WorkflowAssistant:
                 name="Sample Exploration",
                 description="Exploratory sample analysis workflow",
                 steps=[
-                    {"step": 1, "action": "browse_library", "description": "Browse audio library"},
-                    {"step": 2, "action": "analyze_batch", "description": "Batch analyze samples"},
-                    {"step": 3, "action": "search_similar", "description": "Search similar samples"},
-                    {"step": 4, "action": "save_favorites", "description": "Save favorites"},
-                    {"step": 5, "action": "create_collection", "description": "Create collection"},
+                    {
+                        "step": 1,
+                        "action": "browse_library",
+                        "description": "Browse audio library",
+                    },
+                    {
+                        "step": 2,
+                        "action": "analyze_batch",
+                        "description": "Batch analyze samples",
+                    },
+                    {
+                        "step": 3,
+                        "action": "search_similar",
+                        "description": "Search similar samples",
+                    },
+                    {
+                        "step": 4,
+                        "action": "save_favorites",
+                        "description": "Save favorites",
+                    },
+                    {
+                        "step": 5,
+                        "action": "create_collection",
+                        "description": "Create collection",
+                    },
                 ],
                 tags=["exploration", "discovery", "sampling"],
             ),
@@ -256,10 +305,26 @@ class WorkflowAssistant:
                         "action": "import_acapella",
                         "description": "Import vocal acapella",
                     },
-                    {"step": 2, "action": "analyze_acapella", "description": "Analyze acapella"},
-                    {"step": 3, "action": "find_drums", "description": "Find matching drums"},
-                    {"step": 4, "action": "find_bass", "description": "Find matching bass"},
-                    {"step": 5, "action": "arrange_remix", "description": "Arrange remix"},
+                    {
+                        "step": 2,
+                        "action": "analyze_acapella",
+                        "description": "Analyze acapella",
+                    },
+                    {
+                        "step": 3,
+                        "action": "find_drums",
+                        "description": "Find matching drums",
+                    },
+                    {
+                        "step": 4,
+                        "action": "find_bass",
+                        "description": "Find matching bass",
+                    },
+                    {
+                        "step": 5,
+                        "action": "arrange_remix",
+                        "description": "Arrange remix",
+                    },
                 ],
                 tags=["remix", "arrangement", "production"],
             ),
@@ -306,10 +371,12 @@ class WorkflowAssistant:
         return {
             "total_patterns": len(self.usage_patterns),
             "confident_patterns": len(confident_patterns),
-            "avg_confidence": sum(p.confidence_score for p in self.usage_patterns.values())
-            / len(self.usage_patterns)
-            if self.usage_patterns
-            else 0,
+            "avg_confidence": (
+                sum(p.confidence_score for p in self.usage_patterns.values())
+                / len(self.usage_patterns)
+                if self.usage_patterns
+                else 0
+            ),
             "workflow_steps_recorded": len(self.workflow_history),
             "samples_analyzed": len(self.sample_usage_history),
         }

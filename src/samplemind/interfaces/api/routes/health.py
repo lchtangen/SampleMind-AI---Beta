@@ -13,13 +13,13 @@ router = APIRouter()
 async def health_check():
     """Basic health check"""
     settings = get_settings()
-    
+
     components = {}
-    
+
     # Check AudioEngine
     audio_engine = get_app_state("audio_engine")
     components["audio_engine"] = "healthy" if audio_engine else "unavailable"
-    
+
     # Check AI Manager
     ai_manager = get_app_state("ai_manager")
     if ai_manager:
@@ -30,12 +30,12 @@ async def health_check():
             components["ai_providers"] = "error"
     else:
         components["ai_providers"] = "unavailable"
-    
+
     return HealthCheckResponse(
         status="healthy",
         version=__version__,
         environment=settings.ENVIRONMENT,
-        components=components
+        components=components,
     )
 
 
@@ -44,10 +44,10 @@ async def readiness_check():
     """Readiness probe for K8s"""
     audio_engine = get_app_state("audio_engine")
     ai_manager = get_app_state("ai_manager")
-    
+
     if not audio_engine or not ai_manager:
         return {"status": "not_ready"}
-    
+
     return {"status": "ready"}
 
 

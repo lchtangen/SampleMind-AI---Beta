@@ -15,7 +15,9 @@ class TestVectorSearchEngine:
     @patch("samplemind.core.search.vector_engine.ClapProcessor")
     @patch("samplemind.core.search.vector_engine.torch")
     @patch("samplemind.core.search.vector_engine.librosa")
-    def test_search_integration(self, mock_librosa, mock_torch, mock_proc_cls, mock_model_cls, mock_chroma):
+    def test_search_integration(
+        self, mock_librosa, mock_torch, mock_proc_cls, mock_model_cls, mock_chroma
+    ):
         """Test the full flow with mocks"""
 
         # Setup Chroma Mock
@@ -32,7 +34,7 @@ class TestVectorSearchEngine:
         # ClapModel.from_pretrained() returns a model instance
         mock_model_inst = MagicMock()
         mock_model_cls.from_pretrained.return_value = mock_model_inst
-        mock_model_inst.to.return_value = mock_model_inst # handle .to(device)
+        mock_model_inst.to.return_value = mock_model_inst  # handle .to(device)
 
         # Setup Librosa
         # librosa.load returns (audio, sr)
@@ -50,7 +52,11 @@ class TestVectorSearchEngine:
         # embedding = outputs[0].cpu().numpy().tolist()
 
         mock_tensor = MagicMock()
-        mock_tensor.cpu.return_value.numpy.return_value.tolist.return_value = [0.1, 0.2, 0.3]
+        mock_tensor.cpu.return_value.numpy.return_value.tolist.return_value = [
+            0.1,
+            0.2,
+            0.3,
+        ]
 
         # If code uses outputs[0], we need get_audio_features to return something indexable
         mock_outputs = MagicMock()
@@ -78,18 +84,18 @@ class TestVectorSearchEngine:
         # upsert(ids=[...], embeddings=[...], metadatas=[...])
         assert mock_coll.upsert.called
         call_kwargs = mock_coll.upsert.call_args[1]
-        assert call_kwargs['embeddings'] == [[0.1, 0.2, 0.3]]
-        assert call_kwargs['metadatas'][0]['filename'] == 'kick.wav'
+        assert call_kwargs["embeddings"] == [[0.1, 0.2, 0.3]]
+        assert call_kwargs["metadatas"][0]["filename"] == "kick.wav"
 
         # 3. Search
         # Mock query result
         mock_coll.query.return_value = {
-            'ids': [['id1']],
-            'metadatas': [[{'path': '/abs/kick.wav', 'filename': 'kick.wav'}]],
-            'distances': [[0.1]]
+            "ids": [["id1"]],
+            "metadatas": [[{"path": "/abs/kick.wav", "filename": "kick.wav"}]],
+            "distances": [[0.1]],
         }
 
         results = engine.search("punchy kick")
 
         assert len(results) == 1
-        assert results[0]['filename'] == 'kick.wav'
+        assert results[0]["filename"] == "kick.wav"

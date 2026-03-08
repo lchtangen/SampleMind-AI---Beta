@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 class BindingStyle(Enum):
     """Keyboard binding styles"""
+
     DEFAULT = "default"
     VIM = "vim"
     EMACS = "emacs"
@@ -26,18 +27,15 @@ DEFAULT_SHORTCUTS = {
     "back": ["escape", "backspace"],
     "help": ["h", "f1", "?"],
     "menu": ["m", "ctrl+m"],
-
     # Analysis screen
     "analyze": ["a", "ctrl+a"],
     "browse": ["ctrl+o"],
     "batch": ["b", "ctrl+b"],
-
     # Results
     "export": ["ctrl+e"],
     "save": ["ctrl+s"],
     "copy": ["ctrl+c"],
     "compare": ["c"],
-
     # Playback
     "play_pause": ["space"],
     "stop": ["ctrl+."],
@@ -45,20 +43,17 @@ DEFAULT_SHORTCUTS = {
     "previous": ["p", "left", "k"],
     "seek_forward": [">"],
     "seek_backward": ["<"],
-
     # Tagging and organization
     "favorite": ["f", "ctrl+d"],
     "tag": ["t", "ctrl+t"],
     "rating_up": ["]"],
     "rating_down": ["["],
-
     # View and tools
     "settings": ["s", "ctrl+,"],
     "search": ["/", "ctrl+f"],
     "filter": ["ctrl+l"],
     "sort": ["ctrl+k"],
     "refresh": ["r", "f5"],
-
     # Advanced
     "history": ["ctrl+h"],
     "favorites": ["ctrl+b"],

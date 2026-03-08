@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 class SortOption(Enum):
     """Library sorting options"""
+
     NAME_ASC = "name_asc"
     NAME_DESC = "name_desc"
     SIZE_ASC = "size_asc"
@@ -30,6 +31,7 @@ class SortOption(Enum):
 @dataclass
 class AudioFileInfo:
     """Information about an audio file"""
+
     path: str
     name: str
     size: int  # bytes
@@ -61,6 +63,7 @@ class AudioFileInfo:
 @dataclass
 class LibraryStats:
     """Library statistics"""
+
     total_files: int = 0
     total_size: int = 0  # bytes
     total_duration: float = 0.0  # seconds
@@ -118,7 +121,9 @@ class LibraryBrowser:
         self.file_hashes: Dict[str, List[str]] = defaultdict(list)  # hash -> [paths]
         self.duplicates: List[List[AudioFileInfo]] = []
 
-    def scan_directory(self, path: Optional[str] = None, recursive: bool = True) -> List[AudioFileInfo]:
+    def scan_directory(
+        self, path: Optional[str] = None, recursive: bool = True
+    ) -> List[AudioFileInfo]:
         """
         Scan directory for audio files
 
@@ -150,7 +155,10 @@ class LibraryBrowser:
                 pattern = "*"
 
             for file_path in scan_path.glob(pattern):
-                if file_path.is_file() and file_path.suffix.lower() in self.AUDIO_FORMATS:
+                if (
+                    file_path.is_file()
+                    and file_path.suffix.lower() in self.AUDIO_FORMATS
+                ):
                     info = self._create_file_info(file_path)
                     if info:
                         self.files.append(info)
@@ -253,8 +261,12 @@ class LibraryBrowser:
         stats.file_formats = dict(format_counts)
         stats.duplicate_groups = len(self.duplicates)
         stats.duplicate_files = sum(len(group) - 1 for group in self.duplicates)
-        stats.average_file_size = total_size / stats.total_files if stats.total_files > 0 else 0
-        stats.average_duration = total_duration / files_with_duration if files_with_duration > 0 else 0
+        stats.average_file_size = (
+            total_size / stats.total_files if stats.total_files > 0 else 0
+        )
+        stats.average_duration = (
+            total_duration / files_with_duration if files_with_duration > 0 else 0
+        )
 
         return stats
 
@@ -272,7 +284,9 @@ class LibraryBrowser:
         filtered = [f for f in self.files if f.format == self.filter_format]
         return filtered
 
-    def filter_by_size(self, min_size: int = 0, max_size: int = int(1e9)) -> List[AudioFileInfo]:
+    def filter_by_size(
+        self, min_size: int = 0, max_size: int = int(1e9)
+    ) -> List[AudioFileInfo]:
         """
         Filter files by size
 
@@ -285,7 +299,9 @@ class LibraryBrowser:
         """
         return [f for f in self.files if min_size <= f.size <= max_size]
 
-    def filter_by_duration(self, min_duration: float = 0, max_duration: float = float("inf")) -> List[AudioFileInfo]:
+    def filter_by_duration(
+        self, min_duration: float = 0, max_duration: float = float("inf")
+    ) -> List[AudioFileInfo]:
         """
         Filter files by duration
 
@@ -297,8 +313,11 @@ class LibraryBrowser:
             Filtered list
         """
         return [
-            f for f in self.files
-            if f.duration and min_duration <= f.duration <= max_duration or not f.duration
+            f
+            for f in self.files
+            if f.duration
+            and min_duration <= f.duration <= max_duration
+            or not f.duration
         ]
 
     def search_files(self, query: str) -> List[AudioFileInfo]:
@@ -349,7 +368,9 @@ class LibraryBrowser:
         """Apply current sort option"""
         self.sort_files(self.sort_option)
 
-    def get_directory_tree(self, path: Optional[str] = None, depth: int = 3) -> Dict[str, Any]:
+    def get_directory_tree(
+        self, path: Optional[str] = None, depth: int = 3
+    ) -> Dict[str, Any]:
         """
         Get directory tree structure
 
@@ -371,9 +392,16 @@ class LibraryBrowser:
         try:
             for item_path in sorted(Path(path).iterdir()):
                 if item_path.is_dir() and not item_path.name.startswith("."):
-                    tree["children"].append(self.get_directory_tree(str(item_path), depth - 1))
-                elif item_path.is_file() and item_path.suffix.lower() in self.AUDIO_FORMATS:
-                    tree["children"].append({"name": item_path.name, "path": str(item_path), "type": "file"})
+                    tree["children"].append(
+                        self.get_directory_tree(str(item_path), depth - 1)
+                    )
+                elif (
+                    item_path.is_file()
+                    and item_path.suffix.lower() in self.AUDIO_FORMATS
+                ):
+                    tree["children"].append(
+                        {"name": item_path.name, "path": str(item_path), "type": "file"}
+                    )
 
         except Exception as e:
             logger.error(f"Error building tree: {e}")
@@ -401,7 +429,9 @@ class LibraryBrowser:
                 lines.append(f"    Hash: {file_info.file_hash[:16]}...")
 
         lines.append(f"\nTotal duplicate groups: {len(self.duplicates)}")
-        lines.append(f"Total duplicate files: {sum(len(g) - 1 for g in self.duplicates)}")
+        lines.append(
+            f"Total duplicate files: {sum(len(g) - 1 for g in self.duplicates)}"
+        )
 
         return "\n".join(lines)
 
@@ -421,7 +451,9 @@ class LibraryBrowser:
         lines.append(f"Total Files: {stats.total_files}")
         lines.append(f"Total Size: {stats.format_total_size()}")
         lines.append(f"Total Duration: {stats.format_total_duration()}")
-        lines.append(f"Average File Size: {stats.average_file_size / 1024 / 1024:.1f}MB")
+        lines.append(
+            f"Average File Size: {stats.average_file_size / 1024 / 1024:.1f}MB"
+        )
         lines.append(f"Average Duration: {stats.average_duration / 60:.1f} minutes")
         lines.append("")
         lines.append("Format Breakdown:")

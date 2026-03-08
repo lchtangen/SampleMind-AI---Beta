@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 class ThemeName(Enum):
     """Available themes"""
+
     DARK = "dark"
     LIGHT = "light"
     CYBERPUNK = "cyberpunk"
@@ -26,6 +27,7 @@ class ThemeName(Enum):
 @dataclass
 class ThemeColors:
     """Color palette for a theme"""
+
     primary: str
     secondary: str
     accent: str

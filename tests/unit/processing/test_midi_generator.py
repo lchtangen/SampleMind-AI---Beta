@@ -27,20 +27,25 @@ class TestMIDIGenerator:
     @patch("samplemind.core.processing.midi_generator.librosa")
     def test_extract_melody(self, mock_librosa, generator, audio_chunk):
         # Mock librosa results
-        mock_librosa.effects.hpss.return_value = (audio_chunk, audio_chunk) # harmonic, percussive
+        mock_librosa.effects.hpss.return_value = (
+            audio_chunk,
+            audio_chunk,
+        )  # harmonic, percussive
         mock_librosa.cqt.return_value = np.zeros((12, 100))
 
         # Mock piptrack: returns pitches, mags. Shape (d, t)
         # Create a fake pitch track around 440Hz (A4)
         pitches = np.zeros((100, 50))
         mags = np.zeros((100, 50))
-        pitches[50, 10:20] = 440.0 # Frames 10-20 have 440Hz
+        pitches[50, 10:20] = 440.0  # Frames 10-20 have 440Hz
         mags[50, 10:20] = 1.0
 
         mock_librosa.piptrack.return_value = (pitches, mags)
-        mock_librosa.hz_to_midi.side_effect = lambda x: 69 if abs(x-440) < 1 else 0
-        mock_librosa.frames_to_time.side_effect = lambda f, sr=None, hop_length=None: f * 0.02
-        mock_librosa.util.normalize.return_value = mags[50] # Simplified confidence
+        mock_librosa.hz_to_midi.side_effect = lambda x: 69 if abs(x - 440) < 1 else 0
+        mock_librosa.frames_to_time.side_effect = (
+            lambda f, sr=None, hop_length=None: f * 0.02
+        )
+        mock_librosa.util.normalize.return_value = mags[50]  # Simplified confidence
 
         # Tempo mocks
         mock_librosa.onset.onset_strength.return_value = np.zeros(100)
@@ -67,7 +72,9 @@ class TestMIDIGenerator:
         # Tempo
         mock_librosa.feature.tempo.return_value = [120.0]
         # Frames to time
-        mock_librosa.frames_to_time.side_effect = lambda f, sr=None, hop_length=None: f * 0.02
+        mock_librosa.frames_to_time.side_effect = (
+            lambda f, sr=None, hop_length=None: f * 0.02
+        )
 
         result = generator.extract_chords(audio_chunk)
 
@@ -86,9 +93,9 @@ class TestMIDIGenerator:
         mock_librosa.effects.hpss.return_value = (audio_chunk, audio_chunk)
 
         # Mock onsets at 0.5s, 1.0s
-        mock_librosa.onset.onset_detect.return_value = [25, 50] # frames
+        mock_librosa.onset.onset_detect.return_value = [25, 50]  # frames
         mock_librosa.frames_to_time.return_value = np.array([0.5, 1.0])
-        mock_librosa.feature.tempo.return_value = [120.0] # 0.5s per beat
+        mock_librosa.feature.tempo.return_value = [120.0]  # 0.5s per beat
 
         result = generator.extract_drums(audio_chunk)
 
@@ -99,11 +106,11 @@ class TestMIDIGenerator:
     def test_midi_file_creation(self, generator):
         notes = [
             MidiNote(start_time=0.0, duration=0.5, pitch=60, velocity=100),
-            MidiNote(start_time=0.5, duration=0.5, pitch=62, velocity=100)
+            MidiNote(start_time=0.5, duration=0.5, pitch=62, velocity=100),
         ]
         mid = generator._create_midi_file(notes, tempo_bpm=120.0)
         assert len(mid.tracks) == 1
-        assert len(mid.tracks[0]) > 0 # Should have events
+        assert len(mid.tracks[0]) > 0  # Should have events
 
     @patch("samplemind.core.processing.midi_generator.librosa")
     def test_high_level_extract(self, mock_librosa, generator):

@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 
 class AIProviderInfo(BaseModel):
     """AI provider information"""
+
     name: str
     status: str = Field(description="Status: available, unavailable, error")
     model: Optional[str] = None
@@ -15,15 +16,19 @@ class AIProviderInfo(BaseModel):
 
 class AIAnalysisRequest(BaseModel):
     """Request for AI analysis"""
+
     analysis_type: str = Field(
         "comprehensive_analysis",
-        description="Type: quick_analysis, comprehensive_analysis, production_coaching, creative_suggestions"
+        description="Type: quick_analysis, comprehensive_analysis, production_coaching, creative_suggestions",
     )
-    provider: Optional[str] = Field(None, description="Preferred provider: google_ai or openai")
+    provider: Optional[str] = Field(
+        None, description="Preferred provider: google_ai or openai"
+    )
 
 
 class AIAnalysisResponse(BaseModel):
     """AI analysis results"""
+
     provider: str
     model: str
     summary: str

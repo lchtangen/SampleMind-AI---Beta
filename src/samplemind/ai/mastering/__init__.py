@@ -5,6 +5,6 @@ automatic loudness normalization.
 """
 
 from .mastering_engine import MasteringEngine
-from .reference_analyzer import ReferenceAnalyzer, MasteringProfile
+from .reference_analyzer import MasteringProfile, ReferenceAnalyzer
 
 __all__ = ["MasteringEngine", "ReferenceAnalyzer", "MasteringProfile"]

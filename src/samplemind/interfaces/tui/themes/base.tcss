@@ -1,0 +1,216 @@
+/* SampleMind TUI — Base Structural CSS
+ * Loaded via CSS_PATH for all themes.
+ * Uses Textual theme variable names ($primary, $accent, $surface, etc.)
+ * Colors are resolved from the active Theme object registered in app.py.
+ */
+
+/* ── Global ───────────────────────────────────────────────────────────────── */
+Screen {
+    background: $background;
+    color: $foreground;
+}
+
+Header {
+    height: 1;
+    text-style: bold;
+}
+
+Footer {
+    height: 1;
+}
+
+/* ── Typography helpers ──────────────────────────────────────────────────── */
+.screen-title {
+    color: $primary;
+    text-style: bold;
+    height: 2;
+    margin-bottom: 1;
+}
+
+.hint-label {
+    color: $foreground 50%;
+    margin-top: 1;
+    height: 1;
+}
+
+.section-header {
+    color: $accent;
+    text-style: bold underline;
+    height: 1;
+    margin-bottom: 1;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+Button {
+    min-width: 12;
+    margin: 0 1 0 0;
+}
+
+Button:hover {
+    text-style: bold;
+}
+
+Button:focus {
+    text-style: bold;
+}
+
+/* ── Inputs ──────────────────────────────────────────────────────────────── */
+Input {
+    margin-bottom: 1;
+}
+
+Input:focus {
+    border: tall $accent;
+}
+
+TextArea {
+    height: 6;
+    margin-bottom: 1;
+    border: solid $primary;
+}
+
+TextArea:focus {
+    border: solid $accent;
+}
+
+/* ── DataTable ───────────────────────────────────────────────────────────── */
+DataTable {
+    background: $surface;
+}
+
+DataTable > .datatable--header {
+    text-style: bold;
+    background: $primary;
+    color: $background;
+}
+
+DataTable > .datatable--cursor {
+    background: $accent;
+    color: $background;
+}
+
+DataTable > .datatable--hover {
+    background: $primary 20%;
+}
+
+DataTable > .datatable--zebra {
+    background: $surface 80%;
+}
+
+/* ── Progress ────────────────────────────────────────────────────────────── */
+ProgressBar > .bar--bar {
+    color: $primary;
+}
+
+ProgressBar > .bar--complete {
+    color: $success;
+}
+
+ProgressBar > .bar--indeterminate {
+    color: $accent;
+}
+
+/* ── RichLog ─────────────────────────────────────────────────────────────── */
+RichLog {
+    background: $surface;
+    border: solid $panel;
+    padding: 0 1;
+}
+
+/* ── Collapsible ─────────────────────────────────────────────────────────── */
+Collapsible {
+    background: $panel;
+    border: solid $primary 30%;
+    margin: 0 0 1 0;
+}
+
+CollapsibleTitle {
+    color: $foreground;
+}
+
+CollapsibleTitle:hover {
+    color: $primary;
+}
+
+/* ── Select ──────────────────────────────────────────────────────────────── */
+Select {
+    margin-bottom: 1;
+}
+
+/* ── RadioSet ────────────────────────────────────────────────────────────── */
+RadioSet {
+    background: $panel;
+    border: solid $primary 30%;
+    padding: 0 1;
+    height: auto;
+    margin-bottom: 1;
+}
+
+RadioButton {
+    height: 1;
+    padding: 0 1;
+}
+
+/* ── TabbedContent ───────────────────────────────────────────────────────── */
+TabbedContent ContentSwitcher {
+    background: $surface;
+}
+
+TabbedContent TabPane {
+    padding: 1;
+    background: $surface;
+}
+
+Tabs Tab {
+    color: $foreground 70%;
+}
+
+Tabs Tab.-active {
+    color: $primary;
+    text-style: bold;
+}
+
+Tabs Tab:hover {
+    color: $primary;
+}
+
+/* ── ListView / ListItem ─────────────────────────────────────────────────── */
+ListView {
+    background: $surface;
+    border: none;
+}
+
+ListItem {
+    height: 1;
+    padding: 0 2;
+}
+
+ListItem:hover {
+    background: $accent 20%;
+}
+
+ListItem.--highlight {
+    background: $accent 40%;
+}
+
+/* ── Dialogs / Modals ────────────────────────────────────────────────────── */
+ModalScreen {
+    align: center middle;
+    background: $background 80%;
+}
+
+/* ── Sparkline ───────────────────────────────────────────────────────────── */
+Sparkline {
+    height: 3;
+    color: $primary;
+}
+
+Sparkline .sparkline--max-color {
+    color: $accent;
+}
+
+/* ── Digits ──────────────────────────────────────────────────────────────── */
+Digits {
+    color: $primary;
+    text-style: bold;
+}

@@ -26,6 +26,7 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+
 class VectorSearchEngine:
     """
     Manages audio embedding generation and vector search.
@@ -58,8 +59,7 @@ class VectorSearchEngine:
         try:
             self.chroma_client = chromadb.PersistentClient(path=self.persistent_path)
             self.collection = self.chroma_client.get_or_create_collection(
-                name=self.COLLECTION_NAME,
-                metadata={"hnsw:space": "cosine"}
+                name=self.COLLECTION_NAME, metadata={"hnsw:space": "cosine"}
             )
             self._db_initialized = True
             logger.info(f"Vector DB initialized at {self.persistent_path}")
@@ -82,7 +82,7 @@ class VectorSearchEngine:
             # Using the huggingface model
             self.processor = ClapProcessor.from_pretrained(self.MODEL_NAME)
             self.model = ClapModel.from_pretrained(self.MODEL_NAME).to(self.device)
-            self.model.eval() # Inference mode
+            self.model.eval()  # Inference mode
             logger.info(f"CLAP model loaded on {self.device}")
         except Exception as e:
             logger.error(f"Failed to load CLAP model: {e}")
@@ -98,7 +98,9 @@ class VectorSearchEngine:
             y, sr = librosa.load(str(file_path), sr=48000, duration=10.0)
 
             # Prepare inputs
-            inputs = self.processor(audios=y, sampling_rate=48000, return_tensors="pt").to(self.device)
+            inputs = self.processor(
+                audios=y, sampling_rate=48000, return_tensors="pt"
+            ).to(self.device)
 
             # Inference
             with torch.no_grad():
@@ -160,7 +162,7 @@ class VectorSearchEngine:
                 ids=[doc_id],
                 embeddings=[embedding],
                 metadatas=[metadata],
-                documents=[file_path.name] # Optional source document
+                documents=[file_path.name],  # Optional source document
             )
             logger.info(f"Indexed: {file_path.name}")
             return True
@@ -190,26 +192,32 @@ class VectorSearchEngine:
 
         try:
             results = self.collection.query(
-                query_embeddings=[query_embedding],
-                n_results=n_results
+                query_embeddings=[query_embedding], n_results=n_results
             )
 
             # Format outputs
             formatted_results = []
-            if results['ids'] and len(results['ids'][0]) > 0:
-                count = len(results['ids'][0])
+            if results["ids"] and len(results["ids"][0]) > 0:
+                count = len(results["ids"][0])
                 for i in range(count):
                     # Chroma returns lists of lists
-                    meta = results['metadatas'][0][i]
+                    meta = results["metadatas"][0][i]
                     # distance/score ? 'distances' in results
-                    distance = results['distances'][0][i] if 'distances' in results and results['distances'] else 0.0
+                    distance = (
+                        results["distances"][0][i]
+                        if "distances" in results and results["distances"]
+                        else 0.0
+                    )
 
-                    formatted_results.append({
-                        "path": meta.get("path", ""),
-                        "filename": meta.get("filename", ""),
-                        "score": 1.0 - distance, # Convert distance to similarity score approx
-                        "metadata": meta
-                    })
+                    formatted_results.append(
+                        {
+                            "path": meta.get("path", ""),
+                            "filename": meta.get("filename", ""),
+                            "score": 1.0
+                            - distance,  # Convert distance to similarity score approx
+                            "metadata": meta,
+                        }
+                    )
 
             return formatted_results
 

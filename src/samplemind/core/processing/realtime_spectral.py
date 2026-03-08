@@ -21,22 +21,27 @@ librosa = None
 signal = None
 hann = None
 
+
 def _ensure_libs():
     """Lazily import heavy dependencies."""
     global librosa, signal, hann
     if librosa is None:
         import librosa as _librosa
+
         librosa = _librosa
     if signal is None:
         from scipy import signal as _signal
+
         signal = _signal
     if hann is None:
         from scipy.signal.windows import hann as _hann
+
         hann = _hann
 
 
 class FrequencyScale(Enum):
     """Frequency scale types"""
+
     LINEAR = "linear"
     LOG = "logarithmic"
     MEL = "mel"
@@ -45,6 +50,7 @@ class FrequencyScale(Enum):
 @dataclass
 class SpectralFrame:
     """Single spectral analysis frame"""
+
     timestamp_ms: float
     frequencies_hz: np.ndarray  # Frequency bins in Hz
     magnitude: np.ndarray  # Magnitude in dB
@@ -105,7 +111,9 @@ class RealtimeSpectral:
             f"fft_size={fft_size}, target_fps={target_fps})"
         )
 
-    def process_chunk(self, audio_chunk: np.ndarray, current_time_ms: float = 0.0) -> SpectralFrame:
+    def process_chunk(
+        self, audio_chunk: np.ndarray, current_time_ms: float = 0.0
+    ) -> SpectralFrame:
         """
         Process audio chunk and return spectral frame.
 
@@ -118,7 +126,9 @@ class RealtimeSpectral:
         """
         # Ensure correct size
         if len(audio_chunk) != self.fft_size:
-            raise ValueError(f"Expected {self.fft_size} samples, got {len(audio_chunk)}")
+            raise ValueError(
+                f"Expected {self.fft_size} samples, got {len(audio_chunk)}"
+            )
 
         # Apply window
         windowed = audio_chunk * self.window
@@ -201,7 +211,9 @@ class RealtimeSpectral:
             "scale": scale.value,
         }
 
-    def get_frequency_at_position(self, position: float, scale: FrequencyScale) -> float:
+    def get_frequency_at_position(
+        self, position: float, scale: FrequencyScale
+    ) -> float:
         """
         Get frequency at display position (for interactive features).
 
@@ -214,7 +226,7 @@ class RealtimeSpectral:
         """
         if scale == FrequencyScale.LOG:
             # Reverse log transformation
-            freq = 10 ** position - 1
+            freq = 10**position - 1
         elif scale == FrequencyScale.MEL:
             # Reverse mel transformation
             freq = librosa.mel_to_hz(position * 2595)
@@ -293,7 +305,9 @@ class PitchDetector:
         # Convert lag to frequency
         if lag > 0:
             frequency = self.sample_rate / lag
-            confidence = min(1.0, autocorr[lag])  # Confidence based on correlation strength
+            confidence = min(
+                1.0, autocorr[lag]
+            )  # Confidence based on correlation strength
 
             # Clamp to valid range
             if self.min_freq <= frequency <= self.max_freq:

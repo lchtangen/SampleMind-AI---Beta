@@ -20,12 +20,15 @@ from samplemind.core.processing.audio_effects import (
 )
 from . import utils
 
-app = typer.Typer(help="🎛️  Audio Effects - Professional processing & presets", no_args_is_help=True)
+app = typer.Typer(
+    help="🎛️  Audio Effects - Professional processing & presets", no_args_is_help=True
+)
 console = utils.console
 
 
 class EffectPreset(str, Enum):
     """Built-in audio effect presets"""
+
     VOCAL = "vocal"
     DRUMS = "drums"
     BASS = "bass"
@@ -46,16 +49,20 @@ PRESET_DESCRIPTIONS = {
 # SECTION 1: EFFECT PRESETS (5 commands)
 # ============================================================================
 
+
 @app.command("preset")
 @utils.with_error_handling
 def apply_preset(
     file: Path = typer.Argument(..., help="Audio file to process"),
     preset: EffectPreset = typer.Option(
         EffectPreset.MASTER,
-        "--type", "-t",
-        help="Preset type: vocal, drums, bass, master, vintage"
+        "--type",
+        "-t",
+        help="Preset type: vocal, drums, bass, master, vintage",
     ),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output file path"
+    ),
 ) -> None:
     """
     Apply a built-in audio effects preset.
@@ -106,7 +113,9 @@ def apply_preset(
 @utils.with_error_handling
 def apply_vocal_preset(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output file path"
+    ),
 ) -> None:
     """Apply vocal enhancement preset (presence boost + reverb)"""
     try:
@@ -137,7 +146,9 @@ def apply_vocal_preset(
 @utils.with_error_handling
 def apply_drums_preset(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output file path"
+    ),
 ) -> None:
     """Apply drum processing preset (compression + saturation)"""
     try:
@@ -168,7 +179,9 @@ def apply_drums_preset(
 @utils.with_error_handling
 def apply_bass_preset(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output file path"
+    ),
 ) -> None:
     """Apply bass enhancement preset (sub-boost + limiting)"""
     try:
@@ -199,7 +212,9 @@ def apply_bass_preset(
 @utils.with_error_handling
 def apply_master_preset(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output file path"
+    ),
 ) -> None:
     """Apply master bus preset (gentle compression + limiting)"""
     try:
@@ -230,7 +245,9 @@ def apply_master_preset(
 @utils.with_error_handling
 def apply_vintage_preset(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output file path"
+    ),
 ) -> None:
     """Apply vintage/warm preset (saturation + soft compression)"""
     try:
@@ -261,16 +278,20 @@ def apply_vintage_preset(
 # SECTION 2: INDIVIDUAL EFFECTS (5 commands)
 # ============================================================================
 
+
 @app.command("eq")
 @utils.with_error_handling
 def apply_eq_effect(
     file: Path = typer.Argument(..., help="Audio file to process"),
     gains: str = typer.Option(
         "0,0,0,0,0,0,0,0,0,0",
-        "--gains", "-g",
-        help="10-band EQ gains in dB (comma-separated, e.g. '3,0,-2,0,0,0,0,0,0,0')"
+        "--gains",
+        "-g",
+        help="10-band EQ gains in dB (comma-separated, e.g. '3,0,-2,0,0,0,0,0,0,0')",
     ),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output file path"
+    ),
 ) -> None:
     """
     Apply 10-band parametric EQ.
@@ -291,10 +312,14 @@ def apply_eq_effect(
         try:
             gains_list = [float(g.strip()) for g in gains.split(",")]
             if len(gains_list) != 10:
-                console.print(f"[red]✗ Must provide exactly 10 gain values (got {len(gains_list)})[/red]")
+                console.print(
+                    f"[red]✗ Must provide exactly 10 gain values (got {len(gains_list)})[/red]"
+                )
                 raise typer.Exit(1)
         except ValueError:
-            console.print(f"[red]✗ Invalid gain values. Use comma-separated floats, e.g.: 3,0,-2,0,0,0,0,0,0,0[/red]")
+            console.print(
+                f"[red]✗ Invalid gain values. Use comma-separated floats, e.g.: 3,0,-2,0,0,0,0,0,0,0[/red]"
+            )
             raise typer.Exit(1)
 
         output_file = output or file.with_stem(file.stem + "_eq")
@@ -338,12 +363,16 @@ def apply_eq_effect(
 @utils.with_error_handling
 def apply_compression_effect(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    ratio: float = typer.Option(4.0, "--ratio", "-r", help="Compression ratio (e.g., 4.0 = 4:1)"),
+    ratio: float = typer.Option(
+        4.0, "--ratio", "-r", help="Compression ratio (e.g., 4.0 = 4:1)"
+    ),
     threshold: float = typer.Option(-20.0, "--threshold", "-t", help="Threshold in dB"),
     attack: float = typer.Option(10.0, "--attack", "-a", help="Attack time in ms"),
     release: float = typer.Option(100.0, "--release", "-l", help="Release time in ms"),
     makeup: float = typer.Option(0.0, "--makeup", "-m", help="Makeup gain in dB"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output file path"
+    ),
 ) -> None:
     """
     Apply dynamic compression.
@@ -385,7 +414,7 @@ def apply_compression_effect(
                 threshold_db=threshold,
                 attack_ms=attack,
                 release_ms=release,
-                makeup_gain_db=makeup
+                makeup_gain_db=makeup,
             )
             output_file = Path(output_file).expanduser().resolve()
             output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -403,9 +432,13 @@ def apply_compression_effect(
 @utils.with_error_handling
 def apply_limiting_effect(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    threshold: float = typer.Option(-3.0, "--threshold", "-t", help="Limiting threshold in dB"),
+    threshold: float = typer.Option(
+        -3.0, "--threshold", "-t", help="Limiting threshold in dB"
+    ),
     release: float = typer.Option(50.0, "--release", "-r", help="Release time in ms"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output file path"
+    ),
 ) -> None:
     """
     Apply hard limiter (infinite ratio compression).
@@ -434,9 +467,7 @@ def apply_limiting_effect(
             processor = AudioEffectsProcessor()
             audio, sr = processor.load_audio(file)
             processed = processor.apply_limiting(
-                audio,
-                threshold_db=threshold,
-                release_ms=release
+                audio, threshold_db=threshold, release_ms=release
             )
             output_file = Path(output_file).expanduser().resolve()
             output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -454,10 +485,16 @@ def apply_limiting_effect(
 @utils.with_error_handling
 def apply_distortion_effect(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    drive: float = typer.Option(1.0, "--drive", "-d", help="Drive amount (1.0=clean, >1.0=distorted)"),
-    tone: float = typer.Option(0.5, "--tone", "-t", help="Tone shaping (0-1, 0=warm, 1=bright)"),
+    drive: float = typer.Option(
+        1.0, "--drive", "-d", help="Drive amount (1.0=clean, >1.0=distorted)"
+    ),
+    tone: float = typer.Option(
+        0.5, "--tone", "-t", help="Tone shaping (0-1, 0=warm, 1=bright)"
+    ),
     output_gain: float = typer.Option(0.0, "--gain", "-g", help="Output gain in dB"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output file path"
+    ),
 ) -> None:
     """
     Apply soft clipping distortion.
@@ -492,10 +529,7 @@ def apply_distortion_effect(
             processor = AudioEffectsProcessor()
             audio, sr = processor.load_audio(file)
             processed = processor.apply_distortion(
-                audio,
-                drive=drive,
-                tone=tone,
-                output_gain_db=output_gain
+                audio, drive=drive, tone=tone, output_gain_db=output_gain
             )
             output_file = Path(output_file).expanduser().resolve()
             output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -517,7 +551,9 @@ def apply_reverb_effect(
     damping: float = typer.Option(0.5, "--damping", "-d", help="Damping (0-1)"),
     width: float = typer.Option(1.0, "--width", "-w", help="Stereo width (0-1)"),
     mix: float = typer.Option(0.3, "--mix", "-m", help="Dry/wet mix (0-1, 1=all wet)"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output file path"
+    ),
 ) -> None:
     """
     Apply reverb effect.
@@ -553,11 +589,7 @@ def apply_reverb_effect(
             processor = AudioEffectsProcessor()
             audio, sr = processor.load_audio(file)
             processed = processor.apply_reverb(
-                audio,
-                room_size=room,
-                damping=damping,
-                width=width,
-                dry_wet_mix=mix
+                audio, room_size=room, damping=damping, width=width, dry_wet_mix=mix
             )
             output_file = Path(output_file).expanduser().resolve()
             output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -574,6 +606,7 @@ def apply_reverb_effect(
 # ============================================================================
 # SECTION 3: LIST & REFERENCE (1 command)
 # ============================================================================
+
 
 @app.command("list")
 @utils.with_error_handling
@@ -604,11 +637,27 @@ def list_effects() -> None:
     effects_table.add_column("Command")
 
     effects_data = [
-        ("10-Band EQ", "Parametric equalization across frequency spectrum", "samplemind audio:eq"),
-        ("Compression", "Dynamic range compression with adjustable ratio", "samplemind audio:compress"),
+        (
+            "10-Band EQ",
+            "Parametric equalization across frequency spectrum",
+            "samplemind audio:eq",
+        ),
+        (
+            "Compression",
+            "Dynamic range compression with adjustable ratio",
+            "samplemind audio:compress",
+        ),
         ("Limiter", "Hard limiting to prevent clipping", "samplemind audio:limit"),
-        ("Distortion", "Soft clipping distortion and saturation", "samplemind audio:distort"),
-        ("Reverb", "Room modeling with adjustable parameters", "samplemind audio:reverb"),
+        (
+            "Distortion",
+            "Soft clipping distortion and saturation",
+            "samplemind audio:distort",
+        ),
+        (
+            "Reverb",
+            "Room modeling with adjustable parameters",
+            "samplemind audio:reverb",
+        ),
     ]
 
     for effect, desc, cmd in effects_data:
@@ -627,7 +676,7 @@ def list_effects() -> None:
 [cyan]samplemind audio:distort synth.wav --drive 2.0 --tone 0.5[/cyan]
 [cyan]samplemind audio:reverb vocal.wav --room 0.8 --mix 0.3[/cyan]""",
         title="Examples",
-        border_style="cyan"
+        border_style="cyan",
     )
     console.print(examples_panel)
     console.print()

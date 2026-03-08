@@ -23,6 +23,7 @@ class TestAbletonBackendAPI:
         """Mock the FastAPI app if not available"""
         try:
             from ableton.python_backend import app
+
             return app
         except ImportError:
             # Backend not yet created, return mock
@@ -45,7 +46,7 @@ class TestAbletonBackendAPI:
             "genre": "Electronic",
             "energy": 0.75,
             "confidence": 0.92,
-            "analysis_time_ms": 1250
+            "analysis_time_ms": 1250,
         }
 
     # Health Check Endpoints (2 tests)
@@ -66,7 +67,7 @@ class TestAbletonBackendAPI:
         expected_response = {
             "status": "healthy",
             "timestamp": datetime.now().isoformat(),
-            "version": "1.0.0"
+            "version": "1.0.0",
         }
 
         # Verify response has required fields
@@ -80,10 +81,7 @@ class TestAbletonBackendAPI:
     def test_analyze_single_audio_file(self, mock_analysis_result):
         """Test /api/analyze endpoint with single file"""
         # Mock request
-        request = {
-            "file_path": "/path/to/audio.wav",
-            "analysis_level": "STANDARD"
-        }
+        request = {"file_path": "/path/to/audio.wav", "analysis_level": "STANDARD"}
 
         # Expected response structure
         response = mock_analysis_result
@@ -111,7 +109,7 @@ class TestAbletonBackendAPI:
             "BASIC": {"tempo_bpm": 120, "confidence": 0.7},
             "STANDARD": {"tempo_bpm": 120, "confidence": 0.85},
             "DETAILED": {"tempo_bpm": 120, "confidence": 0.92},
-            "PROFESSIONAL": {"tempo_bpm": 120, "confidence": 0.98}
+            "PROFESSIONAL": {"tempo_bpm": 120, "confidence": 0.98},
         }
 
         for level in levels:
@@ -129,17 +127,25 @@ class TestAbletonBackendAPI:
         # Mock batch request
         request = {
             "files": ["/path/to/audio1.wav", "/path/to/audio2.wav"],
-            "analysis_level": "STANDARD"
+            "analysis_level": "STANDARD",
         }
 
         # Mock batch response
         response = {
             "results": [
-                {"file_path": "/path/to/audio1.wav", "tempo_bpm": 120, "confidence": 0.92},
-                {"file_path": "/path/to/audio2.wav", "tempo_bpm": 130, "confidence": 0.87}
+                {
+                    "file_path": "/path/to/audio1.wav",
+                    "tempo_bpm": 120,
+                    "confidence": 0.92,
+                },
+                {
+                    "file_path": "/path/to/audio2.wav",
+                    "tempo_bpm": 130,
+                    "confidence": 0.87,
+                },
             ],
             "success_count": 2,
-            "error_count": 0
+            "error_count": 0,
         }
 
         # Verify response structure
@@ -163,7 +169,7 @@ class TestAbletonBackendAPI:
         error_scenarios = [
             {"error": "File not found", "status": 404},
             {"error": "Invalid file format", "status": 400},
-            {"error": "Permission denied", "status": 403}
+            {"error": "Permission denied", "status": 403},
         ]
 
         # Verify error structure for each scenario
@@ -177,10 +183,7 @@ class TestAbletonBackendAPI:
     def test_find_similar_samples(self):
         """Test /api/similar endpoint"""
         # Mock request
-        request = {
-            "file_path": "/path/to/audio.wav",
-            "limit": 10
-        }
+        request = {"file_path": "/path/to/audio.wav", "limit": 10}
 
         # Mock response
         response = {
@@ -188,9 +191,9 @@ class TestAbletonBackendAPI:
             "similar_samples": [
                 {"file_path": "/library/sample1.wav", "similarity": 0.95},
                 {"file_path": "/library/sample2.wav", "similarity": 0.87},
-                {"file_path": "/library/sample3.wav", "similarity": 0.79}
+                {"file_path": "/library/sample3.wav", "similarity": 0.79},
             ],
-            "count": 3
+            "count": 3,
         }
 
         # Verify response structure
@@ -210,10 +213,7 @@ class TestAbletonBackendAPI:
     def test_semantic_search(self):
         """Test /api/search endpoint"""
         # Mock request
-        request = {
-            "query": "fast dance track",
-            "limit": 10
-        }
+        request = {"query": "fast dance track", "limit": 10}
 
         # Mock response
         response = {
@@ -221,10 +221,10 @@ class TestAbletonBackendAPI:
             "results": [
                 {"file_path": "/library/dance1.wav", "relevance": 0.96},
                 {"file_path": "/library/dance2.wav", "relevance": 0.89},
-                {"file_path": "/library/dance3.wav", "relevance": 0.82}
+                {"file_path": "/library/dance3.wav", "relevance": 0.82},
             ],
             "count": 3,
-            "search_time_ms": 125
+            "search_time_ms": 125,
         }
 
         # Verify response structure
@@ -247,16 +247,13 @@ class TestAbletonBackendAPI:
     def test_search_error_handling(self):
         """Test search error handling"""
         # Test empty query
-        empty_query_response = {
-            "error": "Query cannot be empty",
-            "status": 400
-        }
+        empty_query_response = {"error": "Query cannot be empty", "status": 400}
         assert empty_query_response["status"] == 400
 
         # Test query too long
         long_query_response = {
             "error": "Query too long (max 500 characters)",
-            "status": 400
+            "status": 400,
         }
         assert long_query_response["status"] == 400
 
@@ -265,7 +262,7 @@ class TestAbletonBackendAPI:
             "query": "very_specific_nonexistent_query_xyz",
             "results": [],
             "count": 0,
-            "search_time_ms": 45
+            "search_time_ms": 45,
         }
         assert no_results_response["count"] == 0
         assert len(no_results_response["results"]) == 0
@@ -275,22 +272,33 @@ class TestAbletonBackendAPI:
     def test_project_sync_recommendations(self):
         """Test /api/project-sync endpoint"""
         # Mock request
-        request = {
-            "project_bpm": 120,
-            "project_key": "C Major",
-            "limit": 10
-        }
+        request = {"project_bpm": 120, "project_key": "C Major", "limit": 10}
 
         # Mock response
         response = {
             "project_bpm": request["project_bpm"],
             "project_key": request["project_key"],
             "matched_samples": [
-                {"file_path": "/library/match1.wav", "bpm": 120, "key": "C Major", "match_score": 0.98},
-                {"file_path": "/library/match2.wav", "bpm": 118, "key": "C Major", "match_score": 0.94},
-                {"file_path": "/library/match3.wav", "bpm": 122, "key": "C Major", "match_score": 0.91}
+                {
+                    "file_path": "/library/match1.wav",
+                    "bpm": 120,
+                    "key": "C Major",
+                    "match_score": 0.98,
+                },
+                {
+                    "file_path": "/library/match2.wav",
+                    "bpm": 118,
+                    "key": "C Major",
+                    "match_score": 0.94,
+                },
+                {
+                    "file_path": "/library/match3.wav",
+                    "bpm": 122,
+                    "key": "C Major",
+                    "match_score": 0.91,
+                },
             ],
-            "count": 3
+            "count": 3,
         }
 
         # Verify response structure
@@ -316,15 +324,22 @@ class TestAbletonBackendAPI:
         # Expected response
         response = {
             "keys": [
-                "C Major", "C Minor",
-                "D Major", "D Minor",
-                "E Major", "E Minor",
-                "F Major", "F Minor",
-                "G Major", "G Minor",
-                "A Major", "A Minor",
-                "B Major", "B Minor"
+                "C Major",
+                "C Minor",
+                "D Major",
+                "D Minor",
+                "E Major",
+                "E Minor",
+                "F Major",
+                "F Minor",
+                "G Major",
+                "G Minor",
+                "A Major",
+                "A Minor",
+                "B Major",
+                "B Minor",
             ],
-            "count": 14
+            "count": 14,
         }
 
         # Verify response structure
@@ -346,21 +361,18 @@ class TestAbletonBackendAPI:
         # Test invalid BPM (0)
         invalid_bpm_response = {
             "error": "BPM must be between 40 and 300",
-            "status": 400
+            "status": 400,
         }
         assert invalid_bpm_response["status"] == 400
 
         # Test negative BPM
-        negative_bpm_response = {
-            "error": "BPM must be positive",
-            "status": 400
-        }
+        negative_bpm_response = {"error": "BPM must be positive", "status": 400}
         assert negative_bpm_response["status"] == 400
 
         # Test invalid key format
         invalid_key_response = {
             "error": "Invalid key format. Use format: 'Note Major/Minor' (e.g., 'C Major')",
-            "status": 400
+            "status": 400,
         }
         assert invalid_key_response["status"] == 400
 
@@ -369,7 +381,7 @@ class TestAbletonBackendAPI:
             "project_bpm": 200,
             "project_key": "B Minor",
             "matched_samples": [],
-            "count": 0
+            "count": 0,
         }
         assert no_matches_response["count"] == 0
         assert len(no_matches_response["matched_samples"]) == 0
@@ -379,10 +391,7 @@ class TestAbletonBackendAPI:
     def test_generate_midi_melody(self):
         """Test /api/generate-midi endpoint for melody extraction"""
         # Mock request
-        request = {
-            "file_path": "/path/to/audio.wav",
-            "extraction_type": "melody"
-        }
+        request = {"file_path": "/path/to/audio.wav", "extraction_type": "melody"}
 
         # Mock response
         response = {
@@ -390,7 +399,7 @@ class TestAbletonBackendAPI:
             "extraction_type": "melody",
             "note_count": 24,
             "confidence": 0.87,
-            "duration_seconds": 2.5
+            "duration_seconds": 2.5,
         }
 
         # Verify response structure
@@ -413,7 +422,7 @@ class TestAbletonBackendAPI:
             "melody": {"note_count": 24, "confidence": 0.87},
             "harmony": {"note_count": 12, "confidence": 0.82},
             "drums": {"note_count": 8, "confidence": 0.91},
-            "bass_line": {"note_count": 6, "confidence": 0.85}
+            "bass_line": {"note_count": 6, "confidence": 0.85},
         }
 
         for extraction_type in extraction_types:
@@ -434,21 +443,21 @@ class TestAbletonBackendAPI:
         # Test invalid extraction type
         invalid_type_response = {
             "error": "Invalid extraction_type. Must be one of: melody, harmony, drums, bass_line",
-            "status": 400
+            "status": 400,
         }
         assert invalid_type_response["status"] == 400
 
         # Test no MIDI data extracted
         no_midi_response = {
             "error": "No MIDI data could be extracted from the audio",
-            "status": 422
+            "status": 422,
         }
         assert no_midi_response["status"] == 422
 
         # Test file processing error
         processing_error_response = {
             "error": "Error processing audio file",
-            "status": 500
+            "status": 500,
         }
         assert processing_error_response["status"] == 500
 
@@ -462,7 +471,7 @@ class TestAbletonBackendAPI:
             "total_size_gb": 45.2,
             "last_updated": "2026-02-04T12:30:45Z",
             "supported_formats": ["wav", "mp3", "aiff", "ogg"],
-            "analysis_cache_size": 2500
+            "analysis_cache_size": 2500,
         }
 
         # Verify response structure
@@ -487,14 +496,14 @@ class TestAbletonBackendAPI:
         # Mock request
         request = {
             "file_path": "/path/to/audio.wav",
-            "metadata": {"artist": "Test Artist", "title": "Test Track"}
+            "metadata": {"artist": "Test Artist", "title": "Test Track"},
         }
 
         # Mock response
         response = {
             "file_path": "/path/to/audio.wav",
             "added": True,
-            "timestamp": "2026-02-04T12:35:20Z"
+            "timestamp": "2026-02-04T12:35:20Z",
         }
 
         # Verify response structure
@@ -508,24 +517,15 @@ class TestAbletonBackendAPI:
     def test_library_management_error_handling(self):
         """Test library management error handling"""
         # Test duplicate file
-        duplicate_response = {
-            "error": "File already exists in library",
-            "status": 409
-        }
+        duplicate_response = {"error": "File already exists in library", "status": 409}
         assert duplicate_response["status"] == 409
 
         # Test file not found
-        not_found_response = {
-            "error": "File not found",
-            "status": 404
-        }
+        not_found_response = {"error": "File not found", "status": 404}
         assert not_found_response["status"] == 404
 
         # Test disk full
-        disk_full_response = {
-            "error": "Not enough disk space",
-            "status": 507
-        }
+        disk_full_response = {"error": "Not enough disk space", "status": 507}
         assert disk_full_response["status"] == 507
 
     # Error Handling Tests (7+ tests)
@@ -536,7 +536,7 @@ class TestAbletonBackendAPI:
         response = {
             "error": "Not Found",
             "status": 404,
-            "detail": "The requested endpoint does not exist"
+            "detail": "The requested endpoint does not exist",
         }
 
         # Verify error structure
@@ -549,7 +549,7 @@ class TestAbletonBackendAPI:
         response = {
             "error": "Bad Request",
             "status": 400,
-            "detail": "Missing required field: file_path"
+            "detail": "Missing required field: file_path",
         }
 
         # Verify error structure
@@ -562,7 +562,7 @@ class TestAbletonBackendAPI:
         response = {
             "error": "Internal Server Error",
             "status": 500,
-            "detail": "An unexpected error occurred"
+            "detail": "An unexpected error occurred",
         }
 
         # Verify error structure
@@ -572,11 +572,7 @@ class TestAbletonBackendAPI:
     def test_503_service_unavailable(self):
         """Test 503 error when service unavailable"""
         # Mock response
-        response = {
-            "error": "Service Unavailable",
-            "status": 503,
-            "retry_after": 60
-        }
+        response = {"error": "Service Unavailable", "status": 503, "retry_after": 60}
 
         # Verify error structure
         assert response["status"] == 503
@@ -585,11 +581,7 @@ class TestAbletonBackendAPI:
     def test_rate_limiting(self):
         """Test rate limiting (if implemented)"""
         # Mock response after rate limit exceeded
-        response = {
-            "error": "Too Many Requests",
-            "status": 429,
-            "retry_after": 60
-        }
+        response = {"error": "Too Many Requests", "status": 429, "retry_after": 60}
 
         # Verify rate limit response
         assert response["status"] == 429
@@ -601,7 +593,7 @@ class TestAbletonBackendAPI:
         response = {
             "error": "Request Timeout",
             "status": 408,
-            "detail": "Request timed out after 30 seconds"
+            "detail": "Request timed out after 30 seconds",
         }
 
         # Verify timeout response
@@ -614,7 +606,7 @@ class TestAbletonBackendAPI:
         headers = {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type"
+            "Access-Control-Allow-Headers": "Content-Type",
         }
 
         # Verify CORS headers
@@ -632,7 +624,7 @@ class TestAbletonBackendAPI:
             "file_path": "/path/to/audio.wav",
             "tempo_bpm": 120,
             "key": "C Major",
-            "confidence": 0.92
+            "confidence": 0.92,
         }
 
         # Step 2: Find similar samples
@@ -640,16 +632,13 @@ class TestAbletonBackendAPI:
             "query_file": "/path/to/audio.wav",
             "similar_samples": [
                 {"file_path": "/library/similar1.wav", "similarity": 0.94},
-                {"file_path": "/library/similar2.wav", "similarity": 0.87}
+                {"file_path": "/library/similar2.wav", "similarity": 0.87},
             ],
-            "count": 2
+            "count": 2,
         }
 
         # Step 3: Check library stats
-        stats_response = {
-            "total_files": 1500,
-            "total_size_gb": 45.2
-        }
+        stats_response = {"total_files": 1500, "total_size_gb": 45.2}
 
         # Verify all steps succeeded
         assert analysis_response["confidence"] > 0.8
@@ -665,14 +654,14 @@ class TestAbletonBackendAPI:
         analysis_response = {
             "file_path": "/path/to/audio.wav",
             "tempo_bpm": 120,
-            "key": "C Major"
+            "key": "C Major",
         }
 
         # Step 2: Generate MIDI
         midi_response = {
             "extraction_type": "melody",
             "note_count": 24,
-            "confidence": 0.87
+            "confidence": 0.87,
         }
 
         # Verify both steps succeeded
@@ -695,7 +684,7 @@ class TestAbletonBackendAPI:
         analysis_response = {
             "file_path": "/path/to/audio.wav",
             "tempo_bpm": 120,
-            "analysis_time_ms": 1250
+            "analysis_time_ms": 1250,
         }
 
         end_time = time.time()
@@ -714,7 +703,7 @@ class TestAbletonBackendAPI:
             ],
             "total_time_ms": 12000,
             "success_count": 10,
-            "error_count": 0
+            "error_count": 0,
         }
 
         # Verify batch processing
@@ -737,11 +726,9 @@ class TestAbletonBackendIntegration:
         """Test backend integration with AudioEngine"""
         # Mock AudioEngine integration
         audio_engine_mock = Mock()
-        audio_engine_mock.analyze = Mock(return_value={
-            "tempo_bpm": 120,
-            "key": "C Major",
-            "confidence": 0.92
-        })
+        audio_engine_mock.analyze = Mock(
+            return_value={"tempo_bpm": 120, "key": "C Major", "confidence": 0.92}
+        )
 
         # Verify backend uses AudioEngine
         result = audio_engine_mock.analyze("test_audio.wav")
@@ -758,11 +745,13 @@ class TestAbletonBackendIntegration:
         """Test backend integration with MIDIGenerator"""
         # Mock MIDIGenerator integration
         midi_generator_mock = Mock()
-        midi_generator_mock.generate = Mock(return_value={
-            "midi_file": "base64_encoded_data",
-            "note_count": 24,
-            "confidence": 0.87
-        })
+        midi_generator_mock.generate = Mock(
+            return_value={
+                "midi_file": "base64_encoded_data",
+                "note_count": 24,
+                "confidence": 0.87,
+            }
+        )
 
         # Verify MIDI generation
         result = midi_generator_mock.generate("test_audio.wav", "melody")
@@ -779,11 +768,13 @@ class TestAbletonBackendIntegration:
         """Test backend integration with ChromaDB"""
         # Mock ChromaDB integration
         chromadb_mock = Mock()
-        chromadb_mock.search = Mock(return_value=[
-            {"file_path": "/library/similar1.wav", "similarity": 0.94},
-            {"file_path": "/library/similar2.wav", "similarity": 0.87},
-            {"file_path": "/library/similar3.wav", "similarity": 0.79}
-        ])
+        chromadb_mock.search = Mock(
+            return_value=[
+                {"file_path": "/library/similar1.wav", "similarity": 0.94},
+                {"file_path": "/library/similar2.wav", "similarity": 0.87},
+                {"file_path": "/library/similar3.wav", "similarity": 0.79},
+            ]
+        )
 
         # Verify similarity search
         results = chromadb_mock.search("test_audio.wav", limit=10)

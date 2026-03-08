@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 class CollectionType(Enum):
     """Types of collections"""
+
     FAVORITES = "favorites"
     CUSTOM = "custom"
     WORKFLOW = "workflow"
@@ -37,7 +38,7 @@ class Sample:
         filename: str,
         path: str,
         metadata: Optional[Dict] = None,
-        added_at: Optional[str] = None
+        added_at: Optional[str] = None,
     ):
         self.id = id
         self.filename = filename
@@ -52,7 +53,7 @@ class Sample:
             "filename": self.filename,
             "path": self.path,
             "metadata": self.metadata,
-            "added_at": self.added_at
+            "added_at": self.added_at,
         }
 
     @classmethod
@@ -63,7 +64,7 @@ class Sample:
             filename=data["filename"],
             path=data["path"],
             metadata=data.get("metadata", {}),
-            added_at=data.get("added_at")
+            added_at=data.get("added_at"),
         )
 
 
@@ -77,7 +78,7 @@ class Collection:
         collection_type: CollectionType = CollectionType.CUSTOM,
         description: str = "",
         metadata: Optional[Dict] = None,
-        created_at: Optional[str] = None
+        created_at: Optional[str] = None,
     ):
         self.id = id
         self.name = name
@@ -147,7 +148,7 @@ class Collection:
             "description": self.description,
             "metadata": self.metadata,
             "created_at": self.created_at,
-            "samples": [s.to_dict() for s in self.samples.values()]
+            "samples": [s.to_dict() for s in self.samples.values()],
         }
 
     @classmethod
@@ -159,7 +160,7 @@ class Collection:
             collection_type=CollectionType(data.get("type", "custom")),
             description=data.get("description", ""),
             metadata=data.get("metadata", {}),
-            created_at=data.get("created_at")
+            created_at=data.get("created_at"),
         )
 
         # Add samples
@@ -202,7 +203,7 @@ class FavoritesManager:
             id="favorites",
             name="Favorites",
             collection_type=CollectionType.FAVORITES,
-            description="Your favorite samples"
+            description="Your favorite samples",
         )
         self.collections["favorites"] = favorites
 
@@ -211,7 +212,7 @@ class FavoritesManager:
         name: str,
         description: str = "",
         collection_type: CollectionType = CollectionType.CUSTOM,
-        metadata: Optional[Dict] = None
+        metadata: Optional[Dict] = None,
     ) -> Collection:
         """
         Create a new collection.
@@ -237,7 +238,7 @@ class FavoritesManager:
             name=name,
             collection_type=collection_type,
             description=description,
-            metadata=metadata
+            metadata=metadata,
         )
 
         self.collections[collection_id] = collection
@@ -250,7 +251,9 @@ class FavoritesManager:
         """Get collection by ID"""
         return self.collections.get(collection_id)
 
-    def list_collections(self, collection_type: Optional[CollectionType] = None) -> List[Collection]:
+    def list_collections(
+        self, collection_type: Optional[CollectionType] = None
+    ) -> List[Collection]:
         """
         List collections.
 
@@ -263,7 +266,9 @@ class FavoritesManager:
         collections = list(self.collections.values())
 
         if collection_type:
-            collections = [c for c in collections if c.collection_type == collection_type]
+            collections = [
+                c for c in collections if c.collection_type == collection_type
+            ]
 
         return sorted(collections, key=lambda c: c.created_at)
 
@@ -433,7 +438,13 @@ class FavoritesManager:
             "total_collections": len(self.collections),
             "total_samples": total_samples,
             "favorites_count": self.collections["favorites"].get_size(),
-            "custom_collections": len([c for c in self.collections.values() if c.collection_type == CollectionType.CUSTOM]),
+            "custom_collections": len(
+                [
+                    c
+                    for c in self.collections.values()
+                    if c.collection_type == CollectionType.CUSTOM
+                ]
+            ),
         }
 
     def _save_collection(self, collection: Collection) -> None:

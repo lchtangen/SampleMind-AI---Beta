@@ -17,7 +17,7 @@ class APIKeyRepository:
         key_hash: str,
         permissions: List[str],
         created_at: Optional[datetime] = None,
-        is_active: bool = True
+        is_active: bool = True,
     ) -> APIKey:
         """Create new API key"""
         api_key = APIKey(
@@ -28,7 +28,7 @@ class APIKeyRepository:
             key_hash=key_hash,
             permissions=permissions,
             is_active=is_active,
-            created_at=created_at or datetime.utcnow()
+            created_at=created_at or datetime.utcnow(),
         )
         await api_key.insert()
         return api_key
@@ -40,12 +40,15 @@ class APIKeyRepository:
 
     @staticmethod
     async def get_by_user_id(
-        user_id: str,
-        limit: int = 50,
-        offset: int = 0
+        user_id: str, limit: int = 50, offset: int = 0
     ) -> Optional[List[APIKey]]:
         """Get all API keys for a user"""
-        return await APIKey.find(APIKey.user_id == user_id).skip(offset).limit(limit).to_list()
+        return (
+            await APIKey.find(APIKey.user_id == user_id)
+            .skip(offset)
+            .limit(limit)
+            .to_list()
+        )
 
     @staticmethod
     async def get_by_hash(key_hash: str) -> Optional[APIKey]:

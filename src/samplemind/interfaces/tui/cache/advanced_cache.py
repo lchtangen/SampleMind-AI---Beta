@@ -101,7 +101,9 @@ class AdvancedCache:
             evicted_key, _ = self.l1_cache.popitem(last=False)
             logger.debug(f"💾 L1 EVICT: {evicted_key}")
 
-        logger.debug(f"💾 L1 SET: {key} (size: {len(self.l1_cache)}/{self.l1_max_size})")
+        logger.debug(
+            f"💾 L1 SET: {key} (size: {len(self.l1_cache)}/{self.l1_max_size})"
+        )
 
     def _l1_clear(self) -> None:
         """Clear L1 cache"""
@@ -160,7 +162,11 @@ class AdvancedCache:
         return None
 
     async def set(
-        self, namespace: str, identifier: str, value: Any, tags: Optional[List[str]] = None
+        self,
+        namespace: str,
+        identifier: str,
+        value: Any,
+        tags: Optional[List[str]] = None,
     ) -> None:
         """Set value in cache (L1 + L2 + L3)"""
         key = self._generate_key(namespace, identifier)

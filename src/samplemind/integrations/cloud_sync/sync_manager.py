@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 class SyncAction(str, Enum):
     """Sync actions"""
+
     CREATE = "create"
     UPDATE = "update"
     DELETE = "delete"
@@ -24,6 +25,7 @@ class SyncAction(str, Enum):
 @dataclass
 class SyncEvent:
     """Single synchronization event"""
+
     event_id: str
     user_id: str
     collection: str  # 'samples', 'analyses', 'workspaces'
@@ -49,7 +51,9 @@ class OfflineQueue:
             return False
 
         self.queue.append(event)
-        logger.debug(f"Event queued: {event.event_id} ({event.action} {event.collection})")
+        logger.debug(
+            f"Event queued: {event.event_id} ({event.action} {event.collection})"
+        )
         return True
 
     def get_pending(self, limit: int = 100) -> List[SyncEvent]:
@@ -81,8 +85,7 @@ class ConflictResolver:
 
     @staticmethod
     def resolve_conflict(
-        local_doc: Dict[str, Any],
-        remote_event: SyncEvent
+        local_doc: Dict[str, Any], remote_event: SyncEvent
     ) -> SyncEvent:
         """
         Resolve conflict using last-write-wins strategy
@@ -94,7 +97,7 @@ class ConflictResolver:
         Returns:
             Resolved SyncEvent (either local or remote)
         """
-        local_timestamp = local_doc.get('updated_at')
+        local_timestamp = local_doc.get("updated_at")
         remote_timestamp = remote_event.timestamp
 
         if isinstance(local_timestamp, str):
@@ -116,8 +119,8 @@ class ConflictResolver:
                 action="update",
                 data=local_doc,
                 timestamp=datetime.utcnow(),
-                device_id=local_doc.get('device_id', 'unknown'),
-                version=local_doc.get('version', 1) + 1
+                device_id=local_doc.get("device_id", "unknown"),
+                version=local_doc.get("version", 1) + 1,
             )
         else:
             # Remote is newer or same, use remote
@@ -137,7 +140,7 @@ class CloudSyncManager:
         redis_client=None,
         s3_client=None,
         sync_interval: int = 60,
-        enable_auto_sync: bool = True
+        enable_auto_sync: bool = True,
     ):
         self.mongodb = mongodb_client
         self.redis = redis_client
@@ -173,9 +176,8 @@ class CloudSyncManager:
             # Store sync state in database
             if self.mongodb:
                 from samplemind.core.database.mongo import UserSettings
-                settings = await UserSettings.find_one(
-                    UserSettings.user_id == user_id
-                )
+
+                settings = await UserSettings.find_one(UserSettings.user_id == user_id)
                 if settings:
                     settings.cloud_sync_enabled = True
                     await settings.save()
@@ -192,7 +194,9 @@ class CloudSyncManager:
             return True
 
         except Exception as e:
-            logger.error(f"Failed to enable sync for {user_id}: {str(e)}", exc_info=True)
+            logger.error(
+                f"Failed to enable sync for {user_id}: {str(e)}", exc_info=True
+            )
             return False
 
     async def disable_sync(self, user_id: str) -> bool:
@@ -219,9 +223,8 @@ class CloudSyncManager:
             # Store sync state in database
             if self.mongodb:
                 from samplemind.core.database.mongo import UserSettings
-                settings = await UserSettings.find_one(
-                    UserSettings.user_id == user_id
-                )
+
+                settings = await UserSettings.find_one(UserSettings.user_id == user_id)
                 if settings:
                     settings.cloud_sync_enabled = False
                     await settings.save()
@@ -230,7 +233,9 @@ class CloudSyncManager:
             return True
 
         except Exception as e:
-            logger.error(f"Failed to disable sync for {user_id}: {str(e)}", exc_info=True)
+            logger.error(
+                f"Failed to disable sync for {user_id}: {str(e)}", exc_info=True
+            )
             return False
 
     async def queue_event(
@@ -240,7 +245,7 @@ class CloudSyncManager:
         document_id: str,
         action: str,
         data: Dict[str, Any],
-        device_id: str
+        device_id: str,
     ) -> Optional[SyncEvent]:
         """
         Queue a sync event
@@ -266,7 +271,7 @@ class CloudSyncManager:
                 data=data,
                 timestamp=datetime.utcnow(),
                 device_id=device_id,
-                version=1
+                version=1,
             )
 
             # Get or create offline queue
@@ -302,7 +307,7 @@ class CloudSyncManager:
             "pushed": 0,
             "pulled": 0,
             "conflicts_resolved": 0,
-            "errors": []
+            "errors": [],
         }
 
         try:
@@ -314,7 +319,9 @@ class CloudSyncManager:
             pulled = await self._pull_changes(user_id)
             result["pulled"] = pulled
 
-            logger.info(f"✅ Sync completed for user {user_id}: pushed={pushed}, pulled={pulled}")
+            logger.info(
+                f"✅ Sync completed for user {user_id}: pushed={pushed}, pulled={pulled}"
+            )
 
         except Exception as e:
             logger.error(f"Sync error for {user_id}: {str(e)}", exc_info=True)
@@ -343,7 +350,9 @@ class CloudSyncManager:
                 logger.info(f"Sync worker cancelled for user: {user_id}")
                 break
             except Exception as e:
-                logger.error(f"Sync worker error for {user_id}: {str(e)}", exc_info=True)
+                logger.error(
+                    f"Sync worker error for {user_id}: {str(e)}", exc_info=True
+                )
                 await asyncio.sleep(self.sync_interval)
 
     async def _push_changes(self, user_id: str) -> int:
@@ -437,9 +446,11 @@ class CloudSyncManager:
             # Get collection
             if change.collection == "samples":
                 from samplemind.core.database.mongo import AudioFile
+
                 collection_class = AudioFile
             elif change.collection == "analyses":
                 from samplemind.core.database.mongo import Analysis
+
                 collection_class = Analysis
             else:
                 logger.warning(f"Unknown collection: {change.collection}")
@@ -450,13 +461,13 @@ class CloudSyncManager:
                 collection_class.id == change.document_id  # type: ignore
             )
 
-            if local_doc and hasattr(local_doc, 'version'):
+            if local_doc and hasattr(local_doc, "version"):
                 if local_doc.version != change.version - 1:  # type: ignore
                     # Conflict detected
                     logger.warning(f"Conflict detected for {change.document_id}")
                     resolved = ConflictResolver.resolve_conflict(
-                        local_doc.dict() if hasattr(local_doc, 'dict') else local_doc,
-                        change
+                        local_doc.dict() if hasattr(local_doc, "dict") else local_doc,
+                        change,
                     )
                     change = resolved
 
@@ -494,9 +505,7 @@ class CloudSyncManager:
             raise
 
     async def _fetch_remote_changes(
-        self,
-        user_id: str,
-        since: Optional[datetime] = None
+        self, user_id: str, since: Optional[datetime] = None
     ) -> List[SyncEvent]:
         """Fetch remote changes from cloud storage"""
         # Placeholder implementation
@@ -521,7 +530,7 @@ class CloudSyncManager:
                 await self.redis.set(
                     f"user:{user_id}:last_sync",
                     timestamp.isoformat(),
-                    ex=30 * 24 * 60 * 60  # 30 days expiry
+                    ex=30 * 24 * 60 * 60,  # 30 days expiry
                 )
         except Exception as e:
             logger.warning(f"Failed to set last sync time: {str(e)}")
@@ -530,6 +539,7 @@ class CloudSyncManager:
         """Get sync status for user"""
         return {
             "enabled": self.sync_enabled.get(user_id, False),
-            "syncing": user_id in self.sync_workers and not self.sync_workers[user_id].done(),
+            "syncing": user_id in self.sync_workers
+            and not self.sync_workers[user_id].done(),
             "pending_events": self.offline_queues.get(user_id, OfflineQueue()).size(),
         }

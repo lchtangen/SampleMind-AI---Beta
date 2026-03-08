@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 try:
     from langgraph.graph import StateGraph, END
     from langgraph.checkpoint.redis import RedisSaver
+
     LANGGRAPH_AVAILABLE = True
 except ImportError:
     LANGGRAPH_AVAILABLE = False
@@ -35,7 +36,11 @@ except ImportError:
     )
 
 try:
-    from langchain_core.messages import HumanMessage as _HumanMessage, AIMessage as _AIMessage  # noqa: F401
+    from langchain_core.messages import (
+        HumanMessage as _HumanMessage,
+        AIMessage as _AIMessage,
+    )  # noqa: F401
+
     LANGCHAIN_CORE_AVAILABLE = True
 except ImportError:
     LANGCHAIN_CORE_AVAILABLE = False
@@ -47,6 +52,7 @@ except ImportError:
 # ---------------------------------------------------------------------------
 # Graph state schema
 # ---------------------------------------------------------------------------
+
 
 class AudioGraphState(TypedDict, total=False):
     """Shared state dictionary passed between graph nodes."""
@@ -72,6 +78,7 @@ class AudioGraphState(TypedDict, total=False):
 # ---------------------------------------------------------------------------
 # Node implementations
 # ---------------------------------------------------------------------------
+
 
 async def _node_analyze(state: AudioGraphState) -> AudioGraphState:
     """
@@ -172,7 +179,7 @@ async def _node_tag(state: AudioGraphState) -> AudioGraphState:
                 f"Generate 8–12 concise lowercase semantic tags for this audio sample. "
                 f"Genre: {state.get('genre', 'unknown')}, Mood: {state.get('mood', 'unknown')}.\n"
                 f"Analysis: {state.get('analysis_text', '')[:500]}\n"
-                f"Return ONLY a JSON array of strings, e.g. [\"tag1\", \"tag2\"]"
+                f'Return ONLY a JSON array of strings, e.g. ["tag1", "tag2"]'
             )
             response = await client.chat.completions.create(
                 model="gpt-4o-mini",
@@ -187,7 +194,9 @@ async def _node_tag(state: AudioGraphState) -> AudioGraphState:
                 if isinstance(data, list):
                     semantic_tags = data
                 elif isinstance(data, dict):
-                    semantic_tags = data.get("tags", list(data.values())[0] if data else [])
+                    semantic_tags = data.get(
+                        "tags", list(data.values())[0] if data else []
+                    )
             except json.JSONDecodeError:
                 semantic_tags = []
         else:
@@ -215,6 +224,7 @@ async def _node_embed(state: AudioGraphState) -> AudioGraphState:
     audio_path = state.get("audio_path")
     try:
         from samplemind.core.engine.neural_engine import NeuralFeatureExtractor
+
         extractor = NeuralFeatureExtractor()
         if audio_path and not extractor.use_mock:
             emb = extractor.get_audio_embedding(str(audio_path))
@@ -249,6 +259,7 @@ async def _node_search(state: AudioGraphState) -> AudioGraphState:
     try:
         if embedding:
             from samplemind.core.search.vector_engine import VectorSearchEngine
+
             engine = VectorSearchEngine()
             results = await engine.search_by_embedding(embedding, top_k=5)
             similar_samples = results if isinstance(results, list) else []
@@ -265,6 +276,7 @@ async def _node_search(state: AudioGraphState) -> AudioGraphState:
 # ---------------------------------------------------------------------------
 # Graph builder
 # ---------------------------------------------------------------------------
+
 
 class AudioLangGraph:
     """

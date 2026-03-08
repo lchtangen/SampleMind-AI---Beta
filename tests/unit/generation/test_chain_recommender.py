@@ -59,7 +59,7 @@ class TestChainRecommender:
         chain = recommender.build_chain(
             seed_sample=seed,
             template_name="standard_kit",
-            search_paths=[mock_library_path]
+            search_paths=[mock_library_path],
         )
 
         # Standard kit has 4 slots: Kick, Snare, Hat, Perc
@@ -68,7 +68,7 @@ class TestChainRecommender:
         # "standard_kit" defines Perc keywords: ["perc", "tom", ...]. None match "bass".
         # So we expect Kick(Seed) + Snare + Hat. Perc will be skipped.
 
-        assert len(chain.nodes) == 3 # Kick + Snare + Hat
+        assert len(chain.nodes) == 3  # Kick + Snare + Hat
 
         node_names = [n.slot_name for n in chain.nodes]
         assert "Kick" in node_names

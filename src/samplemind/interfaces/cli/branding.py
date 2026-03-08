@@ -107,19 +107,19 @@ WELCOME_MESSAGE = """
 # BANNER GENERATION
 # ============================================================================
 
+
 def get_version() -> str:
     """Get current version from package"""
     try:
         from samplemind import __version__
+
         return __version__
     except ImportError:
         return "v2.2.0-beta"
 
 
 def print_startup_banner(
-    show_tips: bool = True,
-    show_welcome: bool = False,
-    compact: bool = False
+    show_tips: bool = True, show_welcome: bool = False, compact: bool = False
 ) -> None:
     """
     Print professional startup banner
@@ -146,7 +146,9 @@ def print_startup_banner(
     version = get_version()
     tagline = random.choice(TAGLINES)
 
-    version_text = f"[bold cyan]SampleMind AI {version}[/bold cyan] [dim]|[/dim] {tagline}"
+    version_text = (
+        f"[bold cyan]SampleMind AI {version}[/bold cyan] [dim]|[/dim] {tagline}"
+    )
     console.print(Align.center(version_text))
 
     # Separator
@@ -193,12 +195,13 @@ def print_error_banner(message: str, icon: str = "❌") -> None:
 # SYSTEM STATUS DISPLAY
 # ============================================================================
 
+
 def print_system_status(
     audio_engine_ready: bool = True,
     ai_manager_ready: bool = True,
     database_ready: bool = True,
     cache_size: int = 0,
-    primary_provider: str = "Google Gemini"
+    primary_provider: str = "Google Gemini",
 ) -> None:
     """
     Print system status table
@@ -238,69 +241,35 @@ def print_system_status(
 # THEMED PANELS
 # ============================================================================
 
-def create_info_panel(
-    title: str,
-    content: str,
-    icon: str = "ℹ️"
-) -> Panel:
+
+def create_info_panel(title: str, content: str, icon: str = "ℹ️") -> Panel:
     """Create an info panel with content"""
     panel_content = f"{icon} [bold cyan]{content}[/bold cyan]"
-    return Panel(
-        panel_content,
-        title=title,
-        border_style="cyan",
-        expand=False
-    )
+    return Panel(panel_content, title=title, border_style="cyan", expand=False)
 
 
-def create_success_panel(
-    title: str,
-    content: str,
-    icon: str = "✅"
-) -> Panel:
+def create_success_panel(title: str, content: str, icon: str = "✅") -> Panel:
     """Create a success panel"""
     panel_content = f"{icon} [bold green]{content}[/bold green]"
-    return Panel(
-        panel_content,
-        title=title,
-        border_style="green",
-        expand=False
-    )
+    return Panel(panel_content, title=title, border_style="green", expand=False)
 
 
-def create_warning_panel(
-    title: str,
-    content: str,
-    icon: str = "⚠️"
-) -> Panel:
+def create_warning_panel(title: str, content: str, icon: str = "⚠️") -> Panel:
     """Create a warning panel"""
     panel_content = f"{icon} [bold yellow]{content}[/bold yellow]"
-    return Panel(
-        panel_content,
-        title=title,
-        border_style="yellow",
-        expand=False
-    )
+    return Panel(panel_content, title=title, border_style="yellow", expand=False)
 
 
-def create_error_panel(
-    title: str,
-    content: str,
-    icon: str = "❌"
-) -> Panel:
+def create_error_panel(title: str, content: str, icon: str = "❌") -> Panel:
     """Create an error panel"""
     panel_content = f"{icon} [bold red]{content}[/bold red]"
-    return Panel(
-        panel_content,
-        title=title,
-        border_style="red",
-        expand=False
-    )
+    return Panel(panel_content, title=title, border_style="red", expand=False)
 
 
 # ============================================================================
 # FEATURE SHOWCASE
 # ============================================================================
+
 
 def print_feature_highlights() -> None:
     """Print available premium features"""
@@ -314,11 +283,31 @@ def print_feature_highlights() -> None:
     features_table.add_column(width=50)  # Description
 
     features = [
-        ("🎵", "[cyan]AI Sample Tagging[/cyan]", "Auto-generate descriptive tags for samples"),
-        ("🎚️", "[cyan]Mastering Assistant[/cyan]", "LUFS analysis with platform-specific targets"),
-        ("🔀", "[cyan]Intelligent Layering[/cyan]", "Phase-aligned sample stacking analysis"),
-        ("🎶", "[cyan]Groove Extraction[/cyan]", "Capture and apply groove feel from samples"),
-        ("📁", "[cyan]Interactive File Picker[/cyan]", "Native GUI file selection (all platforms)"),
+        (
+            "🎵",
+            "[cyan]AI Sample Tagging[/cyan]",
+            "Auto-generate descriptive tags for samples",
+        ),
+        (
+            "🎚️",
+            "[cyan]Mastering Assistant[/cyan]",
+            "LUFS analysis with platform-specific targets",
+        ),
+        (
+            "🔀",
+            "[cyan]Intelligent Layering[/cyan]",
+            "Phase-aligned sample stacking analysis",
+        ),
+        (
+            "🎶",
+            "[cyan]Groove Extraction[/cyan]",
+            "Capture and apply groove feel from samples",
+        ),
+        (
+            "📁",
+            "[cyan]Interactive File Picker[/cyan]",
+            "Native GUI file selection (all platforms)",
+        ),
         ("📊", "[cyan]Recent Files[/cyan]", "Quick access to recently analyzed files"),
         ("⭐", "[cyan]Favorites System[/cyan]", "Organize samples into collections"),
         ("💾", "[cyan]Session Management[/cyan]", "Save and resume analysis sessions"),
@@ -335,9 +324,9 @@ def print_feature_highlights() -> None:
 # COMMAND SUGGESTIONS
 # ============================================================================
 
+
 def print_command_suggestions(
-    last_command: Optional[str] = None,
-    context: Optional[str] = None
+    last_command: Optional[str] = None, context: Optional[str] = None
 ) -> None:
     """
     Print contextual command suggestions
@@ -352,12 +341,16 @@ def print_command_suggestions(
     suggestions = []
 
     if context and "analyzed" in context.lower():
-        suggestions.append(("[cyan]samplemind similar:find[/cyan]", "Find similar samples"))
+        suggestions.append(
+            ("[cyan]samplemind similar:find[/cyan]", "Find similar samples")
+        )
         suggestions.append(("[cyan]samplemind report:json[/cyan]", "Export as JSON"))
         suggestions.append(("[cyan]samplemind ai:coach[/cyan]", "Get production tips"))
 
     if context and "tag" in context.lower():
-        suggestions.append(("[cyan]samplemind library:search --tags[/cyan]", "Search by tags"))
+        suggestions.append(
+            ("[cyan]samplemind library:search --tags[/cyan]", "Search by tags")
+        )
         suggestions.append(("[cyan]samplemind fav:add[/cyan]", "Add to favorites"))
 
     if not suggestions:

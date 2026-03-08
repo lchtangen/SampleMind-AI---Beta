@@ -28,10 +28,13 @@ console = utils.console
 # SECTION 1: REPORTS (5 commands)
 # ============================================================================
 
+
 @app.command("library")
 @utils.with_error_handling
 def report_library(
-    folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
+    folder: Path = typer.Argument(
+        Path.home() / "SampleMind" / "Library", help="Library folder"
+    ),
     output: Optional[Path] = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Generate library statistics report"""
@@ -47,7 +50,10 @@ def report_library(
         total_size = sum(f.stat().st_size for f in files) / 1e9
         table.add_row("Total Samples", str(len(files)))
         table.add_row("Total Size", f"{total_size:.2f} GB")
-        table.add_row("Average Size", f"{total_size * 1e9 / len(files) / 1e6:.1f} MB" if files else "N/A")
+        table.add_row(
+            "Average Size",
+            f"{total_size * 1e9 / len(files) / 1e6:.1f} MB" if files else "N/A",
+        )
         table.add_row("Audio Formats", str(len(set(f.suffix.lower() for f in files))))
         table.add_row("Collections", "5")
         table.add_row("Archived Samples", str(len(files) // 10))
@@ -171,7 +177,9 @@ def report_quality(
 @app.command("export-all")
 @utils.with_error_handling
 def report_export_all(
-    folder: Path = typer.Argument(Path.home() / "SampleMind" / "Library", help="Library folder"),
+    folder: Path = typer.Argument(
+        Path.home() / "SampleMind" / "Library", help="Library folder"
+    ),
     output: Path = typer.Option(Path.cwd() / "reports", "--output", "-o"),
 ) -> None:
     """Export all reports at once"""
@@ -196,6 +204,7 @@ def report_export_all(
 # SECTION 2: EXPORT FORMATS (5 commands)
 # ============================================================================
 
+
 @app.command("export:json")
 @utils.with_error_handling
 def export_json(
@@ -205,7 +214,9 @@ def export_json(
 ) -> None:
     """Export analysis to JSON"""
     try:
-        output_file = output or file.with_suffix(".json").with_stem(file.stem + "_analysis")
+        output_file = output or file.with_suffix(".json").with_stem(
+            file.stem + "_analysis"
+        )
 
         with utils.ProgressTracker("Exporting to JSON"):
             pass
@@ -225,7 +236,9 @@ def export_csv(
 ) -> None:
     """Export analysis to CSV"""
     try:
-        output_file = output or file.with_suffix(".csv").with_stem(file.stem + "_analysis")
+        output_file = output or file.with_suffix(".csv").with_stem(
+            file.stem + "_analysis"
+        )
 
         with utils.ProgressTracker("Exporting to CSV"):
             pass
@@ -245,7 +258,9 @@ def export_yaml(
 ) -> None:
     """Export analysis to YAML"""
     try:
-        output_file = output or file.with_suffix(".yaml").with_stem(file.stem + "_analysis")
+        output_file = output or file.with_suffix(".yaml").with_stem(
+            file.stem + "_analysis"
+        )
 
         with utils.ProgressTracker("Exporting to YAML"):
             pass
@@ -266,7 +281,9 @@ def export_pdf(
 ) -> None:
     """Export analysis report to PDF"""
     try:
-        output_file = output or file.with_suffix(".pdf").with_stem(file.stem + "_report")
+        output_file = output or file.with_suffix(".pdf").with_stem(
+            file.stem + "_report"
+        )
 
         with utils.ProgressTracker(f"Generating PDF report"):
             pass

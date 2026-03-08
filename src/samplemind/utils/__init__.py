@@ -13,10 +13,10 @@ from .file_picker import (
 )
 
 __all__ = [
-    'CrossPlatformFilePicker',
-    'get_file_picker',
-    'select_audio_file',
-    'select_directory',
-    'select_any_file',
-    'select_file_or_folder',
+    "CrossPlatformFilePicker",
+    "get_file_picker",
+    "select_audio_file",
+    "select_directory",
+    "select_any_file",
+    "select_file_or_folder",
 ]

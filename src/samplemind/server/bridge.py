@@ -8,12 +8,15 @@ from fastapi import WebSocket, WebSocketDisconnect
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class BridgeMessage:
     """Message format for DAW bridge communication"""
+
     action: str
     payload: dict
     source: str = "Client"
+
 
 class DAWBridgeServer:
     """
@@ -28,19 +31,26 @@ class DAWBridgeServer:
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
         self.active_connections.append(websocket)
-        logger.info(f"Client connected. Active connections: {len(self.active_connections)}")
+        logger.info(
+            f"Client connected. Active connections: {len(self.active_connections)}"
+        )
 
         # Send handshake
         await self.send_message(
-            BridgeMessage(action="handshake", payload={"server": "SampleMind v6", "status": "ready"}),
-            websocket
+            BridgeMessage(
+                action="handshake",
+                payload={"server": "SampleMind v6", "status": "ready"},
+            ),
+            websocket,
         )
 
     def disconnect(self, websocket: WebSocket) -> None:
         """Disconnect a client from the bridge"""
         if websocket in self.active_connections:
             self.active_connections.remove(websocket)
-        logger.info(f"Client disconnected. Active connections: {len(self.active_connections)}")
+        logger.info(
+            f"Client disconnected. Active connections: {len(self.active_connections)}"
+        )
 
     async def broadcast(self, message: BridgeMessage):
         """Send a message to all connected clients (DAWs)."""
@@ -78,6 +88,7 @@ class DAWBridgeServer:
             logger.info(f"DAW requesting sample: {path}")
             # Logic to locate and serve sample
 
+
 # Global instance
 bridge = DAWBridgeServer()
 
@@ -86,6 +97,7 @@ import uvicorn
 from fastapi import FastAPI
 
 app = FastAPI(title="SampleMind DAW Bridge")
+
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -101,7 +113,7 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         bridge.disconnect(websocket)
 
+
 def run_server(host="127.0.0.1", port=8000):
     """Run the bridge server."""
     uvicorn.run(app, host=host, port=port)
-

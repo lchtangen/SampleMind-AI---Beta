@@ -10,6 +10,7 @@ from datetime import datetime
 
 class TaskSubmitRequest(BaseModel):
     """Submit a task for background processing"""
+
     file_id: str
     file_path: str
     user_id: Optional[str] = None
@@ -18,6 +19,7 @@ class TaskSubmitRequest(BaseModel):
 
 class BatchTaskSubmitRequest(BaseModel):
     """Submit multiple files for batch processing"""
+
     batch_id: str
     file_infos: List[Dict[str, Any]]
     user_id: Optional[str] = None
@@ -26,6 +28,7 @@ class BatchTaskSubmitRequest(BaseModel):
 
 class TaskStatusResponse(BaseModel):
     """Task status response"""
+
     task_id: str
     status: str  # PENDING, STARTED, PROGRESS, SUCCESS, FAILURE, RETRY
     result: Optional[Dict[str, Any]] = None
@@ -38,6 +41,7 @@ class TaskStatusResponse(BaseModel):
 
 class TaskSubmitResponse(BaseModel):
     """Task submission response"""
+
     task_id: str
     status: str
     message: str
@@ -45,26 +49,30 @@ class TaskSubmitResponse(BaseModel):
 
 class TaskListResponse(BaseModel):
     """List of tasks"""
+
     tasks: List[TaskStatusResponse]
     total: int
-    
-    
+
+
 class WorkerInfo(BaseModel):
     """Celery worker information"""
+
     hostname: str
     status: str
     active_tasks: int
     processed_tasks: int
-    
+
 
 class WorkersStatusResponse(BaseModel):
     """Workers status response"""
+
     workers: List[WorkerInfo]
     total_workers: int
 
 
 class QueueStats(BaseModel):
     """Queue statistics"""
+
     name: str
     messages: int
     consumers: int
@@ -72,5 +80,6 @@ class QueueStats(BaseModel):
 
 class QueueStatsResponse(BaseModel):
     """Queue statistics response"""
+
     queues: List[QueueStats]
     total_queues: int

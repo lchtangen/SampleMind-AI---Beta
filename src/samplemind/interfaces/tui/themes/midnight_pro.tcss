@@ -1,0 +1,56 @@
+/* Midnight Pro Theme — Pure black + gold accent
+ * Primary:    #FFD700  Gold
+ * Accent:     #FFB800  Amber
+ * Background: #000000  Pure Black
+ * Surface:    #111111  Near Black
+ * Error:      #FF4040  Red
+ * Success:    #00FF88  Mint Green
+ *
+ * Applied via Textual Theme object: name="midnight-pro"
+ */
+
+Header {
+    background: #000000;
+    color: #FFD700;
+    border-bottom: solid #FFD700 50%;
+}
+
+Footer {
+    background: #0A0A0A;
+    color: #FFD700 60%;
+}
+
+DataTable > .datatable--header {
+    background: #111111;
+    color: #FFD700;
+}
+
+DataTable > .datatable--cursor {
+    background: #FFD700 30%;
+    color: #000000;
+}
+
+Button.-primary {
+    background: #FFD700;
+    color: #000000;
+}
+
+Button.-success {
+    background: #00FF88;
+    color: #000000;
+}
+
+Collapsible {
+    border: solid #FFD700 30%;
+}
+
+Input {
+    border: tall #FFD700 60%;
+    background: #111111;
+    color: #FFFFFF;
+}
+
+RichLog {
+    background: #0A0A0A;
+    border: solid #1A1A1A;
+}

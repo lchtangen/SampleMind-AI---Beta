@@ -143,7 +143,9 @@ class TestMasteringChain:
         processed = chain.process(audio)
         assert processed.shape == audio.shape
         # Since input is 0.5 and limiter at -0.1 (~0.11), signal shouldn't be clipped
-        assert np.max(np.abs(processed)) <= 0.5 + 0.01  # Some small processing artifacts
+        assert (
+            np.max(np.abs(processed)) <= 0.5 + 0.01
+        )  # Some small processing artifacts
 
     def test_process_stereo_audio(self):
         """Test processing stereo audio."""

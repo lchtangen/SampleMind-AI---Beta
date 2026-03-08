@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class Prediction:
     """Single cache prediction"""
+
     file_id: str
     file_name: str
     feature_type: str
@@ -37,13 +38,14 @@ class Prediction:
             "confidence": self.confidence,
             "priority": self.priority,
             "steps_ahead": self.steps_ahead,
-            "timestamp": self.timestamp
+            "timestamp": self.timestamp,
         }
 
 
 @dataclass
 class PredictionResult:
     """Result of a prediction cycle"""
+
     timestamp: float
     current_state: str
     predictions: List[Prediction] = field(default_factory=list)
@@ -57,7 +59,7 @@ class PredictionResult:
             "current_state": self.current_state,
             "predictions": [p.to_dict() for p in self.predictions],
             "accuracy": self.accuracy,
-            "model_updated_at": self.model_updated_at
+            "model_updated_at": self.model_updated_at,
         }
 
 
@@ -95,7 +97,9 @@ class MarkovPredictor:
         self.usage_tracker = tracker
         logger.info("Usage tracker attached to predictor")
 
-    def register_file(self, file_id: str, file_name: str, file_size: int, duration: float) -> None:
+    def register_file(
+        self, file_id: str, file_name: str, file_size: int, duration: float
+    ) -> None:
         """
         Register file metadata for predictions.
 
@@ -108,7 +112,7 @@ class MarkovPredictor:
         self.file_metadata[file_id] = {
             "file_name": file_name,
             "file_size": file_size,
-            "duration": duration
+            "duration": duration,
         }
 
     def predict_next(self, current_state: str, top_n: int = 5) -> List[Prediction]:
@@ -157,7 +161,7 @@ class MarkovPredictor:
                 analysis_level=analysis_level,
                 confidence=round(probability, 3),
                 priority=i + 1,
-                steps_ahead=1
+                steps_ahead=1,
             )
 
             predictions.append(prediction)
@@ -165,10 +169,7 @@ class MarkovPredictor:
         return predictions
 
     def predict_with_lookahead(
-        self,
-        current_state: str,
-        lookahead_depth: int = 2,
-        top_n: int = 5
+        self, current_state: str, lookahead_depth: int = 2, top_n: int = 5
     ) -> List[Prediction]:
         """
         Predict with multiple lookahead steps.
@@ -199,14 +200,15 @@ class MarkovPredictor:
                     depth_weight = 1.0 / (1.0 + (depth - 1) * 0.3)  # Decay with depth
                     weighted_confidence = pred.confidence * depth_weight
 
-                    state_key = f"{pred.file_id}:{pred.feature_type}:{pred.analysis_level}"
+                    state_key = (
+                        f"{pred.file_id}:{pred.feature_type}:{pred.analysis_level}"
+                    )
 
                     if state_key in all_predictions:
                         # Accumulate confidence
                         existing = all_predictions[state_key]
                         existing.confidence = min(
-                            1.0,
-                            existing.confidence + weighted_confidence
+                            1.0, existing.confidence + weighted_confidence
                         )
                     else:
                         pred.confidence = weighted_confidence
@@ -218,9 +220,7 @@ class MarkovPredictor:
 
         # Sort by confidence and return
         sorted_predictions = sorted(
-            all_predictions.values(),
-            key=lambda p: p.confidence,
-            reverse=True
+            all_predictions.values(), key=lambda p: p.confidence, reverse=True
         )
 
         return sorted_predictions[:top_n]
@@ -233,11 +233,13 @@ class MarkovPredictor:
             prediction: Original prediction
             was_correct: Whether the prediction was correct
         """
-        self.prediction_history.append({
-            "prediction": prediction.to_dict(),
-            "was_correct": was_correct,
-            "timestamp": time.time()
-        })
+        self.prediction_history.append(
+            {
+                "prediction": prediction.to_dict(),
+                "was_correct": was_correct,
+                "timestamp": time.time(),
+            }
+        )
 
         self.total_predictions += 1
         if was_correct:
@@ -276,7 +278,7 @@ class MarkovPredictor:
             "recent_accuracy": round(self.get_recent_accuracy(), 3),
             "confidence_threshold": self.confidence_threshold,
             "registered_files": len(self.file_metadata),
-            "prediction_history_size": len(self.prediction_history)
+            "prediction_history_size": len(self.prediction_history),
         }
 
     def update_confidence_threshold(self, threshold: float) -> None:
@@ -305,11 +307,15 @@ class MarkovPredictor:
 
         if accuracy > 0.80 and self.confidence_threshold > 0.40:
             self.confidence_threshold = max(0.40, self.confidence_threshold - 0.05)
-            logger.info(f"Lowered threshold to {self.confidence_threshold:.2f} (high accuracy)")
+            logger.info(
+                f"Lowered threshold to {self.confidence_threshold:.2f} (high accuracy)"
+            )
 
         elif accuracy < 0.60 and self.confidence_threshold < 0.80:
             self.confidence_threshold = min(0.80, self.confidence_threshold + 0.05)
-            logger.info(f"Raised threshold to {self.confidence_threshold:.2f} (low accuracy)")
+            logger.info(
+                f"Raised threshold to {self.confidence_threshold:.2f} (low accuracy)"
+            )
 
     def reset_stats(self) -> None:
         """Reset prediction statistics"""
@@ -325,7 +331,9 @@ class MarkovPredictor:
             "confidence_threshold": self.confidence_threshold,
             "file_metadata": self.file_metadata,
             "recent_accuracy": self.get_recent_accuracy(),
-            "prediction_history_sample": self.prediction_history[-10:] if self.prediction_history else []
+            "prediction_history_sample": (
+                self.prediction_history[-10:] if self.prediction_history else []
+            ),
         }
 
 

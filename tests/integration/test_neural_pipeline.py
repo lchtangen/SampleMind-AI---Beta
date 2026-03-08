@@ -19,7 +19,11 @@ import numpy as np
 import pytest
 import soundfile as sf
 
-from samplemind.core.engine.audio_engine import AudioEngine, AnalysisLevel, AudioFeatures
+from samplemind.core.engine.audio_engine import (
+    AudioEngine,
+    AnalysisLevel,
+    AudioFeatures,
+)
 from samplemind.core.engine.neural_engine import NeuralFeatureExtractor
 from samplemind.core.database import chroma as chroma_db
 from samplemind.core.generation.generation_manager import (
@@ -42,7 +46,9 @@ class TestNeuralPipeline:
         self.temp_dir = tempfile.mkdtemp()
 
         # Initialize ChromaDB for tests
-        chroma_db.init_chromadb(persist_directory="./data/chroma_test", collection_name="test_embeddings")
+        chroma_db.init_chromadb(
+            persist_directory="./data/chroma_test", collection_name="test_embeddings"
+        )
 
         # Generate synthetic audio for testing
         duration = 2  # seconds
@@ -67,6 +73,7 @@ class TestNeuralPipeline:
         # Clean up temp files
         try:
             import shutil
+
             shutil.rmtree(self.temp_dir)
         except:
             pass
@@ -75,8 +82,7 @@ class TestNeuralPipeline:
         """Test that AudioEngine generates neural embeddings"""
         # Analyze at STANDARD level to trigger neural embedding
         features = self.audio_engine.analyze_audio(
-            self.test_audio_path,
-            level=AnalysisLevel.STANDARD
+            self.test_audio_path, level=AnalysisLevel.STANDARD
         )
 
         # Verify neural embedding is present
@@ -126,9 +132,7 @@ class TestNeuralPipeline:
 
         # Add to ChromaDB
         success = await chroma_db.add_embedding(
-            file_id="test_audio_001",
-            embedding=embedding,
-            metadata=metadata
+            file_id="test_audio_001", embedding=embedding, metadata=metadata
         )
         assert success
 
@@ -146,7 +150,9 @@ class TestNeuralPipeline:
         embeddings = []
         for i in range(3):
             # Slightly vary the audio for different embeddings
-            varied_audio = self.test_audio + (0.01 * i) * np.random.randn(len(self.test_audio))
+            varied_audio = self.test_audio + (0.01 * i) * np.random.randn(
+                len(self.test_audio)
+            )
             varied_path = Path(self.temp_dir) / f"test_audio_{i}.wav"
             sf.write(varied_path, varied_audio, 44100)
 
@@ -160,9 +166,7 @@ class TestNeuralPipeline:
             }
 
             success = await chroma_db.add_embedding(
-                file_id=f"test_{i}",
-                embedding=embedding,
-                metadata=metadata
+                file_id=f"test_{i}", embedding=embedding, metadata=metadata
             )
             assert success
 
@@ -183,7 +187,7 @@ class TestNeuralPipeline:
         request = GenerationRequest(
             mode=GenerationMode.TEXT_TO_SAMPLE,
             prompt="upbeat electronic drum loop",
-            parameters={"limit": 5}
+            parameters={"limit": 5},
         )
 
         # Generate
@@ -196,8 +200,8 @@ class TestNeuralPipeline:
         # Verify result structure
         if result.matches:
             match = result.matches[0]
-            assert hasattr(match, 'file_id')
-            assert hasattr(match, 'score')
+            assert hasattr(match, "file_id")
+            assert hasattr(match, "score")
             assert 0 <= match.score <= 1
 
     @pytest.mark.asyncio
@@ -207,7 +211,7 @@ class TestNeuralPipeline:
         request = GenerationRequest(
             mode=GenerationMode.AUDIO_VARIATION,
             prompt="test_audio.wav",
-            parameters={"variation_count": 3}
+            parameters={"variation_count": 3},
         )
 
         # Generate
@@ -223,11 +227,7 @@ class TestNeuralPipeline:
         request = GenerationRequest(
             mode=GenerationMode.CONTEXT_SUGGEST,
             prompt="C Major 120 BPM electronic",
-            parameters={
-                "key": "C Major",
-                "tempo": 120,
-                "genre": "electronic"
-            }
+            parameters={"key": "C Major", "tempo": 120, "genre": "electronic"},
         )
 
         # Generate suggestions
@@ -243,7 +243,7 @@ class TestNeuralPipeline:
         request = GenerationRequest(
             mode=GenerationMode.STEM_REMIX,
             prompt="test_audio.wav",
-            parameters={"remix_count": 3}
+            parameters={"remix_count": 3},
         )
 
         # Generate
@@ -268,14 +268,13 @@ class TestNeuralPipeline:
         # This should attempt analysis and fall back if needed
         try:
             result = await ai_manager.analyze_music(
-                features,
-                AnalysisType.COMPREHENSIVE_ANALYSIS
+                features, AnalysisType.COMPREHENSIVE_ANALYSIS
             )
 
             # Verify result structure
             assert result is not None
-            assert hasattr(result, 'provider')
-            assert hasattr(result, 'summary')
+            assert hasattr(result, "provider")
+            assert hasattr(result, "summary")
         except RuntimeError as e:
             # OK if no providers configured - we're testing the fallback chain exists
             assert "provider" in str(e).lower() or "configured" in str(e).lower()
@@ -320,8 +319,7 @@ class TestNeuralPipelinePerformance:
 
         start = time.time()
         features = self.audio_engine.analyze_audio(
-            self.test_audio_path,
-            level=AnalysisLevel.STANDARD
+            self.test_audio_path, level=AnalysisLevel.STANDARD
         )
         elapsed = time.time() - start
 
@@ -344,7 +342,9 @@ class TestNeuralPipelineIntegration:
         self.temp_dir = tempfile.mkdtemp()
 
         # Initialize ChromaDB for tests
-        chroma_db.init_chromadb(persist_directory="./data/chroma_test", collection_name="test_embeddings")
+        chroma_db.init_chromadb(
+            persist_directory="./data/chroma_test", collection_name="test_embeddings"
+        )
 
     @pytest.mark.asyncio
     async def test_complete_analysis_and_search_workflow(self):
@@ -361,8 +361,7 @@ class TestNeuralPipelineIntegration:
 
         # Step 2: Analyze with neural embedding
         features = self.audio_engine.analyze_audio(
-            audio_path,
-            level=AnalysisLevel.STANDARD
+            audio_path, level=AnalysisLevel.STANDARD
         )
 
         assert features.neural_embedding is not None
@@ -379,7 +378,7 @@ class TestNeuralPipelineIntegration:
             success = await chroma_db.add_embedding(
                 file_id="workflow_test_001",
                 embedding=features.neural_embedding,
-                metadata=metadata
+                metadata=metadata,
             )
             assert success
 

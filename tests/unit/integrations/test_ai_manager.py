@@ -19,7 +19,7 @@ from samplemind.integrations.ai_manager import (
     AnalysisType,
     UnifiedAnalysisResult,
     AIProviderConfig,
-    AILoadBalancer
+    AILoadBalancer,
 )
 
 
@@ -29,9 +29,7 @@ class TestAIProviderConfig:
     def test_create_config(self):
         """Test creating provider configuration"""
         config = AIProviderConfig(
-            provider=AIProvider.ANTHROPIC,
-            api_key="test_key",
-            priority=1
+            provider=AIProvider.ANTHROPIC, api_key="test_key", priority=1
         )
 
         assert config.provider == AIProvider.ANTHROPIC
@@ -42,10 +40,7 @@ class TestAIProviderConfig:
 
     def test_default_values(self):
         """Test default configuration values"""
-        config = AIProviderConfig(
-            provider=AIProvider.OPENAI,
-            api_key="test"
-        )
+        config = AIProviderConfig(provider=AIProvider.OPENAI, api_key="test")
 
         assert config.enabled == True
         assert config.priority == 1
@@ -59,14 +54,10 @@ class TestAILoadBalancer:
     def test_select_provider_by_priority(self):
         """Test provider selection based on priority — Anthropic is priority 1"""
         provider1 = AIProviderConfig(
-            provider=AIProvider.ANTHROPIC,
-            api_key="key1",
-            priority=1
+            provider=AIProvider.ANTHROPIC, api_key="key1", priority=1
         )
         provider2 = AIProviderConfig(
-            provider=AIProvider.OPENAI,
-            api_key="key2",
-            priority=2
+            provider=AIProvider.OPENAI, api_key="key2", priority=2
         )
 
         balancer = AILoadBalancer([provider1, provider2])
@@ -77,20 +68,15 @@ class TestAILoadBalancer:
     def test_select_preferred_provider(self):
         """Test explicit provider preference"""
         provider1 = AIProviderConfig(
-            provider=AIProvider.GOOGLE_AI,
-            api_key="key1",
-            priority=1
+            provider=AIProvider.GOOGLE_AI, api_key="key1", priority=1
         )
         provider2 = AIProviderConfig(
-            provider=AIProvider.OPENAI,
-            api_key="key2",
-            priority=2
+            provider=AIProvider.OPENAI, api_key="key2", priority=2
         )
 
         balancer = AILoadBalancer([provider1, provider2])
         selected = balancer.select_provider(
-            AnalysisType.COMPREHENSIVE_ANALYSIS,
-            preferred_provider=AIProvider.OPENAI
+            AnalysisType.COMPREHENSIVE_ANALYSIS, preferred_provider=AIProvider.OPENAI
         )
 
         assert selected == AIProvider.OPENAI
@@ -98,16 +84,10 @@ class TestAILoadBalancer:
     def test_skip_disabled_provider(self):
         """Test that disabled providers are skipped"""
         provider1 = AIProviderConfig(
-            provider=AIProvider.GOOGLE_AI,
-            api_key="key1",
-            priority=1,
-            enabled=False
+            provider=AIProvider.GOOGLE_AI, api_key="key1", priority=1, enabled=False
         )
         provider2 = AIProviderConfig(
-            provider=AIProvider.OPENAI,
-            api_key="key2",
-            priority=2,
-            enabled=True
+            provider=AIProvider.OPENAI, api_key="key2", priority=2, enabled=True
         )
 
         balancer = AILoadBalancer([provider1, provider2])
@@ -118,9 +98,7 @@ class TestAILoadBalancer:
     def test_no_available_providers(self):
         """Test error when no providers are available"""
         provider1 = AIProviderConfig(
-            provider=AIProvider.GOOGLE_AI,
-            api_key="key1",
-            enabled=False
+            provider=AIProvider.GOOGLE_AI, api_key="key1", enabled=False
         )
 
         balancer = AILoadBalancer([provider1])
@@ -146,8 +124,8 @@ class TestSampleMindAIManager:
     def test_initialization(self, ai_manager):
         """Test AI manager initializes correctly"""
         assert ai_manager is not None
-        assert hasattr(ai_manager, 'providers')
-        assert hasattr(ai_manager, 'load_balancer')
+        assert hasattr(ai_manager, "providers")
+        assert hasattr(ai_manager, "load_balancer")
         assert len(ai_manager.providers) >= 1
 
     def test_provider_status(self, ai_manager):
@@ -159,48 +137,47 @@ class TestSampleMindAIManager:
 
         # Check status structure
         for provider, info in status.items():
-            assert 'enabled' in info
-            assert 'priority' in info
-            assert 'total_requests' in info
+            assert "enabled" in info
+            assert "priority" in info
+            assert "total_requests" in info
 
     def test_global_stats(self, ai_manager):
         """Test global statistics"""
         stats = ai_manager.get_global_stats()
 
         assert isinstance(stats, dict)
-        assert 'total_requests' in stats
-        assert 'total_tokens' in stats
-        assert 'total_cost' in stats
-        assert 'providers_configured' in stats
+        assert "total_requests" in stats
+        assert "total_tokens" in stats
+        assert "total_cost" in stats
+        assert "providers_configured" in stats
 
     @pytest.mark.asyncio
     async def test_analyze_music_mock(self, ai_manager):
         """Test music analysis with mocked AI response — primary is Anthropic"""
         # Mock audio features
         test_features = {
-            'duration': 180.0,
-            'tempo': 128.0,
-            'key': 'C',
-            'mode': 'major',
-            'sample_rate': 44100
+            "duration": 180.0,
+            "tempo": 128.0,
+            "key": "C",
+            "mode": "major",
+            "sample_rate": 44100,
         }
 
         # Mock the AI provider
-        with patch.object(ai_manager, '_analyze_with_provider') as mock_analyze:
+        with patch.object(ai_manager, "_analyze_with_provider") as mock_analyze:
             # Create mock result — Anthropic is primary
             mock_result = UnifiedAnalysisResult(
                 provider=AIProvider.ANTHROPIC,
                 analysis_type=AnalysisType.COMPREHENSIVE_ANALYSIS,
                 model_used="claude-3-7-sonnet-20250219",
                 summary="Test analysis summary",
-                processing_time=1.0
+                processing_time=1.0,
             )
             mock_analyze.return_value = mock_result
 
             # Perform analysis
             result = await ai_manager.analyze_music(
-                test_features,
-                AnalysisType.COMPREHENSIVE_ANALYSIS
+                test_features, AnalysisType.COMPREHENSIVE_ANALYSIS
             )
 
             assert result is not None
@@ -210,15 +187,15 @@ class TestSampleMindAIManager:
     @pytest.mark.asyncio
     async def test_fallback_on_failure(self, ai_manager):
         """Test automatic fallback when primary provider fails"""
-        test_features = {'duration': 180.0, 'tempo': 128.0}
+        test_features = {"duration": 180.0, "tempo": 128.0}
 
-        with patch.object(ai_manager, '_analyze_with_provider') as mock_analyze:
+        with patch.object(ai_manager, "_analyze_with_provider") as mock_analyze:
             # First call fails, second succeeds
             mock_success = UnifiedAnalysisResult(
                 provider=AIProvider.OPENAI,
                 analysis_type=AnalysisType.COMPREHENSIVE_ANALYSIS,
                 model_used="gpt-4o",
-                summary="Fallback successful"
+                summary="Fallback successful",
             )
 
             mock_analyze.side_effect = [
@@ -228,9 +205,7 @@ class TestSampleMindAIManager:
 
             # Should succeed with fallback
             result = await ai_manager.analyze_music(
-                test_features,
-                AnalysisType.COMPREHENSIVE_ANALYSIS,
-                enable_fallback=True
+                test_features, AnalysisType.COMPREHENSIVE_ANALYSIS, enable_fallback=True
             )
 
             assert result is not None
@@ -273,7 +248,7 @@ class TestUnifiedAnalysisResult:
             analysis_type=AnalysisType.COMPREHENSIVE_ANALYSIS,
             model_used="gemini-2.5-pro",
             summary="Test summary",
-            processing_time=5.0
+            processing_time=5.0,
         )
 
         assert result.provider == AIProvider.GOOGLE_AI
@@ -286,7 +261,7 @@ class TestUnifiedAnalysisResult:
         result = UnifiedAnalysisResult(
             provider=AIProvider.OPENAI,
             analysis_type=AnalysisType.QUICK_ANALYSIS,
-            model_used="gpt-4o"
+            model_used="gpt-4o",
         )
 
         assert result.summary == ""
@@ -302,28 +277,41 @@ class TestAnalysisRoutingTable:
     def test_comprehensive_routes_to_anthropic(self):
         """COMPREHENSIVE_ANALYSIS must route to Anthropic (was Google in old code)"""
         from samplemind.integrations.ai_manager import ANALYSIS_ROUTING
-        assert ANALYSIS_ROUTING[AnalysisType.COMPREHENSIVE_ANALYSIS] == AIProvider.ANTHROPIC
+
+        assert (
+            ANALYSIS_ROUTING[AnalysisType.COMPREHENSIVE_ANALYSIS]
+            == AIProvider.ANTHROPIC
+        )
 
     def test_harmonic_routes_to_anthropic(self):
         """HARMONIC_ANALYSIS must route to Anthropic (was Google in old code)"""
         from samplemind.integrations.ai_manager import ANALYSIS_ROUTING
+
         assert ANALYSIS_ROUTING[AnalysisType.HARMONIC_ANALYSIS] == AIProvider.ANTHROPIC
 
     def test_production_coaching_routes_to_anthropic(self):
         from samplemind.integrations.ai_manager import ANALYSIS_ROUTING
-        assert ANALYSIS_ROUTING[AnalysisType.PRODUCTION_COACHING] == AIProvider.ANTHROPIC
+
+        assert (
+            ANALYSIS_ROUTING[AnalysisType.PRODUCTION_COACHING] == AIProvider.ANTHROPIC
+        )
 
     def test_genre_routes_to_google(self):
         from samplemind.integrations.ai_manager import ANALYSIS_ROUTING
-        assert ANALYSIS_ROUTING[AnalysisType.GENRE_CLASSIFICATION] == AIProvider.GOOGLE_AI
+
+        assert (
+            ANALYSIS_ROUTING[AnalysisType.GENRE_CLASSIFICATION] == AIProvider.GOOGLE_AI
+        )
 
     def test_rhythm_routes_to_google(self):
         from samplemind.integrations.ai_manager import ANALYSIS_ROUTING
+
         assert ANALYSIS_ROUTING[AnalysisType.RHYTHM_ANALYSIS] == AIProvider.GOOGLE_AI
 
     def test_quick_analysis_routes_to_ollama(self):
         """QUICK_ANALYSIS must route to Ollama for offline speed"""
         from samplemind.integrations.ai_manager import ANALYSIS_ROUTING
+
         assert ANALYSIS_ROUTING[AnalysisType.QUICK_ANALYSIS] == AIProvider.OLLAMA
 
 
@@ -341,7 +329,11 @@ class TestOllamaProvider:
         manager.providers = {}
         manager.provider_configs = {}
 
-        from samplemind.integrations.ollama_integration import OllamaMusicAnalysis, OllamaModel
+        from samplemind.integrations.ollama_integration import (
+            OllamaMusicAnalysis,
+            OllamaModel,
+        )
+
         mock_result = OllamaMusicAnalysis(
             summary="Quick analysis done",
             production_tips=["tip1", "tip2"],

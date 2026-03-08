@@ -14,18 +14,19 @@ from .ai_manager import SampleMindAIManager, AIProviderConfig, AIProvider, Analy
 
 try:
     from .anthropic_integration import AnthropicMusicProducer
+
     ANTHROPIC_AVAILABLE = True
 except ImportError:
     ANTHROPIC_AVAILABLE = False
     AnthropicMusicProducer = None
 
 __all__ = [
-    'GoogleAIMusicProducer',
-    'OpenAIMusicProducer',
-    'AnthropicMusicProducer',
-    'SampleMindAIManager',
-    'AIProviderConfig',
-    'AIProvider',
-    'AnalysisType',
-    'ANTHROPIC_AVAILABLE',
+    "GoogleAIMusicProducer",
+    "OpenAIMusicProducer",
+    "AnthropicMusicProducer",
+    "SampleMindAIManager",
+    "AIProviderConfig",
+    "AIProvider",
+    "AnalysisType",
+    "ANTHROPIC_AVAILABLE",
 ]

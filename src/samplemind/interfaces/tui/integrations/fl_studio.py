@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class FLStudioPreset:
     """FL Studio preset data"""
+
     name: str
     tempo: float
     key: str
@@ -355,6 +356,7 @@ class FLStudioIntegration:
     def _get_timestamp() -> str:
         """Get current timestamp"""
         from datetime import datetime
+
         return datetime.now().isoformat()
 
 

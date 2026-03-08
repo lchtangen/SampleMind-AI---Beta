@@ -27,9 +27,11 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # ============================================================================
 
+
 @dataclass
 class RecentFile:
     """Represents a recently analyzed file"""
+
     path: str  # Full path to the file
     name: str  # Filename only
     timestamp: str  # ISO format timestamp
@@ -87,6 +89,7 @@ class RecentFile:
 # ============================================================================
 # RECENT FILES MANAGER
 # ============================================================================
+
 
 class RecentFilesManager:
     """Manages recent file history"""
@@ -170,7 +173,7 @@ class RecentFilesManager:
         self._files.insert(0, recent_file)
 
         # Trim to max history
-        self._files = self._files[:self.max_history]
+        self._files = self._files[: self.max_history]
 
         # Save to disk
         self._save()
@@ -319,6 +322,7 @@ def get_manager() -> RecentFilesManager:
 # ============================================================================
 # CONVENIENCE FUNCTIONS
 # ============================================================================
+
 
 def add_recent_file(
     file_path: Path,

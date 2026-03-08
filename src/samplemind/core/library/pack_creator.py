@@ -23,41 +23,43 @@ logger = logging.getLogger(__name__)
 
 class PackTemplate(str, Enum):
     """Sample pack templates"""
-    DRUMS = "drums"           # Kick, snare, hihat, percussion, fills
-    MELODIC = "melodic"       # Synths, instruments, leads, pads
-    EFFECTS = "effects"       # FX, transitions, impacts, transitions
-    LOOPS = "loops"            # One-shots, loops, grooves, rhythms
-    CUSTOM = "custom"         # User-defined template
+
+    DRUMS = "drums"  # Kick, snare, hihat, percussion, fills
+    MELODIC = "melodic"  # Synths, instruments, leads, pads
+    EFFECTS = "effects"  # FX, transitions, impacts, transitions
+    LOOPS = "loops"  # One-shots, loops, grooves, rhythms
+    CUSTOM = "custom"  # User-defined template
 
 
 @dataclass
 class PackMetadata:
     """Sample pack metadata"""
-    name: str                          # Pack name
-    version: str = "1.0.0"             # Semantic versioning
-    author: str = "Unknown"            # Pack creator name
-    description: str = ""              # Pack description
-    genre: str = ""                    # Primary genre
-    bpm: Optional[float] = None        # Suggested tempo
-    key: Optional[str] = None          # Musical key
+
+    name: str  # Pack name
+    version: str = "1.0.0"  # Semantic versioning
+    author: str = "Unknown"  # Pack creator name
+    description: str = ""  # Pack description
+    genre: str = ""  # Primary genre
+    bpm: Optional[float] = None  # Suggested tempo
+    key: Optional[str] = None  # Musical key
     created_date: str = field(default_factory=lambda: datetime.now().isoformat())
     updated_date: str = field(default_factory=lambda: datetime.now().isoformat())
-    sample_count: int = 0              # Number of samples
-    total_size_mb: float = 0.0         # Total pack size
+    sample_count: int = 0  # Number of samples
+    total_size_mb: float = 0.0  # Total pack size
     license: str = "Creative Commons"  # License type
     tags: List[str] = field(default_factory=list)
-    cover_art: Optional[Path] = None   # Cover image path
+    cover_art: Optional[Path] = None  # Cover image path
 
     def to_dict(self) -> Dict:
         """Convert to dictionary"""
         data = asdict(self)
         if self.cover_art:
-            data['cover_art'] = str(self.cover_art)
+            data["cover_art"] = str(self.cover_art)
         return data
 
     def save_json(self, output_path: Path) -> None:
         """Save metadata as JSON"""
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             json.dump(self.to_dict(), f, indent=2)
         logger.info(f"Saved pack metadata to {output_path}")
 
@@ -65,6 +67,7 @@ class PackMetadata:
 @dataclass
 class SampleInfo:
     """Information about a single sample"""
+
     filename: str
     duration_seconds: float
     sample_rate: int
@@ -96,24 +99,21 @@ class SamplePackCreator:
     TEMPLATE_STRUCTURE = {
         PackTemplate.DRUMS: {
             "folders": ["kicks", "snares", "hihats", "percussion", "fills"],
-            "description": "Drum and percussion samples"
+            "description": "Drum and percussion samples",
         },
         PackTemplate.MELODIC: {
             "folders": ["synths", "strings", "leads", "pads", "basses"],
-            "description": "Melodic and harmonic samples"
+            "description": "Melodic and harmonic samples",
         },
         PackTemplate.EFFECTS: {
             "folders": ["transitions", "impacts", "risers", "drops", "fills"],
-            "description": "Sound effects and transitions"
+            "description": "Sound effects and transitions",
         },
         PackTemplate.LOOPS: {
             "folders": ["drums", "music", "bass", "melody", "grooves"],
-            "description": "Loops and grooves"
+            "description": "Loops and grooves",
         },
-        PackTemplate.CUSTOM: {
-            "folders": [],
-            "description": "Custom pack structure"
-        }
+        PackTemplate.CUSTOM: {"folders": [], "description": "Custom pack structure"},
     }
 
     def __init__(self):
@@ -149,18 +149,12 @@ class SamplePackCreator:
 
         # Create metadata
         metadata = PackMetadata(
-            name=name,
-            author=author,
-            description=description,
-            version="1.0.0"
+            name=name, author=author, description=description, version="1.0.0"
         )
 
         # Create pack
         pack = SamplePack(
-            name=name,
-            pack_dir=pack_dir,
-            template=template,
-            metadata=metadata
+            name=name, pack_dir=pack_dir, template=template, metadata=metadata
         )
 
         # Create folder structure
@@ -356,15 +350,20 @@ class SamplePack:
                 filename=file_path.name,
                 duration_seconds=duration,
                 sample_rate=info.samplerate,
-                bit_depth=info.subtype_info.split("_")[-1] if "_" in info.subtype_info else "16",
+                bit_depth=(
+                    info.subtype_info.split("_")[-1]
+                    if "_" in info.subtype_info
+                    else "16"
+                ),
                 channels=info.channels,
-                file_size_mb=file_path.stat().st_size / (1024 * 1024)
+                file_size_mb=file_path.stat().st_size / (1024 * 1024),
             )
 
             # Try to extract tempo using librosa
             try:
-                onset_env = librosa.onset.onset_strength(y=audio if audio.ndim == 1 else audio[0],
-                                                        sr=sr)
+                onset_env = librosa.onset.onset_strength(
+                    y=audio if audio.ndim == 1 else audio[0], sr=sr
+                )
                 tempo = librosa.feature.tempo(onset_envelope=onset_env, sr=sr)[0]
                 sample_info.bpm = tempo
             except:
@@ -381,7 +380,7 @@ class SamplePack:
                 sample_rate=44100,
                 bit_depth=16,
                 channels=2,
-                file_size_mb=file_path.stat().st_size / (1024 * 1024)
+                file_size_mb=file_path.stat().st_size / (1024 * 1024),
             )
 
     def _categorize_sample(self, file_path: Path, sample_info: SampleInfo) -> Path:
@@ -477,8 +476,8 @@ class SamplePack:
         """Export pack as ZIP"""
         output_file = output_dir / f"{self.name.replace(' ', '_')}.zip"
 
-        with zipfile.ZipFile(output_file, 'w', zipfile.ZIP_DEFLATED) as zf:
-            for file_path in self.pack_dir.rglob('*'):
+        with zipfile.ZipFile(output_file, "w", zipfile.ZIP_DEFLATED) as zf:
+            for file_path in self.pack_dir.rglob("*"):
                 if file_path.is_file():
                     arcname = file_path.relative_to(self.pack_dir.parent)
                     zf.write(file_path, arcname)
@@ -493,7 +492,7 @@ class SamplePack:
 
         output_file = output_dir / f"{self.name.replace(' ', '_')}.tar.gz"
 
-        with tarfile.open(output_file, 'w:gz') as tf:
+        with tarfile.open(output_file, "w:gz") as tf:
             tf.add(self.pack_dir, arcname=self.pack_dir.name)
 
         logger.info(f"Exported pack to TAR.GZ: {output_file}")
@@ -522,7 +521,7 @@ class SamplePack:
             "author": self.metadata.author,
             "version": self.metadata.version,
             "created": self.metadata.created_date,
-            "pack_path": str(self.pack_dir)
+            "pack_path": str(self.pack_dir),
         }
 
 

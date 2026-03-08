@@ -33,6 +33,7 @@ console = utils.console
 def _get_analyzer():
     """Lazy import to avoid circular imports"""
     from ....core.analysis import MusicTheoryAnalyzer
+
     return MusicTheoryAnalyzer()
 
 
@@ -40,7 +41,9 @@ def _get_analyzer():
 @utils.with_error_handling
 def theory_key(
     file: Path = typer.Argument(..., help="Audio file to analyze"),
-    detail: bool = typer.Option(False, "--detail", "-d", help="Show detailed analysis with modulations"),
+    detail: bool = typer.Option(
+        False, "--detail", "-d", help="Show detailed analysis with modulations"
+    ),
 ) -> None:
     """Detect the musical key of an audio file"""
     try:
@@ -83,7 +86,9 @@ def theory_key(
             confidence_color = "red"
 
         console.print(f"[bold]Detected Key:[/bold] [cyan]{key_name}[/cyan]")
-        console.print(f"[bold]Confidence:[/bold] [{confidence_color}]{confidence_pct:.1f}%[/{confidence_color}]")
+        console.print(
+            f"[bold]Confidence:[/bold] [{confidence_color}]{confidence_pct:.1f}%[/{confidence_color}]"
+        )
 
         if detail and modulations:
             console.print()
@@ -101,9 +106,15 @@ def theory_key(
 @utils.with_error_handling
 def theory_chords(
     file: Path = typer.Argument(..., help="Audio file to analyze"),
-    format: str = typer.Option("table", "--format", "-f", help="Output format (table, timeline, list)"),
-    roman: bool = typer.Option(False, "--roman", "-r", help="Include Roman numeral analysis"),
-    min_duration: float = typer.Option(0.25, "--min-duration", help="Minimum chord duration (seconds)"),
+    format: str = typer.Option(
+        "table", "--format", "-f", help="Output format (table, timeline, list)"
+    ),
+    roman: bool = typer.Option(
+        False, "--roman", "-r", help="Include Roman numeral analysis"
+    ),
+    min_duration: float = typer.Option(
+        0.25, "--min-duration", help="Minimum chord duration (seconds)"
+    ),
 ) -> None:
     """Detect chord progression in an audio file"""
     try:
@@ -124,6 +135,7 @@ def theory_chords(
             task = progress.add_task("Detecting chords...", total=None)
 
             from ....core.analysis import MusicTheoryAnalyzer
+
             analyzer = MusicTheoryAnalyzer(min_chord_duration=min_duration)
             analysis = analyzer.analyze(file)
 
@@ -156,8 +168,11 @@ def theory_chords(
 
                 if roman:
                     table.add_row(
-                        time_str, chord.chord, chord.roman_numeral,
-                        duration_str, confidence_str
+                        time_str,
+                        chord.chord,
+                        chord.roman_numeral,
+                        duration_str,
+                        confidence_str,
                     )
                 else:
                     table.add_row(time_str, chord.chord, duration_str, confidence_str)
@@ -173,7 +188,9 @@ def theory_chords(
                 bar = "█" * bar_width
 
                 if roman:
-                    console.print(f"  {time_str} [cyan]{chord.chord:6}[/cyan] [yellow]{chord.roman_numeral:5}[/yellow] {bar}")
+                    console.print(
+                        f"  {time_str} [cyan]{chord.chord:6}[/cyan] [yellow]{chord.roman_numeral:5}[/yellow] {bar}"
+                    )
                 else:
                     console.print(f"  {time_str} [cyan]{chord.chord:6}[/cyan] {bar}")
 
@@ -195,7 +212,9 @@ def theory_chords(
 @utils.with_error_handling
 def theory_harmony(
     file: Path = typer.Argument(..., help="Audio file to analyze"),
-    roman: bool = typer.Option(True, "--roman/--no-roman", help="Show Roman numeral analysis"),
+    roman: bool = typer.Option(
+        True, "--roman/--no-roman", help="Show Roman numeral analysis"
+    ),
 ) -> None:
     """Perform full harmonic analysis on an audio file"""
     try:
@@ -229,7 +248,9 @@ def theory_harmony(
         summary_table.add_row("Key Confidence", f"{analysis.key_confidence * 100:.1f}%")
         summary_table.add_row("Duration", f"{analysis.duration:.2f}s")
         summary_table.add_row("Chord Changes", str(len(analysis.chord_progression)))
-        summary_table.add_row("Harmonic Rhythm", f"{analysis.harmonic_rhythm:.2f} changes/bar")
+        summary_table.add_row(
+            "Harmonic Rhythm", f"{analysis.harmonic_rhythm:.2f} changes/bar"
+        )
         summary_table.add_row("Modulations", str(len(analysis.modulations)))
 
         console.print(summary_table)
@@ -241,7 +262,10 @@ def theory_harmony(
 
             if roman:
                 # Show with Roman numerals
-                chord_pairs = [f"{c.chord} ({c.roman_numeral})" for c in analysis.chord_progression[:12]]
+                chord_pairs = [
+                    f"{c.chord} ({c.roman_numeral})"
+                    for c in analysis.chord_progression[:12]
+                ]
             else:
                 chord_pairs = [c.chord for c in analysis.chord_progression[:12]]
 
@@ -249,7 +273,9 @@ def theory_harmony(
             console.print(f"  [cyan]{progression_str}[/cyan]")
 
             if len(analysis.chord_progression) > 12:
-                console.print(f"  [dim]... and {len(analysis.chord_progression) - 12} more[/dim]")
+                console.print(
+                    f"  [dim]... and {len(analysis.chord_progression) - 12} more[/dim]"
+                )
 
         # Modulations
         if analysis.modulations:
@@ -257,7 +283,9 @@ def theory_harmony(
             console.print("[bold]Key Modulations:[/bold]")
             for mod in analysis.modulations:
                 time_str = f"{int(mod.time // 60)}:{mod.time % 60:05.2f}"
-                console.print(f"  [dim]{time_str}[/dim] {mod.from_key} → [yellow]{mod.to_key}[/yellow]")
+                console.print(
+                    f"  [dim]{time_str}[/dim] {mod.from_key} → [yellow]{mod.to_key}[/yellow]"
+                )
 
         # Scale notes
         console.print()
@@ -280,22 +308,24 @@ def theory_scale(
 
         # Parse key
         key = key.strip()
-        parts = key.replace('-', ' ').split()
+        parts = key.replace("-", " ").split()
 
         if len(parts) == 1:
             # Single word: "Am" or "C"
             note = parts[0]
-            if note.endswith('m') or note.endswith('min'):
-                mode = 'minor'
-                note = note.rstrip('m').rstrip('in')
+            if note.endswith("m") or note.endswith("min"):
+                mode = "minor"
+                note = note.rstrip("m").rstrip("in")
             else:
-                mode = 'major'
+                mode = "major"
         elif len(parts) == 2:
             note = parts[0]
             mode_str = parts[1].lower()
-            mode = 'minor' if mode_str in ['minor', 'min', 'm'] else 'major'
+            mode = "minor" if mode_str in ["minor", "min", "m"] else "major"
         else:
-            console.print(f"[red]Error: Invalid key format. Use 'C major' or 'Am'[/red]")
+            console.print(
+                f"[red]Error: Invalid key format. Use 'C major' or 'Am'[/red]"
+            )
             raise typer.Exit(1)
 
         # Get root pitch class
@@ -315,10 +345,10 @@ def theory_scale(
         console.print()
 
         # Show scale degrees
-        if mode == 'major':
-            degrees = ['1', '2', '3', '4', '5', '6', '7']
+        if mode == "major":
+            degrees = ["1", "2", "3", "4", "5", "6", "7"]
         else:
-            degrees = ['1', '2', 'b3', '4', '5', 'b6', 'b7']
+            degrees = ["1", "2", "b3", "4", "5", "b6", "b7"]
 
         table = Table(show_header=True)
         table.add_column("Degree", style="dim")
@@ -336,7 +366,7 @@ def theory_scale(
         # Show common chords
         console.print()
         console.print("[bold]Common Chords in Key:[/bold]")
-        if mode == 'major':
+        if mode == "major":
             console.print(f"  I    : [cyan]{scale_notes[0]}[/cyan] major")
             console.print(f"  ii   : [cyan]{scale_notes[1]}[/cyan] minor")
             console.print(f"  iii  : [cyan]{scale_notes[2]}[/cyan] minor")

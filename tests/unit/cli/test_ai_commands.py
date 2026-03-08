@@ -27,12 +27,12 @@ class TestAIAnalysisCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.ai_analyze_async') as mock_ai:
+        with patch("samplemind.interfaces.cli.commands.ai.ai_analyze_async") as mock_ai:
             mock_ai.return_value = {
-                'provider': 'gemini',
-                'summary': 'Electronic track with steady 120 BPM rhythm',
-                'confidence': 0.92,
-                'analysis_time': 2.5
+                "provider": "gemini",
+                "summary": "Electronic track with steady 120 BPM rhythm",
+                "confidence": 0.92,
+                "analysis_time": 2.5,
             }
 
             result = runner.invoke(app, ["ai:analyze", str(audio_file)])
@@ -47,11 +47,13 @@ class TestAIAnalysisCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.ai_classify_async') as mock_classify:
+        with patch(
+            "samplemind.interfaces.cli.commands.ai.ai_classify_async"
+        ) as mock_classify:
             mock_classify.return_value = {
-                'genres': ['electronic', 'ambient'],
-                'confidence': 0.88,
-                'subgenres': ['techno', 'house']
+                "genres": ["electronic", "ambient"],
+                "confidence": 0.88,
+                "subgenres": ["techno", "house"],
             }
 
             result = runner.invoke(app, ["ai:classify", str(audio_file)])
@@ -65,10 +67,10 @@ class TestAIAnalysisCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.ai_tag_async') as mock_tag:
+        with patch("samplemind.interfaces.cli.commands.ai.ai_tag_async") as mock_tag:
             mock_tag.return_value = {
-                'tags': ['upbeat', 'electronic', 'loop', 'production'],
-                'confidence': 0.85
+                "tags": ["upbeat", "electronic", "loop", "production"],
+                "confidence": 0.85,
             }
 
             result = runner.invoke(app, ["ai:tag", str(audio_file)])
@@ -82,19 +84,20 @@ class TestAIAnalysisCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.ai_suggest_async') as mock_suggest:
+        with patch(
+            "samplemind.interfaces.cli.commands.ai.ai_suggest_async"
+        ) as mock_suggest:
             mock_suggest.return_value = {
-                'suggestions': 5,
-                'samples': [
-                    {'name': 'similar_1.wav', 'score': 0.95},
-                    {'name': 'similar_2.wav', 'score': 0.88}
-                ]
+                "suggestions": 5,
+                "samples": [
+                    {"name": "similar_1.wav", "score": 0.95},
+                    {"name": "similar_2.wav", "score": 0.88},
+                ],
             }
 
-            result = runner.invoke(app, [
-                "ai:suggest", str(audio_file),
-                "--limit", "10"
-            ])
+            result = runner.invoke(
+                app, ["ai:suggest", str(audio_file), "--limit", "10"]
+            )
 
         assert result.exit_code == 0
 
@@ -105,13 +108,15 @@ class TestAIAnalysisCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.ai_coach_async') as mock_coach:
+        with patch(
+            "samplemind.interfaces.cli.commands.ai.ai_coach_async"
+        ) as mock_coach:
             mock_coach.return_value = {
-                'tips': [
-                    'Add subtle reverb to enhance space',
-                    'EQ the highs for a warmer tone'
+                "tips": [
+                    "Add subtle reverb to enhance space",
+                    "EQ the highs for a warmer tone",
                 ],
-                'quality_score': 0.78
+                "quality_score": 0.78,
             }
 
             result = runner.invoke(app, ["ai:coach", str(audio_file)])
@@ -125,10 +130,12 @@ class TestAIAnalysisCommands:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.ai_generate_presets_async') as mock_presets:
+        with patch(
+            "samplemind.interfaces.cli.commands.ai.ai_generate_presets_async"
+        ) as mock_presets:
             mock_presets.return_value = {
-                'eq_preset': {'low': -2, 'mid': 0, 'high': 3},
-                'compressor': {'ratio': 4, 'threshold': -20}
+                "eq_preset": {"low": -2, "mid": 0, "high": 3},
+                "compressor": {"ratio": 4, "threshold": -20},
             }
 
             result = runner.invoke(app, ["ai:presets", str(audio_file)])
@@ -145,13 +152,12 @@ class TestAIProviderConfiguration:
 
         runner = CliRunner()
 
-        with patch('samplemind.interfaces.cli.commands.utils.set_ai_provider_async') as mock_set:
-            mock_set.return_value = {'provider': 'gemini', 'status': 'configured'}
+        with patch(
+            "samplemind.interfaces.cli.commands.ai.set_ai_provider_async"
+        ) as mock_set:
+            mock_set.return_value = {"provider": "gemini", "status": "configured"}
 
-            result = runner.invoke(app, [
-                "ai:provider",
-                "--provider", "gemini"
-            ])
+            result = runner.invoke(app, ["ai:provider", "--provider", "gemini"])
 
         assert result.exit_code == 0
 
@@ -161,13 +167,12 @@ class TestAIProviderConfiguration:
 
         runner = CliRunner()
 
-        with patch('samplemind.interfaces.cli.commands.utils.set_ai_provider_async') as mock_set:
-            mock_set.return_value = {'provider': 'openai', 'status': 'configured'}
+        with patch(
+            "samplemind.interfaces.cli.commands.ai.set_ai_provider_async"
+        ) as mock_set:
+            mock_set.return_value = {"provider": "openai", "status": "configured"}
 
-            result = runner.invoke(app, [
-                "ai:provider",
-                "--provider", "openai"
-            ])
+            result = runner.invoke(app, ["ai:provider", "--provider", "openai"])
 
         assert result.exit_code == 0
 
@@ -177,13 +182,12 @@ class TestAIProviderConfiguration:
 
         runner = CliRunner()
 
-        with patch('samplemind.interfaces.cli.commands.utils.set_ai_provider_async') as mock_set:
-            mock_set.return_value = {'provider': 'ollama', 'status': 'configured'}
+        with patch(
+            "samplemind.interfaces.cli.commands.ai.set_ai_provider_async"
+        ) as mock_set:
+            mock_set.return_value = {"provider": "ollama", "status": "configured"}
 
-            result = runner.invoke(app, [
-                "ai:provider",
-                "--provider", "ollama"
-            ])
+            result = runner.invoke(app, ["ai:provider", "--provider", "ollama"])
 
         assert result.exit_code == 0
 
@@ -193,14 +197,14 @@ class TestAIProviderConfiguration:
 
         runner = CliRunner()
 
-        with patch('samplemind.interfaces.cli.commands.utils.set_api_key_async') as mock_set_key:
-            mock_set_key.return_value = {'provider': 'gemini', 'configured': True}
+        with patch(
+            "samplemind.interfaces.cli.commands.ai.set_api_key_async"
+        ) as mock_set_key:
+            mock_set_key.return_value = {"provider": "gemini", "configured": True}
 
-            result = runner.invoke(app, [
-                "ai:key",
-                "--provider", "gemini",
-                "--key", "test_key_123"
-            ])
+            result = runner.invoke(
+                app, ["ai:key", "--provider", "gemini", "--key", "test_key_123"]
+            )
 
         assert result.exit_code == 0
 
@@ -210,13 +214,12 @@ class TestAIProviderConfiguration:
 
         runner = CliRunner()
 
-        with patch('samplemind.interfaces.cli.commands.utils.set_ai_model_async') as mock_set_model:
-            mock_set_model.return_value = {'model': 'gpt-4o', 'provider': 'openai'}
+        with patch(
+            "samplemind.interfaces.cli.commands.ai.set_ai_model_async"
+        ) as mock_set_model:
+            mock_set_model.return_value = {"model": "gpt-4o", "provider": "openai"}
 
-            result = runner.invoke(app, [
-                "ai:model",
-                "--model", "gpt-4o"
-            ])
+            result = runner.invoke(app, ["ai:model", "--model", "gpt-4o"])
 
         assert result.exit_code == 0
 
@@ -226,55 +229,63 @@ class TestAIProviderConfiguration:
 
         runner = CliRunner()
 
-        with patch('samplemind.interfaces.cli.commands.utils.test_ai_connection_async') as mock_test:
+        with patch(
+            "samplemind.interfaces.cli.commands.ai.test_ai_connection_async"
+        ) as mock_test:
             mock_test.return_value = {
-                'provider': 'gemini',
-                'status': 'connected',
-                'latency_ms': 250
+                "provider": "gemini",
+                "status": "connected",
+                "latency_ms": 250,
             }
 
             result = runner.invoke(app, ["ai:test"])
 
         assert result.exit_code == 0
-        assert "connected" in result.stdout.lower() or "success" in result.stdout.lower()
+        assert (
+            "connected" in result.stdout.lower() or "success" in result.stdout.lower()
+        )
 
 
 class TestAIOfflineMode:
     """Test offline-first AI capabilities"""
 
-    def test_ai_offline_mode_enabled(self, typer_runner, test_audio_samples, clean_environment):
+    def test_ai_offline_mode_enabled(
+        self, typer_runner, test_audio_samples, clean_environment
+    ):
         """Test AI commands work in offline mode with Ollama"""
         from samplemind.interfaces.cli.typer_app import app
 
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.ai_analyze_async') as mock_ai:
+        with patch("samplemind.interfaces.cli.commands.ai.ai_analyze_async") as mock_ai:
             mock_ai.return_value = {
-                'provider': 'ollama',
-                'model': 'phi3:mini',
-                'summary': 'Offline analysis result',
-                'response_time': 0.85
+                "provider": "ollama",
+                "model": "phi3:mini",
+                "summary": "Offline analysis result",
+                "response_time": 0.85,
             }
 
             result = runner.invoke(app, ["ai:analyze", str(audio_file)])
 
         assert result.exit_code == 0
 
-    def test_ai_fallback_to_ollama_on_network_error(self, typer_runner, test_audio_samples):
+    def test_ai_fallback_to_ollama_on_network_error(
+        self, typer_runner, test_audio_samples
+    ):
         """Test AI fallback to Ollama when cloud API fails"""
         from samplemind.interfaces.cli.typer_app import app
 
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.ai_analyze_async') as mock_ai:
+        with patch("samplemind.interfaces.cli.commands.ai.ai_analyze_async") as mock_ai:
             # First call fails (cloud API), falls back to Ollama
             mock_ai.return_value = {
-                'provider': 'ollama',
-                'fallback': True,
-                'original_provider': 'gemini',
-                'summary': 'Fallback analysis'
+                "provider": "ollama",
+                "fallback": True,
+                "original_provider": "gemini",
+                "summary": "Fallback analysis",
             }
 
             result = runner.invoke(app, ["ai:analyze", str(audio_file)])
@@ -292,7 +303,7 @@ class TestAIErrorHandling:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.ai_analyze_async') as mock_ai:
+        with patch("samplemind.interfaces.cli.commands.ai.ai_analyze_async") as mock_ai:
             mock_ai.side_effect = Exception("API key not configured")
 
             result = runner.invoke(app, ["ai:analyze", str(audio_file)])
@@ -307,7 +318,7 @@ class TestAIErrorHandling:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.ai_analyze_async') as mock_ai:
+        with patch("samplemind.interfaces.cli.commands.ai.ai_analyze_async") as mock_ai:
             mock_ai.side_effect = TimeoutError("API request timed out")
 
             result = runner.invoke(app, ["ai:analyze", str(audio_file)])
@@ -322,7 +333,7 @@ class TestAIErrorHandling:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.ai_analyze_async') as mock_ai:
+        with patch("samplemind.interfaces.cli.commands.ai.ai_analyze_async") as mock_ai:
             mock_ai.side_effect = Exception("Rate limit exceeded")
 
             result = runner.invoke(app, ["ai:analyze", str(audio_file)])
@@ -334,10 +345,7 @@ class TestAIErrorHandling:
         from samplemind.interfaces.cli.typer_app import app
 
         runner = CliRunner()
-        result = runner.invoke(app, [
-            "ai:provider",
-            "--provider", "invalid_provider"
-        ])
+        result = runner.invoke(app, ["ai:provider", "--provider", "invalid_provider"])
 
         assert result.exit_code != 0
 
@@ -347,14 +355,14 @@ class TestAIErrorHandling:
 
         runner = CliRunner()
 
-        with patch('samplemind.interfaces.cli.commands.utils.validate_api_key') as mock_validate:
+        with patch(
+            "samplemind.interfaces.cli.commands.ai.validate_api_key"
+        ) as mock_validate:
             mock_validate.return_value = False
 
-            result = runner.invoke(app, [
-                "ai:key",
-                "--provider", "gemini",
-                "--key", "invalid_key"
-            ])
+            result = runner.invoke(
+                app, ["ai:key", "--provider", "gemini", "--key", "invalid_key"]
+            )
 
         # May or may not fail depending on validation strictness
 
@@ -364,22 +372,20 @@ class TestAIPerformance:
 
     @pytest.mark.performance
     @pytest.mark.ai
-    def test_ai_analyze_response_time(self, typer_runner, test_audio_samples, performance_timer):
+    def test_ai_analyze_response_time(
+        self, typer_runner, test_audio_samples, performance_timer
+    ):
         """Test ai:analyze completes within performance target"""
         from samplemind.interfaces.cli.typer_app import app
 
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.ai_analyze_async') as mock_ai:
-            mock_ai.return_value = {
-                'provider': 'gemini',
-                'summary': 'Test analysis'
-            }
+        with patch("samplemind.interfaces.cli.commands.ai.ai_analyze_async") as mock_ai:
+            mock_ai.return_value = {"provider": "gemini", "summary": "Test analysis"}
 
             result, elapsed = performance_timer.time_operation(
-                runner.invoke,
-                app, ["ai:analyze", str(audio_file)]
+                runner.invoke, app, ["ai:analyze", str(audio_file)]
             )
 
         # AI analysis may take longer due to API calls
@@ -387,22 +393,20 @@ class TestAIPerformance:
         assert elapsed < 10.0, f"AI analysis took {elapsed:.2f}s"
 
     @pytest.mark.performance
-    def test_ai_offline_fast_response(self, typer_runner, test_audio_samples, performance_timer):
+    def test_ai_offline_fast_response(
+        self, typer_runner, test_audio_samples, performance_timer
+    ):
         """Test offline AI response time (<1s)"""
         from samplemind.interfaces.cli.typer_app import app
 
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.utils.ai_analyze_async') as mock_ai:
-            mock_ai.return_value = {
-                'provider': 'ollama',
-                'response_time': 0.5
-            }
+        with patch("samplemind.interfaces.cli.commands.ai.ai_analyze_async") as mock_ai:
+            mock_ai.return_value = {"provider": "ollama", "response_time": 0.5}
 
             result, elapsed = performance_timer.time_operation(
-                runner.invoke,
-                app, ["ai:analyze", str(audio_file)]
+                runner.invoke, app, ["ai:analyze", str(audio_file)]
             )
 
         # Offline AI should be very fast

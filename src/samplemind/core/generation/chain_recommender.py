@@ -19,14 +19,17 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ChainSlot:
     """Definition of a slot in a sample chain"""
-    name: str                   # e.g., "Snare", "HiHat"
-    required_keywords: list[str]# e.g., ["snare", "clap"]
+
+    name: str  # e.g., "Snare", "HiHat"
+    required_keywords: list[str]  # e.g., ["snare", "clap"]
     frequency_range: tuple[int, int] = (20, 20000)
     preferred_duration_max: float = 5.0
+
 
 @dataclass
 class SampleNode:
     """A sample in the chain"""
+
     file_path: Path
     slot_name: str
     compatibility_score: float = 0.0
@@ -35,7 +38,10 @@ class SampleNode:
 
 class ChainContext:
     """Context for the current chain being built"""
-    def __init__(self, seed_sample: Path, bpm: float | None = None, key: str | None = None):
+
+    def __init__(
+        self, seed_sample: Path, bpm: float | None = None, key: str | None = None
+    ):
         self.seed_sample = seed_sample
         self.bpm = bpm
         self.key = key
@@ -56,14 +62,14 @@ class ChainRecommender:
             ChainSlot("Kick", ["kick", "bass drum"], (20, 100)),
             ChainSlot("Snare", ["snare", "clap", "rim"], (200, 5000)),
             ChainSlot("HiHat", ["hat", "closed", "cymbal"], (1000, 20000)),
-            ChainSlot("Perc", ["perc", "tom", "bongo", "conga"], (100, 10000))
+            ChainSlot("Perc", ["perc", "tom", "bongo", "conga"], (100, 10000)),
         ],
         "techno_rumble": [
             ChainSlot("Kick", ["kick", "rumble"], (20, 80)),
             ChainSlot("Rumble", ["reverb", "sub", "bass"], (30, 100)),
             ChainSlot("Hat_O", ["open", "hat"], (5000, 15000)),
-            ChainSlot("Hat_C", ["closed", "hat"], (8000, 18000))
-        ]
+            ChainSlot("Hat_C", ["closed", "hat"], (8000, 18000)),
+        ],
     }
 
     def __init__(self, library_path: Path | None = None):
@@ -82,7 +88,7 @@ class ChainRecommender:
         seed_sample: Path,
         template_name: str = "standard_kit",
         search_paths: list[Path] | None = None,
-        creativity: float = 0.5
+        creativity: float = 0.5,
     ) -> ChainContext:
         """
         Build a complete chain starting from a seed sample.
@@ -119,7 +125,7 @@ class ChainRecommender:
             return chain_ctx
 
         # Iterate remaining slots
-        for slot in template[1:]: # Skip first as it's the seed
+        for slot in template[1:]:  # Skip first as it's the seed
             candidates = self._find_candidates(slot, search_dirs)
 
             if not candidates:
@@ -128,10 +134,7 @@ class ChainRecommender:
 
             # Score and Pick
             best_candidate = self._pick_best_candidate(
-                candidates,
-                chain_ctx,
-                slot,
-                creativity
+                candidates, chain_ctx, slot, creativity
             )
 
             if best_candidate:
@@ -148,7 +151,8 @@ class ChainRecommender:
         MAX_CANDIDATES = 50
 
         for directory in search_dirs:
-            if not directory.exists(): continue
+            if not directory.exists():
+                continue
 
             # Walk and find matches
             for p in directory.rglob("*"):
@@ -169,7 +173,7 @@ class ChainRecommender:
         candidates: list[Path],
         context: ChainContext,
         slot: ChainSlot,
-        creativity: float
+        creativity: float,
     ) -> SampleNode | None:
         """
         Score candidates and pick one.
@@ -189,5 +193,5 @@ class ChainRecommender:
         return SampleNode(
             file_path=chosen,
             slot_name=slot.name,
-            compatibility_score=random.random() # Placeholder
+            compatibility_score=random.random(),  # Placeholder
         )

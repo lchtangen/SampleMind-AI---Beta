@@ -23,14 +23,16 @@ logger = logging.getLogger(__name__)
 
 class MIDIExtractionType(str, Enum):
     """Types of MIDI extraction"""
-    MELODY = "melody"           # Monophonic melody extraction
-    HARMONY = "harmony"         # Chord detection
-    RHYTHM = "rhythm"           # Drum/beat pattern
-    BASS_LINE = "bass_line"     # Bass line extraction
+
+    MELODY = "melody"  # Monophonic melody extraction
+    HARMONY = "harmony"  # Chord detection
+    RHYTHM = "rhythm"  # Drum/beat pattern
+    BASS_LINE = "bass_line"  # Bass line extraction
 
 
 class ChordType(str, Enum):
     """Common chord types"""
+
     MAJOR = "major"
     MINOR = "minor"
     MAJOR_7 = "maj7"
@@ -44,19 +46,22 @@ class ChordType(str, Enum):
 @dataclass
 class MidiNote:
     """Representation of a single MIDI note"""
-    start_time: float       # Seconds
-    duration: float         # Seconds
-    pitch: int              # MIDI note number (0-127)
-    velocity: int = 64      # Velocity (0-127)
-    confidence: float = 1.0 # Confidence (0-1)
+
+    start_time: float  # Seconds
+    duration: float  # Seconds
+    pitch: int  # MIDI note number (0-127)
+    velocity: int = 64  # Velocity (0-127)
+    confidence: float = 1.0  # Confidence (0-1)
 
     def to_mido_events(self, tick_rate: float) -> tuple[Message, Message]:
         """Convert to mido note on/off messages"""
         start_ticks = int(self.start_time * tick_rate)
         duration_ticks = int(self.duration * tick_rate)
 
-        note_on = Message('note_on', note=self.pitch, velocity=self.velocity, time=start_ticks)
-        note_off = Message('note_off', note=self.pitch, velocity=0, time=duration_ticks)
+        note_on = Message(
+            "note_on", note=self.pitch, velocity=self.velocity, time=start_ticks
+        )
+        note_off = Message("note_off", note=self.pitch, velocity=0, time=duration_ticks)
 
         return note_on, note_off
 
@@ -64,16 +69,17 @@ class MidiNote:
 @dataclass
 class Chord:
     """Representation of a chord"""
-    start_time: float           # Seconds
-    duration: float             # Seconds
-    root: int                   # Root note MIDI number
-    chord_type: ChordType       # Chord type
-    notes: list[int]            # MIDI notes in chord
-    confidence: float = 1.0     # Confidence (0-1)
+
+    start_time: float  # Seconds
+    duration: float  # Seconds
+    root: int  # Root note MIDI number
+    chord_type: ChordType  # Chord type
+    notes: list[int]  # MIDI notes in chord
+    confidence: float = 1.0  # Confidence (0-1)
 
     def get_name(self) -> str:
         """Get chord name (e.g., 'C Major')"""
-        note_names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+        note_names = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
         root_name = note_names[self.root % 12]
         return f"{root_name} {self.chord_type.value.title()}"
 
@@ -81,12 +87,13 @@ class Chord:
 @dataclass
 class MIDIExtractionResult:
     """Result of MIDI extraction"""
+
     extraction_type: MIDIExtractionType
-    notes: list[MidiNote]           # For melody
-    chords: list[Chord]             # For harmony
-    tempo_bpm: float | None      # Detected tempo
+    notes: list[MidiNote]  # For melody
+    chords: list[Chord]  # For harmony
+    tempo_bpm: float | None  # Detected tempo
     time_signature: tuple[int, int] | None  # (numerator, denominator)
-    confidence: float               # Overall confidence (0-1)
+    confidence: float  # Overall confidence (0-1)
     midi_file: MidiFile | None = None  # Generated MIDI file
 
 
@@ -148,25 +155,19 @@ class MIDIGenerator:
 
         # Get pitch contour
         pitches, confidences = librosa.piptrack(
-            y=audio,
-            sr=self.sample_rate,
-            threshold=0.1,
-            fmin=50,
-            fmax=2000
+            y=audio, sr=self.sample_rate, threshold=0.1, fmin=50, fmax=2000
         )
 
         # Convert pitch contour to MIDI notes
         notes = self._pitch_contour_to_notes(
-            pitches,
-            confidences,
-            self.sample_rate,
-            min_duration,
-            confidence_threshold
+            pitches, confidences, self.sample_rate, min_duration, confidence_threshold
         )
 
         # Estimate tempo
         onset_env = librosa.onset.onset_strength(y=audio, sr=self.sample_rate)
-        tempogram = librosa.feature.tempogram(onset_envelope=onset_env, sr=self.sample_rate)
+        tempogram = librosa.feature.tempogram(
+            onset_envelope=onset_env, sr=self.sample_rate
+        )
         tempo = librosa.feature.tempo(onset_envelope=onset_env, sr=self.sample_rate)[0]
 
         # Create MIDI file
@@ -181,7 +182,7 @@ class MIDIGenerator:
             tempo_bpm=tempo,
             time_signature=(4, 4),
             confidence=np.mean([n.confidence for n in notes]) if notes else 0.0,
-            midi_file=midi_file
+            midi_file=midi_file,
         )
 
     def _pitch_contour_to_notes(
@@ -221,25 +222,32 @@ class MIDIGenerator:
                 else:
                     # Note changed
                     if frame_time - current_start >= min_duration:
-                        notes.append(MidiNote(
-                            start_time=current_start,
-                            duration=frame_time - current_start,
-                            pitch=int(round(current_pitch)),
-                            velocity=int(64 + confidence * 32),
-                            confidence=confidence
-                        ))
+                        notes.append(
+                            MidiNote(
+                                start_time=current_start,
+                                duration=frame_time - current_start,
+                                pitch=int(round(current_pitch)),
+                                velocity=int(64 + confidence * 32),
+                                confidence=confidence,
+                            )
+                        )
                     current_pitch = midi_pitch
                     current_start = frame_time
             else:
                 # Silence or low confidence
-                if current_pitch is not None and frame_time - current_start >= min_duration:
-                    notes.append(MidiNote(
-                        start_time=current_start,
-                        duration=frame_time - current_start,
-                        pitch=int(round(current_pitch)),
-                        velocity=int(64 + confidence * 32),
-                        confidence=confidence
-                    ))
+                if (
+                    current_pitch is not None
+                    and frame_time - current_start >= min_duration
+                ):
+                    notes.append(
+                        MidiNote(
+                            start_time=current_start,
+                            duration=frame_time - current_start,
+                            pitch=int(round(current_pitch)),
+                            velocity=int(64 + confidence * 32),
+                            confidence=confidence,
+                        )
+                    )
                 current_pitch = None
 
         return notes
@@ -269,10 +277,7 @@ class MIDIGenerator:
         """
         # Extract chroma features (pitch class distribution)
         chroma = librosa.feature.chroma_cqt(
-            y=audio,
-            sr=self.sample_rate,
-            fmin=fmin,
-            fmax=fmax
+            y=audio, sr=self.sample_rate, fmin=fmin, fmax=fmax
         )
 
         # Smooth chroma over time
@@ -294,7 +299,7 @@ class MIDIGenerator:
             tempo_bpm=tempo,
             time_signature=(4, 4),
             confidence=np.mean([c.confidence for c in chords]) if chords else 0.0,
-            midi_file=None
+            midi_file=None,
         )
 
     def _detect_chords_from_chroma(
@@ -343,7 +348,9 @@ class MIDIGenerator:
 
             if best_chord:
                 root, chord_type, score = best_chord
-                frame_time = librosa.frames_to_time(frame_idx, sr=sr, hop_length=hop_length)
+                frame_time = librosa.frames_to_time(
+                    frame_idx, sr=sr, hop_length=hop_length
+                )
                 confidence = float(best_score / 3.0)  # Normalize confidence
 
                 chord = Chord(
@@ -351,16 +358,21 @@ class MIDIGenerator:
                     duration=0.5,
                     root=root + 60,  # MIDI note C4 = 60
                     chord_type=chord_type,
-                    notes=[root + 60 + offset for offset in chord_templates[chord_type]],
-                    confidence=min(1.0, confidence)
+                    notes=[
+                        root + 60 + offset for offset in chord_templates[chord_type]
+                    ],
+                    confidence=min(1.0, confidence),
                 )
                 chord_frames.append(chord)
 
         # Merge consecutive same chords
         merged_chords = []
         for chord in chord_frames:
-            if merged_chords and merged_chords[-1].chord_type == chord.chord_type and \
-               abs(merged_chords[-1].root - chord.root) < 1:
+            if (
+                merged_chords
+                and merged_chords[-1].chord_type == chord.chord_type
+                and abs(merged_chords[-1].root - chord.root) < 1
+            ):
                 # Same chord, extend duration
                 merged_chords[-1].duration += 0.5
             else:
@@ -392,9 +404,7 @@ class MIDIGenerator:
 
         # Detect onsets
         onset_frames = librosa.onset.onset_detect(
-            y=percussive,
-            sr=self.sample_rate,
-            units='frames'
+            y=percussive, sr=self.sample_rate, units="frames"
         )
 
         # Convert to time
@@ -407,7 +417,9 @@ class MIDIGenerator:
         # Quantize onsets to grid
         quantized_notes = self._quantize_onsets(onset_times, tempo, quantize_grid)
 
-        logger.info(f"Extracted drum pattern: {len(quantized_notes)} notes, tempo: {tempo:.1f} BPM")
+        logger.info(
+            f"Extracted drum pattern: {len(quantized_notes)} notes, tempo: {tempo:.1f} BPM"
+        )
 
         return MIDIExtractionResult(
             extraction_type=MIDIExtractionType.RHYTHM,
@@ -416,7 +428,7 @@ class MIDIGenerator:
             tempo_bpm=tempo,
             time_signature=(4, 4),
             confidence=0.8,  # Drums are usually well-detected
-            midi_file=None
+            midi_file=None,
         )
 
     def _quantize_onsets(
@@ -445,7 +457,7 @@ class MIDIGenerator:
                     duration=0.1,  # Short drum hit
                     pitch=note_pitch,
                     velocity=100,
-                    confidence=0.8
+                    confidence=0.8,
                 )
                 quantized_notes.append(note)
                 current_grid_idx = grid_idx + 1
@@ -469,12 +481,18 @@ class MIDIGenerator:
 
         # Set tempo
         tempo_us = int(60_000_000 / tempo_bpm)
-        track.append(Message('program_change', program=0, time=0))
-        track.append(mido.MetaMessage('set_tempo', tempo=tempo_us, time=0))
+        track.append(Message("program_change", program=0, time=0))
+        track.append(mido.MetaMessage("set_tempo", tempo=tempo_us, time=0))
 
         # Add time signature
-        track.append(mido.MetaMessage('time_signature', numerator=time_signature[0],
-                                      denominator=time_signature[1], time=0))
+        track.append(
+            mido.MetaMessage(
+                "time_signature",
+                numerator=time_signature[0],
+                denominator=time_signature[1],
+                time=0,
+            )
+        )
 
         # Convert notes to MIDI messages
         tick_rate = mid.ticks_per_beat * (tempo_bpm / 60.0)
@@ -486,12 +504,16 @@ class MIDIGenerator:
             time_delta = current_time - last_time
 
             # Add note on
-            note_on = Message('note_on', note=note.pitch, velocity=note.velocity, time=time_delta)
+            note_on = Message(
+                "note_on", note=note.pitch, velocity=note.velocity, time=time_delta
+            )
             track.append(note_on)
 
             # Add note off
             duration_ticks = int(note.duration * tick_rate)
-            note_off = Message('note_off', note=note.pitch, velocity=0, time=duration_ticks)
+            note_off = Message(
+                "note_off", note=note.pitch, velocity=0, time=duration_ticks
+            )
             track.append(note_off)
 
             last_time = current_time + duration_ticks
@@ -511,7 +533,7 @@ class MIDIGenerator:
         self,
         file_path: Path,
         extraction_type: MIDIExtractionType = MIDIExtractionType.MELODY,
-        **kwargs
+        **kwargs,
     ) -> MIDIExtractionResult:
         """
         Extract MIDI from audio file.

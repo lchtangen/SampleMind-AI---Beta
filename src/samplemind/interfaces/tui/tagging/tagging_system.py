@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 class TagCategory(Enum):
     """Tag categories"""
+
     INSTRUMENT = "instrument"
     GENRE = "genre"
     MOOD = "mood"
@@ -25,33 +26,111 @@ class TagCategory(Enum):
 # Predefined tags by category
 TAG_CATEGORIES = {
     TagCategory.INSTRUMENT: [
-        "kick", "snare", "hi-hat", "clap", "crash", "tom", "cowbell",
-        "bass", "guitar", "piano", "synth", "pad", "lead", "strings",
-        "brass", "woodwind", "vocal", "drums", "percussion", "effect"
+        "kick",
+        "snare",
+        "hi-hat",
+        "clap",
+        "crash",
+        "tom",
+        "cowbell",
+        "bass",
+        "guitar",
+        "piano",
+        "synth",
+        "pad",
+        "lead",
+        "strings",
+        "brass",
+        "woodwind",
+        "vocal",
+        "drums",
+        "percussion",
+        "effect",
     ],
     TagCategory.GENRE: [
-        "techno", "house", "electro", "deep-house", "minimal",
-        "dubstep", "drum-and-bass", "trap", "dnb", "uk-garage",
-        "ambient", "downtempo", "trip-hop", "experimental",
-        "pop", "rock", "hip-hop", "r-and-b", "reggae", "folk", "jazz"
+        "techno",
+        "house",
+        "electro",
+        "deep-house",
+        "minimal",
+        "dubstep",
+        "drum-and-bass",
+        "trap",
+        "dnb",
+        "uk-garage",
+        "ambient",
+        "downtempo",
+        "trip-hop",
+        "experimental",
+        "pop",
+        "rock",
+        "hip-hop",
+        "r-and-b",
+        "reggae",
+        "folk",
+        "jazz",
     ],
     TagCategory.MOOD: [
-        "dark", "bright", "aggressive", "mellow", "chill", "energetic",
-        "melancholic", "happy", "sad", "mysterious", "peaceful",
-        "intense", "calm", "uplifting", "moody", "dreamy"
+        "dark",
+        "bright",
+        "aggressive",
+        "mellow",
+        "chill",
+        "energetic",
+        "melancholic",
+        "happy",
+        "sad",
+        "mysterious",
+        "peaceful",
+        "intense",
+        "calm",
+        "uplifting",
+        "moody",
+        "dreamy",
     ],
     TagCategory.ENERGY: [
-        "low", "low-medium", "medium", "medium-high", "high", "very-high"
+        "low",
+        "low-medium",
+        "medium",
+        "medium-high",
+        "high",
+        "very-high",
     ],
     TagCategory.PRODUCTION: [
-        "clean", "dirty", "lo-fi", "polished", "raw", "distorted",
-        "compressed", "layered", "minimal", "complex", "warm", "cold",
-        "bright", "dark", "dry", "wet", "analog", "digital"
+        "clean",
+        "dirty",
+        "lo-fi",
+        "polished",
+        "raw",
+        "distorted",
+        "compressed",
+        "layered",
+        "minimal",
+        "complex",
+        "warm",
+        "cold",
+        "bright",
+        "dark",
+        "dry",
+        "wet",
+        "analog",
+        "digital",
     ],
     TagCategory.USAGE: [
-        "intro", "drop", "break", "breakdown", "build", "outro",
-        "fill", "transition", "ambient", "background", "loop",
-        "one-shot", "sample", "loop-ready"
+        "intro",
+        "drop",
+        "break",
+        "breakdown",
+        "build",
+        "outro",
+        "fill",
+        "transition",
+        "ambient",
+        "background",
+        "loop",
+        "one-shot",
+        "sample",
+        "loop-ready",
     ],
 }
 
@@ -59,6 +138,7 @@ TAG_CATEGORIES = {
 @dataclass
 class Tag:
     """Individual tag"""
+
     name: str
     category: TagCategory
     description: Optional[str] = None
@@ -70,6 +150,7 @@ class Tag:
 @dataclass
 class TaggingProfile:
     """Profile of tags for an analysis"""
+
     analysis_id: str
     tags: Set[str] = field(default_factory=set)
     custom_tags: Set[str] = field(default_factory=set)
@@ -127,7 +208,10 @@ class TaggingSystem:
         return self.profiles.get(analysis_id)
 
     def add_tag(
-        self, analysis_id: str, tag_name: str, category: TagCategory = TagCategory.CUSTOM
+        self,
+        analysis_id: str,
+        tag_name: str,
+        category: TagCategory = TagCategory.CUSTOM,
     ) -> bool:
         """Add tag to analysis"""
         profile = self.create_profile(analysis_id)
@@ -151,9 +235,7 @@ class TaggingSystem:
         logger.debug(f"Added tag '{tag_name}' to {analysis_id}")
         return True
 
-    def remove_tag(
-        self, analysis_id: str, tag_name: str
-    ) -> bool:
+    def remove_tag(self, analysis_id: str, tag_name: str) -> bool:
         """Remove tag from analysis"""
         profile = self.get_profile(analysis_id)
         if not profile:
@@ -188,7 +270,10 @@ class TaggingSystem:
         return removed
 
     def add_tags_batch(
-        self, analysis_id: str, tags: List[str], category: TagCategory = TagCategory.CUSTOM
+        self,
+        analysis_id: str,
+        tags: List[str],
+        category: TagCategory = TagCategory.CUSTOM,
     ) -> int:
         """Add multiple tags at once"""
         count = 0
@@ -230,9 +315,7 @@ class TaggingSystem:
         """Find all analyses with a specific tag"""
         return list(self.tag_index.get(tag_name, set()))
 
-    def search_by_tags(
-        self, tags: List[str], match_all: bool = False
-    ) -> List[str]:
+    def search_by_tags(self, tags: List[str], match_all: bool = False) -> List[str]:
         """Find analyses with tags (AND or OR logic)"""
         if not tags:
             return []
@@ -270,16 +353,12 @@ class TaggingSystem:
     def get_tag_statistics(self) -> Dict[str, Any]:
         """Get tagging statistics"""
         total_tags = len(self.all_tags)
-        total_custom_tags = sum(
-            len(p.custom_tags) for p in self.profiles.values()
-        )
+        total_custom_tags = sum(len(p.custom_tags) for p in self.profiles.values())
         total_taggings = sum(
             len(p.tags) + len(p.custom_tags) for p in self.profiles.values()
         )
 
-        most_used = sorted(
-            self.all_tags.items(), key=lambda x: -x[1].frequency
-        )[:10]
+        most_used = sorted(self.all_tags.items(), key=lambda x: -x[1].frequency)[:10]
 
         return {
             "total_predefined_tags": total_tags,
@@ -289,9 +368,7 @@ class TaggingSystem:
             "most_used_tags": [(tag.name, tag.frequency) for _, tag in most_used],
         }
 
-    def get_tag_list(
-        self, category: Optional[TagCategory] = None
-    ) -> List[str]:
+    def get_tag_list(self, category: Optional[TagCategory] = None) -> List[str]:
         """Get list of available tags"""
         if category:
             return TAG_CATEGORIES.get(category, [])

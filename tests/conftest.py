@@ -23,13 +23,18 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 # Also add the modern src directory to prefer latest modules for `samplemind` imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from samplemind.core.engine.audio_engine import AudioEngine, AnalysisLevel, AudioFeatures
+from samplemind.core.engine.audio_engine import (
+    AudioEngine,
+    AnalysisLevel,
+    AudioFeatures,
+)
 from samplemind.integrations.openai_integration import OpenAIMusicProducer, OpenAIModel
 
 
 # ============================================================================
 # Scope Configuration
 # ============================================================================
+
 
 def pytest_configure(config):
     """Configure pytest environment"""
@@ -51,61 +56,64 @@ def pytest_unconfigure(config):
 # Test Data Fixtures
 # ============================================================================
 
+
 @pytest.fixture(scope="session")
 def test_audio_samples():
     """Generate synthetic audio samples for testing"""
     test_root = Path(__file__).parent
     fixtures_dir = test_root / "fixtures"
     fixtures_dir.mkdir(exist_ok=True)
-    
+
     samples = {}
-    
+
     # Sample 1: 120 BPM C major track
     sample_rate = 44100
     duration = 3.0  # 3 seconds
     t = np.linspace(0, duration, int(sample_rate * duration))
-    
+
     # Create C major chord progression
     c_major = [261.63, 329.63, 392.00]  # C, E, G
     signal = np.zeros_like(t)
     for freq in c_major:
         signal += 0.3 * np.sin(2 * np.pi * freq * t)
-    
+
     # Add 120 BPM rhythm
     beat_freq = 2.0  # 120 BPM = 2 beats per second
     rhythm = 0.2 * np.sin(2 * np.pi * beat_freq * t) * np.sin(2 * np.pi * 60 * t)
     signal += rhythm
-    
+
     # Apply envelope
     envelope = np.exp(-0.5 * t)
     signal = signal * envelope
-    
+
     file_120_c = fixtures_dir / "test_120bpm_c_major.wav"
     sf.write(file_120_c, signal, sample_rate)
     samples["120_c_major"] = file_120_c
-    
-    # Sample 2: 140 BPM A minor track  
+
+    # Sample 2: 140 BPM A minor track
     a_minor = [220.00, 261.63, 329.63]  # A, C, E
     signal_minor = np.zeros_like(t)
     for freq in a_minor:
         signal_minor += 0.3 * np.sin(2 * np.pi * freq * t)
-    
+
     # Add 140 BPM rhythm
     beat_freq_fast = 2.33  # 140 BPM
-    rhythm_fast = 0.2 * np.sin(2 * np.pi * beat_freq_fast * t) * np.sin(2 * np.pi * 80 * t)
+    rhythm_fast = (
+        0.2 * np.sin(2 * np.pi * beat_freq_fast * t) * np.sin(2 * np.pi * 80 * t)
+    )
     signal_minor += rhythm_fast
     signal_minor = signal_minor * envelope
-    
+
     file_140_a = fixtures_dir / "test_140bpm_a_minor.wav"
     sf.write(file_140_a, signal_minor, sample_rate)
     samples["140_a_minor"] = file_140_a
-    
+
     # Sample 3: Noise sample for filtering tests
     noise = 0.1 * np.random.randn(len(t))
     file_noise = fixtures_dir / "test_noise.wav"
     sf.write(file_noise, noise, sample_rate)
     samples["noise"] = file_noise
-    
+
     return samples
 
 
@@ -119,12 +127,25 @@ def sample_audio_features():
         tempo=120.0,
         key="C",
         mode="major",
-        pitch_class_distribution=[0.2, 0.1, 0.15, 0.05, 0.2, 0.1, 0.05, 0.15, 0.0, 0.0, 0.0, 0.0],
+        pitch_class_distribution=[
+            0.2,
+            0.1,
+            0.15,
+            0.05,
+            0.2,
+            0.1,
+            0.05,
+            0.15,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+        ],
         spectral_centroid=[2500.0] * 100,
         rms_energy=[0.5] * 100,
         file_hash="test_hash_123",
         file_size=1024000,
-        analysis_level=AnalysisLevel.STANDARD
+        analysis_level=AnalysisLevel.STANDARD,
     )
 
 
@@ -132,24 +153,25 @@ def sample_audio_features():
 def sample_features_dict():
     """Provide sample audio features as dictionary for AI testing"""
     return {
-        'tempo': 128.0,
-        'key': 'C',
-        'mode': 'major',
-        'duration': 180.0,
-        'sample_rate': 44100,
-        'spectral_centroid': [2500.0] * 100,
-        'spectral_bandwidth': [1000.0] * 100,
-        'spectral_rolloff': [4000.0] * 100,
-        'rms_energy': [0.5] * 100,
-        'pitch_class_distribution': [0.1] * 12,
-        'mfccs': [[1.0] * 13] * 100,
-        'zero_crossing_rate': [0.1] * 100
+        "tempo": 128.0,
+        "key": "C",
+        "mode": "major",
+        "duration": 180.0,
+        "sample_rate": 44100,
+        "spectral_centroid": [2500.0] * 100,
+        "spectral_bandwidth": [1000.0] * 100,
+        "spectral_rolloff": [4000.0] * 100,
+        "rms_energy": [0.5] * 100,
+        "pitch_class_distribution": [0.1] * 12,
+        "mfccs": [[1.0] * 13] * 100,
+        "zero_crossing_rate": [0.1] * 100,
     }
 
 
 # ============================================================================
 # Audio Engine Fixtures
 # ============================================================================
+
 
 @pytest.fixture
 def audio_engine():
@@ -171,11 +193,12 @@ def async_audio_engine():
 # AI Integration Fixtures
 # ============================================================================
 
+
 @pytest.fixture
 def mock_openai_producer():
     """Provide mocked OpenAI producer for testing without API calls"""
     producer = MagicMock(spec=OpenAIMusicProducer)
-    
+
     # Mock analysis result
     mock_analysis = MagicMock()
     mock_analysis.summary = "Test analysis summary"
@@ -188,31 +211,33 @@ def mock_openai_producer():
     mock_analysis.processing_time = 1.5
     mock_analysis.tokens_used = 500
     mock_analysis.confidence_score = 0.9
-    
+
     producer.analyze_music_comprehensive = AsyncMock(return_value=mock_analysis)
     producer.analyze_music_sync = MagicMock(return_value=mock_analysis)
-    producer.get_usage_stats = MagicMock(return_value={
-        'total_requests': 10,
-        'total_tokens': 5000,
-        'avg_response_time': 2.0,
-        'cache_hits': 5,
-        'cache_size': 3,
-        'cache_hit_rate': 0.5
-    })
-    
+    producer.get_usage_stats = MagicMock(
+        return_value={
+            "total_requests": 10,
+            "total_tokens": 5000,
+            "avg_response_time": 2.0,
+            "cache_hits": 5,
+            "cache_size": 3,
+            "cache_hit_rate": 0.5,
+        }
+    )
+
     return producer
 
 
 @pytest.fixture
 def real_openai_producer():
     """Provide real OpenAI producer (requires API key)"""
-    api_key = os.getenv('OPENAI_API_KEY')
+    api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         pytest.skip("OPENAI_API_KEY not available")
-    
+
     producer = OpenAIMusicProducer(
         api_key=api_key,
-        default_model=OpenAIModel.GPT_4O_MINI  # Use cheaper model for testing
+        default_model=OpenAIModel.GPT_4O_MINI,  # Use cheaper model for testing
     )
     yield producer
     asyncio.run(producer.close())
@@ -221,6 +246,7 @@ def real_openai_producer():
 # ============================================================================
 # Database Fixtures
 # ============================================================================
+
 
 @pytest.fixture
 async def test_mongodb():
@@ -231,14 +257,16 @@ async def test_mongodb():
     mock_collection = MagicMock()
     mock_db.audio_features = mock_collection
     mock_db.analysis_results = mock_collection
-    
+
     # Mock common operations
-    mock_collection.insert_one = AsyncMock(return_value=MagicMock(inserted_id="test_id"))
+    mock_collection.insert_one = AsyncMock(
+        return_value=MagicMock(inserted_id="test_id")
+    )
     mock_collection.find_one = AsyncMock(return_value=None)
     mock_collection.find = MagicMock(return_value=[])
     mock_collection.update_one = AsyncMock(return_value=MagicMock(modified_count=1))
     mock_collection.delete_one = AsyncMock(return_value=MagicMock(deleted_count=1))
-    
+
     return mock_db
 
 
@@ -251,7 +279,7 @@ async def test_redis():
     mock_redis.delete = AsyncMock(return_value=1)
     mock_redis.exists = AsyncMock(return_value=False)
     mock_redis.flushdb = AsyncMock(return_value=True)
-    
+
     return mock_redis
 
 
@@ -260,26 +288,27 @@ async def test_chromadb():
     """Provide test ChromaDB connection"""
     mock_chroma = MagicMock()
     mock_collection = MagicMock()
-    
+
     mock_chroma.get_or_create_collection = MagicMock(return_value=mock_collection)
     mock_collection.add = MagicMock()
-    mock_collection.query = MagicMock(return_value={
-        'documents': [['test document']],
-        'metadatas': [[{'id': 'test'}]],
-        'distances': [[0.5]]
-    })
-    mock_collection.get = MagicMock(return_value={
-        'documents': [],
-        'metadatas': [],
-        'ids': []
-    })
-    
+    mock_collection.query = MagicMock(
+        return_value={
+            "documents": [["test document"]],
+            "metadatas": [[{"id": "test"}]],
+            "distances": [[0.5]],
+        }
+    )
+    mock_collection.get = MagicMock(
+        return_value={"documents": [], "metadatas": [], "ids": []}
+    )
+
     return mock_chroma
 
 
 # ============================================================================
 # File System Fixtures
 # ============================================================================
+
 
 @pytest.fixture
 def temp_directory():
@@ -293,26 +322,18 @@ def temp_directory():
 def test_config_file(temp_directory):
     """Provide test configuration file"""
     config = {
-        "audio_engine": {
-            "max_workers": 2,
-            "cache_size": 10
-        },
-        "ai_providers": {
-            "openai": {
-                "enabled": True,
-                "model": "gpt-4o-mini"
-            }
-        },
+        "audio_engine": {"max_workers": 2, "cache_size": 10},
+        "ai_providers": {"openai": {"enabled": True, "model": "gpt-4o-mini"}},
         "database": {
             "mongodb_url": "mongodb://localhost:27017/test_samplemind",
-            "redis_url": "redis://localhost:6379/1"
-        }
+            "redis_url": "redis://localhost:6379/1",
+        },
     }
-    
+
     config_file = temp_directory / "test_config.json"
-    with open(config_file, 'w') as f:
+    with open(config_file, "w") as f:
         json.dump(config, f, indent=2)
-    
+
     return config_file
 
 
@@ -320,24 +341,25 @@ def test_config_file(temp_directory):
 # Environment Fixtures
 # ============================================================================
 
+
 @pytest.fixture
 def clean_environment():
     """Provide clean environment variables for testing"""
     original_env = os.environ.copy()
-    
+
     # Set test environment variables
     test_env = {
-        'SAMPLEMIND_ENV': 'test',
-        'SAMPLEMIND_LOG_LEVEL': 'DEBUG',
-        'SAMPLEMIND_CACHE_SIZE': '10',
-        'SAMPLEMIND_MAX_WORKERS': '2'
+        "SAMPLEMIND_ENV": "test",
+        "SAMPLEMIND_LOG_LEVEL": "DEBUG",
+        "SAMPLEMIND_CACHE_SIZE": "10",
+        "SAMPLEMIND_MAX_WORKERS": "2",
     }
-    
+
     for key, value in test_env.items():
         os.environ[key] = value
-    
+
     yield test_env
-    
+
     # Restore original environment
     os.environ.clear()
     os.environ.update(original_env)
@@ -347,15 +369,16 @@ def clean_environment():
 # Performance Testing Fixtures
 # ============================================================================
 
+
 @pytest.fixture
 def performance_timer():
     """Provide performance timing utilities"""
     import time
-    
+
     class Timer:
         def __init__(self):
             self.times = []
-        
+
         def time_operation(self, func, *args, **kwargs):
             start = time.time()
             result = func(*args, **kwargs)
@@ -363,7 +386,7 @@ def performance_timer():
             elapsed = end - start
             self.times.append(elapsed)
             return result, elapsed
-        
+
         async def time_async_operation(self, coro):
             start = time.time()
             result = await coro
@@ -371,18 +394,18 @@ def performance_timer():
             elapsed = end - start
             self.times.append(elapsed)
             return result, elapsed
-        
+
         def get_stats(self):
             if not self.times:
                 return {}
             return {
-                'count': len(self.times),
-                'total': sum(self.times),
-                'average': sum(self.times) / len(self.times),
-                'min': min(self.times),
-                'max': max(self.times)
+                "count": len(self.times),
+                "total": sum(self.times),
+                "average": sum(self.times) / len(self.times),
+                "min": min(self.times),
+                "max": max(self.times),
             }
-    
+
     return Timer()
 
 
@@ -390,13 +413,16 @@ def performance_timer():
 # API Testing Fixtures
 # ============================================================================
 
+
 @pytest_asyncio.fixture
 async def api_client():
     """FastAPI test client for integration tests"""
     from httpx import AsyncClient, ASGITransport
     from samplemind.interfaces.api.main import app
 
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as client:
         yield client
 
 
@@ -406,7 +432,7 @@ def sample_user_data():
     return {
         "email": "test@example.com",
         "username": "testuser",
-        "password": "TestPassword123!"
+        "password": "TestPassword123!",
     }
 
 
@@ -414,10 +440,12 @@ def sample_user_data():
 # CLI Testing Fixtures
 # ============================================================================
 
+
 @pytest.fixture
 def typer_runner():
     """Provide Typer test runner for CLI commands"""
     from typer.testing import CliRunner
+
     return CliRunner()
 
 
@@ -425,6 +453,7 @@ def typer_runner():
 def cli_app():
     """Provide the CLI app instance for testing"""
     from samplemind.interfaces.cli.typer_app import app
+
     return app
 
 
@@ -435,7 +464,7 @@ def mock_cli_context(temp_directory):
         "work_dir": temp_directory,
         "cache_dir": temp_directory / ".samplemind" / "cache",
         "config_dir": temp_directory / ".samplemind" / "config",
-        "logs_dir": temp_directory / ".samplemind" / "logs"
+        "logs_dir": temp_directory / ".samplemind" / "logs",
     }
 
 
@@ -444,21 +473,13 @@ def sample_cli_config(temp_directory):
     """Provide sample CLI configuration"""
     return {
         "version": "2.1.0-beta",
-        "audio_engine": {
-            "max_workers": 2,
-            "cache_enabled": True,
-            "cache_size_mb": 100
-        },
+        "audio_engine": {"max_workers": 2, "cache_enabled": True, "cache_size_mb": 100},
         "ai_providers": {
             "primary": "gemini",
             "fallback": "ollama",
-            "offline_only": False
+            "offline_only": False,
         },
-        "output": {
-            "format": "table",
-            "colorize": True,
-            "verbose": False
-        }
+        "output": {"format": "table", "colorize": True, "verbose": False},
     }
 
 
@@ -469,5 +490,5 @@ def sample_cli_config(temp_directory):
 # Custom markers for test categorization
 pytestmark = [
     pytest.mark.filterwarnings("ignore::DeprecationWarning"),
-    pytest.mark.filterwarnings("ignore::UserWarning")
+    pytest.mark.filterwarnings("ignore::UserWarning"),
 ]

@@ -7,7 +7,7 @@ from .audio import (
     AudioUploadResponse,
     AudioAnalysisRequest,
     AudioAnalysisResponse,
-    AudioFileMetadata
+    AudioFileMetadata,
 )
 from .ai import AIProviderInfo, AIAnalysisRequest, AIAnalysisResponse
 from .batch import BatchUploadRequest, BatchStatusResponse

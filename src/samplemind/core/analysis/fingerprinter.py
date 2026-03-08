@@ -114,7 +114,9 @@ class AudioFingerprinter:
             import librosa
         except ImportError:
             logger.warning("librosa not available — returning empty fingerprint")
-            return FingerprintResult(sample_rate=sr, duration=float(len(y)) / max(sr, 1))
+            return FingerprintResult(
+                sample_rate=sr, duration=float(len(y)) / max(sr, 1)
+            )
 
         duration = float(len(y)) / sr
         result = FingerprintResult(sample_rate=sr, duration=duration)
@@ -195,7 +197,9 @@ class AudioFingerprinter:
             return result
         except Exception as exc:
             logger.error(f"AudioFingerprinter failed for {path}: {exc}")
-            return FingerprintResult(sample_rate=sample_rate, duration=0.0, file_path=str(path))
+            return FingerprintResult(
+                sample_rate=sample_rate, duration=0.0, file_path=str(path)
+            )
 
     @staticmethod
     def _search_near_duplicates(

@@ -54,6 +54,7 @@ try:
         SessionStats,
         get_tui_engine,
     )
+
     print_test("Import TUIAudioEngine bridge", True)
 except Exception as e:
     print_test("Import TUIAudioEngine bridge", False, str(e))
@@ -67,6 +68,7 @@ try:
         WarningDialog,
         LoadingDialog,
     )
+
     print_test("Import dialog widgets", True)
 except Exception as e:
     print_test("Import dialog widgets", False, str(e))
@@ -74,6 +76,7 @@ except Exception as e:
 
 try:
     from samplemind.interfaces.tui.screens.analyze_screen import AnalyzeScreen
+
     print_test("Import AnalyzeScreen", True)
 except Exception as e:
     print_test("Import AnalyzeScreen", False, str(e))
@@ -81,6 +84,7 @@ except Exception as e:
 
 try:
     from samplemind.interfaces.tui.screens.batch_screen import BatchScreen
+
     print_test("Import BatchScreen", True)
 except Exception as e:
     print_test("Import BatchScreen", False, str(e))
@@ -88,6 +92,7 @@ except Exception as e:
 
 try:
     from samplemind.interfaces.tui.screens.results_screen import ResultsScreen
+
     print_test("Import ResultsScreen", True)
 except Exception as e:
     print_test("Import ResultsScreen", False, str(e))
@@ -142,7 +147,9 @@ try:
     cache.hit_count = 5
     cache.miss_count = 5
     hit_rate = cache.get_hit_rate()
-    print_test("Cache hit rate calculation", hit_rate == 0.5, f"Hit rate: {hit_rate*100:.0f}%")
+    print_test(
+        "Cache hit rate calculation", hit_rate == 0.5, f"Hit rate: {hit_rate*100:.0f}%"
+    )
 
 finally:
     os.unlink(temp_path)
@@ -155,7 +162,9 @@ try:
     engine = TUIAudioEngine()
     print_test("Initialize TUIAudioEngine", True)
 
-    print_test("Engine has cache", hasattr(engine, "cache") and engine.cache is not None)
+    print_test(
+        "Engine has cache", hasattr(engine, "cache") and engine.cache is not None
+    )
     print_test("Engine has session stats", hasattr(engine, "session_stats"))
     print_test("Engine has audio engine", hasattr(engine, "engine"))
 
@@ -167,6 +176,7 @@ except Exception as e:
 print_section("5. FEATURE FORMATTING")
 
 engine = TUIAudioEngine()
+
 
 # Create mock features
 class MockFeatures:
@@ -272,7 +282,9 @@ for seconds, expected in test_cases:
     minutes = int(seconds // 60)
     secs = int(seconds % 60)
     result = f"{minutes}:{secs:02d}"
-    print_test(f"Format {seconds}s to MM:SS", result == expected, f"{result} == {expected}")
+    print_test(
+        f"Format {seconds}s to MM:SS", result == expected, f"{result} == {expected}"
+    )
 
 
 # Test 9: Singleton pattern
@@ -315,7 +327,8 @@ for filename, should_be_valid in test_files:
 # Final summary
 print_section("PHASE 2 VALIDATION SUMMARY")
 
-print(f"""
+print(
+    f"""
 {BOLD}Phase 2.1: Core AudioEngine Integration{RESET}
   ✓ TUIAudioEngine bridge created
   ✓ SessionStats tracking implemented
@@ -347,7 +360,8 @@ print(f"""
 
 {BOLD}{GREEN}All Phase 2 components validated successfully!{RESET}
 {BOLD}{GREEN}Ready for cross-platform testing and deployment.{RESET}
-""")
+"""
+)
 
 print(f"\n{BOLD}Next Steps:{RESET}")
 print("1. Run: source .venv/bin/activate && python -m pytest tests/unit/interfaces/")

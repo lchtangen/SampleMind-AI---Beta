@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class UsageEvent:
     """Single usage event in workflow"""
+
     timestamp: float
     file_id: str
     file_name: str
@@ -39,8 +40,11 @@ class UsageEvent:
 @dataclass
 class TransitionMatrix:
     """Order-2 Markov chain transition matrix"""
+
     # state_1 -> state_2 -> count
-    transitions: Dict[str, Dict[str, int]] = field(default_factory=lambda: defaultdict(lambda: defaultdict(int)))
+    transitions: Dict[str, Dict[str, int]] = field(
+        default_factory=lambda: defaultdict(lambda: defaultdict(int))
+    )
     # Total transitions for normalization
     total_transitions: int = 0
     # Last update time
@@ -73,7 +77,9 @@ class TransitionMatrix:
         total = sum(transitions.values())
 
         # Convert to probabilities and sort
-        probs = [(next_state, count / total) for next_state, count in transitions.items()]
+        probs = [
+            (next_state, count / total) for next_state, count in transitions.items()
+        ]
         probs.sort(key=lambda x: x[1], reverse=True)
 
         return probs[:n]
@@ -83,7 +89,7 @@ class TransitionMatrix:
         return {
             "transitions": {k: dict(v) for k, v in self.transitions.items()},
             "total_transitions": self.total_transitions,
-            "last_updated": self.last_updated
+            "last_updated": self.last_updated,
         }
 
 
@@ -177,11 +183,14 @@ class UsagePatternTracker:
     def get_stats(self) -> Dict:
         """Get current statistics"""
         total_requests = self.total_hits + self.total_misses
-        hit_ratio = (self.total_hits / total_requests * 100) if total_requests > 0 else 0
+        hit_ratio = (
+            (self.total_hits / total_requests * 100) if total_requests > 0 else 0
+        )
 
         avg_processing_time = (
             sum(self.processing_times) / len(self.processing_times)
-            if self.processing_times else 0
+            if self.processing_times
+            else 0
         )
 
         return {
@@ -192,14 +201,16 @@ class UsagePatternTracker:
             "avg_processing_time_ms": round(avg_processing_time, 2),
             "recent_events": len(self.events),
             "transition_matrix_size": len(self.transition_matrix.transitions),
-            "state_history_length": len(self._state_history)
+            "state_history_length": len(self._state_history),
         }
 
     def get_recent_events(self, limit: int = 10) -> List[UsageEvent]:
         """Get most recent events"""
         return self.events[-limit:]
 
-    def get_transition_probabilities(self, state: str, top_n: int = 5) -> List[Tuple[str, float]]:
+    def get_transition_probabilities(
+        self, state: str, top_n: int = 5
+    ) -> List[Tuple[str, float]]:
         """
         Get most likely next states from given state.
 
@@ -227,7 +238,9 @@ class UsagePatternTracker:
         self._state_history.clear()
         logger.info("Usage pattern tracker cleared")
 
-    def get_workflow_patterns(self, min_frequency: int = 2) -> List[Tuple[List[str], int]]:
+    def get_workflow_patterns(
+        self, min_frequency: int = 2
+    ) -> List[Tuple[List[str], int]]:
         """
         Get common workflow patterns (sequences of states).
 
@@ -244,7 +257,7 @@ class UsagePatternTracker:
             pattern = (
                 self._state_history[i],
                 self._state_history[i + 1],
-                self._state_history[i + 2]
+                self._state_history[i + 2],
             )
             patterns[pattern] += 1
 
@@ -277,21 +290,25 @@ class UsagePatternTracker:
         next_states = self.get_transition_probabilities(current_state, top_n=5)
 
         for next_state, probability in next_states:
-            predictions.append({
-                "state": next_state,
-                "probability": round(probability, 3),
-                "steps_ahead": 1
-            })
+            predictions.append(
+                {
+                    "state": next_state,
+                    "probability": round(probability, 3),
+                    "steps_ahead": 1,
+                }
+            )
 
             # Optional: predict further ahead (can be expensive)
             if depth > 1:
                 second_order = self.get_transition_probabilities(next_state, top_n=2)
                 for next_next_state, next_prob in second_order:
-                    predictions.append({
-                        "state": next_next_state,
-                        "probability": round(probability * next_prob, 3),
-                        "steps_ahead": 2
-                    })
+                    predictions.append(
+                        {
+                            "state": next_next_state,
+                            "probability": round(probability * next_prob, 3),
+                            "steps_ahead": 2,
+                        }
+                    )
 
         # Sort by probability
         predictions.sort(key=lambda x: x["probability"], reverse=True)

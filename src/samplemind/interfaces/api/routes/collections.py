@@ -25,7 +25,7 @@ MOCK_COLLECTIONS = [
         "file_count": 12,
         "total_duration": 345.5,
         "created_at": datetime.now(),
-        "updated_at": datetime.now()
+        "updated_at": datetime.now(),
     },
     {
         "id": "col_2",
@@ -38,20 +38,18 @@ MOCK_COLLECTIONS = [
         "file_count": 5,
         "total_duration": 120.0,
         "created_at": datetime.now(),
-        "updated_at": datetime.now()
-    }
+        "updated_at": datetime.now(),
+    },
 ]
+
 
 def is_db_available() -> bool:
     """Check if MongoDB is available"""
     return get_app_state("mongodb") or False
 
+
 @router.get("/", response_model=List[CollectionResponse])
-async def list_collections(
-    request: Request,
-    skip: int = 0,
-    limit: int = 100
-) -> None:
+async def list_collections(request: Request, skip: int = 0, limit: int = 100) -> None:
     """List all collections"""
     if is_db_available():
         # Get user ID from request state (injected by AuthMiddleware)
@@ -70,11 +68,13 @@ async def list_collections(
                 file_count=c.file_count,
                 total_duration=c.total_duration,
                 created_at=c.created_at,
-                updated_at=c.updated_at
-            ) for c in cols
+                updated_at=c.updated_at,
+            )
+            for c in cols
         ]
 
     return MOCK_COLLECTIONS[skip : skip + limit]
+
 
 @router.post("/", response_model=CollectionResponse)
 async def create_collection(collection: CollectionCreate):
@@ -88,7 +88,7 @@ async def create_collection(collection: CollectionCreate):
             description=collection.description,
             is_public=collection.is_public,
             tags=collection.tags,
-            metadata=collection.metadata
+            metadata=collection.metadata,
         )
         return CollectionResponse(
             id=db_col.collection_id,
@@ -101,7 +101,7 @@ async def create_collection(collection: CollectionCreate):
             file_count=db_col.file_count,
             total_duration=db_col.total_duration,
             created_at=db_col.created_at,
-            updated_at=db_col.updated_at
+            updated_at=db_col.updated_at,
         )
 
     # Fallback to Mock
@@ -115,6 +115,7 @@ async def create_collection(collection: CollectionCreate):
 
     MOCK_COLLECTIONS.append(new_col)
     return new_col
+
 
 @router.get("/{collection_id}", response_model=CollectionResponse)
 async def get_collection(collection_id: str) -> Any:
@@ -134,13 +135,14 @@ async def get_collection(collection_id: str) -> Any:
             file_count=c.file_count,
             total_duration=c.total_duration,
             created_at=c.created_at,
-            updated_at=c.updated_at
+            updated_at=c.updated_at,
         )
 
     for col in MOCK_COLLECTIONS:
         if col["id"] == collection_id:
             return col
     raise HTTPException(status_code=404, detail="Collection not found")
+
 
 @router.put("/{collection_id}", response_model=CollectionResponse)
 async def update_collection(collection_id: str, collection: CollectionUpdate):
@@ -162,7 +164,7 @@ async def update_collection(collection_id: str, collection: CollectionUpdate):
             file_count=c.file_count,
             total_duration=c.total_duration,
             created_at=c.created_at,
-            updated_at=c.updated_at
+            updated_at=c.updated_at,
         )
 
     for i, col in enumerate(MOCK_COLLECTIONS):
@@ -175,6 +177,7 @@ async def update_collection(collection_id: str, collection: CollectionUpdate):
             return updated_col
 
     raise HTTPException(status_code=404, detail="Collection not found")
+
 
 @router.delete("/{collection_id}")
 async def delete_collection(collection_id: str):
@@ -193,6 +196,7 @@ async def delete_collection(collection_id: str):
 
     raise HTTPException(status_code=404, detail="Collection not found")
 
+
 @router.get("/{collection_id}/items", response_model=List[Dict[str, Any]])
 async def get_collection_items(collection_id: str):
     """Get items in a collection"""
@@ -210,7 +214,7 @@ async def get_collection_items(collection_id: str):
                 "filename": item.filename,
                 "duration": item.duration,
                 "format": item.format,
-                "created_at": item.created_at
+                "created_at": item.created_at,
             }
             for item in items
         ]
@@ -231,13 +235,13 @@ async def get_collection_items(collection_id: str):
             "filename": "Drum_Loop_120bpm.wav",
             "duration": 4.5,
             "format": "wav",
-            "created_at": datetime.now()
+            "created_at": datetime.now(),
         },
         {
             "id": "audio_2",
             "filename": "Synth_Pad_Am.mp3",
             "duration": 12.0,
             "format": "mp3",
-            "created_at": datetime.now()
-        }
+            "created_at": datetime.now(),
+        },
     ]

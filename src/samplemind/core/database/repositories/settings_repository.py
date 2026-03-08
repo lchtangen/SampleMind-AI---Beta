@@ -56,9 +56,7 @@ class SettingsRepository:
         return settings
 
     @staticmethod
-    async def update_analysis_level(
-        user_id: Optional[str], level: str
-    ) -> UserSettings:
+    async def update_analysis_level(user_id: Optional[str], level: str) -> UserSettings:
         """Update default analysis level"""
         return await SettingsRepository.update(user_id, default_analysis_level=level)
 
@@ -98,7 +96,9 @@ class SettingsRepository:
         return await SettingsRepository.update(user_id, max_cache_size=size)
 
     @staticmethod
-    async def set_parallel_workers(user_id: Optional[str], workers: int) -> UserSettings:
+    async def set_parallel_workers(
+        user_id: Optional[str], workers: int
+    ) -> UserSettings:
         """Set batch parallel workers"""
         if workers < 1 or workers > 32:
             raise ValueError("Parallel workers must be between 1 and 32")

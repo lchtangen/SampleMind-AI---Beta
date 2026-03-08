@@ -38,7 +38,9 @@ def _ensure_beats() -> bool:
         return True
     try:
         import torch as _t
-        from transformers import AutoModel as _AM, AutoProcessor as _AP
+        from transformers import AutoModel as _AM
+        from transformers import AutoProcessor as _AP
+
         _torch = _t
         _AutoModel = _AM
         _AutoProcessor = _AP
@@ -53,6 +55,7 @@ def _ensure_beats() -> bool:
 # ---------------------------------------------------------------------------
 # Encoder
 # ---------------------------------------------------------------------------
+
 
 class BEATsEncoder:
     """
@@ -167,6 +170,7 @@ class BEATsEncoder:
         """Perform actual BEATs inference."""
         try:
             import librosa
+
             waveform, sr = librosa.load(str(audio_path), sr=16000, mono=True)
         except Exception as exc:
             logger.error(f"Audio load failed for {audio_path}: {exc}")

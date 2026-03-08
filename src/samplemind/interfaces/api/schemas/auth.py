@@ -11,6 +11,7 @@ import re
 
 class UserRegisterRequest(BaseModel):
     """User registration request"""
+
     email: EmailStr
     username: str = Field(..., min_length=3, max_length=50)
     password: str = Field(..., min_length=8, max_length=100)
@@ -20,7 +21,9 @@ class UserRegisterRequest(BaseModel):
     def username_alphanumeric(cls, v):
         """Validate username contains only alphanumeric and underscores"""
         if not re.match(r"^[a-zA-Z0-9_]+$", v):
-            raise ValueError("Username must contain only letters, numbers, and underscores")
+            raise ValueError(
+                "Username must contain only letters, numbers, and underscores"
+            )
         return v
 
     @field_validator("password")
@@ -40,12 +43,14 @@ class UserRegisterRequest(BaseModel):
 
 class UserLoginRequest(BaseModel):
     """User login request (OAuth2 compatible)"""
+
     username: str  # Can be email or username
     password: str
 
 
 class TokenResponse(BaseModel):
     """JWT token response"""
+
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
@@ -54,11 +59,13 @@ class TokenResponse(BaseModel):
 
 class RefreshTokenRequest(BaseModel):
     """Refresh token request"""
+
     refresh_token: str
 
 
 class ChangePasswordRequest(BaseModel):
     """Change password request"""
+
     current_password: str
     new_password: str = Field(..., min_length=8, max_length=100)
 
@@ -79,6 +86,7 @@ class ChangePasswordRequest(BaseModel):
 
 class UserResponse(BaseModel):
     """User information response"""
+
     user_id: str
     email: str
     username: str
@@ -88,14 +96,16 @@ class UserResponse(BaseModel):
     last_login: Optional[datetime] = None
     total_analyses: int = 0
     total_uploads: int = 0
-    
+
     class Config:
         """Pydantic configuration for ORM mode compatibility."""
+
         from_attributes = True
 
 
 class UserProfileUpdate(BaseModel):
     """Update user profile"""
+
     username: Optional[str] = Field(None, min_length=3, max_length=50)
 
     @field_validator("username")
@@ -103,10 +113,13 @@ class UserProfileUpdate(BaseModel):
     def username_alphanumeric(cls, v):
         """Validate username contains only alphanumeric and underscores"""
         if v and not re.match(r"^[a-zA-Z0-9_]+$", v):
-            raise ValueError("Username must contain only letters, numbers, and underscores")
+            raise ValueError(
+                "Username must contain only letters, numbers, and underscores"
+            )
         return v
 
 
 class MessageResponse(BaseModel):
     """Generic message response"""
+
     message: str

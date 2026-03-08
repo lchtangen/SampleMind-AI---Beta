@@ -60,7 +60,7 @@ class AnalyticsMiddleware(BaseHTTPMiddleware):
                     "status_code": response.status_code,
                     "duration_ms": duration_ms,
                     "client_host": request.client.host if request.client else None,
-                }
+                },
             )
 
             return response
@@ -78,7 +78,7 @@ class AnalyticsMiddleware(BaseHTTPMiddleware):
                     "method": request.method,
                     "error": str(e),
                     "duration_ms": duration_ms,
-                }
+                },
             )
 
             # Re-raise the exception

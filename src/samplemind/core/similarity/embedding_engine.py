@@ -27,10 +27,13 @@ EMBEDDING_DIM = 128
 @dataclass
 class AudioEmbedding:
     """Container for an audio file's embedding and metadata"""
-    file_id: str                    # Unique identifier (usually file hash)
-    file_path: Path                 # Original file path
-    embedding: np.ndarray           # Fixed-size embedding vector
-    metadata: dict[str, Any] = field(default_factory=dict)  # Extracted features for filtering
+
+    file_id: str  # Unique identifier (usually file hash)
+    file_path: Path  # Original file path
+    embedding: np.ndarray  # Fixed-size embedding vector
+    metadata: dict[str, Any] = field(
+        default_factory=dict
+    )  # Extracted features for filtering
 
     def to_list(self) -> list[float]:
         """Convert embedding to list for ChromaDB"""
@@ -126,8 +129,21 @@ class AudioEmbeddingEngine:
         if include_metadata:
             # Estimate key from chroma
             key_idx = int(np.argmax(chroma_mean))
-            key_names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-            metadata['estimated_key'] = key_names[key_idx]
+            key_names = [
+                "C",
+                "C#",
+                "D",
+                "D#",
+                "E",
+                "F",
+                "F#",
+                "G",
+                "G#",
+                "A",
+                "A#",
+                "B",
+            ]
+            metadata["estimated_key"] = key_names[key_idx]
 
         # 3. Spectral features (4 features * 4 stats = 16 dims)
         spectral_centroid = librosa.feature.spectral_centroid(y=y, sr=sr)[0]
@@ -135,75 +151,93 @@ class AudioEmbeddingEngine:
         spectral_rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr)[0]
         spectral_contrast = librosa.feature.spectral_contrast(y=y, sr=sr)
 
-        spectral_features = np.array([
-            np.mean(spectral_centroid), np.std(spectral_centroid),
-            np.mean(spectral_bandwidth), np.std(spectral_bandwidth),
-            np.mean(spectral_rolloff), np.std(spectral_rolloff),
-            np.mean(spectral_contrast), np.std(spectral_contrast),
-            np.max(spectral_centroid), np.min(spectral_centroid),
-            np.max(spectral_bandwidth), np.min(spectral_bandwidth),
-            np.max(spectral_rolloff), np.min(spectral_rolloff),
-            np.median(spectral_centroid), np.median(spectral_bandwidth),
-        ])
+        spectral_features = np.array(
+            [
+                np.mean(spectral_centroid),
+                np.std(spectral_centroid),
+                np.mean(spectral_bandwidth),
+                np.std(spectral_bandwidth),
+                np.mean(spectral_rolloff),
+                np.std(spectral_rolloff),
+                np.mean(spectral_contrast),
+                np.std(spectral_contrast),
+                np.max(spectral_centroid),
+                np.min(spectral_centroid),
+                np.max(spectral_bandwidth),
+                np.min(spectral_bandwidth),
+                np.max(spectral_rolloff),
+                np.min(spectral_rolloff),
+                np.median(spectral_centroid),
+                np.median(spectral_bandwidth),
+            ]
+        )
         embedding_parts.append(spectral_features)
 
         if include_metadata:
-            metadata['spectral_centroid_mean'] = float(np.mean(spectral_centroid))
-            metadata['brightness'] = 'bright' if np.mean(spectral_centroid) > 3000 else 'dark'
+            metadata["spectral_centroid_mean"] = float(np.mean(spectral_centroid))
+            metadata["brightness"] = (
+                "bright" if np.mean(spectral_centroid) > 3000 else "dark"
+            )
 
         # 4. Rhythm features (8 dims)
         tempo, beats = librosa.beat.beat_track(y=y, sr=sr)
         onset_env = librosa.onset.onset_strength(y=y, sr=sr)
 
-        rhythm_features = np.array([
-            float(tempo) / 200.0,  # Normalized tempo
-            np.mean(onset_env),
-            np.std(onset_env),
-            np.max(onset_env),
-            len(beats) / (len(y) / sr) if len(y) > 0 else 0,  # Beat density
-            np.var(np.diff(beats)) if len(beats) > 1 else 0,  # Beat variance
-            np.median(onset_env),
-            float(np.percentile(onset_env, 90)),
-        ])
+        rhythm_features = np.array(
+            [
+                float(tempo) / 200.0,  # Normalized tempo
+                np.mean(onset_env),
+                np.std(onset_env),
+                np.max(onset_env),
+                len(beats) / (len(y) / sr) if len(y) > 0 else 0,  # Beat density
+                np.var(np.diff(beats)) if len(beats) > 1 else 0,  # Beat variance
+                np.median(onset_env),
+                float(np.percentile(onset_env, 90)),
+            ]
+        )
         embedding_parts.append(rhythm_features)
 
         if include_metadata:
-            metadata['tempo'] = float(tempo)
+            metadata["tempo"] = float(tempo)
 
         # 5. Energy features (8 dims)
         rms = librosa.feature.rms(y=y)[0]
         zcr = librosa.feature.zero_crossing_rate(y)[0]
 
-        energy_features = np.array([
-            np.mean(rms),
-            np.std(rms),
-            np.max(rms),
-            np.min(rms),
-            np.mean(zcr),
-            np.std(zcr),
-            np.max(rms) - np.min(rms),  # Dynamic range
-            np.percentile(rms, 90) - np.percentile(rms, 10),  # Robust dynamic range
-        ])
+        energy_features = np.array(
+            [
+                np.mean(rms),
+                np.std(rms),
+                np.max(rms),
+                np.min(rms),
+                np.mean(zcr),
+                np.std(zcr),
+                np.max(rms) - np.min(rms),  # Dynamic range
+                np.percentile(rms, 90) - np.percentile(rms, 10),  # Robust dynamic range
+            ]
+        )
         embedding_parts.append(energy_features)
 
         if include_metadata:
-            metadata['energy'] = 'high' if np.mean(rms) > 0.1 else 'low'
-            metadata['dynamic_range'] = float(np.max(rms) - np.min(rms))
+            metadata["energy"] = "high" if np.mean(rms) > 0.1 else "low"
+            metadata["dynamic_range"] = float(np.max(rms) - np.min(rms))
 
         # 6. Harmonic-Percussive features (4 dims)
         y_harmonic, y_percussive = librosa.effects.hpss(y)
         hp_ratio = np.mean(np.abs(y_harmonic)) / (np.mean(np.abs(y_percussive)) + 1e-8)
 
-        hp_features = np.array([
-            np.mean(np.abs(y_harmonic)),
-            np.mean(np.abs(y_percussive)),
-            hp_ratio,
-            1.0 / (hp_ratio + 1e-8),  # Inverse ratio
-        ])
+        hp_features = np.array(
+            [
+                np.mean(np.abs(y_harmonic)),
+                np.mean(np.abs(y_percussive)),
+                hp_ratio,
+                1.0 / (hp_ratio + 1e-8),  # Inverse ratio
+            ]
+        )
         embedding_parts.append(hp_features)
 
         if include_metadata:
-            metadata['character'] = 'harmonic' if hp_ratio > 1.0 else 'percussive'
+            metadata["character"] = "harmonic" if hp_ratio > 1.0 else "percussive"
 
         # Concatenate all parts
         embedding = np.concatenate(embedding_parts)
@@ -213,15 +247,22 @@ class AudioEmbeddingEngine:
             # Pad with additional statistics
             padding_needed = EMBEDDING_DIM - len(embedding)
             # Add more statistics from the signal
-            additional_stats = np.array([
-                np.mean(y), np.std(y), np.max(y), np.min(y),
-                float(len(y) / sr),  # Duration
-                np.percentile(np.abs(y), 95),
-                np.percentile(np.abs(y), 5),
-                np.median(np.abs(y)),
-            ])
+            additional_stats = np.array(
+                [
+                    np.mean(y),
+                    np.std(y),
+                    np.max(y),
+                    np.min(y),
+                    float(len(y) / sr),  # Duration
+                    np.percentile(np.abs(y), 95),
+                    np.percentile(np.abs(y), 5),
+                    np.median(np.abs(y)),
+                ]
+            )
             padding = np.zeros(padding_needed)
-            padding[:min(len(additional_stats), padding_needed)] = additional_stats[:padding_needed]
+            padding[: min(len(additional_stats), padding_needed)] = additional_stats[
+                :padding_needed
+            ]
             embedding = np.concatenate([embedding, padding])
         else:
             embedding = embedding[:EMBEDDING_DIM]
@@ -232,9 +273,9 @@ class AudioEmbeddingEngine:
             embedding = embedding / norm
 
         if include_metadata:
-            metadata['duration'] = float(len(y) / sr)
-            metadata['file_name'] = file_path.name
-            metadata['file_path'] = str(file_path)
+            metadata["duration"] = float(len(y) / sr)
+            metadata["file_name"] = file_path.name
+            metadata["file_path"] = str(file_path)
 
         return AudioEmbedding(
             file_id=file_id,
@@ -298,9 +339,9 @@ class AudioEmbeddingEngine:
     def _compute_file_hash(file_path: Path) -> str:
         """Compute SHA-256 hash of file for unique identification"""
         sha256 = hashlib.sha256()
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             # Read in chunks for large files
-            for chunk in iter(lambda: f.read(8192), b''):
+            for chunk in iter(lambda: f.read(8192), b""):
                 sha256.update(chunk)
         return sha256.hexdigest()[:16]  # Use first 16 chars for brevity
 

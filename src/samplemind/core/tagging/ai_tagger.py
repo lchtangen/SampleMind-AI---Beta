@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 # AI TAGGER ENGINE
 # ============================================================================
 
+
 class AITagger:
     """Generates AI-powered tags for audio samples"""
 
@@ -121,7 +122,9 @@ class AITagger:
 
         return tags
 
-    def _tag_from_key_mode(self, key: Optional[str], mode: Optional[str]) -> List[TagConfidence]:
+    def _tag_from_key_mode(
+        self, key: Optional[str], mode: Optional[str]
+    ) -> List[TagConfidence]:
         """Infer mood from key and mode"""
         tags = []
 
@@ -262,7 +265,9 @@ class AITagger:
     # TAG ORGANIZATION & FILTERING
     # ========================================================================
 
-    def organize_by_category(self, tags: List[TagConfidence]) -> Dict[str, List[TagConfidence]]:
+    def organize_by_category(
+        self, tags: List[TagConfidence]
+    ) -> Dict[str, List[TagConfidence]]:
         """Organize tags by category"""
         organized = {
             "genre": [],

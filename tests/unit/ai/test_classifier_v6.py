@@ -14,16 +14,16 @@ def mock_features():
     # but the rule-based system needs specific attributes
     # We will mock the attributes the classifier looks for
     features = MockFeatures(
-        path="test.wav", duration=5.0, sample_rate=44100,
-        channels=2, format="wav"
+        path="test.wav", duration=5.0, sample_rate=44100, channels=2, format="wav"
     )
     features.tempo = 140.0
     features.key_details = {"scale": "major"}
     # The classifier calls np.mean on these
-    features.spectral_centroid = [100.0, 100.0] # Low centroid for bass/kick
-    features.rms_energy = [0.2, 0.2] # High energy
+    features.spectral_centroid = [100.0, 100.0]  # Low centroid for bass/kick
+    features.rms_energy = [0.2, 0.2]  # High energy
     features.zero_crossing_rate = [0.01, 0.01]
     return features
+
 
 def test_rule_based_classification_kick(mock_features):
     classifier = AIClassifier()
@@ -33,8 +33,9 @@ def test_rule_based_classification_kick(mock_features):
 
     result = classifier.classify_audio(mock_features)
     assert result.instrument == "kick"
-    assert result.genre == "techno" # 140 bpm
-    assert result.mood == "energetic" # Major + high energy
+    assert result.genre == "techno"  # 140 bpm
+    assert result.mood == "energetic"  # Major + high energy
+
 
 def test_rule_based_classification_hihat(mock_features):
     classifier = AIClassifier()
@@ -45,6 +46,7 @@ def test_rule_based_classification_hihat(mock_features):
 
     result = classifier.classify_audio(mock_features)
     assert result.instrument == "hihat"
+
 
 def test_rule_based_classification_tempo(mock_features):
     classifier = AIClassifier()

@@ -6,7 +6,13 @@ and a Prometheus-compatible monitoring server.
 """
 
 try:
-    from .monitor import Monitor, SystemMetricsCollector, AudioProcessingMetrics, MetricType, Metric
+    from .monitor import (
+        Monitor,
+        SystemMetricsCollector,
+        AudioProcessingMetrics,
+        MetricType,
+        Metric,
+    )
     from .server import MonitoringServer
 
     __all__ = [

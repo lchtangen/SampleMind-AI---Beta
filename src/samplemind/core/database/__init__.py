@@ -12,7 +12,7 @@ __all__ = [
     "close_mongodb",
     "get_database",
     "init_redis",
-    "close_redis", 
+    "close_redis",
     "get_redis",
     "init_chromadb",
     "get_chroma_client",

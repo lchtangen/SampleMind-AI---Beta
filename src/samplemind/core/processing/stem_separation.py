@@ -19,13 +19,15 @@ _DEFAULT_STEMS = ("vocals", "drums", "bass", "other")
 
 class StemQuality(str, Enum):
     """Quality presets for stem separation"""
-    FAST = "fast"           # Quick, lower quality
-    STANDARD = "standard"   # Balanced quality/speed
-    HIGH = "high"           # Best quality, slower
+
+    FAST = "fast"  # Quick, lower quality
+    STANDARD = "standard"  # Balanced quality/speed
+    HIGH = "high"  # Best quality, slower
 
 
 class StemBackend(str, Enum):
     """Available stem separation backends"""
+
     DEMUCS = "demucs"
     SPLEETER = "spleeter"
 
@@ -33,6 +35,7 @@ class StemBackend(str, Enum):
 @dataclass
 class QualityPreset:
     """Configuration for a quality preset"""
+
     model: str
     shifts: int
     overlap: float
@@ -45,19 +48,19 @@ QUALITY_PRESETS: dict[StemQuality, QualityPreset] = {
         model="mdx",
         shifts=1,
         overlap=0.1,
-        description="Fast processing, good for previews"
+        description="Fast processing, good for previews",
     ),
     StemQuality.STANDARD: QualityPreset(
         model="mdx_extra",
         shifts=1,
         overlap=0.25,
-        description="Balanced quality and speed (recommended)"
+        description="Balanced quality and speed (recommended)",
     ),
     StemQuality.HIGH: QualityPreset(
         model="mdx_extra",
         shifts=5,
         overlap=0.5,
-        description="Best quality, slower processing"
+        description="Best quality, slower processing",
     ),
 }
 
@@ -108,8 +111,9 @@ class StemSeparationEngine:
         # Detect model version
         if model not in self.ALL_MODELS:
             logger.warning(
-                "Unknown model '%s'. Assuming Demucs v4. "
-                "Valid models: %s", model, self.ALL_MODELS
+                "Unknown model '%s'. Assuming Demucs v4. " "Valid models: %s",
+                model,
+                self.ALL_MODELS,
             )
         self.is_v4 = model in self.V4_MODELS or model not in self.V3_MODELS
 
@@ -136,7 +140,9 @@ class StemSeparationEngine:
             result = engine.separate("track.wav")
         """
         preset = QUALITY_PRESETS[quality]
-        logger.info(f"Creating stem separation engine with {quality.value} preset: {preset.description}")
+        logger.info(
+            f"Creating stem separation engine with {quality.value} preset: {preset.description}"
+        )
         return cls(
             model=preset.model,
             device=device,
@@ -152,7 +158,10 @@ class StemSeparationEngine:
 
     @staticmethod
     def _assert_dependency() -> None:
-        if importlib.util.find_spec("demucs") is None and shutil.which("demucs") is None:
+        if (
+            importlib.util.find_spec("demucs") is None
+            and shutil.which("demucs") is None
+        ):
             raise OptionalDependencyError(
                 "demucs",
                 "Demucs is required for stem separation. Please install it externally via 'pipx install demucs' (recommended for Python 3.12+), or 'pip install demucs'.",
@@ -195,7 +204,9 @@ class StemSeparationEngine:
                 _DEFAULT_STEMS,
             )
 
-        target_dir = output_directory or Path(tempfile.mkdtemp(prefix="samplemind-demucs-"))
+        target_dir = output_directory or Path(
+            tempfile.mkdtemp(prefix="samplemind-demucs-")
+        )
         target_dir = target_dir.expanduser().resolve()
         target_dir.mkdir(parents=True, exist_ok=True)
 
@@ -249,9 +260,11 @@ class StemSeparationEngine:
         # Input file
         command.append(str(audio_path))
 
-        logger.info("Running Demucs %s separation: %s",
-                   "v4" if self.is_v4 else "v3",
-                   " ".join(command))
+        logger.info(
+            "Running Demucs %s separation: %s",
+            "v4" if self.is_v4 else "v3",
+            " ".join(command),
+        )
         process = subprocess.run(command, check=False, capture_output=True, text=True)
 
         if process.returncode != 0:

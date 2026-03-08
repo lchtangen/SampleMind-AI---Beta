@@ -25,22 +25,28 @@ from samplemind.integrations.anthropic_integration import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def mock_anthropic_response():
     """Mock successful Claude API response with JSON content"""
     mock = MagicMock()
     mock.content = [
         MagicMock(
-            text=json.dumps({
-                "summary": "Energetic electronic track with driving rhythm.",
-                "detailed_analysis": "Full analysis here.",
-                "production_tips": ["Add sidechain compression", "Layer pads"],
-                "creative_ideas": ["Try a breakdown at 2:00"],
-                "fl_studio_recommendations": ["Use Serum for lead"],
-                "arrangement_suggestions": ["Add a bridge section"],
-                "harmonic_analysis": {"key_info": "C minor", "progressions": ["i-VI-III-VII"]},
-                "confidence_score": 0.9,
-            })
+            text=json.dumps(
+                {
+                    "summary": "Energetic electronic track with driving rhythm.",
+                    "detailed_analysis": "Full analysis here.",
+                    "production_tips": ["Add sidechain compression", "Layer pads"],
+                    "creative_ideas": ["Try a breakdown at 2:00"],
+                    "fl_studio_recommendations": ["Use Serum for lead"],
+                    "arrangement_suggestions": ["Add a bridge section"],
+                    "harmonic_analysis": {
+                        "key_info": "C minor",
+                        "progressions": ["i-VI-III-VII"],
+                    },
+                    "confidence_score": 0.9,
+                }
+            )
         )
     ]
     mock.usage = MagicMock()
@@ -52,8 +58,7 @@ def mock_anthropic_response():
 @pytest.fixture
 def producer():
     """AnthropicMusicProducer with mocked async client"""
-    with patch("anthropic.AsyncAnthropic") as mock_cls, \
-         patch("anthropic.Anthropic"):
+    with patch("anthropic.AsyncAnthropic") as mock_cls, patch("anthropic.Anthropic"):
         instance = mock_cls.return_value
         instance.messages = MagicMock()
         instance.messages.create = AsyncMock()
@@ -76,6 +81,7 @@ def sample_features():
 # ---------------------------------------------------------------------------
 # TestClaudeModel
 # ---------------------------------------------------------------------------
+
 
 class TestClaudeModel:
     def test_claude_3_7_sonnet_exists(self):
@@ -105,6 +111,7 @@ class TestClaudeModel:
 # TestAnthropicMusicProducer — Initialization
 # ---------------------------------------------------------------------------
 
+
 class TestAnthropicMusicProducer:
     def test_init_with_api_key(self):
         with patch("anthropic.AsyncAnthropic"), patch("anthropic.Anthropic"):
@@ -132,6 +139,7 @@ class TestAnthropicMusicProducer:
 # ---------------------------------------------------------------------------
 # TestExtendedThinking
 # ---------------------------------------------------------------------------
+
 
 class TestExtendedThinking:
     @pytest.mark.asyncio
@@ -174,8 +182,11 @@ class TestExtendedThinking:
 # TestPromptBuilding
 # ---------------------------------------------------------------------------
 
+
 class TestPromptBuilding:
-    def test_all_analysis_types_produce_nonempty_prompt(self, producer, sample_features):
+    def test_all_analysis_types_produce_nonempty_prompt(
+        self, producer, sample_features
+    ):
         for analysis_type in AnthropicAnalysisType:
             prompt = producer._build_prompt(sample_features, analysis_type, None)
             assert isinstance(prompt, str)
@@ -186,7 +197,7 @@ class TestPromptBuilding:
             sample_features, AnthropicAnalysisType.COMPREHENSIVE_ANALYSIS, None
         )
         assert "128" in prompt  # tempo
-        assert "C" in prompt    # key
+        assert "C" in prompt  # key
         assert "minor" in prompt
 
     def test_user_context_included_when_provided(self, producer, sample_features):
@@ -200,6 +211,7 @@ class TestPromptBuilding:
 # ---------------------------------------------------------------------------
 # TestResponseParsing
 # ---------------------------------------------------------------------------
+
 
 class TestResponseParsing:
     def test_valid_json_response_parsed(self, producer, mock_anthropic_response):
@@ -218,7 +230,9 @@ class TestResponseParsing:
             mock_response, AnthropicAnalysisType.COMPREHENSIVE_ANALYSIS
         )
         assert isinstance(result, AnthropicMusicAnalysis)
-        assert "This is plain text" in result.summary or len(result.detailed_analysis) > 0
+        assert (
+            "This is plain text" in result.summary or len(result.detailed_analysis) > 0
+        )
 
     def test_json_in_code_block_extracted(self, producer):
         inner = json.dumps({"summary": "Test summary", "production_tips": ["tip1"]})
@@ -234,6 +248,7 @@ class TestResponseParsing:
 # ---------------------------------------------------------------------------
 # TestStatsTracking
 # ---------------------------------------------------------------------------
+
 
 class TestStatsTracking:
     @pytest.mark.asyncio
@@ -271,6 +286,7 @@ class TestStatsTracking:
 # ---------------------------------------------------------------------------
 # TestAnalysisFlow
 # ---------------------------------------------------------------------------
+
 
 class TestAnalysisFlow:
     @pytest.mark.asyncio

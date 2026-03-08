@@ -39,14 +39,21 @@ console = utils.console
 # AUTO-TAG COMMAND
 # ============================================================================
 
+
 @app.command("auto")
 @utils.with_error_handling
 @utils.async_command
 async def auto_tag(
     file: Optional[Path] = typer.Argument(None, help="Audio file to tag"),
-    interactive: bool = typer.Option(False, "--interactive", "-i", help="Launch file picker"),
-    show_sources: bool = typer.Option(False, "--sources", "-s", help="Show tag sources"),
-    min_confidence: float = typer.Option(0.5, "--min-confidence", help="Minimum confidence (0.0-1.0)"),
+    interactive: bool = typer.Option(
+        False, "--interactive", "-i", help="Launch file picker"
+    ),
+    show_sources: bool = typer.Option(
+        False, "--sources", "-s", help="Show tag sources"
+    ),
+    min_confidence: float = typer.Option(
+        0.5, "--min-confidence", help="Minimum confidence (0.0-1.0)"
+    ),
     save: bool = typer.Option(False, "--save", help="Save tags to database"),
 ) -> None:
     """Auto-generate tags for an audio file using AI and feature analysis"""
@@ -54,6 +61,7 @@ async def auto_tag(
         # Handle file selection
         if not file or interactive:
             from samplemind.utils.file_picker import select_audio_file
+
             console.print("[cyan]📁 Opening file picker...[/cyan]")
             selected_file = select_audio_file(title="Select Audio File for Tagging")
             if not selected_file:
@@ -104,9 +112,7 @@ async def auto_tag(
                     confidence_str = f"{tag.confidence:.0%}"
                     if show_sources:
                         tag_table.add_row(
-                            f"  {tag.tag}",
-                            confidence_str,
-                            f"[{tag.source}]"
+                            f"  {tag.tag}", confidence_str, f"[{tag.source}]"
                         )
                     else:
                         tag_table.add_row(f"  {tag.tag}", confidence_str)
@@ -123,9 +129,7 @@ async def auto_tag(
         # 7. Statistics
         stats = {
             "total_tags": len(filtered_tags),
-            "by_category": {
-                cat: len(tags) for cat, tags in organized.items() if tags
-            },
+            "by_category": {cat: len(tags) for cat, tags in organized.items() if tags},
         }
 
         console.print(f"[dim]📊 Generated {stats['total_tags']} tags[/dim]")
@@ -139,10 +143,13 @@ async def auto_tag(
 # VOCABULARY COMMAND
 # ============================================================================
 
+
 @app.command("vocab")
 @utils.with_error_handling
 def show_vocabulary(
-    category: Optional[str] = typer.Option(None, "--category", "-c", help="Show specific category"),
+    category: Optional[str] = typer.Option(
+        None, "--category", "-c", help="Show specific category"
+    ),
     limit: int = typer.Option(20, "--limit", "-l", help="Number of tags to show"),
 ) -> None:
     """Show available tag vocabulary and categories"""
@@ -171,13 +178,15 @@ def show_vocabulary(
 
         if tags:
             console.print()
-            console.print(f"[bold]{category_lower.upper()} Tags ({len(tags)} total):[/bold]\n")
+            console.print(
+                f"[bold]{category_lower.upper()} Tags ({len(tags)} total):[/bold]\n"
+            )
 
             # Display in columns
             sorted_tags = sorted(list(tags))[:limit]
             cols = 4
             for i in range(0, len(sorted_tags), cols):
-                row = sorted_tags[i:i + cols]
+                row = sorted_tags[i : i + cols]
                 console.print("  " + "  |  ".join(f"{tag:<20}" for tag in row))
 
             if len(tags) > limit:
@@ -188,7 +197,13 @@ def show_vocabulary(
         # Show all categories
         console.print()
         console.print("[bold]Available Categories:[/bold]")
-        for cat_name in ["genres", "moods", "instruments", "energy_levels", "descriptors"]:
+        for cat_name in [
+            "genres",
+            "moods",
+            "instruments",
+            "energy_levels",
+            "descriptors",
+        ]:
             actual_name = cat_name.replace("_", "-")
             console.print(f"  • [cyan]--category {actual_name}[/cyan]")
 
@@ -200,10 +215,13 @@ def show_vocabulary(
 # SEARCH COMMAND
 # ============================================================================
 
+
 @app.command("search")
 @utils.with_error_handling
 def search_by_tags(
-    tags: str = typer.Option(..., "--tags", "-t", help="Tags to search (comma-separated)"),
+    tags: str = typer.Option(
+        ..., "--tags", "-t", help="Tags to search (comma-separated)"
+    ),
     limit: int = typer.Option(20, "--limit", "-l", help="Max results"),
 ) -> None:
     """Search library by tags (integrates with tag database)"""
@@ -231,11 +249,7 @@ def search_by_tags(
     example_table.add_column("Match Score")
     example_table.add_column("Matching Tags")
 
-    example_table.add_row(
-        "example_kick.wav",
-        "95%",
-        "drums, kick, punchy, bright"
-    )
+    example_table.add_row("example_kick.wav", "95%", "drums, kick, punchy, bright")
     console.print(example_table)
 
 
@@ -243,16 +257,20 @@ def search_by_tags(
 # EDIT COMMAND
 # ============================================================================
 
+
 @app.command("edit")
 @utils.with_error_handling
 def edit_tags(
     file: Optional[Path] = typer.Argument(None, help="Audio file to edit tags for"),
-    interactive: bool = typer.Option(False, "--interactive", "-i", help="Launch file picker"),
+    interactive: bool = typer.Option(
+        False, "--interactive", "-i", help="Launch file picker"
+    ),
 ) -> None:
     """Edit tags for a sample (interactive mode)"""
     # Handle file selection
     if not file or interactive:
         from samplemind.utils.file_picker import select_audio_file
+
         console.print("[cyan]📁 Opening file picker...[/cyan]")
         selected_file = select_audio_file(title="Select Audio File to Tag")
         if not selected_file:
@@ -277,17 +295,23 @@ def edit_tags(
 # BATCH COMMAND
 # ============================================================================
 
+
 @app.command("batch")
 @utils.with_error_handling
 async def batch_tag(
     folder: Optional[Path] = typer.Argument(None, help="Folder to batch tag"),
-    interactive: bool = typer.Option(False, "--interactive", "-i", help="Launch folder picker"),
-    dry_run: bool = typer.Option(False, "--dry-run", help="Show results without saving"),
+    interactive: bool = typer.Option(
+        False, "--interactive", "-i", help="Launch folder picker"
+    ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Show results without saving"
+    ),
 ) -> None:
     """Batch tag all audio files in a folder"""
     # Handle folder selection
     if not folder or interactive:
         from samplemind.utils.file_picker import select_directory
+
         console.print("[cyan]📁 Opening folder picker...[/cyan]")
         selected_folder = select_directory(title="Select Folder to Batch Tag")
         if not selected_folder:

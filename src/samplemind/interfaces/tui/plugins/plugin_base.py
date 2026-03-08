@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 class PluginHook(Enum):
     """Available plugin hooks"""
+
     # Analysis hooks
     BEFORE_ANALYSIS = "before_analysis"
     AFTER_ANALYSIS = "after_analysis"
@@ -43,6 +44,7 @@ class PluginHook(Enum):
 @dataclass
 class PluginMetadata:
     """Plugin metadata"""
+
     name: str
     version: str
     author: str

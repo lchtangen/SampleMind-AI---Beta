@@ -37,7 +37,7 @@ class LoopResult:
     loop_length_beats: float = 0.0
 
     # Boundary quality
-    phase_alignment: float = 0.0   # 0–1 (1 = perfectly phase-aligned)
+    phase_alignment: float = 0.0  # 0–1 (1 = perfectly phase-aligned)
     spectral_continuity: float = 0.0  # 0–1 (1 = no audible seam)
 
     # BPM (required for beat-based loop length)
@@ -109,7 +109,9 @@ class LoopDetector:
         onset_env = librosa.onset.onset_strength(y=y, sr=sr, hop_length=self.hop_length)
 
         # --- BPM estimate (for beat-length validation) --------------------
-        tempo_arr, _ = librosa.beat.beat_track(onset_envelope=onset_env, sr=sr, hop_length=self.hop_length)
+        tempo_arr, _ = librosa.beat.beat_track(
+            onset_envelope=onset_env, sr=sr, hop_length=self.hop_length
+        )
         bpm = float(tempo_arr) if np.isscalar(tempo_arr) else float(tempo_arr[0])
         result.bpm = round(bpm, 2)
 
@@ -117,7 +119,7 @@ class LoopDetector:
         ac = _autocorrelate(onset_env)
 
         # Find peak lags (excluding lag=0)
-        min_lag = max(1, int(0.25 * sr / self.hop_length))   # ≥ 250 ms
+        min_lag = max(1, int(0.25 * sr / self.hop_length))  # ≥ 250 ms
         max_lag = len(ac) - 1
 
         if max_lag <= min_lag:
@@ -146,18 +148,24 @@ class LoopDetector:
         boundary_samples = max(1, int(self.boundary_window_sec * sr))
         loop_sample = int(loop_sec * sr)
 
-        result.phase_alignment = _compute_phase_alignment(y, loop_sample, boundary_samples)
-        result.spectral_continuity = _compute_spectral_continuity(y, loop_sample, boundary_samples, sr)
+        result.phase_alignment = _compute_phase_alignment(
+            y, loop_sample, boundary_samples
+        )
+        result.spectral_continuity = _compute_spectral_continuity(
+            y, loop_sample, boundary_samples, sr
+        )
 
         # --- Loop probability score ---------------------------------------
         result.loop_probability = round(
-            float(np.clip(
-                0.4 * peak_val
-                + 0.3 * result.phase_alignment
-                + 0.3 * result.spectral_continuity,
-                0.0,
-                1.0,
-            )),
+            float(
+                np.clip(
+                    0.4 * peak_val
+                    + 0.3 * result.phase_alignment
+                    + 0.3 * result.spectral_continuity,
+                    0.0,
+                    1.0,
+                )
+            ),
             3,
         )
         result.is_loop = result.loop_probability >= self.loop_prob_threshold
@@ -267,15 +275,19 @@ def _compute_spectral_continuity(
 
     try:
         # Boundary region
-        boundary = np.concatenate([
-            y[loop_sample - window : loop_sample],
-            y[:window],
-        ])
+        boundary = np.concatenate(
+            [
+                y[loop_sample - window : loop_sample],
+                y[:window],
+            ]
+        )
         # Mid-segment region (reference)
         mid_start = max(0, loop_sample // 2 - window)
         mid_region = y[mid_start : mid_start + 2 * window]
 
-        c_boundary = float(np.mean(librosa.feature.spectral_centroid(y=boundary, sr=sr)))
+        c_boundary = float(
+            np.mean(librosa.feature.spectral_centroid(y=boundary, sr=sr))
+        )
         c_mid = float(np.mean(librosa.feature.spectral_centroid(y=mid_region, sr=sr)))
 
         diff_ratio = abs(c_boundary - c_mid) / max(c_mid, 1.0)

@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 class GenreType(Enum):
     """Supported music genres"""
+
     ELECTRONIC = "electronic"
     HIP_HOP = "hip_hop"
     AMBIENT = "ambient"
@@ -31,6 +32,7 @@ class GenreType(Enum):
 
 class ProductionTipCategory(Enum):
     """Production tip categories"""
+
     ARRANGEMENT = "arrangement"
     MIXING = "mixing"
     SOUND_DESIGN = "sound_design"
@@ -43,6 +45,7 @@ class ProductionTipCategory(Enum):
 @dataclass
 class ProductionTip:
     """Production tip with context"""
+
     category: ProductionTipCategory
     title: str
     description: str
@@ -55,6 +58,7 @@ class ProductionTip:
 @dataclass
 class GenreAdvice:
     """Genre-specific production advice"""
+
     genre: GenreType
     tempo_range: tuple  # (min, max)
     key_recommendations: List[str]
@@ -67,6 +71,7 @@ class GenreAdvice:
 @dataclass
 class SamplePairing:
     """Suggested sample pairing"""
+
     sample_name: str
     reason: str
     compatibility_score: float  # 0-1
@@ -87,21 +92,21 @@ class AICoach:
                 description="Build techno tracks by adding elements every 16 bars",
                 genre=GenreType.TECHNO,
                 difficulty=2,
-                example="Kick (0-16) → Bassline (16-32) → Hi-hat (32-48) → Pad (48-64)"
+                example="Kick (0-16) → Bassline (16-32) → Hi-hat (32-48) → Pad (48-64)",
             ),
             ProductionTip(
                 category=ProductionTipCategory.SOUND_DESIGN,
                 title="Analog Warmth",
                 description="Use saturation on basslines for thick, analog-style sound",
                 genre=GenreType.TECHNO,
-                difficulty=2
+                difficulty=2,
             ),
             ProductionTip(
                 category=ProductionTipCategory.MIXING,
                 title="Compression Trick",
                 description="Use parallel compression on drums for punch without losing dynamics",
                 genre=GenreType.TECHNO,
-                difficulty=3
+                difficulty=3,
             ),
         ],
         GenreType.HOUSE: [
@@ -110,14 +115,14 @@ class AICoach:
                 title="4-Bar Structure",
                 description="Build house tracks in 4 and 8-bar sections for cohesive flow",
                 genre=GenreType.HOUSE,
-                difficulty=2
+                difficulty=2,
             ),
             ProductionTip(
                 category=ProductionTipCategory.SOUND_DESIGN,
                 title="Sidechain Pumping",
                 description="Create dynamic pumping effect using sidechain compression",
                 genre=GenreType.HOUSE,
-                difficulty=2
+                difficulty=2,
             ),
         ],
         GenreType.TRAP: [
@@ -126,14 +131,14 @@ class AICoach:
                 title="808 Layering",
                 description="Layer 808s with sub-bass for depth and punch",
                 genre=GenreType.TRAP,
-                difficulty=2
+                difficulty=2,
             ),
             ProductionTip(
                 category=ProductionTipCategory.MIXING,
                 title="Snare Compression",
                 description="Use fast attack compression to tighten snare hits",
                 genre=GenreType.TRAP,
-                difficulty=2
+                difficulty=2,
             ),
         ],
         GenreType.AMBIENT: [
@@ -142,14 +147,14 @@ class AICoach:
                 title="Subtle Evolution",
                 description="Let ambient tracks evolve slowly over time with gradual changes",
                 genre=GenreType.AMBIENT,
-                difficulty=3
+                difficulty=3,
             ),
             ProductionTip(
                 category=ProductionTipCategory.MIXING,
                 title="Reverb and Space",
                 description="Use reverb creatively to create depth and space",
                 genre=GenreType.AMBIENT,
-                difficulty=2
+                difficulty=2,
             ),
         ],
     }
@@ -160,37 +165,68 @@ class AICoach:
             genre=GenreType.TECHNO,
             tempo_range=(120, 130),
             key_recommendations=["A minor", "C minor", "D minor", "E minor"],
-            typical_instruments=["Kick drum", "Bassline", "Closed hi-hat", "Crash", "Pad", "Synth"],
-            production_techniques=["Sidechain compression", "Saturation", "EQ automation"],
+            typical_instruments=[
+                "Kick drum",
+                "Bassline",
+                "Closed hi-hat",
+                "Crash",
+                "Pad",
+                "Synth",
+            ],
+            production_techniques=[
+                "Sidechain compression",
+                "Saturation",
+                "EQ automation",
+            ],
             mixing_tips=["Deep bass essential", "Tight drums", "Minimal reverb"],
-            sample_characteristics=["Dark", "Percussive", "Synthetic", "Repetitive"]
+            sample_characteristics=["Dark", "Percussive", "Synthetic", "Repetitive"],
         ),
         GenreType.HOUSE: GenreAdvice(
             genre=GenreType.HOUSE,
             tempo_range=(120, 128),
             key_recommendations=["A minor", "E major", "D minor", "G major"],
-            typical_instruments=["Kick drum", "Bassline", "Open/closed hi-hat", "Clap", "String pad", "Vocal"],
+            typical_instruments=[
+                "Kick drum",
+                "Bassline",
+                "Open/closed hi-hat",
+                "Clap",
+                "String pad",
+                "Vocal",
+            ],
             production_techniques=["Sidechain pumping", "Filter sweeps", "Automation"],
             mixing_tips=["Punchy kick", "Warm bass", "Spacious vocals"],
-            sample_characteristics=["Groovy", "Warm", "Soulful", "Syncopated"]
+            sample_characteristics=["Groovy", "Warm", "Soulful", "Syncopated"],
         ),
         GenreType.TRAP: GenreAdvice(
             genre=GenreType.TRAP,
             tempo_range=(140, 160),
             key_recommendations=["A minor", "C minor", "D minor", "E minor"],
-            typical_instruments=["808 drum", "Snare", "Hi-hat", "Clap", "Synth pad", "Vocal"],
+            typical_instruments=[
+                "808 drum",
+                "Snare",
+                "Hi-hat",
+                "Clap",
+                "Synth pad",
+                "Vocal",
+            ],
             production_techniques=["808 layering", "Snare rolls", "Reverse cymbals"],
             mixing_tips=["Sub-bass focus", "Punchy snare", "Clear vocals"],
-            sample_characteristics=["Heavy bass", "Percussive", "Modern", "Dark"]
+            sample_characteristics=["Heavy bass", "Percussive", "Modern", "Dark"],
         ),
         GenreType.AMBIENT: GenreAdvice(
             genre=GenreType.AMBIENT,
             tempo_range=(60, 90),
             key_recommendations=["Any minor key", "Any major key"],
-            typical_instruments=["Pad", "String", "Piano", "Field recording", "Atmospheric FX"],
+            typical_instruments=[
+                "Pad",
+                "String",
+                "Piano",
+                "Field recording",
+                "Atmospheric FX",
+            ],
             production_techniques=["Reverb", "Delay", "Granular synthesis"],
             mixing_tips=["Ethereal reverb", "Minimal compression", "Slow automation"],
-            sample_characteristics=["Textured", "Atmospheric", "Harmonic", "Evolving"]
+            sample_characteristics=["Textured", "Atmospheric", "Harmonic", "Evolving"],
         ),
     }
 
@@ -231,7 +267,7 @@ class AICoach:
         genre: GenreType = GenreType.UNKNOWN,
         difficulty_level: int = 2,
         category: Optional[ProductionTipCategory] = None,
-        limit: int = 3
+        limit: int = 3,
     ) -> List[ProductionTip]:
         """
         Get production tips
@@ -284,9 +320,7 @@ class AICoach:
         return self.GENRE_ADVICE.get(genre)
 
     def suggest_sample_pairings(
-        self,
-        current_sample: Dict[str, Any],
-        available_samples: List[Dict[str, Any]]
+        self, current_sample: Dict[str, Any], available_samples: List[Dict[str, Any]]
     ) -> List[SamplePairing]:
         """
         Suggest compatible sample pairings
@@ -317,9 +351,13 @@ class AICoach:
 
             # Calculate compatibility
             tempo_diff = abs(current_tempo - sample_tempo)
-            tempo_match = tempo_diff < 5 or tempo_diff > 115  # Harmonic tempo relationship
+            tempo_match = (
+                tempo_diff < 5 or tempo_diff > 115
+            )  # Harmonic tempo relationship
 
-            key_compatible = current_key == sample_key or self._is_compatible_key(current_key, sample_key)
+            key_compatible = current_key == sample_key or self._is_compatible_key(
+                current_key, sample_key
+            )
             energy_complement = 0.3 < abs(current_energy - sample_energy) < 0.7
 
             # Score calculation
@@ -344,7 +382,7 @@ class AICoach:
                     compatibility_score=max(0, min(1, compatibility)),
                     genre=self.detect_genre(sample),
                     tempo_match=tempo_match,
-                    key_compatible=key_compatible
+                    key_compatible=key_compatible,
                 )
             )
 
@@ -370,7 +408,9 @@ class AICoach:
 
         # Workflow tips
         if analyzed_count == 0:
-            tips.append("💡 Start by analyzing your first sample to get detailed audio features")
+            tips.append(
+                "💡 Start by analyzing your first sample to get detailed audio features"
+            )
         elif analyzed_count == 1:
             tips.append("💡 Try comparing samples to see how they differ")
         elif analyzed_count == 5:
@@ -387,9 +427,13 @@ class AICoach:
 
         # Difficulty-based tips
         if user_level == "beginner":
-            tips.append("📚 Check out the settings to customize the theme and analysis levels")
+            tips.append(
+                "📚 Check out the settings to customize the theme and analysis levels"
+            )
         elif user_level == "intermediate":
-            tips.append("🔧 Try using the comparison feature to analyze sample differences")
+            tips.append(
+                "🔧 Try using the comparison feature to analyze sample differences"
+            )
         elif user_level == "advanced":
             tips.append("⚙️ Consider creating custom presets for your workflow")
 
@@ -428,7 +472,11 @@ class AICoach:
 
     def format_pairing_suggestion(self, pairing: SamplePairing) -> str:
         """Format pairing suggestion for display"""
-        confidence = "🟢" if pairing.compatibility_score > 0.8 else "🟡" if pairing.compatibility_score > 0.6 else "🔴"
+        confidence = (
+            "🟢"
+            if pairing.compatibility_score > 0.8
+            else "🟡" if pairing.compatibility_score > 0.6 else "🔴"
+        )
         return (
             f"{confidence} {pairing.sample_name}\n"
             f"   {pairing.reason}\n"

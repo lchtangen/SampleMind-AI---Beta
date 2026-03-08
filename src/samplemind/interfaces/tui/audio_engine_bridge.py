@@ -14,7 +14,11 @@ import os
 import time
 from typing import Callable, Dict, List, Optional, Tuple
 
-from samplemind.core.engine.audio_engine import AudioEngine, AudioFeatures, AnalysisLevel
+from samplemind.core.engine.audio_engine import (
+    AudioEngine,
+    AudioFeatures,
+    AnalysisLevel,
+)
 
 
 class SessionStats:
@@ -161,7 +165,9 @@ class TUIAudioEngine:
         if cached_result:
             if progress_callback:
                 progress_callback(1.0)
-            self.session_stats.set_status(f"✓ Cached: {self.session_stats.current_file}")
+            self.session_stats.set_status(
+                f"✓ Cached: {self.session_stats.current_file}"
+            )
             return cached_result
 
         self.session_stats.set_status("Loading audio...")
@@ -340,8 +346,16 @@ class TUIAudioEngine:
             # MFCC Summary
             "MFCC Coefficients": f"{len(features.mfccs) if features.mfccs else 0}",
             # Advanced Features
-            "Harmonic Content": f"{features.harmonic_content:.4f}" if features.harmonic_content else "N/A",
-            "Percussive Content": f"{features.percussive_content:.4f}" if features.percussive_content else "N/A",
+            "Harmonic Content": (
+                f"{features.harmonic_content:.4f}"
+                if features.harmonic_content
+                else "N/A"
+            ),
+            "Percussive Content": (
+                f"{features.percussive_content:.4f}"
+                if features.percussive_content
+                else "N/A"
+            ),
         }
 
     def get_performance_stats(self) -> Dict[str, any]:

@@ -25,7 +25,7 @@ class TestUsageEvent:
             processing_time_ms=45.2,
             cache_hit=True,
             file_size_bytes=1024000,
-            duration_seconds=30.5
+            duration_seconds=30.5,
         )
 
         assert event.file_id == "audio_123"
@@ -42,7 +42,7 @@ class TestUsageEvent:
             feature_type="spectral",
             analysis_level="standard",
             processing_time_ms=45.2,
-            cache_hit=True
+            cache_hit=True,
         )
 
         event_dict = event.to_dict()
@@ -127,7 +127,7 @@ class TestUsagePatternTracker:
             feature_type="spectral",
             analysis_level="standard",
             processing_time_ms=45.2,
-            cache_hit=True
+            cache_hit=True,
         )
 
         tracker.record_event(event)
@@ -149,7 +149,7 @@ class TestUsagePatternTracker:
                 feature_type="spectral",
                 analysis_level="standard",
                 processing_time_ms=10.0 + i,
-                cache_hit=True
+                cache_hit=True,
             )
             tracker.record_event(event)
 
@@ -162,7 +162,7 @@ class TestUsagePatternTracker:
                 feature_type="spectral",
                 analysis_level="standard",
                 processing_time_ms=20.0 + i,
-                cache_hit=False
+                cache_hit=False,
             )
             tracker.record_event(event)
 
@@ -187,13 +187,15 @@ class TestUsagePatternTracker:
                 feature_type="spectral",
                 analysis_level="standard",
                 processing_time_ms=10.0,
-                cache_hit=True
+                cache_hit=True,
             )
             tracker.record_event(event)
 
         # Check transitions were recorded
         matrix_dict = tracker.export_transition_matrix()
-        assert matrix_dict["total_transitions"] == 2  # audio_1->audio_2, audio_2->audio_3
+        assert (
+            matrix_dict["total_transitions"] == 2
+        )  # audio_1->audio_2, audio_2->audio_3
 
     def test_max_events_limit(self):
         """Test that tracker respects max events limit"""
@@ -208,7 +210,7 @@ class TestUsagePatternTracker:
                 feature_type="spectral",
                 analysis_level="standard",
                 processing_time_ms=10.0,
-                cache_hit=True
+                cache_hit=True,
             )
             tracker.record_event(event)
 
@@ -228,7 +230,7 @@ class TestUsagePatternTracker:
                 feature_type="spectral",
                 analysis_level="standard",
                 processing_time_ms=10.0,
-                cache_hit=True
+                cache_hit=True,
             )
             tracker.record_event(event)
 
@@ -254,7 +256,7 @@ class TestUsagePatternTracker:
                 feature_type="spectral",
                 analysis_level="standard",
                 processing_time_ms=10.0 + i * 5,
-                cache_hit=(i % 2 == 0)
+                cache_hit=(i % 2 == 0),
             )
             tracker.record_event(event)
 
@@ -281,7 +283,7 @@ class TestUsagePatternTracker:
                     feature_type="spectral",
                     analysis_level="standard",
                     processing_time_ms=10.0,
-                    cache_hit=True
+                    cache_hit=True,
                 )
                 tracker.record_event(event)
 
@@ -304,7 +306,7 @@ class TestUsagePatternTracker:
                 feature_type="spectral",
                 analysis_level="standard",
                 processing_time_ms=10.0,
-                cache_hit=True
+                cache_hit=True,
             )
             tracker.record_event(event)
 
@@ -329,7 +331,7 @@ class TestUsagePatternTracker:
             feature_type="spectral",
             analysis_level="standard",
             processing_time_ms=10.0,
-            cache_hit=True
+            cache_hit=True,
         )
         tracker.record_event(event)
 

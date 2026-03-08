@@ -1,200 +1,175 @@
-"""
-Audio Library Browser Screen for SampleMind TUI
-Directory navigation, file browsing, duplicate detection
-"""
+"""Library Screen for SampleMind TUI v3.0"""
 
-import logging
-from typing import Optional, List
+from __future__ import annotations
 
+from textual import on, work
 from textual.app import ComposeResult
+from textual.binding import Binding
+from textual.containers import Horizontal, Vertical
+from textual.coordinate import Coordinate
 from textual.screen import Screen
-from textual.widgets import Header, Footer, DataTable, Input, Static, Button
-from textual.containers import Container, Vertical, Horizontal
-from textual.reactive import reactive
-
-from samplemind.interfaces.tui.library import get_library_browser, SortOption
-
-logger = logging.getLogger(__name__)
-
-
-class LibraryStatsWidget(Static):
-    """Widget displaying library statistics"""
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.browser = get_library_browser()
-
-    def render(self) -> str:
-        """Render library statistics"""
-        stats = self.browser.get_statistics()
-
-        lines = [
-            "╔═════════════════════════════════════════════════════════╗",
-            "║           📚 AUDIO LIBRARY STATISTICS                  ║",
-            "╠═════════════════════════════════════════════════════════╣",
-            f"║ Total Files:        {stats.total_files:<48} ║",
-            f"║ Total Size:         {stats.format_total_size():<48} ║",
-            f"║ Total Duration:     {stats.format_total_duration():<48} ║",
-            f"║ Average File Size:  {stats.average_file_size / 1024 / 1024:>6.1f} MB                                  ║",
-            f"║ Average Duration:   {stats.average_duration / 60:>6.1f} minutes                              ║",
-            "╠═════════════════════════════════════════════════════════╣",
-            "║ Format Distribution:                                    ║",
-        ]
-
-        for format_type, count in sorted(stats.file_formats.items()):
-            lines.append(f"║   .{format_type:<7} {count:>4} files " + " " * 35 + "║")
-
-        lines.extend([
-            "╠═════════════════════════════════════════════════════════╣",
-            "║ Duplicate Detection:                                    ║",
-            f"║   Groups:           {stats.duplicate_groups:<48} ║",
-            f"║   Duplicate Files:  {stats.duplicate_files:<48} ║",
-            "╠═════════════════════════════════════════════════════════╣",
-            "║ [D] Detect Duplicates | [E] Export | [R] Refresh       ║",
-            "╚═════════════════════════════════════════════════════════╝",
-        ])
-
-        return "\n".join(lines)
-
-
-class LibraryFileTableWidget(Static):
-    """Widget displaying files in table format"""
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.browser = get_library_browser()
-        self.table = DataTable(id="library-table")
-
-    def compose(self) -> ComposeResult:
-        """Compose the widget"""
-        yield self.table
-
-    def on_mount(self) -> None:
-        """Set up table"""
-        self.table.add_columns("Name", "Size", "Format", "Modified", "Duration")
-
-        # Add sample files
-        for file_info in self.browser.files[:50]:
-            self.table.add_row(
-                file_info.name,
-                file_info.format_size(),
-                file_info.format,
-                "N/A",
-                file_info.format_duration(),
-            )
+from textual.widgets import (
+    Button,
+    DataTable,
+    Footer,
+    Header,
+    Input,
+    Label,
+    RichLog,
+)
 
 
 class LibraryScreen(Screen):
-    """Audio library browser screen"""
+    """Browse the full sample library with filter and search."""
 
     BINDINGS = [
-        ("s", "sort_by_name", "Sort"),
-        ("f", "filter_files", "Filter"),
-        ("d", "detect_duplicates", "Duplicates"),
-        ("r", "refresh", "Refresh"),
-        ("e", "export_report", "Export"),
-        ("q", "back", "Back"),
+        Binding("escape", "action_back", "Back"),
+        Binding("ctrl+f", "focus_filter", "Filter"),
+        Binding("r", "reload_library", "Reload"),
     ]
 
-    def __init__(self) -> None:
-        super().__init__()
-        self.browser = get_library_browser()
-        self.search_query = ""
+    DEFAULT_CSS = """
+    LibraryScreen { layout: vertical; }
+    #library_body { height: 1fr; padding: 1 2; }
+    .screen-title { color: $primary; text-style: bold; height: 1; margin-bottom: 1; }
+    #filter_row { height: auto; margin-bottom: 1; }
+    #filter_row Input { width: 1fr; margin-bottom: 0; }
+    #filter_row Button { min-width: 10; margin-left: 1; }
+    #lib_table { height: 1fr; }
+    #log_area { height: 4; }
+    #btn_row { height: 3; margin-top: 1; }
+    #btn_row Button { margin-right: 1; }
+    """
 
     def compose(self) -> ComposeResult:
-        """Compose the screen"""
         yield Header(show_clock=True)
-
-        with Container(id="library-main"):
-            with Vertical():
-                # Search bar
+        with Vertical(id="library_body"):
+            yield Label("Sample Library", classes="screen-title")
+            with Horizontal(id="filter_row"):
                 yield Input(
-                    placeholder="Search audio files... (name, format, size)",
-                    id="library-search",
+                    placeholder="Filter by name, key, BPM, genre...", id="filter_input"
                 )
-
-                # Statistics widget
-                yield LibraryStatsWidget(id="library-stats")
-
-                # File list
-                yield LibraryFileTableWidget(id="library-table-widget")
-
+                yield Button("Filter", id="btn_filter", variant="primary")
+                yield Button("Reload", id="btn_reload", variant="default")
+            yield Label("Loading...", id="count_label")
+            yield DataTable(zebra_stripes=True, id="lib_table")
+            yield RichLog(highlight=True, id="log_area", wrap=True)
+            with Horizontal(id="btn_row"):
+                yield Button("Analyze", id="btn_analyze", variant="primary")
+                yield Button("Favorite", id="btn_fav", variant="success")
+                yield Button("Back", id="btn_back", variant="warning")
         yield Footer()
 
     def on_mount(self) -> None:
-        """Initialize screen"""
-        # Scan default directory
-        self.browser.scan_directory()
+        table = self.query_one("#lib_table", DataTable)
+        table.add_columns("File", "BPM", "Key", "Genre", "Duration", "Tags")
+        self._load_library()
 
-        # Update stats
-        stats_widget = self.query_one("#library-stats", LibraryStatsWidget)
-        stats_widget.update(stats_widget.render())
+    @on(Input.Submitted, "#filter_input")
+    def on_filter_submitted(self, _: Input.Submitted) -> None:
+        self._apply_filter()
 
-    def on_input_changed(self, event: Input.Changed) -> None:
-        """Handle search input change"""
-        self.search_query = event.value
-        self._update_file_list()
+    @on(Button.Pressed, "#btn_filter")
+    def on_filter_btn(self, _: Button.Pressed) -> None:
+        self._apply_filter()
 
-    def _update_file_list(self) -> None:
-        """Update file list based on search/filter"""
-        table_widget = self.query_one("#library-table-widget", LibraryFileTableWidget)
-        table = table_widget.table
+    @on(Button.Pressed, "#btn_reload")
+    def on_reload(self, _: Button.Pressed) -> None:
+        self._load_library()
 
-        # Clear existing rows
-        table.clear()
+    @on(Button.Pressed, "#btn_analyze")
+    def on_analyze(self, _: Button.Pressed) -> None:
+        try:
+            table = self.query_one("#lib_table", DataTable)
+            row = table.cursor_row
+            if row is not None:
+                _fp = str(table.get_cell_at(Coordinate(row, 0)))
+                from .analyze_screen import AnalyzeScreen
 
-        # Search if query provided
-        if self.search_query:
-            files = self.browser.search_files(self.search_query)
-        else:
-            files = self.browser.files
+                self.app.push_screen(AnalyzeScreen())
+        except Exception as exc:
+            self.notify(f"Cannot open: {exc}", severity="warning")
 
-        # Add rows
-        for file_info in files[:100]:  # Limit to 100 for performance
-            table.add_row(
-                file_info.name,
-                file_info.format_size(),
-                file_info.format,
-                "N/A",
-                file_info.format_duration(),
+    @on(Button.Pressed, "#btn_fav")
+    def on_fav(self, _: Button.Pressed) -> None:
+        try:
+            table = self.query_one("#lib_table", DataTable)
+            row = table.cursor_row
+            if row is not None:
+                fp = str(table.get_cell_at(Coordinate(row, 0)))
+                import asyncio
+
+                from samplemind.services.favorites_service import (  # type: ignore[import]
+                    get_favorites_manager,
+                )
+
+                mgr = get_favorites_manager()
+                asyncio.get_event_loop().run_until_complete(mgr.add(fp))
+                self.notify("Added to favorites")
+        except Exception as exc:
+            self.notify(f"Favorite failed: {exc}", severity="warning")
+
+    @on(Button.Pressed, "#btn_back")
+    def on_back(self, _: Button.Pressed) -> None:
+        self.app.pop_screen()
+
+    def _apply_filter(self) -> None:
+        query = self.query_one("#filter_input", Input).value.strip()
+        self._load_library(query)
+
+    @work(thread=True)
+    def _load_library(self, query: str = "") -> None:
+        import asyncio
+
+        try:
+            from samplemind.services.library_service import (  # type: ignore[import]
+                get_library_service,
             )
 
-    def action_sort_by_name(self) -> None:
-        """Sort by name"""
-        current = self.browser.sort_option
-        if current == SortOption.NAME_ASC:
-            self.browser.sort_files(SortOption.NAME_DESC)
-        else:
-            self.browser.sort_files(SortOption.NAME_ASC)
-        self._update_file_list()
+            svc = get_library_service()
+            loop = asyncio.new_event_loop()
+            items = loop.run_until_complete(svc.list(query=query, limit=500))
+            loop.close()
+            self.app.call_from_thread(self._populate, items)
+        except Exception as exc:
+            self.app.call_from_thread(
+                self._log, f"[yellow]Library unavailable: {exc}[/]"
+            )
+            self.app.call_from_thread(
+                self.query_one("#count_label", Label).update, "Library not available"
+            )
 
-    def action_filter_files(self) -> None:
-        """Filter files"""
-        logger.info("Filter action - implement filter dialog")
+    def _populate(self, items: list) -> None:
+        table = self.query_one("#lib_table", DataTable)
+        table.clear()
+        for item in items:
+            fp = getattr(item, "file_path", str(item))
+            bpm = getattr(item, "tempo", "-")
+            key = getattr(item, "key", "-")
+            genre = getattr(item, "genre", "-")
+            dur = getattr(item, "duration", "-")
+            if isinstance(dur, float):
+                dur = f"{dur:.1f}s"
+            tags = ", ".join(getattr(item, "tags", []) or [])
+            table.add_row(
+                str(fp)[:60], str(bpm), str(key), str(genre), str(dur), tags[:30]
+            )
+        count = len(items)
+        self.query_one("#count_label", Label).update(
+            f"{count} sample{'s' if count != 1 else ''}"
+        )
 
-    def action_detect_duplicates(self) -> None:
-        """Detect and display duplicates"""
-        duplicates = self.browser.detect_duplicates()
-        report = self.browser.get_duplicate_report()
-        logger.info(f"Duplicate detection complete:\n{report}")
-
-    def action_refresh(self) -> None:
-        """Refresh library scan"""
-        self.browser.scan_directory()
-        self._update_file_list()
-
-        # Update stats
-        stats_widget = self.query_one("#library-stats", LibraryStatsWidget)
-        stats_widget.update(stats_widget.render())
-
-    def action_export_report(self) -> None:
-        """Export library report"""
-        library_report = self.browser.get_library_report()
-        duplicate_report = self.browser.get_duplicate_report()
-
-        full_report = f"{library_report}\n\n{duplicate_report}"
-        logger.info(f"Library Report:\n{full_report}")
+    def _log(self, msg: str) -> None:
+        try:
+            self.query_one("#log_area", RichLog).write(msg)
+        except Exception:
+            pass
 
     def action_back(self) -> None:
-        """Go back to previous screen"""
         self.app.pop_screen()
+
+    def action_focus_filter(self) -> None:
+        self.query_one("#filter_input", Input).focus()
+
+    def action_reload_library(self) -> None:
+        self._load_library()

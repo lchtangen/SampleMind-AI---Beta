@@ -56,7 +56,9 @@ class PluginManager:
 
         return discovered
 
-    def load_plugin(self, plugin_name: str, config: Optional[Dict[str, Any]] = None) -> bool:
+    def load_plugin(
+        self, plugin_name: str, config: Optional[Dict[str, Any]] = None
+    ) -> bool:
         """
         Load a plugin
 
@@ -150,7 +152,9 @@ class PluginManager:
             logger.error(f"Error unloading plugin {plugin_name}: {e}")
             return False
 
-    def reload_plugin(self, plugin_name: str, config: Optional[Dict[str, Any]] = None) -> bool:
+    def reload_plugin(
+        self, plugin_name: str, config: Optional[Dict[str, Any]] = None
+    ) -> bool:
         """
         Reload a plugin
 
@@ -263,7 +267,9 @@ class PluginManager:
 
         return None
 
-    def _load_module_from_file(self, module_name: str, file_path: Path) -> Optional[Any]:
+    def _load_module_from_file(
+        self, module_name: str, file_path: Path
+    ) -> Optional[Any]:
         """Load Python module from file"""
         try:
             spec = importlib.util.spec_from_file_location(module_name, file_path)
@@ -285,7 +291,11 @@ class PluginManager:
         """Find TUIPlugin subclass in module"""
         for attr_name in dir(module):
             attr = getattr(module, attr_name)
-            if isinstance(attr, type) and issubclass(attr, TUIPlugin) and attr != TUIPlugin:
+            if (
+                isinstance(attr, type)
+                and issubclass(attr, TUIPlugin)
+                and attr != TUIPlugin
+            ):
                 return attr
 
         return None

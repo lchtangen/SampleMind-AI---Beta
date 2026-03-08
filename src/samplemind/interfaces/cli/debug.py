@@ -120,6 +120,7 @@ async def diagnose_audio_file(
     # Check 3: File format
     try:
         import magic
+
         file_type = magic.from_file(str(file))
         console.print(f"[cyan]🎵 Format: {file_type}[/cyan]")
     except:
@@ -130,6 +131,7 @@ async def diagnose_audio_file(
     # Check 4: Read with librosa
     try:
         import librosa
+
         console.print("[cyan]📖 Attempting to read with librosa...[/cyan]")
 
         # Try to load first 0.1 seconds
@@ -150,6 +152,7 @@ async def diagnose_audio_file(
     # Check 5: Read with soundfile
     try:
         import soundfile as sf
+
         console.print("[cyan]📖 Attempting to read with soundfile...[/cyan]")
 
         with sf.SoundFile(str(file)) as f:
@@ -343,7 +346,9 @@ async def enable_tracing(
         configure_log_level(level)
 
         console.print(f"[green]✅ Debug tracing enabled at {level} level[/green]")
-        console.print("[dim]Logs will be written to: ~/.samplemind/logs/samplemind.log[/dim]")
+        console.print(
+            "[dim]Logs will be written to: ~/.samplemind/logs/samplemind.log[/dim]"
+        )
 
         logger.info(f"Debug tracing enabled at level {level}")
 

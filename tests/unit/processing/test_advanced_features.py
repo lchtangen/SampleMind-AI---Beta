@@ -165,7 +165,10 @@ class TestAdvancedFeatureExtractor:
 
     def test_global_instance(self):
         """Test global extractor instance"""
-        from samplemind.core.processing.advanced_features import init_extractor, get_extractor
+        from samplemind.core.processing.advanced_features import (
+            init_extractor,
+            get_extractor,
+        )
 
         extractor1 = init_extractor()
         extractor2 = get_extractor()

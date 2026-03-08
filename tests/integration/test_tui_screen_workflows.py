@@ -69,7 +69,9 @@ class TestAnalyzeScreenWorkflow:
     @pytest.mark.asyncio
     @patch("samplemind.interfaces.tui.screens.analyze_screen.get_tui_engine")
     @patch("samplemind.interfaces.tui.screens.analyze_screen.CrossPlatformFilePicker")
-    async def test_analyze_single_file_workflow(self, mock_picker_class, mock_engine_getter, temp_audio_file):
+    async def test_analyze_single_file_workflow(
+        self, mock_picker_class, mock_engine_getter, temp_audio_file
+    ):
         """Test complete single file analysis workflow."""
         # Setup mocks
         mock_engine = AsyncMock()
@@ -161,14 +163,15 @@ class TestBatchScreenWorkflow:
     @pytest.mark.asyncio
     @patch("samplemind.interfaces.tui.screens.batch_screen.get_tui_engine")
     @patch("samplemind.interfaces.tui.screens.batch_screen.CrossPlatformFilePicker")
-    async def test_batch_processing_workflow(self, mock_picker_class, mock_engine_getter, temp_audio_folder):
+    async def test_batch_processing_workflow(
+        self, mock_picker_class, mock_engine_getter, temp_audio_folder
+    ):
         """Test complete batch processing workflow."""
         # Setup mocks
         mock_engine = AsyncMock()
         mock_engine.analyze_batch = AsyncMock(
             return_value=[
-                MockAudioFeatures(file_path=f)
-                for f in os.listdir(temp_audio_folder)
+                MockAudioFeatures(file_path=f) for f in os.listdir(temp_audio_folder)
             ]
         )
         mock_engine_getter.return_value = mock_engine
@@ -217,7 +220,9 @@ class TestBatchScreenWorkflow:
 
         # Simulate batch processing
         files = [f"file_{i}.wav" for i in range(3)]
-        results = await mock_engine.analyze_batch(files, lambda c, t: None, AnalysisLevel.STANDARD)
+        results = await mock_engine.analyze_batch(
+            files, lambda c, t: None, AnalysisLevel.STANDARD
+        )
 
         assert len(results) == 3
         assert len(processed) == 3
@@ -293,13 +298,9 @@ class TestAnalysisLevelHandling:
             AnalysisLevel.PROFESSIONAL,
         ]:
             # Each level should work
-            mock_engine.analyze_file = AsyncMock(
-                return_value=MockAudioFeatures()
-            )
+            mock_engine.analyze_file = AsyncMock(return_value=MockAudioFeatures())
 
-            result = await mock_engine.analyze_file(
-                "/path/to/audio.wav", level=level
-            )
+            result = await mock_engine.analyze_file("/path/to/audio.wav", level=level)
             assert result is not None
 
 
@@ -363,17 +364,13 @@ class TestErrorRecovery:
         mock_engine = AsyncMock()
 
         # First call fails
-        mock_engine.analyze_file = AsyncMock(
-            side_effect=ValueError("Invalid file")
-        )
+        mock_engine.analyze_file = AsyncMock(side_effect=ValueError("Invalid file"))
 
         with pytest.raises(ValueError):
             await mock_engine.analyze_file("/invalid/file.wav")
 
         # Should be able to try again with different file
-        mock_engine.analyze_file = AsyncMock(
-            return_value=MockAudioFeatures()
-        )
+        mock_engine.analyze_file = AsyncMock(return_value=MockAudioFeatures())
 
         result = await mock_engine.analyze_file("/valid/file.wav")
         assert result is not None
@@ -399,9 +396,7 @@ class TestErrorRecovery:
         mock_engine.analyze_batch = mock_batch_with_error
 
         files = ["file1.wav", "error_file.wav", "file3.wav"]
-        results = await mock_engine.analyze_batch(
-            files, None, AnalysisLevel.STANDARD
-        )
+        results = await mock_engine.analyze_batch(files, None, AnalysisLevel.STANDARD)
 
         # Should have processed 2 files despite 1 error
         assert len(completed) == 2

@@ -44,6 +44,7 @@ console = Console()
 # MAIN RECENT FILES LIST COMMAND
 # ============================================================================
 
+
 @app.command()
 @utils.with_error_handling
 def list_recent(
@@ -54,7 +55,9 @@ def list_recent(
     files = get_recent_files()
 
     if not files:
-        console.print("[yellow]📭 No recent files. Try analyzing something first![/yellow]")
+        console.print(
+            "[yellow]📭 No recent files. Try analyzing something first![/yellow]"
+        )
         return
 
     # Show recent files table
@@ -83,8 +86,12 @@ def list_recent(
     # Usage hints
     console.print()
     console.print("[bold cyan]💡 Usage Hints:[/bold cyan]")
-    console.print("  [dim]samplemind analyze:full @1[/dim]      Re-analyze most recent file")
-    console.print("  [dim]samplemind recent:search <query>[/dim]  Search by filename or tags")
+    console.print(
+        "  [dim]samplemind analyze:full @1[/dim]      Re-analyze most recent file"
+    )
+    console.print(
+        "  [dim]samplemind recent:search <query>[/dim]  Search by filename or tags"
+    )
     console.print("  [dim]samplemind recent:export[/dim]         Export as JSON")
 
     # Show stats if requested
@@ -99,7 +106,9 @@ def list_recent(
 
         stats_table.add_row("Total Files:", str(stats["total_files"]))
         stats_table.add_row("Total Size:", f"{stats['total_size_mb']:.2f} MB")
-        stats_table.add_row("Total Duration:", f"{stats['total_duration_hours']:.1f} hours")
+        stats_table.add_row(
+            "Total Duration:", f"{stats['total_duration_hours']:.1f} hours"
+        )
 
         console.print(stats_table)
 
@@ -113,6 +122,7 @@ def list_recent(
 # ============================================================================
 # SEARCH COMMAND
 # ============================================================================
+
 
 @app.command("search")
 @utils.with_error_handling
@@ -151,6 +161,7 @@ def search_command(
 # EXPORT COMMAND
 # ============================================================================
 
+
 @app.command("export")
 @utils.with_error_handling
 def export_command(
@@ -158,7 +169,7 @@ def export_command(
         None,
         "--output",
         "-o",
-        help="Output file (default: recent_files.json in current directory)"
+        help="Output file (default: recent_files.json in current directory)",
     ),
 ) -> None:
     """Export recent files as JSON"""
@@ -174,15 +185,11 @@ def export_command(
 # CLEAR COMMAND
 # ============================================================================
 
+
 @app.command("clear")
 @utils.with_error_handling
 def clear_command(
-    confirm: bool = typer.Option(
-        False,
-        "--yes",
-        "-y",
-        help="Skip confirmation"
-    ),
+    confirm: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation"),
 ) -> None:
     """Clear all recent file history"""
     if not confirm:
@@ -199,6 +206,7 @@ def clear_command(
 # ============================================================================
 # VIEW COMMAND - Show details for a specific file
 # ============================================================================
+
 
 @app.command("view")
 @utils.with_error_handling
@@ -236,12 +244,15 @@ def view_command(
     console.print("[bold cyan]💡 Quick Actions:[/bold cyan]")
     console.print(f"  [dim]samplemind analyze:full @{index}[/dim]           Re-analyze")
     console.print(f"  [dim]samplemind tag:auto @{index}[/dim]              Auto-tag")
-    console.print(f"  [dim]samplemind fav:add @{index}[/dim]               Add to favorites")
+    console.print(
+        f"  [dim]samplemind fav:add @{index}[/dim]               Add to favorites"
+    )
 
 
 # ============================================================================
 # STATS COMMAND
 # ============================================================================
+
 
 @app.command("stats")
 @utils.with_error_handling
@@ -269,7 +280,9 @@ def stats_command():
     if stats["by_analysis_level"]:
         console.print()
         console.print("[bold]By Analysis Level:[/bold]")
-        level_table = Table(show_header=True, header_style="bold cyan", show_lines=False)
+        level_table = Table(
+            show_header=True, header_style="bold cyan", show_lines=False
+        )
         level_table.add_column("Level", style="cyan")
         level_table.add_column("Count", justify="right", style="green")
 

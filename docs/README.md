@@ -1,91 +1,127 @@
-# SampleMind AI — Documentation
+# SampleMind AI — Docs
 
-**Version:** 3.0 (migrating) | **Active Phase:** 15 — v3.0 Migration | **Last Updated:** 2026-03-07
-
----
-
-## AI Agents — Start Here
-
-> **[active/INDEX.md](active/INDEX.md)** — Master navigation hub for Claude Code, GitHub Copilot,
-> and all AI agents. Contains active document map, priority queue, key file paths, and task routing.
-
-- **[.claude/CLAUDE.md](../.claude/CLAUDE.md)** — Full Claude Code project instructions
-- **[../.github/copilot-instructions.md](../.github/copilot-instructions.md)** — GitHub Copilot auto-loaded context
+> **AI agent entry point.** Read this file first.
+> **Phase:** 15 — v3.0 Migration | **Version:** 2.1.0-beta → 3.0.0 | **Updated:** 2026-03-08
 
 ---
 
-## Active V3 Working Documents
+## Structure
 
-All V3 working documents live in `active/`. This is the primary workspace for Phase 15.
-
-| Document | Purpose |
-|----------|---------|
-| [active/INDEX.md](active/INDEX.md) | Master navigation hub — read first |
-| [active/roadmap/PHASE_15_PROGRESS.md](active/roadmap/PHASE_15_PROGRESS.md) | Session-by-session progress log |
-| [active/roadmap/V3_100_KEYPOINTS.md](active/roadmap/V3_100_KEYPOINTS.md) | Full 100-point v3.0 upgrade plan |
-| [active/architecture/V3_ARCHITECTURE_DECISIONS.md](active/architecture/V3_ARCHITECTURE_DECISIONS.md) | ADRs for all v3.0 decisions |
-| [active/devops/DEPENDENCY_UPGRADE_STATUS.md](active/devops/DEPENDENCY_UPGRADE_STATUS.md) | Dependency upgrade tracking |
-| [active/models/AI_PROVIDER_UPGRADE_LOG.md](active/models/AI_PROVIDER_UPGRADE_LOG.md) | AI provider upgrade log |
-| [active/ui-ux/TUI_V3_UPGRADE_NOTES.md](active/ui-ux/TUI_V3_UPGRADE_NOTES.md) | Textual ^0.87 migration notes |
-| [active/features/WEB_UI_SPEC.md](active/features/WEB_UI_SPEC.md) | Next.js 15 web UI specification |
+```
+docs/
+├── README.md          ← you are here
+├── v3/                ← active working docs (update every session)
+├── guides/            ← reference docs (stable)
+└── archive/
+    ├── phases/        ← completed phase history (1–16)
+    └── legacy/        ← old notes, business docs
+```
 
 ---
 
-## Status & Roadmap
+## v3/ — Active Working Documents
 
-| Document | Purpose | Update Frequency |
-|----------|---------|-----------------|
-| [02-ROADMAPS/CURRENT_STATUS.md](02-ROADMAPS/CURRENT_STATUS.md) | Real-time project status | Every session |
-| [02-ROADMAPS/V3_MIGRATION_CHECKLIST.md](02-ROADMAPS/V3_MIGRATION_CHECKLIST.md) | 100-item P0/P1/P2 checklist | Tick off as done |
-| [SESSION_START_GUIDE.md](SESSION_START_GUIDE.md) | Session startup checklist | Reference |
-| [00-INDEX/PHASE_STATUS_DASHBOARD.md](00-INDEX/PHASE_STATUS_DASHBOARD.md) | Phase 1–15 status dashboard | Per phase |
+> These are the files you open and update every session.
 
----
-
-## Reference Documentation
-
-| Document | Purpose | Size |
-|----------|---------|------|
-| [CLI_REFERENCE.md](CLI_REFERENCE.md) | Full CLI command reference | 62K |
-| [API_DOCUMENTATION.md](API_DOCUMENTATION.md) | Full FastAPI endpoint reference | 24K |
-| [ERROR_HANDLING_GUIDE.md](ERROR_HANDLING_GUIDE.md) | Error handling patterns | — |
-| [ALIASES_REFERENCE.md](ALIASES_REFERENCE.md) | Shell aliases | — |
+| File | Purpose |
+|------|---------|
+| `v3/STATUS.md` | Current project state — update at session end |
+| `v3/CHECKLIST.md` | P0/P1/P2 migration tasks — tick items as done |
+| `v3/PHASE15.md` | Session-by-session progress log |
+| `v3/ROADMAP.md` | Full 100-point v3.0 upgrade plan |
+| `v3/ARCHITECTURE.md` | ADRs and v3.0 architecture decisions |
+| `v3/DEPENDENCIES.md` | Dep upgrade tracking (all P0 done) |
+| `v3/AI_PROVIDERS.md` | Claude / Gemini / GPT-4o / Ollama upgrade log |
+| `v3/TUI_NOTES.md` | Textual ^0.87 migration notes |
+| `v3/WEB_UI.md` | Next.js 15 web UI spec |
 
 ---
 
-## Technical Guides
+## guides/ — Reference Docs
 
-All guides are in `04-TECHNICAL-IMPLEMENTATION/guides/`:
-
-- [guides/INSTALLATION_GUIDE.md](04-TECHNICAL-IMPLEMENTATION/guides/INSTALLATION_GUIDE.md) — Main install
-- [guides/AI_INTEGRATION_SETUP.md](04-TECHNICAL-IMPLEMENTATION/guides/AI_INTEGRATION_SETUP.md) — AI providers (v3.0)
-- [guides/TEXTUAL_MIGRATION.md](04-TECHNICAL-IMPLEMENTATION/guides/TEXTUAL_MIGRATION.md) — TUI ^0.87 migration
-- [guides/PLUGIN_INSTALLATION_GUIDE.md](04-TECHNICAL-IMPLEMENTATION/guides/PLUGIN_INSTALLATION_GUIDE.md) — DAW plugins
-- [guides/USER_GUIDE.md](04-TECHNICAL-IMPLEMENTATION/guides/USER_GUIDE.md) — CLI user guide
-- [guides/LINUX_GUIDE.md](04-TECHNICAL-IMPLEMENTATION/guides/LINUX_GUIDE.md) / [MACOS_GUIDE.md](04-TECHNICAL-IMPLEMENTATION/guides/MACOS_GUIDE.md) / [WINDOWS_GUIDE.md](04-TECHNICAL-IMPLEMENTATION/guides/WINDOWS_GUIDE.md) — Platform guides
-
-Technical deep dives in `04-TECHNICAL-IMPLEMENTATION/technical/`:
-
-- [technical/audio_processing.md](04-TECHNICAL-IMPLEMENTATION/technical/audio_processing.md) — Audio pipeline
-- [technical/OPTIMIZATION_GUIDE.md](04-TECHNICAL-IMPLEMENTATION/technical/OPTIMIZATION_GUIDE.md) — Performance
-
----
-
-## Phase History
-
-- [00-INDEX/MASTER_PHASE_INDEX.md](00-INDEX/MASTER_PHASE_INDEX.md) — All phases 1–15 documented
-- [01-PHASES/](01-PHASES/) — Phase-by-phase completion reports
-- [01-PHASES/15-PHASE-15-IN-PROGRESS/](01-PHASES/15-PHASE-15-IN-PROGRESS/) — Active phase 15
+| File | Purpose |
+|------|---------|
+| `guides/QUICKSTART.md` | 60-second startup |
+| `guides/INSTALLATION.md` | Full install guide |
+| `guides/DEVELOPMENT.md` | Dev workflow, commands, Makefile |
+| `guides/CLI.md` | Full CLI command reference |
+| `guides/API.md` | FastAPI endpoint reference |
+| `guides/AI_SETUP.md` | AI provider setup (keys, models) |
+| `guides/PLUGINS.md` | FL Studio / Ableton plugin install |
+| `guides/TUI_MIGRATION.md` | Textual ^0.87 migration guide |
+| `guides/AUDIO.md` | Audio processing pipeline deep dive |
+| `guides/PERFORMANCE.md` | Performance targets and profiling |
+| `guides/ARCHITECTURE.md` | System architecture overview |
+| `guides/SESSION_START.md` | Session startup checklist |
 
 ---
 
-## Archive
+## Quick Reference
 
-Historical docs (73+ files) — read-only reference:
-- [_archive/legacy-phases/](_archive/legacy-phases/) — Phase 11–14 completion reports
-- [_archive/legacy-notes/](_archive/legacy-notes/) — Session logs, v2 beta guides
-- [_archive/legacy-roadmaps/](_archive/legacy-roadmaps/) — Outdated roadmap versions
+### Session Checklist
+```bash
+git pull
+source .venv/bin/activate
+# Read: docs/v3/STATUS.md + docs/v3/CHECKLIST.md
+python main.py
+# At end: update docs/v3/STATUS.md + docs/v3/PHASE15.md → commit
+```
 
----
+### Key Source Paths
+| What | Where |
+|------|-------|
+| CLI entry | `main.py` |
+| CLI menu | `src/samplemind/interfaces/cli/menu.py` |
+| Audio engine | `src/samplemind/core/engine/audio_engine.py` |
+| AI manager | `src/samplemind/integrations/ai_manager.py` |
+| TUI app | `src/samplemind/interfaces/tui/app.py` |
+| TUI screens | `src/samplemind/interfaces/tui/screens/` |
+| FastAPI | `src/samplemind/interfaces/api/` + `src/samplemind/server/` |
+| Config | `pyproject.toml` |
 
-**Last Updated:** 2026-03-07 | **Maintained By:** SampleMind AI Team
+### AI SDK Patterns (v3.0)
+```python
+# Anthropic — PRIMARY (no temperature with extended thinking)
+from anthropic import AsyncAnthropic
+client = AsyncAnthropic(api_key=key)
+response = await client.messages.create(
+    model="claude-3-7-sonnet-20250219",
+    max_tokens=8096,
+    thinking={"type": "enabled", "budget_tokens": 5000},
+    messages=[{"role": "user", "content": prompt}],
+)
+
+# Google — package is google-genai, NOT google-generativeai
+from google import genai
+client = genai.Client(api_key=key)
+
+# OpenAI — gpt-4o only (gpt-5 does not exist)
+from openai import AsyncOpenAI
+client = AsyncOpenAI(api_key=key)
+
+# Ollama — offline, no API key
+import ollama
+client = ollama.AsyncClient(host="http://localhost:11434")
+```
+
+### Service Ports
+| Service | Port | Command |
+|---------|------|---------|
+| CLI | — | `python main.py` |
+| FastAPI | 8000 | `make dev` |
+| Next.js | 3000 | `cd apps/web && npm run dev` |
+| MongoDB | 27017 | `docker-compose up -d` |
+| Redis | 6379 | `docker-compose up -d` |
+| ChromaDB | 8002 | `docker-compose up -d` |
+| Ollama | 11434 | `scripts/launch-ollama-api.sh` |
+
+### Task Routing
+| Task | Read |
+|------|------|
+| Audio analysis | `guides/AUDIO.md` + `core/engine/audio_engine.py` |
+| AI integration | `v3/AI_PROVIDERS.md` + `integrations/ai_manager.py` |
+| CLI work | `guides/CLI.md` + `interfaces/cli/menu.py` |
+| TUI work | `v3/TUI_NOTES.md` + `guides/TUI_MIGRATION.md` |
+| API work | `guides/API.md` + `interfaces/api/` |
+| Dependency upgrade | `v3/DEPENDENCIES.md` + `pyproject.toml` |
+| Next task to work on | `v3/CHECKLIST.md` + `v3/STATUS.md` |

@@ -42,19 +42,19 @@ class QualityMetrics:
     """Audio quality metrics."""
 
     # Loudness
-    lufs_integrated: float = 0.0   # dBFS/LUFS (negative — louder is closer to 0)
-    true_peak_dbfs: float = 0.0    # dBFS
+    lufs_integrated: float = 0.0  # dBFS/LUFS (negative — louder is closer to 0)
+    true_peak_dbfs: float = 0.0  # dBFS
 
     # Dynamics
     dynamic_range_lu: float = 0.0  # LU (LUFS units)
-    snr_db: float = 0.0            # Estimated S/N ratio dB
+    snr_db: float = 0.0  # Estimated S/N ratio dB
 
     # Artifact indicators
-    clipping_ratio: float = 0.0    # 0–1 fraction of clipped samples
+    clipping_ratio: float = 0.0  # 0–1 fraction of clipped samples
 
     # Summary
-    overall_score: float = 0.0     # 0–100
-    quality_label: str = "unknown" # excellent | good | fair | poor
+    overall_score: float = 0.0  # 0–100
+    quality_label: str = "unknown"  # excellent | good | fair | poor
 
     # Metadata
     sample_rate: int = 44100
@@ -215,7 +215,7 @@ class AudioQualityScorer:
             pass
 
         # RMS-based LUFS approximation (-0.691 dB offset per BS.1770)
-        rms = float(np.sqrt(np.mean(samples ** 2)))
+        rms = float(np.sqrt(np.mean(samples**2)))
         return _db(rms) - 0.691
 
     def _compute_score(self, m: QualityMetrics) -> float:

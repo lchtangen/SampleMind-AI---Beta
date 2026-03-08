@@ -215,18 +215,16 @@ async def health_check(
     ]
 
     if not failed_checks:
-        console.print(
-            "\n[green]✅ All critical systems operational[/green]"
-        )
+        console.print("\n[green]✅ All critical systems operational[/green]")
         logger.info("Health check: All systems operational")
     else:
-        console.print(
-            f"\n[yellow]⚠️  {len(failed_checks)} issue(s) found[/yellow]"
-        )
+        console.print(f"\n[yellow]⚠️  {len(failed_checks)} issue(s) found[/yellow]")
         logger.warning(f"Health check: {len(failed_checks)} issue(s) found")
 
     if verbose:
-        console.print(Panel(str(health_status), title="[dim]Raw Status[/dim]", expand=False))
+        console.print(
+            Panel(str(health_status), title="[dim]Raw Status[/dim]", expand=False)
+        )
 
 
 # ============================================================================
@@ -244,8 +242,10 @@ async def system_status() -> None:
     # Get uptime
     try:
         import psutil
+
         boot_time = psutil.boot_time()
         import time
+
         uptime_seconds = time.time() - boot_time
         uptime_hours = uptime_seconds / 3600
         console.print(f"[cyan]System Uptime:[/cyan] {uptime_hours:.1f} hours")
@@ -255,6 +255,7 @@ async def system_status() -> None:
     # Get memory usage
     try:
         import psutil
+
         memory = psutil.virtual_memory()
         console.print(
             f"[cyan]Memory Usage:[/cyan] {memory.percent:.1f}% ({memory.used / 1024**3:.1f}GB / {memory.total / 1024**3:.1f}GB)"

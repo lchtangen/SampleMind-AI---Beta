@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class AdvancedAudioFeatures:
     """Extended audio features"""
+
     # Temporal features
     temporal_centroid: float  # Where is energy concentrated in time?
     temporal_variance: float  # How spread out is energy?
@@ -102,7 +103,9 @@ class AdvancedFeatureExtractor:
         # Compute envelope (RMS energy over time)
         frame_length = 2048
         hop_length = 512
-        frames = librosa.util.frame(audio, frame_length=frame_length, hop_length=hop_length)
+        frames = librosa.util.frame(
+            audio, frame_length=frame_length, hop_length=hop_length
+        )
         envelope = np.sqrt(np.mean(frames**2, axis=0))
 
         # Normalize
@@ -175,11 +178,15 @@ class AdvancedFeatureExtractor:
         except Exception:
             # Fallback: compute onset strength first, then use alternative method
             onset_env = librosa.onset.onset_strength(y=audio, sr=self.sample_rate)
-            tempogram = librosa.feature.tempogram(onset_env=onset_env, sr=self.sample_rate)
+            tempogram = librosa.feature.tempogram(
+                onset_env=onset_env, sr=self.sample_rate
+            )
 
         return tempogram
 
-    def _extract_timbral_features(self, audio: np.ndarray) -> Tuple[float, float, float]:
+    def _extract_timbral_features(
+        self, audio: np.ndarray
+    ) -> Tuple[float, float, float]:
         """
         Extract timbral features: brightness, warmth, sharpness.
 
@@ -208,7 +215,9 @@ class AdvancedFeatureExtractor:
         brightness = (high_freq_energy - np.min(S_db)) / (
             np.max(S_db) - np.min(S_db) + 1e-10
         )
-        warmth = (low_freq_energy - np.min(S_db)) / (np.max(S_db) - np.min(S_db) + 1e-10)
+        warmth = (low_freq_energy - np.min(S_db)) / (
+            np.max(S_db) - np.min(S_db) + 1e-10
+        )
 
         # Sharpness: spectral sparsity (concentration of energy)
         # High sharpness = energy concentrated in few bins

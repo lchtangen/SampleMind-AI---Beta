@@ -73,7 +73,9 @@ class AudioToMIDIConverter:
         if not audio_path.exists():
             raise FileNotFoundError(f"Audio file not found: {audio_path}")
 
-        output_dir = output_directory or Path(tempfile.mkdtemp(prefix="samplemind-midi-"))
+        output_dir = output_directory or Path(
+            tempfile.mkdtemp(prefix="samplemind-midi-")
+        )
         output_dir = output_dir.expanduser().resolve()
         output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -100,7 +102,9 @@ class AudioToMIDIConverter:
                 end_time=float(event[1]),
                 midi_pitch=int(event[2]),
                 amplitude=float(event[3]),
-                pitch_bends=list(event[4]) if len(event) > 4 and event[4] is not None else None,
+                pitch_bends=(
+                    list(event[4]) if len(event) > 4 and event[4] is not None else None
+                ),
             )
             for event in note_events
         ]

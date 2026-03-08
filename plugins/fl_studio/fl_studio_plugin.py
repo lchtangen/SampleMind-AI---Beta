@@ -151,7 +151,9 @@ class FLStudioSampleMindPlugin:
             logger.error(f"Search failed: {e}")
             return []
 
-    def get_similar_samples(self, file_path: str, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_similar_samples(
+        self, file_path: str, limit: int = 10
+    ) -> List[Dict[str, Any]]:
         """
         Find samples similar to the given file.
 
@@ -385,10 +387,11 @@ class FLStudioSampleMindPlugin:
         """Save plugin state to file"""
         try:
             import json
+
             state_file = Path.home() / ".samplemind" / "fl_studio_plugin_state.json"
             state_file.parent.mkdir(parents=True, exist_ok=True)
 
-            with open(state_file, 'w') as f:
+            with open(state_file, "w") as f:
                 json.dump(self.get_state(), f, indent=2)
 
             logger.info("Plugin state saved")
@@ -399,6 +402,7 @@ class FLStudioSampleMindPlugin:
         """Load plugin state from file"""
         try:
             import json
+
             state_file = Path.home() / ".samplemind" / "fl_studio_plugin_state.json"
 
             if state_file.exists():
@@ -419,7 +423,9 @@ class FLStudioSampleMindPlugin:
             "name": self.plugin_name,
             "version": self.plugin_version,
             "unique_id": hex(self.unique_id),
-            "current_sample": str(self.current_sample) if self.current_sample else "None",
+            "current_sample": (
+                str(self.current_sample) if self.current_sample else "None"
+            ),
             "cache_size_mb": str(self.cache_size_mb),
             "recent_samples": str(len(self.recent_samples)),
         }
@@ -435,6 +441,7 @@ class FLStudioSampleMindPlugin:
 
 # In production, this would be loaded by FL Studio's plugin loader
 # The plugin would need to be compiled with FL Studio SDK
+
 
 def create_plugin():
     """Factory function for plugin creation"""

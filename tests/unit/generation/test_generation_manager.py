@@ -199,4 +199,9 @@ class TestGenerationManager:
         mock_features = MagicMock()
         transforms = manager._suggest_transforms(mock_features, 0)
         assert len(transforms) == 2
-        assert transforms[0]["type"] in ["pitch_shift", "time_stretch", "reverb", "filter"]
+        assert transforms[0]["type"] in [
+            "pitch_shift",
+            "time_stretch",
+            "reverb",
+            "filter",
+        ]

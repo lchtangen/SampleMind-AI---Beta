@@ -1,0 +1,125 @@
+/* High Contrast Theme — WCAG-compliant accessible design
+ * Primary:    #FFFFFF  White
+ * Secondary:  #FFFF00  Yellow
+ * Accent:     #00FFFF  Cyan
+ * Background: #000000  Black
+ * Surface:    #0A0A0A  Near Black
+ * Error:      #FF0000  Pure Red
+ * Warning:    #FFFF00  Yellow
+ * Success:    #00FF00  Pure Green
+ *
+ * Applied via Textual Theme object: name="high-contrast"
+ * WCAG AA+ compliant — all text meets 4.5:1 contrast ratio minimum.
+ */
+
+Header {
+    background: #000000;
+    color: #FFFFFF;
+    border-bottom: solid #FFFFFF;
+    text-style: bold;
+}
+
+Footer {
+    background: #000000;
+    color: #FFFFFF;
+    border-top: solid #FFFFFF;
+}
+
+DataTable > .datatable--header {
+    background: #000000;
+    color: #FFFF00;
+    text-style: bold underline;
+}
+
+DataTable > .datatable--cursor {
+    background: #FFFFFF;
+    color: #000000;
+    text-style: bold;
+}
+
+DataTable > .datatable--hover {
+    background: #333333;
+}
+
+Button {
+    border: solid #FFFFFF;
+    color: #FFFFFF;
+    background: #000000;
+    text-style: bold;
+}
+
+Button:hover {
+    background: #FFFFFF;
+    color: #000000;
+}
+
+Button.-primary {
+    background: #000000;
+    color: #00FFFF;
+    border: solid #00FFFF;
+}
+
+Button.-success {
+    background: #000000;
+    color: #00FF00;
+    border: solid #00FF00;
+}
+
+Button.-error {
+    background: #000000;
+    color: #FF0000;
+    border: solid #FF0000;
+}
+
+Button.-warning {
+    background: #000000;
+    color: #FFFF00;
+    border: solid #FFFF00;
+}
+
+Collapsible {
+    border: solid #FFFFFF;
+}
+
+CollapsibleTitle {
+    color: #FFFF00;
+    text-style: bold;
+}
+
+Input {
+    background: #000000;
+    color: #FFFFFF;
+    border: tall #FFFFFF;
+}
+
+Input:focus {
+    border: tall #00FFFF;
+}
+
+RichLog {
+    background: #000000;
+    border: solid #FFFFFF;
+    color: #FFFFFF;
+}
+
+Sparkline {
+    color: #00FFFF;
+}
+
+Digits {
+    color: #FFFF00;
+    text-style: bold;
+}
+
+Tabs Tab.-active {
+    color: #00FFFF;
+    text-style: bold underline;
+}
+
+ProgressBar > .bar--bar {
+    color: #00FFFF;
+}
+
+ProgressBar > .bar--complete {
+    color: #00FF00;
+}

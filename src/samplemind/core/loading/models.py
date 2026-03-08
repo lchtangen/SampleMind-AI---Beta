@@ -18,27 +18,50 @@ import numpy as np
 
 class AudioFormat(Enum):
     """Supported audio formats with detailed information"""
-    WAV = {"ext": ".wav", "mime": "audio/wav", "compressed": False, "quality": "lossless"}
-    FLAC = {"ext": ".flac", "mime": "audio/flac", "compressed": True, "quality": "lossless"}
-    AIFF = {"ext": ".aiff", "mime": "audio/aiff", "compressed": False, "quality": "lossless"}
+
+    WAV = {
+        "ext": ".wav",
+        "mime": "audio/wav",
+        "compressed": False,
+        "quality": "lossless",
+    }
+    FLAC = {
+        "ext": ".flac",
+        "mime": "audio/flac",
+        "compressed": True,
+        "quality": "lossless",
+    }
+    AIFF = {
+        "ext": ".aiff",
+        "mime": "audio/aiff",
+        "compressed": False,
+        "quality": "lossless",
+    }
     MP3 = {"ext": ".mp3", "mime": "audio/mpeg", "compressed": True, "quality": "lossy"}
     AAC = {"ext": ".aac", "mime": "audio/aac", "compressed": True, "quality": "lossy"}
     M4A = {"ext": ".m4a", "mime": "audio/mp4", "compressed": True, "quality": "lossy"}
     OGG = {"ext": ".ogg", "mime": "audio/ogg", "compressed": True, "quality": "lossy"}
-    WMA = {"ext": ".wma", "mime": "audio/x-ms-wma", "compressed": True, "quality": "lossy"}
+    WMA = {
+        "ext": ".wma",
+        "mime": "audio/x-ms-wma",
+        "compressed": True,
+        "quality": "lossy",
+    }
 
 
 class LoadingStrategy(Enum):
     """Audio loading strategies for different use cases"""
-    FAST = "fast"          # Quick loading, lower quality for previews
+
+    FAST = "fast"  # Quick loading, lower quality for previews
     BALANCED = "balanced"  # Good balance of speed and quality
-    QUALITY = "quality"    # High quality loading for analysis
+    QUALITY = "quality"  # High quality loading for analysis
     STREAMING = "streaming"  # Chunk-based loading for large files
 
 
 @dataclass
 class AudioMetadata:
     """Comprehensive audio file metadata"""
+
     # File information
     file_path: Path
     file_size: int
@@ -102,6 +125,7 @@ class AudioMetadata:
 @dataclass
 class LoadedAudio:
     """Container for loaded audio data and metadata"""
+
     audio_data: np.ndarray
     metadata: AudioMetadata
     chunks: Optional[List[np.ndarray]] = None  # For streaming

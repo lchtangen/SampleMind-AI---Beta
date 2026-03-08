@@ -17,7 +17,7 @@ class CollectionRepository:
         description: Optional[str] = None,
         is_public: bool = False,
         tags: List[str] = [],
-        metadata: dict = {}
+        metadata: dict = {},
     ) -> AudioCollection:
         """Create new collection"""
         collection = AudioCollection(
@@ -29,7 +29,7 @@ class CollectionRepository:
             tags=tags,
             metadata=metadata,
             file_count=0,
-            total_duration=0.0
+            total_duration=0.0,
         )
         await collection.insert()
         return collection
@@ -37,23 +37,29 @@ class CollectionRepository:
     @staticmethod
     async def get_by_id(collection_id: str) -> Optional[AudioCollection]:
         """Get collection by ID"""
-        return await AudioCollection.find_one(AudioCollection.collection_id == collection_id)
+        return await AudioCollection.find_one(
+            AudioCollection.collection_id == collection_id
+        )
 
     @staticmethod
     async def get_by_user(
-        user_id: str,
-        skip: int = 0,
-        limit: int = 100
+        user_id: str, skip: int = 0, limit: int = 100
     ) -> List[AudioCollection]:
         """List collections for a user"""
-        return await AudioCollection.find(
-            AudioCollection.user_id == user_id
-        ).sort(-AudioCollection.updated_at).skip(skip).limit(limit).to_list()
+        return (
+            await AudioCollection.find(AudioCollection.user_id == user_id)
+            .sort(-AudioCollection.updated_at)
+            .skip(skip)
+            .limit(limit)
+            .to_list()
+        )
 
     @staticmethod
     async def update(collection_id: str, **kwargs) -> Optional[AudioCollection]:
         """Update collection fields"""
-        collection = await AudioCollection.find_one(AudioCollection.collection_id == collection_id)
+        collection = await AudioCollection.find_one(
+            AudioCollection.collection_id == collection_id
+        )
         if collection:
             for key, value in kwargs.items():
                 if hasattr(collection, key) and value is not None:
@@ -65,12 +71,14 @@ class CollectionRepository:
     @staticmethod
     async def delete(collection_id: str) -> bool:
         """Delete collection"""
-        collection = await AudioCollection.find_one(AudioCollection.collection_id == collection_id)
+        collection = await AudioCollection.find_one(
+            AudioCollection.collection_id == collection_id
+        )
         if collection:
             # Also remove this collection ID from all audio files
-            await AudioFile.find(
-                {"collection_ids": collection_id}
-            ).update({"$pull": {"collection_ids": collection_id}})
+            await AudioFile.find({"collection_ids": collection_id}).update(
+                {"$pull": {"collection_ids": collection_id}}
+            )
 
             await collection.delete()
             return True
@@ -79,6 +87,8 @@ class CollectionRepository:
     @staticmethod
     async def get_collection_items(collection_id: str) -> List[AudioFile]:
         """Get all audio files in a collection"""
-        return await AudioFile.find(
-            {"collection_ids": collection_id}
-        ).sort(-AudioFile.created_at).to_list()
+        return (
+            await AudioFile.find({"collection_ids": collection_id})
+            .sort(-AudioFile.created_at)
+            .to_list()
+        )

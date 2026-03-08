@@ -26,6 +26,7 @@ console = utils.console
 # SECTION 1: WAVEFORM & SPECTRAL (8 commands)
 # ============================================================================
 
+
 @app.command("waveform")
 @utils.with_error_handling
 def viz_waveform(
@@ -36,7 +37,9 @@ def viz_waveform(
 ) -> None:
     """Generate waveform visualization"""
     try:
-        output_file = output or file.with_suffix(".png").with_stem(file.stem + "_waveform")
+        output_file = output or file.with_suffix(".png").with_stem(
+            file.stem + "_waveform"
+        )
         with utils.ProgressTracker(f"Generating waveform ({size})"):
             pass
 
@@ -57,7 +60,9 @@ def viz_spectrogram(
 ) -> None:
     """Generate spectrogram visualization"""
     try:
-        output_file = output or file.with_suffix(".png").with_stem(file.stem + "_spectrogram")
+        output_file = output or file.with_suffix(".png").with_stem(
+            file.stem + "_spectrogram"
+        )
         with utils.ProgressTracker("Generating spectrogram"):
             pass
 
@@ -77,7 +82,9 @@ def viz_chromagram(
 ) -> None:
     """Generate chromagram (chroma over time)"""
     try:
-        output_file = output or file.with_suffix(".png").with_stem(file.stem + "_chromagram")
+        output_file = output or file.with_suffix(".png").with_stem(
+            file.stem + "_chromagram"
+        )
         with utils.ProgressTracker("Generating chromagram"):
             pass
 
@@ -117,7 +124,9 @@ def viz_tempogram(
 ) -> None:
     """Generate tempogram (tempo over time)"""
     try:
-        output_file = output or file.with_suffix(".png").with_stem(file.stem + "_tempogram")
+        output_file = output or file.with_suffix(".png").with_stem(
+            file.stem + "_tempogram"
+        )
         with utils.ProgressTracker("Generating tempogram"):
             pass
 
@@ -138,7 +147,9 @@ def viz_frequency(
 ) -> None:
     """Generate frequency response curve"""
     try:
-        output_file = output or file.with_suffix(".png").with_stem(file.stem + "_frequency")
+        output_file = output or file.with_suffix(".png").with_stem(
+            file.stem + "_frequency"
+        )
         with utils.ProgressTracker("Generating frequency response"):
             pass
 
@@ -178,7 +189,9 @@ def viz_stereo(
 ) -> None:
     """Generate stereo field visualization"""
     try:
-        output_file = output or file.with_suffix(".png").with_stem(file.stem + "_stereo")
+        output_file = output or file.with_suffix(".png").with_stem(
+            file.stem + "_stereo"
+        )
         with utils.ProgressTracker("Generating stereo plot"):
             pass
 
@@ -194,11 +207,14 @@ def viz_stereo(
 # SECTION 2: EXPORT & COMPARISON (7 commands)
 # ============================================================================
 
+
 @app.command("export")
 @utils.with_error_handling
 def viz_export(
     file: Path = typer.Argument(...),
-    format: str = typer.Option("png", "--format", "-f", help="Export format (png|svg|pdf)"),
+    format: str = typer.Option(
+        "png", "--format", "-f", help="Export format (png|svg|pdf)"
+    ),
     dpi: int = typer.Option(300, "--dpi", help="DPI for export"),
 ) -> None:
     """Export visualization to file"""
@@ -260,7 +276,9 @@ def viz_compare_batch(
 @utils.with_error_handling
 def viz_heatmap(
     folder: Path = typer.Argument(...),
-    metric: str = typer.Option("bpm", "--metric", help="Metric for heatmap (bpm|key|genre)"),
+    metric: str = typer.Option(
+        "bpm", "--metric", help="Metric for heatmap (bpm|key|genre)"
+    ),
 ) -> None:
     """Generate sample BPM/key/genre heatmap"""
     try:

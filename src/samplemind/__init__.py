@@ -25,8 +25,10 @@ import warnings
 # Fix for Librosa 0.10.1 compability with Scipy 1.14+ (removal of signal.hann)
 try:
     import scipy.signal
-    if not hasattr(scipy.signal, 'hann'):
+
+    if not hasattr(scipy.signal, "hann"):
         import scipy.signal.windows
+
         scipy.signal.hann = scipy.signal.windows.hann
 except ImportError:
     pass
@@ -50,37 +52,48 @@ __release_date__ = "2025-10-04"
 __author__ = "SampleMind AI Team"
 __description__ = "Professional AI-powered music production suite"
 
+
 # Lazy imports - import on demand to avoid loading heavy dependencies at startup
 def __getattr__(name: str) -> Any:
     """Lazy load modules on demand"""
     if name == "AudioEngine":
         from .core.engine.audio_engine import AudioEngine
+
         return AudioEngine
     elif name == "AudioFeatures":
         from .core.engine.audio_engine import AudioFeatures
+
         return AudioFeatures
     elif name == "AnalysisLevel":
         from .core.engine.audio_engine import AnalysisLevel
+
         return AnalysisLevel
     elif name == "AdvancedAudioLoader":
         from .core.loader import AdvancedAudioLoader
+
         return AdvancedAudioLoader
     elif name == "LoadingStrategy":
         from .core.loader import LoadingStrategy
+
         return LoadingStrategy
     elif name == "AudioFormat":
         from .core.loader import AudioFormat
+
         return AudioFormat
     elif name == "SampleMindAIManager":
         from .integrations.ai_manager import SampleMindAIManager
+
         return SampleMindAIManager
     elif name == "AnalysisType":
         from .integrations.ai_manager import AnalysisType
+
         return AnalysisType
     elif name == "AIProvider":
         from .integrations.ai_manager import AIProvider
+
         return AIProvider
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+
 
 # Make key classes available at package level
 __all__ = [
@@ -91,21 +104,21 @@ __all__ = [
     "AdvancedAudioLoader",
     "LoadingStrategy",
     "AudioFormat",
-
     # AI classes
     "SampleMindAIManager",
     "AnalysisType",
     "AIProvider",
-
     # Package info
     "__version__",
     "__author__",
-    "__description__"
+    "__description__",
 ]
+
 
 def get_version() -> str:
     """Get SampleMind AI version"""
     return __version__
+
 
 def get_info() -> dict:
     """Get package information"""
@@ -113,5 +126,5 @@ def get_info() -> dict:
         "name": "SampleMind AI",
         "version": __version__,
         "description": __description__,
-        "author": __author__
+        "author": __author__,
     }

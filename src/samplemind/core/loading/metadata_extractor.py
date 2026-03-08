@@ -43,7 +43,9 @@ class MetadataExtractor:
                     audio_file, ["TCON", "GENRE", "\xa9gen"]
                 )
                 metadata["year"] = MetadataExtractor._get_year(audio_file)
-                metadata["track_number"] = MetadataExtractor._get_track_number(audio_file)
+                metadata["track_number"] = MetadataExtractor._get_track_number(
+                    audio_file
+                )
 
                 # Technical properties from mutagen's info block
                 if hasattr(audio_file, "info"):

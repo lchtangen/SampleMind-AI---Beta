@@ -13,11 +13,14 @@ from typing import BinaryIO, List, Optional, TypedDict, Union
 
 logger = logging.getLogger(__name__)
 
+
 class FileMetadata(TypedDict):
     """Metadata for a stored file"""
+
     size: int
     mtime: float
     hash: Optional[str] = None
+
 
 class StorageProvider(abc.ABC):
     """Abstract base class for storage providers"""
@@ -28,7 +31,9 @@ class StorageProvider(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def upload_file(self, content: Union[BinaryIO, bytes, Path], remote_path: str) -> str:
+    async def upload_file(
+        self, content: Union[BinaryIO, bytes, Path], remote_path: str
+    ) -> str:
         """Upload file to storage"""
         pass
 
@@ -64,10 +69,12 @@ class LocalStorageProvider(StorageProvider):
         return FileMetadata(
             size=stat.st_size,
             mtime=stat.st_mtime,
-            hash=None  # Hash is expensive, compute only if needed or cached
+            hash=None,  # Hash is expensive, compute only if needed or cached
         )
 
-    async def upload_file(self, content: Union[BinaryIO, bytes, Path], remote_path: str) -> str:
+    async def upload_file(
+        self, content: Union[BinaryIO, bytes, Path], remote_path: str
+    ) -> str:
         dest_path = self.root_dir / remote_path
         dest_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -125,7 +132,9 @@ class MockS3StorageProvider(StorageProvider):
         # In a real mock, this would check an internal dict
         return None
 
-    async def upload_file(self, content: Union[BinaryIO, bytes, Path], remote_path: str) -> str:
+    async def upload_file(
+        self, content: Union[BinaryIO, bytes, Path], remote_path: str
+    ) -> str:
         logger.info(f"[MOCK] Uploading to S3://{self.bucket}/{remote_path}")
         return f"s3://{self.bucket}/{remote_path}"
 
@@ -152,10 +161,12 @@ class S3StorageProvider(StorageProvider):
             import boto3
             from botocore.exceptions import ClientError
         except ImportError:
-            raise ImportError("boto3 is required for S3 storage. Install it with: pip install boto3")
+            raise ImportError(
+                "boto3 is required for S3 storage. Install it with: pip install boto3"
+            )
 
         self.bucket_name = bucket_name
-        self.s3_client = boto3.client('s3', region_name=region)
+        self.s3_client = boto3.client("s3", region_name=region)
         self.ClientError = ClientError
         logger.info(f"Initialized S3 Provider: {bucket_name} ({region})")
 
@@ -165,32 +176,41 @@ class S3StorageProvider(StorageProvider):
                 self.s3_client.head_object, Bucket=self.bucket_name, Key=remote_path
             )
             return FileMetadata(
-                size=response['ContentLength'],
-                mtime=response['LastModified'].timestamp(),
+                size=response["ContentLength"],
+                mtime=response["LastModified"].timestamp(),
                 # ETag is often the MD5, but surrounded by quotes
-                hash=response.get('ETag', '').strip('"')
+                hash=response.get("ETag", "").strip('"'),
             )
         except self.ClientError:
             # 404 or other error -> treat as not found for now
             return None
 
-    async def upload_file(self, content: Union[BinaryIO, bytes, Path], remote_path: str) -> str:
+    async def upload_file(
+        self, content: Union[BinaryIO, bytes, Path], remote_path: str
+    ) -> str:
         try:
             if isinstance(content, Path) or isinstance(content, str):
                 await asyncio.to_thread(
-                    self.s3_client.upload_file, str(content), self.bucket_name, remote_path
+                    self.s3_client.upload_file,
+                    str(content),
+                    self.bucket_name,
+                    remote_path,
                 )
             elif isinstance(content, bytes):
-                 import io
-                 f = io.BytesIO(content)
-                 await asyncio.to_thread(
-                     self.s3_client.upload_fileobj, f, self.bucket_name, remote_path
-                 )
+                import io
+
+                f = io.BytesIO(content)
+                await asyncio.to_thread(
+                    self.s3_client.upload_fileobj, f, self.bucket_name, remote_path
+                )
             else:
-                 # BinaryIO
-                 await asyncio.to_thread(
-                     self.s3_client.upload_fileobj, content, self.bucket_name, remote_path
-                 )
+                # BinaryIO
+                await asyncio.to_thread(
+                    self.s3_client.upload_fileobj,
+                    content,
+                    self.bucket_name,
+                    remote_path,
+                )
             return f"s3://{self.bucket_name}/{remote_path}"
         except self.ClientError as e:
             logger.error(f"S3 Upload Error: {e}")
@@ -200,27 +220,30 @@ class S3StorageProvider(StorageProvider):
         try:
             local_path.parent.mkdir(parents=True, exist_ok=True)
             await asyncio.to_thread(
-                self.s3_client.download_file, self.bucket_name, remote_path, str(local_path)
+                self.s3_client.download_file,
+                self.bucket_name,
+                remote_path,
+                str(local_path),
             )
             return True
         except self.ClientError as e:
             # 404 check
-            if e.response['Error']['Code'] == "404":
+            if e.response["Error"]["Code"] == "404":
                 return False
             logger.error(f"S3 Download Error: {e}")
             return False
 
     async def list_files(self, prefix: str = "") -> List[str]:
         try:
-            paginator = self.s3_client.get_paginator('list_objects_v2')
+            paginator = self.s3_client.get_paginator("list_objects_v2")
             files = []
 
             # Use thread for blocking I/O
             def _list() -> Any:
                 for page in paginator.paginate(Bucket=self.bucket_name, Prefix=prefix):
-                    if 'Contents' in page:
-                        for obj in page['Contents']:
-                            files.append(obj['Key'])
+                    if "Contents" in page:
+                        for obj in page["Contents"]:
+                            files.append(obj["Key"])
                 return files
 
             return await asyncio.to_thread(_list)

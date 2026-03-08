@@ -20,7 +20,7 @@ class TestCacheEntry:
             value={"data": "value"},
             created_at=time.time(),
             last_accessed=time.time(),
-            ttl=3600
+            ttl=3600,
         )
 
         assert entry.key == "test_key"
@@ -31,11 +31,7 @@ class TestCacheEntry:
         """Test non-expired entry"""
         now = time.time()
         entry = CacheEntry(
-            key="test_key",
-            value="value",
-            created_at=now,
-            last_accessed=now,
-            ttl=3600
+            key="test_key", value="value", created_at=now, last_accessed=now, ttl=3600
         )
 
         assert entry.is_expired() is False
@@ -44,11 +40,7 @@ class TestCacheEntry:
         """Test expired entry"""
         past = time.time() - 7200  # 2 hours ago
         entry = CacheEntry(
-            key="test_key",
-            value="value",
-            created_at=past,
-            last_accessed=past,
-            ttl=3600
+            key="test_key", value="value", created_at=past, last_accessed=past, ttl=3600
         )
 
         assert entry.is_expired() is True
@@ -57,11 +49,7 @@ class TestCacheEntry:
         """Test recency score calculation"""
         now = time.time()
         entry = CacheEntry(
-            key="test_key",
-            value="value",
-            created_at=now,
-            last_accessed=now,
-            ttl=3600
+            key="test_key", value="value", created_at=now, last_accessed=now, ttl=3600
         )
 
         recency = entry.get_recency()
@@ -80,7 +68,7 @@ class TestCacheEntry:
             created_at=time.time(),
             last_accessed=time.time(),
             ttl=3600,
-            access_count=0
+            access_count=0,
         )
 
         assert entry.get_frequency() == 0.0
@@ -100,7 +88,7 @@ class TestCacheEntry:
             value="value",
             created_at=time.time(),
             last_accessed=time.time(),
-            ttl=3600
+            ttl=3600,
         )
 
         assert entry.access_count == 0

@@ -48,6 +48,7 @@ logger = logging.getLogger(__name__)
 
 class AudioFormat(Enum):
     """Supported audio formats"""
+
     WAV = "wav"
     MP3 = "mp3"
     FLAC = "flac"
@@ -58,6 +59,7 @@ class AudioFormat(Enum):
 
 class AnalysisLevel(Enum):
     """Audio analysis complexity levels"""
+
     BASIC = "basic"
     STANDARD = "standard"
     DETAILED = "detailed"
@@ -67,6 +69,7 @@ class AnalysisLevel(Enum):
 @dataclass
 class AudioFeatures:
     """Comprehensive audio feature representation"""
+
     # Basic properties
     duration: float
     sample_rate: int
@@ -114,7 +117,7 @@ class AudioFeatures:
     file_size: int = 0
     analysis_level: AnalysisLevel = AnalysisLevel.STANDARD
 
-    def calculate_similarity(self, other: 'AudioFeatures') -> float:
+    def calculate_similarity(self, other: "AudioFeatures") -> float:
         """
         Calculate similarity score between two AudioFeatures objects
         Returns a score between 0.0 (completely different) and 1.0 (identical)
@@ -125,7 +128,9 @@ class AudioFeatures:
 
         # Tempo similarity (normalized difference)
         if self.tempo > 0 and other.tempo > 0:
-            tempo_sim = 1.0 - min(abs(self.tempo - other.tempo) / max(self.tempo, other.tempo), 1.0)
+            tempo_sim = 1.0 - min(
+                abs(self.tempo - other.tempo) / max(self.tempo, other.tempo), 1.0
+            )
             similarities.append(tempo_sim * 0.2)  # 20% weight
 
         # Key/mode similarity
@@ -135,19 +140,34 @@ class AudioFeatures:
             similarities.append(0.1)  # 10% weight
 
         # Pitch class distribution similarity
-        if len(self.pitch_class_distribution) == len(other.pitch_class_distribution) == 12:
-            pcd_sim = 1.0 - cosine(self.pitch_class_distribution, other.pitch_class_distribution)
+        if (
+            len(self.pitch_class_distribution)
+            == len(other.pitch_class_distribution)
+            == 12
+        ):
+            pcd_sim = 1.0 - cosine(
+                self.pitch_class_distribution, other.pitch_class_distribution
+            )
             similarities.append(pcd_sim * 0.25)  # 25% weight
 
         # Spectral features similarity
         if self.spectral_centroid and other.spectral_centroid:
-            spec_sim = 1.0 - min(abs(np.mean(self.spectral_centroid) - np.mean(other.spectral_centroid)) /
-                                 max(np.mean(self.spectral_centroid), np.mean(other.spectral_centroid)), 1.0)
+            spec_sim = 1.0 - min(
+                abs(np.mean(self.spectral_centroid) - np.mean(other.spectral_centroid))
+                / max(
+                    np.mean(self.spectral_centroid), np.mean(other.spectral_centroid)
+                ),
+                1.0,
+            )
             similarities.append(spec_sim * 0.15)  # 15% weight
 
         # Duration similarity
         if self.duration > 0 and other.duration > 0:
-            dur_sim = 1.0 - min(abs(self.duration - other.duration) / max(self.duration, other.duration), 1.0)
+            dur_sim = 1.0 - min(
+                abs(self.duration - other.duration)
+                / max(self.duration, other.duration),
+                1.0,
+            )
             similarities.append(dur_sim * 0.15)  # 15% weight
 
         return sum(similarities) if similarities else 0.0
@@ -157,8 +177,8 @@ class AudioFeatures:
         import hashlib
 
         hash_sha256 = hashlib.sha256()
-        with open(file_path, 'rb') as f:
-            for chunk in iter(lambda: f.read(4096), b''):
+        with open(file_path, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
                 hash_sha256.update(chunk)
         return hash_sha256.hexdigest()
 
@@ -175,19 +195,24 @@ class AudioFeatures:
         return result
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> 'AudioFeatures':
+    def from_dict(cls, data: dict[str, Any]) -> "AudioFeatures":
         """Create AudioFeatures from dictionary"""
         # Convert lists back to numpy arrays where needed
-        numpy_fields = ['chroma_features', 'mfccs', 'harmonic_content', 'percussive_content', 'groove_template']
+        numpy_fields = [
+            "chroma_features",
+            "mfccs",
+            "harmonic_content",
+            "percussive_content",
+            "groove_template",
+        ]
         for field in numpy_fields:
             if field in data and isinstance(data[field], list):
                 data[field] = np.array(data[field])
 
-        if 'analysis_level' in data and isinstance(data['analysis_level'], str):
-            data['analysis_level'] = AnalysisLevel(data['analysis_level'])
+        if "analysis_level" in data and isinstance(data["analysis_level"], str):
+            data["analysis_level"] = AnalysisLevel(data["analysis_level"])
 
         return cls(**data)
-
 
     def save(self, file_path: str | Path) -> bool:
         """Save features to a sidecar JSON file"""
@@ -195,12 +220,15 @@ class AudioFeatures:
             path = Path(file_path)
             sidecar_path = path.with_suffix(path.suffix + ".json")
 
-            with open(sidecar_path, 'w') as f:
+            with open(sidecar_path, "w") as f:
                 json.dump(self.to_dict(), f, indent=2)
             return True
         except Exception as e:
-            logging.getLogger(__name__).error(f"Failed to save sidecar for {file_path}: {e}")
+            logging.getLogger(__name__).error(
+                f"Failed to save sidecar for {file_path}: {e}"
+            )
             return False
+
 
 class AudioProcessor:
     """Advanced audio processing utilities"""
@@ -215,15 +243,19 @@ class AudioProcessor:
         return y
 
     @staticmethod
-    def apply_high_pass_filter(y: np.ndarray, sr: int, cutoff: float = 80.0) -> np.ndarray:
+    def apply_high_pass_filter(
+        y: np.ndarray, sr: int, cutoff: float = 80.0
+    ) -> np.ndarray:
         """Apply high-pass filter to remove low-frequency noise"""
         nyquist = sr // 2
         normalized_cutoff = cutoff / nyquist
-        b, a = signal.butter(4, normalized_cutoff, btype='high')
+        b, a = signal.butter(4, normalized_cutoff, btype="high")
         return signal.filtfilt(b, a, y)
 
     @staticmethod
-    def extract_harmonic_percussive(y: np.ndarray, margin: float = 3.0) -> tuple[np.ndarray, np.ndarray]:
+    def extract_harmonic_percussive(
+        y: np.ndarray, margin: float = 3.0
+    ) -> tuple[np.ndarray, np.ndarray]:
         """
         Separate harmonic and percussive components of an audio signal.
 
@@ -243,7 +275,9 @@ class AudioProcessor:
             raise ValueError("Input must be a 1D numpy array")
 
         if len(y) < 512:  # Minimum length for STFT
-            raise ValueError(f"Input signal too short for HPSS. Got {len(y)} samples, need at least 512.")
+            raise ValueError(
+                f"Input signal too short for HPSS. Got {len(y)} samples, need at least 512."
+            )
 
         if not np.isfinite(y).all():
             raise ValueError("Input contains NaN or infinite values")
@@ -263,9 +297,9 @@ class AudioProcessor:
                 y_norm,
                 n_fft=n_fft,
                 hop_length=hop_length,
-                window='hann',
+                window="hann",
                 center=True,
-                pad_mode='reflect'
+                pad_mode="reflect",
             )
 
             # Separate harmonic and percussive components
@@ -273,26 +307,22 @@ class AudioProcessor:
                 D,
                 margin=margin,
                 kernel_size=31,  # Larger kernel for better separation
-                power=2.0       # Power of the margin distance
+                power=2.0,  # Power of the margin distance
             )
 
             # Invert back to time domain
             y_harmonic = librosa.istft(
-                D_harmonic,
-                hop_length=hop_length,
-                length=len(y_norm),
-                window='hann'
+                D_harmonic, hop_length=hop_length, length=len(y_norm), window="hann"
             )
 
             y_percussive = librosa.istft(
-                D_percussive,
-                hop_length=hop_length,
-                length=len(y_norm),
-                window='hann'
+                D_percussive, hop_length=hop_length, length=len(y_norm), window="hann"
             )
 
             # Ensure output has same scale as input
-            scale = np.max(np.abs(y)) / (np.max(np.abs([y_harmonic, y_percussive])) + 1e-8)
+            scale = np.max(np.abs(y)) / (
+                np.max(np.abs([y_harmonic, y_percussive])) + 1e-8
+            )
             y_harmonic = y_harmonic * scale
             y_percussive = y_percussive * scale
 
@@ -342,7 +372,9 @@ class AdvancedFeatureExtractor:
             Dictionary containing tonal features
         """
         # Compute chroma features for key detection
-        chroma = librosa.feature.chroma_stft(y=y, sr=self.sample_rate, hop_length=self.hop_length)
+        chroma = librosa.feature.chroma_stft(
+            y=y, sr=self.sample_rate, hop_length=self.hop_length
+        )
         chroma_mean = np.mean(chroma, axis=1)
 
         # Get key and mode
@@ -352,16 +384,18 @@ class AdvancedFeatureExtractor:
         y_harmonic, y_percussive = librosa.effects.hpss(y)
 
         # Get harmonic ratio
-        harmonic_ratio = np.mean(y_harmonic**2) / (np.mean(y_harmonic**2) + np.mean(y_percussive**2) + 1e-6)
+        harmonic_ratio = np.mean(y_harmonic**2) / (
+            np.mean(y_harmonic**2) + np.mean(y_percussive**2) + 1e-6
+        )
 
         return {
-            'chroma': chroma,
-            'chroma_features': chroma,
-            'chroma_mean': chroma_mean,
-            'key': key,
-            'mode': mode,
-            'harmonic_ratio': harmonic_ratio,
-            'pitch_class_distribution': chroma_mean.tolist()
+            "chroma": chroma,
+            "chroma_features": chroma,
+            "chroma_mean": chroma_mean,
+            "key": key,
+            "mode": mode,
+            "harmonic_ratio": harmonic_ratio,
+            "pitch_class_distribution": chroma_mean.tolist(),
         }
 
     def extract_rhythmic_features(self, y: np.ndarray) -> dict[str, Any]:
@@ -375,7 +409,7 @@ class AdvancedFeatureExtractor:
             Dictionary containing rhythmic features
         """
         # Check cache first if enabled
-        cache_key = self._get_cache_key('rhythm', y)
+        cache_key = self._get_cache_key("rhythm", y)
         if self.use_cache and self._cache:
             cached = self._cache.get(y, cache_key)
             if cached is not None:
@@ -385,48 +419,53 @@ class AdvancedFeatureExtractor:
 
         try:
             # Compute onset envelope
-            onset_env = librosa.onset.onset_strength(y=y, sr=self.sample_rate, hop_length=self.hop_length)
+            onset_env = librosa.onset.onset_strength(
+                y=y, sr=self.sample_rate, hop_length=self.hop_length
+            )
 
             # Estimate tempo
             tempo, beat_frames = librosa.beat.beat_track(
                 onset_envelope=onset_env,
                 sr=self.sample_rate,
-                hop_length=self.hop_length
+                hop_length=self.hop_length,
             )
 
             # Ensure tempo is a scalar value
             if isinstance(tempo, (np.ndarray, list)):
-                tempo = tempo[0] if len(tempo) > 0 else 120.0  # Default to 120 BPM if no tempo detected
+                tempo = (
+                    tempo[0] if len(tempo) > 0 else 120.0
+                )  # Default to 120 BPM if no tempo detected
 
             # Get beat times
-            beat_times = librosa.frames_to_time(beat_frames, sr=self.sample_rate, hop_length=self.hop_length)
+            beat_times = librosa.frames_to_time(
+                beat_frames, sr=self.sample_rate, hop_length=self.hop_length
+            )
 
             # Get onset times
             onset_frames = librosa.onset.onset_detect(
-                y=y,
-                sr=self.sample_rate,
-                hop_length=self.hop_length,
-                backtrack=True
+                y=y, sr=self.sample_rate, hop_length=self.hop_length, backtrack=True
             )
-            onset_times = librosa.frames_to_time(onset_frames, sr=self.sample_rate, hop_length=self.hop_length)
+            onset_times = librosa.frames_to_time(
+                onset_frames, sr=self.sample_rate, hop_length=self.hop_length
+            )
 
             # Compute rhythm pattern
             rhythm_pattern = self._analyze_rhythm_pattern(beat_times, onset_times)
 
             result = {
-                'tempo': float(tempo),
-                'beats': beat_times.tolist(),
-                'beat_times': beat_times.tolist(),
-                'onset_times': onset_times.tolist(),
-                'onset_env': onset_env.tolist(),
-                'rhythm_pattern': rhythm_pattern,
-                '_cached': False
+                "tempo": float(tempo),
+                "beats": beat_times.tolist(),
+                "beat_times": beat_times.tolist(),
+                "onset_times": onset_times.tolist(),
+                "onset_env": onset_env.tolist(),
+                "rhythm_pattern": rhythm_pattern,
+                "_cached": False,
             }
 
             # Cache the result
             if self.use_cache and self._cache:
                 self._cache.set(y, cache_key, result)
-                result['_cached'] = True
+                result["_cached"] = True
 
             processing_time = time.time() - start_time
             logger.debug(f"Extracted rhythmic features in {processing_time:.3f}s")
@@ -435,6 +474,7 @@ class AdvancedFeatureExtractor:
 
         except Exception as e:
             import traceback
+
             traceback.print_exc()
             logger.error(f"Error extracting rhythmic features: {e}")
             raise
@@ -450,7 +490,7 @@ class AdvancedFeatureExtractor:
             Dictionary containing spectral features
         """
         # Check cache first if enabled
-        cache_key = self._get_cache_key('spectral', y)
+        cache_key = self._get_cache_key("spectral", y)
         if self.use_cache and self._cache:
             cached = self._cache.get(y, cache_key)
             if cached is not None:
@@ -460,61 +500,50 @@ class AdvancedFeatureExtractor:
 
         try:
             # Compute spectral features in parallel where possible
-            with np.errstate(divide='ignore', invalid='ignore'):
+            with np.errstate(divide="ignore", invalid="ignore"):
                 # Use stft as a basis for multiple features
-                D = np.abs(librosa.stft(y, n_fft=self.n_fft, hop_length=self.hop_length))
+                D = np.abs(
+                    librosa.stft(y, n_fft=self.n_fft, hop_length=self.hop_length)
+                )
 
                 # Compute features in parallel
                 spectral_centroid = librosa.feature.spectral_centroid(
-                    S=D,
-                    sr=self.sample_rate,
-                    hop_length=self.hop_length
+                    S=D, sr=self.sample_rate, hop_length=self.hop_length
                 )
 
                 spectral_bandwidth = librosa.feature.spectral_bandwidth(
-                    S=D,
-                    sr=self.sample_rate,
-                    hop_length=self.hop_length
+                    S=D, sr=self.sample_rate, hop_length=self.hop_length
                 )
 
                 spectral_rolloff = librosa.feature.spectral_rolloff(
-                    S=D,
-                    sr=self.sample_rate,
-                    hop_length=self.hop_length
+                    S=D, sr=self.sample_rate, hop_length=self.hop_length
                 )
 
                 # These features don't use the STFT
                 zero_crossing_rate = librosa.feature.zero_crossing_rate(
-                    y,
-                    hop_length=self.hop_length
+                    y, hop_length=self.hop_length
                 )
 
-                rms_energy = librosa.feature.rms(
-                    y=y,
-                    hop_length=self.hop_length
-                )
+                rms_energy = librosa.feature.rms(y=y, hop_length=self.hop_length)
 
                 mfcc = librosa.feature.mfcc(
-                    y=y,
-                    sr=self.sample_rate,
-                    n_mfcc=13,
-                    hop_length=self.hop_length
+                    y=y, sr=self.sample_rate, n_mfcc=13, hop_length=self.hop_length
                 )
 
             result = {
-                'spectral_centroid': spectral_centroid[0].tolist(),
-                'spectral_bandwidth': spectral_bandwidth[0].tolist(),
-                'spectral_rolloff': spectral_rolloff[0].tolist(),
-                'zero_crossing_rate': zero_crossing_rate[0].tolist(),
-                'rms_energy': rms_energy[0].tolist(),
-                'mfccs': mfcc,
-                '_cached': False
+                "spectral_centroid": spectral_centroid[0].tolist(),
+                "spectral_bandwidth": spectral_bandwidth[0].tolist(),
+                "spectral_rolloff": spectral_rolloff[0].tolist(),
+                "zero_crossing_rate": zero_crossing_rate[0].tolist(),
+                "rms_energy": rms_energy[0].tolist(),
+                "mfccs": mfcc,
+                "_cached": False,
             }
 
             # Cache the result
             if self.use_cache and self._cache:
                 self._cache.set(y, cache_key, result)
-                result['_cached'] = True
+                result["_cached"] = True
 
             processing_time = time.time() - start_time
             logger.debug(f"Extracted spectral features in {processing_time:.3f}s")
@@ -537,7 +566,7 @@ class AdvancedFeatureExtractor:
             Dictionary containing MFCC features
         """
         # Check cache first if enabled
-        cache_key = self._get_cache_key(f'mfcc_{n_mfcc}', y)
+        cache_key = self._get_cache_key(f"mfcc_{n_mfcc}", y)
         if self.use_cache and self._cache:
             cached = self._cache.get(y, cache_key)
             if cached is not None:
@@ -557,9 +586,9 @@ class AdvancedFeatureExtractor:
                 n_fft=n_fft,
                 hop_length=self.hop_length,
                 n_mels=128,  # Increased mel bands for better resolution
-                fmin=20,     # Lower frequency bound (Hz)
-                fmax=8000,   # Upper frequency bound (Hz)
-                htk=True     # Use HTK formula for mel scaling (matches some other tools)
+                fmin=20,  # Lower frequency bound (Hz)
+                fmax=8000,  # Upper frequency bound (Hz)
+                htk=True,  # Use HTK formula for mel scaling (matches some other tools)
             )
 
             # Compute delta and delta-delta features
@@ -567,16 +596,16 @@ class AdvancedFeatureExtractor:
             mfcc_delta2 = librosa.feature.delta(mfcc, order=2)
 
             result = {
-                'mfcc': mfcc.tolist(),
-                'mfcc_delta': mfcc_delta.tolist(),
-                'mfcc_delta2': mfcc_delta2.tolist(),
-                '_cached': False
+                "mfcc": mfcc.tolist(),
+                "mfcc_delta": mfcc_delta.tolist(),
+                "mfcc_delta2": mfcc_delta2.tolist(),
+                "_cached": False,
             }
 
             # Cache the result
             if self.use_cache and self._cache:
                 self._cache.set(y, cache_key, result)
-                result['_cached'] = True
+                result["_cached"] = True
 
             processing_time = time.time() - start_time
             logger.debug(f"Extracted {n_mfcc} MFCCs in {processing_time:.3f}s")
@@ -599,13 +628,16 @@ class AdvancedFeatureExtractor:
             Dictionary of parameters for caching
         """
         import hashlib
+
         return {
-            'feature_type': feature_type,
-            'sample_rate': self.sample_rate,
-            'hop_length': self.hop_length,
-            'n_fft': self.n_fft,
-            'audio_length': len(y),
-            'audio_hash': hashlib.sha256(y.tobytes()).hexdigest()[:16]  # First 16 chars of hash
+            "feature_type": feature_type,
+            "sample_rate": self.sample_rate,
+            "hop_length": self.hop_length,
+            "n_fft": self.n_fft,
+            "audio_length": len(y),
+            "audio_hash": hashlib.sha256(y.tobytes()).hexdigest()[
+                :16
+            ],  # First 16 chars of hash
         }
 
     def _estimate_key_mode(self, chroma_mean: np.ndarray) -> tuple[str, str]:
@@ -619,8 +651,12 @@ class AdvancedFeatureExtractor:
             Tuple of (key, mode) where key is a note name (A-G) and mode is 'major' or 'minor'
         """
         # Chroma features for major and minor keys (Krumhansl-Kessler profiles)
-        major_profile = np.array([6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88])
-        minor_profile = np.array([6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17])
+        major_profile = np.array(
+            [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88]
+        )
+        minor_profile = np.array(
+            [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17]
+        )
 
         # Normalize profiles
         major_profile = major_profile / np.linalg.norm(major_profile)
@@ -632,22 +668,24 @@ class AdvancedFeatureExtractor:
             # Major key
             shifted = np.roll(chroma_mean, i)
             major_corr = np.corrcoef(shifted, major_profile)[0, 1]
-            correlations[(i, 'major')] = major_corr
+            correlations[(i, "major")] = major_corr
 
             # Minor key
             minor_corr = np.corrcoef(shifted, minor_profile)[0, 1]
-            correlations[(i, 'minor')] = minor_corr
+            correlations[(i, "minor")] = minor_corr
 
         # Find the best matching key and mode
         (shift, mode), _ = max(correlations.items(), key=lambda x: x[1])
 
         # Map shift to note name
-        notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+        notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
         key = notes[shift]
 
         return key, mode
 
-    def _analyze_rhythm_pattern(self, beat_times: np.ndarray, onset_times: np.ndarray) -> list[float]:
+    def _analyze_rhythm_pattern(
+        self, beat_times: np.ndarray, onset_times: np.ndarray
+    ) -> list[float]:
         """
         Analyze rhythm pattern complexity based on beat and onset times.
 
@@ -675,7 +713,9 @@ class AdvancedFeatureExtractor:
             if closest_beat_idx < len(beat_times):
                 # Map to 16-step grid (4 beats * 4 subdivisions)
                 beat_position = closest_beat_idx % 4  # Position within current measure
-                relative_position = (onset - beat_times[closest_beat_idx]) / beat_duration
+                relative_position = (
+                    onset - beat_times[closest_beat_idx]
+                ) / beat_duration
                 grid_position = int(beat_position * 4 + relative_position * 4)
                 grid_position = max(0, min(15, grid_position))
                 pattern[grid_position] += 1
@@ -689,7 +729,7 @@ class AdvancedFeatureExtractor:
             np.mean(pattern[::4]),  # Downbeats
             np.mean(pattern[2::4]),  # Backbeats
             np.mean(pattern[1::2]),  # All offbeats
-            np.mean(np.abs(np.diff(pattern)))  # Syncopation
+            np.mean(np.abs(np.diff(pattern))),  # Syncopation
         ]
 
 
@@ -725,9 +765,13 @@ class AudioEngine:
         self.cache_hits = 0
         self.cache_misses = 0
 
-        logger.info(f"🎵 SampleMind Audio Engine initialized with {max_workers} workers")
+        logger.info(
+            f"🎵 SampleMind Audio Engine initialized with {max_workers} workers"
+        )
 
-    def load_audio(self, file_path: str | Path, target_sr: int | None = None) -> tuple[np.ndarray, int]:
+    def load_audio(
+        self, file_path: str | Path, target_sr: int | None = None
+    ) -> tuple[np.ndarray, int]:
         """
         Load audio file with automatic format detection and conversion
 
@@ -773,7 +817,7 @@ class AudioEngine:
         self,
         file_path: str | Path,
         level: AnalysisLevel = AnalysisLevel.STANDARD,
-        use_cache: bool = True
+        use_cache: bool = True,
     ) -> AudioFeatures:
         """
         Comprehensive audio analysis
@@ -811,7 +855,7 @@ class AudioEngine:
                 channels=1,  # We convert to mono
                 file_hash=self._compute_file_hash(file_path),
                 file_size=file_path.stat().st_size,
-                analysis_level=level
+                analysis_level=level,
             )
 
             # Basic analysis (always performed)
@@ -820,29 +864,35 @@ class AudioEngine:
             spectral_features = self.feature_extractor.extract_spectral_features(y)
 
             # Update features
-            features.chroma_features = tonal_features['chroma_features']
-            features.key = tonal_features['key']
-            features.mode = tonal_features['mode']
-            features.pitch_class_distribution = tonal_features['pitch_class_distribution']
+            features.chroma_features = tonal_features["chroma_features"]
+            features.key = tonal_features["key"]
+            features.mode = tonal_features["mode"]
+            features.pitch_class_distribution = tonal_features[
+                "pitch_class_distribution"
+            ]
 
-            features.tempo = rhythmic_features['tempo']
-            features.beats = rhythmic_features['beats']
-            features.onset_times = rhythmic_features['onset_times']
-            features.rhythm_pattern = rhythmic_features['rhythm_pattern']
+            features.tempo = rhythmic_features["tempo"]
+            features.beats = rhythmic_features["beats"]
+            features.onset_times = rhythmic_features["onset_times"]
+            features.rhythm_pattern = rhythmic_features["rhythm_pattern"]
 
-            features.spectral_centroid = spectral_features['spectral_centroid']
-            features.spectral_bandwidth = spectral_features['spectral_bandwidth']
-            features.spectral_rolloff = spectral_features['spectral_rolloff']
-            features.zero_crossing_rate = spectral_features['zero_crossing_rate']
-            features.mfccs = spectral_features['mfccs']
-            features.rms_energy = spectral_features['rms_energy']
+            features.spectral_centroid = spectral_features["spectral_centroid"]
+            features.spectral_bandwidth = spectral_features["spectral_bandwidth"]
+            features.spectral_rolloff = spectral_features["spectral_rolloff"]
+            features.zero_crossing_rate = spectral_features["zero_crossing_rate"]
+            features.mfccs = spectral_features["mfccs"]
+            features.rms_energy = spectral_features["rms_energy"]
 
             # Neural Embedding (Semantic)
             if self.neural_extractor:
                 try:
-                    features.neural_embedding = self.neural_extractor.generate_embedding(file_path)
+                    features.neural_embedding = (
+                        self.neural_extractor.generate_embedding(file_path)
+                    )
                 except Exception as ne:
-                    logger.warning(f"Neural embedding generation failed for {file_path}: {ne}")
+                    logger.warning(
+                        f"Neural embedding generation failed for {file_path}: {ne}"
+                    )
 
             # Advanced analysis for higher levels
             if level in [AnalysisLevel.DETAILED, AnalysisLevel.PROFESSIONAL]:
@@ -854,9 +904,12 @@ class AudioEngine:
             if level == AnalysisLevel.PROFESSIONAL:
                 try:
                     from ..processing.forensics_analyzer import ForensicsAnalyzer
+
                     forensics = ForensicsAnalyzer(sample_rate=sr)
                     loop = asyncio.new_event_loop()
-                    forensics_result = loop.run_until_complete(forensics.analyze(file_path))
+                    forensics_result = loop.run_until_complete(
+                        forensics.analyze(file_path)
+                    )
                     loop.close()
                     features.forensics_result = forensics_result.to_dict()
                     logger.info(f"🔍 Forensics analysis complete for {file_path.name}")
@@ -865,12 +918,15 @@ class AudioEngine:
 
                 try:
                     from ..processing.advanced_features import AdvancedFeatureExtractor
+
                     extractor = AdvancedFeatureExtractor(sample_rate=sr)
                     loop = asyncio.new_event_loop()
                     adv_features = loop.run_until_complete(extractor.extract(y))
                     loop.close()
                     features.advanced_features = adv_features.to_dict()
-                    logger.info(f"🔬 Advanced feature extraction complete for {file_path.name}")
+                    logger.info(
+                        f"🔬 Advanced feature extraction complete for {file_path.name}"
+                    )
                 except Exception as ae:
                     logger.warning(f"Advanced feature extraction skipped: {ae}")
 
@@ -881,7 +937,9 @@ class AudioEngine:
             analysis_time = time.time() - start_time
             self.analysis_times.append(analysis_time)
 
-            logger.info(f"🎯 Analysis complete: {file_path.name} ({analysis_time:.2f}s, {level.value})")
+            logger.info(
+                f"🎯 Analysis complete: {file_path.name} ({analysis_time:.2f}s, {level.value})"
+            )
             return features
 
         except Exception as e:
@@ -889,25 +947,19 @@ class AudioEngine:
             raise
 
     async def analyze_audio_async(
-        self,
-        file_path: str | Path,
-        level: AnalysisLevel = AnalysisLevel.STANDARD
+        self, file_path: str | Path, level: AnalysisLevel = AnalysisLevel.STANDARD
     ) -> AudioFeatures:
         """Asynchronous audio analysis"""
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(
-            self.executor,
-            self.analyze_audio,
-            file_path,
-            level,
-            True
+            self.executor, self.analyze_audio, file_path, level, True
         )
 
     def batch_analyze(
         self,
         file_paths: list[str | Path],
         level: AnalysisLevel = AnalysisLevel.STANDARD,
-        parallel: bool = True
+        parallel: bool = True,
     ) -> list[AudioFeatures]:
         """
         Batch analyze multiple audio files
@@ -938,7 +990,9 @@ class AudioEngine:
                 except Exception as e:
                     logger.error(f"❌ Failed to analyze {file_paths[i]}: {e}")
                     # Create empty features for failed analysis
-                    empty_features = AudioFeatures(duration=0, sample_rate=44100, channels=0)
+                    empty_features = AudioFeatures(
+                        duration=0, sample_rate=44100, channels=0
+                    )
                     results.append(empty_features)
 
             return results
@@ -952,7 +1006,9 @@ class AudioEngine:
                     logger.info(f"📈 Progress: {i+1}/{len(file_paths)}")
                 except Exception as e:
                     logger.error(f"❌ Failed to analyze {file_path}: {e}")
-                    empty_features = AudioFeatures(duration=0, sample_rate=44100, channels=0)
+                    empty_features = AudioFeatures(
+                        duration=0, sample_rate=44100, channels=0
+                    )
                     results.append(empty_features)
 
             return results
@@ -961,7 +1017,7 @@ class AudioEngine:
         self,
         features1: AudioFeatures,
         features2: AudioFeatures,
-        weights: dict[str, float] | None = None
+        weights: dict[str, float] | None = None,
     ) -> float:
         """
         Compare similarity between two audio files based on their features
@@ -976,11 +1032,11 @@ class AudioEngine:
         """
         if weights is None:
             weights = {
-                'tempo': 0.2,
-                'key': 0.15,
-                'chroma': 0.25,
-                'mfcc': 0.25,
-                'spectral': 0.15
+                "tempo": 0.2,
+                "key": 0.15,
+                "chroma": 0.25,
+                "mfcc": 0.25,
+                "spectral": 0.15,
             }
 
         similarities = []
@@ -988,33 +1044,36 @@ class AudioEngine:
         # Tempo similarity
         tempo_diff = abs(features1.tempo - features2.tempo)
         tempo_sim = max(0, 1 - tempo_diff / 50.0)  # Normalize by reasonable tempo range
-        similarities.append(('tempo', tempo_sim))
+        similarities.append(("tempo", tempo_sim))
 
         # Key similarity (simple approach)
         key_sim = 1.0 if features1.key == features2.key else 0.5
-        similarities.append(('key', key_sim))
+        similarities.append(("key", key_sim))
 
         # Chroma similarity
         if features1.chroma_features.size > 0 and features2.chroma_features.size > 0:
             chroma1_mean = np.mean(features1.chroma_features, axis=1)
             chroma2_mean = np.mean(features2.chroma_features, axis=1)
             chroma_sim = 1 - cosine(chroma1_mean, chroma2_mean)
-            similarities.append(('chroma', max(0, chroma_sim)))
+            similarities.append(("chroma", max(0, chroma_sim)))
 
         # MFCC similarity
         if features1.mfccs.size > 0 and features2.mfccs.size > 0:
             mfcc1_mean = np.mean(features1.mfccs, axis=1)
             mfcc2_mean = np.mean(features2.mfccs, axis=1)
             mfcc_sim = 1 - cosine(mfcc1_mean, mfcc2_mean)
-            similarities.append(('mfcc', max(0, mfcc_sim)))
+            similarities.append(("mfcc", max(0, mfcc_sim)))
 
         # Spectral similarity
-        if (len(features1.spectral_centroid) > 0 and len(features2.spectral_centroid) > 0):
+        if (
+            len(features1.spectral_centroid) > 0
+            and len(features2.spectral_centroid) > 0
+        ):
             spec1 = np.mean(features1.spectral_centroid)
             spec2 = np.mean(features2.spectral_centroid)
             spec_diff = abs(spec1 - spec2)
             spec_sim = max(0, 1 - spec_diff / 5000.0)  # Normalize by frequency range
-            similarities.append(('spectral', spec_sim))
+            similarities.append(("spectral", spec_sim))
 
         # Weighted average
         total_weight = 0
@@ -1031,22 +1090,26 @@ class AudioEngine:
     def get_performance_stats(self) -> dict[str, Any]:
         """Get performance statistics"""
         avg_analysis_time = np.mean(self.analysis_times) if self.analysis_times else 0
-        cache_hit_rate = self.cache_hits / (self.cache_hits + self.cache_misses) if (self.cache_hits + self.cache_misses) > 0 else 0
+        cache_hit_rate = (
+            self.cache_hits / (self.cache_hits + self.cache_misses)
+            if (self.cache_hits + self.cache_misses) > 0
+            else 0
+        )
 
         return {
-            'total_analyses': len(self.analysis_times),
-            'avg_analysis_time': avg_analysis_time,
-            'cache_hit_rate': cache_hit_rate,
-            'cache_size': len(self.feature_cache),
-            'cache_hits': self.cache_hits,
-            'cache_misses': self.cache_misses
+            "total_analyses": len(self.analysis_times),
+            "avg_analysis_time": avg_analysis_time,
+            "cache_hit_rate": cache_hit_rate,
+            "cache_size": len(self.feature_cache),
+            "cache_hits": self.cache_hits,
+            "cache_misses": self.cache_misses,
         }
 
     def export_features(self, features: AudioFeatures, output_path: str | Path) -> None:
         """Export features to JSON file"""
         output_path = Path(output_path)
 
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             json.dump(features.to_dict(), f, indent=2)
 
         logger.info(f"💾 Features exported to {output_path}")
@@ -1106,12 +1169,12 @@ class FLStudioIntegration:
     def generate_fl_preset(features: AudioFeatures) -> dict[str, Any]:
         """Generate FL Studio preset based on audio features"""
         preset = {
-            'name': f"SampleMind_{features.key}_{int(features.tempo)}BPM",
-            'tempo': features.tempo,
-            'key': features.key,
-            'mode': features.mode,
-            'suggested_effects': FLStudioIntegration._suggest_effects(features),
-            'mixer_settings': FLStudioIntegration._suggest_mixer_settings(features)
+            "name": f"SampleMind_{features.key}_{int(features.tempo)}BPM",
+            "tempo": features.tempo,
+            "key": features.key,
+            "mode": features.mode,
+            "suggested_effects": FLStudioIntegration._suggest_effects(features),
+            "mixer_settings": FLStudioIntegration._suggest_mixer_settings(features),
         }
         return preset
 
@@ -1146,17 +1209,17 @@ class FLStudioIntegration:
     def _suggest_mixer_settings(features: AudioFeatures) -> dict[str, Any]:
         """Suggest mixer settings based on audio analysis"""
         settings = {
-            'eq': {
-                'low_cut': 80 if features.key in ['C', 'D', 'E'] else 60,
-                'low_boost': 2 if 'bass' in features.key.lower() else 0,
-                'mid_boost': 1 if features.mode == 'major' else -1,
-                'high_boost': 3 if np.mean(features.spectral_centroid) > 4000 else 1
+            "eq": {
+                "low_cut": 80 if features.key in ["C", "D", "E"] else 60,
+                "low_boost": 2 if "bass" in features.key.lower() else 0,
+                "mid_boost": 1 if features.mode == "major" else -1,
+                "high_boost": 3 if np.mean(features.spectral_centroid) > 4000 else 1,
             },
-            'compression': {
-                'ratio': 3.0 if np.std(features.rms_energy) > 0.15 else 2.0,
-                'attack': 'fast' if features.tempo > 120 else 'medium',
-                'release': 'auto'
-            }
+            "compression": {
+                "ratio": 3.0 if np.std(features.rms_energy) > 0.15 else 2.0,
+                "attack": "fast" if features.tempo > 120 else "medium",
+                "release": "auto",
+            },
         }
         return settings
 

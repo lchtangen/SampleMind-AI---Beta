@@ -312,7 +312,9 @@ class DatabaseLogger:
     @staticmethod
     def query_start(operation: str, **kwargs) -> None:
         """Log start of database query."""
-        logger.debug(f"Database query started", extra={"operation": operation, **kwargs})
+        logger.debug(
+            f"Database query started", extra={"operation": operation, **kwargs}
+        )
 
     @staticmethod
     def query_complete(operation: str, duration_ms: float, rows: int = 0) -> None:

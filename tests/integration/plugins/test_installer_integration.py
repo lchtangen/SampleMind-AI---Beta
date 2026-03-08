@@ -50,7 +50,11 @@ class TestPluginInstallerIntegration:
         # DAW install directories
         daw_dirs = {
             "fl_studio": tmp_path / "daw_fl" / "Plugins" / "Fruity" / "Generators",
-            "ableton": tmp_path / "daw_ableton" / "Presets" / "Instruments" / "Max Instrument",
+            "ableton": tmp_path
+            / "daw_ableton"
+            / "Presets"
+            / "Instruments"
+            / "Max Instrument",
         }
 
         for daw_type, daw_path in daw_dirs.items():
@@ -234,7 +238,9 @@ class TestPluginInstallerIntegration:
 
         # Install Ableton
         with patch.object(installer, "get_ableton_plugin_paths") as mock_paths:
-            with patch.object(installer.detector, "is_daw_installed", return_value=True):
+            with patch.object(
+                installer.detector, "is_daw_installed", return_value=True
+            ):
                 mock_paths.return_value = {Platform.LINUX: ableton_dest}
                 installer.install_ableton_plugin()
 

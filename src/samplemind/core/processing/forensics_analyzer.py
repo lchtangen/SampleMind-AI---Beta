@@ -22,22 +22,27 @@ fft = None
 
 logger = logging.getLogger(__name__)
 
+
 def _ensure_deps():
     global librosa, signal, fft
     if librosa is None:
         import librosa as _librosa
+
         librosa = _librosa
     if signal is None:
         from scipy import signal as _signal
+
         signal = _signal
     if fft is None:
         from scipy.fft import fft as _fft
+
         fft = _fft
 
 
 @dataclass
 class CompressionAnalysis:
     """Compression detection result"""
+
     probability: float  # 0.0-1.0, likelihood of compression
     indicators: list[str]  # Types of indicators found
     estimated_ratio: str  # Estimated compression ratio
@@ -47,6 +52,7 @@ class CompressionAnalysis:
 @dataclass
 class DistortionAnalysis:
     """Distortion detection result"""
+
     probability: float  # 0.0-1.0
     distortion_type: str  # "clipping", "overdrive", "saturation", "none"
     affected_frequencies: list[tuple[float, float]]  # Hz ranges
@@ -56,6 +62,7 @@ class DistortionAnalysis:
 @dataclass
 class EditPoint:
     """Detected edit point"""
+
     time_ms: float
     confidence: float  # 0.0-1.0
     edit_type: str  # "cut", "splice", "time_stretch"
@@ -65,6 +72,7 @@ class EditPoint:
 @dataclass
 class ForensicsResult:
     """Complete forensics analysis"""
+
     file_path: str
     duration_seconds: float
     sample_rate: int
@@ -195,7 +203,9 @@ class ForensicsAnalyzer:
         # Analyze loudness consistency (compressed audio is more consistent)
         frame_lengths = 2048
         hop_length = 512
-        frames = librosa.util.frame(y, frame_length=frame_lengths, hop_length=hop_length)
+        frames = librosa.util.frame(
+            y, frame_length=frame_lengths, hop_length=hop_length
+        )
         frame_rms = np.sqrt(np.mean(frames**2, axis=0))
         rms_variance = np.var(frame_rms)
 
@@ -244,8 +254,8 @@ class ForensicsAnalyzer:
             freqs = librosa.fft_frequencies(sr=self.sample_rate)
 
             # Clipping affects high frequencies more
-            high_freq_energy = np.mean(spec[len(spec)//2:])
-            low_freq_energy = np.mean(spec[:len(spec)//2])
+            high_freq_energy = np.mean(spec[len(spec) // 2 :])
+            low_freq_energy = np.mean(spec[: len(spec) // 2])
 
             if high_freq_energy > low_freq_energy * 1.5:
                 affected_frequencies.append((5000, 22050))
@@ -416,9 +426,13 @@ class ForensicsAnalyzer:
                 "Overall quality is poor - strongly recommend re-recording from original source"
             )
         elif quality_score < 70:
-            recommendations.append("Quality is acceptable but could be improved with re-recording")
+            recommendations.append(
+                "Quality is acceptable but could be improved with re-recording"
+            )
         elif quality_score > 90:
-            recommendations.append("Audio quality is excellent - suitable for professional use")
+            recommendations.append(
+                "Audio quality is excellent - suitable for professional use"
+            )
 
         return recommendations
 

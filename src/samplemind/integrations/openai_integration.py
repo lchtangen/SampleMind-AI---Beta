@@ -29,16 +29,18 @@ logger = logging.getLogger(__name__)
 
 class OpenAIModel(Enum):
     """Available OpenAI models for music production — v3.0"""
-    GPT_4O = "gpt-4o"                                   # PRIMARY
-    GPT_4O_MINI = "gpt-4o-mini"                         # fast/cheap secondary
-    GPT_4_TURBO = "gpt-4-turbo"                         # high context
-    GPT_4 = "gpt-4"                                     # legacy fallback
-    GPT_4O_AUDIO_PREVIEW = "gpt-4o-audio-preview"       # audio file submission
-    GPT_4O_REALTIME_PREVIEW = "gpt-4o-realtime-preview" # real-time audio
+
+    GPT_4O = "gpt-4o"  # PRIMARY
+    GPT_4O_MINI = "gpt-4o-mini"  # fast/cheap secondary
+    GPT_4_TURBO = "gpt-4-turbo"  # high context
+    GPT_4 = "gpt-4"  # legacy fallback
+    GPT_4O_AUDIO_PREVIEW = "gpt-4o-audio-preview"  # audio file submission
+    GPT_4O_REALTIME_PREVIEW = "gpt-4o-realtime-preview"  # real-time audio
 
 
 class MusicAnalysisType(Enum):
     """Types of music analysis available"""
+
     QUICK_ANALYSIS = "quick_analysis"
     COMPREHENSIVE_ANALYSIS = "comprehensive_analysis"
     PRODUCTION_COACHING = "production_coaching"
@@ -54,6 +56,7 @@ class MusicAnalysisType(Enum):
 @dataclass
 class OpenAIMusicAnalysis:
     """Comprehensive music analysis result from OpenAI"""
+
     analysis_type: MusicAnalysisType
     model_used: str
     timestamp: float = field(default_factory=time.time)
@@ -98,11 +101,13 @@ class AdvancedMusicPromptEngine:
         self,
         audio_features: Dict[str, Any],
         analysis_type: MusicAnalysisType,
-        user_context: Optional[Dict[str, Any]] = None
+        user_context: Optional[Dict[str, Any]] = None,
     ) -> str:
         """Create sophisticated prompt for music analysis"""
 
-        base_prompt = self.base_prompts.get(analysis_type, self.base_prompts[MusicAnalysisType.COMPREHENSIVE_ANALYSIS])
+        base_prompt = self.base_prompts.get(
+            analysis_type, self.base_prompts[MusicAnalysisType.COMPREHENSIVE_ANALYSIS]
+        )
 
         # Build feature description
         feature_description = self._format_audio_features(audio_features)
@@ -155,36 +160,31 @@ Please provide a comprehensive response in JSON format with the following struct
 You are an expert music producer and audio engineer. Provide a quick but insightful analysis of this audio track.
 Focus on the most important elements: tempo, key, energy, and immediate production opportunities.
             """,
-
             MusicAnalysisType.COMPREHENSIVE_ANALYSIS: """
 You are a world-class music producer, audio engineer, and creative consultant with 20+ years of experience.
 Analyze this audio track comprehensively, considering all musical, technical, and creative aspects.
 Provide detailed insights that would help both beginners and professionals improve their production.
             """,
-
             MusicAnalysisType.PRODUCTION_COACHING: """
 You are a personal music production coach and mentor. Your goal is to help the user improve their production skills.
 Analyze this track and provide specific, actionable advice for enhancing the production quality.
 Focus on practical tips they can implement immediately in their DAW.
             """,
-
             MusicAnalysisType.FL_STUDIO_OPTIMIZATION: """
 You are an FL Studio expert and certified trainer. Analyze this track specifically for FL Studio optimization.
 Provide detailed recommendations for plugins, routing, effects chains, and workflow improvements.
 Include specific FL Studio plugin names and parameter suggestions.
             """,
-
             MusicAnalysisType.CREATIVE_SUGGESTIONS: """
 You are a creative music consultant and innovation expert. Your role is to inspire and guide creative decisions.
 Analyze this track and provide innovative ideas for enhancement, arrangement, and creative development.
 Think outside the box while maintaining musical coherence.
             """,
-
             MusicAnalysisType.MIXING_MASTERING: """
 You are a professional mixing and mastering engineer. Analyze this track for technical excellence.
 Provide specific recommendations for EQ, compression, spatial processing, and mastering considerations.
 Focus on achieving professional sound quality and competitive loudness.
-            """
+            """,
         }
 
     def _load_context_enhancers(self) -> Dict[str, str]:
@@ -195,7 +195,7 @@ Focus on achieving professional sound quality and competitive loudness.
             "expert": "Use professional terminology and advanced techniques.",
             "live_performance": "Focus on live performance considerations.",
             "studio_recording": "Emphasize studio recording techniques.",
-            "home_studio": "Consider home studio limitations and solutions."
+            "home_studio": "Consider home studio limitations and solutions.",
         }
 
     def _format_audio_features(self, features: Dict[str, Any]) -> str:
@@ -203,31 +203,33 @@ Focus on achieving professional sound quality and competitive loudness.
         formatted = []
 
         # Basic properties
-        if 'duration' in features:
+        if "duration" in features:
             formatted.append(f"Duration: {features['duration']:.2f} seconds")
-        if 'sample_rate' in features:
+        if "sample_rate" in features:
             formatted.append(f"Sample Rate: {features['sample_rate']} Hz")
 
         # Musical features
-        if 'tempo' in features:
+        if "tempo" in features:
             formatted.append(f"Tempo: {features['tempo']:.1f} BPM")
-        if 'key' in features:
+        if "key" in features:
             formatted.append(f"Key: {features['key']}")
-        if 'mode' in features:
+        if "mode" in features:
             formatted.append(f"Mode: {features['mode']}")
 
         # Spectral features
-        if 'spectral_centroid' in features and features['spectral_centroid']:
-            avg_centroid = np.mean(features['spectral_centroid'])
+        if "spectral_centroid" in features and features["spectral_centroid"]:
+            avg_centroid = np.mean(features["spectral_centroid"])
             formatted.append(f"Spectral Centroid: {avg_centroid:.1f} Hz")
 
-        if 'rms_energy' in features and features['rms_energy']:
-            avg_rms = np.mean(features['rms_energy'])
+        if "rms_energy" in features and features["rms_energy"]:
+            avg_rms = np.mean(features["rms_energy"])
             formatted.append(f"Average RMS Energy: {avg_rms:.3f}")
 
         # Harmonic content
-        if 'pitch_class_distribution' in features:
-            formatted.append(f"Pitch Class Distribution: {features['pitch_class_distribution']}")
+        if "pitch_class_distribution" in features:
+            formatted.append(
+                f"Pitch Class Distribution: {features['pitch_class_distribution']}"
+            )
 
         return "\n".join(formatted)
 
@@ -235,13 +237,13 @@ Focus on achieving professional sound quality and competitive loudness.
         """Format user context for prompt inclusion"""
         formatted = ["USER CONTEXT:"]
 
-        if 'skill_level' in context:
+        if "skill_level" in context:
             formatted.append(f"Skill Level: {context['skill_level']}")
-        if 'genre_preference' in context:
+        if "genre_preference" in context:
             formatted.append(f"Genre Focus: {context['genre_preference']}")
-        if 'production_goal' in context:
+        if "production_goal" in context:
             formatted.append(f"Production Goal: {context['production_goal']}")
-        if 'equipment' in context:
+        if "equipment" in context:
             formatted.append(f"Equipment: {context['equipment']}")
 
         return "\n".join(formatted)
@@ -260,7 +262,7 @@ class OpenAIMusicProducer:
         api_key: str,
         default_model: OpenAIModel = OpenAIModel.GPT_4O,
         max_retries: int = 3,
-        timeout: float = 30.0
+        timeout: float = 30.0,
     ):
         self.api_key = api_key
         self.default_model = default_model
@@ -277,10 +279,10 @@ class OpenAIMusicProducer:
         # Caching and optimization
         self.analysis_cache = {}
         self.usage_stats = {
-            'total_requests': 0,
-            'total_tokens': 0,
-            'avg_response_time': 0.0,
-            'cache_hits': 0
+            "total_requests": 0,
+            "total_tokens": 0,
+            "avg_response_time": 0.0,
+            "cache_hits": 0,
         }
 
         logger.info(f"🎵 OpenAI Music Producer initialized with {default_model.value}")
@@ -291,7 +293,7 @@ class OpenAIMusicProducer:
         analysis_type: MusicAnalysisType = MusicAnalysisType.COMPREHENSIVE_ANALYSIS,
         model: Optional[OpenAIModel] = None,
         user_context: Optional[Dict[str, Any]] = None,
-        use_cache: bool = True
+        use_cache: bool = True,
     ) -> OpenAIMusicAnalysis:
         """
         Perform comprehensive music analysis using OpenAI
@@ -314,7 +316,7 @@ class OpenAIMusicProducer:
 
         # Check cache
         if use_cache and cache_key in self.analysis_cache:
-            self.usage_stats['cache_hits'] += 1
+            self.usage_stats["cache_hits"] += 1
             logger.info("📦 Using cached analysis result")
             return self.analysis_cache[cache_key]
 
@@ -330,17 +332,19 @@ class OpenAIMusicProducer:
                 "messages": [
                     {
                         "role": "system",
-                        "content": "You are an expert music producer, audio engineer, and creative consultant."
+                        "content": "You are an expert music producer, audio engineer, and creative consultant.",
                     },
-                    {"role": "user", "content": prompt}
+                    {"role": "user", "content": prompt},
                 ],
                 "temperature": 0.7,
-                "response_format": {"type": "json_object"}
+                "response_format": {"type": "json_object"},
             }
 
             completion_kwargs["max_tokens"] = 4000
 
-            response = await self.async_client.chat.completions.create(**completion_kwargs)
+            response = await self.async_client.chat.completions.create(
+                **completion_kwargs
+            )
 
             # Parse response
             content = response.choices[0].message.content
@@ -350,22 +354,36 @@ class OpenAIMusicProducer:
             analysis = OpenAIMusicAnalysis(
                 analysis_type=analysis_type,
                 model_used=model.value,
-                summary=analysis_data.get('summary', ''),
-                detailed_analysis=analysis_data.get('detailed_analysis', {}),
-                production_tips=analysis_data.get('production_tips', []),
-                fl_studio_recommendations=analysis_data.get('fl_studio_recommendations', []),
-                effect_suggestions=analysis_data.get('effect_suggestions', []),
-                creative_ideas=analysis_data.get('creative_ideas', []),
-                arrangement_suggestions=analysis_data.get('arrangement_suggestions', []),
-                harmonic_analysis=analysis_data.get('detailed_analysis', {}).get('harmonic_content', {}),
-                rhythmic_analysis=analysis_data.get('detailed_analysis', {}).get('tempo_analysis', {}),
-                spectral_analysis=analysis_data.get('detailed_analysis', {}).get('spectral_characteristics', {}),
-                creativity_score=analysis_data.get('scores', {}).get('creativity', 0.0),
-                production_quality_score=analysis_data.get('scores', {}).get('production_quality', 0.0),
-                commercial_potential_score=analysis_data.get('scores', {}).get('commercial_potential', 0.0),
+                summary=analysis_data.get("summary", ""),
+                detailed_analysis=analysis_data.get("detailed_analysis", {}),
+                production_tips=analysis_data.get("production_tips", []),
+                fl_studio_recommendations=analysis_data.get(
+                    "fl_studio_recommendations", []
+                ),
+                effect_suggestions=analysis_data.get("effect_suggestions", []),
+                creative_ideas=analysis_data.get("creative_ideas", []),
+                arrangement_suggestions=analysis_data.get(
+                    "arrangement_suggestions", []
+                ),
+                harmonic_analysis=analysis_data.get("detailed_analysis", {}).get(
+                    "harmonic_content", {}
+                ),
+                rhythmic_analysis=analysis_data.get("detailed_analysis", {}).get(
+                    "tempo_analysis", {}
+                ),
+                spectral_analysis=analysis_data.get("detailed_analysis", {}).get(
+                    "spectral_characteristics", {}
+                ),
+                creativity_score=analysis_data.get("scores", {}).get("creativity", 0.0),
+                production_quality_score=analysis_data.get("scores", {}).get(
+                    "production_quality", 0.0
+                ),
+                commercial_potential_score=analysis_data.get("scores", {}).get(
+                    "commercial_potential", 0.0
+                ),
                 tokens_used=response.usage.total_tokens,
                 processing_time=time.time() - start_time,
-                confidence_score=analysis_data.get('confidence', 0.0)
+                confidence_score=analysis_data.get("confidence", 0.0),
             )
 
             # Cache result
@@ -373,9 +391,13 @@ class OpenAIMusicProducer:
                 self.analysis_cache[cache_key] = analysis
 
             # Update usage stats
-            self._update_usage_stats(response.usage.total_tokens, time.time() - start_time)
+            self._update_usage_stats(
+                response.usage.total_tokens, time.time() - start_time
+            )
 
-            logger.info(f"🎯 OpenAI analysis complete ({analysis.processing_time:.2f}s, {analysis.tokens_used} tokens)")
+            logger.info(
+                f"🎯 OpenAI analysis complete ({analysis.processing_time:.2f}s, {analysis.tokens_used} tokens)"
+            )
             return analysis
 
         except Exception as e:
@@ -387,55 +409,55 @@ class OpenAIMusicProducer:
         audio_features: Dict[str, Any],
         analysis_type: MusicAnalysisType = MusicAnalysisType.COMPREHENSIVE_ANALYSIS,
         model: Optional[OpenAIModel] = None,
-        user_context: Optional[Dict[str, Any]] = None
+        user_context: Optional[Dict[str, Any]] = None,
     ) -> OpenAIMusicAnalysis:
         """Synchronous version of music analysis"""
-        return asyncio.run(self.analyze_music_comprehensive(
-            audio_features, analysis_type, model, user_context
-        ))
+        return asyncio.run(
+            self.analyze_music_comprehensive(
+                audio_features, analysis_type, model, user_context
+            )
+        )
 
     async def get_production_coaching(
         self,
         audio_features: Dict[str, Any],
         current_issues: List[str],
-        skill_level: str = "intermediate"
+        skill_level: str = "intermediate",
     ) -> OpenAIMusicAnalysis:
         """Get personalized production coaching"""
         user_context = {
-            'skill_level': skill_level,
-            'current_issues': current_issues,
-            'production_goal': 'Improve production skills'
+            "skill_level": skill_level,
+            "current_issues": current_issues,
+            "production_goal": "Improve production skills",
         }
 
         return await self.analyze_music_comprehensive(
             audio_features,
             MusicAnalysisType.PRODUCTION_COACHING,
-            user_context=user_context
+            user_context=user_context,
         )
 
     async def get_fl_studio_optimization(
-        self,
-        audio_features: Dict[str, Any],
-        current_plugins: List[str] = None
+        self, audio_features: Dict[str, Any], current_plugins: List[str] = None
     ) -> OpenAIMusicAnalysis:
         """Get FL Studio specific optimization advice"""
         user_context = {
-            'daw': 'FL Studio',
-            'current_plugins': current_plugins or [],
-            'production_goal': 'Optimize FL Studio workflow'
+            "daw": "FL Studio",
+            "current_plugins": current_plugins or [],
+            "production_goal": "Optimize FL Studio workflow",
         }
 
         return await self.analyze_music_comprehensive(
             audio_features,
             MusicAnalysisType.FL_STUDIO_OPTIMIZATION,
-            user_context=user_context
+            user_context=user_context,
         )
 
     async def batch_analyze(
         self,
         audio_features_list: List[Dict[str, Any]],
         analysis_type: MusicAnalysisType = MusicAnalysisType.COMPREHENSIVE_ANALYSIS,
-        max_concurrent: int = 5
+        max_concurrent: int = 5,
     ) -> List[OpenAIMusicAnalysis]:
         """Batch analyze multiple tracks with concurrency control"""
         semaphore = asyncio.Semaphore(max_concurrent)
@@ -453,7 +475,9 @@ class OpenAIMusicProducer:
             if isinstance(result, Exception):
                 logger.error(f"❌ Batch analysis failed for item {i}: {result}")
                 # Create empty analysis for failed items
-                empty_analysis = OpenAIMusicAnalysis(analysis_type=analysis_type, model_used=self.default_model.value)
+                empty_analysis = OpenAIMusicAnalysis(
+                    analysis_type=analysis_type, model_used=self.default_model.value
+                )
                 processed_results.append(empty_analysis)
             else:
                 processed_results.append(result)
@@ -531,8 +555,9 @@ class OpenAIMusicProducer:
         """Get usage statistics and performance metrics"""
         return {
             **self.usage_stats,
-            'cache_size': len(self.analysis_cache),
-            'cache_hit_rate': self.usage_stats['cache_hits'] / max(1, self.usage_stats['total_requests'])
+            "cache_size": len(self.analysis_cache),
+            "cache_hit_rate": self.usage_stats["cache_hits"]
+            / max(1, self.usage_stats["total_requests"]),
         }
 
     def clear_cache(self) -> None:
@@ -544,16 +569,16 @@ class OpenAIMusicProducer:
         self,
         audio_features: Dict[str, Any],
         analysis_type: MusicAnalysisType,
-        model: OpenAIModel
+        model: OpenAIModel,
     ) -> str:
         """Generate cache key for analysis request"""
         # Create a hash from features and parameters
         key_data = {
-            'tempo': audio_features.get('tempo', 0),
-            'key': audio_features.get('key', ''),
-            'duration': audio_features.get('duration', 0),
-            'analysis_type': analysis_type.value,
-            'model': model.value
+            "tempo": audio_features.get("tempo", 0),
+            "key": audio_features.get("key", ""),
+            "duration": audio_features.get("duration", 0),
+            "analysis_type": analysis_type.value,
+            "model": model.value,
         }
 
         key_string = json.dumps(key_data, sort_keys=True)
@@ -561,13 +586,15 @@ class OpenAIMusicProducer:
 
     def _update_usage_stats(self, tokens_used: int, response_time: float) -> None:
         """Update usage statistics"""
-        self.usage_stats['total_requests'] += 1
-        self.usage_stats['total_tokens'] += tokens_used
+        self.usage_stats["total_requests"] += 1
+        self.usage_stats["total_tokens"] += tokens_used
 
         # Update running average response time
-        prev_avg = self.usage_stats['avg_response_time']
-        prev_count = self.usage_stats['total_requests'] - 1
-        self.usage_stats['avg_response_time'] = (prev_avg * prev_count + response_time) / self.usage_stats['total_requests']
+        prev_avg = self.usage_stats["avg_response_time"]
+        prev_count = self.usage_stats["total_requests"] - 1
+        self.usage_stats["avg_response_time"] = (
+            prev_avg * prev_count + response_time
+        ) / self.usage_stats["total_requests"]
 
     async def close(self):
         """Clean up resources"""
@@ -582,7 +609,7 @@ def create_openai_producer_from_env() -> OpenAIMusicProducer:
     from dotenv import load_dotenv
 
     load_dotenv()
-    api_key = os.getenv('OPENAI_API_KEY')
+    api_key = os.getenv("OPENAI_API_KEY")
 
     if not api_key:
         raise ValueError("OPENAI_API_KEY not found in environment variables")
@@ -592,17 +619,18 @@ def create_openai_producer_from_env() -> OpenAIMusicProducer:
 
 # Example usage
 if __name__ == "__main__":
+
     async def example_usage():
         # Example audio features (would come from audio_engine.py)
         sample_features = {
-            'tempo': 128.0,
-            'key': 'C',
-            'mode': 'major',
-            'duration': 180.0,
-            'sample_rate': 44100,
-            'spectral_centroid': [2500.0] * 100,
-            'rms_energy': [0.5] * 100,
-            'pitch_class_distribution': [0.1] * 12
+            "tempo": 128.0,
+            "key": "C",
+            "mode": "major",
+            "duration": 180.0,
+            "sample_rate": 44100,
+            "spectral_centroid": [2500.0] * 100,
+            "rms_energy": [0.5] * 100,
+            "pitch_class_distribution": [0.1] * 12,
         }
 
         try:

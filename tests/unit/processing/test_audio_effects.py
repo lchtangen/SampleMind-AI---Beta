@@ -22,7 +22,7 @@ class TestAudioEffectsProcessor:
     def audio_chunk(self):
         # 1 second of silence/noise
         np.random.seed(42)
-        return np.random.rand(44100).astype(np.float32) * 0.1 # normalize somewhat
+        return np.random.rand(44100).astype(np.float32) * 0.1  # normalize somewhat
 
     @pytest.fixture
     def stereo_chunk(self):
@@ -49,14 +49,14 @@ class TestAudioEffectsProcessor:
         # Test compression
         # Create a signal with peaks
         signal = np.zeros(44100)
-        signal[1000:2000] = 10.0 # High peak
+        signal[1000:2000] = 10.0  # High peak
 
         compressed = processor.apply_compression(
             signal,
             ratio=10.0,
-            threshold_db=-20.0, # -20dB is 0.1
+            threshold_db=-20.0,  # -20dB is 0.1
             attack_ms=0.1,
-            release_ms=0.1
+            release_ms=0.1,
         )
 
         # Peak should be reduced. 10.0 is +20dB relative to 1.0 (0dB = 1.0 usually in audio DSP, or whatever reference)

@@ -14,6 +14,7 @@ def temp_library(tmp_path):
         (tmp_path / f).touch()
     return tmp_path
 
+
 @pytest.mark.asyncio
 async def test_organize_file_dry_run(temp_library):
     organizer = OrganizationEngine(dry_run=True)
@@ -21,16 +22,14 @@ async def test_organize_file_dry_run(temp_library):
     metadata = {"genre": "Techno", "bpm": 130, "key": "Cm"}
 
     result = await organizer.organize_file(
-        file_path,
-        metadata,
-        pattern="{genre}/{bpm}/{filename}",
-        root_dir=temp_library
+        file_path, metadata, pattern="{genre}/{bpm}/{filename}", root_dir=temp_library
     )
 
     assert result.success
     assert result.destination == temp_library / "Techno/130/beat.wav"
-    assert file_path.exists() # Should still exist in source
-    assert not result.destination.exists() # Should NOT exist in dest (dry run)
+    assert file_path.exists()  # Should still exist in source
+    assert not result.destination.exists()  # Should NOT exist in dest (dry run)
+
 
 @pytest.mark.asyncio
 async def test_organize_file_move(temp_library):
@@ -39,16 +38,14 @@ async def test_organize_file_move(temp_library):
     metadata = {"genre": "Ambient", "bpm": 90}
 
     result = await organizer.organize_file(
-        file_path,
-        metadata,
-        pattern="{genre}/{bpm}/{filename}",
-        root_dir=temp_library
+        file_path, metadata, pattern="{genre}/{bpm}/{filename}", root_dir=temp_library
     )
 
     assert result.success
     assert result.destination == temp_library / "Ambient/90/synths.mp3"
-    assert not file_path.exists() # Should move
+    assert not file_path.exists()  # Should move
     assert result.destination.exists()
+
 
 @pytest.mark.asyncio
 async def test_collision_handling(temp_library):
@@ -57,16 +54,13 @@ async def test_collision_handling(temp_library):
     # Create a file that will collide
     dest_dir = temp_library / "Techno"
     dest_dir.mkdir()
-    (dest_dir / "beat.wav").touch() # Existing file
+    (dest_dir / "beat.wav").touch()  # Existing file
 
     file_path = temp_library / "beat.wav"
     metadata = {"genre": "Techno"}
 
     result = await organizer.organize_file(
-        file_path,
-        metadata,
-        pattern="{genre}/{filename}",
-        root_dir=temp_library
+        file_path, metadata, pattern="{genre}/{filename}", root_dir=temp_library
     )
 
     assert result.success

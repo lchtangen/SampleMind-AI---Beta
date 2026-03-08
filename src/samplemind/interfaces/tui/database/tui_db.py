@@ -57,9 +57,21 @@ class TUIDatabase:
             file_id = f"{file_path}_{analysis_level}"
 
             # Extract features (assuming AudioFeatures object or dict)
-            tempo = features.get("tempo", 0.0) if isinstance(features, dict) else features.tempo
-            key = features.get("key", "Unknown") if isinstance(features, dict) else features.key
-            mode = features.get("mode", "Unknown") if isinstance(features, dict) else features.mode
+            tempo = (
+                features.get("tempo", 0.0)
+                if isinstance(features, dict)
+                else features.tempo
+            )
+            key = (
+                features.get("key", "Unknown")
+                if isinstance(features, dict)
+                else features.key
+            )
+            mode = (
+                features.get("mode", "Unknown")
+                if isinstance(features, dict)
+                else features.mode
+            )
             time_signature = (
                 features.get("time_signature", [4, 4])
                 if isinstance(features, dict)
@@ -87,9 +99,7 @@ class TUIDatabase:
                 spectral_features=spectral_features,
             )
 
-            logger.info(
-                f"✅ Saved analysis result: {file_path} (ID: {analysis_id})"
-            )
+            logger.info(f"✅ Saved analysis result: {file_path} (ID: {analysis_id})")
             return analysis_id
 
         except Exception as e:
@@ -242,9 +252,7 @@ class TUIDatabase:
     async def update_theme(self, theme: str) -> bool:
         """Update theme preference"""
         try:
-            self._settings = await SettingsRepository.update_theme(
-                self.user_id, theme
-            )
+            self._settings = await SettingsRepository.update_theme(self.user_id, theme)
             logger.info(f"✅ Updated theme: {theme}")
             return True
         except Exception as e:
@@ -274,9 +282,7 @@ class TUIDatabase:
     async def reset_settings_to_defaults(self) -> bool:
         """Reset all settings to defaults"""
         try:
-            self._settings = await SettingsRepository.reset_to_defaults(
-                self.user_id
-            )
+            self._settings = await SettingsRepository.reset_to_defaults(self.user_id)
             logger.info("✅ Reset settings to defaults")
             return True
         except Exception as e:
@@ -338,9 +344,9 @@ class TUIDatabase:
             key_counts = {}
             for key in keys:
                 key_counts[key] = key_counts.get(key, 0) + 1
-            common_keys = sorted(
-                key_counts.items(), key=lambda x: x[1], reverse=True
-            )[:5]
+            common_keys = sorted(key_counts.items(), key=lambda x: x[1], reverse=True)[
+                :5
+            ]
 
             return {
                 "total_analyses": len(analyses),

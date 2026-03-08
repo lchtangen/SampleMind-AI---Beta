@@ -20,27 +20,29 @@ logger = logging.getLogger(__name__)
 
 class ParameterType(str, Enum):
     """Parameter data types"""
-    FLOAT = "float"           # Float parameter (0-1)
-    INT = "int"               # Integer parameter
-    BOOL = "bool"             # Boolean parameter
-    STRING = "string"         # String parameter
-    CHOICE = "choice"         # Enumerated choice
-    FILE = "file"             # File path
+
+    FLOAT = "float"  # Float parameter (0-1)
+    INT = "int"  # Integer parameter
+    BOOL = "bool"  # Boolean parameter
+    STRING = "string"  # String parameter
+    CHOICE = "choice"  # Enumerated choice
+    FILE = "file"  # File path
 
 
 @dataclass
 class Parameter:
     """Plugin parameter definition"""
-    name: str                          # Parameter name
-    param_type: ParameterType          # Parameter type
-    default_value: Any                 # Default value
+
+    name: str  # Parameter name
+    param_type: ParameterType  # Parameter type
+    default_value: Any  # Default value
     min_value: Optional[float] = None  # Minimum (for numeric)
     max_value: Optional[float] = None  # Maximum (for numeric)
     choices: List[str] = field(default_factory=list)  # Choices (for choice type)
-    label: str = ""                    # Display label
-    description: str = ""              # Parameter description
-    automation_enabled: bool = True    # Allow automation
-    current_value: Any = None          # Current value
+    label: str = ""  # Display label
+    description: str = ""  # Parameter description
+    automation_enabled: bool = True  # Allow automation
+    current_value: Any = None  # Current value
 
     def __post_init__(self):
         if self.current_value is None:
@@ -83,6 +85,7 @@ class Parameter:
 @dataclass
 class Preset:
     """Plugin preset"""
+
     name: str
     description: str = ""
     author: str = "Unknown"
@@ -98,7 +101,7 @@ class Preset:
             "author": self.author,
             "parameters": self.parameters,
             "created_date": self.created_date,
-            "tags": self.tags
+            "tags": self.tags,
         }
 
 
@@ -108,13 +111,14 @@ class AudioBuffer:
     def __init__(self, num_samples: int, num_channels: int, sample_rate: int):
         """Initialize audio buffer"""
         import numpy as np
+
         self.data = np.zeros((num_channels, num_samples), dtype=np.float32)
         self.num_samples = num_samples
         self.num_channels = num_channels
         self.sample_rate = sample_rate
         self.is_silent = True
 
-    def get_channel(self, channel: int) -> 'np.ndarray':
+    def get_channel(self, channel: int) -> "np.ndarray":
         """Get audio data for a channel"""
         return self.data[channel]
 
@@ -126,6 +130,7 @@ class AudioBuffer:
     def apply_gain(self, gain_db: float) -> None:
         """Apply gain to entire buffer"""
         import numpy as np
+
         gain_linear = 10 ** (gain_db / 20.0)
         self.data *= gain_linear
 
@@ -274,14 +279,11 @@ class SampleMindPlugin(ABC):
     def save_preset(self, preset_name: str, description: str = "") -> bool:
         """Save current state as preset"""
         params_dict = {
-            param_id: param.current_value
-            for param_id, param in self.parameters.items()
+            param_id: param.current_value for param_id, param in self.parameters.items()
         }
 
         preset = Preset(
-            name=preset_name,
-            description=description,
-            parameters=params_dict
+            name=preset_name, description=description, parameters=params_dict
         )
 
         self.add_preset(preset)
@@ -296,7 +298,9 @@ class SampleMindPlugin(ABC):
     # ========================================================================
 
     @abstractmethod
-    def process_audio(self, input_buffer: AudioBuffer, output_buffer: AudioBuffer) -> None:
+    def process_audio(
+        self, input_buffer: AudioBuffer, output_buffer: AudioBuffer
+    ) -> None:
         """
         Process audio samples.
 
@@ -327,6 +331,7 @@ class SampleMindPlugin(ABC):
 
         input_buffer = AudioBuffer(num_samples, num_channels, self.sample_rate)
         import numpy as np
+
         for ch in range(num_channels):
             input_buffer.data[ch] = np.array(input_data[ch], dtype=np.float32)
 
@@ -350,7 +355,7 @@ class SampleMindPlugin(ABC):
                 param_id: param.current_value
                 for param_id, param in self.parameters.items()
             },
-            "current_preset": self.current_preset.name if self.current_preset else None
+            "current_preset": self.current_preset.name if self.current_preset else None,
         }
 
     def set_state(self, state: Dict[str, Any]) -> bool:

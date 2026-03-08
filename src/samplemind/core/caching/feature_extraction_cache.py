@@ -40,7 +40,7 @@ class FeatureExtractionCache:
         self,
         memory_max_items: int = 1000,
         cache_dir: str = ".feature_cache",
-        enable_disk_cache: bool = True
+        enable_disk_cache: bool = True,
     ):
         """
         Initialize feature extraction cache.
@@ -80,7 +80,7 @@ class FeatureExtractionCache:
         Used to detect file changes.
         """
         try:
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 return hashlib.sha256(f.read()).hexdigest()
         except Exception as e:
             logger.warning(f"Failed to hash file {file_path}: {e}")
@@ -94,9 +94,7 @@ class FeatureExtractionCache:
             return 0.0
 
     def _generate_cache_key(
-        self,
-        file_path: str,
-        analysis_level: str = "standard"
+        self, file_path: str, analysis_level: str = "standard"
     ) -> str:
         """
         Generate deterministic cache key from file path and analysis level.
@@ -112,9 +110,7 @@ class FeatureExtractionCache:
         return self.cache_dir / f"{cache_key}.npz"
 
     def get(
-        self,
-        file_path: str,
-        analysis_level: str = "standard"
+        self, file_path: str, analysis_level: str = "standard"
     ) -> Optional[Dict[str, Any]]:
         """
         Get cached features for audio file.
@@ -169,10 +165,7 @@ class FeatureExtractionCache:
         return None
 
     def set(
-        self,
-        file_path: str,
-        features: Dict[str, Any],
-        analysis_level: str = "standard"
+        self, file_path: str, features: Dict[str, Any], analysis_level: str = "standard"
     ) -> bool:
         """
         Cache extracted features for audio file.
@@ -261,7 +254,10 @@ class FeatureExtractionCache:
         """Load features from disk cache."""
         try:
             data = np.load(disk_path, allow_pickle=True)
-            features = {k: data[k].item() if data[k].dtype == object else data[k] for k in data.files}
+            features = {
+                k: data[k].item() if data[k].dtype == object else data[k]
+                for k in data.files
+            }
             return features
         except Exception as e:
             logger.warning(f"Failed to load from disk: {e}")
@@ -285,8 +281,7 @@ class FeatureExtractionCache:
     def invalidate(self, file_path: str) -> None:
         """Manually invalidate cache for a file."""
         cache_keys_to_remove = [
-            k for k in self.file_metadata.keys()
-            if file_path in str(k)
+            k for k in self.file_metadata.keys() if file_path in str(k)
         ]
 
         for cache_key in cache_keys_to_remove:
@@ -303,7 +298,9 @@ class FeatureExtractionCache:
                 except Exception as e:
                     logger.warning(f"Failed to delete disk cache: {e}")
 
-        logger.debug(f"Invalidated {len(cache_keys_to_remove)} cache entries for {file_path}")
+        logger.debug(
+            f"Invalidated {len(cache_keys_to_remove)} cache entries for {file_path}"
+        )
 
     def get_stats(self) -> Dict[str, Any]:
         """Get cache statistics."""
@@ -321,7 +318,7 @@ class FeatureExtractionCache:
             "memory_items": len(self.memory_cache),
             "memory_max": self.memory_max_items,
             "disk_enabled": self.enable_disk_cache,
-            "total_requests": total_requests
+            "total_requests": total_requests,
         }
 
     def clear(self) -> None:

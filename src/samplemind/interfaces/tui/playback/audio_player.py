@@ -4,15 +4,25 @@ Play, pause, seek, and control audio playback
 """
 
 import logging
+import threading
 from typing import Optional, List, Callable
 from dataclasses import dataclass
 from enum import Enum
 
 logger = logging.getLogger(__name__)
 
+_SD_AVAILABLE = False
+try:
+    import sounddevice as _sd  # type: ignore[import]
+
+    _SD_AVAILABLE = True
+except ImportError:
+    pass
+
 
 class PlaybackState(Enum):
     """Playback state"""
+
     STOPPED = "stopped"
     PLAYING = "playing"
     PAUSED = "paused"
@@ -21,6 +31,7 @@ class PlaybackState(Enum):
 
 class LoopMode(Enum):
     """Loop modes"""
+
     OFF = "off"
     LOOP_ALL = "loop_all"
     LOOP_SELECTION = "loop_selection"
@@ -29,6 +40,7 @@ class LoopMode(Enum):
 @dataclass
 class PlaybackStats:
     """Playback statistics"""
+
     current_position: float = 0.0  # In seconds
     duration: float = 0.0
     playback_rate: float = 1.0
@@ -40,7 +52,9 @@ class PlaybackStats:
 class AudioPlayer:
     """Audio playback and transport control"""
 
-    def __init__(self, audio_data: Optional[List[float]] = None, sample_rate: int = 44100) -> None:
+    def __init__(
+        self, audio_data: Optional[List[float]] = None, sample_rate: int = 44100
+    ) -> None:
         """
         Initialize audio player
 
@@ -57,6 +71,10 @@ class AudioPlayer:
         self.on_state_change: Optional[Callable] = None
         self.on_position_change: Optional[Callable] = None
 
+        # sounddevice playback thread
+        self._playback_thread: Optional[threading.Thread] = None
+        self._stop_event = threading.Event()
+
     def load_audio(self, audio_data: List[float], sample_rate: int = 44100) -> None:
         """Load audio data"""
         self.audio_data = audio_data
@@ -66,7 +84,7 @@ class AudioPlayer:
         logger.info(f"Loaded audio: {self.stats.duration:.2f}s @ {sample_rate}Hz")
 
     def play(self) -> bool:
-        """Start playback"""
+        """Start playback using sounddevice if available, otherwise stub."""
         if not self.audio_data:
             logger.warning("No audio loaded")
             return False
@@ -74,17 +92,60 @@ class AudioPlayer:
         self.state = PlaybackState.PLAYING
         logger.info("Playback started")
 
+        if _SD_AVAILABLE:
+            import numpy as np
+
+            self._stop_event.clear()
+            start_sample = int(self.stats.current_position * self.sample_rate)
+            audio_np = np.array(self.audio_data, dtype=np.float32)
+            segment = audio_np[start_sample:]
+            volume = self.stats.volume / 100.0
+            if self.stats.is_muted:
+                volume = 0.0
+
+            def _playback_worker() -> None:
+                try:
+                    chunk_size = 1024
+                    for i in range(0, len(segment), chunk_size):
+                        if self._stop_event.is_set():
+                            break
+                        chunk = segment[i : i + chunk_size] * volume
+                        _sd.play(
+                            chunk,
+                            samplerate=int(self.sample_rate * self.stats.playback_rate),
+                        )
+                        _sd.wait()
+                        elapsed = (start_sample + i + len(chunk)) / self.sample_rate
+                        self.stats.current_position = min(elapsed, self.stats.duration)
+                        if self.on_position_change:
+                            self.on_position_change(self.stats.current_position)
+                    if not self._stop_event.is_set():
+                        self.state = PlaybackState.STOPPED
+                        self.stats.current_position = 0.0
+                        if self.on_state_change:
+                            self.on_state_change(self.state)
+                except Exception as exc:
+                    logger.warning(f"Playback error: {exc}")
+
+            self._playback_thread = threading.Thread(
+                target=_playback_worker, daemon=True
+            )
+            self._playback_thread.start()
+
         if self.on_state_change:
             self.on_state_change(self.state)
 
         return True
 
     def pause(self) -> bool:
-        """Pause playback"""
+        """Pause playback."""
         if self.state != PlaybackState.PLAYING:
             return False
 
         self.state = PlaybackState.PAUSED
+        if _SD_AVAILABLE:
+            self._stop_event.set()
+            _sd.stop()
         logger.info("Playback paused")
 
         if self.on_state_change:
@@ -93,20 +154,17 @@ class AudioPlayer:
         return True
 
     def resume(self) -> bool:
-        """Resume from pause"""
+        """Resume from pause."""
         if self.state != PlaybackState.PAUSED:
             return False
 
-        self.state = PlaybackState.PLAYING
-        logger.info("Playback resumed")
-
-        if self.on_state_change:
-            self.on_state_change(self.state)
-
-        return True
+        return self.play()
 
     def stop(self) -> bool:
-        """Stop playback and reset position"""
+        """Stop playback and reset position."""
+        self._stop_event.set()
+        if _SD_AVAILABLE:
+            _sd.stop()
         self.state = PlaybackState.STOPPED
         self.stats.current_position = 0.0
         logger.info("Playback stopped")

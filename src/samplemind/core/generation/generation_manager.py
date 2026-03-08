@@ -28,14 +28,16 @@ logger = logging.getLogger(__name__)
 
 class GenerationMode(str, Enum):
     """Available generation modes"""
-    TEXT_TO_SAMPLE = "text_to_sample"       # Find samples matching text description
-    AUDIO_VARIATION = "audio_variation"     # Create variations of existing audio
-    CONTEXT_SUGGEST = "context_suggest"     # AI suggestions based on project context
-    STEM_REMIX = "stem_remix"              # Remix stems from multiple sources
+
+    TEXT_TO_SAMPLE = "text_to_sample"  # Find samples matching text description
+    AUDIO_VARIATION = "audio_variation"  # Create variations of existing audio
+    CONTEXT_SUGGEST = "context_suggest"  # AI suggestions based on project context
+    STEM_REMIX = "stem_remix"  # Remix stems from multiple sources
 
 
 class GenerationStatus(str, Enum):
     """Status of a generation request"""
+
     PENDING = "pending"
     PROCESSING = "processing"
     COMPLETED = "completed"
@@ -46,6 +48,7 @@ class GenerationStatus(str, Enum):
 @dataclass
 class GenerationRequest:
     """A request for audio generation or sample matching"""
+
     id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
     mode: GenerationMode = GenerationMode.TEXT_TO_SAMPLE
     prompt: str = ""
@@ -70,6 +73,7 @@ class GenerationRequest:
 @dataclass
 class GenerationResult:
     """Result from a generation request"""
+
     request_id: str
     mode: GenerationMode
     matches: List[Dict[str, Any]] = field(default_factory=list)
@@ -116,6 +120,7 @@ class GenerationManager:
         if self._neural_engine is None:
             try:
                 from ..engine.neural_engine import NeuralFeatureExtractor
+
                 self._neural_engine = NeuralFeatureExtractor(use_mock=True)
                 logger.info("Neural engine loaded for generation")
             except Exception as e:
@@ -128,6 +133,7 @@ class GenerationManager:
         if self._stem_engine is None:
             try:
                 from ..processing.stem_separation import StemSeparationEngine
+
                 self._stem_engine = StemSeparationEngine()
                 logger.info("Stem engine loaded for generation")
             except Exception as e:
@@ -202,6 +208,7 @@ class GenerationManager:
         # Search library using embeddings via ChromaDB
         try:
             from ..similarity.similarity_db import SimilarityDB
+
             db = SimilarityDB()
             matches = await db.search_by_embedding(
                 embedding=text_embedding,
@@ -213,11 +220,13 @@ class GenerationManager:
             # Fallback: return prompt metadata for external processing
             result.metadata["text_embedding_dim"] = len(text_embedding)
             result.metadata["prompt"] = request.prompt
-            result.suggestions = [{
-                "action": "search_library",
-                "query": request.prompt,
-                "embedding_ready": True,
-            }]
+            result.suggestions = [
+                {
+                    "action": "search_library",
+                    "query": request.prompt,
+                    "embedding_ready": True,
+                }
+            ]
 
         return result
 
@@ -243,6 +252,7 @@ class GenerationManager:
         # Generate variation suggestions based on audio analysis
         try:
             from ..engine.audio_engine import AudioEngine, AnalysisLevel
+
             engine = AudioEngine()
             features = engine.analyze_audio(source, level=AnalysisLevel.STANDARD)
 
@@ -353,16 +363,33 @@ class GenerationManager:
         """Suggest audio transforms for creating variations"""
         transforms = [
             [
-                {"type": "pitch_shift", "semitones": 2, "description": "Pitch up 2 semitones"},
-                {"type": "time_stretch", "rate": 1.05, "description": "Slightly faster"},
+                {
+                    "type": "pitch_shift",
+                    "semitones": 2,
+                    "description": "Pitch up 2 semitones",
+                },
+                {
+                    "type": "time_stretch",
+                    "rate": 1.05,
+                    "description": "Slightly faster",
+                },
             ],
             [
-                {"type": "pitch_shift", "semitones": -3, "description": "Pitch down 3 semitones"},
+                {
+                    "type": "pitch_shift",
+                    "semitones": -3,
+                    "description": "Pitch down 3 semitones",
+                },
                 {"type": "reverb", "amount": 0.4, "description": "Add medium reverb"},
             ],
             [
                 {"type": "time_stretch", "rate": 0.85, "description": "Slow down 15%"},
-                {"type": "filter", "type_name": "lowpass", "cutoff": 4000, "description": "Lo-fi filter"},
+                {
+                    "type": "filter",
+                    "type_name": "lowpass",
+                    "cutoff": 4000,
+                    "description": "Lo-fi filter",
+                },
             ],
         ]
         return transforms[variation_index % len(transforms)]
@@ -371,7 +398,9 @@ class GenerationManager:
         """Get harmonically compatible keys using circle of fifths"""
         circle = ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"]
         try:
-            base = key.replace("m", "").replace(" major", "").replace(" minor", "").strip()
+            base = (
+                key.replace("m", "").replace(" major", "").replace(" minor", "").strip()
+            )
             idx = circle.index(base)
             # Return adjacent keys in circle of fifths + relative minor/major
             return [

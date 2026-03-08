@@ -38,14 +38,19 @@ console = utils.console
 # MAIN ANALYZE COMMAND
 # ============================================================================
 
+
 @app.command("analyze")
 @utils.with_error_handling
 @utils.async_command
 async def analyze_mastering(
     file: Optional[Path] = typer.Argument(None, help="Audio file to analyze"),
     platform: str = typer.Option("spotify", "--platform", "-p", help="Target platform"),
-    interactive: bool = typer.Option(False, "--interactive", "-i", help="Launch file picker"),
-    show_spectral: bool = typer.Option(True, "--spectral", help="Show spectral analysis"),
+    interactive: bool = typer.Option(
+        False, "--interactive", "-i", help="Launch file picker"
+    ),
+    show_spectral: bool = typer.Option(
+        True, "--spectral", help="Show spectral analysis"
+    ),
     show_stereo: bool = typer.Option(True, "--stereo", help="Show stereo analysis"),
 ) -> None:
     """Analyze audio for mastering readiness"""
@@ -53,8 +58,11 @@ async def analyze_mastering(
         # Handle file selection
         if not file or interactive:
             from samplemind.utils.file_picker import select_audio_file
+
             console.print("[cyan]📁 Opening file picker...[/cyan]")
-            selected_file = select_audio_file(title="Select Audio File for Mastering Analysis")
+            selected_file = select_audio_file(
+                title="Select Audio File for Mastering Analysis"
+            )
             if not selected_file:
                 console.print("[yellow]❌ No file selected[/yellow]")
                 raise typer.Exit(1)
@@ -63,15 +71,20 @@ async def analyze_mastering(
 
         # Validate platform
         if platform.lower() not in PLATFORM_TARGETS:
-            console.print(f"[yellow]⚠️  Unknown platform '{platform}', using 'spotify'[/yellow]")
+            console.print(
+                f"[yellow]⚠️  Unknown platform '{platform}', using 'spotify'[/yellow]"
+            )
             platform = "spotify"
 
         # Load audio (in production, use librosa)
         try:
             import librosa
+
             audio, sr = librosa.load(str(file), sr=None, mono=False)
         except ImportError:
-            console.print("[yellow]⚠️  librosa not available, using placeholder analysis[/yellow]")
+            console.print(
+                "[yellow]⚠️  librosa not available, using placeholder analysis[/yellow]"
+            )
             return
 
         # Analyze
@@ -88,7 +101,9 @@ async def analyze_mastering(
         # Display header
         console.print()
         console.print(f"[bold cyan]🎚️  Mastering Analysis[/bold cyan]")
-        console.print(f"[dim]File: {file.name} | Platform: {analysis.target_platform.title()}[/dim]\n")
+        console.print(
+            f"[dim]File: {file.name} | Platform: {analysis.target_platform.title()}[/dim]\n"
+        )
 
         # ====================================================================
         # LOUDNESS ANALYSIS SECTION
@@ -102,14 +117,16 @@ async def analyze_mastering(
 
         # Current vs Target
         loudness_table.add_row(
-            "Current Loudness:",
-            f"{analysis.loudness.integrated_loudness:.1f} LUFS",
-            ""
+            "Current Loudness:", f"{analysis.loudness.integrated_loudness:.1f} LUFS", ""
         )
         loudness_table.add_row(
             "Target Loudness:",
             f"{analysis.platform_target:.1f} LUFS",
-            "[bold cyan](Spotify standard)[/bold cyan]" if platform == "spotify" else ""
+            (
+                "[bold cyan](Spotify standard)[/bold cyan]"
+                if platform == "spotify"
+                else ""
+            ),
         )
 
         # Difference indicator
@@ -128,9 +145,7 @@ async def analyze_mastering(
             diff_status = "❌ Adjust"
 
         loudness_table.add_row(
-            "Difference:",
-            f"[{diff_color}]{diff:+.1f} dB[/{diff_color}]",
-            diff_status
+            "Difference:", f"[{diff_color}]{diff:+.1f} dB[/{diff_color}]", diff_status
         )
 
         loudness_table.add_row("", "", "")  # Separator
@@ -139,17 +154,15 @@ async def analyze_mastering(
         loudness_table.add_row(
             "Short-Term Loudness:",
             f"{analysis.loudness.short_term_loudness:.1f} LUFS",
-            ""
+            "",
         )
         loudness_table.add_row(
             "Momentary Loudness:",
             f"{analysis.loudness.momentary_loudness:.1f} LUFS",
-            ""
+            "",
         )
         loudness_table.add_row(
-            "Loudness Range:",
-            f"{analysis.loudness.loudness_range:.1f} LU",
-            ""
+            "Loudness Range:", f"{analysis.loudness.loudness_range:.1f} LU", ""
         )
 
         loudness_table.add_row("", "", "")  # Separator
@@ -157,18 +170,14 @@ async def analyze_mastering(
         loudness_table.add_row(
             "True Peak:",
             f"{analysis.loudness.true_peak:.1f} dBFS",
-            "✅ OK" if not analysis.has_clipping else "❌ CLIPPING"
+            "✅ OK" if not analysis.has_clipping else "❌ CLIPPING",
         )
         loudness_table.add_row(
-            "Headroom to -1 dBTP:",
-            f"{abs(analysis.loudness.true_peak) - 1:.1f} dB",
-            ""
+            "Headroom to -1 dBTP:", f"{abs(analysis.loudness.true_peak) - 1:.1f} dB", ""
         )
 
         loudness_table.add_row(
-            "Dynamic Range:",
-            f"{analysis.loudness.dynamic_range:.1f} dB",
-            ""
+            "Dynamic Range:", f"{analysis.loudness.dynamic_range:.1f} dB", ""
         )
 
         console.print(loudness_table)
@@ -180,7 +189,9 @@ async def analyze_mastering(
             console.print()
             console.print("[bold]📈 Spectral Balance (relative to mids)[/bold]")
 
-            spectral_table = Table(show_header=True, header_style="bold cyan", show_lines=False)
+            spectral_table = Table(
+                show_header=True, header_style="bold cyan", show_lines=False
+            )
             spectral_table.add_column("Frequency Band", style="cyan", width=15)
             spectral_table.add_column("Level", justify="right", width=12, style="green")
             spectral_table.add_column("Status", width=20)
@@ -207,15 +218,15 @@ async def analyze_mastering(
                     color = "red"
 
                 spectral_table.add_row(
-                    band_name,
-                    f"[{color}]{level:+.1f} dB[/{color}]",
-                    status
+                    band_name, f"[{color}]{level:+.1f} dB[/{color}]", status
                 )
 
             console.print(spectral_table)
 
             console.print()
-            console.print(f"[dim]Estimated Brightness: {analysis.estimated_brightness:.0%}[/dim]")
+            console.print(
+                f"[dim]Estimated Brightness: {analysis.estimated_brightness:.0%}[/dim]"
+            )
 
         # ====================================================================
         # STEREO ANALYSIS SECTION
@@ -275,20 +286,16 @@ async def analyze_mastering(
         console.print()
 
         grade = analyzer.get_mastering_grade(analysis)
-        grade_emoji = {
-            "A": "🌟",
-            "B": "👍",
-            "C": "📝",
-            "D": "⚠️",
-            "F": "❌"
-        }.get(grade, "?")
+        grade_emoji = {"A": "🌟", "B": "👍", "C": "📝", "D": "⚠️", "F": "❌"}.get(
+            grade, "?"
+        )
 
         grade_color = {
             "A": "green",
             "B": "green",
             "C": "yellow",
             "D": "yellow",
-            "F": "red"
+            "F": "red",
         }.get(grade, "white")
 
         console.print(
@@ -306,6 +313,7 @@ async def analyze_mastering(
 # ============================================================================
 # PLATFORM TARGETS COMMAND
 # ============================================================================
+
 
 @app.command("targets")
 @utils.with_error_handling
@@ -325,7 +333,7 @@ def show_targets():
             platform.title(),
             f"{targets['integrated_loudness']:.1f} LUFS",
             f"{targets['true_peak']:.1f} dBTP",
-            targets["description"]
+            targets["description"],
         )
 
     console.print(table)
@@ -339,6 +347,7 @@ def show_targets():
 # ============================================================================
 # COMPARE COMMAND (Placeholder)
 # ============================================================================
+
 
 @app.command("compare")
 @utils.with_error_handling

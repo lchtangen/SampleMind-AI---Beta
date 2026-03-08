@@ -27,13 +27,12 @@ from celery.result import AsyncResult
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/tasks", tags=["Tasks"]) 
+router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
 
 @router.post("/analyze", response_model=TaskSubmitResponse)
 async def submit_audio_analysis(
-    request: TaskSubmitRequest,
-    current_user = Depends(get_current_active_user)
+    request: TaskSubmitRequest, current_user=Depends(get_current_active_user)
 ) -> None:
     """
     Submit a single audio file for background analysis
@@ -48,22 +47,19 @@ async def submit_audio_analysis(
             "analysis_options": request.analysis_options or {},
         },
         queue="audio_processing",
-        routing_key="audio.process"
+        routing_key="audio.process",
     )
-    
+
     logger.info(f"Submitted analysis task {result.id} for file {request.file_id}")
-    
+
     return TaskSubmitResponse(
-        task_id=result.id,
-        status="submitted",
-        message="Audio analysis task submitted"
+        task_id=result.id, status="submitted", message="Audio analysis task submitted"
     )
 
 
 @router.post("/analyze/batch", response_model=TaskSubmitResponse)
 async def submit_batch_audio_analysis(
-    request: BatchTaskSubmitRequest,
-    current_user = Depends(get_current_active_user)
+    request: BatchTaskSubmitRequest, current_user=Depends(get_current_active_user)
 ) -> None:
     """
     Submit multiple audio files for background batch processing
@@ -77,36 +73,37 @@ async def submit_batch_audio_analysis(
             "analysis_options": request.analysis_options or {},
         },
         queue="audio_processing",
-        routing_key="audio.process"
+        routing_key="audio.process",
     )
-    
-    logger.info(f"Submitted batch task {result.id} with {len(request.file_infos)} files")
-    
+
+    logger.info(
+        f"Submitted batch task {result.id} with {len(request.file_infos)} files"
+    )
+
     return TaskSubmitResponse(
         task_id=result.id,
         status="submitted",
-        message="Batch audio analysis task submitted"
+        message="Batch audio analysis task submitted",
     )
 
 
 @router.get("/{task_id}", response_model=TaskStatusResponse)
 async def get_task_status(
-    task_id: str,
-    current_user = Depends(get_current_active_user)
+    task_id: str, current_user=Depends(get_current_active_user)
 ) -> None:
     """
     Get task status and result
     """
     async_result = AsyncResult(task_id, app=celery_app)
     status_str = async_result.status
-    
+
     progress = None
     progress_message = None
     result = None
     error = None
     started_at = None
     completed_at = None
-    
+
     try:
         if async_result.info and isinstance(async_result.info, dict):
             info = async_result.info
@@ -114,7 +111,7 @@ async def get_task_status(
             progress_message = info.get("status")
     except Exception:
         pass
-    
+
     if async_result.successful():
         try:
             result = async_result.get(disable_sync_subtasks=False)
@@ -126,7 +123,7 @@ async def get_task_status(
             result = async_result.get(propagate=False)
         except Exception as e:
             error = str(e)
-    
+
     return TaskStatusResponse(
         task_id=task_id,
         status=status_str,
@@ -135,12 +132,12 @@ async def get_task_status(
         progress_message=progress_message,
         error=error,
         started_at=started_at,
-        completed_at=completed_at
+        completed_at=completed_at,
     )
 
 
 @router.get("/workers/status", response_model=WorkersStatusResponse)
-async def get_workers_status(current_user = Depends(get_current_active_user)):
+async def get_workers_status(current_user=Depends(get_current_active_user)):
     """
     Get Celery workers status
     """
@@ -148,7 +145,7 @@ async def get_workers_status(current_user = Depends(get_current_active_user)):
         insp = celery_app.control.inspect(timeout=1.0)
         active = insp.active() or {}
         stats = insp.stats() or {}
-        
+
         workers: list[WorkerInfo] = []
         for hostname, tasks in active.items():
             st = stats.get(hostname, {})
@@ -157,10 +154,10 @@ async def get_workers_status(current_user = Depends(get_current_active_user)):
                     hostname=hostname,
                     status="online",
                     active_tasks=len(tasks or []),
-                    processed_tasks=st.get("total", {}).get("task-received", 0)
+                    processed_tasks=st.get("total", {}).get("task-received", 0),
                 )
             )
-        
+
         return WorkersStatusResponse(workers=workers, total_workers=len(workers))
     except Exception as e:
         logger.warning(f"Could not fetch workers status: {e}")
@@ -168,7 +165,7 @@ async def get_workers_status(current_user = Depends(get_current_active_user)):
 
 
 @router.get("/queues/stats", response_model=QueueStatsResponse)
-async def get_queue_stats(current_user = Depends(get_current_active_user)):
+async def get_queue_stats(current_user=Depends(get_current_active_user)):
     """
     Get queue statistics
     """
@@ -182,7 +179,13 @@ async def get_queue_stats(current_user = Depends(get_current_active_user)):
                     bound = q.bind(conn)
                     # inspect queue for messages and consumers
                     _, message_count, consumer_count = bound.queue_declare(passive=True)
-                    queues.append(QueueStats(name=q.name, messages=message_count, consumers=consumer_count))
+                    queues.append(
+                        QueueStats(
+                            name=q.name,
+                            messages=message_count,
+                            consumers=consumer_count,
+                        )
+                    )
                 except Exception:
                     queues.append(QueueStats(name=q.name, messages=0, consumers=0))
             return QueueStatsResponse(queues=queues, total_queues=len(queues))

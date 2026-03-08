@@ -84,7 +84,9 @@ class MasteringEngine:
 
         # Determine output path
         if output_path is None:
-            output_path = audio_path.parent / f"{audio_path.stem}_mastered{audio_path.suffix}"
+            output_path = (
+                audio_path.parent / f"{audio_path.stem}_mastered{audio_path.suffix}"
+            )
 
         # Save output
         try:
@@ -92,7 +94,11 @@ class MasteringEngine:
             output_path.parent.mkdir(parents=True, exist_ok=True)
 
             # Save file
-            sf.write(output_path, mastered.T if mastered.ndim > 1 else mastered, self.sample_rate)
+            sf.write(
+                output_path,
+                mastered.T if mastered.ndim > 1 else mastered,
+                self.sample_rate,
+            )
             logger.info(f"Mastered audio saved to: {output_path}")
 
         except Exception as e:

@@ -54,6 +54,7 @@ from samplemind.utils.file_picker import (
 # Rich console setup
 console = Console()
 
+
 class SampleMindCLI:
     """
     Interactive CLI for SampleMind AI v6
@@ -76,10 +77,10 @@ class SampleMindCLI:
 
         # Stats tracking
         self.session_stats = {
-            'files_analyzed': 0,
-            'total_processing_time': 0.0,
-            'ai_requests': 0,
-            'session_start': time.time()
+            "files_analyzed": 0,
+            "total_processing_time": 0.0,
+            "ai_requests": 0,
+            "session_start": time.time(),
         }
 
     def display_banner(self) -> None:
@@ -95,7 +96,7 @@ class SampleMindCLI:
         panel = Panel(
             Align.center(Text(banner, style="bold blue")),
             border_style="blue",
-            padding=(1, 2)
+            padding=(1, 2),
         )
         console.print(panel)
 
@@ -108,7 +109,7 @@ class SampleMindCLI:
             with Progress(
                 SpinnerColumn(),
                 TextColumn("[progress.description]{task.description}"),
-                console=console
+                console=console,
             ) as progress:
 
                 # Initialize Audio Engine
@@ -127,7 +128,9 @@ class SampleMindCLI:
                 progress.remove_task(task3)
 
                 # Initialize Processors
-                task_proc = progress.add_task("⚙️ Initializing Processors...", total=None)
+                task_proc = progress.add_task(
+                    "⚙️ Initializing Processors...", total=None
+                )
                 self.effects_processor = AudioEffectsProcessor()
                 self.midi_generator = MIDIGenerator()
                 self.pack_creator = SamplePackCreator()
@@ -139,14 +142,20 @@ class SampleMindCLI:
                 # Verify AI providers
                 task4 = progress.add_task("🔍 Checking AI Providers...", total=None)
                 provider_status = self.ai_manager.get_provider_status()
-                enabled_providers = sum(1 for status in provider_status.values() if status['enabled'])
+                enabled_providers = sum(
+                    1 for status in provider_status.values() if status["enabled"]
+                )
                 progress.remove_task(task4)
 
                 if enabled_providers == 0:
                     console.print("[bold red]⚠️ No AI providers configured![/bold red]")
                     console.print("Please run the API setup scripts first:")
-                    console.print("  • [cyan]./setup_openai_api.sh[/cyan] - For OpenAI GPT-5")
-                    console.print("  • [cyan]./setup_google_ai_api.sh[/cyan] - For Google AI")
+                    console.print(
+                        "  • [cyan]./setup_openai_api.sh[/cyan] - For OpenAI GPT-5"
+                    )
+                    console.print(
+                        "  • [cyan]./setup_google_ai_api.sh[/cyan] - For Google AI"
+                    )
                     return False
 
             self.initialized = True
@@ -161,31 +170,33 @@ class SampleMindCLI:
             platform_info = picker.get_platform_info()
 
             # Determine file picker type
-            if platform_info['os'] == 'macos':
+            if platform_info["os"] == "macos":
                 file_picker_name = "Finder (macOS native)"
-            elif platform_info['os'] == 'linux':
-                if platform_info.get('has_zenity'):
+            elif platform_info["os"] == "linux":
+                if platform_info.get("has_zenity"):
                     file_picker_name = "Zenity (GTK native)"
-                elif platform_info.get('has_kdialog'):
+                elif platform_info.get("has_kdialog"):
                     file_picker_name = "KDialog (KDE native)"
-                elif platform_info.get('has_tkinter'):
+                elif platform_info.get("has_tkinter"):
                     file_picker_name = "Tkinter (cross-platform)"
                 else:
                     file_picker_name = "Text input (fallback)"
-            elif platform_info['os'] == 'windows':
+            elif platform_info["os"] == "windows":
                 file_picker_name = "Windows Explorer (native)"
             else:
                 file_picker_name = "Unknown"
 
             success_table.add_row("🎛️ Audio Engine", "✅ Ready")
             success_table.add_row("📁 Audio Loader", "✅ Ready")
-            success_table.add_row("🤖 AI Manager", f"✅ Ready ({enabled_providers} providers)")
+            success_table.add_row(
+                "🤖 AI Manager", f"✅ Ready ({enabled_providers} providers)"
+            )
             success_table.add_row("📂 File Picker", f"✅ {file_picker_name}")
 
             panel = Panel(
                 success_table,
                 title=f"[bold green]🚀 System Initialized ({platform_info['os'].title()})[/bold green]",
-                border_style="green"
+                border_style="green",
             )
             console.print(panel)
 
@@ -202,19 +213,31 @@ class SampleMindCLI:
         menu_table.add_column("Description", style="white")
         menu_table.add_column("Details", style="dim")
 
-        menu_table.add_row("1", "🎯 Analyze Single File", "AI-powered analysis of audio file")
-        menu_table.add_row("2", "📁 Batch Process Directory", "Process multiple files with AI")
-        menu_table.add_row("3", "📁 Analyze Folder Samples", "Select folder and analyze all audio files")
+        menu_table.add_row(
+            "1", "🎯 Analyze Single File", "AI-powered analysis of audio file"
+        )
+        menu_table.add_row(
+            "2", "📁 Batch Process Directory", "Process multiple files with AI"
+        )
+        menu_table.add_row(
+            "3",
+            "📁 Analyze Folder Samples",
+            "Select folder and analyze all audio files",
+        )
         menu_table.add_row("4", "🔍 Scan & Preview", "Scan directory and preview files")
         menu_table.add_row("5", "⚙️ Configuration", "Manage settings and preferences")
         menu_table.add_row("6", "📊 System Status", "View performance and statistics")
-        menu_table.add_row("7", "🤖 AI Provider Settings", "Manage AI providers and models")
+        menu_table.add_row(
+            "7", "🤖 AI Provider Settings", "Manage AI providers and models"
+        )
         menu_table.add_row("8", "💡 Production Tips", "Get production coaching")
         menu_table.add_row("9", "🎛️ FL Studio Integration", "FL Studio specific tools")
         menu_table.add_row("A", "📈 Session Analytics", "View current session stats")
         menu_table.add_row("B", "🎛️ Audio Effects", "Apply professional audio effects")
         menu_table.add_row("C", "🎹 Audio to MIDI", "Convert audio to MIDI")
-        menu_table.add_row("D", "📦 Create Sample Pack", "Create organized sample packs")
+        menu_table.add_row(
+            "D", "📦 Create Sample Pack", "Create organized sample packs"
+        )
         menu_table.add_row("E", "🔗 Chain Recommender", "Build kits from seed sample")
         menu_table.add_row("F", "🔎 Semantic Search", "Search samples by description")
         menu_table.add_row("0", "🚪 Exit", "Quit SampleMind AI")
@@ -222,7 +245,7 @@ class SampleMindCLI:
         panel = Panel(
             menu_table,
             title="[bold blue]🎵 SampleMind AI v6 - Main Menu[/bold blue]",
-            border_style="blue"
+            border_style="blue",
         )
         console.print(panel)
 
@@ -234,13 +257,15 @@ class SampleMindCLI:
         console.print("[cyan]📁 Choose audio file using Finder...[/cyan]")
         file_path = select_audio_file(
             title="Choose Audio File for Analysis",
-            initial_directory=self.current_directory
+            initial_directory=self.current_directory,
         )
 
         if not file_path:
             # Fallback to manual input
             if Confirm.ask("Would you like to enter the file path manually?"):
-                file_path_str = Prompt.ask("📁 Enter audio file path", default=str(self.current_directory))
+                file_path_str = Prompt.ask(
+                    "📁 Enter audio file path", default=str(self.current_directory)
+                )
                 file_path = Path(file_path_str)
             else:
                 console.print("[yellow]⚠️ No file selected[/yellow]")
@@ -252,7 +277,9 @@ class SampleMindCLI:
 
         if file_path.is_dir():
             # If directory provided, let user select file
-            audio_files = self.audio_loader.scan_directory(file_path, supported_only=True)
+            audio_files = self.audio_loader.scan_directory(
+                file_path, supported_only=True
+            )
             if not audio_files:
                 console.print("[yellow]⚠️ No audio files found[/yellow]")
                 return
@@ -277,22 +304,26 @@ class SampleMindCLI:
                 return
 
         # Get analysis preferences
-        analysis_types = ["comprehensive", "production", "creative", "fl_studio", "quick"]
+        analysis_types = [
+            "comprehensive",
+            "production",
+            "creative",
+            "fl_studio",
+            "quick",
+        ]
         analysis_type = Prompt.ask(
-            "🔍 Analysis type",
-            choices=analysis_types,
-            default="comprehensive"
+            "🔍 Analysis type", choices=analysis_types, default="comprehensive"
         )
 
         providers = ["auto", "openai", "google_ai"]
-        provider = Prompt.ask(
-            "🤖 AI Provider",
-            choices=providers,
-            default="auto"
-        )
+        provider = Prompt.ask("🤖 AI Provider", choices=providers, default="auto")
 
         # Convert to enums
-        analysis_type_enum = AnalysisType(analysis_type.upper() + "_ANALYSIS" if not analysis_type.endswith("_analysis") else analysis_type.upper())
+        analysis_type_enum = AnalysisType(
+            analysis_type.upper() + "_ANALYSIS"
+            if not analysis_type.endswith("_analysis")
+            else analysis_type.upper()
+        )
         provider_enum = None if provider == "auto" else AIProvider(provider.upper())
 
         try:
@@ -304,26 +335,28 @@ class SampleMindCLI:
                 BarColumn(),
                 TaskProgressColumn(),
                 TimeElapsedColumn(),
-                console=console
+                console=console,
             ) as progress:
 
                 # Step 1: Load audio
                 load_task = progress.add_task("📁 Loading audio...", total=100)
-                loaded_audio = self.audio_loader.load_audio(file_path, strategy=LoadingStrategy.QUALITY)
+                loaded_audio = self.audio_loader.load_audio(
+                    file_path, strategy=LoadingStrategy.QUALITY
+                )
                 progress.update(load_task, completed=100)
 
                 # Step 2: Extract features
                 feature_task = progress.add_task("🎵 Extracting features...", total=100)
-                features = self.audio_engine.analyze_audio(file_path, level=AnalysisLevel.DETAILED)
+                features = self.audio_engine.analyze_audio(
+                    file_path, level=AnalysisLevel.DETAILED
+                )
                 progress.update(feature_task, completed=100)
 
                 # Step 3: AI Analysis
                 ai_task = progress.add_task("🤖 AI analysis...", total=100)
                 features_dict = features.to_dict()
                 ai_result = await self.ai_manager.analyze_music(
-                    features_dict,
-                    analysis_type_enum,
-                    preferred_provider=provider_enum
+                    features_dict, analysis_type_enum, preferred_provider=provider_enum
                 )
                 progress.update(ai_task, completed=100)
 
@@ -331,13 +364,13 @@ class SampleMindCLI:
             self._display_analysis_results(ai_result, loaded_audio, features)
 
             # Update session stats
-            self.session_stats['files_analyzed'] += 1
-            self.session_stats['total_processing_time'] += time.time() - start_time
-            self.session_stats['ai_requests'] += 1
+            self.session_stats["files_analyzed"] += 1
+            self.session_stats["total_processing_time"] += time.time() - start_time
+            self.session_stats["ai_requests"] += 1
 
             # Ask to save results
             if Confirm.ask("💾 Save analysis results?"):
-                output_file = file_path.with_suffix('.samplemind.json')
+                output_file = file_path.with_suffix(".samplemind.json")
                 self._save_analysis(ai_result, loaded_audio, features, output_file)
                 console.print(f"[green]✅ Results saved: {output_file}[/green]")
 
@@ -349,10 +382,12 @@ class SampleMindCLI:
         console.print("\n[bold blue]📁 Folder Samples Analysis[/bold blue]")
 
         # Use Finder dialog to select folder
-        console.print("[cyan]📁 Choose folder containing audio samples using Finder...[/cyan]")
+        console.print(
+            "[cyan]📁 Choose folder containing audio samples using Finder...[/cyan]"
+        )
         folder_path = select_directory(
             title="Choose Folder with Audio Samples for Analysis",
-            initial_directory=self.current_directory
+            initial_directory=self.current_directory,
         )
 
         if not folder_path:
@@ -361,13 +396,17 @@ class SampleMindCLI:
 
         # Scan folder for audio files
         console.print("[cyan]🔍 Scanning folder for audio files...[/cyan]")
-        file_paths = self.audio_loader.scan_directory(folder_path, recursive=True, supported_only=True)
+        file_paths = self.audio_loader.scan_directory(
+            folder_path, recursive=True, supported_only=True
+        )
 
         if not file_paths:
             console.print("[yellow]⚠️ No audio files found in selected folder[/yellow]")
             return
 
-        console.print(f"[green]Found {len(file_paths)} audio files in folder for analysis[/green]")
+        console.print(
+            f"[green]Found {len(file_paths)} audio files in folder for analysis[/green]"
+        )
 
         # Show found files preview
         preview_table = Table(title="🎵 Audio Files Found")
@@ -389,22 +428,26 @@ class SampleMindCLI:
             return
 
         # Get analysis preferences
-        analysis_types = ["comprehensive", "production", "creative", "fl_studio", "quick"]
+        analysis_types = [
+            "comprehensive",
+            "production",
+            "creative",
+            "fl_studio",
+            "quick",
+        ]
         analysis_type = Prompt.ask(
-            "🔍 Analysis type",
-            choices=analysis_types,
-            default="comprehensive"
+            "🔍 Analysis type", choices=analysis_types, default="comprehensive"
         )
 
         providers = ["auto", "openai", "google_ai"]
-        provider = Prompt.ask(
-            "🤖 AI Provider",
-            choices=providers,
-            default="auto"
-        )
+        provider = Prompt.ask("🤖 AI Provider", choices=providers, default="auto")
 
         # Convert to enums
-        analysis_type_enum = AnalysisType(analysis_type.upper() + "_ANALYSIS" if not analysis_type.endswith("_analysis") else analysis_type.upper())
+        analysis_type_enum = AnalysisType(
+            analysis_type.upper() + "_ANALYSIS"
+            if not analysis_type.endswith("_analysis")
+            else analysis_type.upper()
+        )
         provider_enum = None if provider == "auto" else AIProvider(provider.upper())
 
         results = []
@@ -418,33 +461,43 @@ class SampleMindCLI:
                 TaskProgressColumn(),
                 TimeElapsedColumn(),
                 TimeRemainingColumn(),
-                console=console
+                console=console,
             ) as progress:
 
-                main_task = progress.add_task(f"🔄 Processing {len(file_paths)} files...", total=len(file_paths))
+                main_task = progress.add_task(
+                    f"🔄 Processing {len(file_paths)} files...", total=len(file_paths)
+                )
 
                 for i, file_path in enumerate(file_paths):
                     try:
-                        progress.update(main_task, description=f"Processing: {file_path.name}")
+                        progress.update(
+                            main_task, description=f"Processing: {file_path.name}"
+                        )
 
                         # Load and analyze
-                        loaded_audio = self.audio_loader.load_audio(file_path, strategy=LoadingStrategy.QUALITY)
-                        features = self.audio_engine.analyze_audio(file_path, level=AnalysisLevel.DETAILED)
+                        loaded_audio = self.audio_loader.load_audio(
+                            file_path, strategy=LoadingStrategy.QUALITY
+                        )
+                        features = self.audio_engine.analyze_audio(
+                            file_path, level=AnalysisLevel.DETAILED
+                        )
                         features_dict = features.to_dict()
 
                         # AI analysis
                         ai_result = await self.ai_manager.analyze_music(
                             features_dict,
                             analysis_type_enum,
-                            preferred_provider=provider_enum
+                            preferred_provider=provider_enum,
                         )
 
-                        results.append({
-                            'file': str(file_path),
-                            'ai_result': ai_result,
-                            'features': features,
-                            'loaded_audio': loaded_audio
-                        })
+                        results.append(
+                            {
+                                "file": str(file_path),
+                                "ai_result": ai_result,
+                                "features": features,
+                                "loaded_audio": loaded_audio,
+                            }
+                        )
 
                         progress.advance(main_task)
 
@@ -454,16 +507,20 @@ class SampleMindCLI:
 
             # Display individual results for each file
             for result in results:
-                console.print(f"\n[bold cyan]═══ Analysis for {Path(result['file']).name} ═══[/bold cyan]")
-                self._display_analysis_results(result['ai_result'], result['loaded_audio'], result['features'])
+                console.print(
+                    f"\n[bold cyan]═══ Analysis for {Path(result['file']).name} ═══[/bold cyan]"
+                )
+                self._display_analysis_results(
+                    result["ai_result"], result["loaded_audio"], result["features"]
+                )
 
             # Generate summary
             self._display_batch_summary(results, time.time() - start_time)
 
             # Update session stats
-            self.session_stats['files_analyzed'] += len(results)
-            self.session_stats['total_processing_time'] += time.time() - start_time
-            self.session_stats['ai_requests'] += len(results)
+            self.session_stats["files_analyzed"] += len(results)
+            self.session_stats["total_processing_time"] += time.time() - start_time
+            self.session_stats["ai_requests"] += len(results)
 
             # Ask to save results
             if results and Confirm.ask("💾 Save all analysis results?"):
@@ -472,14 +529,21 @@ class SampleMindCLI:
                 output_dir.mkdir(exist_ok=True)
 
                 for result in results:
-                    file_name = Path(result['file']).stem
+                    file_name = Path(result["file"]).stem
                     output_file = output_dir / f"{file_name}.samplemind.json"
-                    self._save_analysis(result['ai_result'], result['loaded_audio'], result['features'], output_file)
+                    self._save_analysis(
+                        result["ai_result"],
+                        result["loaded_audio"],
+                        result["features"],
+                        output_file,
+                    )
 
                 console.print(f"[green]✅ All results saved to: {output_dir}[/green]")
 
         except Exception as e:
-            console.print(f"[bold red]❌ Multiple files analysis failed: {e}[/bold red]")
+            console.print(
+                f"[bold red]❌ Multiple files analysis failed: {e}[/bold red]"
+            )
 
     async def run_batch_processing(self):
         """Run batch processing on directory"""
@@ -489,13 +553,15 @@ class SampleMindCLI:
         console.print("[cyan]📁 Choose directory using Finder...[/cyan]")
         directory = select_directory(
             title="Choose Directory for Batch Processing",
-            initial_directory=self.current_directory
+            initial_directory=self.current_directory,
         )
 
         if not directory:
             # Fallback to manual input
             if Confirm.ask("Would you like to enter the directory path manually?"):
-                directory_str = Prompt.ask("📁 Enter directory path", default=str(self.current_directory))
+                directory_str = Prompt.ask(
+                    "📁 Enter directory path", default=str(self.current_directory)
+                )
                 directory = Path(directory_str)
             else:
                 console.print("[yellow]⚠️ No directory selected[/yellow]")
@@ -522,7 +588,7 @@ class SampleMindCLI:
         analysis_type = Prompt.ask(
             "🔍 Analysis type",
             choices=["comprehensive", "production", "creative", "quick"],
-            default="comprehensive"
+            default="comprehensive",
         )
 
         output_dir = Prompt.ask("📂 Output directory", default="./results")
@@ -541,14 +607,19 @@ class SampleMindCLI:
             TaskProgressColumn(),
             TimeElapsedColumn(),
             TimeRemainingColumn(),
-            console=console
+            console=console,
         ) as progress:
 
-            main_task = progress.add_task(f"🔄 Processing {len(files_to_process)} files...", total=len(files_to_process))
+            main_task = progress.add_task(
+                f"🔄 Processing {len(files_to_process)} files...",
+                total=len(files_to_process),
+            )
 
             for i, file_path in enumerate(files_to_process):
                 try:
-                    progress.update(main_task, description=f"Processing: {file_path.name}")
+                    progress.update(
+                        main_task, description=f"Processing: {file_path.name}"
+                    )
 
                     # Load and analyze
                     loaded_audio = self.audio_loader.load_audio(file_path)
@@ -557,16 +628,17 @@ class SampleMindCLI:
 
                     # AI analysis
                     ai_result = await self.ai_manager.analyze_music(
-                        features_dict,
-                        analysis_type_enum
+                        features_dict, analysis_type_enum
                     )
 
-                    results.append({
-                        'file': str(file_path),
-                        'ai_result': ai_result,
-                        'features': features,
-                        'loaded_audio': loaded_audio
-                    })
+                    results.append(
+                        {
+                            "file": str(file_path),
+                            "ai_result": ai_result,
+                            "features": features,
+                            "loaded_audio": loaded_audio,
+                        }
+                    )
 
                     # Save individual result
                     output_dir_path = Path(output_dir)
@@ -584,9 +656,9 @@ class SampleMindCLI:
         self._display_batch_summary(results, time.time() - start_time)
 
         # Update session stats
-        self.session_stats['files_analyzed'] += len(results)
-        self.session_stats['total_processing_time'] += time.time() - start_time
-        self.session_stats['ai_requests'] += len(results)
+        self.session_stats["files_analyzed"] += len(results)
+        self.session_stats["total_processing_time"] += time.time() - start_time
+        self.session_stats["ai_requests"] += len(results)
 
     def scan_and_preview(self) -> None:
         """Scan directory and show preview"""
@@ -596,13 +668,15 @@ class SampleMindCLI:
         console.print("[cyan]📁 Choose directory using Finder...[/cyan]")
         directory = select_directory(
             title="Choose Directory to Scan & Preview",
-            initial_directory=self.current_directory
+            initial_directory=self.current_directory,
         )
 
         if not directory:
             # Fallback to manual input
             if Confirm.ask("Would you like to enter the directory path manually?"):
-                directory_str = Prompt.ask("📁 Enter directory path", default=str(self.current_directory))
+                directory_str = Prompt.ask(
+                    "📁 Enter directory path", default=str(self.current_directory)
+                )
                 directory = Path(directory_str)
             else:
                 console.print("[yellow]⚠️ No directory selected[/yellow]")
@@ -631,15 +705,9 @@ class SampleMindCLI:
 
         # Create comprehensive status display
         layout = Layout()
-        layout.split_column(
-            Layout(name="header", size=3),
-            Layout(name="body")
-        )
+        layout.split_column(Layout(name="header", size=3), Layout(name="body"))
 
-        layout["body"].split_row(
-            Layout(name="left"),
-            Layout(name="right")
-        )
+        layout["body"].split_row(Layout(name="left"), Layout(name="right"))
 
         # Header
         layout["header"].update(
@@ -652,11 +720,13 @@ class SampleMindCLI:
         perf_table.add_column("Value", style="green")
 
         perf_table.add_row("Audio Engine", "✅ Active")
-        perf_table.add_row("Avg Analysis Time", f"{engine_stats['avg_analysis_time']:.2f}s")
+        perf_table.add_row(
+            "Avg Analysis Time", f"{engine_stats['avg_analysis_time']:.2f}s"
+        )
         perf_table.add_row("Cache Hit Rate", f"{engine_stats['cache_hit_rate']:.1%}")
-        perf_table.add_row("Total Analyses", str(engine_stats['total_analyses']))
-        perf_table.add_row("AI Requests", str(ai_stats['total_requests']))
-        perf_table.add_row("Total Tokens", str(ai_stats['total_tokens']))
+        perf_table.add_row("Total Analyses", str(engine_stats["total_analyses"]))
+        perf_table.add_row("AI Requests", str(ai_stats["total_requests"]))
+        perf_table.add_row("Total Tokens", str(ai_stats["total_tokens"]))
 
         layout["left"].update(perf_table)
 
@@ -667,12 +737,8 @@ class SampleMindCLI:
         provider_table.add_column("Requests", style="yellow")
 
         for provider, status in provider_status.items():
-            status_icon = "✅" if status['enabled'] else "❌"
-            provider_table.add_row(
-                provider,
-                status_icon,
-                str(status['total_requests'])
-            )
+            status_icon = "✅" if status["enabled"] else "❌"
+            provider_table.add_row(provider, status_icon, str(status["total_requests"]))
 
         layout["right"].update(provider_table)
 
@@ -682,19 +748,27 @@ class SampleMindCLI:
         """Display current session analytics"""
         console.print("\n[bold blue]📈 Session Analytics[/bold blue]")
 
-        session_time = time.time() - self.session_stats['session_start']
+        session_time = time.time() - self.session_stats["session_start"]
 
         analytics_table = Table(title="📊 Current Session")
         analytics_table.add_column("Metric", style="cyan")
         analytics_table.add_column("Value", style="green")
 
         analytics_table.add_row("Session Duration", f"{session_time / 60:.1f} minutes")
-        analytics_table.add_row("Files Analyzed", str(self.session_stats['files_analyzed']))
-        analytics_table.add_row("AI Requests", str(self.session_stats['ai_requests']))
-        analytics_table.add_row("Total Processing Time", f"{self.session_stats['total_processing_time']:.1f}s")
+        analytics_table.add_row(
+            "Files Analyzed", str(self.session_stats["files_analyzed"])
+        )
+        analytics_table.add_row("AI Requests", str(self.session_stats["ai_requests"]))
+        analytics_table.add_row(
+            "Total Processing Time",
+            f"{self.session_stats['total_processing_time']:.1f}s",
+        )
 
-        if self.session_stats['files_analyzed'] > 0:
-            avg_time = self.session_stats['total_processing_time'] / self.session_stats['files_analyzed']
+        if self.session_stats["files_analyzed"] > 0:
+            avg_time = (
+                self.session_stats["total_processing_time"]
+                / self.session_stats["files_analyzed"]
+            )
             analytics_table.add_row("Avg Time Per File", f"{avg_time:.2f}s")
 
         console.print(analytics_table)
@@ -720,12 +794,14 @@ class SampleMindCLI:
             panel = Panel(
                 config_table,
                 title="[bold blue]⚙️ Configuration Options[/bold blue]",
-                border_style="blue"
+                border_style="blue",
             )
             console.print(panel)
 
-            config_choice = Prompt.ask("⚙️ Select configuration option",
-                                     choices=["0", "1", "2", "3", "4", "5", "6", "7"])
+            config_choice = Prompt.ask(
+                "⚙️ Select configuration option",
+                choices=["0", "1", "2", "3", "4", "5", "6", "7"],
+            )
 
             if config_choice == "0":
                 break
@@ -755,15 +831,29 @@ class SampleMindCLI:
         settings_table.add_column("Current Value", style="green")
         settings_table.add_column("Description", style="dim")
 
-        settings_table.add_row("Max Workers", str(self.audio_engine.max_workers), "Parallel processing threads")
-        settings_table.add_row("Cache Size", str(self.audio_engine.cache_size), "Feature cache capacity")
-        settings_table.add_row("Cache Hit Rate", f"{current_stats['cache_hit_rate']:.1%}", "Cache effectiveness")
+        settings_table.add_row(
+            "Max Workers",
+            str(self.audio_engine.max_workers),
+            "Parallel processing threads",
+        )
+        settings_table.add_row(
+            "Cache Size", str(self.audio_engine.cache_size), "Feature cache capacity"
+        )
+        settings_table.add_row(
+            "Cache Hit Rate",
+            f"{current_stats['cache_hit_rate']:.1%}",
+            "Cache effectiveness",
+        )
 
         console.print(settings_table)
 
         if Confirm.ask("🔧 Modify audio engine settings?"):
-            new_workers = Prompt.ask("Max Workers", default=str(self.audio_engine.max_workers))
-            new_cache_size = Prompt.ask("Cache Size", default=str(self.audio_engine.cache_size))
+            new_workers = Prompt.ask(
+                "Max Workers", default=str(self.audio_engine.max_workers)
+            )
+            new_cache_size = Prompt.ask(
+                "Cache Size", default=str(self.audio_engine.cache_size)
+            )
 
             try:
                 self.audio_engine.max_workers = int(new_workers)
@@ -787,9 +877,13 @@ class SampleMindCLI:
         console.print(dirs_table)
 
         if Confirm.ask("📂 Change default directories?"):
-            new_current = Prompt.ask("Working Directory", default=str(self.current_directory))
+            new_current = Prompt.ask(
+                "Working Directory", default=str(self.current_directory)
+            )
             self.current_directory = Path(new_current)
-            console.print(f"[green]✅ Working directory set to: {self.current_directory}[/green]")
+            console.print(
+                f"[green]✅ Working directory set to: {self.current_directory}[/green]"
+            )
 
     async def _configure_processing(self):
         """Configure processing preferences"""
@@ -799,13 +893,17 @@ class SampleMindCLI:
         prefs_table.add_column("Setting", style="cyan")
         prefs_table.add_column("Options", style="green")
 
-        prefs_table.add_row("Default Analysis Level", "BASIC, STANDARD, DETAILED, PROFESSIONAL")
+        prefs_table.add_row(
+            "Default Analysis Level", "BASIC, STANDARD, DETAILED, PROFESSIONAL"
+        )
         prefs_table.add_row("Default AI Provider", "auto, openai, google_ai")
         prefs_table.add_row("Auto-save Results", "yes, no")
         prefs_table.add_row("Parallel Processing", "yes, no")
 
         console.print(prefs_table)
-        console.print("[yellow]💡 Processing preferences configuration coming in next update![/yellow]")
+        console.print(
+            "[yellow]💡 Processing preferences configuration coming in next update![/yellow]"
+        )
 
     async def _manage_cache(self):
         """Manage system cache"""
@@ -819,14 +917,24 @@ class SampleMindCLI:
         cache_table.add_column("Size", style="green")
         cache_table.add_column("Hit Rate", style="yellow")
 
-        cache_table.add_row("Audio Features", str(engine_stats['cache_size']), f"{engine_stats['cache_hit_rate']:.1%}")
-        cache_table.add_row("AI Responses", str(ai_stats.get('cache_size', 0)), f"{ai_stats.get('cache_hit_rate', 0):.1%}")
+        cache_table.add_row(
+            "Audio Features",
+            str(engine_stats["cache_size"]),
+            f"{engine_stats['cache_hit_rate']:.1%}",
+        )
+        cache_table.add_row(
+            "AI Responses",
+            str(ai_stats.get("cache_size", 0)),
+            f"{ai_stats.get('cache_hit_rate', 0):.1%}",
+        )
 
         console.print(cache_table)
 
-        cache_choice = Prompt.ask("Cache action",
-                                choices=["view", "clear_audio", "clear_ai", "clear_all", "cancel"],
-                                default="view")
+        cache_choice = Prompt.ask(
+            "Cache action",
+            choices=["view", "clear_audio", "clear_ai", "clear_all", "cancel"],
+            default="view",
+        )
 
         if cache_choice == "clear_audio":
             self.audio_engine.clear_cache()
@@ -844,6 +952,7 @@ class SampleMindCLI:
         console.print("\n[bold cyan]📊 Logging Configuration[/bold cyan]")
 
         import logging
+
         current_level = logging.getLogger().level
         level_names = {10: "DEBUG", 20: "INFO", 30: "WARNING", 40: "ERROR"}
 
@@ -852,19 +961,33 @@ class SampleMindCLI:
         log_table.add_column("Description", style="green")
         log_table.add_column("Current", style="yellow")
 
-        log_table.add_row("DEBUG", "Detailed debugging info", "✅" if current_level <= 10 else "")
-        log_table.add_row("INFO", "General information", "✅" if current_level <= 20 else "")
-        log_table.add_row("WARNING", "Warning messages", "✅" if current_level <= 30 else "")
-        log_table.add_row("ERROR", "Error messages only", "✅" if current_level <= 40 else "")
+        log_table.add_row(
+            "DEBUG", "Detailed debugging info", "✅" if current_level <= 10 else ""
+        )
+        log_table.add_row(
+            "INFO", "General information", "✅" if current_level <= 20 else ""
+        )
+        log_table.add_row(
+            "WARNING", "Warning messages", "✅" if current_level <= 30 else ""
+        )
+        log_table.add_row(
+            "ERROR", "Error messages only", "✅" if current_level <= 40 else ""
+        )
 
         console.print(log_table)
-        console.print(f"[cyan]Current Level: {level_names.get(current_level, current_level)}[/cyan]")
+        console.print(
+            f"[cyan]Current Level: {level_names.get(current_level, current_level)}[/cyan]"
+        )
 
         if Confirm.ask("🔧 Change logging level?"):
-            new_level = Prompt.ask("Logging level",
-                                 choices=["DEBUG", "INFO", "WARNING", "ERROR"],
-                                 default="INFO")
-            level_value = {"DEBUG": 10, "INFO": 20, "WARNING": 30, "ERROR": 40}[new_level]
+            new_level = Prompt.ask(
+                "Logging level",
+                choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+                default="INFO",
+            )
+            level_value = {"DEBUG": 10, "INFO": 20, "WARNING": 30, "ERROR": 40}[
+                new_level
+            ]
             logging.getLogger().setLevel(level_value)
             console.print(f"[green]✅ Logging level set to {new_level}![/green]")
 
@@ -872,14 +995,13 @@ class SampleMindCLI:
         """Configure API settings"""
         console.print("\n[bold cyan]🌐 API Settings[/bold cyan]")
 
-
         api_table = Table(title="API Configuration")
         api_table.add_column("Service", style="cyan")
         api_table.add_column("Status", style="green")
         api_table.add_column("Key Present", style="yellow")
 
-        openai_key = "✅" if os.getenv('OPENAI_API_KEY') else "❌"
-        google_key = "✅" if os.getenv('GOOGLE_AI_API_KEY') else "❌"
+        openai_key = "✅" if os.getenv("OPENAI_API_KEY") else "❌"
+        google_key = "✅" if os.getenv("GOOGLE_AI_API_KEY") else "❌"
 
         api_table.add_row("OpenAI", "Available", openai_key)
         api_table.add_row("Google AI", "Available", google_key)
@@ -894,43 +1016,53 @@ class SampleMindCLI:
         """Export or import configuration"""
         console.print("\n[bold cyan]💾 Export/Import Configuration[/bold cyan]")
 
-        action = Prompt.ask("Action", choices=["export", "import", "cancel"], default="export")
+        action = Prompt.ask(
+            "Action", choices=["export", "import", "cancel"], default="export"
+        )
 
         if action == "export":
             config_data = {
                 "audio_engine": {
                     "max_workers": self.audio_engine.max_workers,
-                    "cache_size": self.audio_engine.cache_size
+                    "cache_size": self.audio_engine.cache_size,
                 },
-                "directories": {
-                    "current": str(self.current_directory)
-                },
-                "session": self.session_stats
+                "directories": {"current": str(self.current_directory)},
+                "session": self.session_stats,
             }
 
             import json
+
             config_file = Path("samplemind_config.json")
-            with open(config_file, 'w') as f:
+            with open(config_file, "w") as f:
                 json.dump(config_data, f, indent=2)
 
             console.print(f"[green]✅ Configuration exported to: {config_file}[/green]")
 
         elif action == "import":
-            config_file = Prompt.ask("Configuration file path", default="samplemind_config.json")
+            config_file = Prompt.ask(
+                "Configuration file path", default="samplemind_config.json"
+            )
             try:
                 import json
+
                 with open(config_file) as f:
                     config_data = json.load(f)
 
                 # Apply configuration
                 if "audio_engine" in config_data:
-                    self.audio_engine.max_workers = config_data["audio_engine"]["max_workers"]
-                    self.audio_engine.cache_size = config_data["audio_engine"]["cache_size"]
+                    self.audio_engine.max_workers = config_data["audio_engine"][
+                        "max_workers"
+                    ]
+                    self.audio_engine.cache_size = config_data["audio_engine"][
+                        "cache_size"
+                    ]
 
                 if "directories" in config_data:
                     self.current_directory = Path(config_data["directories"]["current"])
 
-                console.print(f"[green]✅ Configuration imported from: {config_file}[/green]")
+                console.print(
+                    f"[green]✅ Configuration imported from: {config_file}[/green]"
+                )
             except Exception as e:
                 console.print(f"[red]❌ Failed to import configuration: {e}[/red]")
 
@@ -949,17 +1081,13 @@ class SampleMindCLI:
         provider_table.add_column("Avg Response Time", style="dim")
 
         for provider, status in provider_status.items():
-            status_icon = "✅ Enabled" if status['enabled'] else "❌ Disabled"
-            model = status.get('default_model', 'N/A')
-            requests = status.get('total_requests', 0)
-            avg_time = status.get('avg_response_time', 0)
+            status_icon = "✅ Enabled" if status["enabled"] else "❌ Disabled"
+            model = status.get("default_model", "N/A")
+            requests = status.get("total_requests", 0)
+            avg_time = status.get("avg_response_time", 0)
 
             provider_table.add_row(
-                provider,
-                status_icon,
-                model,
-                str(requests),
-                f"{avg_time:.2f}s"
+                provider, status_icon, model, str(requests), f"{avg_time:.2f}s"
             )
 
         console.print(provider_table)
@@ -979,7 +1107,7 @@ class SampleMindCLI:
         panel = Panel(
             provider_actions,
             title="[bold blue]🤖 Provider Management[/bold blue]",
-            border_style="blue"
+            border_style="blue",
         )
         console.print(panel)
 
@@ -1003,7 +1131,7 @@ class SampleMindCLI:
         console.print("\n[cyan]🔧 Configure Provider Priority[/cyan]")
 
         provider_status = self.ai_manager.get_provider_status()
-        enabled_providers = [p for p, s in provider_status.items() if s['enabled']]
+        enabled_providers = [p for p, s in provider_status.items() if s["enabled"]]
 
         if not enabled_providers:
             console.print("[red]❌ No providers enabled![/red]")
@@ -1017,7 +1145,9 @@ class SampleMindCLI:
             priority_table.add_row(str(i), provider)
 
         console.print(priority_table)
-        console.print("[yellow]💡 Priority configuration coming in next update![/yellow]")
+        console.print(
+            "[yellow]💡 Priority configuration coming in next update![/yellow]"
+        )
 
     async def _test_provider_connections(self):
         """Test AI provider connections"""
@@ -1026,22 +1156,22 @@ class SampleMindCLI:
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
-            console=console
+            console=console,
         ) as progress:
 
             # Test with sample data
             sample_features = {
-                'tempo': 120.0,
-                'key': 'C',
-                'mode': 'major',
-                'duration': 30.0,
-                'sample_rate': 44100
+                "tempo": 120.0,
+                "key": "C",
+                "mode": "major",
+                "duration": 30.0,
+                "sample_rate": 44100,
             }
 
             provider_status = self.ai_manager.get_provider_status()
 
             for provider, status in provider_status.items():
-                if not status['enabled']:
+                if not status["enabled"]:
                     continue
 
                 task = progress.add_task(f"Testing {provider}...", total=None)
@@ -1051,10 +1181,12 @@ class SampleMindCLI:
                     result = await self.ai_manager.analyze_music(
                         sample_features,
                         AnalysisType.QUICK_ANALYSIS,
-                        preferred_provider=AIProvider(provider.upper())
+                        preferred_provider=AIProvider(provider.upper()),
                     )
                     progress.remove_task(task)
-                    console.print(f"[green]✅ {provider}: Connection successful[/green]")
+                    console.print(
+                        f"[green]✅ {provider}: Connection successful[/green]"
+                    )
 
                 except Exception as e:
                     progress.remove_task(task)
@@ -1070,10 +1202,14 @@ class SampleMindCLI:
         stats_table.add_column("Metric", style="cyan")
         stats_table.add_column("Value", style="green")
 
-        stats_table.add_row("Total Requests", str(ai_stats.get('total_requests', 0)))
-        stats_table.add_row("Total Tokens", str(ai_stats.get('total_tokens', 0)))
-        stats_table.add_row("Average Response Time", f"{ai_stats.get('avg_response_time', 0):.2f}s")
-        stats_table.add_row("Cache Hit Rate", f"{ai_stats.get('cache_hit_rate', 0):.1%}")
+        stats_table.add_row("Total Requests", str(ai_stats.get("total_requests", 0)))
+        stats_table.add_row("Total Tokens", str(ai_stats.get("total_tokens", 0)))
+        stats_table.add_row(
+            "Average Response Time", f"{ai_stats.get('avg_response_time', 0):.2f}s"
+        )
+        stats_table.add_row(
+            "Cache Hit Rate", f"{ai_stats.get('cache_hit_rate', 0):.1%}"
+        )
 
         console.print(stats_table)
 
@@ -1114,11 +1250,13 @@ class SampleMindCLI:
         panel = Panel(
             tips_menu,
             title="[bold blue]💡 Production Tips Menu[/bold blue]",
-            border_style="blue"
+            border_style="blue",
         )
         console.print(panel)
 
-        choice = Prompt.ask("💡 Select tip category", choices=["0", "1", "2", "3", "4", "5", "6", "7"])
+        choice = Prompt.ask(
+            "💡 Select tip category", choices=["0", "1", "2", "3", "4", "5", "6", "7"]
+        )
 
         match choice:
             case "0":
@@ -1150,13 +1288,15 @@ class SampleMindCLI:
             "🎵 **Frequency Separation**: Give each element its own frequency space",
             "🎛️ **Compression Technique**: Use slow attack for punch, fast attack for control",
             "🌊 **Reverb & Delay**: Create depth with spatial effects, but don't overdo it",
-            "📈 **Mix in Mono**: Check mono compatibility for translation across systems"
+            "📈 **Mix in Mono**: Check mono compatibility for translation across systems",
         ]
 
         for tip in mixing_tips:
             console.print(f"   {tip}")
 
-        console.print("\n[yellow]💡 Pro Tip: Trust your ears over your eyes when mixing![/yellow]")
+        console.print(
+            "\n[yellow]💡 Pro Tip: Trust your ears over your eyes when mixing![/yellow]"
+        )
 
     def _show_arrangement_tips(self) -> None:
         """Display arrangement techniques"""
@@ -1170,13 +1310,15 @@ class SampleMindCLI:
             "🥁 **Rhythm Variation**: Change drum patterns between sections for movement",
             "🎸 **Instrumental Roles**: Lead, rhythm, bass, percussion - define each element's purpose",
             "🎯 **Focus Elements**: Don't let everything compete - create a hierarchy",
-            "⏰ **Timing**: Know when to introduce and remove elements for maximum impact"
+            "⏰ **Timing**: Know when to introduce and remove elements for maximum impact",
         ]
 
         for tip in arrangement_tips:
             console.print(f"   {tip}")
 
-        console.print("\n[yellow]💡 Pro Tip: Less is often more - every element should serve a purpose![/yellow]")
+        console.print(
+            "\n[yellow]💡 Pro Tip: Less is often more - every element should serve a purpose![/yellow]"
+        )
 
     def _show_mastering_tips(self) -> None:
         """Display mastering basics"""
@@ -1190,13 +1332,15 @@ class SampleMindCLI:
             "🔊 **LUFS Targets**: Aim for -14 LUFS for streaming, -8 to -10 for club music",
             "🎵 **Stereo Imaging**: Enhance width carefully, keep bass centered",
             "⚡ **Transient Control**: Shape attack and sustain of the overall mix",
-            "🎚️ **Multiple Versions**: Create different masters for different platforms"
+            "🎚️ **Multiple Versions**: Create different masters for different platforms",
         ]
 
         for tip in mastering_tips:
             console.print(f"   {tip}")
 
-        console.print("\n[yellow]💡 Pro Tip: Mastering should enhance, not fix - get your mix right first![/yellow]")
+        console.print(
+            "\n[yellow]💡 Pro Tip: Mastering should enhance, not fix - get your mix right first![/yellow]"
+        )
 
     def _show_sound_design_tips(self) -> None:
         """Display sound design tips"""
@@ -1210,13 +1354,15 @@ class SampleMindCLI:
             "🔄 **Effects Processing**: Reverb, delay, distortion for character",
             "🎵 **Harmonic Content**: Add overtones and harmonics for richness",
             "📊 **Frequency Analysis**: Use spectrum analyzer to understand your sounds",
-            "🎯 **Context Mixing**: Design sounds to fit in the mix, not in isolation"
+            "🎯 **Context Mixing**: Design sounds to fit in the mix, not in isolation",
         ]
 
         for tip in sound_design_tips:
             console.print(f"   {tip}")
 
-        console.print("\n[yellow]💡 Pro Tip: Record real-world sounds and process them for unique textures![/yellow]")
+        console.print(
+            "\n[yellow]💡 Pro Tip: Record real-world sounds and process them for unique textures![/yellow]"
+        )
 
     def _show_workflow_tips(self) -> None:
         """Display workflow optimization tips"""
@@ -1230,72 +1376,80 @@ class SampleMindCLI:
             "⌨️ **Keyboard Shortcuts**: Learn and use DAW shortcuts for speed",
             "🎯 **Focus Sessions**: Dedicate specific sessions to writing, recording, mixing",
             "📋 **Track Bouncing**: Bounce MIDI to audio to free up CPU resources",
-            "🔄 **Backup Strategy**: Automated backups to cloud and external drives"
+            "🔄 **Backup Strategy**: Automated backups to cloud and external drives",
         ]
 
         for tip in workflow_tips:
             console.print(f"   {tip}")
 
-        console.print("\n[yellow]💡 Pro Tip: Spend time setting up your environment - it pays off in productivity![/yellow]")
+        console.print(
+            "\n[yellow]💡 Pro Tip: Spend time setting up your environment - it pays off in productivity![/yellow]"
+        )
 
     async def _show_genre_specific_tips(self):
         """Show genre-specific production advice"""
         console.print("\n[bold cyan]🎯 Genre-Specific Advice[/bold cyan]")
 
-        genre = Prompt.ask("Select genre",
-                          choices=["house", "techno", "trap", "pop", "rock", "jazz", "ambient"],
-                          default="house")
+        genre = Prompt.ask(
+            "Select genre",
+            choices=["house", "techno", "trap", "pop", "rock", "jazz", "ambient"],
+            default="house",
+        )
 
         genre_tips = {
             "house": [
                 "🥁 **Four-on-the-floor**: Strong kick on every beat",
                 "🎵 **Groove**: Swing and shuffle for that house feel",
                 "🔊 **Bass**: Deep, warm basslines that complement the kick",
-                "🎹 **Chords**: Warm pads and stabby chord progressions"
+                "🎹 **Chords**: Warm pads and stabby chord progressions",
             ],
             "techno": [
                 "⚡ **Driving Rhythm**: Relentless, hypnotic beats",
                 "🔊 **Industrial Sounds**: Metallic, mechanical textures",
                 "🎛️ **Automation**: Constant parameter changes for evolution",
-                "📊 **Minimal Approach**: Less elements, more impact"
+                "📊 **Minimal Approach**: Less elements, more impact",
             ],
             "trap": [
                 "🥁 **808s**: Deep, punchy 808 drums with long decay",
                 "⚡ **Hi-hats**: Fast, syncopated hi-hat patterns",
                 "🎵 **Melody**: Dark, minor scale melodies",
-                "🔊 **Dynamics**: Heavy use of drops and buildups"
+                "🔊 **Dynamics**: Heavy use of drops and buildups",
             ],
             "pop": [
                 "🎵 **Catchy Hooks**: Memorable melodies and phrases",
                 "🎚️ **Vocal Focus**: Vocals are the star, everything supports them",
                 "📊 **Radio Ready**: Consistent levels, commercial sound",
-                "🎹 **Instrument Balance**: Clear separation, nothing muddy"
+                "🎹 **Instrument Balance**: Clear separation, nothing muddy",
             ],
             "rock": [
                 "🎸 **Guitar Power**: Distorted power chords and riffs",
                 "🥁 **Live Drums**: Natural, dynamic drum sounds",
                 "🔊 **Energy**: High energy throughout, driving rhythms",
-                "🎵 **Song Structure**: Traditional verse/chorus structures"
+                "🎵 **Song Structure**: Traditional verse/chorus structures",
             ],
             "jazz": [
                 "🎹 **Complex Harmony**: Extended chords and progressions",
                 "🎵 **Improvisation**: Space for solos and musical expression",
                 "🥁 **Swing Feel**: Rhythmic complexity and groove",
-                "🎚️ **Natural Sound**: Minimal processing, acoustic instruments"
+                "🎚️ **Natural Sound**: Minimal processing, acoustic instruments",
             ],
             "ambient": [
                 "🌊 **Atmosphere**: Focus on mood and texture over rhythm",
                 "⏰ **Long Forms**: Slow evolution over extended periods",
                 "🔊 **Reverb**: Spacious, ethereal soundscapes",
-                "🎵 **Minimalism**: Subtle changes, less is more"
-            ]
+                "🎵 **Minimalism**: Subtle changes, less is more",
+            ],
         }
 
-        console.print(f"\n[bold yellow]🎯 {genre.title()} Production Tips:[/bold yellow]")
+        console.print(
+            f"\n[bold yellow]🎯 {genre.title()} Production Tips:[/bold yellow]"
+        )
         for tip in genre_tips[genre]:
             console.print(f"   {tip}")
 
-        console.print(f"\n[yellow]💡 Pro Tip: Listen to reference tracks in {genre} and analyze their production techniques![/yellow]")
+        console.print(
+            f"\n[yellow]💡 Pro Tip: Listen to reference tracks in {genre} and analyze their production techniques![/yellow]"
+        )
 
     async def _show_ai_coaching(self):
         """Provide AI-powered production coaching"""
@@ -1305,7 +1459,7 @@ class SampleMindCLI:
             "🎯 Get personalized tips based on your recent tracks",
             "🎵 Analyze a specific track for improvement suggestions",
             "📈 Production skill assessment and learning path",
-            "🎛️ Technical problem solving assistance"
+            "🎛️ Technical problem solving assistance",
         ]
 
         for i, option in enumerate(coaching_options, 1):
@@ -1314,41 +1468,57 @@ class SampleMindCLI:
         choice = Prompt.ask("Select coaching option", choices=["1", "2", "3", "4"])
 
         if choice == "1":
-            console.print("[cyan]🔍 Analyzing your session data for personalized tips...[/cyan]")
+            console.print(
+                "[cyan]🔍 Analyzing your session data for personalized tips...[/cyan]"
+            )
             await self._generate_personalized_tips()
         elif choice == "2":
-            console.print("[cyan]📁 Select a track to analyze for improvement...[/cyan]")
+            console.print(
+                "[cyan]📁 Select a track to analyze for improvement...[/cyan]"
+            )
             await self._analyze_track_for_coaching()
         else:
-            console.print("[yellow]💡 Advanced AI coaching features coming in next update![/yellow]")
+            console.print(
+                "[yellow]💡 Advanced AI coaching features coming in next update![/yellow]"
+            )
 
     async def _generate_personalized_tips(self):
         """Generate personalized tips based on session data"""
-        session_duration = time.time() - self.session_stats['session_start']
-        files_analyzed = self.session_stats['files_analyzed']
+        session_duration = time.time() - self.session_stats["session_start"]
+        files_analyzed = self.session_stats["files_analyzed"]
 
         if files_analyzed == 0:
-            console.print("[yellow]💡 No tracks analyzed yet. Try analyzing some files first![/yellow]")
+            console.print(
+                "[yellow]💡 No tracks analyzed yet. Try analyzing some files first![/yellow]"
+            )
             return
 
         # Mock personalized coaching based on session stats
         tips = []
 
         if session_duration > 3600:  # More than 1 hour
-            tips.append("⏰ **Take breaks**: You've been working for over an hour. Take regular breaks to keep your ears fresh!")
+            tips.append(
+                "⏰ **Take breaks**: You've been working for over an hour. Take regular breaks to keep your ears fresh!"
+            )
 
         if files_analyzed > 5:
-            tips.append("📊 **Batch processing**: You've analyzed many files. Consider using batch processing for efficiency!")
+            tips.append(
+                "📊 **Batch processing**: You've analyzed many files. Consider using batch processing for efficiency!"
+            )
 
-        avg_time = self.session_stats['total_processing_time'] / files_analyzed
+        avg_time = self.session_stats["total_processing_time"] / files_analyzed
         if avg_time > 10:
-            tips.append("⚡ **Optimize workflow**: Your average processing time is high. Consider using faster analysis modes for iteration!")
+            tips.append(
+                "⚡ **Optimize workflow**: Your average processing time is high. Consider using faster analysis modes for iteration!"
+            )
 
-        tips.extend([
-            "🎯 **Focus on fundamentals**: Master EQ, compression, and reverb before moving to advanced techniques",
-            "🎵 **Reference often**: A/B compare your tracks with professional releases",
-            "📈 **Track your progress**: Keep notes on what you learn in each session"
-        ])
+        tips.extend(
+            [
+                "🎯 **Focus on fundamentals**: Master EQ, compression, and reverb before moving to advanced techniques",
+                "🎵 **Reference often**: A/B compare your tracks with professional releases",
+                "📈 **Track your progress**: Keep notes on what you learn in each session",
+            ]
+        )
 
         console.print("\n[bold green]🤖 Your Personalized Tips:[/bold green]")
         for tip in tips[:5]:  # Show top 5 tips
@@ -1359,7 +1529,7 @@ class SampleMindCLI:
         # Use existing file selection logic
         file_path = select_audio_file(
             title="Choose Track for AI Coaching Analysis",
-            initial_directory=self.current_directory
+            initial_directory=self.current_directory,
         )
 
         if not file_path:
@@ -1370,26 +1540,32 @@ class SampleMindCLI:
             with Progress(
                 SpinnerColumn(),
                 TextColumn("[progress.description]{task.description}"),
-                console=console
+                console=console,
             ) as progress:
 
-                task = progress.add_task("🤖 Analyzing track for coaching insights...", total=None)
+                task = progress.add_task(
+                    "🤖 Analyzing track for coaching insights...", total=None
+                )
 
                 # Analyze the track
-                features = self.audio_engine.analyze_audio(file_path, level=AnalysisLevel.DETAILED)
+                features = self.audio_engine.analyze_audio(
+                    file_path, level=AnalysisLevel.DETAILED
+                )
                 features_dict = features.to_dict()
 
                 # Get AI coaching analysis
                 ai_result = await self.ai_manager.analyze_music(
                     features_dict,
                     AnalysisType.PRODUCTION_ANALYSIS,
-                    user_context={'goal': 'coaching', 'skill_level': 'intermediate'}
+                    user_context={"goal": "coaching", "skill_level": "intermediate"},
                 )
 
                 progress.remove_task(task)
 
             # Display coaching results
-            console.print(f"\n[bold green]🎯 Coaching Analysis for: {file_path.name}[/bold green]")
+            console.print(
+                f"\n[bold green]🎯 Coaching Analysis for: {file_path.name}[/bold green]"
+            )
             console.print(f"\n[cyan]Summary:[/cyan] {ai_result.summary}")
 
             if ai_result.production_tips:
@@ -1398,7 +1574,9 @@ class SampleMindCLI:
                     console.print(f"   • {tip}")
 
             if ai_result.fl_studio_recommendations:
-                console.print("\n[bold magenta]🎛️ Technical Recommendations:[/bold magenta]")
+                console.print(
+                    "\n[bold magenta]🎛️ Technical Recommendations:[/bold magenta]"
+                )
                 for rec in ai_result.fl_studio_recommendations:
                     console.print(f"   • {rec}")
 
@@ -1425,11 +1603,14 @@ class SampleMindCLI:
         panel = Panel(
             fl_menu,
             title="[bold blue]🎛️ FL Studio Integration[/bold blue]",
-            border_style="blue"
+            border_style="blue",
         )
         console.print(panel)
 
-        choice = Prompt.ask("🎛️ Select FL Studio feature", choices=["0", "1", "2", "3", "4", "5", "6", "7"])
+        choice = Prompt.ask(
+            "🎛️ Select FL Studio feature",
+            choices=["0", "1", "2", "3", "4", "5", "6", "7"],
+        )
 
         if choice == "0":
             return
@@ -1455,7 +1636,7 @@ class SampleMindCLI:
         # Select audio file for preset generation
         file_path = select_audio_file(
             title="Choose Audio File for Preset Generation",
-            initial_directory=self.current_directory
+            initial_directory=self.current_directory,
         )
 
         if not file_path:
@@ -1466,16 +1647,21 @@ class SampleMindCLI:
             with Progress(
                 SpinnerColumn(),
                 TextColumn("[progress.description]{task.description}"),
-                console=console
+                console=console,
             ) as progress:
 
-                task = progress.add_task("🔍 Analyzing audio for FL preset generation...", total=None)
+                task = progress.add_task(
+                    "🔍 Analyzing audio for FL preset generation...", total=None
+                )
 
                 # Analyze the audio
-                features = self.audio_engine.analyze_audio(file_path, level=AnalysisLevel.DETAILED)
+                features = self.audio_engine.analyze_audio(
+                    file_path, level=AnalysisLevel.DETAILED
+                )
 
                 # Generate FL Studio preset based on features
                 from samplemind.core.engine.audio_engine import FLStudioIntegration
+
                 preset = FLStudioIntegration.generate_fl_preset(features)
 
                 progress.remove_task(task)
@@ -1488,35 +1674,44 @@ class SampleMindCLI:
             preset_table.add_column("Value", style="green")
             preset_table.add_column("Description", style="dim")
 
-            preset_table.add_row("Tempo", f"{preset['tempo']:.1f} BPM", "Project tempo setting")
-            preset_table.add_row("Key", f"{preset['key']} {preset['mode']}", "Musical key signature")
+            preset_table.add_row(
+                "Tempo", f"{preset['tempo']:.1f} BPM", "Project tempo setting"
+            )
+            preset_table.add_row(
+                "Key", f"{preset['key']} {preset['mode']}", "Musical key signature"
+            )
 
             console.print(preset_table)
 
             # Show suggested effects
-            if preset['suggested_effects']:
+            if preset["suggested_effects"]:
                 console.print("\n[bold yellow]🎛️ Recommended Effects:[/bold yellow]")
-                for effect in preset['suggested_effects']:
+                for effect in preset["suggested_effects"]:
                     console.print(f"   • {effect}")
 
             # Show mixer settings
-            if preset['mixer_settings']:
-                mixer_settings = preset['mixer_settings']
+            if preset["mixer_settings"]:
+                mixer_settings = preset["mixer_settings"]
                 console.print("\n[bold magenta]🎚️ Mixer Recommendations:[/bold magenta]")
 
-                if 'eq' in mixer_settings:
-                    eq = mixer_settings['eq']
-                    console.print(f"   EQ: Low Cut @ {eq['low_cut']}Hz, Mid Boost: {eq['mid_boost']}dB")
+                if "eq" in mixer_settings:
+                    eq = mixer_settings["eq"]
+                    console.print(
+                        f"   EQ: Low Cut @ {eq['low_cut']}Hz, Mid Boost: {eq['mid_boost']}dB"
+                    )
 
-                if 'compression' in mixer_settings:
-                    comp = mixer_settings['compression']
-                    console.print(f"   Compression: Ratio {comp['ratio']}:1, {comp['attack']} attack")
+                if "compression" in mixer_settings:
+                    comp = mixer_settings["compression"]
+                    console.print(
+                        f"   Compression: Ratio {comp['ratio']}:1, {comp['attack']} attack"
+                    )
 
             # Ask to save preset
             if Confirm.ask("💾 Save FL Studio preset file?"):
-                preset_file = file_path.with_suffix('.flp_preset.json')
+                preset_file = file_path.with_suffix(".flp_preset.json")
                 import json
-                with open(preset_file, 'w') as f:
+
+                with open(preset_file, "w") as f:
                     json.dump(preset, f, indent=2)
                 console.print(f"[green]✅ Preset saved: {preset_file}[/green]")
 
@@ -1535,13 +1730,15 @@ class SampleMindCLI:
             "🎵 **Sidechain**: Use Fruity Peak Controller for sidechain compression effects",
             "🔗 **Routing**: Route drums to a bus for group processing",
             "📈 **Automation**: Automate send levels for dynamic effects",
-            "🎯 **Master Chain**: EQ → Compression → Limiting on master channel"
+            "🎯 **Master Chain**: EQ → Compression → Limiting on master channel",
         ]
 
         for tip in mixer_tips:
             console.print(f"   {tip}")
 
-        console.print("\n[yellow]💡 Pro Tip: Use FL's built-in analyzer plugins to visualize your frequency spectrum![/yellow]")
+        console.print(
+            "\n[yellow]💡 Pro Tip: Use FL's built-in analyzer plugins to visualize your frequency spectrum![/yellow]"
+        )
 
     async def _show_plugin_chains(self):
         """Show recommended FL Studio plugin chains"""
@@ -1553,37 +1750,39 @@ class SampleMindCLI:
                 "2. Fruity Compressor (3:1 ratio, medium attack)",
                 "3. Fruity DeEsser (if needed)",
                 "4. Fruity Parametric EQ 2 (Presence boost @ 3-5kHz)",
-                "5. Fruity Reverb 2 (Send track)"
+                "5. Fruity Reverb 2 (Send track)",
             ],
             "Drums": [
                 "1. Fruity Parametric EQ 2 (Shape for punch)",
                 "2. Fruity Compressor (Fast attack, auto release)",
                 "3. Fruity Multiband Compressor (Maximus)",
-                "4. Fruity Limiter (Gentle limiting)"
+                "4. Fruity Limiter (Gentle limiting)",
             ],
             "Bass": [
                 "1. Fruity Parametric EQ 2 (Low-end sculpting)",
                 "2. Fruity Compressor (Slow attack, fast release)",
                 "3. Fruity Waveshaper (Harmonic saturation)",
-                "4. Fruity Parametric EQ 2 (High-frequency control)"
+                "4. Fruity Parametric EQ 2 (High-frequency control)",
             ],
             "Lead/Synth": [
                 "1. Fruity Parametric EQ 2 (Frequency carving)",
                 "2. Fruity Chorus (Width and movement)",
                 "3. Fruity Delay 3 (Rhythmic delays)",
-                "4. Fruity Reverb 2 (Spatial depth)"
-            ]
+                "4. Fruity Reverb 2 (Spatial depth)",
+            ],
         }
 
-        chain_type = Prompt.ask("Select instrument type",
-                               choices=list(chain_types.keys()),
-                               default="Vocal")
+        chain_type = Prompt.ask(
+            "Select instrument type", choices=list(chain_types.keys()), default="Vocal"
+        )
 
         console.print(f"\n[bold green]🔗 {chain_type} Plugin Chain:[/bold green]")
         for step in chain_types[chain_type]:
             console.print(f"   {step}")
 
-        console.print(f"\n[yellow]💡 Tip: Adjust parameters based on the specific {chain_type.lower()} source material![/yellow]")
+        console.print(
+            f"\n[yellow]💡 Tip: Adjust parameters based on the specific {chain_type.lower()} source material![/yellow]"
+        )
 
     async def _generate_project_template(self):
         """Generate FL Studio project template"""
@@ -1593,38 +1792,42 @@ class SampleMindCLI:
             "House": {
                 "bpm": 128,
                 "tracks": ["Kick", "Bass", "Lead", "Pads", "Percussion", "FX"],
-                "effects": ["Reverb Send", "Delay Send", "Master Bus"]
+                "effects": ["Reverb Send", "Delay Send", "Master Bus"],
             },
             "Trap": {
                 "bpm": 140,
                 "tracks": ["808", "Kick", "Snare", "Hi-hats", "Melody", "Lead"],
-                "effects": ["Reverb Send", "Distortion", "Master Bus"]
+                "effects": ["Reverb Send", "Distortion", "Master Bus"],
             },
             "Pop": {
                 "bpm": 120,
                 "tracks": ["Drums", "Bass", "Guitar", "Vocals", "Synths", "Strings"],
-                "effects": ["Vocal Reverb", "Instrument Reverb", "Master Bus"]
-            }
+                "effects": ["Vocal Reverb", "Instrument Reverb", "Master Bus"],
+            },
         }
 
-        template_type = Prompt.ask("Select template type",
-                                  choices=list(template_types.keys()),
-                                  default="House")
+        template_type = Prompt.ask(
+            "Select template type", choices=list(template_types.keys()), default="House"
+        )
 
         template = template_types[template_type]
 
-        console.print(f"\n[bold green]📁 {template_type} Project Template:[/bold green]")
+        console.print(
+            f"\n[bold green]📁 {template_type} Project Template:[/bold green]"
+        )
         console.print(f"   🎵 **BPM**: {template['bpm']}")
         console.print(f"   🎛️ **Mixer Tracks**: {len(template['tracks'])} channels")
 
-        for i, track in enumerate(template['tracks'], 1):
+        for i, track in enumerate(template["tracks"], 1):
             console.print(f"      Track {i}: {track}")
 
         console.print(f"   🔊 **Effect Sends**: {len(template['effects'])} sends")
-        for effect in template['effects']:
+        for effect in template["effects"]:
             console.print(f"      • {effect}")
 
-        console.print("\n[yellow]💡 Pro Tip: Save this as an FL Studio template file for quick project starts![/yellow]")
+        console.print(
+            "\n[yellow]💡 Pro Tip: Save this as an FL Studio template file for quick project starts![/yellow]"
+        )
 
     def _show_fl_tips(self) -> None:
         """Show FL Studio specific production tips"""
@@ -1638,13 +1841,15 @@ class SampleMindCLI:
             "🔄 **Automation**: Right-click any knob and select 'Edit Events' for precision",
             "🎵 **Step Sequencer**: Use swing settings for groove, layer patterns for variation",
             "💾 **Project Management**: Save different versions, use 'Save New Version'",
-            "🎯 **CPU Optimization**: Freeze tracks with complex processing"
+            "🎯 **CPU Optimization**: Freeze tracks with complex processing",
         ]
 
         for tip in fl_tips:
             console.print(f"   {tip}")
 
-        console.print("\n[yellow]💡 Master Tip: Use FL's lifetime free updates - always stay current![/yellow]")
+        console.print(
+            "\n[yellow]💡 Master Tip: Use FL's lifetime free updates - always stay current![/yellow]"
+        )
 
     def _show_fl_workflow(self) -> None:
         """Show FL Studio workflow optimization"""
@@ -1655,20 +1860,20 @@ class SampleMindCLI:
                 "Start with Step Sequencer for drum patterns",
                 "Use Piano Roll for melodies and chords",
                 "Layer instruments in the Channel Rack",
-                "Arrange in Playlist view"
+                "Arrange in Playlist view",
             ],
             "Mixing": [
                 "Group related tracks in Mixer",
                 "Use Color coding for organization",
                 "Set up Send tracks early",
-                "Mix with reference tracks"
+                "Mix with reference tracks",
             ],
             "Efficiency": [
                 "Create custom templates",
                 "Use keyboard shortcuts extensively",
                 "Save channel presets",
-                "Organize samples in Browser"
-            ]
+                "Organize samples in Browser",
+            ],
         }
 
         for section, tips in workflow_sections.items():
@@ -1676,7 +1881,9 @@ class SampleMindCLI:
             for tip in tips:
                 console.print(f"   • {tip}")
 
-        console.print("\n[yellow]💡 Workflow Tip: Spend time customizing FL Studio to match your creative process![/yellow]")
+        console.print(
+            "\n[yellow]💡 Workflow Tip: Spend time customizing FL Studio to match your creative process![/yellow]"
+        )
 
     def _show_export_settings(self) -> None:
         """Show FL Studio export settings guide"""
@@ -1687,35 +1894,39 @@ class SampleMindCLI:
                 "format": "WAV 24-bit",
                 "sample_rate": "44.1 kHz",
                 "lufs": "-14 LUFS",
-                "notes": "Use Fruity Limiter with LUFS metering"
+                "notes": "Use Fruity Limiter with LUFS metering",
             },
             "Club/DJ Play": {
                 "format": "WAV 24-bit",
                 "sample_rate": "44.1 kHz",
                 "lufs": "-8 to -10 LUFS",
-                "notes": "Higher loudness for club systems"
+                "notes": "Higher loudness for club systems",
             },
             "Mastering": {
                 "format": "WAV 32-bit float",
                 "sample_rate": "48 kHz or higher",
                 "lufs": "No limiting",
-                "notes": "Full dynamic range for mastering engineer"
+                "notes": "Full dynamic range for mastering engineer",
             },
             "Demo/Rough Mix": {
                 "format": "MP3 320 kbps",
                 "sample_rate": "44.1 kHz",
                 "lufs": "-12 LUFS",
-                "notes": "Good quality, smaller file size"
-            }
+                "notes": "Good quality, smaller file size",
+            },
         }
 
-        format_type = Prompt.ask("Select export purpose",
-                                choices=list(export_formats.keys()),
-                                default="Streaming (Spotify, Apple Music)")
+        format_type = Prompt.ask(
+            "Select export purpose",
+            choices=list(export_formats.keys()),
+            default="Streaming (Spotify, Apple Music)",
+        )
 
         settings = export_formats[format_type]
 
-        console.print(f"\n[bold green]🔄 Export Settings for {format_type}:[/bold green]")
+        console.print(
+            f"\n[bold green]🔄 Export Settings for {format_type}:[/bold green]"
+        )
         for key, value in settings.items():
             if key != "notes":
                 console.print(f"   📊 **{key.title().replace('_', ' ')}**: {value}")
@@ -1745,18 +1956,12 @@ class SampleMindCLI:
         info_table.add_row("🤖 AI Provider", ai_result.provider.value)
         info_table.add_row("⚡ Processing Time", f"{ai_result.processing_time:.2f}s")
 
-        file_panel = Panel(
-            info_table,
-            title="📋 File Information",
-            border_style="blue"
-        )
+        file_panel = Panel(info_table, title="📋 File Information", border_style="blue")
         console.print(file_panel)
 
         # AI Analysis summary
         summary_panel = Panel(
-            ai_result.summary,
-            title="🤖 AI Analysis Summary",
-            border_style="green"
+            ai_result.summary, title="🤖 AI Analysis Summary", border_style="green"
         )
         console.print(summary_panel)
 
@@ -1764,19 +1969,17 @@ class SampleMindCLI:
         if ai_result.production_tips:
             tips_text = "\n".join([f"• {tip}" for tip in ai_result.production_tips])
             tips_panel = Panel(
-                tips_text,
-                title="💡 Production Tips",
-                border_style="yellow"
+                tips_text, title="💡 Production Tips", border_style="yellow"
             )
             console.print(tips_panel)
 
         # FL Studio recommendations
         if ai_result.fl_studio_recommendations:
-            fl_text = "\n".join([f"• {rec}" for rec in ai_result.fl_studio_recommendations])
+            fl_text = "\n".join(
+                [f"• {rec}" for rec in ai_result.fl_studio_recommendations]
+            )
             fl_panel = Panel(
-                fl_text,
-                title="🎛️ FL Studio Recommendations",
-                border_style="magenta"
+                fl_text, title="🎛️ FL Studio Recommendations", border_style="magenta"
             )
             console.print(fl_panel)
 
@@ -1788,14 +1991,30 @@ class SampleMindCLI:
 
         def get_rating(score):
             """Convert score to rating text"""
-            if score >= 0.8: return "🌟 Excellent"
-            elif score >= 0.6: return "⭐ Good"
-            elif score >= 0.4: return "✨ Average"
-            else: return "💫 Needs Work"
+            if score >= 0.8:
+                return "🌟 Excellent"
+            elif score >= 0.6:
+                return "⭐ Good"
+            elif score >= 0.4:
+                return "✨ Average"
+            else:
+                return "💫 Needs Work"
 
-        scores_table.add_row("Creativity", f"{ai_result.creativity_score:.2f}", get_rating(ai_result.creativity_score))
-        scores_table.add_row("Production Quality", f"{ai_result.production_quality_score:.2f}", get_rating(ai_result.production_quality_score))
-        scores_table.add_row("Commercial Potential", f"{ai_result.commercial_potential_score:.2f}", get_rating(ai_result.commercial_potential_score))
+        scores_table.add_row(
+            "Creativity",
+            f"{ai_result.creativity_score:.2f}",
+            get_rating(ai_result.creativity_score),
+        )
+        scores_table.add_row(
+            "Production Quality",
+            f"{ai_result.production_quality_score:.2f}",
+            get_rating(ai_result.production_quality_score),
+        )
+        scores_table.add_row(
+            "Commercial Potential",
+            f"{ai_result.commercial_potential_score:.2f}",
+            get_rating(ai_result.commercial_potential_score),
+        )
 
         console.print(scores_table)
 
@@ -1805,8 +2024,8 @@ class SampleMindCLI:
             return
 
         # Calculate statistics
-        creativity_scores = [r['ai_result'].creativity_score for r in results]
-        production_scores = [r['ai_result'].production_quality_score for r in results]
+        creativity_scores = [r["ai_result"].creativity_score for r in results]
+        production_scores = [r["ai_result"].production_quality_score for r in results]
 
         avg_creativity = sum(creativity_scores) / len(creativity_scores)
         avg_production = sum(production_scores) / len(production_scores)
@@ -1817,14 +2036,18 @@ class SampleMindCLI:
 
         summary_table.add_row("Files Processed", str(len(results)))
         summary_table.add_row("Total Time", f"{processing_time:.1f}s")
-        summary_table.add_row("Avg Time Per File", f"{processing_time / len(results):.2f}s")
+        summary_table.add_row(
+            "Avg Time Per File", f"{processing_time / len(results):.2f}s"
+        )
         summary_table.add_row("Avg Creativity Score", f"{avg_creativity:.2f}")
         summary_table.add_row("Avg Production Score", f"{avg_production:.2f}")
 
         console.print(summary_table)
 
         # Top files by creativity
-        top_creative = sorted(results, key=lambda x: x['ai_result'].creativity_score, reverse=True)[:5]
+        top_creative = sorted(
+            results, key=lambda x: x["ai_result"].creativity_score, reverse=True
+        )[:5]
 
         top_table = Table(title="🌟 Top Creative Files")
         top_table.add_column("File", style="cyan")
@@ -1832,9 +2055,9 @@ class SampleMindCLI:
         top_table.add_column("Production", style="yellow")
 
         for result in top_creative:
-            file_name = Path(result['file']).name
-            creativity = result['ai_result'].creativity_score
-            production = result['ai_result'].production_quality_score
+            file_name = Path(result["file"]).name
+            creativity = result["ai_result"].creativity_score
+            production = result["ai_result"].production_quality_score
             top_table.add_row(file_name, f"{creativity:.2f}", f"{production:.2f}")
 
         console.print(top_table)
@@ -1846,20 +2069,22 @@ class SampleMindCLI:
         summary_table.add_column("Property", style="cyan")
         summary_table.add_column("Value", style="green")
 
-        summary_table.add_row("Total Files", str(dir_info['total_files']))
-        summary_table.add_row("Total Size", f"{dir_info['total_size'] / (1024*1024):.1f} MB")
+        summary_table.add_row("Total Files", str(dir_info["total_files"]))
+        summary_table.add_row(
+            "Total Size", f"{dir_info['total_size'] / (1024*1024):.1f} MB"
+        )
 
         console.print(summary_table)
 
         # Format distribution
-        if dir_info['format_distribution']:
+        if dir_info["format_distribution"]:
             format_table = Table(title="🎵 Format Distribution")
             format_table.add_column("Format", style="cyan")
             format_table.add_column("Count", style="green")
             format_table.add_column("Percentage", style="yellow")
 
-            total = dir_info['total_files']
-            for fmt, count in dir_info['format_distribution'].items():
+            total = dir_info["total_files"]
+            for fmt, count in dir_info["format_distribution"].items():
                 percentage = (count / total) * 100 if total > 0 else 0
                 format_table.add_row(fmt, str(count), f"{percentage:.1f}%")
 
@@ -1885,7 +2110,7 @@ class SampleMindCLI:
             "1": ("Compression", EffectType.COMPRESSION),
             "2": ("EQ", EffectType.EQ),
             "3": ("Reverb", EffectType.REVERB),
-            "4": ("Distortion", EffectType.DISTORTION)
+            "4": ("Distortion", EffectType.DISTORTION),
         }
 
         for k, (name, _) in effects.items():
@@ -1898,21 +2123,24 @@ class SampleMindCLI:
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
-            console=console
+            console=console,
         ) as progress:
             task = progress.add_task(f"Applying {effect_name}...", total=None)
 
-            output_path = file_path.parent / f"{file_path.stem}_{effect_name.lower()}{file_path.suffix}"
+            output_path = (
+                file_path.parent
+                / f"{file_path.stem}_{effect_name.lower()}{file_path.suffix}"
+            )
             success = self.effects_processor.apply_effect(
-                file_path,
-                output_path,
-                effect_type
+                file_path, output_path, effect_type
             )
 
             progress.remove_task(task)
 
         if success:
-            console.print(f"[green]✅ Effect applied! Saved to: {output_path.name}[/green]")
+            console.print(
+                f"[green]✅ Effect applied! Saved to: {output_path.name}[/green]"
+            )
         else:
             console.print("[red]❌ Failed to apply effect[/red]")
 
@@ -1934,7 +2162,7 @@ class SampleMindCLI:
         modes = {
             "1": "Melody (Monophonic)",
             "2": "Chords (Polyphonic)",
-            "3": "Drums (Percussive)"
+            "3": "Drums (Percussive)",
         }
         for k, v in modes.items():
             console.print(f"  {k}. {v}")
@@ -1944,12 +2172,13 @@ class SampleMindCLI:
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
-            console=console
+            console=console,
         ) as progress:
             task = progress.add_task("Converting to MIDI...", total=None)
 
             # Load audio
             import librosa
+
             y, sr = librosa.load(file_path, sr=None)
 
             midi_file = None
@@ -1963,7 +2192,7 @@ class SampleMindCLI:
             progress.remove_task(task)
 
         if midi_file:
-            output_path = file_path.with_suffix('.mid')
+            output_path = file_path.with_suffix(".mid")
             midi_file.save(output_path)
             console.print(f"[green]✅ MIDI saved to: {output_path.name}[/green]")
         else:
@@ -1982,12 +2211,14 @@ class SampleMindCLI:
         templates = {
             "1": ("Drums", PackTemplate.DRUMS),
             "2": ("Melodic", PackTemplate.MELODIC),
-            "3": ("Loops", PackTemplate.LOOPS)
+            "3": ("Loops", PackTemplate.LOOPS),
         }
         for k, (n, _) in templates.items():
             console.print(f"  {k}. {n}")
 
-        t_choice = Prompt.ask("Select template", choices=list(templates.keys()), default="1")
+        t_choice = Prompt.ask(
+            "Select template", choices=list(templates.keys()), default="1"
+        )
         template = templates[t_choice][1]
 
         # Select Source Folder
@@ -2002,7 +2233,7 @@ class SampleMindCLI:
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
-            console=console
+            console=console,
         ) as progress:
             task = progress.add_task(f"Creating pack '{name}'...", total=None)
 
@@ -2010,7 +2241,7 @@ class SampleMindCLI:
                 name=name,
                 source_folder=Path(source_dir),
                 template=template,
-                author=author
+                author=author,
             )
 
             progress.remove_task(task)
@@ -2020,9 +2251,10 @@ class SampleMindCLI:
             console.print(f"📊 Added {pack.metadata.sample_count} samples")
 
             if Confirm.ask("Export to ZIP?"):
-                zip_path = pack.pack_dir.with_suffix('.zip')
+                zip_path = pack.pack_dir.with_suffix(".zip")
                 import shutil
-                shutil.make_archive(str(pack.pack_dir), 'zip', pack.pack_dir)
+
+                shutil.make_archive(str(pack.pack_dir), "zip", pack.pack_dir)
                 console.print(f"[green]✅ ZIP exported to: {zip_path}[/green]")
 
     def run_chain_recommender(self):
@@ -2036,7 +2268,9 @@ class SampleMindCLI:
             return
 
         # Select Library/Search Path
-        console.print("\n[cyan]📁 Select Library/Folder to search for candidates...[/cyan]")
+        console.print(
+            "\n[cyan]📁 Select Library/Folder to search for candidates...[/cyan]"
+        )
         library_path = select_directory(title="Select Library Folder")
         if not library_path:
             library_path = seed_path.parent
@@ -2048,14 +2282,14 @@ class SampleMindCLI:
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
-            console=console
+            console=console,
         ) as progress:
             task = progress.add_task("Building Kit Chain...", total=None)
 
             chain_ctx = self.chain_recommender.build_chain(
                 seed_sample=seed_path,
                 template_name="standard_kit",
-                search_paths=[library_path]
+                search_paths=[library_path],
             )
 
             progress.remove_task(task)
@@ -2072,7 +2306,9 @@ class SampleMindCLI:
         table.add_column("Score", style="yellow")
 
         for node in chain_ctx.nodes:
-            table.add_row(node.slot_name, node.file_path.name, f"{node.compatibility_score:.2f}")
+            table.add_row(
+                node.slot_name, node.file_path.name, f"{node.compatibility_score:.2f}"
+            )
 
         console.print(table)
 
@@ -2085,7 +2321,9 @@ class SampleMindCLI:
                 # For now just printing
                 output_dir.mkdir(parents=True, exist_ok=True)
                 console.print(f"[green]Kit folder created at {output_dir}[/green]")
-                console.print("(Copying implementation pending integration with PackCreator)")
+                console.print(
+                    "(Copying implementation pending integration with PackCreator)"
+                )
             except Exception as e:
                 console.print(f"[red]Error exporting kit: {e}[/red]")
 
@@ -2113,13 +2351,21 @@ class SampleMindCLI:
                 folder = select_directory("Choose folder to index")
                 if folder and folder.exists():
                     # Walk and index
-                    files = list(folder.rglob("*.wav")) + list(folder.rglob("*.mp3")) + list(folder.rglob("*.flac"))
+                    files = (
+                        list(folder.rglob("*.wav"))
+                        + list(folder.rglob("*.mp3"))
+                        + list(folder.rglob("*.flac"))
+                    )
                     if not files:
                         console.print("[yellow]No audio files found.[/yellow]")
                         continue
 
                     console.print(f"Found {len(files)} files. Indexing...")
-                    with Progress(SpinnerColumn(), *Progress.get_default_columns(), console=console) as progress:
+                    with Progress(
+                        SpinnerColumn(),
+                        *Progress.get_default_columns(),
+                        console=console,
+                    ) as progress:
                         task = progress.add_task("Indexing...", total=len(files))
                         for f in files:
                             self.vector_engine.index_file(f)
@@ -2131,7 +2377,11 @@ class SampleMindCLI:
                 if not query.strip():
                     continue
 
-                with Progress(SpinnerColumn(), TextColumn("[cyan]Searching...[/cyan]"), console=console) as progress:
+                with Progress(
+                    SpinnerColumn(),
+                    TextColumn("[cyan]Searching...[/cyan]"),
+                    console=console,
+                ) as progress:
                     task = progress.add_task("search", total=None)
                     results = self.vector_engine.search(query, n_results=10)
                     progress.remove_task(task)
@@ -2149,13 +2399,16 @@ class SampleMindCLI:
                         # Score is distance, lower is better. Convert to similarity?
                         # Chroma returns distance. 0 is exact match.
                         score_display = f"{res['score']:.4f}"
-                        table.add_row(str(i+1), res['filename'], score_display, res['path'])
+                        table.add_row(
+                            str(i + 1), res["filename"], score_display, res["path"]
+                        )
 
                     console.print(table)
 
             output_dir.mkdir(parents=True, exist_ok=True)
 
             import shutil
+
             for node in chain_ctx.nodes:
                 dest = output_dir / f"{node.slot_name}_{node.file_path.name}"
                 shutil.copy2(node.file_path, dest)
@@ -2167,29 +2420,29 @@ class SampleMindCLI:
         import json
 
         result = {
-            'timestamp': time.time(),
-            'file_info': {
-                'path': str(loaded_audio.metadata.file_path),
-                'duration': loaded_audio.get_duration_seconds(),
-                'sample_rate': loaded_audio.metadata.sample_rate,
-                'format': loaded_audio.metadata.format.name,
+            "timestamp": time.time(),
+            "file_info": {
+                "path": str(loaded_audio.metadata.file_path),
+                "duration": loaded_audio.get_duration_seconds(),
+                "sample_rate": loaded_audio.metadata.sample_rate,
+                "format": loaded_audio.metadata.format.name,
             },
-            'audio_features': features.to_dict(),
-            'ai_analysis': {
-                'provider': ai_result.provider.value,
-                'model': ai_result.model_used,
-                'summary': ai_result.summary,
-                'production_tips': ai_result.production_tips,
-                'fl_studio_recommendations': ai_result.fl_studio_recommendations,
-                'scores': {
-                    'creativity': ai_result.creativity_score,
-                    'production_quality': ai_result.production_quality_score,
-                    'commercial_potential': ai_result.commercial_potential_score
-                }
-            }
+            "audio_features": features.to_dict(),
+            "ai_analysis": {
+                "provider": ai_result.provider.value,
+                "model": ai_result.model_used,
+                "summary": ai_result.summary,
+                "production_tips": ai_result.production_tips,
+                "fl_studio_recommendations": ai_result.fl_studio_recommendations,
+                "scores": {
+                    "creativity": ai_result.creativity_score,
+                    "production_quality": ai_result.production_quality_score,
+                    "commercial_potential": ai_result.commercial_potential_score,
+                },
+            },
         }
 
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(result, f, indent=2)
 
     async def run(self):
@@ -2206,11 +2459,39 @@ class SampleMindCLI:
                 console.print("\n")
                 self.display_main_menu()
 
-                choice = Prompt.ask("\n🎵 Select option", choices=["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "a", "B", "b", "C", "c", "D", "d", "E", "e", "F", "f"])
+                choice = Prompt.ask(
+                    "\n🎵 Select option",
+                    choices=[
+                        "0",
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                        "A",
+                        "a",
+                        "B",
+                        "b",
+                        "C",
+                        "c",
+                        "D",
+                        "d",
+                        "E",
+                        "e",
+                        "F",
+                        "f",
+                    ],
+                )
 
                 match choice.upper():
                     case "0":
-                        console.print("\n[bold blue]👋 Thank you for using SampleMind AI v3.0![/bold blue]")
+                        console.print(
+                            "\n[bold blue]👋 Thank you for using SampleMind AI v3.0![/bold blue]"
+                        )
                         break
                     case "1":
                         await self.run_single_analysis()

@@ -16,23 +16,20 @@ _redis_client: Optional[redis.Redis] = None
 async def init_redis(redis_url: str = "redis://localhost:6379"):
     """Initialize Redis connection"""
     global _redis_client
-    
+
     try:
         logger.info("🔌 Connecting to Redis...")
-        
+
         _redis_client = redis.from_url(
-            redis_url,
-            encoding="utf-8",
-            decode_responses=True,
-            max_connections=10
+            redis_url, encoding="utf-8", decode_responses=True, max_connections=10
         )
-        
+
         # Test connection
         await _redis_client.ping()
-        
+
         logger.info("✅ Redis connected")
         return _redis_client
-        
+
     except RedisError as e:
         logger.error(f"❌ Redis connection failed: {e}")
         raise
@@ -44,7 +41,7 @@ async def init_redis(redis_url: str = "redis://localhost:6379"):
 async def close_redis():
     """Close Redis connection"""
     global _redis_client
-    
+
     if _redis_client:
         await _redis_client.close()
         logger.info("✅ Redis connection closed")
@@ -59,6 +56,7 @@ def get_redis() -> redis.Redis:
 
 
 # Caching utilities
+
 
 async def cache_set(key: str, value: Any, ttl: int = 3600) -> bool:
     """Set a value in cache with TTL"""
@@ -107,27 +105,28 @@ async def cache_exists(key: str) -> bool:
 
 # Rate limiting
 
+
 async def rate_limit_check(key: str, limit: int = 60, window: int = 60) -> bool:
     """
     Check rate limit using sliding window
-    
+
     Args:
         key: Unique identifier (e.g., user_id, ip_address)
         limit: Maximum requests allowed
         window: Time window in seconds
-        
+
     Returns:
         True if within limit, False if exceeded
     """
     try:
         client = get_redis()
         current_count = await client.incr(key)
-        
+
         if current_count == 1:
             await client.expire(key, window)
-        
+
         return current_count <= limit
-        
+
     except Exception as e:
         logger.error(f"Rate limit check error: {e}")
         return True  # Allow on error
@@ -143,6 +142,7 @@ async def rate_limit_reset(key: str):
 
 
 # Session management
+
 
 async def session_set(session_id: str, data: Dict[str, Any], ttl: int = 86400) -> bool:
     """Set session data (default 24 hour TTL)"""
@@ -161,37 +161,42 @@ async def session_delete(session_id: str) -> bool:
 
 # Decorator for caching function results
 
+
 def redis_cache(ttl: int = 3600, key_prefix: str = "cache") -> Any:
     """
     Decorator to cache function results in Redis
-    
+
     Usage:
         @redis_cache(ttl=600, key_prefix="analysis")
         async def expensive_operation(param1, param2):
             # ...
     """
+
     def decorator(func: Any) -> Any:
         """Decorator wrapper for Redis caching"""
+
         @wraps(func)
         async def wrapper(*args, **kwargs) -> None:
             # Generate cache key from function name and arguments
             cache_key = f"{key_prefix}:{func.__name__}:{hash((args, tuple(sorted(kwargs.items()))))}"
-            
+
             # Try to get from cache
             cached_result = await cache_get(cache_key)
             if cached_result is not None:
                 logger.debug(f"Cache hit: {cache_key}")
                 return cached_result
-            
+
             # Execute function
             result = await func(*args, **kwargs)
-            
+
             # Store in cache
             await cache_set(cache_key, result, ttl)
             logger.debug(f"Cache miss, stored: {cache_key}")
-            
+
             return result
+
         return wrapper
+
     return decorator
 
 

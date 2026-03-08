@@ -35,6 +35,7 @@ console = Console()
 # OUTPUT FORMATTERS
 # ============================================================================
 
+
 def format_json(data: Any, pretty: bool = True) -> str:
     """Format data as JSON"""
     if pretty:
@@ -48,6 +49,7 @@ def format_csv(data: List[Dict], output_file: Optional[Path] = None) -> str:
         return ""
 
     import io
+
     output = io.StringIO()
     writer = csv.DictWriter(output, fieldnames=data[0].keys())
     writer.writeheader()
@@ -87,6 +89,7 @@ def format_yaml(data: Any) -> str:
     """Format data as YAML"""
     try:
         import yaml
+
         return yaml.dump(data, default_flow_style=False)
     except ImportError:
         console.print("[yellow]⚠ PyYAML not installed, using JSON instead[/yellow]")
@@ -96,6 +99,7 @@ def format_yaml(data: Any) -> str:
 # ============================================================================
 # OUTPUT HANDLERS
 # ============================================================================
+
 
 def output_result(
     data: Any,
@@ -143,6 +147,7 @@ def output_result(
 # PROGRESS TRACKING
 # ============================================================================
 
+
 class ProgressTracker:
     """Context manager for progress tracking"""
 
@@ -153,7 +158,9 @@ class ProgressTracker:
     def __enter__(self) -> None:
         self.progress = Progress(
             SpinnerColumn(),
-            TextColumn(f"[progress.description]{self.description}[/progress.description]"),
+            TextColumn(
+                f"[progress.description]{self.description}[/progress.description]"
+            ),
             console=console,
         )
         self.progress.__enter__()
@@ -180,23 +187,28 @@ def create_progress_bar(
 # ERROR HANDLING
 # ============================================================================
 
+
 class CLIError(Exception):
     """Base exception for CLI errors"""
+
     pass
 
 
 class AudioFileError(CLIError):
     """Error loading or processing audio file"""
+
     pass
 
 
 class AnalysisError(CLIError):
     """Error during audio analysis"""
+
     pass
 
 
 class ProcessingError(CLIError):
     """Error during audio processing"""
+
     pass
 
 
@@ -214,22 +226,25 @@ def handle_error(error: Exception, context: str = "") -> None:
 # DECORATORS
 # ============================================================================
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 def async_command(func: Callable[..., T]) -> Callable[..., T]:
     """Decorator to handle async commands"""
+
     @wraps(func)
     def wrapper(*args, **kwargs) -> None:
         """Wrapper for async command execution"""
         if asyncio.iscoroutinefunction(func):
             return asyncio.run(func(*args, **kwargs))
         return func(*args, **kwargs)
+
     return wrapper
 
 
 def with_error_handling(func: Callable[..., T]) -> Callable[..., T]:
     """Decorator to add error handling to commands"""
+
     @wraps(func)
     def wrapper(*args, **kwargs) -> None:
         """Wrapper with error handling"""
@@ -241,19 +256,24 @@ def with_error_handling(func: Callable[..., T]) -> Callable[..., T]:
         except Exception as e:
             handle_error(e)
             raise typer.Exit(code=1)
+
     return wrapper
 
 
 def with_progress(description: str = "Processing"):
     """Decorator to show progress spinner"""
+
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         """Decorator wrapper"""
+
         @wraps(func)
         def wrapper(*args, **kwargs) -> None:
             """Wrapper with progress tracking"""
             with ProgressTracker(description):
                 return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -261,15 +281,18 @@ def with_progress(description: str = "Processing"):
 # AUDIO ENGINE INTEGRATION
 # ============================================================================
 
+
 async def get_audio_engine():
     """Get or create AudioEngine instance"""
     from src.samplemind.core.engine.audio_engine import AudioEngine
+
     return AudioEngine()
 
 
 async def get_ai_manager():
     """Get or create AIManager instance"""
     from src.samplemind.integrations.ai_manager import SampleMindAIManager
+
     return SampleMindAIManager()
 
 
@@ -286,6 +309,7 @@ async def analyze_file_async(
 
         # Get analysis level enum
         from src.samplemind.core.engine.audio_engine import AnalysisLevel
+
         level = getattr(AnalysisLevel, analysis_level.upper(), AnalysisLevel.STANDARD)
 
         # Run analysis
@@ -297,7 +321,7 @@ async def analyze_file_async(
             "tempo": features.tempo,
             "key": features.key,
             "mode": features.mode,
-            "features": asdict(features) if hasattr(features, '__dict__') else features
+            "features": asdict(features) if hasattr(features, "__dict__") else features,
         }
 
     except Exception as e:
@@ -308,9 +332,10 @@ async def analyze_file_async(
 # FILE OPERATIONS
 # ============================================================================
 
+
 def get_audio_files(directory: Path) -> List[Path]:
     """Get all audio files in directory"""
-    supported_formats = {'.wav', '.mp3', '.flac', '.aiff', '.m4a', '.ogg'}
+    supported_formats = {".wav", ".mp3", ".flac", ".aiff", ".m4a", ".ogg"}
 
     files = []
     for file in directory.rglob("*"):
@@ -328,6 +353,7 @@ def validate_audio_file(file_path: Path) -> bool:
 # ============================================================================
 # FORMATTING UTILITIES
 # ============================================================================
+
 
 def format_duration(seconds: float) -> str:
     """Format duration in seconds to MM:SS"""
@@ -359,6 +385,7 @@ def format_frequency(hz: float) -> str:
 # BATCH PROCESSING
 # ============================================================================
 
+
 async def batch_analyze_files(
     files: List[Path],
     analysis_level: str = "STANDARD",
@@ -375,8 +402,7 @@ async def batch_analyze_files(
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = [
-            executor.submit(analyze_file_async, file, analysis_level)
-            for file in files
+            executor.submit(analyze_file_async, file, analysis_level) for file in files
         ]
 
         for future in concurrent.futures.as_completed(futures):
@@ -394,6 +420,7 @@ async def batch_analyze_files(
 # ============================================================================
 # VALIDATION
 # ============================================================================
+
 
 def validate_output_format(format: str) -> bool:
     """Validate output format"""

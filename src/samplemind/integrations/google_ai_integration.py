@@ -41,15 +41,17 @@ logger = logging.getLogger(__name__)
 
 class GeminiModel(Enum):
     """Available Gemini models for music production — v3.0"""
-    GEMINI_2_0_FLASH = "gemini-2.0-flash"                         # PRIMARY — fast, multimodal
-    GEMINI_2_0_FLASH_EXP = "gemini-2.0-flash-exp"                 # experimental variant
-    GEMINI_2_0_FLASH_THINKING = "gemini-2.0-flash-thinking-exp"   # reasoning
-    GEMINI_1_5_PRO = "gemini-1.5-pro"                             # high context fallback
-    GEMINI_1_5_FLASH = "gemini-1.5-flash"                         # legacy fast
+
+    GEMINI_2_0_FLASH = "gemini-2.0-flash"  # PRIMARY — fast, multimodal
+    GEMINI_2_0_FLASH_EXP = "gemini-2.0-flash-exp"  # experimental variant
+    GEMINI_2_0_FLASH_THINKING = "gemini-2.0-flash-thinking-exp"  # reasoning
+    GEMINI_1_5_PRO = "gemini-1.5-pro"  # high context fallback
+    GEMINI_1_5_FLASH = "gemini-1.5-flash"  # legacy fast
 
 
 class MusicAnalysisType(Enum):
     """Advanced music analysis types"""
+
     COMPREHENSIVE_ANALYSIS = "comprehensive_analysis"
     CREATIVE_PRODUCTION = "creative_production"
     GENRE_CLASSIFICATION = "genre_classification"
@@ -67,6 +69,7 @@ class MusicAnalysisType(Enum):
 @dataclass
 class AdvancedMusicAnalysis:
     """Comprehensive AI music analysis result"""
+
     analysis_type: MusicAnalysisType
     model_used: GeminiModel
     timestamp: float = field(default_factory=time.time)
@@ -347,7 +350,9 @@ Analyze this sample with the depth and expertise expected from the world's premi
 """
 
     @staticmethod
-    def create_real_time_coaching_prompt(audio_features: Dict[str, Any], user_question: str) -> str:
+    def create_real_time_coaching_prompt(
+        audio_features: Dict[str, Any], user_question: str
+    ) -> str:
         """Create real-time music production coaching prompt"""
         return f"""
 🎼 **REAL-TIME MUSIC PRODUCTION COACHING** 🎼
@@ -388,7 +393,9 @@ Respond as if you're sitting right next to them in the studio, providing the exa
 """
 
     @staticmethod
-    def create_lyric_composition_prompt(audio_features: Dict[str, Any], theme: str = "") -> str:
+    def create_lyric_composition_prompt(
+        audio_features: Dict[str, Any], theme: str = ""
+    ) -> str:
         """Create AI-powered lyric composition prompt"""
         return f"""
 🎤 **AI LYRIC COMPOSITION ENGINE** 🎤
@@ -441,12 +448,14 @@ class GoogleAIMusicProducer:
         api_key: Optional[str] = None,
         default_model: GeminiModel = GeminiModel.GEMINI_2_0_FLASH,
         max_workers: int = 8,
-        enable_caching: bool = True
+        enable_caching: bool = True,
     ):
         # Configure API — new SDK uses Client instance, not genai.configure()
-        self.api_key = api_key or os.getenv('GOOGLE_AI_API_KEY')
+        self.api_key = api_key or os.getenv("GOOGLE_AI_API_KEY")
         if not self.api_key:
-            raise ValueError("Google AI API key is required. Set GOOGLE_AI_API_KEY environment variable.")
+            raise ValueError(
+                "Google AI API key is required. Set GOOGLE_AI_API_KEY environment variable."
+            )
 
         self.client = genai.Client(api_key=self.api_key)
 
@@ -477,7 +486,7 @@ class GoogleAIMusicProducer:
         audio_features: Dict[str, Any],
         analysis_type: MusicAnalysisType = MusicAnalysisType.COMPREHENSIVE_ANALYSIS,
         model: Optional[GeminiModel] = None,
-        custom_prompt: Optional[str] = None
+        custom_prompt: Optional[str] = None,
     ) -> AdvancedMusicAnalysis:
         """
         Ultimate comprehensive music analysis using Google's most advanced AI
@@ -528,7 +537,9 @@ class GoogleAIMusicProducer:
             )
 
             # Generate analysis — new SDK uses client.aio.models.generate_content
-            logger.info(f"Generating {analysis_type.value} analysis with {model.value}...")
+            logger.info(
+                f"Generating {analysis_type.value} analysis with {model.value}..."
+            )
             response = await self.client.aio.models.generate_content(
                 model=model.value,
                 contents=prompt,
@@ -538,10 +549,7 @@ class GoogleAIMusicProducer:
             # Process response
             processing_time = time.time() - start_time
             analysis_result = self._process_ai_response(
-                response,
-                analysis_type,
-                model,
-                processing_time
+                response, analysis_type, model, processing_time
             )
 
             # Update performance metrics
@@ -551,7 +559,9 @@ class GoogleAIMusicProducer:
             if self.analysis_cache:
                 self.analysis_cache[cache_key] = analysis_result
 
-            logger.info(f"✅ Analysis complete: {analysis_type.value} ({processing_time:.2f}s)")
+            logger.info(
+                f"✅ Analysis complete: {analysis_type.value} ({processing_time:.2f}s)"
+            )
             return analysis_result
 
         except Exception as e:
@@ -562,14 +572,14 @@ class GoogleAIMusicProducer:
                 model_used=model,
                 detailed_description=f"Analysis failed: {str(e)}",
                 processing_time=time.time() - start_time,
-                raw_response=str(e)
+                raw_response=str(e),
             )
 
     async def real_time_production_coaching(
         self,
         audio_features: Dict[str, Any],
         user_question: str,
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[Dict[str, Any]] = None,
     ) -> AdvancedMusicAnalysis:
         """Real-time music production coaching and Q&A"""
         prompt = AdvancedPromptEngine.create_real_time_coaching_prompt(
@@ -577,16 +587,11 @@ class GoogleAIMusicProducer:
         )
 
         return await self.analyze_music_comprehensive(
-            audio_features,
-            MusicAnalysisType.REAL_TIME_COACHING,
-            custom_prompt=prompt
+            audio_features, MusicAnalysisType.REAL_TIME_COACHING, custom_prompt=prompt
         )
 
     async def generate_lyrics(
-        self,
-        audio_features: Dict[str, Any],
-        theme: str = "",
-        style: str = ""
+        self, audio_features: Dict[str, Any], theme: str = "", style: str = ""
     ) -> AdvancedMusicAnalysis:
         """AI-powered lyric composition based on musical features"""
         prompt = AdvancedPromptEngine.create_lyric_composition_prompt(
@@ -594,15 +599,13 @@ class GoogleAIMusicProducer:
         )
 
         return await self.analyze_music_comprehensive(
-            audio_features,
-            MusicAnalysisType.LYRIC_COMPOSITION,
-            custom_prompt=prompt
+            audio_features, MusicAnalysisType.LYRIC_COMPOSITION, custom_prompt=prompt
         )
 
     async def batch_analyze_tracks(
         self,
         audio_features_list: List[Dict[str, Any]],
-        analysis_type: MusicAnalysisType = MusicAnalysisType.COMPREHENSIVE_ANALYSIS
+        analysis_type: MusicAnalysisType = MusicAnalysisType.COMPREHENSIVE_ANALYSIS,
     ) -> List[AdvancedMusicAnalysis]:
         """Batch analyze multiple tracks with parallel processing"""
         logger.info(f"🔄 Starting batch analysis of {len(audio_features_list)} tracks")
@@ -624,7 +627,7 @@ class GoogleAIMusicProducer:
                 error_result = AdvancedMusicAnalysis(
                     analysis_type=analysis_type,
                     model_used=self.default_model,
-                    detailed_description=f"Analysis failed: {str(result)}"
+                    detailed_description=f"Analysis failed: {str(result)}",
                 )
                 processed_results.append(error_result)
             else:
@@ -634,9 +637,7 @@ class GoogleAIMusicProducer:
         return processed_results
 
     def _get_analysis_prompt(
-        self,
-        audio_features: Dict[str, Any],
-        analysis_type: MusicAnalysisType
+        self, audio_features: Dict[str, Any], analysis_type: MusicAnalysisType
     ) -> str:
         """Get appropriate prompt for analysis type"""
         prompt_map = {
@@ -648,19 +649,23 @@ class GoogleAIMusicProducer:
             return prompt_map[analysis_type](audio_features)
         else:
             # Default to comprehensive analysis
-            return AdvancedPromptEngine.create_comprehensive_analysis_prompt(audio_features)
+            return AdvancedPromptEngine.create_comprehensive_analysis_prompt(
+                audio_features
+            )
 
     def _process_ai_response(
         self,
         response: Any,
         analysis_type: MusicAnalysisType,
         model: GeminiModel,
-        processing_time: float
+        processing_time: float,
     ) -> AdvancedMusicAnalysis:
         """Process and structure AI response"""
         try:
             # Extract response text — new SDK: response.text
-            response_text = response.text if hasattr(response, 'text') else str(response)
+            response_text = (
+                response.text if hasattr(response, "text") else str(response)
+            )
 
             # Parse JSON response
             try:
@@ -671,8 +676,8 @@ class GoogleAIMusicProducer:
 
             # Extract token usage from new SDK response
             token_count = 0
-            if hasattr(response, 'usage_metadata') and response.usage_metadata:
-                token_count = getattr(response.usage_metadata, 'total_token_count', 0)
+            if hasattr(response, "usage_metadata") and response.usage_metadata:
+                token_count = getattr(response.usage_metadata, "total_token_count", 0)
 
             # Create structured analysis result
             analysis = AdvancedMusicAnalysis(
@@ -680,7 +685,7 @@ class GoogleAIMusicProducer:
                 model_used=model,
                 processing_time=processing_time,
                 raw_response=response_text,
-                token_usage={'total_token_count': token_count},
+                token_usage={"total_token_count": token_count},
             )
 
             # Map parsed data to analysis fields
@@ -695,141 +700,146 @@ class GoogleAIMusicProducer:
                 model_used=model,
                 processing_time=processing_time,
                 detailed_description=f"Processing error: {str(e)}",
-                raw_response=str(response)
+                raw_response=str(response),
             )
 
     def _map_response_to_analysis(
-        self,
-        analysis: AdvancedMusicAnalysis,
-        parsed_data: Dict[str, Any]
+        self, analysis: AdvancedMusicAnalysis, parsed_data: Dict[str, Any]
     ) -> None:
         """Map parsed JSON response to analysis object fields"""
 
         # Comprehensive analysis mapping
-        if 'comprehensive_analysis' in parsed_data:
-            comp = parsed_data['comprehensive_analysis']
-            analysis.detailed_description = comp.get('detailed_description', '')
-            analysis.technical_analysis = comp.get('technical_summary', '')
-            analysis.creative_interpretation = comp.get('creative_interpretation', '')
+        if "comprehensive_analysis" in parsed_data:
+            comp = parsed_data["comprehensive_analysis"]
+            analysis.detailed_description = comp.get("detailed_description", "")
+            analysis.technical_analysis = comp.get("technical_summary", "")
+            analysis.creative_interpretation = comp.get("creative_interpretation", "")
 
         # Genre classification
-        if 'genre_classification' in parsed_data:
-            genre = parsed_data['genre_classification']
-            analysis.primary_genre = genre.get('primary_genre', '')
-            analysis.secondary_genres = genre.get('secondary_genres', [])
-            analysis.genre_confidence = genre.get('confidence', 0.0)
-            analysis.style_influences = genre.get('style_influences', [])
-            analysis.era_period = genre.get('era_period', '')
-            analysis.regional_style = genre.get('regional_style', '')
+        if "genre_classification" in parsed_data:
+            genre = parsed_data["genre_classification"]
+            analysis.primary_genre = genre.get("primary_genre", "")
+            analysis.secondary_genres = genre.get("secondary_genres", [])
+            analysis.genre_confidence = genre.get("confidence", 0.0)
+            analysis.style_influences = genre.get("style_influences", [])
+            analysis.era_period = genre.get("era_period", "")
+            analysis.regional_style = genre.get("regional_style", "")
 
         # Emotional analysis
-        if 'emotional_analysis' in parsed_data:
-            emotion = parsed_data['emotional_analysis']
-            analysis.primary_mood = emotion.get('primary_mood', '')
-            analysis.emotional_descriptors = emotion.get('emotional_descriptors', [])
-            analysis.valence_score = emotion.get('valence_score', 0.0)
-            analysis.arousal_score = emotion.get('arousal_score', 0.0)
-            analysis.emotional_intensity = emotion.get('emotional_intensity', 0.0)
-            analysis.emotional_journey = emotion.get('emotional_journey', [])
+        if "emotional_analysis" in parsed_data:
+            emotion = parsed_data["emotional_analysis"]
+            analysis.primary_mood = emotion.get("primary_mood", "")
+            analysis.emotional_descriptors = emotion.get("emotional_descriptors", [])
+            analysis.valence_score = emotion.get("valence_score", 0.0)
+            analysis.arousal_score = emotion.get("arousal_score", 0.0)
+            analysis.emotional_intensity = emotion.get("emotional_intensity", 0.0)
+            analysis.emotional_journey = emotion.get("emotional_journey", [])
 
         # Music theory
-        if 'music_theory' in parsed_data:
-            theory = parsed_data['music_theory']
-            analysis.harmonic_analysis = theory.get('harmonic_analysis', '')
-            analysis.chord_progressions = theory.get('chord_progressions', [])
-            analysis.scale_modes = theory.get('scale_modes', [])
-            analysis.rhythmic_analysis = theory.get('rhythmic_analysis', '')
-            analysis.structural_analysis = theory.get('structural_analysis', '')
-            analysis.complexity_score = theory.get('complexity_score', 0.0)
+        if "music_theory" in parsed_data:
+            theory = parsed_data["music_theory"]
+            analysis.harmonic_analysis = theory.get("harmonic_analysis", "")
+            analysis.chord_progressions = theory.get("chord_progressions", [])
+            analysis.scale_modes = theory.get("scale_modes", [])
+            analysis.rhythmic_analysis = theory.get("rhythmic_analysis", "")
+            analysis.structural_analysis = theory.get("structural_analysis", "")
+            analysis.complexity_score = theory.get("complexity_score", 0.0)
 
         # FL Studio integration
-        if 'fl_studio_integration' in parsed_data:
-            fl = parsed_data['fl_studio_integration']
-            analysis.fl_plugin_recommendations = fl.get('plugin_recommendations', [])
-            analysis.fl_effect_chains = fl.get('effect_chains', [])
-            analysis.fl_mixer_routing = fl.get('mixer_routing', {})
-            analysis.fl_automation_ideas = fl.get('automation_ideas', [])
-            analysis.fl_workflow_tips = fl.get('workflow_tips', [])
+        if "fl_studio_integration" in parsed_data:
+            fl = parsed_data["fl_studio_integration"]
+            analysis.fl_plugin_recommendations = fl.get("plugin_recommendations", [])
+            analysis.fl_effect_chains = fl.get("effect_chains", [])
+            analysis.fl_mixer_routing = fl.get("mixer_routing", {})
+            analysis.fl_automation_ideas = fl.get("automation_ideas", [])
+            analysis.fl_workflow_tips = fl.get("workflow_tips", [])
 
         # Creative suggestions
-        if 'creative_suggestions' in parsed_data:
-            creative = parsed_data['creative_suggestions']
-            analysis.arrangement_ideas = creative.get('arrangement_ideas', [])
-            analysis.remix_potential = creative.get('remix_potential', [])
-            analysis.instrumentation_suggestions = creative.get('instrumentation', [])
-            analysis.collaboration_ideas = creative.get('collaboration_ideas', [])
+        if "creative_suggestions" in parsed_data:
+            creative = parsed_data["creative_suggestions"]
+            analysis.arrangement_ideas = creative.get("arrangement_ideas", [])
+            analysis.remix_potential = creative.get("remix_potential", [])
+            analysis.instrumentation_suggestions = creative.get("instrumentation", [])
+            analysis.collaboration_ideas = creative.get("collaboration_ideas", [])
 
         # Commercial assessment
-        if 'commercial_assessment' in parsed_data:
-            commercial = parsed_data['commercial_assessment']
-            analysis.commercial_potential = commercial.get('market_potential', '')
-            analysis.target_audience = commercial.get('target_audience', [])
-            analysis.playlist_placement = commercial.get('playlist_placement', [])
-            analysis.sync_licensing_potential = commercial.get('sync_potential', '')
+        if "commercial_assessment" in parsed_data:
+            commercial = parsed_data["commercial_assessment"]
+            analysis.commercial_potential = commercial.get("market_potential", "")
+            analysis.target_audience = commercial.get("target_audience", [])
+            analysis.playlist_placement = commercial.get("playlist_placement", [])
+            analysis.sync_licensing_potential = commercial.get("sync_potential", "")
 
         # Similarity recommendations
-        if 'similarity_recommendations' in parsed_data:
-            similarity = parsed_data['similarity_recommendations']
-            analysis.similar_artists = similarity.get('similar_artists', [])
-            analysis.similar_tracks = similarity.get('similar_tracks', [])
-            analysis.recommended_samples = similarity.get('recommended_samples', [])
-            analysis.complementary_tracks = similarity.get('complementary_tracks', [])
+        if "similarity_recommendations" in parsed_data:
+            similarity = parsed_data["similarity_recommendations"]
+            analysis.similar_artists = similarity.get("similar_artists", [])
+            analysis.similar_tracks = similarity.get("similar_tracks", [])
+            analysis.recommended_samples = similarity.get("recommended_samples", [])
+            analysis.complementary_tracks = similarity.get("complementary_tracks", [])
 
         # AI tags
-        if 'ai_tags' in parsed_data:
-            tags = parsed_data['ai_tags']
-            analysis.production_tags = tags.get('production_tags', [])
-            analysis.mood_tags = tags.get('mood_tags', [])
-            analysis.genre_tags = tags.get('genre_tags', [])
+        if "ai_tags" in parsed_data:
+            tags = parsed_data["ai_tags"]
+            analysis.production_tags = tags.get("production_tags", [])
+            analysis.mood_tags = tags.get("mood_tags", [])
+            analysis.genre_tags = tags.get("genre_tags", [])
             analysis.ai_generated_tags = (
-                tags.get('production_tags', []) +
-                tags.get('mood_tags', []) +
-                tags.get('genre_tags', [])
+                tags.get("production_tags", [])
+                + tags.get("mood_tags", [])
+                + tags.get("genre_tags", [])
             )
 
     def _generate_cache_key(
         self,
         audio_features: Dict[str, Any],
         analysis_type: MusicAnalysisType,
-        model: GeminiModel
+        model: GeminiModel,
     ) -> str:
         """Generate cache key for analysis"""
         key_data = {
-            'tempo': audio_features.get('tempo', 0),
-            'key': audio_features.get('key', ''),
-            'duration': audio_features.get('duration', 0),
-            'spectral_centroid_mean': np.mean(audio_features.get('spectral_centroid', [0])),
-            'analysis_type': analysis_type.value,
-            'model': model.value
+            "tempo": audio_features.get("tempo", 0),
+            "key": audio_features.get("key", ""),
+            "duration": audio_features.get("duration", 0),
+            "spectral_centroid_mean": np.mean(
+                audio_features.get("spectral_centroid", [0])
+            ),
+            "analysis_type": analysis_type.value,
+            "model": model.value,
         }
 
         cache_string = json.dumps(key_data, sort_keys=True)
         return hashlib.md5(cache_string.encode()).hexdigest()
 
-    def _update_performance_metrics(self, response: Any, processing_time: float) -> None:
+    def _update_performance_metrics(
+        self, response: Any, processing_time: float
+    ) -> None:
         """Update performance tracking metrics"""
         self.analysis_count += 1
 
         # Update average response time
         self.avg_response_time = (
-            (self.avg_response_time * (self.analysis_count - 1) + processing_time)
-            / self.analysis_count
-        )
+            self.avg_response_time * (self.analysis_count - 1) + processing_time
+        ) / self.analysis_count
 
         # Track token usage — new SDK: response.usage_metadata.total_token_count
-        if response is not None and hasattr(response, 'usage_metadata') and response.usage_metadata:
-            tokens = getattr(response.usage_metadata, 'total_token_count', 0)
+        if (
+            response is not None
+            and hasattr(response, "usage_metadata")
+            and response.usage_metadata
+        ):
+            tokens = getattr(response.usage_metadata, "total_token_count", 0)
             self.total_tokens_used += tokens
 
     def get_performance_stats(self) -> Dict[str, Any]:
         """Get comprehensive performance statistics"""
         return {
-            'total_analyses': self.analysis_count,
-            'total_tokens_used': self.total_tokens_used,
-            'avg_response_time': self.avg_response_time,
-            'cache_size': len(self.analysis_cache) if self.analysis_cache else 0,
-            'model_used': self.default_model.value,
-            'cost_estimate_usd': self._estimate_cost()
+            "total_analyses": self.analysis_count,
+            "total_tokens_used": self.total_tokens_used,
+            "avg_response_time": self.avg_response_time,
+            "cache_size": len(self.analysis_cache) if self.analysis_cache else 0,
+            "model_used": self.default_model.value,
+            "cost_estimate_usd": self._estimate_cost(),
         }
 
     def _estimate_cost(self) -> float:
@@ -856,6 +866,7 @@ class GoogleAIMusicProducer:
 
 # Example usage and testing
 if __name__ == "__main__":
+
     async def test_google_ai_music_producer():
         """Test the Google AI music production system"""
         try:
@@ -864,27 +875,26 @@ if __name__ == "__main__":
 
             # Mock audio features for testing
             test_features = {
-                'duration': 180.5,
-                'tempo': 128.0,
-                'key': 'C',
-                'mode': 'major',
-                'time_signature': (4, 4),
-                'spectral_centroid': [2000, 2100, 1900, 2050, 2200],
-                'spectral_bandwidth': [500, 550, 480, 520, 580],
-                'spectral_rolloff': [4000, 4200, 3800, 4100, 4300],
-                'rms_energy': [0.5, 0.6, 0.4, 0.55, 0.7],
-                'rhythm_pattern': [1.0, 0.5, 0.8, 0.3, 1.0, 0.5, 0.8, 0.3],
-                'onset_times': [0.5, 1.0, 1.5, 2.0, 2.5, 3.0],
-                'chroma_features': np.random.rand(12, 100),
-                'mfccs': np.random.rand(13, 100)
+                "duration": 180.5,
+                "tempo": 128.0,
+                "key": "C",
+                "mode": "major",
+                "time_signature": (4, 4),
+                "spectral_centroid": [2000, 2100, 1900, 2050, 2200],
+                "spectral_bandwidth": [500, 550, 480, 520, 580],
+                "spectral_rolloff": [4000, 4200, 3800, 4100, 4300],
+                "rms_energy": [0.5, 0.6, 0.4, 0.55, 0.7],
+                "rhythm_pattern": [1.0, 0.5, 0.8, 0.3, 1.0, 0.5, 0.8, 0.3],
+                "onset_times": [0.5, 1.0, 1.5, 2.0, 2.5, 3.0],
+                "chroma_features": np.random.rand(12, 100),
+                "mfccs": np.random.rand(13, 100),
             }
 
             logger.info("🎵 Testing Google AI Music Production System...")
 
             # Test comprehensive analysis
             analysis = await ai_producer.analyze_music_comprehensive(
-                test_features,
-                MusicAnalysisType.COMPREHENSIVE_ANALYSIS
+                test_features, MusicAnalysisType.COMPREHENSIVE_ANALYSIS
             )
 
             logger.info(f"🎯 Genre: {analysis.primary_genre}")
@@ -894,8 +904,7 @@ if __name__ == "__main__":
 
             # Test real-time coaching
             coaching = await ai_producer.real_time_production_coaching(
-                test_features,
-                "How can I make this track sound more professional?"
+                test_features, "How can I make this track sound more professional?"
             )
 
             logger.info(f"🎓 Coaching Response: {coaching.detailed_description}")
@@ -907,7 +916,7 @@ if __name__ == "__main__":
         except Exception as e:
             logger.error(f"❌ Test failed: {e}")
         finally:
-            if 'ai_producer' in locals():
+            if "ai_producer" in locals():
                 ai_producer.shutdown()
 
     # Run the test

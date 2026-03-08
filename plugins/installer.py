@@ -21,6 +21,7 @@ import argparse
 
 class Platform(Enum):
     """Supported platforms"""
+
     WINDOWS = "windows"
     MACOS = "macos"
     LINUX = "linux"
@@ -28,6 +29,7 @@ class Platform(Enum):
 
 class DAW(Enum):
     """Supported Digital Audio Workstations"""
+
     FL_STUDIO = "fl_studio"
     ABLETON_LIVE = "ableton_live"
 
@@ -35,6 +37,7 @@ class DAW(Enum):
 @dataclass
 class PluginInfo:
     """Plugin installation information"""
+
     name: str
     version: str
     author: str
@@ -45,6 +48,7 @@ class PluginInfo:
 @dataclass
 class InstallationPath:
     """Path information for plugin installation"""
+
     daw: DAW
     platform: Platform
     plugin_dir: Path
@@ -181,28 +185,68 @@ class PluginInstaller:
     def get_fl_studio_plugin_paths(self) -> Dict[Platform, Path]:
         """Get FL Studio plugin installation paths"""
         return {
-            Platform.WINDOWS: Path("C:/Program Files/Image-Line/FL Studio 21/Plugins/Fruity/Generators"),
-            Platform.MACOS: Path(os.path.expanduser("~/Library/Application Support/Image-Line/FL Studio/Plugins/Fruity/Generators")),
-            Platform.LINUX: Path(os.path.expanduser("~/.config/Image-Line/FL Studio/Plugins/Fruity/Generators")),
+            Platform.WINDOWS: Path(
+                "C:/Program Files/Image-Line/FL Studio 21/Plugins/Fruity/Generators"
+            ),
+            Platform.MACOS: Path(
+                os.path.expanduser(
+                    "~/Library/Application Support/Image-Line/FL Studio/Plugins/Fruity/Generators"
+                )
+            ),
+            Platform.LINUX: Path(
+                os.path.expanduser(
+                    "~/.config/Image-Line/FL Studio/Plugins/Fruity/Generators"
+                )
+            ),
         }
 
     def get_ableton_plugin_paths(self) -> Dict[Platform, Path]:
         """Get Ableton Live plugin installation paths"""
         return {
-            Platform.WINDOWS: Path(os.path.expandvars("%APPDATA%/Ableton/User Library/Presets/Instruments/Max Instrument")),
-            Platform.MACOS: Path(os.path.expanduser("~/Music/Ableton User Library/Presets/Instruments/Max Instrument")),
-            Platform.LINUX: Path(os.path.expanduser("~/.Ableton/User Library/Presets/Instruments/Max Instrument")),
+            Platform.WINDOWS: Path(
+                os.path.expandvars(
+                    "%APPDATA%/Ableton/User Library/Presets/Instruments/Max Instrument"
+                )
+            ),
+            Platform.MACOS: Path(
+                os.path.expanduser(
+                    "~/Music/Ableton User Library/Presets/Instruments/Max Instrument"
+                )
+            ),
+            Platform.LINUX: Path(
+                os.path.expanduser(
+                    "~/.Ableton/User Library/Presets/Instruments/Max Instrument"
+                )
+            ),
         }
 
     def get_plugin_source_path(self, daw: DAW, platform: Platform) -> Optional[Path]:
         """Get the source plugin file path"""
         if daw == DAW.FL_STUDIO:
             if platform == Platform.WINDOWS:
-                return self.plugins_dir / "fl_studio" / "build" / "lib" / "SampleMind_FL_Studio.dll"
+                return (
+                    self.plugins_dir
+                    / "fl_studio"
+                    / "build"
+                    / "lib"
+                    / "SampleMind_FL_Studio.dll"
+                )
             elif platform == Platform.MACOS:
-                return self.plugins_dir / "fl_studio" / "build" / "lib" / "libSampleMind_FL_Studio.dylib"
+                return (
+                    self.plugins_dir
+                    / "fl_studio"
+                    / "build"
+                    / "lib"
+                    / "libSampleMind_FL_Studio.dylib"
+                )
             elif platform == Platform.LINUX:
-                return self.plugins_dir / "fl_studio" / "build" / "lib" / "libSampleMind_FL_Studio.so"
+                return (
+                    self.plugins_dir
+                    / "fl_studio"
+                    / "build"
+                    / "lib"
+                    / "libSampleMind_FL_Studio.so"
+                )
 
         elif daw == DAW.ABLETON_LIVE:
             # For Ableton, we need the Max device and supporting files
@@ -251,7 +295,9 @@ class PluginInstaller:
                 return False
 
         except PermissionError:
-            self.log(f"❌ Permission denied. Try running with administrator/sudo privileges")
+            self.log(
+                f"❌ Permission denied. Try running with administrator/sudo privileges"
+            )
             return False
         except Exception as e:
             self.log(f"❌ Installation failed: {e}")
@@ -308,7 +354,9 @@ class PluginInstaller:
                 return False
 
         except PermissionError:
-            self.log(f"❌ Permission denied. Try running with administrator/sudo privileges")
+            self.log(
+                f"❌ Permission denied. Try running with administrator/sudo privileges"
+            )
             return False
         except Exception as e:
             self.log(f"❌ Installation failed: {e}")
@@ -379,7 +427,9 @@ class PluginInstaller:
                 files_removed += 1
 
             if files_removed > 0:
-                self.log(f"✓ Ableton Live plugin uninstalled ({files_removed} files removed)")
+                self.log(
+                    f"✓ Ableton Live plugin uninstalled ({files_removed} files removed)"
+                )
                 return True
             else:
                 self.log(f"⚠ No plugin files found to remove")
@@ -452,12 +502,14 @@ class PluginInstaller:
 
 def print_banner() -> None:
     """Print installation banner"""
-    print("""
+    print(
+        """
 ╔═══════════════════════════════════════════════════════════════════════════╗
 ║                  SampleMind AI - Plugin Installer v1.0.0                  ║
 ║                       Professional Audio Intelligence                      ║
 ╚═══════════════════════════════════════════════════════════════════════════╝
-""")
+"""
+    )
 
 
 def main():

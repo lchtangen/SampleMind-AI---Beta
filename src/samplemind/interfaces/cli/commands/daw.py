@@ -40,7 +40,9 @@ def daw_server(
     try:
         from samplemind.server.bridge import run_server
 
-        console.print(f"[bold green]🎹 Starting SampleMind DAW Bridge on ws://{host}:{port}/ws[/bold green]")
+        console.print(
+            f"[bold green]🎹 Starting SampleMind DAW Bridge on ws://{host}:{port}/ws[/bold green]"
+        )
         console.print("Press Ctrl+C to stop.")
 
         run_server(host=host, port=port)
@@ -50,6 +52,7 @@ def daw_server(
     except Exception as e:
         utils.handle_error(e, "daw:server")
         raise typer.Exit(1)
+
 
 @app.command("status")
 @utils.with_error_handling
@@ -104,8 +107,12 @@ def daw_status():
         # Usage hints
         console.print()
         console.print("[bold]Quick Start:[/bold]")
-        console.print("  1. Use [cyan]daw:export:flp[/cyan] to create FL Studio projects")
-        console.print("  2. Use [cyan]daw:analyze[/cyan] to analyze samples for DAW use")
+        console.print(
+            "  1. Use [cyan]daw:export:flp[/cyan] to create FL Studio projects"
+        )
+        console.print(
+            "  2. Use [cyan]daw:analyze[/cyan] to analyze samples for DAW use"
+        )
         console.print("  3. Drag analyzed samples into your DAW")
 
     except Exception as e:
@@ -118,7 +125,9 @@ def daw_status():
 def daw_export_flp(
     files: List[Path] = typer.Argument(..., help="Audio files to include"),
     output: Path = typer.Option(None, "--output", "-o", help="Output .flp file"),
-    template: Optional[Path] = typer.Option(None, "--template", "-t", help="Template project"),
+    template: Optional[Path] = typer.Option(
+        None, "--template", "-t", help="Template project"
+    ),
     bpm: Optional[float] = typer.Option(None, "--bpm", help="Project BPM"),
     key: Optional[str] = typer.Option(None, "--key", "-k", help="Project key"),
 ) -> None:
@@ -173,15 +182,17 @@ def daw_export_flp(
 
                 metadata = plugin._analyze_sample(str(f))
                 if metadata:
-                    samples_data.append({
-                        "file_path": str(f),
-                        "file_name": f.name,
-                        "bpm": metadata.bpm,
-                        "key": metadata.key,
-                        "genre": metadata.genre,
-                        "mood": metadata.mood,
-                        "duration": metadata.duration,
-                    })
+                    samples_data.append(
+                        {
+                            "file_path": str(f),
+                            "file_name": f.name,
+                            "bpm": metadata.bpm,
+                            "key": metadata.key,
+                            "genre": metadata.genre,
+                            "mood": metadata.mood,
+                            "duration": metadata.duration,
+                        }
+                    )
 
                     # Use first detected BPM/key as project defaults
                     if detected_bpm is None and metadata.bpm:
@@ -218,7 +229,7 @@ def daw_export_flp(
 
             # Save project file
             output.parent.mkdir(parents=True, exist_ok=True)
-            with open(output, 'w') as f:
+            with open(output, "w") as f:
                 json.dump(project_data, f, indent=2)
 
             progress.update(task, completed=True)
@@ -245,8 +256,12 @@ def daw_export_flp(
 @utils.with_error_handling
 def daw_analyze(
     file: Path = typer.Argument(..., help="Audio file to analyze"),
-    target_bpm: Optional[float] = typer.Option(None, "--target-bpm", help="Target BPM for time-stretching"),
-    target_key: Optional[str] = typer.Option(None, "--target-key", help="Target key for pitch-shifting"),
+    target_bpm: Optional[float] = typer.Option(
+        None, "--target-bpm", help="Target BPM for time-stretching"
+    ),
+    target_key: Optional[str] = typer.Option(
+        None, "--target-key", help="Target key for pitch-shifting"
+    ),
 ) -> None:
     """Analyze a sample for DAW compatibility"""
     try:
@@ -267,6 +282,7 @@ def daw_analyze(
             task = progress.add_task("Analyzing for DAW use...", total=None)
 
             from ....integrations.daw import FLStudioPlugin
+
             plugin = FLStudioPlugin()
             metadata = plugin._analyze_sample(str(file))
 
@@ -306,8 +322,14 @@ def daw_analyze(
         # Other properties
         table.add_row("Genre", metadata.genre or "Unknown", "")
         table.add_row("Mood", metadata.mood or "Unknown", "")
-        table.add_row("Duration", f"{metadata.duration:.2f}s" if metadata.duration else "N/A", "")
-        table.add_row("Sample Rate", f"{metadata.sample_rate} Hz" if metadata.sample_rate else "N/A", "")
+        table.add_row(
+            "Duration", f"{metadata.duration:.2f}s" if metadata.duration else "N/A", ""
+        )
+        table.add_row(
+            "Sample Rate",
+            f"{metadata.sample_rate} Hz" if metadata.sample_rate else "N/A",
+            "",
+        )
         table.add_row("Bit Depth", f"{metadata.bit_depth}-bit", "")
         table.add_row("Channels", "Stereo" if metadata.channels == 2 else "Mono", "")
 
@@ -316,7 +338,9 @@ def daw_analyze(
         # AI Tags
         if metadata.ai_tags:
             console.print()
-            console.print(f"[bold]AI Tags:[/bold] [cyan]{', '.join(metadata.ai_tags)}[/cyan]")
+            console.print(
+                f"[bold]AI Tags:[/bold] [cyan]{', '.join(metadata.ai_tags)}[/cyan]"
+            )
 
         # Recommendations
         console.print()
@@ -342,8 +366,12 @@ def daw_analyze(
 @utils.with_error_handling
 def daw_sync(
     folder: Path = typer.Argument(..., help="Sample library folder to sync"),
-    daw: str = typer.Option("flstudio", "--daw", "-d", help="Target DAW (flstudio, ableton, logic)"),
-    export_metadata: bool = typer.Option(True, "--metadata/--no-metadata", help="Export metadata files"),
+    daw: str = typer.Option(
+        "flstudio", "--daw", "-d", help="Target DAW (flstudio, ableton, logic)"
+    ),
+    export_metadata: bool = typer.Option(
+        True, "--metadata/--no-metadata", help="Export metadata files"
+    ),
 ) -> None:
     """Sync sample library with DAW browser"""
     try:
@@ -358,8 +386,8 @@ def daw_sync(
         console.print()
 
         # Find audio files
-        extensions = ['.wav', '.mp3', '.flac', '.aiff', '.m4a', '.ogg']
-        audio_files = [f for f in folder.rglob('*') if f.suffix.lower() in extensions]
+        extensions = [".wav", ".mp3", ".flac", ".aiff", ".m4a", ".ogg"]
+        audio_files = [f for f in folder.rglob("*") if f.suffix.lower() in extensions]
 
         if not audio_files:
             console.print("[yellow]No audio files found in folder[/yellow]")
@@ -369,6 +397,7 @@ def daw_sync(
         console.print()
 
         from ....integrations.daw import FLStudioPlugin
+
         plugin = FLStudioPlugin()
 
         with Progress(
@@ -382,15 +411,19 @@ def daw_sync(
             metadata_files = []
 
             for i, audio_file in enumerate(audio_files):
-                progress.update(task, description=f"Processing {audio_file.name}...", completed=i)
+                progress.update(
+                    task, description=f"Processing {audio_file.name}...", completed=i
+                )
 
                 try:
                     metadata = plugin._analyze_sample(str(audio_file))
                     if metadata and export_metadata:
                         # Create metadata sidecar file
-                        meta_file = audio_file.with_suffix(audio_file.suffix + ".samplemind.json")
+                        meta_file = audio_file.with_suffix(
+                            audio_file.suffix + ".samplemind.json"
+                        )
                         meta_data = metadata.to_fl_format()
-                        with open(meta_file, 'w') as f:
+                        with open(meta_file, "w") as f:
                             json.dump(meta_data, f, indent=2)
                         metadata_files.append(meta_file)
                     synced += 1
@@ -403,9 +436,13 @@ def daw_sync(
         console.print(f"[green]✓ Synced {synced}/{len(audio_files)} files[/green]")
 
         if export_metadata and metadata_files:
-            console.print(f"[cyan]  Created {len(metadata_files)} metadata files[/cyan]")
+            console.print(
+                f"[cyan]  Created {len(metadata_files)} metadata files[/cyan]"
+            )
             console.print()
-            console.print("[dim]Metadata files contain BPM, key, and other analysis.[/dim]")
+            console.print(
+                "[dim]Metadata files contain BPM, key, and other analysis.[/dim]"
+            )
             console.print("[dim]Some DAWs can read these for smart browsing.[/dim]")
 
     except typer.Exit:

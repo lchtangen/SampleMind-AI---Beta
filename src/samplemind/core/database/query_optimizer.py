@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class QueryPlan:
     """Query execution plan analysis"""
+
     query: str
     plan: str
     total_cost: float
@@ -31,18 +32,18 @@ class QueryOptimizer:
     Production query optimizer
     Analyzes and optimizes database queries automatically
     """
-    
+
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
         self.slow_query_threshold_ms = 100.0
-    
+
     async def analyze_query(self, query: str) -> QueryPlan:
         """
         Analyze query execution plan
-        
+
         Args:
             query: SQL query to analyze
-            
+
         Returns:
             QueryPlan with analysis and recommendations
         """
@@ -52,19 +53,19 @@ class QueryOptimizer:
         )
         plan_json = explain_result.scalar()
         plan = plan_json[0]["Plan"]
-        
+
         # Extract metrics
         total_cost = plan.get("Total Cost", 0)
         execution_time = plan_json[0].get("Execution Time", 0)
         rows_estimated = plan.get("Plan Rows", 0)
         rows_actual = plan.get("Actual Rows", 0)
-        
+
         # Check if indexes are used
         uses_index = self._uses_index(plan)
-        
+
         # Generate recommendations
         recommendations = self._generate_recommendations(plan, query)
-        
+
         return QueryPlan(
             query=query[:200],
             plan=str(plan),
@@ -73,38 +74,38 @@ class QueryOptimizer:
             rows_estimated=rows_estimated,
             rows_actual=rows_actual,
             uses_index=uses_index,
-            recommendations=recommendations
+            recommendations=recommendations,
         )
-    
+
     def _uses_index(self, plan: Dict[str, Any]) -> bool:
         """Check if query uses index scan"""
         node_type = plan.get("Node Type", "")
         if "Index" in node_type:
             return True
-        
+
         # Check child nodes
         for child in plan.get("Plans", []):
             if self._uses_index(child):
                 return True
-        
+
         return False
-    
+
     def _generate_recommendations(self, plan: Dict[str, Any], query: str) -> List[str]:
         """Generate optimization recommendations"""
         recommendations = []
-        
+
         # Check for sequential scans
         if "Seq Scan" in plan.get("Node Type", ""):
             recommendations.append(
                 "Sequential scan detected. Consider adding an index on the filtered columns."
             )
-        
+
         # Check for high cost
         if plan.get("Total Cost", 0) > 1000:
             recommendations.append(
                 "High query cost detected. Review WHERE clauses and JOINs."
             )
-        
+
         # Check for row estimation accuracy
         estimated = plan.get("Plan Rows", 0)
         actual = plan.get("Actual Rows", 0)
@@ -112,29 +113,30 @@ class QueryOptimizer:
             recommendations.append(
                 "Row estimation is inaccurate. Run ANALYZE on the table."
             )
-        
+
         # Check for nested loops with large datasets
         if plan.get("Node Type") == "Nested Loop" and actual > 1000:
             recommendations.append(
                 "Nested loop with large dataset. Consider hash join or merge join."
             )
-        
+
         return recommendations
-    
+
     async def suggest_indexes(self, table_name: str) -> List[str]:
         """
         Suggest indexes based on query patterns
-        
+
         Args:
             table_name: Table to analyze
-            
+
         Returns:
             List of suggested CREATE INDEX statements
         """
         suggestions = []
-        
+
         # Get table statistics
-        stats_query = text("""
+        stats_query = text(
+            """
             SELECT 
                 schemaname,
                 tablename,
@@ -144,11 +146,12 @@ class QueryOptimizer:
             FROM pg_stats
             WHERE tablename = :table_name
             ORDER BY abs(correlation) DESC
-        """)
-        
+        """
+        )
+
         result = await self.session.execute(stats_query, {"table_name": table_name})
         stats = result.fetchall()
-        
+
         # Suggest indexes for columns with high cardinality
         for row in stats:
             if row.n_distinct and abs(row.n_distinct) > 100:
@@ -156,33 +159,34 @@ class QueryOptimizer:
                     f"CREATE INDEX idx_{table_name}_{row.column_name} "
                     f"ON {table_name}({row.column_name});"
                 )
-        
+
         return suggestions
-    
+
     async def optimize_table(self, table_name: str) -> Dict[str, Any]:
         """
         Optimize table (VACUUM ANALYZE)
-        
+
         Returns:
             Optimization results
         """
         logger.info(f"Optimizing table: {table_name}")
-        
+
         # VACUUM ANALYZE
         await self.session.execute(text(f"VACUUM ANALYZE {table_name}"))
-        
+
         # Get updated statistics
         stats = await self.get_table_stats(table_name)
-        
+
         return {
             "table": table_name,
             "optimized_at": datetime.now().isoformat(),
-            "stats": stats
+            "stats": stats,
         }
-    
+
     async def get_table_stats(self, table_name: str) -> Dict[str, Any]:
         """Get table statistics"""
-        query = text("""
+        query = text(
+            """
             SELECT 
                 schemaname,
                 tablename,
@@ -193,11 +197,12 @@ class QueryOptimizer:
                 last_analyze
             FROM pg_stat_user_tables
             WHERE tablename = :table_name
-        """)
-        
+        """
+        )
+
         result = await self.session.execute(query, {"table_name": table_name})
         row = result.fetchone()
-        
+
         if row:
             return {
                 "table": row.tablename,
@@ -205,17 +210,18 @@ class QueryOptimizer:
                 "live_rows": row.live_rows,
                 "dead_rows": row.dead_rows,
                 "last_vacuum": row.last_vacuum,
-                "last_analyze": row.last_analyze
+                "last_analyze": row.last_analyze,
             }
-        
+
         return {}
-    
+
     async def get_slow_queries(self, limit: int = 10) -> List[Dict[str, Any]]:
         """
         Get slowest queries from pg_stat_statements
         Requires pg_stat_statements extension
         """
-        query = text("""
+        query = text(
+            """
             SELECT 
                 query,
                 calls,
@@ -226,8 +232,9 @@ class QueryOptimizer:
             WHERE query NOT LIKE '%pg_stat_statements%'
             ORDER BY total_exec_time DESC
             LIMIT :limit
-        """)
-        
+        """
+        )
+
         try:
             result = await self.session.execute(query, {"limit": limit})
             return [
@@ -236,20 +243,21 @@ class QueryOptimizer:
                     "calls": row.calls,
                     "avg_time_ms": float(row.avg_time_ms),
                     "total_time_ms": float(row.total_exec_time),
-                    "avg_rows": int(row.avg_rows) if row.avg_rows else 0
+                    "avg_rows": int(row.avg_rows) if row.avg_rows else 0,
                 }
                 for row in result.fetchall()
             ]
         except Exception as e:
             logger.warning(f"pg_stat_statements not available: {e}")
             return []
-    
+
     async def get_missing_indexes(self) -> List[Dict[str, Any]]:
         """
         Find tables that might benefit from indexes
         Based on sequential scan statistics
         """
-        query = text("""
+        query = text(
+            """
             SELECT 
                 schemaname,
                 tablename,
@@ -262,24 +270,26 @@ class QueryOptimizer:
               AND idx_scan < seq_scan
             ORDER BY seq_tup_read DESC
             LIMIT 20
-        """)
-        
+        """
+        )
+
         result = await self.session.execute(query)
-        
+
         return [
             {
                 "table": f"{row.schemaname}.{row.tablename}",
                 "seq_scans": row.seq_scan,
                 "index_scans": row.idx_scan or 0,
                 "avg_rows_per_scan": int(row.avg_seq_tup_read),
-                "recommendation": "Consider adding index to reduce sequential scans"
+                "recommendation": "Consider adding index to reduce sequential scans",
             }
             for row in result.fetchall()
         ]
-    
+
     async def get_index_usage(self) -> List[Dict[str, Any]]:
         """Get index usage statistics"""
-        query = text("""
+        query = text(
+            """
             SELECT 
                 schemaname,
                 tablename,
@@ -290,10 +300,11 @@ class QueryOptimizer:
                 pg_size_pretty(pg_relation_size(indexrelid)) as index_size
             FROM pg_stat_user_indexes
             ORDER BY idx_scan DESC
-        """)
-        
+        """
+        )
+
         result = await self.session.execute(query)
-        
+
         return [
             {
                 "table": f"{row.schemaname}.{row.tablename}",
@@ -302,14 +313,15 @@ class QueryOptimizer:
                 "tuples_read": row.idx_tup_read,
                 "tuples_fetched": row.idx_tup_fetch,
                 "size": row.index_size,
-                "unused": row.idx_scan == 0
+                "unused": row.idx_scan == 0,
             }
             for row in result.fetchall()
         ]
-    
+
     async def get_bloat_report(self) -> List[Dict[str, Any]]:
         """Get table bloat report"""
-        query = text("""
+        query = text(
+            """
             SELECT 
                 schemaname,
                 tablename,
@@ -324,10 +336,11 @@ class QueryOptimizer:
             FROM pg_stat_user_tables
             WHERE n_dead_tup > 1000
             ORDER BY n_dead_tup DESC
-        """)
-        
+        """
+        )
+
         result = await self.session.execute(query)
-        
+
         return [
             {
                 "table": f"{row.schemaname}.{row.tablename}",
@@ -335,7 +348,7 @@ class QueryOptimizer:
                 "dead_tuples": row.n_dead_tup,
                 "live_tuples": row.n_live_tup,
                 "bloat_percent": float(row.dead_tuple_percent),
-                "needs_vacuum": row.dead_tuple_percent > 10
+                "needs_vacuum": row.dead_tuple_percent > 10,
             }
             for row in result.fetchall()
         ]
@@ -345,22 +358,26 @@ class QueryOptimizer:
 def optimized_query(cache_plan: bool = True) -> Any:
     """
     Decorator to automatically optimize queries
-    
+
     Usage:
         @optimized_query(cache_plan=True)
         async def get_users(session):
             return await session.execute(query)
     """
+
     def decorator(func: Any) -> Any:
         """Decorator wrapper for query optimization"""
+
         async def wrapper(*args, **kwargs) -> None:
             # Execute query
             result = await func(*args, **kwargs)
-            
+
             # TODO: Add query plan caching and automatic optimization
-            
+
             return result
+
         return wrapper
+
     return decorator
 
 

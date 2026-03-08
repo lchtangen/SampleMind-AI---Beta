@@ -80,10 +80,10 @@ class TestStemSeparationEngine:
         for quality in StemQuality:
             assert quality in QUALITY_PRESETS
             preset = QUALITY_PRESETS[quality]
-            assert hasattr(preset, 'model')
-            assert hasattr(preset, 'shifts')
-            assert hasattr(preset, 'overlap')
-            assert hasattr(preset, 'description')
+            assert hasattr(preset, "model")
+            assert hasattr(preset, "shifts")
+            assert hasattr(preset, "overlap")
+            assert hasattr(preset, "description")
 
 
 class TestStemsSeparateCommand:
@@ -99,7 +99,9 @@ class TestStemsSeparateCommand:
         assert result.exit_code != 0
         assert "not found" in result.stdout.lower() or "error" in result.stdout.lower()
 
-    def test_stems_separate_valid_file(self, typer_runner, test_audio_samples, temp_directory):
+    def test_stems_separate_valid_file(
+        self, typer_runner, test_audio_samples, temp_directory
+    ):
         """Test stems:separate with valid file"""
         from samplemind.interfaces.cli.typer_app import app
 
@@ -107,7 +109,9 @@ class TestStemsSeparateCommand:
         audio_file = test_audio_samples["120_c_major"]
         output_dir = temp_directory / "stems_output"
 
-        with patch('samplemind.interfaces.cli.commands.audio.StemSeparationEngine') as mock_engine_class:
+        with patch(
+            "samplemind.interfaces.cli.commands.audio.StemSeparationEngine"
+        ) as mock_engine_class:
             # Mock the engine instance
             mock_engine = MagicMock()
             mock_engine_class.return_value = mock_engine
@@ -122,23 +126,32 @@ class TestStemsSeparateCommand:
                 command=["demucs", str(audio_file)],
             )
 
-            result = runner.invoke(app, [
-                "stems:separate", str(audio_file),
-                "--output", str(output_dir),
-            ])
+            result = runner.invoke(
+                app,
+                [
+                    "stems:separate",
+                    str(audio_file),
+                    "--output",
+                    str(output_dir),
+                ],
+            )
 
         # Command should succeed (may have warnings about missing files to copy)
         # The important thing is the engine was called
         mock_engine.separate.assert_called_once()
 
-    def test_stems_separate_with_quality_option(self, typer_runner, test_audio_samples, temp_directory):
+    def test_stems_separate_with_quality_option(
+        self, typer_runner, test_audio_samples, temp_directory
+    ):
         """Test stems:separate with quality preset option"""
         from samplemind.interfaces.cli.typer_app import app
 
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.audio.StemSeparationEngine') as mock_engine_class:
+        with patch(
+            "samplemind.interfaces.cli.commands.audio.StemSeparationEngine"
+        ) as mock_engine_class:
             mock_engine = MagicMock()
             mock_engine_class.return_value = mock_engine
             mock_engine.separate.return_value = StemSeparationResult(
@@ -147,10 +160,15 @@ class TestStemsSeparateCommand:
                 command=[],
             )
 
-            result = runner.invoke(app, [
-                "stems:separate", str(audio_file),
-                "--quality", "high",
-            ])
+            result = runner.invoke(
+                app,
+                [
+                    "stems:separate",
+                    str(audio_file),
+                    "--quality",
+                    "high",
+                ],
+            )
 
         # Verify HIGH quality preset was used
         call_kwargs = mock_engine_class.call_args.kwargs
@@ -197,14 +215,18 @@ class TestSingleStemCommands:
 
         assert result.exit_code != 0
 
-    def test_stems_vocals_valid_file(self, typer_runner, test_audio_samples, temp_directory):
+    def test_stems_vocals_valid_file(
+        self, typer_runner, test_audio_samples, temp_directory
+    ):
         """Test stems:vocals with valid file"""
         from samplemind.interfaces.cli.typer_app import app
 
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch('samplemind.interfaces.cli.commands.audio.StemSeparationEngine') as mock_engine_class:
+        with patch(
+            "samplemind.interfaces.cli.commands.audio.StemSeparationEngine"
+        ) as mock_engine_class:
             mock_engine = MagicMock()
             mock_engine_class.return_value = mock_engine
             mock_engine.separate.return_value = StemSeparationResult(
@@ -232,7 +254,10 @@ class TestStemsBatchCommand:
         result = runner.invoke(app, ["stems:batch", "/nonexistent/folder"])
 
         assert result.exit_code != 0
-        assert "not a directory" in result.stdout.lower() or "error" in result.stdout.lower()
+        assert (
+            "not a directory" in result.stdout.lower()
+            or "error" in result.stdout.lower()
+        )
 
     def test_stems_batch_empty_folder(self, typer_runner, temp_directory):
         """Test stems:batch with empty folder (no audio files)"""
@@ -248,7 +273,9 @@ class TestStemsBatchCommand:
         assert result.exit_code == 0
         assert "no audio files" in result.stdout.lower()
 
-    def test_stems_batch_with_files(self, typer_runner, test_audio_samples, temp_directory):
+    def test_stems_batch_with_files(
+        self, typer_runner, test_audio_samples, temp_directory
+    ):
         """Test stems:batch with folder containing audio files"""
         from samplemind.interfaces.cli.typer_app import app
         import shutil
@@ -264,7 +291,9 @@ class TestStemsBatchCommand:
         test_file = test_audio_samples["120_c_major"]
         shutil.copy(test_file, input_folder / "test1.wav")
 
-        with patch('samplemind.interfaces.cli.commands.audio.StemSeparationEngine') as mock_engine_class:
+        with patch(
+            "samplemind.interfaces.cli.commands.audio.StemSeparationEngine"
+        ) as mock_engine_class:
             mock_engine = MagicMock()
             mock_engine_class.return_value = mock_engine
             mock_engine.separate.return_value = StemSeparationResult(
@@ -276,10 +305,15 @@ class TestStemsBatchCommand:
                 command=[],
             )
 
-            result = runner.invoke(app, [
-                "stems:batch", str(input_folder),
-                "--output", str(output_folder),
-            ])
+            result = runner.invoke(
+                app,
+                [
+                    "stems:batch",
+                    str(input_folder),
+                    "--output",
+                    str(output_folder),
+                ],
+            )
 
         # Engine should be called for each file
         mock_engine.separate.assert_called()

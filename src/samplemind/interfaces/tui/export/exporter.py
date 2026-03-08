@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 try:
     import yaml
+
     YAML_AVAILABLE = True
 except ImportError:
     YAML_AVAILABLE = False
@@ -37,7 +38,10 @@ class ResultExporter:
     # ============================================================================
 
     async def export_to_json(
-        self, features: Dict[str, Any], file_name: str, output_path: Optional[str] = None
+        self,
+        features: Dict[str, Any],
+        file_name: str,
+        output_path: Optional[str] = None,
     ) -> str:
         """Export analysis to JSON format"""
         try:
@@ -61,7 +65,10 @@ class ResultExporter:
             raise
 
     async def export_to_csv(
-        self, features: Dict[str, Any], file_name: str, output_path: Optional[str] = None
+        self,
+        features: Dict[str, Any],
+        file_name: str,
+        output_path: Optional[str] = None,
     ) -> str:
         """Export analysis to CSV format"""
         try:
@@ -86,11 +93,16 @@ class ResultExporter:
             raise
 
     async def export_to_yaml(
-        self, features: Dict[str, Any], file_name: str, output_path: Optional[str] = None
+        self,
+        features: Dict[str, Any],
+        file_name: str,
+        output_path: Optional[str] = None,
     ) -> str:
         """Export analysis to YAML format"""
         if not YAML_AVAILABLE:
-            raise ImportError("PyYAML is required for YAML export. Install with: pip install pyyaml")
+            raise ImportError(
+                "PyYAML is required for YAML export. Install with: pip install pyyaml"
+            )
 
         try:
             output_path = output_path or self.output_dir / f"{file_name}.analysis.yaml"
@@ -113,7 +125,10 @@ class ResultExporter:
             raise
 
     async def export_to_markdown(
-        self, features: Dict[str, Any], file_name: str, output_path: Optional[str] = None
+        self,
+        features: Dict[str, Any],
+        file_name: str,
+        output_path: Optional[str] = None,
     ) -> str:
         """Export analysis to Markdown format"""
         try:
@@ -159,7 +174,9 @@ class ResultExporter:
             with open(output_path, "w") as f:
                 json.dump(data, f, indent=2, default=str)
 
-            logger.info(f"✅ Exported batch ({len(analyses)} files) to JSON: {output_path}")
+            logger.info(
+                f"✅ Exported batch ({len(analyses)} files) to JSON: {output_path}"
+            )
             return str(output_path)
 
         except Exception as e:
@@ -247,7 +264,9 @@ class ResultExporter:
             output_path = Path(output_path)
 
             md_content = f"# Batch Analysis Report\n\n"
-            md_content += f"**Export Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+            md_content += (
+                f"**Export Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+            )
             md_content += f"**Batch Name:** {batch_name}\n"
             md_content += f"**Total Files:** {len(analyses)}\n\n"
             md_content += f"---\n\n"
@@ -354,7 +373,9 @@ class ResultExporter:
         elif format_type == "MARKDOWN":
             return await self.export_to_markdown(features, file_name, output_path)
         else:
-            raise ValueError(f"Unsupported format: {format_type}. Supported: {self.FORMATS}")
+            raise ValueError(
+                f"Unsupported format: {format_type}. Supported: {self.FORMATS}"
+            )
 
     async def export_batch(
         self,
@@ -384,9 +405,13 @@ class ResultExporter:
         elif format_type == "YAML":
             return await self.export_batch_to_yaml(analyses, batch_name, output_path)
         elif format_type == "MARKDOWN":
-            return await self.export_batch_to_markdown(analyses, batch_name, output_path)
+            return await self.export_batch_to_markdown(
+                analyses, batch_name, output_path
+            )
         else:
-            raise ValueError(f"Unsupported format: {format_type}. Supported: {self.FORMATS}")
+            raise ValueError(
+                f"Unsupported format: {format_type}. Supported: {self.FORMATS}"
+            )
 
     def get_supported_formats(self) -> List[str]:
         """Get list of supported export formats"""

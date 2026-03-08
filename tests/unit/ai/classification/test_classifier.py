@@ -218,7 +218,9 @@ class TestAIClassifier:
         result = classifier._classify_with_rules(features)
         assert isinstance(result, ClassificationResult)
         assert len(result.tags) > 0
-        assert "techno" in result.tags or "house" in result.tags or "upbeat" in result.tags
+        assert (
+            "techno" in result.tags or "house" in result.tags or "upbeat" in result.tags
+        )
         assert "fast" in result.tags
 
     def test_classifier_caching(self):

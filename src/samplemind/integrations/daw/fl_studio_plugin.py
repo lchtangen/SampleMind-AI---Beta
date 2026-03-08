@@ -125,7 +125,9 @@ class FLStudioPlugin:
                 self.suggestions_cache[file_path] = suggestions
 
                 logger.info(f"Sample analyzed: {file_path}")
-                logger.info(f"BPM: {metadata.bpm}, Key: {metadata.key}, Genre: {metadata.genre}")
+                logger.info(
+                    f"BPM: {metadata.bpm}, Key: {metadata.key}, Genre: {metadata.genre}"
+                )
 
         except Exception as e:
             logger.error(f"Error analyzing dropped file: {e}")
@@ -178,7 +180,9 @@ class FLStudioPlugin:
             fl_meta = metadata.to_fl_format()
 
             # In real FL Studio plugin, this would update the mixer display
-            logger.debug(f"Displaying metadata in mixer: {json.dumps(fl_meta, indent=2)}")
+            logger.debug(
+                f"Displaying metadata in mixer: {json.dumps(fl_meta, indent=2)}"
+            )
 
             # Store as project data for persistence
             self._save_sample_metadata(file_path, fl_meta)
@@ -199,7 +203,9 @@ class FLStudioPlugin:
                 query=query, collection="audio_features", limit=5
             )
 
-            suggestions = [s.get("metadata", {}).get("filename") for s in similar_samples]
+            suggestions = [
+                s.get("metadata", {}).get("filename") for s in similar_samples
+            ]
 
             logger.debug(f"AI suggestions for {metadata.file_path}: {suggestions}")
             return suggestions
@@ -212,7 +218,9 @@ class FLStudioPlugin:
         """Sync current project BPM and key with SampleMind"""
         try:
             # In real FL Studio, would get from FLMidi.getCurrentPunchIn() etc.
-            logger.debug(f"Project sync: BPM={self.project_bpm}, Key={self.project_key}")
+            logger.debug(
+                f"Project sync: BPM={self.project_bpm}, Key={self.project_key}"
+            )
         except Exception as e:
             logger.error(f"Error syncing project info: {e}")
 
@@ -235,9 +243,7 @@ class FLStudioPlugin:
         except Exception as e:
             logger.error(f"Error scanning project samples: {e}")
 
-    def _save_sample_metadata(
-        self, file_path: str, metadata: Dict[str, Any]
-    ) -> None:
+    def _save_sample_metadata(self, file_path: str, metadata: Dict[str, Any]) -> None:
         """Save metadata for persistence across sessions"""
         try:
             meta_dir = Path.home() / ".samplemind" / "fl_studio" / "metadata"

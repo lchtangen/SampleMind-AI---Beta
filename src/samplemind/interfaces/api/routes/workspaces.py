@@ -24,18 +24,21 @@ from pydantic import BaseModel, Field
 
 class WorkspaceCreate(BaseModel):
     """Create workspace request"""
+
     name: str = Field(..., min_length=1, max_length=100)
     description: Optional[str] = Field(None, max_length=500)
 
 
 class WorkspaceUpdate(BaseModel):
     """Update workspace request"""
+
     name: Optional[str] = Field(None, min_length=1, max_length=100)
     description: Optional[str] = Field(None, max_length=500)
 
 
 class WorkspaceResponse(BaseModel):
     """Workspace response"""
+
     workspace_id: str
     user_id: str
     name: str
@@ -47,6 +50,7 @@ class WorkspaceResponse(BaseModel):
 
 class WorkspaceDetailResponse(WorkspaceResponse):
     """Detailed workspace response"""
+
     samples: List[str] = Field(default_factory=list)
 
 
@@ -54,7 +58,7 @@ class WorkspaceDetailResponse(WorkspaceResponse):
 async def create_workspace(
     request: WorkspaceCreate,
     current_user=Depends(get_current_active_user),
-    db: AsyncIOMotorDatabase = Depends(get_db)
+    db: AsyncIOMotorDatabase = Depends(get_db),
 ) -> None:
     """
     Create a new workspace
@@ -70,14 +74,14 @@ async def create_workspace(
 
         # Store in database
         workspace = {
-            '_id': workspace_id,
-            'workspace_id': workspace_id,
-            'user_id': current_user.user_id,
-            'name': request.name,
-            'description': request.description,
-            'samples': [],
-            'created_at': now,
-            'updated_at': now,
+            "_id": workspace_id,
+            "workspace_id": workspace_id,
+            "user_id": current_user.user_id,
+            "name": request.name,
+            "description": request.description,
+            "samples": [],
+            "created_at": now,
+            "updated_at": now,
         }
 
         # Insert into MongoDB
@@ -99,7 +103,7 @@ async def create_workspace(
         logger.error(f"Failed to create workspace: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create workspace"
+            detail="Failed to create workspace",
         )
 
 
@@ -108,7 +112,7 @@ async def list_workspaces(
     current_user=Depends(get_current_active_user),
     limit: int = 50,
     offset: int = 0,
-    db: AsyncIOMotorDatabase = Depends(get_db)
+    db: AsyncIOMotorDatabase = Depends(get_db),
 ) -> None:
     """
     List all workspaces for current user
@@ -119,26 +123,32 @@ async def list_workspaces(
 
     try:
         # Query from database
-        cursor = db.workspaces.find(
-            {'user_id': current_user.user_id}
-        ).skip(offset).limit(limit)
+        cursor = (
+            db.workspaces.find({"user_id": current_user.user_id})
+            .skip(offset)
+            .limit(limit)
+        )
 
         workspaces = []
         async for workspace in cursor:
-            workspaces.append({
-                'workspace_id': workspace['workspace_id'],
-                'name': workspace['name'],
-                'description': workspace.get('description'),
-                'sample_count': len(workspace.get('samples', [])),
-                'created_at': workspace['created_at'],
-                'updated_at': workspace['updated_at'],
-                'user_id': workspace['user_id'],
-            })
+            workspaces.append(
+                {
+                    "workspace_id": workspace["workspace_id"],
+                    "name": workspace["name"],
+                    "description": workspace.get("description"),
+                    "sample_count": len(workspace.get("samples", [])),
+                    "created_at": workspace["created_at"],
+                    "updated_at": workspace["updated_at"],
+                    "user_id": workspace["user_id"],
+                }
+            )
 
         # Get total count
-        total = await db.workspaces.count_documents({'user_id': current_user.user_id})
+        total = await db.workspaces.count_documents({"user_id": current_user.user_id})
 
-        logger.info(f"Retrieved {len(workspaces)} workspaces for user {current_user.user_id}")
+        logger.info(
+            f"Retrieved {len(workspaces)} workspaces for user {current_user.user_id}"
+        )
 
         return {
             "workspaces": workspaces,
@@ -151,7 +161,7 @@ async def list_workspaces(
         logger.error(f"Failed to list workspaces: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to list workspaces"
+            detail="Failed to list workspaces",
         )
 
 
@@ -159,7 +169,7 @@ async def list_workspaces(
 async def get_workspace(
     workspace_id: str,
     current_user=Depends(get_current_active_user),
-    db: AsyncIOMotorDatabase = Depends(get_db)
+    db: AsyncIOMotorDatabase = Depends(get_db),
 ) -> None:
     """
     Get workspace details
@@ -170,28 +180,29 @@ async def get_workspace(
 
     try:
         # Query from database with authorization check
-        workspace = await db.workspaces.find_one({
-            'workspace_id': workspace_id,
-            'user_id': current_user.user_id
-        })
+        workspace = await db.workspaces.find_one(
+            {"workspace_id": workspace_id, "user_id": current_user.user_id}
+        )
 
         if not workspace:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Workspace not found or access denied"
+                detail="Workspace not found or access denied",
             )
 
-        logger.info(f"Retrieved workspace {workspace_id} for user {current_user.user_id}")
+        logger.info(
+            f"Retrieved workspace {workspace_id} for user {current_user.user_id}"
+        )
 
         return WorkspaceDetailResponse(
             workspace_id=workspace_id,
             user_id=current_user.user_id,
-            name=workspace.get('name', ''),
-            description=workspace.get('description'),
-            sample_count=len(workspace.get('samples', [])),
-            samples=workspace.get('samples', []),
-            created_at=workspace.get('created_at', datetime.utcnow()),
-            updated_at=workspace.get('updated_at', datetime.utcnow()),
+            name=workspace.get("name", ""),
+            description=workspace.get("description"),
+            sample_count=len(workspace.get("samples", [])),
+            samples=workspace.get("samples", []),
+            created_at=workspace.get("created_at", datetime.utcnow()),
+            updated_at=workspace.get("updated_at", datetime.utcnow()),
         )
 
     except HTTPException:
@@ -200,7 +211,7 @@ async def get_workspace(
         logger.error(f"Failed to get workspace: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get workspace"
+            detail="Failed to get workspace",
         )
 
 
@@ -209,7 +220,7 @@ async def update_workspace(
     workspace_id: str,
     request: WorkspaceUpdate,
     current_user=Depends(get_current_active_user),
-    db: AsyncIOMotorDatabase = Depends(get_db)
+    db: AsyncIOMotorDatabase = Depends(get_db),
 ) -> None:
     """
     Update workspace
@@ -220,43 +231,43 @@ async def update_workspace(
 
     try:
         # Query from database with authorization check
-        workspace = await db.workspaces.find_one({
-            'workspace_id': workspace_id,
-            'user_id': current_user.user_id
-        })
+        workspace = await db.workspaces.find_one(
+            {"workspace_id": workspace_id, "user_id": current_user.user_id}
+        )
 
         if not workspace:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Workspace not found or access denied"
+                detail="Workspace not found or access denied",
             )
 
         # Update fields
-        update_data = {'updated_at': datetime.utcnow()}
+        update_data = {"updated_at": datetime.utcnow()}
         if request.name:
-            update_data['name'] = request.name
+            update_data["name"] = request.name
         if request.description is not None:
-            update_data['description'] = request.description
+            update_data["description"] = request.description
 
         # Save to database
         result = await db.workspaces.update_one(
-            {'workspace_id': workspace_id},
-            {'$set': update_data}
+            {"workspace_id": workspace_id}, {"$set": update_data}
         )
 
-        logger.info(f"✅ Workspace updated: {workspace_id} (matched={result.matched_count}, modified={result.modified_count})")
+        logger.info(
+            f"✅ Workspace updated: {workspace_id} (matched={result.matched_count}, modified={result.modified_count})"
+        )
 
         # Fetch updated workspace
-        updated = await db.workspaces.find_one({'workspace_id': workspace_id})
+        updated = await db.workspaces.find_one({"workspace_id": workspace_id})
 
         return WorkspaceResponse(
             workspace_id=workspace_id,
             user_id=current_user.user_id,
-            name=updated['name'],
-            description=updated.get('description'),
-            sample_count=len(updated.get('samples', [])),
-            created_at=updated.get('created_at', datetime.utcnow()),
-            updated_at=updated.get('updated_at', datetime.utcnow()),
+            name=updated["name"],
+            description=updated.get("description"),
+            sample_count=len(updated.get("samples", [])),
+            created_at=updated.get("created_at", datetime.utcnow()),
+            updated_at=updated.get("updated_at", datetime.utcnow()),
         )
 
     except HTTPException:
@@ -265,7 +276,7 @@ async def update_workspace(
         logger.error(f"Failed to update workspace: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to update workspace"
+            detail="Failed to update workspace",
         )
 
 
@@ -273,7 +284,7 @@ async def update_workspace(
 async def delete_workspace(
     workspace_id: str,
     current_user=Depends(get_current_active_user),
-    db: AsyncIOMotorDatabase = Depends(get_db)
+    db: AsyncIOMotorDatabase = Depends(get_db),
 ) -> None:
     """
     Delete a workspace
@@ -284,28 +295,28 @@ async def delete_workspace(
 
     try:
         # Query from database with authorization check
-        workspace = await db.workspaces.find_one({
-            'workspace_id': workspace_id,
-            'user_id': current_user.user_id
-        })
+        workspace = await db.workspaces.find_one(
+            {"workspace_id": workspace_id, "user_id": current_user.user_id}
+        )
 
         if not workspace:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Workspace not found or access denied"
+                detail="Workspace not found or access denied",
             )
 
         # Delete from database
-        result = await db.workspaces.delete_one({
-            'workspace_id': workspace_id,
-            'user_id': current_user.user_id
-        })
+        result = await db.workspaces.delete_one(
+            {"workspace_id": workspace_id, "user_id": current_user.user_id}
+        )
 
-        logger.info(f"✅ Workspace deleted: {workspace_id} (deleted={result.deleted_count})")
+        logger.info(
+            f"✅ Workspace deleted: {workspace_id} (deleted={result.deleted_count})"
+        )
 
         return {
             "message": "Workspace successfully deleted",
-            "workspace_id": workspace_id
+            "workspace_id": workspace_id,
         }
 
     except HTTPException:
@@ -314,7 +325,7 @@ async def delete_workspace(
         logger.error(f"Failed to delete workspace: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to delete workspace"
+            detail="Failed to delete workspace",
         )
 
 
@@ -323,7 +334,7 @@ async def add_sample_to_workspace(
     workspace_id: str,
     sample_id: str,
     current_user=Depends(get_current_active_user),
-    db: AsyncIOMotorDatabase = Depends(get_db)
+    db: AsyncIOMotorDatabase = Depends(get_db),
 ) -> None:
     """
     Add sample to workspace
@@ -334,31 +345,29 @@ async def add_sample_to_workspace(
 
     try:
         # Verify workspace ownership and sample ownership
-        workspace = await db.workspaces.find_one({
-            'workspace_id': workspace_id,
-            'user_id': current_user.user_id
-        })
+        workspace = await db.workspaces.find_one(
+            {"workspace_id": workspace_id, "user_id": current_user.user_id}
+        )
 
         if not workspace:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Workspace not found or access denied"
+                detail="Workspace not found or access denied",
             )
 
         # Verify sample belongs to user
-        sample = await db.samples.find_one({
-            'sample_id': sample_id,
-            'user_id': current_user.user_id
-        })
+        sample = await db.samples.find_one(
+            {"sample_id": sample_id, "user_id": current_user.user_id}
+        )
 
         if not sample:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Sample not found or access denied"
+                detail="Sample not found or access denied",
             )
 
         # Check if sample already in workspace
-        if sample_id in workspace.get('samples', []):
+        if sample_id in workspace.get("samples", []):
             return {
                 "message": "Sample already in workspace",
                 "workspace_id": workspace_id,
@@ -367,11 +376,11 @@ async def add_sample_to_workspace(
 
         # Add sample to workspace
         result = await db.workspaces.update_one(
-            {'workspace_id': workspace_id},
+            {"workspace_id": workspace_id},
             {
-                '$push': {'samples': sample_id},
-                '$set': {'updated_at': datetime.utcnow()}
-            }
+                "$push": {"samples": sample_id},
+                "$set": {"updated_at": datetime.utcnow()},
+            },
         )
 
         logger.info(f"✅ Sample {sample_id} added to workspace {workspace_id}")
@@ -388,7 +397,7 @@ async def add_sample_to_workspace(
         logger.error(f"Failed to add sample: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to add sample to workspace"
+            detail="Failed to add sample to workspace",
         )
 
 
@@ -397,7 +406,7 @@ async def remove_sample_from_workspace(
     workspace_id: str,
     sample_id: str,
     current_user=Depends(get_current_active_user),
-    db: AsyncIOMotorDatabase = Depends(get_db)
+    db: AsyncIOMotorDatabase = Depends(get_db),
 ) -> None:
     """
     Remove sample from workspace
@@ -408,36 +417,34 @@ async def remove_sample_from_workspace(
 
     try:
         # Verify workspace ownership and sample ownership
-        workspace = await db.workspaces.find_one({
-            'workspace_id': workspace_id,
-            'user_id': current_user.user_id
-        })
+        workspace = await db.workspaces.find_one(
+            {"workspace_id": workspace_id, "user_id": current_user.user_id}
+        )
 
         if not workspace:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Workspace not found or access denied"
+                detail="Workspace not found or access denied",
             )
 
         # Verify sample belongs to user
-        sample = await db.samples.find_one({
-            'sample_id': sample_id,
-            'user_id': current_user.user_id
-        })
+        sample = await db.samples.find_one(
+            {"sample_id": sample_id, "user_id": current_user.user_id}
+        )
 
         if not sample:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Sample not found or access denied"
+                detail="Sample not found or access denied",
             )
 
         # Remove sample from workspace
         result = await db.workspaces.update_one(
-            {'workspace_id': workspace_id},
+            {"workspace_id": workspace_id},
             {
-                '$pull': {'samples': sample_id},
-                '$set': {'updated_at': datetime.utcnow()}
-            }
+                "$pull": {"samples": sample_id},
+                "$set": {"updated_at": datetime.utcnow()},
+            },
         )
 
         logger.info(f"✅ Sample {sample_id} removed from workspace {workspace_id}")
@@ -454,5 +461,5 @@ async def remove_sample_from_workspace(
         logger.error(f"Failed to remove sample: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to remove sample from workspace"
+            detail="Failed to remove sample from workspace",
         )

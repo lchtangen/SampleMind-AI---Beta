@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 class FilterOperator(Enum):
     """Filter operators"""
+
     EQUALS = "="
     NOT_EQUALS = "!="
     GREATER_THAN = ">"
@@ -29,6 +30,7 @@ class FilterOperator(Enum):
 @dataclass
 class SearchFilter:
     """Individual search filter"""
+
     field: str
     operator: FilterOperator
     value: Any

@@ -75,9 +75,7 @@ def _get_camelot(key: str, mode: str) -> str:
     }
     key_lookup = _sharp_to_flat.get(key, key)
     return (
-        CAMELOT_WHEEL.get((key, mode))
-        or CAMELOT_WHEEL.get((key_lookup, mode))
-        or "?"
+        CAMELOT_WHEEL.get((key, mode)) or CAMELOT_WHEEL.get((key_lookup, mode)) or "?"
     )
 
 
@@ -188,8 +186,8 @@ class HarmonicAnalyzer:
         features.camelot_key = _get_camelot(features.key, features.mode)
 
         # --- Chord timeline ------------------------------------------------
-        features.chord_timeline, features.harmonic_complexity = self._detect_chord_timeline(
-            y_harmonic, sr, chroma_full, features
+        features.chord_timeline, features.harmonic_complexity = (
+            self._detect_chord_timeline(y_harmonic, sr, chroma_full, features)
         )
 
         # --- Progression patterns via MusicTheoryAnalyzer ------------------
@@ -277,7 +275,12 @@ class HarmonicAnalyzer:
                 for (root, quality), template in CHORD_TEMPLATES.items():
                     # Roll template to root position
                     rolled = np.roll(template, root)
-                    score = float(np.dot(window_chroma / (np.linalg.norm(window_chroma) + 1e-9), rolled))
+                    score = float(
+                        np.dot(
+                            window_chroma / (np.linalg.norm(window_chroma) + 1e-9),
+                            rolled,
+                        )
+                    )
                     if score > best_score:
                         best_score = score
                         best_root = root

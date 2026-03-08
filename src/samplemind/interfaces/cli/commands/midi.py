@@ -16,7 +16,10 @@ from samplemind.core.processing.midi_generator import (
 )
 from . import utils
 
-app = typer.Typer(help="🎼 MIDI Extraction - Extract melody, chords, and drums as MIDI", no_args_is_help=True)
+app = typer.Typer(
+    help="🎼 MIDI Extraction - Extract melody, chords, and drums as MIDI",
+    no_args_is_help=True,
+)
 console = utils.console
 
 
@@ -25,19 +28,13 @@ console = utils.console
 def extract_midi(
     file: Optional[Path] = typer.Argument(None, help="Audio file to extract MIDI from"),
     extraction_type: str = typer.Option(
-        "melody",
-        "--type", "-t",
-        help="Extraction type: melody, harmony, rhythm"
+        "melody", "--type", "-t", help="Extraction type: melody, harmony, rhythm"
     ),
     output: Optional[Path] = typer.Option(
-        None,
-        "--output", "-o",
-        help="Output MIDI file path"
+        None, "--output", "-o", help="Output MIDI file path"
     ),
     format_type: str = typer.Option(
-        "table",
-        "--format", "-f",
-        help="Output format: table, json"
+        "table", "--format", "-f", help="Output format: table, json"
     ),
 ) -> None:
     """
@@ -52,6 +49,7 @@ def extract_midi(
         # File selection
         if not file:
             from samplemind.utils.file_picker import select_audio_file
+
             file = select_audio_file(title="Select audio file for MIDI extraction")
             if not file:
                 raise typer.Exit(1)
@@ -65,7 +63,9 @@ def extract_midi(
         extraction_lower = extraction_type.lower()
         valid_types = ["melody", "harmony", "rhythm"]
         if extraction_lower not in valid_types:
-            console.print(f"[red]✗ Invalid type '{extraction_type}'. Use: {', '.join(valid_types)}[/red]")
+            console.print(
+                f"[red]✗ Invalid type '{extraction_type}'. Use: {', '.join(valid_types)}[/red]"
+            )
             raise typer.Exit(1)
 
         # Display header
@@ -84,7 +84,7 @@ def extract_midi(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
             TimeRemainingColumn(),
-            console=console
+            console=console,
         ) as progress:
             task = progress.add_task(f"Extracting {extraction_lower}...", total=None)
             result = generator.extract(file, extraction_type=type_enum)
@@ -130,7 +130,9 @@ def extract_midi(
 @utils.with_error_handling
 def extract_melody_shortcut(
     file: Optional[Path] = typer.Argument(None, help="Audio file"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output MIDI file"),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output MIDI file"
+    ),
 ) -> None:
     """Extract melody from audio (shortcut for --type melody)"""
     extract_midi(file, extraction_type="melody", output=output)
@@ -140,7 +142,9 @@ def extract_melody_shortcut(
 @utils.with_error_handling
 def extract_chords_shortcut(
     file: Optional[Path] = typer.Argument(None, help="Audio file"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output MIDI file"),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output MIDI file"
+    ),
 ) -> None:
     """Extract chords from audio (shortcut for --type harmony)"""
     extract_midi(file, extraction_type="harmony", output=output)
@@ -150,7 +154,9 @@ def extract_chords_shortcut(
 @utils.with_error_handling
 def extract_drums_shortcut(
     file: Optional[Path] = typer.Argument(None, help="Audio file"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output MIDI file"),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output MIDI file"
+    ),
 ) -> None:
     """Extract drum pattern from audio (shortcut for --type rhythm)"""
     extract_midi(file, extraction_type="rhythm", output=output)
@@ -161,14 +167,10 @@ def extract_drums_shortcut(
 def batch_extract_midi(
     folder: Optional[Path] = typer.Argument(None, help="Folder with audio files"),
     extraction_type: str = typer.Option(
-        "melody",
-        "--type", "-t",
-        help="Extraction type: melody, harmony, rhythm"
+        "melody", "--type", "-t", help="Extraction type: melody, harmony, rhythm"
     ),
     output_folder: Optional[Path] = typer.Option(
-        None,
-        "--output", "-o",
-        help="Output folder for MIDI files"
+        None, "--output", "-o", help="Output folder for MIDI files"
     ),
 ) -> None:
     """
@@ -178,6 +180,7 @@ def batch_extract_midi(
         # Folder selection
         if not folder:
             from samplemind.utils.file_picker import select_folder
+
             folder = select_folder(title="Select folder with audio files")
             if not folder:
                 raise typer.Exit(1)
@@ -188,8 +191,12 @@ def batch_extract_midi(
             raise typer.Exit(1)
 
         # Find audio files
-        audio_files = list(folder.glob("*.wav")) + list(folder.glob("*.mp3")) + \
-                      list(folder.glob("*.flac")) + list(folder.glob("*.m4a"))
+        audio_files = (
+            list(folder.glob("*.wav"))
+            + list(folder.glob("*.mp3"))
+            + list(folder.glob("*.flac"))
+            + list(folder.glob("*.m4a"))
+        )
 
         if not audio_files:
             console.print(f"[yellow]⚠ No audio files found in {folder}[/yellow]")
@@ -223,7 +230,7 @@ def batch_extract_midi(
             TextColumn("[progress.description]{task.description}"),
             BarColumn(),
             TextColumn("{task.completed}/{task.total}"),
-            console=console
+            console=console,
         ) as progress:
             task = progress.add_task("Extracting MIDI...", total=len(audio_files))
 
@@ -238,7 +245,9 @@ def batch_extract_midi(
                         success_count += 1
 
                 except Exception as e:
-                    console.print(f"[yellow]⚠ Failed to process {audio_file.name}: {e}[/yellow]")
+                    console.print(
+                        f"[yellow]⚠ Failed to process {audio_file.name}: {e}[/yellow]"
+                    )
 
                 progress.update(task, advance=1)
 
@@ -247,7 +256,9 @@ def batch_extract_midi(
         # Summary
         console.print()
         console.print(f"[green]✓ Batch complete in {elapsed:.1f}s[/green]")
-        console.print(f"[green]Successfully extracted: {success_count}/{len(audio_files)}[/green]")
+        console.print(
+            f"[green]Successfully extracted: {success_count}/{len(audio_files)}[/green]"
+        )
         console.print(f"[dim]MIDI files saved to: {output_folder}[/dim]")
 
     except utils.CLIError as e:
@@ -261,6 +272,7 @@ def batch_extract_midi(
 # ============================================================================
 # Display Helpers
 # ============================================================================
+
 
 def _display_melody_results(result) -> None:
     """Display melody extraction results"""
@@ -283,7 +295,7 @@ def _display_melody_results(result) -> None:
             f"{note.start_time:.2f}",
             f"{note.duration:.2f}",
             str(note.pitch),
-            f"{note.confidence:.2f}"
+            f"{note.confidence:.2f}",
         )
 
     console.print(table)
@@ -312,7 +324,7 @@ def _display_chord_results(result) -> None:
             chord.get_name(),
             f"{chord.start_time:.2f}",
             f"{chord.duration:.2f}",
-            f"{chord.confidence:.2f}"
+            f"{chord.confidence:.2f}",
         )
 
     console.print(table)
@@ -342,7 +354,7 @@ def _display_rhythm_results(result) -> None:
             f"{hit_type} #{i+1}",
             f"{note.start_time:.3f}",
             f"{note.duration:.3f}",
-            str(note.velocity)
+            str(note.velocity),
         )
 
     console.print(table)
@@ -371,7 +383,7 @@ def _output_json_result(result, elapsed: float, extraction_type: str) -> None:
 
 def _get_note_name(midi_number: int) -> str:
     """Get note name from MIDI number"""
-    notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+    notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
     octave = (midi_number // 12) - 1
     note = notes[midi_number % 12]
     return f"{note}{octave}"

@@ -287,9 +287,7 @@ class TestTUIAudioEngine:
 
     @pytest.mark.asyncio
     @patch("samplemind.interfaces.tui.audio_engine_bridge.AudioEngine")
-    async def test_analyze_batch(
-        self, mock_engine_class, mock_audio_features
-    ):
+    async def test_analyze_batch(self, mock_engine_class, mock_audio_features):
         """Test batch file analysis."""
         engine = TUIAudioEngine()
         progress_updates = []

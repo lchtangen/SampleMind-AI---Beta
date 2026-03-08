@@ -20,14 +20,24 @@ from pathlib import Path
 from enum import Enum
 from rich.console import Console
 from rich.table import Table
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
+from rich.progress import (
+    Progress,
+    SpinnerColumn,
+    TextColumn,
+    BarColumn,
+    TaskProgressColumn,
+)
 
 from . import utils
-from ....core.processing.stem_separation import StemSeparationEngine, StemSeparationResult
+from ....core.processing.stem_separation import (
+    StemSeparationEngine,
+    StemSeparationResult,
+)
 
 
 class StemQuality(str, Enum):
     """Quality presets for stem separation"""
+
     FAST = "fast"
     STANDARD = "standard"
     HIGH = "high"
@@ -40,12 +50,15 @@ QUALITY_PRESETS = {
     StemQuality.HIGH: {"model": "mdx_extra", "shifts": 5, "overlap": 0.5},
 }
 
-app = typer.Typer(help="🎙️  Audio processing & conversion (25 commands)", no_args_is_help=True)
+app = typer.Typer(
+    help="🎙️  Audio processing & conversion (25 commands)", no_args_is_help=True
+)
 console = utils.console
 
 # ============================================================================
 # SECTION 1: FORMAT CONVERSION (8 commands)
 # ============================================================================
+
 
 @app.command("convert:wav")
 @utils.with_error_handling
@@ -171,10 +184,14 @@ def convert_batch(
     """Batch convert all audio files"""
     try:
         files = utils.get_audio_files(folder)
-        with utils.ProgressTracker(f"Converting {len(files)} files to {format.upper()}"):
+        with utils.ProgressTracker(
+            f"Converting {len(files)} files to {format.upper()}"
+        ):
             pass
 
-        console.print(f"[green]✓ Converted {len(files)} files to {format.upper()}[/green]")
+        console.print(
+            f"[green]✓ Converted {len(files)} files to {format.upper()}[/green]"
+        )
 
     except Exception as e:
         utils.handle_error(e, "convert:batch")
@@ -184,6 +201,7 @@ def convert_batch(
 # ============================================================================
 # SECTION 2: AUDIO EDITING (8 commands)
 # ============================================================================
+
 
 @app.command("normalize")
 @utils.with_error_handling
@@ -355,14 +373,29 @@ def audio_reverse(
 # SECTION 3: STEM SEPARATION (6 commands)
 # ============================================================================
 
+
 @app.command("stems:separate")
 @utils.with_error_handling
 def stems_separate(
     file: Path = typer.Argument(..., help="Audio file to separate"),
-    model: str = typer.Option("mdx_extra", "--model", "-m", help="Demucs model (mdx, mdx_extra, mdx_q, htdemucs)"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output directory"),
-    quality: StemQuality = typer.Option(StemQuality.STANDARD, "--quality", "-q", help="Quality preset (fast/standard/high)"),
-    device: Optional[str] = typer.Option(None, "--device", "-d", help="Device (cpu, cuda, mps)"),
+    model: str = typer.Option(
+        "mdx_extra",
+        "--model",
+        "-m",
+        help="Demucs model (mdx, mdx_extra, mdx_q, htdemucs)",
+    ),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output directory"
+    ),
+    quality: StemQuality = typer.Option(
+        StemQuality.STANDARD,
+        "--quality",
+        "-q",
+        help="Quality preset (fast/standard/high)",
+    ),
+    device: Optional[str] = typer.Option(
+        None, "--device", "-d", help="Device (cpu, cuda, mps)"
+    ),
 ) -> None:
     """Separate audio into stems (vocals, drums, bass, other) using Demucs AI"""
     try:
@@ -394,7 +427,9 @@ def stems_separate(
             TaskProgressColumn(),
             console=console,
         ) as progress:
-            task = progress.add_task(f"Separating stems with {effective_model}...", total=None)
+            task = progress.add_task(
+                f"Separating stems with {effective_model}...", total=None
+            )
 
             engine = StemSeparationEngine(
                 model=effective_model,
@@ -501,9 +536,15 @@ def _extract_single_stem(
 @utils.with_error_handling
 def stems_vocals(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
-    quality: StemQuality = typer.Option(StemQuality.FAST, "--quality", "-q", help="Quality preset"),
-    device: Optional[str] = typer.Option(None, "--device", "-d", help="Device (cpu, cuda, mps)"),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output file path"
+    ),
+    quality: StemQuality = typer.Option(
+        StemQuality.FAST, "--quality", "-q", help="Quality preset"
+    ),
+    device: Optional[str] = typer.Option(
+        None, "--device", "-d", help="Device (cpu, cuda, mps)"
+    ),
 ) -> None:
     """Extract vocals stem only (fast two-stem mode)"""
     try:
@@ -517,9 +558,15 @@ def stems_vocals(
 @utils.with_error_handling
 def stems_drums(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
-    quality: StemQuality = typer.Option(StemQuality.FAST, "--quality", "-q", help="Quality preset"),
-    device: Optional[str] = typer.Option(None, "--device", "-d", help="Device (cpu, cuda, mps)"),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output file path"
+    ),
+    quality: StemQuality = typer.Option(
+        StemQuality.FAST, "--quality", "-q", help="Quality preset"
+    ),
+    device: Optional[str] = typer.Option(
+        None, "--device", "-d", help="Device (cpu, cuda, mps)"
+    ),
 ) -> None:
     """Extract drums stem only (fast two-stem mode)"""
     try:
@@ -533,9 +580,15 @@ def stems_drums(
 @utils.with_error_handling
 def stems_bass(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
-    quality: StemQuality = typer.Option(StemQuality.STANDARD, "--quality", "-q", help="Quality preset"),
-    device: Optional[str] = typer.Option(None, "--device", "-d", help="Device (cpu, cuda, mps)"),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output file path"
+    ),
+    quality: StemQuality = typer.Option(
+        StemQuality.STANDARD, "--quality", "-q", help="Quality preset"
+    ),
+    device: Optional[str] = typer.Option(
+        None, "--device", "-d", help="Device (cpu, cuda, mps)"
+    ),
 ) -> None:
     """Extract bass stem only (requires full separation)"""
     try:
@@ -549,9 +602,15 @@ def stems_bass(
 @utils.with_error_handling
 def stems_other(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
-    quality: StemQuality = typer.Option(StemQuality.STANDARD, "--quality", "-q", help="Quality preset"),
-    device: Optional[str] = typer.Option(None, "--device", "-d", help="Device (cpu, cuda, mps)"),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output file path"
+    ),
+    quality: StemQuality = typer.Option(
+        StemQuality.STANDARD, "--quality", "-q", help="Quality preset"
+    ),
+    device: Optional[str] = typer.Option(
+        None, "--device", "-d", help="Device (cpu, cuda, mps)"
+    ),
 ) -> None:
     """Extract other/melody stem only (requires full separation)"""
     try:
@@ -565,10 +624,18 @@ def stems_other(
 @utils.with_error_handling
 def stems_batch(
     folder: Path = typer.Argument(..., help="Folder containing audio files"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output directory"),
-    quality: StemQuality = typer.Option(StemQuality.STANDARD, "--quality", "-q", help="Quality preset"),
-    device: Optional[str] = typer.Option(None, "--device", "-d", help="Device (cpu, cuda, mps)"),
-    extensions: str = typer.Option("wav,mp3,flac,aiff,m4a", "--ext", help="File extensions to process"),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output directory"
+    ),
+    quality: StemQuality = typer.Option(
+        StemQuality.STANDARD, "--quality", "-q", help="Quality preset"
+    ),
+    device: Optional[str] = typer.Option(
+        None, "--device", "-d", help="Device (cpu, cuda, mps)"
+    ),
+    extensions: str = typer.Option(
+        "wav,mp3,flac,aiff,m4a", "--ext", help="File extensions to process"
+    ),
 ) -> None:
     """Batch separate stems for all audio files in a folder"""
     try:
@@ -633,7 +700,9 @@ def stems_batch(
                             shutil.copy2(stem_path, final_stem)
 
                 except Exception as file_error:
-                    console.print(f"  [red]✗ Failed: {audio_file.name} - {file_error}[/red]")
+                    console.print(
+                        f"  [red]✗ Failed: {audio_file.name} - {file_error}[/red]"
+                    )
 
                 progress.advance(task)
 
@@ -649,6 +718,7 @@ def stems_batch(
 # ============================================================================
 # SECTION 4: ANALYSIS (3 commands)
 # ============================================================================
+
 
 @app.command("duration")
 @utils.with_error_handling

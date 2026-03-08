@@ -36,7 +36,9 @@ def _ensure_music2vec() -> bool:
         return True
     try:
         import torch as _t
-        from transformers import AutoModel as _AM, AutoProcessor as _AP
+        from transformers import AutoModel as _AM
+        from transformers import AutoProcessor as _AP
+
         _torch = _t
         _AutoModel = _AM
         _AutoProcessor = _AP
@@ -51,6 +53,7 @@ def _ensure_music2vec() -> bool:
 # ---------------------------------------------------------------------------
 # Embedder
 # ---------------------------------------------------------------------------
+
 
 class MusicEmbedder:
     """
@@ -82,7 +85,7 @@ class MusicEmbedder:
         self._processor: Any = None
         self._model: Any = None
         self._cache: Dict[str, np.ndarray] = {}
-        self._chroma: Any = None   # lazy-loaded on first chroma call
+        self._chroma: Any = None  # lazy-loaded on first chroma call
 
         if not self.use_mock:
             if _ensure_music2vec():
@@ -122,6 +125,7 @@ class MusicEmbedder:
             return self._chroma
         try:
             import chromadb
+
             client = chromadb.Client()
             self._chroma = client.get_or_create_collection(
                 name=self.chroma_collection,
@@ -149,7 +153,11 @@ class MusicEmbedder:
         if self.enable_cache and cache_key in self._cache:
             return self._cache[cache_key]
 
-        emb = self._mock_embedding(cache_key) if self.use_mock else self._embed_file(audio_path)
+        emb = (
+            self._mock_embedding(cache_key)
+            if self.use_mock
+            else self._embed_file(audio_path)
+        )
 
         if self.enable_cache:
             self._cache[cache_key] = emb
@@ -225,11 +233,13 @@ class MusicEmbedder:
             )
             output: List[Dict[str, Any]] = []
             for i, doc_id in enumerate(results.get("ids", [[]])[0]):
-                output.append({
-                    "id": doc_id,
-                    "distance": results["distances"][0][i],
-                    "metadata": results["metadatas"][0][i],
-                })
+                output.append(
+                    {
+                        "id": doc_id,
+                        "distance": results["distances"][0][i],
+                        "metadata": results["metadatas"][0][i],
+                    }
+                )
             return output
         except Exception as exc:
             logger.error(f"ChromaDB search failed: {exc}")
@@ -242,6 +252,7 @@ class MusicEmbedder:
     def _embed_file(self, audio_path: Path) -> np.ndarray:
         try:
             import librosa
+
             waveform, _ = librosa.load(str(audio_path), sr=16000, mono=True)
         except Exception as exc:
             logger.error(f"Load failed {audio_path}: {exc}")

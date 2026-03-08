@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 class WarmupPriority(Enum):
     """Cache warmup priority levels"""
+
     CRITICAL = 1
     HIGH = 2
     NORMAL = 3
@@ -28,6 +29,7 @@ class WarmupPriority(Enum):
 @dataclass
 class WarmupTask:
     """Single cache warmup task"""
+
     file_id: str
     file_path: Path
     feature_type: str
@@ -54,6 +56,7 @@ class WarmupTask:
 @dataclass
 class WarmupStats:
     """Statistics for warmup process"""
+
     total_tasks: int = 0
     completed_tasks: int = 0
     skipped_tasks: int = 0
@@ -83,7 +86,7 @@ class CacheWarmer:
         markov_predictor=None,
         cpu_threshold: float = 0.60,
         memory_threshold: float = 0.70,
-        max_concurrent_tasks: int = 2
+        max_concurrent_tasks: int = 2,
     ):
         """
         Initialize cache warmer.
@@ -151,7 +154,9 @@ class CacheWarmer:
 
         # Wait for active tasks to complete
         if self.active_tasks:
-            logger.info(f"Waiting for {len(self.active_tasks)} active tasks to complete...")
+            logger.info(
+                f"Waiting for {len(self.active_tasks)} active tasks to complete..."
+            )
             await asyncio.gather(*self.active_tasks.values(), return_exceptions=True)
 
         logger.info("Cache warmer stopped")
@@ -173,7 +178,7 @@ class CacheWarmer:
         feature_type: str,
         analysis_level: str,
         priority: WarmupPriority = WarmupPriority.NORMAL,
-        confidence: float = 0.5
+        confidence: float = 0.5,
     ) -> bool:
         """
         Add a task to the warmup queue.
@@ -202,7 +207,7 @@ class CacheWarmer:
             analysis_level=analysis_level,
             priority=priority,
             confidence=confidence,
-            created_at=time.time()
+            created_at=time.time(),
         )
 
         try:
@@ -243,8 +248,7 @@ class CacheWarmer:
 
             # Clean up completed tasks
             self.active_tasks = {
-                k: t for k, t in self.active_tasks.items()
-                if not t.done()
+                k: t for k, t in self.active_tasks.items() if not t.done()
             }
 
     async def _warmup_task(self, task: WarmupTask) -> None:
@@ -260,8 +264,7 @@ class CacheWarmer:
             # Analyze file (this populates cache)
             if self.audio_engine:
                 features = await self.audio_engine.analyze_audio_async(
-                    task.file_path,
-                    analysis_level=task.analysis_level
+                    task.file_path, analysis_level=task.analysis_level
                 )
 
                 # Store in cache
@@ -327,7 +330,7 @@ class CacheWarmer:
             "active_tasks": len(self.active_tasks),
             "queue_size": self.task_queue.qsize(),
             "is_running": self.is_running,
-            "pause_count": self.stats.pause_count
+            "pause_count": self.stats.pause_count,
         }
 
     def clear_stats(self) -> None:
@@ -354,10 +357,7 @@ _warmer_instance: Optional[CacheWarmer] = None
 
 
 def init_warmer(
-    audio_engine=None,
-    cache=None,
-    markov_predictor=None,
-    **kwargs
+    audio_engine=None, cache=None, markov_predictor=None, **kwargs
 ) -> CacheWarmer:
     """Initialize global cache warmer instance"""
     global _warmer_instance
@@ -365,7 +365,7 @@ def init_warmer(
         audio_engine=audio_engine,
         cache=cache,
         markov_predictor=markov_predictor,
-        **kwargs
+        **kwargs,
     )
     return _warmer_instance
 

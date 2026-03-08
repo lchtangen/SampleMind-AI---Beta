@@ -12,28 +12,37 @@ from rich.table import Table
 from samplemind.core.processing.groove_extractor import GrooveExtractor
 from . import utils
 
-app = typer.Typer(help="🎵 Groove template extraction & application", no_args_is_help=True)
+app = typer.Typer(
+    help="🎵 Groove template extraction & application", no_args_is_help=True
+)
 console = utils.console
+
 
 @app.command("extract")
 @utils.with_error_handling
 @utils.async_command
 async def extract_groove(
-    file: Optional[Path] = typer.Argument(None, help="Audio file to extract groove from"),
+    file: Optional[Path] = typer.Argument(
+        None, help="Audio file to extract groove from"
+    ),
     name: Optional[str] = typer.Option(None, "--name", "-n", help="Groove name"),
     tempo: Optional[float] = typer.Option(None, "--tempo", "-t", help="Tempo in BPM"),
-    save_path: Optional[Path] = typer.Option(None, "--save", "-s", help="Save groove to file"),
+    save_path: Optional[Path] = typer.Option(
+        None, "--save", "-s", help="Save groove to file"
+    ),
 ) -> None:
     """Extract groove template from drum loop"""
     try:
         if not file:
             from samplemind.utils.file_picker import select_audio_file
+
             file = select_audio_file(title="Select drum loop")
             if not file:
                 raise typer.Exit(1)
 
         try:
             import librosa
+
             audio, sr = librosa.load(str(file), sr=None, mono=True)
         except ImportError:
             console.print("[yellow]⚠️  librosa not available[/yellow]")
@@ -45,12 +54,7 @@ async def extract_groove(
 
         # Extract
         extractor = GrooveExtractor()
-        groove = extractor.extract(
-            audio,
-            sr,
-            name=name or file.stem,
-            tempo_bpm=tempo
-        )
+        groove = extractor.extract(audio, sr, name=name or file.stem, tempo_bpm=tempo)
 
         # Display results
         console.print("[bold]Groove Characteristics:[/bold]")
@@ -74,11 +78,14 @@ async def extract_groove(
         utils.handle_error(e, "groove:extract")
         raise typer.Exit(1)
 
+
 @app.command("apply")
 @utils.with_error_handling
 def apply_groove(
     groove_file: Path = typer.Argument(..., help="Groove template file"),
-    midi_file: Optional[Path] = typer.Option(None, "--midi", "-m", help="MIDI file to apply groove to"),
+    midi_file: Optional[Path] = typer.Option(
+        None, "--midi", "-m", help="MIDI file to apply groove to"
+    ),
 ) -> None:
     """Apply groove template to MIDI"""
     console.print()
@@ -86,5 +93,6 @@ def apply_groove(
     console.print(f"\nGroove: {groove_file.name}")
     if midi_file:
         console.print(f"MIDI: {midi_file.name}")
+
 
 __all__ = ["app"]

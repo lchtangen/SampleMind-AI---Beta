@@ -21,6 +21,7 @@ from typing import Any, Dict, List, Optional
 
 try:
     import ollama
+
     OLLAMA_AVAILABLE = True
 except ImportError:
     OLLAMA_AVAILABLE = False
@@ -30,16 +31,18 @@ logger = logging.getLogger(__name__)
 
 class OllamaModel(Enum):
     """Available Ollama local models"""
-    QWEN_2_5_7B = "qwen2.5:7b-instruct"   # recommended — best quality
-    PHI3_MINI = "phi3:mini"                 # fastest — lowest RAM
-    GEMMA2_2B = "gemma2:2b"                # Google model
-    LLAMA3_2 = "llama3.2:3b"               # Meta Llama 3.2 — good instruction following
-    MISTRAL_7B = "mistral:7b-instruct"     # Mistral 7B instruct
+
+    QWEN_2_5_7B = "qwen2.5:7b-instruct"  # recommended — best quality
+    PHI3_MINI = "phi3:mini"  # fastest — lowest RAM
+    GEMMA2_2B = "gemma2:2b"  # Google model
+    LLAMA3_2 = "llama3.2:3b"  # Meta Llama 3.2 — good instruction following
+    MISTRAL_7B = "mistral:7b-instruct"  # Mistral 7B instruct
 
 
 @dataclass
 class OllamaMusicAnalysis:
     """Result from Ollama local music analysis"""
+
     summary: str = ""
     production_tips: List[str] = field(default_factory=list)
     creative_ideas: List[str] = field(default_factory=list)
@@ -186,7 +189,9 @@ class OllamaMusicProducer:
         """Check if Ollama is running and the configured model is available."""
         try:
             models = await self._client.list()
-            available = [m.model for m in models.models]  # ollama ^0.4.0: typed ListResponse
+            available = [
+                m.model for m in models.models
+            ]  # ollama ^0.4.0: typed ListResponse
             return self.default_model.value in available
         except Exception:
             return False

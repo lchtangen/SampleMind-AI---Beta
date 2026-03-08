@@ -214,8 +214,8 @@ class MasteringChain:
             if np.any(over_threshold):
                 ratio_recip = 1.0 / ratio - 1.0
                 gain_reduction[over_threshold] = (
-                    (smoothed[over_threshold] / threshold_linear) ** ratio_recip
-                )
+                    smoothed[over_threshold] / threshold_linear
+                ) ** ratio_recip
 
             # Apply gain reduction + makeup gain
             makeup_linear = 10 ** (makeup_db / 20)

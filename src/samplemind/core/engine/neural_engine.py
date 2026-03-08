@@ -18,6 +18,7 @@ AutoModel = None
 AutoProcessor = None
 TRANSFORMERS_AVAILABLE = False
 
+
 def _ensure_deps():
     global librosa, torch, F, AutoModel, AutoProcessor, TRANSFORMERS_AVAILABLE
     if torch is None:
@@ -36,7 +37,10 @@ def _ensure_deps():
             TRANSFORMERS_AVAILABLE = True
         except ImportError:
             TRANSFORMERS_AVAILABLE = False
-            logging.getLogger(__name__).warning("Deep learning dependencies not available")
+            logging.getLogger(__name__).warning(
+                "Deep learning dependencies not available"
+            )
+
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +55,7 @@ def _get_embedding_cache() -> Any:
     if _embedding_cache is None:
         try:
             from samplemind.core.caching.semantic_cache import get_semantic_cache
+
             _embedding_cache = get_semantic_cache()
         except ImportError:
             logger.debug("Semantic cache not available, embedding caching disabled")
@@ -70,7 +75,13 @@ class NeuralFeatureExtractor:
     - Performance: ~90% reduction in embedding generation time with cache hits
     """
 
-    def __init__(self, model_name: str = "laion/clap-htsat-unfused", use_gpu: bool = False, use_mock: bool = False, enable_cache: bool = True) -> None:
+    def __init__(
+        self,
+        model_name: str = "laion/clap-htsat-unfused",
+        use_gpu: bool = False,
+        use_mock: bool = False,
+        enable_cache: bool = True,
+    ) -> None:
         """
         Initialize the neural engine.
 
@@ -109,7 +120,9 @@ class NeuralFeatureExtractor:
     def _load_model(self) -> None:
         """Lazy loader for the heavy transformer models."""
         try:
-            logger.info(f"🧠 Loading Neural Model: {self.model_name} on {self.device}...")
+            logger.info(
+                f"🧠 Loading Neural Model: {self.model_name} on {self.device}..."
+            )
             self.processor = AutoProcessor.from_pretrained(self.model_name)
             self.model = AutoModel.from_pretrained(self.model_name).to(self.device)
             logger.info("✓ Neural Model loaded successfully.")
@@ -134,11 +147,14 @@ class NeuralFeatureExtractor:
             if cache is not None:
                 try:
                     import time
+
                     start = time.time()
                     cached = self._sync_get_cached_embedding(audio_path)
                     if cached is not None:
                         elapsed = time.time() - start
-                        logger.debug(f"Embedding cache hit: {audio_path} ({elapsed*1000:.2f}ms)")
+                        logger.debug(
+                            f"Embedding cache hit: {audio_path} ({elapsed*1000:.2f}ms)"
+                        )
                         return cached
                 except Exception as e:
                     logger.debug(f"Cache lookup failed: {e}")
@@ -167,6 +183,7 @@ class NeuralFeatureExtractor:
     def _sync_get_cached_embedding(self, audio_path: str) -> list[float] | None:
         """Synchronous wrapper to get cached embedding."""
         import asyncio
+
         try:
             cache = _get_embedding_cache()
             if cache is None:
@@ -190,9 +207,12 @@ class NeuralFeatureExtractor:
             logger.debug(f"Sync cache get failed: {e}")
             return None
 
-    def _sync_set_cached_embedding(self, audio_path: str, embedding: list[float]) -> None:
+    def _sync_set_cached_embedding(
+        self, audio_path: str, embedding: list[float]
+    ) -> None:
         """Synchronous wrapper to set cached embedding."""
         import asyncio
+
         try:
             cache = _get_embedding_cache()
             if cache is None:
@@ -224,7 +244,9 @@ class NeuralFeatureExtractor:
         y, sr = librosa.load(str(audio_path), sr=48000, duration=10.0)
 
         # Prepare inputs
-        inputs = self.processor(audios=y, sampling_rate=sr, return_tensors="pt").to(self.device)
+        inputs = self.processor(audios=y, sampling_rate=sr, return_tensors="pt").to(
+            self.device
+        )
 
         # Inference
         with torch.no_grad():
@@ -250,11 +272,14 @@ class NeuralFeatureExtractor:
                 try:
                     # Treat text queries as virtual files for cache lookup
                     import time
+
                     start = time.time()
                     cached = self._sync_get_cached_embedding(cache_key)
                     if cached is not None:
                         elapsed = time.time() - start
-                        logger.debug(f"Text embedding cache hit: '{text}' ({elapsed*1000:.2f}ms)")
+                        logger.debug(
+                            f"Text embedding cache hit: '{text}' ({elapsed*1000:.2f}ms)"
+                        )
                         return cached
                 except Exception as e:
                     logger.debug(f"Text cache lookup failed: {e}")
@@ -264,7 +289,9 @@ class NeuralFeatureExtractor:
             embedding = self._generate_mock_embedding(text)
         else:
             try:
-                inputs = self.processor(text=[text], return_tensors="pt").to(self.device)
+                inputs = self.processor(text=[text], return_tensors="pt").to(
+                    self.device
+                )
                 with torch.no_grad():
                     outputs = self.model.get_text_features(**inputs)
                 embedding = outputs[0].cpu().numpy().tolist()
@@ -283,7 +310,9 @@ class NeuralFeatureExtractor:
 
         return embedding
 
-    def _generate_mock_embedding(self, seed_source: str | Path, dim: int = 512) -> list[float]:
+    def _generate_mock_embedding(
+        self, seed_source: str | Path, dim: int = 512
+    ) -> list[float]:
         """
         Generate a deterministic random embedding based on input string hash.
         """

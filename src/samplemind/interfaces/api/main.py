@@ -38,8 +38,7 @@ from .middleware.analytics import AnalyticsMiddleware
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -63,9 +62,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     # Initialize AudioEngine
     try:
         from samplemind.core.engine.audio_engine import AudioEngine
+
         audio_engine = AudioEngine(
-            max_workers=settings.MAX_WORKERS,
-            cache_size=settings.CACHE_SIZE
+            max_workers=settings.MAX_WORKERS, cache_size=settings.CACHE_SIZE
         )
         set_app_state("audio_engine", audio_engine)
         logger.info("✓ AudioEngine initialized")
@@ -108,6 +107,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     # Initialize AI Manager
     try:
         from samplemind.integrations.ai_manager import SampleMindAIManager
+
         ai_manager = SampleMindAIManager()
         set_app_state("ai_manager", ai_manager)
         logger.info("✓ SampleMindAIManager initialized")
@@ -135,20 +135,23 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         if settings.STORAGE_PROVIDER == "s3":
             try:
                 storage_provider = S3StorageProvider(
-                    bucket_name=settings.S3_BUCKET,
-                    region=settings.S3_REGION
+                    bucket_name=settings.S3_BUCKET, region=settings.S3_REGION
                 )
                 storage_info = f"S3 ({settings.S3_BUCKET})"
             except ImportError:
-                 logger.warning("Boto3 not installed, falling back to Mock S3")
-                 storage_provider = MockS3StorageProvider(settings.S3_BUCKET, settings.S3_REGION)
-                 storage_info = f"Mock S3 ({settings.S3_BUCKET})"
+                logger.warning("Boto3 not installed, falling back to Mock S3")
+                storage_provider = MockS3StorageProvider(
+                    settings.S3_BUCKET, settings.S3_REGION
+                )
+                storage_info = f"Mock S3 ({settings.S3_BUCKET})"
             except Exception as e:
                 logger.error(f"Failed to init S3 provider: {e}. Falling back to local.")
 
         if settings.STORAGE_PROVIDER == "s3-mock":
-             storage_provider = MockS3StorageProvider(settings.S3_BUCKET, settings.S3_REGION)
-             storage_info = f"Mock S3 ({settings.S3_BUCKET})"
+            storage_provider = MockS3StorageProvider(
+                settings.S3_BUCKET, settings.S3_REGION
+            )
+            storage_info = f"Mock S3 ({settings.S3_BUCKET})"
 
         if not storage_provider or settings.STORAGE_PROVIDER == "local":
             # Use local storage (default)
@@ -165,11 +168,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     # Configure JWT authentication
     try:
         from samplemind.core.auth.jwt_handler import configure_jwt
+
         configure_jwt(
             secret_key=settings.SECRET_KEY,
             algorithm=settings.ALGORITHM,
             access_expire=settings.ACCESS_TOKEN_EXPIRE_MINUTES,
-            refresh_expire=settings.REFRESH_TOKEN_EXPIRE_DAYS
+            refresh_expire=settings.REFRESH_TOKEN_EXPIRE_DAYS,
         )
         logger.info("✓ JWT authentication configured")
     except Exception as e:
@@ -182,9 +186,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     # Initialize Analytics
     try:
         from samplemind.integrations.analytics import init_analytics
+
         analytics = init_analytics(
-            api_key=settings.POSTHOG_API_KEY,
-            host=settings.POSTHOG_HOST
+            api_key=settings.POSTHOG_API_KEY, host=settings.POSTHOG_HOST
         )
         set_app_state("analytics", analytics)
         if analytics.enabled:
@@ -219,6 +223,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     if get_app_state("mongodb"):
         try:
             from samplemind.core.database import close_mongodb
+
             await close_mongodb()
         except Exception as e:
             logger.error(f"Error closing MongoDB: {e}")
@@ -226,6 +231,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     if get_app_state("redis"):
         try:
             from samplemind.core.database import close_redis
+
             await close_redis()
         except Exception as e:
             logger.error(f"Error closing Redis: {e}")
@@ -282,8 +288,8 @@ def create_application() -> FastAPI:
             content={
                 "error": exc.error_type,
                 "message": exc.message,
-                "details": exc.details
-            }
+                "details": exc.details,
+            },
         )
 
     @app.exception_handler(Exception)
@@ -294,8 +300,8 @@ def create_application() -> FastAPI:
             content={
                 "error": "internal_server_error",
                 "message": "An unexpected error occurred",
-                "details": str(exc) if settings.ENVIRONMENT == "development" else None
-            }
+                "details": str(exc) if settings.ENVIRONMENT == "development" else None,
+            },
         )
 
     # Register routers
@@ -318,7 +324,7 @@ def create_application() -> FastAPI:
             "name": "SampleMind AI API",
             "version": __version__,
             "status": "operational",
-            "docs": "/api/docs"
+            "docs": "/api/docs",
         }
 
     return app
@@ -328,8 +334,6 @@ def create_application() -> FastAPI:
 app = create_application()
 
 
-
-
 if __name__ == "__main__":
     # Run with uvicorn for development
     uvicorn.run(
@@ -337,5 +341,5 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=8000,
         reload=True,
-        log_level="info"
+        log_level="info",
     )

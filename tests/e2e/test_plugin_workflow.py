@@ -50,7 +50,11 @@ class TestPluginInstallationWorkflow:
         # DAW install directories
         daw_dirs = {
             "fl_studio": tmp_path / "daw_fl" / "Plugins" / "Fruity" / "Generators",
-            "ableton": tmp_path / "daw_ableton" / "Presets" / "Instruments" / "Max Instrument",
+            "ableton": tmp_path
+            / "daw_ableton"
+            / "Presets"
+            / "Instruments"
+            / "Max Instrument",
         }
 
         for daw_type, daw_path in daw_dirs.items():
@@ -166,7 +170,9 @@ class TestPluginInstallationWorkflow:
                 mock_fl.return_value = {Platform.LINUX: fl_dest}
                 mock_ab.return_value = {Platform.LINUX: ableton_dest}
 
-                with patch.object(installer.detector, "is_daw_installed", return_value=True):
+                with patch.object(
+                    installer.detector, "is_daw_installed", return_value=True
+                ):
                     # Step 1: Install to both DAWs
                     fl_success = installer.install_fl_studio_plugin()
                     ab_success = installer.install_ableton_plugin()
@@ -345,9 +351,7 @@ class TestBackendAPIWorkflow:
             assert match["match_score"] >= 0.7
 
         # Step 4: Sort by match score (highest first)
-        sorted_matches = sorted(
-            matches, key=lambda x: x["match_score"], reverse=True
-        )
+        sorted_matches = sorted(matches, key=lambda x: x["match_score"], reverse=True)
         assert sorted_matches[0]["match_score"] >= sorted_matches[1]["match_score"]
 
 
@@ -431,9 +435,7 @@ class TestCrossComponentWorkflows:
         installer.plugins_dir = plugins_dir
 
         # Test workflow
-        with patch.object(
-            installer, "get_fl_studio_plugin_paths"
-        ) as mock_paths:
+        with patch.object(installer, "get_fl_studio_plugin_paths") as mock_paths:
             mock_paths.return_value = {Platform.LINUX: daw_dir}
 
             # Detector finds DAW

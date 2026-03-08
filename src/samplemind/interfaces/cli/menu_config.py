@@ -17,6 +17,7 @@ from samplemind.interfaces.cli.modern_menu import MenuTheme
 @dataclass
 class MenuPreferences:
     """User menu preferences"""
+
     theme: MenuTheme = MenuTheme.DARK
     enable_animations: bool = True
     enable_shortcuts_help: bool = True
@@ -48,11 +49,11 @@ class MenuConfigManager:
         """Load preferences from file or create defaults"""
         if self.PREFERENCES_FILE.exists():
             try:
-                with open(self.PREFERENCES_FILE, 'r') as f:
+                with open(self.PREFERENCES_FILE, "r") as f:
                     data = json.load(f)
                     # Convert theme string back to enum
-                    if 'theme' in data:
-                        data['theme'] = MenuTheme(data['theme'])
+                    if "theme" in data:
+                        data["theme"] = MenuTheme(data["theme"])
                     return MenuPreferences(**data)
             except (json.JSONDecodeError, ValueError, TypeError):
                 # Fall back to defaults if file is corrupted
@@ -64,10 +65,10 @@ class MenuConfigManager:
         try:
             # Convert enum to string for JSON serialization
             prefs_dict = asdict(self.preferences)
-            if isinstance(prefs_dict['theme'], MenuTheme):
-                prefs_dict['theme'] = prefs_dict['theme'].value
+            if isinstance(prefs_dict["theme"], MenuTheme):
+                prefs_dict["theme"] = prefs_dict["theme"].value
 
-            with open(self.PREFERENCES_FILE, 'w') as f:
+            with open(self.PREFERENCES_FILE, "w") as f:
                 json.dump(prefs_dict, f, indent=2)
             return True
         except Exception as e:
@@ -124,10 +125,10 @@ class MenuConfigManager:
         """Export preferences to a file"""
         try:
             prefs_dict = asdict(self.preferences)
-            if isinstance(prefs_dict['theme'], MenuTheme):
-                prefs_dict['theme'] = prefs_dict['theme'].value
+            if isinstance(prefs_dict["theme"], MenuTheme):
+                prefs_dict["theme"] = prefs_dict["theme"].value
 
-            with open(file_path, 'w') as f:
+            with open(file_path, "w") as f:
                 json.dump(prefs_dict, f, indent=2)
             return True
         except Exception as e:
@@ -137,10 +138,10 @@ class MenuConfigManager:
     def import_preferences(self, file_path: Path) -> bool:
         """Import preferences from a file"""
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path, "r") as f:
                 data = json.load(f)
-                if 'theme' in data:
-                    data['theme'] = MenuTheme(data['theme'])
+                if "theme" in data:
+                    data["theme"] = MenuTheme(data["theme"])
                 self.preferences = MenuPreferences(**data)
             self.save_preferences()
             return True
@@ -197,9 +198,11 @@ class MenuStateManager:
 
         filtered = []
         for item in items:
-            if (query in item.label.lower() or
-                query in item.description.lower() or
-                (item.help_text and query in item.help_text.lower())):
+            if (
+                query in item.label.lower()
+                or query in item.description.lower()
+                or (item.help_text and query in item.help_text.lower())
+            ):
                 filtered.append(item)
 
         return filtered

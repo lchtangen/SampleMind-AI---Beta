@@ -210,7 +210,18 @@ class AIClassifier:
     def _get_instrument_scores(self, features: AudioFeatures) -> Dict[str, float]:
         """Get confidence scores for all instruments."""
         primary, conf = self._classify_instrument(features)
-        scores = {inst: 0.1 for inst in ["kick", "snare", "hihat", "bass", "vocal", "synth", "percussion"]}
+        scores = {
+            inst: 0.1
+            for inst in [
+                "kick",
+                "snare",
+                "hihat",
+                "bass",
+                "vocal",
+                "synth",
+                "percussion",
+            ]
+        }
         scores[primary] = conf
         return scores
 
@@ -226,7 +237,7 @@ class AIClassifier:
 
         # Techno: 120-145 BPM
         if 120 <= bpm <= 145:
-             return "techno", 0.7
+            return "techno", 0.7
 
         # Hip Hop: 75-115 BPM
         if 75 <= bpm <= 115:
@@ -246,9 +257,9 @@ class AIClassifier:
         return "electronic", 0.4
 
     def _get_genre_scores(self, features: AudioFeatures) -> Dict[str, float]:
-         primary, conf = self._classify_genre(features)
-         # In reality, multiple genres can have high scores
-         return {primary: conf}
+        primary, conf = self._classify_genre(features)
+        # In reality, multiple genres can have high scores
+        return {primary: conf}
 
     def _classify_mood(
         self,
@@ -280,18 +291,21 @@ class AIClassifier:
         """Assess audio quality score (0.0 - 1.0)."""
         energy = self._get_feature_mean(features.rms_energy) or 0.0
 
-        if energy > 0.98: # Potential clipping
+        if energy > 0.98:  # Potential clipping
             return 0.4
-        if energy < 0.01: # Too quiet
+        if energy < 0.01:  # Too quiet
             return 0.3
 
         return 0.9
 
     def _categorize_tempo(self, features: AudioFeatures) -> str:
         bpm = features.tempo
-        if not bpm: return "unknown"
-        if bpm < 90: return "slow"
-        if bpm < 130: return "medium"
+        if not bpm:
+            return "unknown"
+        if bpm < 90:
+            return "slow"
+        if bpm < 130:
+            return "medium"
         return "fast"
 
     def _generate_tags(self, instrument, genre, mood, quality, tempo) -> list:
@@ -318,9 +332,9 @@ class AIClassifier:
                 return None
         # Handle numpy array
         try:
-             return float(np.mean(feature_array))
+            return float(np.mean(feature_array))
         except (TypeError, ValueError):
-             return None
+            return None
 
     def _get_cache_key(self, features: AudioFeatures) -> str:
         """Generate a cache key from features."""

@@ -26,13 +26,39 @@ _AST_AVAILABLE = False
 _AST_MODEL_NAME = "MIT/ast-finetuned-audioset-10-10-0.4593"
 
 # Subset of AudioSet classes relevant to music/sample production
-_MUSIC_RELEVANT_LABELS = frozenset({
-    "Music", "Musical instrument", "Drum", "Bass drum", "Snare drum", "Hi-hat",
-    "Cymbal", "Guitar", "Bass guitar", "Electric guitar", "Piano", "Keyboard",
-    "Synthesizer", "Violin", "Trumpet", "Saxophone", "Clapping", "Singing",
-    "Vocal", "Beat", "Rhythm", "Melody", "Chord", "Electronic music",
-    "Hip hop music", "Pop music", "Rock music", "Techno", "Dance music",
-})
+_MUSIC_RELEVANT_LABELS = frozenset(
+    {
+        "Music",
+        "Musical instrument",
+        "Drum",
+        "Bass drum",
+        "Snare drum",
+        "Hi-hat",
+        "Cymbal",
+        "Guitar",
+        "Bass guitar",
+        "Electric guitar",
+        "Piano",
+        "Keyboard",
+        "Synthesizer",
+        "Violin",
+        "Trumpet",
+        "Saxophone",
+        "Clapping",
+        "Singing",
+        "Vocal",
+        "Beat",
+        "Rhythm",
+        "Melody",
+        "Chord",
+        "Electronic music",
+        "Hip hop music",
+        "Pop music",
+        "Rock music",
+        "Techno",
+        "Dance music",
+    }
+)
 
 
 def _ensure_ast() -> bool:
@@ -43,8 +69,11 @@ def _ensure_ast() -> bool:
         import torch as _t
         from transformers import (
             ASTForAudioClassification as _AST,
+        )
+        from transformers import (
             AutoFeatureExtractor as _AFE,
         )
+
         _torch = _t
         _ASTForAudioClassification = _AST
         _AutoFeatureExtractor = _AFE
@@ -60,8 +89,10 @@ def _ensure_ast() -> bool:
 # Result type
 # ---------------------------------------------------------------------------
 
+
 class AudioLabel:
     """A single AudioSet classification result."""
+
     __slots__ = ("label", "score", "label_id")
 
     def __init__(self, label: str, score: float, label_id: int = -1) -> None:
@@ -76,6 +107,7 @@ class AudioLabel:
 # ---------------------------------------------------------------------------
 # Classifier
 # ---------------------------------------------------------------------------
+
 
 class ASTClassifier:
     """
@@ -186,6 +218,7 @@ class ASTClassifier:
     ) -> List[AudioLabel]:
         try:
             import librosa
+
             waveform, _ = librosa.load(str(audio_path), sr=16000, mono=True)
         except Exception as exc:
             logger.error(f"Audio load failed: {exc}")

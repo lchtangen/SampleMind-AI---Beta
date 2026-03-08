@@ -21,7 +21,13 @@ from typing import Optional
 from pathlib import Path
 from rich.console import Console
 from rich.table import Table
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
+from rich.progress import (
+    Progress,
+    SpinnerColumn,
+    TextColumn,
+    BarColumn,
+    TaskProgressColumn,
+)
 
 from . import utils
 
@@ -32,6 +38,7 @@ console = utils.console
 def _get_similarity_db():
     """Lazy import to avoid circular imports"""
     from ....core.similarity import SimilarityDatabase
+
     return SimilarityDatabase()
 
 
@@ -40,10 +47,18 @@ def _get_similarity_db():
 def similar_find(
     file: Path = typer.Argument(..., help="Query audio file"),
     count: int = typer.Option(10, "--count", "-n", help="Number of results"),
-    min_similarity: float = typer.Option(0.5, "--min", help="Minimum similarity (0.0-1.0)"),
-    tempo_min: Optional[float] = typer.Option(None, "--tempo-min", help="Filter: minimum BPM"),
-    tempo_max: Optional[float] = typer.Option(None, "--tempo-max", help="Filter: maximum BPM"),
-    key: Optional[str] = typer.Option(None, "--key", "-k", help="Filter: musical key (e.g., 'C', 'Am')"),
+    min_similarity: float = typer.Option(
+        0.5, "--min", help="Minimum similarity (0.0-1.0)"
+    ),
+    tempo_min: Optional[float] = typer.Option(
+        None, "--tempo-min", help="Filter: minimum BPM"
+    ),
+    tempo_max: Optional[float] = typer.Option(
+        None, "--tempo-max", help="Filter: maximum BPM"
+    ),
+    key: Optional[str] = typer.Option(
+        None, "--key", "-k", help="Filter: musical key (e.g., 'C', 'Am')"
+    ),
 ) -> None:
     """Find similar samples to a query file"""
     try:
@@ -59,13 +74,13 @@ def similar_find(
         # Build filters
         filters = {}
         if tempo_min is not None or tempo_max is not None:
-            filters['tempo'] = {}
+            filters["tempo"] = {}
             if tempo_min is not None:
-                filters['tempo']['$gte'] = tempo_min
+                filters["tempo"]["$gte"] = tempo_min
             if tempo_max is not None:
-                filters['tempo']['$lte'] = tempo_max
+                filters["tempo"]["$lte"] = tempo_max
         if key is not None:
-            filters['estimated_key'] = key
+            filters["estimated_key"] = key
 
         # Get similarity database
         with Progress(
@@ -87,7 +102,9 @@ def similar_find(
 
         if not results:
             console.print("[yellow]No similar samples found.[/yellow]")
-            console.print("[dim]Try indexing your library first: samplemind similar:index <folder>[/dim]")
+            console.print(
+                "[dim]Try indexing your library first: samplemind similar:index <folder>[/dim]"
+            )
             return
 
         # Display results
@@ -100,7 +117,7 @@ def similar_find(
         table.add_column("Character")
 
         for i, result in enumerate(results, 1):
-            tempo = result.metadata.get('tempo', '-')
+            tempo = result.metadata.get("tempo", "-")
             if isinstance(tempo, (int, float)):
                 tempo = f"{tempo:.0f}"
 
@@ -109,8 +126,8 @@ def similar_find(
                 Path(result.file_path).name,
                 f"{result.percentage:.1f}%",
                 tempo,
-                result.metadata.get('estimated_key', '-'),
-                result.metadata.get('character', '-'),
+                result.metadata.get("estimated_key", "-"),
+                result.metadata.get("character", "-"),
             )
 
         console.print(table)
@@ -124,9 +141,15 @@ def similar_find(
 @utils.with_error_handling
 def similar_index(
     folder: Path = typer.Argument(..., help="Folder to index"),
-    recursive: bool = typer.Option(True, "--recursive/--no-recursive", "-r", help="Include subdirectories"),
-    extensions: str = typer.Option("wav,mp3,flac,aiff,m4a,ogg", "--ext", help="File extensions to index"),
-    rebuild: bool = typer.Option(False, "--rebuild", help="Clear and rebuild entire index"),
+    recursive: bool = typer.Option(
+        True, "--recursive/--no-recursive", "-r", help="Include subdirectories"
+    ),
+    extensions: str = typer.Option(
+        "wav,mp3,flac,aiff,m4a,ogg", "--ext", help="File extensions to index"
+    ),
+    rebuild: bool = typer.Option(
+        False, "--rebuild", help="Clear and rebuild entire index"
+    ),
 ) -> None:
     """Build similarity index for a folder of audio files"""
     try:
@@ -159,7 +182,11 @@ def similar_index(
 
             def progress_callback(current: int, total: int, filename: str):
                 """Update progress bar during indexing"""
-                progress.update(task, completed=(current / total) * 100, description=f"Indexing {filename}...")
+                progress.update(
+                    task,
+                    completed=(current / total) * 100,
+                    description=f"Indexing {filename}...",
+                )
 
             indexed = db.index_library(
                 folder=folder,
@@ -238,7 +265,9 @@ def similar_compare(
         bar = "█" * filled + "░" * (bar_length - filled)
 
         console.print()
-        console.print(f"[{color}]Similarity: {percentage:.1f}% - {description}[/{color}]")
+        console.print(
+            f"[{color}]Similarity: {percentage:.1f}% - {description}[/{color}]"
+        )
         console.print(f"[{color}]{bar}[/{color}]")
 
     except Exception as e:
@@ -258,10 +287,10 @@ def similar_stats():
         table.add_column("Property", style="cyan")
         table.add_column("Value", style="green")
 
-        table.add_row("Collection Name", stats['collection_name'])
-        table.add_row("Total Indexed Files", str(stats['total_files']))
-        table.add_row("Embedding Dimension", str(stats['embedding_dim']))
-        table.add_row("Storage Location", stats['persist_directory'])
+        table.add_row("Collection Name", stats["collection_name"])
+        table.add_row("Total Indexed Files", str(stats["total_files"]))
+        table.add_row("Embedding Dimension", str(stats["embedding_dim"]))
+        table.add_row("Storage Location", stats["persist_directory"])
 
         console.print(table)
 
@@ -278,7 +307,9 @@ def similar_clear(
     """Clear the similarity database"""
     try:
         if not confirm:
-            console.print("[yellow]This will delete all indexed audio embeddings.[/yellow]")
+            console.print(
+                "[yellow]This will delete all indexed audio embeddings.[/yellow]"
+            )
             response = typer.confirm("Are you sure you want to continue?")
             if not response:
                 console.print("[dim]Cancelled.[/dim]")

@@ -74,6 +74,7 @@ def _ensure_torch() -> bool:
         return True
     try:
         import torch as _t
+
         _torch = _t
         _TORCH_AVAILABLE = True
         return True
@@ -88,6 +89,7 @@ def _ensure_librosa() -> bool:
         return True
     try:
         import librosa as _l
+
         _librosa = _l
         _LIBROSA_AVAILABLE = True
         return True
@@ -174,8 +176,8 @@ class CNNAudioClassifier:
     *mock mode* and returns plausible-looking deterministic predictions.
     """
 
-    SR: int = 22050         # target sample rate
-    N_MELS: int = 128       # mel bands (== 1-D input length after mean-pooling)
+    SR: int = 22050  # target sample rate
+    N_MELS: int = 128  # mel bands (== 1-D input length after mean-pooling)
     HOP_LENGTH: int = 512
 
     def __init__(self, weights_path: Optional[Path] = None) -> None:
@@ -197,9 +199,14 @@ class CNNAudioClassifier:
 
         try:
             self._device = _torch.device(
-                "cuda" if _torch.cuda.is_available()
-                else "mps" if getattr(_torch.backends, "mps", None) and _torch.backends.mps.is_available()
-                else "cpu"
+                "cuda"
+                if _torch.cuda.is_available()
+                else (
+                    "mps"
+                    if getattr(_torch.backends, "mps", None)
+                    and _torch.backends.mps.is_available()
+                    else "cpu"
+                )
             )
             self._model = _build_model(self._num_classes).to(self._device)
             self._model.eval()
@@ -209,7 +216,9 @@ class CNNAudioClassifier:
                     self.weights_path, map_location=self._device, weights_only=True
                 )
                 self._model.load_state_dict(state)
-                logger.info(f"CNNAudioClassifier: loaded weights from {self.weights_path}")
+                logger.info(
+                    f"CNNAudioClassifier: loaded weights from {self.weights_path}"
+                )
             else:
                 logger.info(
                     "CNNAudioClassifier: no weights file — using random weights (mock-similar)"
@@ -234,20 +243,16 @@ class CNNAudioClassifier:
         return tensor.to(self._device)
 
     # ------------------------------------------------------------------
-    def _run_inference(
-        self, audio_path: Path, top_k: int
-    ) -> CNNClassificationResult:
+    def _run_inference(self, audio_path: Path, top_k: int) -> CNNClassificationResult:
         """Synchronous inference — called inside ThreadPoolExecutor."""
         t0 = time.perf_counter()
         features = self._extract_features(audio_path)
 
         with _torch.no_grad():
-            logits = self._model(features)           # (1, num_classes)
+            logits = self._model(features)  # (1, num_classes)
             probs = _torch.softmax(logits, dim=-1)[0].cpu().tolist()
 
-        all_scores = sorted(
-            zip(MUSIC_CLASSES, probs), key=lambda x: x[1], reverse=True
-        )
+        all_scores = sorted(zip(MUSIC_CLASSES, probs), key=lambda x: x[1], reverse=True)
         top_k_list = all_scores[:top_k]
 
         return CNNClassificationResult(

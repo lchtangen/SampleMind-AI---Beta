@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from agents import Agent, Runner, function_tool, trace
+
     OPENAI_AGENTS_AVAILABLE = True
 except ImportError:
     OPENAI_AGENTS_AVAILABLE = False
@@ -33,6 +34,7 @@ except ImportError:
 # ---------------------------------------------------------------------------
 # Result dataclass
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class AgentPipelineResult:
@@ -141,6 +143,7 @@ if OPENAI_AGENTS_AVAILABLE:
 # Agent pipeline class
 # ---------------------------------------------------------------------------
 
+
 class AudioAgentPipeline:
     """
     Three-agent OpenAI Agents SDK pipeline for audio analysis.
@@ -230,8 +233,7 @@ class AudioAgentPipeline:
         total_tokens = 0
 
         ctx_manager = (
-            trace(f"SampleMind:{sample_name}") if self.enable_tracing else
-            _null_ctx()
+            trace(f"SampleMind:{sample_name}") if self.enable_tracing else _null_ctx()
         )
 
         async with ctx_manager as run_trace:
@@ -259,10 +261,13 @@ class AudioAgentPipeline:
                     result.key = line.split(":", 1)[-1].strip()
                 elif "bpm:" in lower or "tempo:" in lower:
                     try:
-                        result.bpm = float("".join(
-                            c for c in line.split(":", 1)[-1].strip()
-                            if c.isdigit() or c == "."
-                        ))
+                        result.bpm = float(
+                            "".join(
+                                c
+                                for c in line.split(":", 1)[-1].strip()
+                                if c.isdigit() or c == "."
+                            )
+                        )
                     except ValueError:
                         pass
 
@@ -286,7 +291,9 @@ class AudioAgentPipeline:
                     result.instrument_tags = tags_data.get("instrument_tags", [])
             except (ValueError, json.JSONDecodeError):
                 # Fallback: split comma-separated tags
-                result.semantic_tags = [t.strip() for t in tags_text.split(",") if t.strip()]
+                result.semantic_tags = [
+                    t.strip() for t in tags_text.split(",") if t.strip()
+                ]
 
             # --- Step 3: organisation ---
             genre = result.genre or audio_features.get("genre", "Unknown")
@@ -321,6 +328,7 @@ class AudioAgentPipeline:
 # ---------------------------------------------------------------------------
 # Null context manager for when tracing is disabled
 # ---------------------------------------------------------------------------
+
 
 class _null_ctx:
     async def __aenter__(self) -> "_null_ctx":

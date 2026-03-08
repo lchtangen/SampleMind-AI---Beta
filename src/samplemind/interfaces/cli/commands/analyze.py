@@ -40,22 +40,29 @@ console = utils.console
 # SECTION 1: CORE ANALYSIS COMMANDS (9 commands)
 # ============================================================================
 
+
 @app.command("full")
 @utils.with_error_handling
 @utils.async_command
 async def analyze_full(
     file: Path | None = typer.Argument(None, help="Audio file to analyze"),
     output: Path | None = typer.Option(None, "--output", "-o", help="Output file"),
-    format: str = typer.Option("table", "--format", "-f", help="Output format (json|csv|yaml|table)"),
+    format: str = typer.Option(
+        "table", "--format", "-f", help="Output format (json|csv|yaml|table)"
+    ),
     show_profile: bool = typer.Option(False, "--profile", help="Show profiling info"),
-    interactive: bool = typer.Option(False, "--interactive", "-i", help="Launch file picker"),
+    interactive: bool = typer.Option(
+        False, "--interactive", "-i", help="Launch file picker"
+    ),
 ) -> None:
     """Run comprehensive (DETAILED level) analysis with all features"""
     try:
         # Handle file selection
         if not file or interactive:
             console.print("[cyan]📁 Opening file picker...[/cyan]")
-            selected_file = select_audio_file(title="Select Audio File for Full Analysis")
+            selected_file = select_audio_file(
+                title="Select Audio File for Full Analysis"
+            )
             if not selected_file:
                 console.print("[yellow]❌ No file selected[/yellow]")
                 raise typer.Exit(1)
@@ -66,11 +73,13 @@ async def analyze_full(
             result = await utils.analyze_file_async(file, "DETAILED")
 
         if show_profile:
-            console.print(Panel(
-                "Analysis complete at DETAILED level\nIncludes harmonic/percussive separation, forensics, and advanced features",
-                title="[bold cyan]Analysis Profile[/bold cyan]",
-                expand=False
-            ))
+            console.print(
+                Panel(
+                    "Analysis complete at DETAILED level\nIncludes harmonic/percussive separation, forensics, and advanced features",
+                    title="[bold cyan]Analysis Profile[/bold cyan]",
+                    expand=False,
+                )
+            )
 
         utils.output_result(result, format, "Analysis Results", output)
 
@@ -111,9 +120,13 @@ async def analyze_basic(
         with utils.ProgressTracker("🔍 Analyzing (BASIC level)"):
             result = await utils.analyze_file_async(file, "BASIC")
 
-        console.print(f"[cyan]Duration:[/cyan] {utils.format_duration(result.get('duration', 0))}")
+        console.print(
+            f"[cyan]Duration:[/cyan] {utils.format_duration(result.get('duration', 0))}"
+        )
         console.print(f"[cyan]Tempo:[/cyan] {utils.format_bpm(result.get('tempo', 0))}")
-        console.print(f"[cyan]Key:[/cyan] {utils.format_key(result.get('key', '?'), result.get('mode', ''))}")
+        console.print(
+            f"[cyan]Key:[/cyan] {utils.format_key(result.get('key', '?'), result.get('mode', ''))}"
+        )
 
         if output:
             utils.output_result(result, "json", output_file=output)
@@ -130,17 +143,25 @@ async def analyze_professional(
     file: Path = typer.Argument(..., help="Audio file to analyze"),
     output: Path | None = typer.Option(None, "--output", "-o"),
     format: str = typer.Option("json", "--format", "-f"),
-    export_features: bool = typer.Option(False, "--export-features", help="Export raw feature vectors"),
+    export_features: bool = typer.Option(
+        False, "--export-features", help="Export raw feature vectors"
+    ),
 ) -> None:
     """Run professional analysis (PROFESSIONAL level - ML-optimized)"""
     try:
-        with utils.ProgressTracker("🔍 Analyzing (PROFESSIONAL level with ML optimization)"):
+        with utils.ProgressTracker(
+            "🔍 Analyzing (PROFESSIONAL level with ML optimization)"
+        ):
             result = await utils.analyze_file_async(file, "PROFESSIONAL")
 
         console.print("[bold green]✅ Professional Analysis Complete[/bold green]")
 
         if export_features and "features" in result:
-            features_output = output.with_stem(output.stem + "_features") if output else Path("features.json")
+            features_output = (
+                output.with_stem(output.stem + "_features")
+                if output
+                else Path("features.json")
+            )
             utils.output_result(result["features"], format, output_file=features_output)
             console.print(f"[cyan]Features exported to: {features_output}[/cyan]")
 
@@ -156,14 +177,18 @@ async def analyze_professional(
 @utils.async_command
 async def analyze_quick(
     file: Path | None = typer.Argument(None, help="Audio file to analyze"),
-    interactive: bool = typer.Option(False, "--interactive", "-i", help="Launch file picker"),
+    interactive: bool = typer.Option(
+        False, "--interactive", "-i", help="Launch file picker"
+    ),
 ) -> None:
     """Ultra-fast analysis (< 1 second)"""
     try:
         # Handle file selection
         if not file or interactive:
             console.print("[cyan]📁 Opening file picker...[/cyan]")
-            selected_file = select_audio_file(title="Select Audio File for Quick Analysis")
+            selected_file = select_audio_file(
+                title="Select Audio File for Quick Analysis"
+            )
             if not selected_file:
                 console.print("[yellow]❌ No file selected[/yellow]")
                 raise typer.Exit(1)
@@ -177,7 +202,9 @@ async def analyze_quick(
         table.add_row("File", result.get("file", "?"))
         table.add_row("Duration", utils.format_duration(result.get("duration", 0)))
         table.add_row("Tempo", utils.format_bpm(result.get("tempo", 0)))
-        table.add_row("Key", utils.format_key(result.get("key", "?"), result.get("mode", "")))
+        table.add_row(
+            "Key", utils.format_key(result.get("key", "?"), result.get("mode", ""))
+        )
 
         console.print(table)
 
@@ -199,7 +226,9 @@ async def analyze_bpm(
             features = engine.analyze_audio(file, analysis_level="BASIC")
 
         console.print(f"[bold]{file.name}[/bold]")
-        console.print(f"[cyan]Tempo:[/cyan] [bold green]{utils.format_bpm(features.tempo)}[/bold green] BPM")
+        console.print(
+            f"[cyan]Tempo:[/cyan] [bold green]{utils.format_bpm(features.tempo)}[/bold green] BPM"
+        )
 
     except utils.CLIError as e:
         utils.handle_error(e, "analyze:bpm")
@@ -211,7 +240,9 @@ async def analyze_bpm(
 @utils.async_command
 async def analyze_key(
     file: Path = typer.Argument(..., help="Audio file"),
-    confidence: bool = typer.Option(False, "--confidence", help="Show confidence score"),
+    confidence: bool = typer.Option(
+        False, "--confidence", help="Show confidence score"
+    ),
 ) -> None:
     """Extract key detection only"""
     try:
@@ -220,10 +251,14 @@ async def analyze_key(
             features = engine.analyze_audio(file, analysis_level="STANDARD")
 
         console.print(f"[bold]{file.name}[/bold]")
-        console.print(f"[cyan]Key:[/cyan] [bold green]{utils.format_key(features.key, features.mode)}[/bold green]")
+        console.print(
+            f"[cyan]Key:[/cyan] [bold green]{utils.format_key(features.key, features.mode)}[/bold green]"
+        )
 
         if confidence:
-            console.print("[dim]Confidence scores are computed from feature consistency[/dim]")
+            console.print(
+                "[dim]Confidence scores are computed from feature consistency[/dim]"
+            )
 
     except utils.CLIError as e:
         utils.handle_error(e, "analyze:key")
@@ -276,9 +311,24 @@ async def analyze_compare(
         features1 = engine.analyze_audio(file1, analysis_level="STANDARD")
         features2 = engine.analyze_audio(file2, analysis_level="STANDARD")
 
-        table.add_row("BPM", f"{features1.tempo:.1f}", f"{features2.tempo:.1f}", f"{similarity:.1%}")
-        table.add_row("Key", features1.key, features2.key, "Match" if features1.key == features2.key else "Different")
-        table.add_row("Mode", features1.mode, features2.mode, "Match" if features1.mode == features2.mode else "Different")
+        table.add_row(
+            "BPM",
+            f"{features1.tempo:.1f}",
+            f"{features2.tempo:.1f}",
+            f"{similarity:.1%}",
+        )
+        table.add_row(
+            "Key",
+            features1.key,
+            features2.key,
+            "Match" if features1.key == features2.key else "Different",
+        )
+        table.add_row(
+            "Mode",
+            features1.mode,
+            features2.mode,
+            "Match" if features1.mode == features2.mode else "Different",
+        )
 
         console.print(table)
 
@@ -290,6 +340,7 @@ async def analyze_compare(
 # ============================================================================
 # SECTION 2: GENRE/MOOD/INSTRUMENT ANALYSIS (9 commands)
 # ============================================================================
+
 
 @app.command("genre")
 @utils.with_error_handling
@@ -441,6 +492,7 @@ async def analyze_compression(
 # ============================================================================
 # SECTION 3: ADVANCED AUDIO ANALYSIS (12 commands)
 # ============================================================================
+
 
 @app.command("spectral")
 @utils.with_error_handling
@@ -657,6 +709,7 @@ async def analyze_zero_crossing(
 # SECTION 4: BATCH & PARALLEL ANALYSIS (10 commands)
 # ============================================================================
 
+
 @app.command("batch")
 @utils.with_error_handling
 @utils.async_command
@@ -712,9 +765,13 @@ def analyze_monitor(
         analyzer = RealtimeSpectral(sample_rate=sr, target_fps=fps, fft_size=2048)
 
         # Generator for blocks
-        blocks = sf.blocks(str(file), blocksize=analyzer.fft_size, overlap=0, fill_value=0)
+        blocks = sf.blocks(
+            str(file), blocksize=analyzer.fft_size, overlap=0, fill_value=0
+        )
 
-        console.print(f"[cyan]Starting Real-time Monitor for {file.name} ({sr} Hz)[/cyan]")
+        console.print(
+            f"[cyan]Starting Real-time Monitor for {file.name} ({sr} Hz)[/cyan]"
+        )
         console.print("[dim]Press Ctrl+C to stop[/dim]")
 
         def generate_table(frame: SpectralFrame) -> Panel:
@@ -730,8 +787,8 @@ def analyze_monitor(
             table.add_row("Pitch", f"{pitch_str} {conf_str}")
 
             # Simple bar for energy
-            energy = np.mean(frame.magnitude) # roughly 0-100
-            bar_len = int(energy / 2) # max 50 chars
+            energy = np.mean(frame.magnitude)  # roughly 0-100
+            bar_len = int(energy / 2)  # max 50 chars
             table.add_row("Energy", "█" * bar_len)
 
             return Panel(table, title="Spectral Monitor", border_style="cyan")
@@ -765,14 +822,16 @@ def analyze_monitor(
 def list():
     """List all analyze commands"""
     console.print("[bold cyan]Analyze Commands[/bold cyan]\n")
-    console.print(Panel(
-        "[cyan]Core:[/cyan] full, standard, basic, professional, quick, bpm, key, mode, compare\n"
-        "[cyan]Classification:[/cyan] genre, mood, instrument, vocal, quality, energy, dynamics, loudness, compression\n"
-        "[cyan]Advanced:[/cyan] spectral, harmonic, percussive, mfcc, chroma, onset, beats, segments, tempogram, chromagram, spectral-flux, zero-crossing\n"
-        "[cyan]Batch:[/cyan] batch, and more...",
-        title="40 Commands",
-        expand=False
-    ))
+    console.print(
+        Panel(
+            "[cyan]Core:[/cyan] full, standard, basic, professional, quick, bpm, key, mode, compare\n"
+            "[cyan]Classification:[/cyan] genre, mood, instrument, vocal, quality, energy, dynamics, loudness, compression\n"
+            "[cyan]Advanced:[/cyan] spectral, harmonic, percussive, mfcc, chroma, onset, beats, segments, tempogram, chromagram, spectral-flux, zero-crossing\n"
+            "[cyan]Batch:[/cyan] batch, and more...",
+            title="40 Commands",
+            expand=False,
+        )
+    )
 
 
 # ============================================================================

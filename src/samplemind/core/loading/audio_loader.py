@@ -62,7 +62,9 @@ class AdvancedAudioLoader:
             "format_distribution": {},
         }
 
-        logger.info("🎵 AdvancedAudioLoader initialised (strategy: %s)", default_strategy.value)
+        logger.info(
+            "🎵 AdvancedAudioLoader initialised (strategy: %s)", default_strategy.value
+        )
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
@@ -80,7 +82,9 @@ class AdvancedAudioLoader:
         file_path = Path(file_path)
         strategy = strategy or self.default_strategy
 
-        cache_key = self._generate_cache_key(file_path, strategy, target_sr, mono, normalize)
+        cache_key = self._generate_cache_key(
+            file_path, strategy, target_sr, mono, normalize
+        )
 
         if use_cache and self.cache_enabled and cache_key in self.audio_cache:
             self.loading_stats["cache_hits"] += 1
@@ -95,7 +99,9 @@ class AdvancedAudioLoader:
                 raise ValueError(f"Unsupported audio format: {file_path}")
 
             metadata = self._create_metadata(file_path, audio_format)
-            audio_data, actual_sr = self._load_with_strategy(file_path, strategy, target_sr)
+            audio_data, actual_sr = self._load_with_strategy(
+                file_path, strategy, target_sr
+            )
 
             is_stereo = len(audio_data.shape) > 1
             if mono and is_stereo:
@@ -170,7 +176,9 @@ class AdvancedAudioLoader:
         progress_callback: Optional[Callable[[int, int], None]] = None,
     ) -> List[LoadedAudio]:
         """Load multiple audio files, optionally in parallel."""
-        logger.info("🔄 Batch loading %d files (parallel=%s)", len(file_paths), parallel)
+        logger.info(
+            "🔄 Batch loading %d files (parallel=%s)", len(file_paths), parallel
+        )
         strategy = strategy or self.default_strategy
 
         if parallel:
@@ -237,7 +245,9 @@ class AdvancedAudioLoader:
 
     def get_directory_info(self, directory: Union[str, Path]) -> Dict[str, Any]:
         """Return stats about audio files contained in *directory*."""
-        audio_files = self.scan_directory(directory, recursive=True, supported_only=True)
+        audio_files = self.scan_directory(
+            directory, recursive=True, supported_only=True
+        )
 
         info: Dict[str, Any] = {
             "total_files": len(audio_files),
@@ -268,6 +278,7 @@ class AdvancedAudioLoader:
     ) -> Tuple[np.ndarray, int]:
         import librosa  # lazy: heavy dep, only needed at load time
         import soundfile as sf  # lazy: heavy dep
+
         match strategy:
             case LoadingStrategy.FAST:
                 y, sr = librosa.load(str(file_path), sr=target_sr or 22050, mono=False)
@@ -282,7 +293,9 @@ class AdvancedAudioLoader:
                 raise ValueError(f"Unknown loading strategy: {strategy}")
         return y, sr
 
-    def _create_metadata(self, file_path: Path, audio_format: AudioFormat) -> AudioMetadata:
+    def _create_metadata(
+        self, file_path: Path, audio_format: AudioFormat
+    ) -> AudioMetadata:
         file_stat = file_path.stat()
         extracted = self.metadata_extractor.extract_metadata(file_path, audio_format)
 
@@ -331,7 +344,9 @@ class AdvancedAudioLoader:
             del self.audio_cache[oldest]
         self.audio_cache[cache_key] = loaded_audio
 
-    def _update_loading_stats(self, audio_format: AudioFormat, load_time: float) -> None:
+    def _update_loading_stats(
+        self, audio_format: AudioFormat, load_time: float
+    ) -> None:
         stats = self.loading_stats
         stats["total_loads"] += 1
         prev_avg = stats["avg_load_time"]
@@ -366,6 +381,7 @@ class AdvancedAudioLoader:
 
 
 # ── Factory ────────────────────────────────────────────────────────────────────
+
 
 def create_loader_from_config(config: Dict[str, Any]) -> AdvancedAudioLoader:
     """Instantiate an :class:`AdvancedAudioLoader` from a config dict."""

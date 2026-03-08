@@ -14,7 +14,14 @@ import os
 # Add plugins directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "plugins"))
 
-from installer import Platform, DAW, DAWDetector, PluginInstaller, PluginInfo, InstallationPath
+from installer import (
+    Platform,
+    DAW,
+    DAWDetector,
+    PluginInstaller,
+    PluginInfo,
+    InstallationPath,
+)
 
 
 class TestDAWDetector:
@@ -165,7 +172,7 @@ class TestDAWDetector:
         ableton_path = Path("/opt/Ableton")
         detector.installed_daws = {
             DAW.FL_STUDIO: fl_path,
-            DAW.ABLETON_LIVE: ableton_path
+            DAW.ABLETON_LIVE: ableton_path,
         }
 
         daws = detector.list_installed_daws()
@@ -315,7 +322,13 @@ class TestPluginInstaller:
         installer.detector.platform = Platform.LINUX
 
         # Create source plugin file
-        source_file = installer.plugins_dir / "fl_studio" / "build" / "lib" / "libSampleMind_FL_Studio.so"
+        source_file = (
+            installer.plugins_dir
+            / "fl_studio"
+            / "build"
+            / "lib"
+            / "libSampleMind_FL_Studio.so"
+        )
         source_file.parent.mkdir(parents=True)
         source_file.write_text("dummy plugin")
 
@@ -516,7 +529,7 @@ class TestDataClasses:
             version="1.0.0",
             author="Image-Line",
             website="https://samplemind.ai",
-            description="AI audio analysis plugin"
+            description="AI audio analysis plugin",
         )
 
         assert info.name == "SampleMind"
@@ -528,7 +541,7 @@ class TestDataClasses:
             daw=DAW.FL_STUDIO,
             platform=Platform.WINDOWS,
             plugin_dir=Path("C:/Plugins"),
-            supports_vst3=True
+            supports_vst3=True,
         )
 
         assert path.daw == DAW.FL_STUDIO

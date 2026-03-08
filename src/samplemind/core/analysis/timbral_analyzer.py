@@ -33,23 +33,25 @@ class TimbralFeatures:
     """Perceptual timbral feature set."""
 
     # --- Timbral axes (0–1) ---
-    brightness_score: float = 0.5   # high centroid → bright
-    warmth_score: float = 0.5       # low centroid + strong low-mid → warm
-    roughness_score: float = 0.0    # high zcr + irregular envelope → rough
+    brightness_score: float = 0.5  # high centroid → bright
+    warmth_score: float = 0.5  # low centroid + strong low-mid → warm
+    roughness_score: float = 0.0  # high zcr + irregular envelope → rough
 
     # --- Texture type ---
-    texture_type: str = "unknown"   # granular | sustained | transient | noisy
+    texture_type: str = "unknown"  # granular | sustained | transient | noisy
 
     # --- Instrument detection (lazy ASTClassifier) ---
     instrument_labels: list[str] = field(default_factory=list)
     instrument_confidence: dict[str, float] = field(default_factory=dict)
 
     # --- Russell circumplex (−1 to +1) ---
-    valence: float = 0.0    # negative = negative affect, positive = positive affect
-    arousal: float = 0.0    # negative = calm, positive = energetic
+    valence: float = 0.0  # negative = negative affect, positive = positive affect
+    arousal: float = 0.0  # negative = calm, positive = energetic
 
     # --- Mood ---
-    mood_label: str = "unknown"  # dark | euphoric | aggressive | chill | melancholic | epic
+    mood_label: str = (
+        "unknown"  # dark | euphoric | aggressive | chill | melancholic | epic
+    )
 
     # Metadata
     sample_rate: int = 22050
@@ -124,18 +126,26 @@ class TimbralAnalyzer:
 
         # --- Perceptual timbral axes --------------------------------------
         # Brightness: normalise centroid to 0–1 (range 0–8000 Hz typical)
-        features.brightness_score = round(float(np.clip(centroid_mean / 8000.0, 0.0, 1.0)), 3)
+        features.brightness_score = round(
+            float(np.clip(centroid_mean / 8000.0, 0.0, 1.0)), 3
+        )
 
         # Warmth: inverse of brightness + low energy weight
         low_centroid_factor = 1.0 - features.brightness_score
-        features.warmth_score = round(float(np.clip(low_centroid_factor * 0.7 + rms_mean * 3.0, 0.0, 1.0)), 3)
+        features.warmth_score = round(
+            float(np.clip(low_centroid_factor * 0.7 + rms_mean * 3.0, 0.0, 1.0)), 3
+        )
 
         # Roughness: high ZCR + high RMS variance → rough/distorted
         rms_var = float(np.var(rms))
-        features.roughness_score = round(float(np.clip(zcr_mean * 10.0 + rms_var * 20.0, 0.0, 1.0)), 3)
+        features.roughness_score = round(
+            float(np.clip(zcr_mean * 10.0 + rms_var * 20.0, 0.0, 1.0)), 3
+        )
 
         # --- Texture type -------------------------------------------------
-        features.texture_type = self._classify_texture(rms_mean, zcr_mean, rms_var, duration)
+        features.texture_type = self._classify_texture(
+            rms_mean, zcr_mean, rms_var, duration
+        )
 
         # --- Russell circumplex heuristic ---------------------------------
         # Arousal: driven by energy (RMS), centroid, ZCR
@@ -149,7 +159,9 @@ class TimbralAnalyzer:
         # Valence: driven by major mode, low dissonance, tonal stability
         mode_score = 0.3 if mode == "major" else (-0.2 if mode == "minor" else 0.0)
         chroma_stability = float(np.clip(1.0 - chroma_var * 5.0, 0.0, 1.0))
-        valence_raw = mode_score + 0.4 * chroma_stability + 0.1 * (1.0 - features.roughness_score)
+        valence_raw = (
+            mode_score + 0.4 * chroma_stability + 0.1 * (1.0 - features.roughness_score)
+        )
         features.valence = round(float(np.clip(valence_raw, -1.0, 1.0)), 3)
 
         # --- Mood label ---------------------------------------------------

@@ -38,12 +38,11 @@ def _ensure_demucs() -> bool:
         return True
     try:
         import demucs.api as _api
+
         _demucs_api = _api
         _DEMUCS_AVAILABLE = True
     except ImportError:
-        logger.warning(
-            "demucs not installed. Install with: poetry add 'demucs ^4.0.0'"
-        )
+        logger.warning("demucs not installed. Install with: poetry add 'demucs ^4.0.0'")
     return _DEMUCS_AVAILABLE
 
 
@@ -51,10 +50,12 @@ def _ensure_demucs() -> bool:
 # Result dataclass
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class StemTrack:
     """A single separated stem."""
-    name: str                    # e.g. "drums"
+
+    name: str  # e.g. "drums"
     output_path: Optional[Path]  # None for in-memory only
     sample_rate: int = 44100
 
@@ -86,6 +87,7 @@ class SeparationResult:
 # ---------------------------------------------------------------------------
 # Separator service
 # ---------------------------------------------------------------------------
+
 
 class StemSeparator:
     """
@@ -128,6 +130,7 @@ class StemSeparator:
         if device == "auto":
             try:
                 import torch
+
                 self.device = "cuda" if torch.cuda.is_available() else "cpu"
             except ImportError:
                 self.device = "cpu"
@@ -153,9 +156,7 @@ class StemSeparator:
             self.use_mock = True
             return
         try:
-            logger.info(
-                f"Loading Demucs model: {self.model_name} on {self.device}"
-            )
+            logger.info(f"Loading Demucs model: {self.model_name} on {self.device}")
             self._separator = _demucs_api.Separator(
                 model=self.model_name,
                 device=self.device,
@@ -227,6 +228,7 @@ class StemSeparator:
     ) -> SeparationResult:
         """Synchronous wrapper around :meth:`separate`."""
         import asyncio
+
         return asyncio.run(self.separate(audio_path, output_dir))
 
     # ------------------------------------------------------------------

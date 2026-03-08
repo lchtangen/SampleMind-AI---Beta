@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from plyer import notification
+
     PLYER_AVAILABLE = True
 except ImportError:
     PLYER_AVAILABLE = False
@@ -28,6 +29,7 @@ except ImportError:
 
 class NotificationType(Enum):
     """Notification types with priority levels"""
+
     INFO = ("info", 2000)
     SUCCESS = ("success", 2500)
     WARNING = ("warning", 3000)
@@ -51,7 +53,9 @@ class NotificationManager:
     - Batch notification support
     """
 
-    def __init__(self, enable_desktop: bool = True, enable_terminal: bool = True) -> None:
+    def __init__(
+        self, enable_desktop: bool = True, enable_terminal: bool = True
+    ) -> None:
         """
         Initialize notification manager.
 
@@ -78,7 +82,7 @@ class NotificationManager:
         message: str,
         notification_type: NotificationType = NotificationType.INFO,
         timeout: Optional[int] = None,
-        app_name: str = "SampleMind AI"
+        app_name: str = "SampleMind AI",
     ) -> bool:
         """
         Send a notification to the user.
@@ -118,10 +122,7 @@ class NotificationManager:
         return False
 
     def notify_analysis_complete(
-        self,
-        filename: str,
-        duration: float,
-        success: bool = True
+        self, filename: str, duration: float, success: bool = True
     ) -> None:
         """
         Notify user that audio analysis is complete.
@@ -143,10 +144,7 @@ class NotificationManager:
         self.notify(title, message, notif_type)
 
     def notify_batch_progress(
-        self,
-        completed: int,
-        total: int,
-        current_file: str
+        self, completed: int, total: int, current_file: str
     ) -> None:
         """
         Notify user of batch processing progress.
@@ -161,10 +159,7 @@ class NotificationManager:
         self.notify(title, message, NotificationType.INFO, timeout=1500)
 
     def notify_batch_complete(
-        self,
-        total: int,
-        duration: float,
-        failed: int = 0
+        self, total: int, duration: float, failed: int = 0
     ) -> None:
         """
         Notify user that batch processing is complete.
@@ -221,7 +216,7 @@ class NotificationManager:
         message: str,
         notification_type: NotificationType,
         timeout: int,
-        app_name: str
+        app_name: str,
     ) -> None:
         """Send desktop notification using plyer."""
         notification.notify(
@@ -229,14 +224,11 @@ class NotificationManager:
             message=message,
             app_name=app_name,
             timeout=timeout,
-            app_icon=None  # Can be set to app icon path
+            app_icon=None,  # Can be set to app icon path
         )
 
     def _send_terminal_notification(
-        self,
-        title: str,
-        message: str,
-        notification_type: NotificationType
+        self, title: str, message: str, notification_type: NotificationType
     ) -> None:
         """Send terminal notification as fallback."""
         # Use emoji indicators based on type
@@ -264,24 +256,21 @@ class NotificationManager:
             logger.info(output)
 
     def _record_notification(
-        self,
-        title: str,
-        message: str,
-        notification_type: NotificationType
+        self, title: str, message: str, notification_type: NotificationType
     ) -> None:
         """Record notification in history."""
         entry = {
             "timestamp": datetime.now(),
             "title": title,
             "message": message,
-            "type": notification_type.name
+            "type": notification_type.name,
         }
 
         self.history.append(entry)
 
         # Trim history if needed
         if len(self.history) > self.max_history:
-            self.history = self.history[-self.max_history:]
+            self.history = self.history[-self.max_history :]
 
     def get_history(self, limit: int = 20) -> list:
         """
@@ -303,12 +292,16 @@ class NotificationManager:
     def enable_desktop_notifications(self, enabled: bool) -> None:
         """Enable or disable desktop notifications."""
         self.enable_desktop = enabled and PLYER_AVAILABLE
-        logger.info(f"Desktop notifications {'enabled' if self.enable_desktop else 'disabled'}")
+        logger.info(
+            f"Desktop notifications {'enabled' if self.enable_desktop else 'disabled'}"
+        )
 
     def enable_terminal_notifications(self, enabled: bool) -> None:
         """Enable or disable terminal notifications."""
         self.enable_terminal = enabled
-        logger.info(f"Terminal notifications {'enabled' if self.enable_terminal else 'disabled'}")
+        logger.info(
+            f"Terminal notifications {'enabled' if self.enable_terminal else 'disabled'}"
+        )
 
     def get_status(self) -> dict:
         """Get notification manager status."""
@@ -317,7 +310,7 @@ class NotificationManager:
             "terminal_enabled": self.enable_terminal,
             "desktop_available": PLYER_AVAILABLE,
             "history_count": len(self.history),
-            "max_history": self.max_history
+            "max_history": self.max_history,
         }
 
 
@@ -325,7 +318,9 @@ class NotificationManager:
 _notification_manager: Optional[NotificationManager] = None
 
 
-def init_notifications(enable_desktop: bool = True, enable_terminal: bool = True) -> NotificationManager:
+def init_notifications(
+    enable_desktop: bool = True, enable_terminal: bool = True
+) -> NotificationManager:
     """Initialize global notification manager."""
     global _notification_manager
     _notification_manager = NotificationManager(enable_desktop, enable_terminal)

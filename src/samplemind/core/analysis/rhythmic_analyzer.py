@@ -38,7 +38,7 @@ class RhythmicFeatures:
     bpm: float = 0.0
     bpm_confidence: float = 0.0  # 0–1
 
-    beat_times: list[float] = field(default_factory=list)   # seconds
+    beat_times: list[float] = field(default_factory=list)  # seconds
     onset_times: list[float] = field(default_factory=list)  # seconds
 
     # Coefficient of variation of inter-beat intervals (lower = more stable)
@@ -109,12 +109,18 @@ class RhythmicAnalyzer:
         tempo_lib, beat_frames = librosa.beat.beat_track(
             onset_envelope=onset_env, sr=sr, hop_length=self.hop_length
         )
-        bpm_librosa = float(tempo_lib) if np.isscalar(tempo_lib) else float(tempo_lib[0])
-        beat_times_lib = librosa.frames_to_time(beat_frames, sr=sr, hop_length=self.hop_length)
+        bpm_librosa = (
+            float(tempo_lib) if np.isscalar(tempo_lib) else float(tempo_lib[0])
+        )
+        beat_times_lib = librosa.frames_to_time(
+            beat_frames, sr=sr, hop_length=self.hop_length
+        )
 
         # Pulse LP (probabilistic) for confidence estimate
         try:
-            plp = librosa.beat.plp(onset_envelope=onset_env, sr=sr, hop_length=self.hop_length)
+            plp = librosa.beat.plp(
+                onset_envelope=onset_env, sr=sr, hop_length=self.hop_length
+            )
             bpm_confidence_lib = float(np.mean(plp))
         except Exception:
             bpm_confidence_lib = 0.5
@@ -156,19 +162,23 @@ class RhythmicAnalyzer:
 
         # --- Weighted BPM vote ----------------------------------------------
         if bpm_madmom is not None and features.used_madmom:
-            weighted_bpm = (
-                _MADMOM_WEIGHT * bpm_madmom + _LIBROSA_WEIGHT * bpm_librosa
-            )
+            weighted_bpm = _MADMOM_WEIGHT * bpm_madmom + _LIBROSA_WEIGHT * bpm_librosa
             features.bpm = round(weighted_bpm, 2)
             features.bpm_confidence = min(1.0, bpm_confidence_lib + 0.2)
             # Use madmom beat times (typically more accurate at boundaries)
             beat_times = beat_times_madmom
         else:
             features.bpm = round(bpm_librosa, 2)
-            features.bpm_confidence = round(float(np.clip(bpm_confidence_lib, 0.0, 1.0)), 3)
+            features.bpm_confidence = round(
+                float(np.clip(bpm_confidence_lib, 0.0, 1.0)), 3
+            )
             beat_times = beat_times_lib
 
-        features.beat_times = beat_times.tolist() if isinstance(beat_times, np.ndarray) else list(beat_times)
+        features.beat_times = (
+            beat_times.tolist()
+            if isinstance(beat_times, np.ndarray)
+            else list(beat_times)
+        )
 
         # --- Onset detection ------------------------------------------------
         onset_frames = librosa.onset.onset_detect(
@@ -200,14 +210,10 @@ class RhythmicAnalyzer:
         )
 
         # --- Syncopation score ----------------------------------------------
-        features.syncopation_score = self._compute_syncopation(
-            features.grid_pattern
-        )
+        features.syncopation_score = self._compute_syncopation(features.grid_pattern)
 
         # --- Duration class -------------------------------------------------
-        features.duration_class = self._classify_duration(
-            features.onset_times, y, sr
-        )
+        features.duration_class = self._classify_duration(features.onset_times, y, sr)
 
         return features
 

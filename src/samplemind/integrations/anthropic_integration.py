@@ -15,11 +15,13 @@ import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 import json
 
 try:
     from anthropic import Anthropic, AsyncAnthropic
+
     ANTHROPIC_AVAILABLE = True
 except ImportError:
     ANTHROPIC_AVAILABLE = False
@@ -31,17 +33,19 @@ logger = logging.getLogger(__name__)
 
 class ClaudeModel(Enum):
     """Available Claude models — v3.0"""
-    CLAUDE_3_7_SONNET = "claude-3-7-sonnet-20250219"      # PRIMARY — extended thinking
-    CLAUDE_3_5_SONNET = "claude-3-5-sonnet-20241022"      # previous primary
-    CLAUDE_3_5_HAIKU = "claude-3-5-haiku-20241022"        # fast/cheap secondary
-    CLAUDE_3_OPUS = "claude-3-opus-20240229"               # legacy
-    CLAUDE_3_HAIKU = "claude-3-haiku-20240307"             # legacy
-    CLAUDE_OPUS_4_5 = "claude-opus-4-5"                   # Opus 4.5 — largest
-    CLAUDE_SONNET_4_5 = "claude-sonnet-4-5-20251219"      # Sonnet 4.5
+
+    CLAUDE_3_7_SONNET = "claude-3-7-sonnet-20250219"  # PRIMARY — extended thinking
+    CLAUDE_3_5_SONNET = "claude-3-5-sonnet-20241022"  # previous primary
+    CLAUDE_3_5_HAIKU = "claude-3-5-haiku-20241022"  # fast/cheap secondary
+    CLAUDE_3_OPUS = "claude-3-opus-20240229"  # legacy
+    CLAUDE_3_HAIKU = "claude-3-haiku-20240307"  # legacy
+    CLAUDE_OPUS_4_5 = "claude-opus-4-5"  # Opus 4.5 — largest
+    CLAUDE_SONNET_4_5 = "claude-sonnet-4-5-20251219"  # Sonnet 4.5
 
 
 class AnthropicAnalysisType(Enum):
     """Analysis types optimized for Claude"""
+
     PRODUCTION_COACHING = "production_coaching"
     CREATIVE_SUGGESTIONS = "creative_suggestions"
     FL_STUDIO_OPTIMIZATION = "fl_studio_optimization"
@@ -103,7 +107,7 @@ class AnthropicMusicProducer:
         api_key: Optional[str] = None,
         default_model: ClaudeModel = ClaudeModel.CLAUDE_3_7_SONNET,
         max_tokens: int = 8096,
-        temperature: float = 1.0
+        temperature: float = 1.0,
     ):
         """
         Initialize Anthropic Music Producer
@@ -128,21 +132,23 @@ class AnthropicMusicProducer:
 
         # Performance tracking
         self.stats = {
-            'total_analyses': 0,
-            'total_tokens_used': 0,
-            'total_cost': 0.0,
-            'avg_response_time': 0.0,
-            'success_count': 0,
-            'error_count': 0
+            "total_analyses": 0,
+            "total_tokens_used": 0,
+            "total_cost": 0.0,
+            "avg_response_time": 0.0,
+            "success_count": 0,
+            "error_count": 0,
         }
 
-        logger.info(f"✅ Anthropic Music Producer initialized with {default_model.value}")
+        logger.info(
+            f"✅ Anthropic Music Producer initialized with {default_model.value}"
+        )
 
     async def analyze_music_comprehensive(
         self,
         audio_features: Dict[str, Any],
         analysis_type: AnthropicAnalysisType = AnthropicAnalysisType.COMPREHENSIVE_ANALYSIS,
-        user_context: Optional[Dict[str, Any]] = None
+        user_context: Optional[Dict[str, Any]] = None,
     ) -> AnthropicMusicAnalysis:
         """
         Perform comprehensive music analysis with Claude
@@ -183,7 +189,9 @@ class AnthropicMusicProducer:
             # Update statistics
             processing_time = time.time() - start_time
             result.processing_time = processing_time
-            result.tokens_used = response.usage.input_tokens + response.usage.output_tokens
+            result.tokens_used = (
+                response.usage.input_tokens + response.usage.output_tokens
+            )
 
             self._update_stats(result.tokens_used, processing_time, success=True)
 
@@ -203,16 +211,16 @@ class AnthropicMusicProducer:
         self,
         audio_features: Dict[str, Any],
         analysis_type: AnthropicAnalysisType,
-        user_context: Optional[Dict[str, Any]]
+        user_context: Optional[Dict[str, Any]],
     ) -> str:
         """Build specialized prompt for Claude based on analysis type"""
 
         # Extract key audio features
-        tempo = audio_features.get('tempo', 'Unknown')
-        key = audio_features.get('key', 'Unknown')
-        mode = audio_features.get('mode', 'Unknown')
-        energy = audio_features.get('energy', 'Unknown')
-        duration = audio_features.get('duration', 'Unknown')
+        tempo = audio_features.get("tempo", "Unknown")
+        key = audio_features.get("key", "Unknown")
+        mode = audio_features.get("mode", "Unknown")
+        energy = audio_features.get("energy", "Unknown")
+        duration = audio_features.get("duration", "Unknown")
 
         # Base context
         base_context = f"""You are an expert music producer and audio engineer with deep knowledge of:
@@ -232,7 +240,9 @@ Analyze the following audio track:
 """
 
         if user_context:
-            base_context += f"\n**User Context:** {json.dumps(user_context, indent=2)}\n"
+            base_context += (
+                f"\n**User Context:** {json.dumps(user_context, indent=2)}\n"
+            )
 
         # Add specialized prompts based on analysis type
         if analysis_type == AnthropicAnalysisType.PRODUCTION_COACHING:
@@ -349,9 +359,7 @@ Provide your response as a structured JSON object with these keys:
         return base_context + specific_prompt + output_format
 
     def _parse_response(
-        self,
-        response: Any,
-        analysis_type: AnthropicAnalysisType
+        self, response: Any, analysis_type: AnthropicAnalysisType
     ) -> AnthropicMusicAnalysis:
         """Parse Claude API response into structured analysis"""
 
@@ -374,17 +382,11 @@ Provide your response as a structured JSON object with these keys:
                 data = json.loads(content)
             else:
                 # Fallback: treat entire response as summary
-                data = {
-                    "summary": content[:500],
-                    "detailed_analysis": content
-                }
+                data = {"summary": content[:500], "detailed_analysis": content}
 
         except json.JSONDecodeError:
             logger.warning("Failed to parse JSON response, using fallback format")
-            data = {
-                "summary": content[:500],
-                "detailed_analysis": content
-            }
+            data = {"summary": content[:500], "detailed_analysis": content}
 
         # Build structured result
         return AnthropicMusicAnalysis(
@@ -403,47 +405,52 @@ Provide your response as a structured JSON object with these keys:
             modal_analysis=data.get("modal_analysis", []),
             chord_progressions=data.get("chord_progressions", []),
             model_used=self.default_model,
-            confidence_score=data.get("confidence_score", 0.85)
+            confidence_score=data.get("confidence_score", 0.85),
         )
 
-    def _update_stats(self, tokens_used: int, processing_time: float, success: bool) -> None:
+    def _update_stats(
+        self, tokens_used: int, processing_time: float, success: bool
+    ) -> None:
         """Update performance statistics"""
-        self.stats['total_analyses'] += 1
+        self.stats["total_analyses"] += 1
 
         if success:
-            self.stats['success_count'] += 1
-            self.stats['total_tokens_used'] += tokens_used
+            self.stats["success_count"] += 1
+            self.stats["total_tokens_used"] += tokens_used
 
             # Calculate cost (Claude 3.7 Sonnet pricing)
             # Input: $3/MTok, Output: $15/MTok (approximate average: $9/MTok)
             cost = (tokens_used / 1000) * 0.009
-            self.stats['total_cost'] += cost
+            self.stats["total_cost"] += cost
 
             # Update average response time
-            prev_avg = self.stats['avg_response_time']
-            count = self.stats['success_count']
-            self.stats['avg_response_time'] = (
-                (prev_avg * (count - 1) + processing_time) / count
-            )
+            prev_avg = self.stats["avg_response_time"]
+            count = self.stats["success_count"]
+            self.stats["avg_response_time"] = (
+                prev_avg * (count - 1) + processing_time
+            ) / count
         else:
-            self.stats['error_count'] += 1
+            self.stats["error_count"] += 1
 
     def get_performance_stats(self) -> Dict[str, Any]:
         """Get performance statistics"""
         return {
             **self.stats,
-            'success_rate': (
-                self.stats['success_count'] / self.stats['total_analyses']
-                if self.stats['total_analyses'] > 0 else 0.0
+            "success_rate": (
+                self.stats["success_count"] / self.stats["total_analyses"]
+                if self.stats["total_analyses"] > 0
+                else 0.0
             ),
-            'avg_tokens_per_analysis': (
-                self.stats['total_tokens_used'] / self.stats['success_count']
-                if self.stats['success_count'] > 0 else 0
+            "avg_tokens_per_analysis": (
+                self.stats["total_tokens_used"] / self.stats["success_count"]
+                if self.stats["success_count"] > 0
+                else 0
             ),
-            'cost_per_analysis': (
-                self.stats['total_cost'] / self.stats['success_count']
-                if self.stats['success_count'] > 0 else 0.0
-            )
+            "cost_per_analysis": (
+                self.stats["total_cost"] / self.stats["success_count"]
+                if self.stats["success_count"] > 0
+                else 0.0
+            ),
         }
 
     async def submit_audio_via_files_api(
@@ -467,6 +474,7 @@ Provide your response as a structured JSON object with these keys:
             AnthropicMusicAnalysis with Claude's structured response.
         """
         import time as _time
+
         start_time = _time.time()
         model = model or self.default_model
 
@@ -501,7 +509,9 @@ Provide your response as a structured JSON object with these keys:
                 params["temperature"] = self.temperature
 
             response = await self.async_client.messages.create(**params)
-            result = self._parse_response(response, AnthropicAnalysisType.COMPREHENSIVE_ANALYSIS)
+            result = self._parse_response(
+                response, AnthropicAnalysisType.COMPREHENSIVE_ANALYSIS
+            )
             processing_time = _time.time() - start_time
             result.processing_time = processing_time
             result.tokens_used = (
@@ -528,7 +538,7 @@ Provide your response as a structured JSON object with these keys:
 async def analyze_with_claude(
     audio_features: Dict[str, Any],
     api_key: Optional[str] = None,
-    analysis_type: AnthropicAnalysisType = AnthropicAnalysisType.COMPREHENSIVE_ANALYSIS
+    analysis_type: AnthropicAnalysisType = AnthropicAnalysisType.COMPREHENSIVE_ANALYSIS,
 ) -> AnthropicMusicAnalysis:
     """
     Quick analysis with Claude

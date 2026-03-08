@@ -1,386 +1,179 @@
-"""
-Error Handling and Dialog Widgets for SampleMind TUI
+"""Modal Dialog Widgets for SampleMind TUI — Textual ^0.87"""
 
-Provides modal dialogs for user notifications:
-- ErrorDialog: Display error messages with OK button
-- InfoDialog: Display informational messages
-- ConfirmDialog: Get user confirmation (Yes/No)
-- LoadingDialog: Show loading/processing state
-"""
+from __future__ import annotations
 
+from textual import on
 from textual.app import ComposeResult
-from textual.containers import Container, Vertical, Horizontal
 from textual.screen import ModalScreen
-from textual.widgets import Label, Button, Static
-from rich.panel import Panel
-from rich.text import Text
+from textual.widgets import Button, Label, ProgressBar, Static
+from textual.containers import Container, Horizontal
 
 
-class ErrorDialog(ModalScreen):
-    """Modal dialog for displaying error messages."""
-
-    BINDINGS = [("escape", "cancel")]
-
-    CSS = """
-    ErrorDialog {
+class _BaseDialog(ModalScreen[bool]):
+    DEFAULT_CSS = """
+    _BaseDialog {
         align: center middle;
     }
-
-    #error_dialog {
+    _BaseDialog > Container {
         width: 60;
-        height: auto;
+        min-height: 8;
+        max-height: 24;
+        border: double $primary;
         background: $surface;
-        border: solid $error;
-    }
-
-    #error_title {
-        width: 1fr;
-        height: auto;
-        content-align: center middle;
-        background: $error;
-        color: $text;
         padding: 1 2;
-        text-style: bold;
     }
-
-    #error_content {
+    _BaseDialog #title {
+        text-style: bold;
+        color: $primary;
         width: 1fr;
         height: auto;
-        padding: 2;
+        margin-bottom: 1;
     }
-
-    #error_buttons {
+    _BaseDialog #message {
         width: 1fr;
+        height: auto;
+        margin-bottom: 1;
+    }
+    _BaseDialog Horizontal {
         height: auto;
         align: center middle;
-        padding: 1 2;
+        margin-top: 1;
     }
-
-    Button {
+    _BaseDialog Button {
+        min-width: 10;
         margin: 0 1;
     }
     """
 
     def __init__(self, title: str, message: str) -> None:
-        """Initialize error dialog.
-
-        Args:
-            title: Error title/heading
-            message: Error message body
-        """
         super().__init__()
-        self.title_text = title
-        self.message_text = message
+        self._title = title
+        self._message = message
 
+
+class ErrorDialog(_BaseDialog):
     def compose(self) -> ComposeResult:
-        """Compose error dialog layout."""
-        with Vertical(id="error_dialog"):
-            yield Label(f"❌ {self.title_text}", id="error_title")
+        with Container():
+            yield Label(f"❌  {self._title}", id="title")
+            yield Static(self._message, id="message")
+            with Horizontal():
+                yield Button("Close", id="close_btn", variant="error")
 
-            with Container(id="error_content"):
-                yield Label(self.message_text)
-
-            with Horizontal(id="error_buttons"):
-                yield Button("OK", variant="error", id="error_ok")
-
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Handle button press."""
-        if event.button.id == "error_ok":
-            self.app.pop_screen()
-
-    def action_cancel(self) -> None:
-        """Close dialog on escape."""
-        self.app.pop_screen()
+    @on(Button.Pressed, "#close_btn")
+    def on_close(self, _: Button.Pressed) -> None:
+        self.dismiss(False)
 
 
-class InfoDialog(ModalScreen):
-    """Modal dialog for displaying informational messages."""
-
-    BINDINGS = [("escape", "cancel")]
-
-    CSS = """
-    InfoDialog {
-        align: center middle;
-    }
-
-    #info_dialog {
-        width: 60;
-        height: auto;
-        background: $surface;
-        border: solid $accent;
-    }
-
-    #info_title {
-        width: 1fr;
-        height: auto;
-        content-align: center middle;
-        background: $accent;
-        color: $text;
-        padding: 1 2;
-        text-style: bold;
-    }
-
-    #info_content {
-        width: 1fr;
-        height: auto;
-        padding: 2;
-    }
-
-    #info_buttons {
-        width: 1fr;
-        height: auto;
-        align: center middle;
-        padding: 1 2;
-    }
-
-    Button {
-        margin: 0 1;
-    }
-    """
-
-    def __init__(self, title: str, message: str) -> None:
-        """Initialize info dialog.
-
-        Args:
-            title: Info title/heading
-            message: Info message body
-        """
-        super().__init__()
-        self.title_text = title
-        self.message_text = message
-
+class InfoDialog(_BaseDialog):
     def compose(self) -> ComposeResult:
-        """Compose info dialog layout."""
-        with Vertical(id="info_dialog"):
-            yield Label(f"ℹ️  {self.title_text}", id="info_title")
+        with Container():
+            yield Label(f"ℹ️   {self._title}", id="title")
+            yield Static(self._message, id="message")
+            with Horizontal():
+                yield Button("OK", id="ok_btn", variant="primary")
 
-            with Container(id="info_content"):
-                yield Label(self.message_text)
-
-            with Horizontal(id="info_buttons"):
-                yield Button("OK", variant="primary", id="info_ok")
-
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Handle button press."""
-        if event.button.id == "info_ok":
-            self.app.pop_screen()
-
-    def action_cancel(self) -> None:
-        """Close dialog on escape."""
-        self.app.pop_screen()
+    @on(Button.Pressed, "#ok_btn")
+    def on_ok(self, _: Button.Pressed) -> None:
+        self.dismiss(True)
 
 
-class ConfirmDialog(ModalScreen):
-    """Modal dialog for getting user confirmation (Yes/No)."""
-
-    BINDINGS = [("escape", "cancel")]
-
-    CSS = """
-    ConfirmDialog {
-        align: center middle;
-    }
-
-    #confirm_dialog {
-        width: 60;
-        height: auto;
-        background: $surface;
-        border: solid $warning;
-    }
-
-    #confirm_title {
-        width: 1fr;
-        height: auto;
-        content-align: center middle;
-        background: $warning;
-        color: $text;
-        padding: 1 2;
-        text-style: bold;
-    }
-
-    #confirm_content {
-        width: 1fr;
-        height: auto;
-        padding: 2;
-    }
-
-    #confirm_buttons {
-        width: 1fr;
-        height: auto;
-        align: center middle;
-        padding: 1 2;
-    }
-
-    Button {
-        margin: 0 1;
-    }
-    """
-
-    def __init__(self, title: str, message: str) -> None:
-        """Initialize confirmation dialog.
-
-        Args:
-            title: Confirmation title/heading
-            message: Confirmation message body
-        """
-        super().__init__()
-        self.title_text = title
-        self.message_text = message
-        self.result = False
-
+class WarningDialog(_BaseDialog):
     def compose(self) -> ComposeResult:
-        """Compose confirmation dialog layout."""
-        with Vertical(id="confirm_dialog"):
-            yield Label(f"❓ {self.title_text}", id="confirm_title")
+        with Container():
+            yield Label(f"⚠️   {self._title}", id="title")
+            yield Static(self._message, id="message")
+            with Horizontal():
+                yield Button("Acknowledge", id="ack_btn", variant="warning")
 
-            with Container(id="confirm_content"):
-                yield Label(self.message_text)
-
-            with Horizontal(id="confirm_buttons"):
-                yield Button("Yes", variant="success", id="confirm_yes")
-                yield Button("No", variant="error", id="confirm_no")
-
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Handle button press."""
-        if event.button.id == "confirm_yes":
-            self.result = True
-            self.app.pop_screen()
-        elif event.button.id == "confirm_no":
-            self.result = False
-            self.app.pop_screen()
-
-    def action_cancel(self) -> None:
-        """Close dialog on escape (default to No)."""
-        self.result = False
-        self.app.pop_screen()
+    @on(Button.Pressed, "#ack_btn")
+    def on_ack(self, _: Button.Pressed) -> None:
+        self.dismiss(True)
 
 
-class LoadingDialog(ModalScreen):
-    """Modal dialog for displaying loading/processing state."""
+class ConfirmDialog(_BaseDialog):
+    def compose(self) -> ComposeResult:
+        with Container():
+            yield Label(f"❓  {self._title}", id="title")
+            yield Static(self._message, id="message")
+            with Horizontal():
+                yield Button("Confirm", id="confirm_btn", variant="success")
+                yield Button("Cancel", id="cancel_btn", variant="error")
 
-    CSS = """
+    @on(Button.Pressed, "#confirm_btn")
+    def on_confirm(self, _: Button.Pressed) -> None:
+        self.dismiss(True)
+
+    @on(Button.Pressed, "#cancel_btn")
+    def on_cancel(self, _: Button.Pressed) -> None:
+        self.dismiss(False)
+
+
+class LoadingDialog(ModalScreen[None]):
+    DEFAULT_CSS = """
     LoadingDialog {
         align: center middle;
     }
-
-    #loading_dialog {
-        width: 50;
-        height: auto;
+    LoadingDialog > Container {
+        width: 40;
+        height: 7;
+        border: double $primary;
         background: $surface;
-        border: solid $accent;
+        padding: 1 2;
+        align: center middle;
     }
-
-    #loading_content {
-        width: 1fr;
-        height: auto;
-        padding: 2;
-        content-align: center middle;
-    }
-
-    .spinner {
-        text-align: center;
-    }
+    LoadingDialog Label { width: 1fr; text-align: center; margin-bottom: 1; }
+    LoadingDialog ProgressBar { width: 1fr; }
     """
 
     def __init__(self, message: str = "Processing...") -> None:
-        """Initialize loading dialog.
-
-        Args:
-            message: Message to display while loading
-        """
         super().__init__()
-        self.message_text = message
+        self._message = message
 
     def compose(self) -> ComposeResult:
-        """Compose loading dialog layout."""
-        with Vertical(id="loading_dialog"):
-            with Container(id="loading_content"):
-                yield Label(
-                    "⏳ " + self.message_text,
-                    classes="spinner"
-                )
-
-    def update_message(self, message: str) -> None:
-        """Update the loading message.
-
-        Args:
-            message: New message to display
-        """
-        label = self.query_one(Label)
-        label.update("⏳ " + message)
+        with Container():
+            yield Label(f"⏳  {self._message}", id="message")
+            yield ProgressBar(total=None, show_eta=False)
 
 
-class WarningDialog(ModalScreen):
-    """Modal dialog for displaying warning messages."""
-
-    BINDINGS = [("escape", "cancel")]
-
-    CSS = """
-    WarningDialog {
+class ProgressDialog(ModalScreen[None]):
+    DEFAULT_CSS = """
+    ProgressDialog {
         align: center middle;
     }
-
-    #warning_dialog {
-        width: 60;
-        height: auto;
+    ProgressDialog > Container {
+        width: 52;
+        height: 11;
+        border: double $primary;
         background: $surface;
-        border: solid $warning;
-    }
-
-    #warning_title {
-        width: 1fr;
-        height: auto;
-        content-align: center middle;
-        background: $warning;
-        color: $text;
-        padding: 1 2;
-        text-style: bold;
-    }
-
-    #warning_content {
-        width: 1fr;
-        height: auto;
-        padding: 2;
-    }
-
-    #warning_buttons {
-        width: 1fr;
-        height: auto;
-        align: center middle;
         padding: 1 2;
     }
-
-    Button {
-        margin: 0 1;
-    }
+    ProgressDialog #title { text-style: bold; color: $primary; margin-bottom: 1; }
+    ProgressDialog #status { height: 1; color: $foreground 70%; margin-bottom: 1; }
+    ProgressDialog ProgressBar { width: 1fr; margin-bottom: 1; }
+    ProgressDialog Horizontal { height: auto; align: center middle; }
     """
 
-    def __init__(self, title: str, message: str) -> None:
-        """Initialize warning dialog.
-
-        Args:
-            title: Warning title/heading
-            message: Warning message body
-        """
+    def __init__(self, title: str, total: int = 100) -> None:
         super().__init__()
-        self.title_text = title
-        self.message_text = message
+        self._title = title
+        self._total = total
 
     def compose(self) -> ComposeResult:
-        """Compose warning dialog layout."""
-        with Vertical(id="warning_dialog"):
-            yield Label(f"⚠️  {self.title_text}", id="warning_title")
+        with Container():
+            yield Label(f"⏳  {self._title}", id="title")
+            yield Label("", id="status")
+            yield ProgressBar(total=self._total, id="progress", show_eta=True)
+            with Horizontal():
+                yield Button("Cancel", id="cancel_btn", variant="error")
 
-            with Container(id="warning_content"):
-                yield Label(self.message_text)
+    def advance(self, amount: int = 1, status: str = "") -> None:
+        try:
+            self.query_one("#progress", ProgressBar).advance(amount)
+            if status:
+                self.query_one("#status", Label).update(status)
+        except Exception:
+            pass
 
-            with Horizontal(id="warning_buttons"):
-                yield Button("OK", variant="warning", id="warning_ok")
-
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Handle button press."""
-        if event.button.id == "warning_ok":
-            self.app.pop_screen()
-
-    def action_cancel(self) -> None:
-        """Close dialog on escape."""
-        self.app.pop_screen()
+    @on(Button.Pressed, "#cancel_btn")
+    def on_cancel(self, _: Button.Pressed) -> None:
+        self.dismiss(None)

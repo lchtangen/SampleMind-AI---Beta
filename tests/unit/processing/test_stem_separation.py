@@ -86,7 +86,9 @@ class TestStemSeparationEngine:
             StemSeparationEngine._assert_dependency()
 
     @patch("samplemind.core.processing.stem_separation.subprocess.run")
-    @patch("samplemind.core.processing.stem_separation.StemSeparationEngine._assert_dependency")
+    @patch(
+        "samplemind.core.processing.stem_separation.StemSeparationEngine._assert_dependency"
+    )
     def test_separate_success_v4(self, mock_assert, mock_run):
         """Test successful separation with v4 model"""
         # Create mock audio file
@@ -110,7 +112,9 @@ class TestStemSeparationEngine:
 
                 engine = StemSeparationEngine(model="mdx_extra")
 
-                with patch("samplemind.core.processing.stem_separation.Path") as MockPath:
+                with patch(
+                    "samplemind.core.processing.stem_separation.Path"
+                ) as MockPath:
                     # Setup path mocking
                     mock_paths = {}
 
@@ -145,7 +149,9 @@ class TestStemSeparationEngine:
         assert engine.is_v4 is True
 
     @patch("samplemind.core.processing.stem_separation.subprocess.run")
-    @patch("samplemind.core.processing.stem_separation.StemSeparationEngine._assert_dependency")
+    @patch(
+        "samplemind.core.processing.stem_separation.StemSeparationEngine._assert_dependency"
+    )
     def test_command_construction_v4(self, mock_assert, mock_run):
         """Test command construction for v4 model"""
         mock_run.return_value = Mock(returncode=0, stderr="")
@@ -220,10 +226,7 @@ class TestStemSeparationEngine:
 class TestStemSeparationIntegration:
     """Integration tests for stem separation (requires actual demucs)"""
 
-    @pytest.mark.skipif(
-        not _check_demucs_available(),
-        reason="Demucs not installed"
-    )
+    @pytest.mark.skipif(not _check_demucs_available(), reason="Demucs not installed")
     def test_actual_separation(self):
         """Test actual stem separation if demucs available (integration test)"""
         # Skip if demucs not available

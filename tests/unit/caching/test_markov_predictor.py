@@ -26,7 +26,7 @@ class TestPrediction:
             analysis_level="standard",
             confidence=0.85,
             priority=1,
-            steps_ahead=1
+            steps_ahead=1,
         )
 
         assert pred.file_id == "audio_123"
@@ -42,7 +42,7 @@ class TestPrediction:
             analysis_level="standard",
             confidence=0.85,
             priority=1,
-            steps_ahead=1
+            steps_ahead=1,
         )
 
         pred_dict = pred.to_dict()
@@ -67,10 +67,7 @@ class TestMarkovPredictor:
         predictor = MarkovPredictor()
 
         predictor.register_file(
-            file_id="audio_123",
-            file_name="test.wav",
-            file_size=1024000,
-            duration=30.5
+            file_id="audio_123", file_name="test.wav", file_size=1024000, duration=30.5
         )
 
         assert "audio_123" in predictor.file_metadata
@@ -100,7 +97,7 @@ class TestMarkovPredictor:
                 feature_type="spectral",
                 analysis_level="standard",
                 processing_time_ms=10.0,
-                cache_hit=True
+                cache_hit=True,
             )
             tracker.record_event(event)
 
@@ -110,7 +107,7 @@ class TestMarkovPredictor:
                 file_id=file_id,
                 file_name=f"{file_id}.wav",
                 file_size=1024,
-                duration=30.0
+                duration=30.0,
             )
 
         # Predict from "a"
@@ -135,7 +132,7 @@ class TestMarkovPredictor:
                 feature_type="spectral",
                 analysis_level="standard",
                 processing_time_ms=10.0,
-                cache_hit=True
+                cache_hit=True,
             )
             tracker.record_event(event)
 
@@ -145,15 +142,13 @@ class TestMarkovPredictor:
                 file_id=file_id,
                 file_name=f"{file_id}.wav",
                 file_size=1024,
-                duration=30.0
+                duration=30.0,
             )
 
         # Predict with lookahead
         state_a = "a:spectral:standard"
         predictions = predictor.predict_with_lookahead(
-            state_a,
-            lookahead_depth=2,
-            top_n=5
+            state_a, lookahead_depth=2, top_n=5
         )
 
         # Should return some predictions or none if chain is incomplete
@@ -170,7 +165,7 @@ class TestMarkovPredictor:
             analysis_level="standard",
             confidence=0.85,
             priority=1,
-            steps_ahead=1
+            steps_ahead=1,
         )
 
         predictor.evaluate_prediction(pred, was_correct=True)
@@ -190,7 +185,7 @@ class TestMarkovPredictor:
             analysis_level="standard",
             confidence=0.85,
             priority=1,
-            steps_ahead=1
+            steps_ahead=1,
         )
 
         predictor.evaluate_prediction(pred, was_correct=False)
@@ -210,7 +205,7 @@ class TestMarkovPredictor:
             analysis_level="standard",
             confidence=0.85,
             priority=1,
-            steps_ahead=1
+            steps_ahead=1,
         )
 
         # Record 10 predictions: 7 correct, 3 incorrect
@@ -234,7 +229,7 @@ class TestMarkovPredictor:
             analysis_level="standard",
             confidence=0.85,
             priority=1,
-            steps_ahead=1
+            steps_ahead=1,
         )
 
         # Add 20 predictions
@@ -273,7 +268,7 @@ class TestMarkovPredictor:
             analysis_level="standard",
             confidence=0.85,
             priority=1,
-            steps_ahead=1
+            steps_ahead=1,
         )
 
         # Record 90+ correct predictions (90% accuracy)
@@ -297,7 +292,7 @@ class TestMarkovPredictor:
             analysis_level="standard",
             confidence=0.85,
             priority=1,
-            steps_ahead=1
+            steps_ahead=1,
         )
 
         # Record 50% correct predictions (50% accuracy)
@@ -315,10 +310,7 @@ class TestMarkovPredictor:
         predictor = MarkovPredictor()
 
         predictor.register_file(
-            file_id="audio_123",
-            file_name="test.wav",
-            file_size=1024,
-            duration=30.0
+            file_id="audio_123", file_name="test.wav", file_size=1024, duration=30.0
         )
 
         stats = predictor.get_stats()
@@ -341,7 +333,7 @@ class TestMarkovPredictor:
             analysis_level="standard",
             confidence=0.85,
             priority=1,
-            steps_ahead=1
+            steps_ahead=1,
         )
 
         predictor.evaluate_prediction(pred, was_correct=True)
@@ -357,10 +349,7 @@ class TestMarkovPredictor:
         predictor = MarkovPredictor()
 
         predictor.register_file(
-            file_id="audio_123",
-            file_name="test.wav",
-            file_size=1024,
-            duration=30.0
+            file_id="audio_123", file_name="test.wav", file_size=1024, duration=30.0
         )
 
         model = predictor.export_model()
@@ -372,7 +361,10 @@ class TestMarkovPredictor:
 
     def test_global_instance(self):
         """Test global predictor instance"""
-        from samplemind.core.caching.markov_predictor import init_predictor, get_predictor
+        from samplemind.core.caching.markov_predictor import (
+            init_predictor,
+            get_predictor,
+        )
 
         # Initialize
         predictor1 = init_predictor()
