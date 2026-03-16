@@ -279,5 +279,11 @@
   "extensions.autoCheckUpdates": false,
   "update.mode": "none",
   "npm.fetchOnlinePackageInfo": false,
-  "editor.largeFileOptimizations": true
+  "editor.largeFileOptimizations": true,
+
+  // Pylance: analyse only open files, not the full workspace.
+  // Without this, Pylance walks the entire .venv on first open
+  // causing hundreds of USB reads and a very slow startup.
+  "python.analysis.diagnosticMode": "openFilesOnly",
+  "python.analysis.indexing": false
 }

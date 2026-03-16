@@ -21,7 +21,7 @@ COPY pyproject.toml ./
 ENV POETRY_CACHE_DIR=/root/.cache/pypoetry
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR \
     poetry config virtualenvs.create false \
-    && poetry install --without dev --no-root
+    && poetry install --without dev,heavy --no-root
 
 # Copy application code
 COPY src/ ./src/
