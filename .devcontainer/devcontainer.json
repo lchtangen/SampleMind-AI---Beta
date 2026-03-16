@@ -1,0 +1,53 @@
+{
+  // VS Code Dev Container — SampleMind AI (USB Dev)
+  // Opens the project inside the samplemind-api Docker container.
+  // All Python/Node deps are pre-installed in the container image,
+  // so no host installation is required on the USB drive.
+  //
+  // Usage: Ctrl+Shift+P → "Dev Containers: Reopen in Container"
+  "name": "SampleMind AI (USB Dev)",
+  "dockerComposeFile": [
+    "../docker-compose.yml",
+    "../docker-compose.dev-usb.yml"
+  ],
+  "service": "samplemind-api",
+  "workspaceFolder": "/app",
+  "shutdownAction": "stopCompose",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.black-formatter",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.vscode-typescript-next",
+        "eamodio.gitlens",
+        "usernamehw.errorlens",
+        "streetsidesoftware.code-spell-checker",
+        "tamasfe.even-better-toml",
+        "redhat.vscode-yaml"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.terminal.activateEnvironment": false,
+        "telemetry.telemetryLevel": "off",
+        "extensions.autoCheckUpdates": false,
+        "update.mode": "none"
+      }
+    }
+  },
+
+  // Redirect pycache and pip cache to container tmpfs — avoids USB writes
+  "remoteEnv": {
+    "PYTHONPYCACHEPREFIX": "/tmp/pycache",
+    "PIP_NO_CACHE_DIR": "1",
+    "POETRY_CACHE_DIR": "/tmp/poetry-cache"
+  },
+
+  // Install deps (without heavy ML group) after container creation
+  "postCreateCommand": "poetry install --without heavy --no-interaction && pip install --upgrade pip --quiet"
+}

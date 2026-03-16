@@ -73,22 +73,9 @@ resampy = "^0.4.2"
 scipy = "^1.14.0"
 numpy = ">=2.0.0,<3.0.0"
 numba = ">=0.59.0"
-demucs = "^4.0.0"
 pedalboard = "^0.9.0"
-faster-whisper = "^1.1.0"
 mido = "^1.3.0"
 pydub = "^0.25.1"
-
-# ── ML / Deep Learning ────────────────────────────────────────────────────────
-torch = { version = "^2.8.0", source = "pytorch" }
-torchaudio = { version = "^2.8.0", source = "pytorch" }
-
-# transformers 5.x NOT yet compatible with sentence-transformers 3.x — held at 4.x
-# Revisit when sentence-transformers adds transformers 5.x support
-transformers = "^4.47.0"
-
-# ⚠️ BREAKING from 2.x: sentence-transformers 3.x API changes
-sentence-transformers = "^3.0.0"
 
 # ── Database ──────────────────────────────────────────────────────────────────
 motor = "^3.6.0"
@@ -132,6 +119,20 @@ loguru = "^0.7.3"
 httpx = "^0.28.1"
 aiofiles = "^25.1.0"          # calendar versioning: was 23.2.1
 structlog = "^24.0.0"         # calendar versioning: was 23.2.0
+
+[tool.poetry.group.heavy]
+optional = true
+
+[tool.poetry.group.heavy.dependencies]
+# PyTorch + audio ML — large downloads (~500MB+), skip on USB with --without heavy
+torch = { version = "^2.8.0", source = "pytorch" }
+torchaudio = { version = "^2.8.0", source = "pytorch" }
+demucs = "^4.0.0"
+# transformers 5.x NOT yet compatible with sentence-transformers 3.x — held at 4.x
+transformers = "^4.47.0"
+# ⚠️ BREAKING from 2.x: sentence-transformers 3.x API changes
+sentence-transformers = "^3.0.0"
+faster-whisper = "^1.1.0"
 
 [tool.poetry.group.dev.dependencies]
 # Testing

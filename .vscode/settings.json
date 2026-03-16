@@ -270,5 +270,14 @@
   "explorer.confirmDelete": false,
   "security.workspace.trust.untrustedFiles": "open",
   "docker.showStartPage": false,
-  "editorconfig.generateAuto": false
+  "editorconfig.generateAuto": false,
+
+  // ─────────────────────────────────────────────────────────────────
+  // USB BOOT — Minimise background disk I/O & network activity
+  // ─────────────────────────────────────────────────────────────────
+  "telemetry.telemetryLevel": "off",
+  "extensions.autoCheckUpdates": false,
+  "update.mode": "none",
+  "npm.fetchOnlinePackageInfo": false,
+  "editor.largeFileOptimizations": true
 }

@@ -1,0 +1,71 @@
+# docker-compose.dev-usb.yml
+# USB boot override — strips monitoring stack, uses tmpfs for all data volumes
+# so Docker containers write to RAM instead of the persistence USB drive.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev-usb.yml up -d
+#
+# Services active:   samplemind-api, mongodb, redis, chromadb
+# Services disabled: ollama (too heavy), prometheus, grafana (monitoring)
+
+services:
+  samplemind-api:
+    depends_on:
+      - mongodb
+      - redis
+      - chromadb
+    environment:
+      - OLLAMA_HOST=  # Ollama disabled on USB boot (use cloud AI instead)
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  mongodb:
+    volumes:
+      - type: tmpfs
+        target: /data/db
+        tmpfs:
+          size: 536870912  # 512MB
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    command: mongod --nojournal --quiet  # --nojournal reduces write amplification
+
+  redis:
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru --save "" --appendonly no
+    volumes:
+      - type: tmpfs
+        target: /data
+        tmpfs:
+          size: 268435456  # 256MB
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  chromadb:
+    volumes:
+      - type: tmpfs
+        target: /chroma/chroma
+        tmpfs:
+          size: 536870912  # 512MB
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # Disable heavy/monitoring services on USB boot
+  # Use `profiles: [full]` to opt them back in when needed
+  ollama:
+    profiles:
+      - full
+
+  prometheus:
+    profiles:
+      - monitoring
+
+  grafana:
+    profiles:
+      - monitoring

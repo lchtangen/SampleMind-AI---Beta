@@ -129,3 +129,54 @@ pre-commit: format lint test-fast ## Run pre-commit checks
 
 pre-release: validate ## Prepare for beta release
 	@echo "🚀 Beta release preparation complete!"
+
+# ============================================================================
+# USB BOOT TARGETS — Optimised for Ubuntu 25.10 persistence USB drive
+# ============================================================================
+.PHONY: setup-usb dev-usb mount-tmpfs usb-status clean-usb
+
+setup-usb: ## Full one-command setup for Ubuntu 25.10 USB boot
+	@bash scripts/setup-usb.sh
+
+setup-usb-full: ## USB setup including heavy ML deps (torch, transformers, demucs ~5GB)
+	@bash scripts/setup-usb.sh --full
+
+mount-tmpfs: ## Mount 2GB RAM disk for caches (run after each reboot)
+	@mkdir -p /tmp/samplemind-dev/{pip,poetry,pnpm,pycache,next,dist}
+	@(mountpoint -q /tmp/samplemind-dev 2>/dev/null && echo "  tmpfs already mounted") || \
+	  (sudo mount -t tmpfs -o size=2G,mode=1777 tmpfs /tmp/samplemind-dev && echo "  tmpfs mounted at /tmp/samplemind-dev (2GB)")
+	@echo ""
+	@echo "Add these to your shell or source .env.usb-cache:"
+	@echo "  export PIP_CACHE_DIR=/tmp/samplemind-dev/pip"
+	@echo "  export POETRY_CACHE_DIR=/tmp/samplemind-dev/poetry"
+	@echo "  export PYTHONPYCACHEPREFIX=/tmp/samplemind-dev/pycache"
+	@echo "  export PNPM_STORE_DIR=/tmp/samplemind-dev/pnpm"
+
+dev-usb: ## Start minimal services (MongoDB, Redis, ChromaDB) + API with hot-reload
+	@echo "Starting USB dev stack (no Ollama/Prometheus/Grafana)..."
+	docker compose -f docker-compose.yml -f docker-compose.dev-usb.yml up -d mongodb redis chromadb
+	@echo "Services up. Starting API..."
+	PYTHONPYCACHEPREFIX=/tmp/samplemind-dev/pycache \
+	  $(PYTHON) -m uvicorn samplemind.server.main:app --reload --host 0.0.0.0 --port 8000
+
+usb-status: ## Show USB persistence space, RAM usage, and service health
+	@echo "=== Persistence .dat space ==="
+	@df -h / | awk 'NR==2{print "  " $$3 " used / " $$2 " total (" $$5 " full)"}'
+	@echo ""
+	@echo "=== tmpfs RAM cache ==="
+	@(df -h /tmp/samplemind-dev 2>/dev/null | awk 'NR==2{print "  " $$3 " used / " $$2 " total"}') || echo "  (not mounted — run: make mount-tmpfs)"
+	@echo ""
+	@echo "=== Docker services ==="
+	@docker compose -f docker-compose.yml -f docker-compose.dev-usb.yml ps --format "table {{.Name}}\t{{.Status}}" 2>/dev/null || echo "  (Docker not running)"
+	@echo ""
+	@echo "=== Python venv ==="
+	@du -sh .venv 2>/dev/null | awk '{print "  " $$1}' || echo "  (not installed — run: make setup-usb)"
+
+clean-usb: ## Remove build artifacts from persistence storage (free up .dat space)
+	@echo "Cleaning build artifacts from persistence storage..."
+	@find . -type d -name __pycache__ -not -path "./.venv/*" -exec rm -rf {} + 2>/dev/null; true
+	@find . -type d -name .pytest_cache -exec rm -rf {} + 2>/dev/null; true
+	@find . -type d -name .mypy_cache -exec rm -rf {} + 2>/dev/null; true
+	@find . -type d -name .ruff_cache -exec rm -rf {} + 2>/dev/null; true
+	@rm -rf .next dist build *.egg-info 2>/dev/null; true
+	@echo "Done. Run 'make usb-status' to check freed space."
