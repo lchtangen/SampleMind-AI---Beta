@@ -1,9 +1,9 @@
 # 🎯 SampleMind AI — Current Status
 
-**Last Updated:** 2026-03-07 (Session 3 — P0+P1 migration: all AI providers, deps, version strings, tests)
-**Version:** `2.1.0-beta` → migrating to `3.0.0`
+**Last Updated:** 2026-03-17 (Session 4 — Documentation review & roadmap overhaul)
+**Version:** `3.0.0-alpha` (migrating from `2.1.0-beta`)
 **Active Phase:** Phase 15 — v3.0 Migration & Next-Level Upgrade
-**Overall Progress:** Phase 14 Complete ✅ | Phase 15 In Progress 🚀
+**Overall Progress:** Phase 14 Complete ✅ | Phase 15 In Progress 🚀 (~35%)
 
 ---
 
@@ -74,73 +74,53 @@
 
 ## 🚀 Phase 15 — v3.0 Migration (Started 2026-03-07)
 
-### Priority 0 — Foundation (This Week)
-- [ ] Upgrade `CLAUDE.md` to v3.0 context ✅ Done
-- [ ] Update `CURRENT_STATUS.md` ✅ Done (this file)
-- [ ] Upgrade `pyproject.toml` dependencies to 2026 versions ⏳
-- [ ] Create `V3_MIGRATION_CHECKLIST.md` ✅ Done
-- [ ] Create `SESSION_START_GUIDE.md` ✅ Done
+### Priority 0 — Foundation ✅ Complete
+- [x] Upgrade `CLAUDE.md` to v3.0 context
+- [x] Update `CURRENT_STATUS.md`
+- [x] Upgrade `pyproject.toml` dependencies to 2026 versions
+- [x] Create `V3_MIGRATION_CHECKLIST.md`
+- [x] Create `SESSION_START_GUIDE.md`
 
-### Priority 1 — AI Models & Providers (Week 1)
-- [ ] Upgrade `anthropic` `^0.7.0` → `^0.40.0` (Claude 3.7 Sonnet)
-- [ ] Upgrade `openai` `^1.3.0` → `^1.58.0` (o3, Agents SDK, Audio API)
-- [ ] Upgrade `google-generativeai` `^0.3.0` → `^0.8.0` (Gemini 2.0 Flash)
-- [ ] Update `SampleMindAIManager` for new provider APIs
-- [ ] Add `claude-3-7-sonnet-20250219` as primary model
-- [ ] Add `gemini-2.0-flash` as fast model
+### Priority 1 — AI Models & Providers ✅ Complete
+- [x] Upgrade `anthropic` `^0.7.0` → `^0.84.0` (Claude 3.7 Sonnet)
+- [x] Upgrade `openai` `^1.3.0` → `^2.0.0` (GPT-4o, Agents SDK)
+- [x] Upgrade `google-generativeai` `^0.3.0` → `google-genai ^1.56.0` (Gemini 2.0 Flash)
+- [x] Update `SampleMindAIManager` for new provider APIs
+- [x] Add `claude-3-7-sonnet-20250219` as primary model
+- [x] Add `gemini-2.0-flash` as fast model
+- [x] Add Ollama as offline provider (qwen2.5:7b-instruct)
 
-### Priority 2 — Audio Engine Upgrades (Week 1-2)
-- [ ] Upgrade `torch` `^2.1.0` → `^2.5.0`
-- [ ] Upgrade `transformers` `^4.35.0` → `^4.47.0`
-- [ ] Re-enable `basic-pitch = "^0.4.0"` (MIDI transcription)
-- [ ] Add `demucs = "^4.0.0"` (htdemucs 6-stem separation)
-- [ ] Add `pedalboard = "^0.9.0"` (Spotify audio effects)
+### Priority 2 — Audio Engine Upgrades ✅ Partially Complete
+- [x] Upgrade `torch` → `^2.8.0`
+- [x] Upgrade `transformers` → `^4.47.0`
+- [x] Re-enable `basic-pitch = "^0.4.0"` (MIDI transcription)
+- [x] Add `demucs = "^4.0.0"` (htdemucs 6-stem separation)
+- [x] Add `pedalboard = "^0.9.0"` (Spotify audio effects)
+- [ ] Integrate `demucs` into `audio_engine.py`
+- [ ] Integrate `pedalboard` effects chain into CLI + API
 - [ ] Integrate `microsoft/BEATs` audio classifier
-- [ ] Integrate `openai/whisper-large-v3` for transcription
-- [ ] Add `pyaudio` for real-time audio I/O
 
-### Priority 3 — Multi-Agent Architecture (Week 2)
-- [ ] Add `langgraph = "^0.2.0"` for agent orchestration
-- [ ] Add `langchain-core = "^0.3.0"` for agent tooling
+### Priority 3 — Multi-Agent Architecture (Pending)
+- [x] Add `langgraph` / `langchain-core` / `openai-agents` to pyproject.toml
 - [ ] Design `AgentOrchestrator` class in `src/samplemind/integrations/agents/`
 - [ ] Implement specialized agents: AnalysisAgent, RecommendationAgent, MixingAgent
 - [ ] Build agent routing layer in `SampleMindAIManager`
 
-### Priority 4 — TUI v3 (Week 2-3)
-- [ ] Upgrade `textual` `^0.44.0` → `^0.87.0`
+### Priority 4 — TUI v3 (Pending)
+- [x] Upgrade `textual` `^0.44.0` → `^0.87.0`
 - [ ] Update all TUI screens for new Textual API
 - [ ] Add new screens: AgentChatScreen, WaveformScreen, MixingBoardScreen
-- [ ] Implement proper design system with CSS variables
-- [ ] Add animated waveform widget
-- [ ] Add real-time spectrum analyzer widget
-- [ ] Dark/light theme polish
-- [ ] WCAG 2.1 AA compliance audit
 
-### Priority 5 — Web UI Foundation (Week 3-4)
+### Priority 5 — Web UI Foundation (Pending)
 - [ ] Initialize `apps/web/` with Next.js 15 + React 19
 - [ ] Set up Tailwind CSS v4 + shadcn/ui
-- [ ] Implement Zustand v5 + TanStack Query v5
 - [ ] Build landing page with feature showcase
-- [ ] Build audio upload + analysis page
-- [ ] Build sample library browser
-- [ ] Integrate Wavesurfer.js v7 for waveform display
-- [ ] API client generation from FastAPI OpenAPI spec
 
-### Priority 6 — DAW Plugin v2 (Week 4+)
-- [ ] JUCE-based VST3 native plugin
-- [ ] Improved FL Studio real-time sync
-- [ ] Ableton MIDI clip generation from analysis
-- [ ] Logic Pro integration planning
-- [ ] AU (Audio Unit) plugin for macOS
-
-### Priority 7 — Platform & Infrastructure (Ongoing)
-- [ ] Upgrade test coverage from 30% → 80%+
-- [ ] Add `opentelemetry` distributed tracing
-- [ ] Cloud storage integration (S3/GCS)
-- [ ] Sample marketplace MVP
-- [ ] User accounts + cloud sync
-- [ ] Docker multi-stage build optimization
-- [ ] GitHub Actions: full CI/CD with test gates
+### Priority 6 — Documentation & Quality ✅ In Progress
+- [x] Rewrite `INSTALLATION.md` (was severely outdated with v6 references)
+- [x] Rewrite `QUICKSTART.md` (removed exposed API key, fixed models)
+- [x] Create comprehensive alpha/beta release roadmap
+- [ ] Raise test coverage from 30% → 80%+
 
 ---
 
@@ -166,52 +146,58 @@
 ```
 SampleMind-AI---Beta/
 ├── src/samplemind/
-│   ├── __init__.py              ✅ Lazy imports, version
+│   ├── __init__.py              ✅ Lazy imports, version 2.1.0-beta → 3.0.0-alpha
 │   ├── core/
 │   │   ├── engine/
-│   │   │   └── audio_engine.py  ✅ Main audio processing
+│   │   │   └── audio_engine.py  ✅ Main audio processing (1,247 lines)
 │   │   ├── loader.py            ✅ AdvancedAudioLoader
 │   │   ├── library/
 │   │   │   └── pack_creator.py  ✅ Sample pack creation
 │   │   └── database/
 │   │       └── chroma.py        ✅ ChromaDB manager
 │   ├── integrations/
-│   │   ├── ai_manager.py        ✅ Multi-provider AI routing
+│   │   ├── ai_manager.py        ✅ Multi-provider AI routing (1,105 lines)
+│   │   ├── anthropic_integration.py  ✅ Claude 3.7 Sonnet + extended thinking
+│   │   ├── google_ai_integration.py  ✅ Gemini 2.0 Flash (google-genai)
+│   │   ├── openai_integration.py     ✅ GPT-4o
+│   │   ├── ollama_integration.py     ✅ Offline (qwen2.5:7b)
 │   │   └── daw/
 │   │       ├── fl_studio_plugin.py   ✅ FL Studio
-│   │       └── __init__.py          ✅ DAW exports
+│   │       └── __init__.py
 │   ├── interfaces/
 │   │   ├── cli/
-│   │   │   ├── menu.py          ✅ Main CLI (~2255 lines)
+│   │   │   ├── menu.py          ✅ Main CLI (~2,550 lines)
 │   │   │   └── commands/
 │   │   │       └── effects.py   ✅ Effects CLI (Phase 13)
 │   │   ├── tui/
-│   │   │   ├── app.py           ✅ Textual app
+│   │   │   ├── app.py           ✅ Textual app (6 themes)
 │   │   │   ├── main.py          ✅ Entry point
-│   │   │   └── screens/         ✅ 11 screens
-│   │   └── __init__.py          ⚠️ Stub (1 line)
-│   └── utils/                   ✅ Utilities
+│   │   │   └── screens/         ✅ 15 screens
+│   │   ├── api/                 ✅ FastAPI routers (14 route modules)
+│   │   └── __init__.py
+│   ├── server/
+│   │   └── bridge.py            ✅ DAW bridge
+│   ├── services/                ✅ Business logic
+│   ├── ai/                      ✅ AI utilities
+│   └── utils/                   ✅ Cross-cutting helpers
 ├── plugins/
 │   ├── fl_studio_plugin.py      ✅ FL Studio Python wrapper
-│   ├── fl_studio/
-│   │   ├── cpp/
-│   │   │   ├── samplemind_wrapper.h    ✅ C++ header
-│   │   │   └── samplemind_wrapper.cpp  ✅ C++ impl (486 lines)
-│   │   └── CMakeLists.txt       ✅ Build config
-│   ├── ableton/
-│   │   ├── python_backend.py    ✅ REST backend
-│   │   └── communication.js     ✅ JS bridge
+│   ├── fl_studio/cpp/           ✅ C++ native plugin (486 lines, JUCE)
+│   ├── ableton/                 ✅ REST backend + JS bridge
 │   └── installer.py             ✅ Cross-DAW installer
-├── tests/
-│   ├── unit/                    ✅ 81 tests (~30% coverage)
-│   └── integration/             ⚠️ Needs expansion
-├── docs/                        ✅ 60+ documentation files
-├── completions/                 ✅ bash, zsh, fish
-├── scripts/                     ✅ Setup + launch scripts
+├── tests/                       ✅ 120+ tests (~30% coverage)
+│   ├── unit/                    ✅ AI, core, interfaces, services
+│   ├── integration/             ⚠️ Needs expansion
+│   └── fixtures/                ✅ Test audio files
+├── docs/                        ✅ 80+ documentation files
+│   ├── v3/                      ✅ Active working docs (updated every session)
+│   ├── guides/                  ✅ Reference docs (stable)
+│   └── archive/                 📦 Completed phases 1–14
+├── apps/web/                    ⏳ Next.js 15 — to be scaffolded
+├── scripts/                     ✅ 17+ utility scripts
 ├── config/                      ✅ Configuration files
-├── data/                        ✅ Sample data + databases
-├── pyproject.toml               ⚠️ Needs major dep upgrade
-├── CLAUDE.md                    ✅ Updated 2026-03-07
+├── completions/                 ✅ Shell completions (bash, zsh, fish, powershell)
+├── pyproject.toml               ✅ All P0/P1/P2 deps upgraded
 └── main.py                      ✅ CLI entry point
 ```
 
@@ -221,40 +207,33 @@ SampleMind-AI---Beta/
 
 | Metric | Current | Target (v3.0) |
 |--------|---------|---------------|
-| Python version | 3.11+ | 3.11–3.12 |
+| Python version | 3.11–3.12 | 3.11–3.12 ✅ |
 | Test coverage | ~30% | 80%+ |
 | CLI commands | 20+ | 30+ |
-| TUI screens | 11 | 15+ |
-| AI providers | 4 (OpenAI, Anthropic, Google, Ollama) | 6+ |
+| TUI screens | 15 (verified on disk) | 18+ |
+| AI providers | 4 (Claude, Gemini, GPT-4o, Ollama) | 4 ✅ (+ agents) |
 | DAW plugins | 2 (FL Studio, Ableton) | 4 (+ Logic, Standalone VST3) |
 | API endpoints | 20+ | 40+ |
-| Documentation files | 60+ | 80+ |
-| Dep versions current | ❌ Outdated | ✅ 2026 latest |
+| Documentation files | 80+ | 100+ |
+| Dep versions current | ✅ All P0/P1/P2 done | ✅ 2026 latest |
 
 ---
 
 ## 🐛 Known Issues (Active)
 
-| # | Issue | Severity | Fix |
-|---|-------|----------|-----|
-| 1 | `anthropic ^0.7.0` — 33 versions behind | 🔴 Critical | Upgrade to ^0.40.0 |
-| 2 | `openai ^1.3.0` — missing Agents SDK, gpt-4o | 🔴 Critical | Upgrade to ^1.58.0 |
-| 3 | `google-generativeai ^0.3.0` — deprecated package | 🔴 Critical | Rename to `google-genai ^0.8.0` |
-| 4 | `textual ^0.44.0` — 43 minor versions behind | 🔴 Critical | Upgrade to ^0.87.0 |
-| 5 | `demucs` not in pyproject.toml | 🟠 High | ADD (not upgrade) to pyproject.toml |
-| 6 | `pedalboard` not in pyproject.toml | 🟠 High | ADD (not upgrade) to pyproject.toml |
-| 7 | `basic-pitch` commented out | 🟠 High | Re-enable + upgrade to ^0.4.0 |
-| 8 | `numpy` capped `<2.0.0` | 🟠 High | Upgrade to `>=2.0.0` (with torch+transformers) |
-| 9 | `torch ^2.1.0`, `transformers ^4.35.0` outdated | 🟠 High | Upgrade to ^2.5.0 / ^4.47.0 |
-| 10 | scipy monkey-patch in `__init__.py` | 🟡 Medium | Fix: upgrade librosa to ^0.11.0, then remove patch |
-| 11 | `main.py` still says "v6.0.0" in docstring + --version | 🟡 Medium | Update to "2.1.0-beta" / "3.0.0" |
-| 12 | `interfaces/__init__.py` says "v6" | 🟡 Medium | Update comment, version strings |
-| 13 | `pyproject.toml` scripts entry has wrong path | 🟡 Medium | Fix `src.interfaces.cli.main:app` path |
-| 14 | Test coverage only 30% | 🟠 High | Add tests — target 80% |
-| 15 | No Web UI | 🟠 High | Phase 15: Next.js 15 scaffold |
-| 16 | CLI startup ~2s (target <1s) | 🟡 Medium | Lazy import optimization |
-| 17 | `fastapi ^0.104.1`, `motor ^3.3.1` outdated | 🟡 Medium | Upgrade to ^0.115.0 / ^3.6.0 |
+| # | Issue | Severity | Status |
+|---|-------|----------|--------|
+| 1 | scipy monkey-patch in `__init__.py` still present | 🟡 Medium | Pending — remove after librosa ^0.11.0 verified |
+| 2 | `main.py` still says "v6.0.0" in docstring + --version | 🟡 Medium | Update to "3.0.0-alpha" |
+| 3 | Test coverage only ~30% | 🟠 High | Target 80%+ — tracked in CHECKLIST.md |
+| 4 | No Web UI | 🟠 High | Phase 15 P2: Next.js 15 scaffold |
+| 5 | CLI startup ~2s (target <1s) | 🟡 Medium | Lazy import optimization |
+| 6 | TUI screens not yet migrated to Textual ^0.87 | 🟠 High | Phase 15 P1-TUI |
+| 7 | `INSTALLATION.md` was severely outdated (v6 refs) | ✅ Fixed | Rewritten 2026-03-17 |
+| 8 | `QUICKSTART.md` had exposed API key + wrong models | ✅ Fixed | Rewritten 2026-03-17 |
+| 9 | README.md badge links point to old doc paths | 🟡 Medium | Need update |
+| 10 | Agent framework packages added but not integrated | 🟡 Medium | langgraph/langchain-core/openai-agents in pyproject.toml |
 
 ---
 
-*Updated by Copilot Agent on 2026-03-07 12:55:53. Update this file at the end of each coding session.*
+*Updated by Copilot Agent on 2026-03-17. Update this file at the end of each coding session.*

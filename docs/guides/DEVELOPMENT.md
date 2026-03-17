@@ -196,7 +196,7 @@ text = response["message"]["content"]
 6. **Never** block `main.py`'s event loop — audio I/O in `ThreadPoolExecutor`
 7. **Keep** the scipy monkey-patch in `__init__.py` until `librosa ^0.11.0` is installed
 8. **Always** run `make quality` before committing (ruff + mypy + bandit)
-9. **Always** update `docs/02-ROADMAPS/CURRENT_STATUS.md` at session end
+9. **Always** update `docs/v3/STATUS.md` at session end
 10. **Always** mock AI clients in tests — never make real API calls in unit tests
 
 ---
@@ -268,17 +268,17 @@ RUN_AI_INTEGRATION_TESTS=0    # set to 1 to run live AI tests (costs tokens)
 
 1. `git pull`
 2. `source .venv/bin/activate`
-3. Read `docs/active/INDEX.md` — master navigation
-4. Check `docs/02-ROADMAPS/CURRENT_STATUS.md` — current state
-5. Check `docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md` — next tasks
+3. Read `docs/v3/STATUS.md` — current project state
+4. Check `docs/v3/CHECKLIST.md` — next tasks
+5. Check `docs/v3/ROADMAP.md` — full alpha/beta release plan
 
 ## Session End Checklist
 
 1. `make quality` — ruff + mypy + bandit (must pass)
 2. `make test-unit`
-3. Update `docs/02-ROADMAPS/CURRENT_STATUS.md`
-4. Update `docs/active/roadmap/PHASE_15_PROGRESS.md`
-5. Tick completed items in `V3_MIGRATION_CHECKLIST.md`
+3. Update `docs/v3/STATUS.md`
+4. Update `docs/v3/PHASE15.md`
+5. Tick completed items in `docs/v3/CHECKLIST.md`
 6. `git add <files> && git commit -m "feat(phase15): ..."`
 7. `git push origin main`
 
@@ -288,18 +288,19 @@ RUN_AI_INTEGRATION_TESTS=0    # set to 1 to run live AI tests (costs tokens)
 
 | Resource | Path |
 |----------|------|
-| AI agent entry point | `docs/active/INDEX.md` |
-| Session startup guide | `docs/SESSION_START_GUIDE.md` |
-| Migration checklist | `docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md` |
-| Current status | `docs/02-ROADMAPS/CURRENT_STATUS.md` |
-| Architecture reference | `docs/ARCHITECTURE.md` |
-| API documentation | `docs/API_DOCUMENTATION.md` |
-| CLI reference | `docs/CLI_REFERENCE.md` |
-| TUI migration guide | `docs/active/ui-ux/TUI_V3_UPGRADE_NOTES.md` |
-| Dep upgrade status | `docs/active/devops/DEPENDENCY_UPGRADE_STATUS.md` |
-| AI provider log | `docs/active/models/AI_PROVIDER_UPGRADE_LOG.md` |
-| Web UI spec | `docs/active/features/WEB_UI_SPEC.md` |
+| Docs entry point | `docs/README.md` |
+| Session startup guide | `docs/guides/SESSION_START.md` |
+| Migration checklist | `docs/v3/CHECKLIST.md` |
+| Current status | `docs/v3/STATUS.md` |
+| Alpha/Beta roadmap | `docs/v3/ROADMAP.md` |
+| Architecture reference | `docs/guides/ARCHITECTURE.md` |
+| API documentation | `docs/guides/API.md` |
+| CLI reference | `docs/guides/CLI.md` |
+| TUI migration guide | `docs/v3/TUI_NOTES.md` |
+| Dep upgrade status | `docs/v3/DEPENDENCIES.md` |
+| AI provider log | `docs/v3/AI_PROVIDERS.md` |
+| Web UI spec | `docs/v3/WEB_UI.md` |
 
 ---
 
-*Developer reference for SampleMind AI v3.0. Updated: 2026-03-07.*
+*Developer reference for SampleMind AI v3.0. Updated: 2026-03-17.*

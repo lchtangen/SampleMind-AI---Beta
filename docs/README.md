@@ -1,7 +1,7 @@
 # SampleMind AI — Docs
 
 > **AI agent entry point.** Read this file first.
-> **Phase:** 15 — v3.0 Migration | **Version:** 2.1.0-beta → 3.0.0 | **Updated:** 2026-03-08
+> **Phase:** 15 — v3.0 Migration | **Version:** 3.0.0-alpha | **Updated:** 2026-03-17
 
 ---
 
@@ -13,7 +13,7 @@ docs/
 ├── v3/                ← active working docs (update every session)
 ├── guides/            ← reference docs (stable)
 └── archive/
-    ├── phases/        ← completed phase history (1–16)
+    ├── phases/        ← completed phase history (1–14)
     └── legacy/        ← old notes, business docs
 ```
 
@@ -28,10 +28,10 @@ docs/
 | `v3/STATUS.md` | Current project state — update at session end |
 | `v3/CHECKLIST.md` | P0/P1/P2 migration tasks — tick items as done |
 | `v3/PHASE15.md` | Session-by-session progress log |
-| `v3/ROADMAP.md` | Full 100-point v3.0 upgrade plan |
+| `v3/ROADMAP.md` | **Alpha/Beta release roadmap** — 132 tasks, 4 milestones, 10 follow-up questions |
 | `v3/ARCHITECTURE.md` | ADRs and v3.0 architecture decisions |
-| `v3/DEPENDENCIES.md` | Dep upgrade tracking (all P0 done) |
-| `v3/AI_PROVIDERS.md` | Claude / Gemini / GPT-4o / Ollama upgrade log |
+| `v3/DEPENDENCIES.md` | Dep upgrade tracking (all P0/P1/P2 done) |
+| `v3/AI_PROVIDERS.md` | Claude 3.7 / Gemini 2.0 / GPT-4o / Ollama upgrade log |
 | `v3/TUI_NOTES.md` | Textual ^0.87 migration notes |
 | `v3/WEB_UI.md` | Next.js 15 web UI spec |
 
@@ -41,10 +41,10 @@ docs/
 
 | File | Purpose |
 |------|---------|
-| `guides/QUICKSTART.md` | 60-second startup |
-| `guides/INSTALLATION.md` | Full install guide |
+| `guides/QUICKSTART.md` | 60-second startup (v3.0 — updated 2026-03-17) |
+| `guides/INSTALLATION.md` | Full install guide (v3.0 — updated 2026-03-17) |
 | `guides/DEVELOPMENT.md` | Dev workflow, commands, Makefile |
-| `guides/CLI.md` | Full CLI command reference |
+| `guides/CLI.md` | Full CLI command reference (200+ commands) |
 | `guides/API.md` | FastAPI endpoint reference |
 | `guides/AI_SETUP.md` | AI provider setup (keys, models) |
 | `guides/PLUGINS.md` | FL Studio / Ableton plugin install |

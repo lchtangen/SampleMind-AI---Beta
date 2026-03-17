@@ -1,8 +1,9 @@
 # SampleMind AI — v3.0 Migration Checklist
 
-> **Started:** 2026-03-07 | **Target Completion:** 2026-Q2
+> **Started:** 2026-03-07 | **Target Completion:** 2026-Q2 (alpha) / 2026-Q3 (beta)
 > **Tracking:** Check off items as you complete them. Update progress % at top.
-> **Overall Progress:** ~30% complete (32/112 items)
+> **Full Roadmap:** See `docs/v3/ROADMAP.md` for the complete 132-task alpha/beta plan.
+> **Overall Progress:** ~35% complete (35/112 items)
 
 ---
 
@@ -221,15 +222,18 @@
 | P5 — Production | 15 | 0 | 0% |
 | **TOTAL** | **112** | **~27** | **~24%** |
 
+> **Note:** See `docs/v3/ROADMAP.md` for the reorganized 132-task roadmap with
+> alpha/beta milestones, systematic ordering, and 10 follow-up questions.
+
 ---
 
 ## Next Session Priorities
 
-1. Run `make upgrade-deps` — actually install all upgraded packages
-2. Remove scipy monkey-patch (after librosa ^0.11.0 verified)
-3. Begin Textual ^0.87 TUI screen migration (P1-TUI-001)
-4. Integrate `demucs` into `audio_engine.py` (P1-011)
-5. Scaffold `apps/web/` Next.js 15 (P2-001)
+1. Remove scipy monkey-patch (after librosa ^0.11.0 verified) — Roadmap A-001
+2. Fix `main.py` version string — Roadmap A-002
+3. Begin Textual ^0.87 TUI screen migration — Roadmap A-027
+4. Integrate `demucs` into `audio_engine.py` — Roadmap A-019
+5. Write integration tests for AI providers — Roadmap A-036
 
 ---
 
