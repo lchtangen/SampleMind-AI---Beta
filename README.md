@@ -6,14 +6,14 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Version](https://img.shields.io/badge/version-2.1.0--beta-orange.svg)](CHANGELOG.md)
-[![Phase 15](https://img.shields.io/badge/phase-15%20v3.0%20migration-blueviolet.svg)](docs/02-ROADMAPS/CURRENT_STATUS.md)
+[![Version](https://img.shields.io/badge/version-3.0.0--alpha-orange.svg)](CHANGELOG.md)
+[![Phase 15](https://img.shields.io/badge/phase-15%20v3.0%20migration-blueviolet.svg)](docs/v3/STATUS.md)
 [![Tests](https://img.shields.io/badge/tests-120%2B-brightgreen.svg)](tests/)
-[![AI Providers](https://img.shields.io/badge/AI_providers-4%20(Claude%20%7C%20Gemini%20%7C%20GPT--4o%20%7C%20Ollama)-blue.svg)](docs/active/models/AI_PROVIDER_UPGRADE_LOG.md)
+[![AI Providers](https://img.shields.io/badge/AI_providers-4%20(Claude%20%7C%20Gemini%20%7C%20GPT--4o%20%7C%20Ollama)-blue.svg)](docs/v3/AI_PROVIDERS.md)
 
 > **⚡ Phase 15 — v3.0 Migration: P0+P1 Complete**
 > All AI provider SDKs upgraded (Claude 3.7 Sonnet, Gemini 2.0 Flash, GPT-4o, Ollama). Next: Textual ^0.87 TUI migration + Next.js 15 web UI.
-> See [`docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md`](docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md) for the full plan.
+> See [`docs/v3/ROADMAP.md`](docs/v3/ROADMAP.md) for the full alpha/beta release roadmap.
 
 ---
 
@@ -49,7 +49,7 @@ export OPENAI_API_KEY="your_openai_key_here"
 python main.py
 ```
 
-📖 **Detailed Setup:** See [docs/04-TECHNICAL-IMPLEMENTATION/guides/START_HERE.md](docs/04-TECHNICAL-IMPLEMENTATION/guides/START_HERE.md)
+📖 **Detailed Setup:** See [docs/guides/INSTALLATION.md](docs/guides/INSTALLATION.md)
 
 ---
 
@@ -83,17 +83,16 @@ Works seamlessly on **Linux, macOS, and Windows** with platform-specific optimiz
 
 All documentation is systematically organized in the `docs/` directory:
 
-- **[📋 Documentation Index](./docs/00-INDEX/README.md)** - Central navigation hub
-- **[📊 Phase Status Dashboard](./docs/00-INDEX/PHASE_STATUS_DASHBOARD.md)** - Real-time project status
-- **[🎯 Phase Navigation Guide](./docs/00-INDEX/PHASE_NAVIGATION_GUIDE.md)** - Fast access by phase and feature
-- **[📖 Phase Documentation](./docs/01-PHASES/)** - Phases 1-10 (all complete)
-- **[🗺️ Roadmaps](./docs/02-ROADMAPS/)** - Strategic planning and future features
-- **[💼 Business Strategy](./docs/03-BUSINESS-STRATEGY/)** - Business plans and go-to-market strategy
-- **[⚙️ Technical Implementation](./docs/04-TECHNICAL-IMPLEMENTATION/)** - Developer guides, API docs, architecture
+- **[📋 Documentation Index](./docs/README.md)** - Central navigation hub
+- **[📊 Current Status](./docs/v3/STATUS.md)** - Real-time project status
+- **[🗺️ Roadmap](./docs/v3/ROADMAP.md)** - Alpha/Beta release plan (132 tasks)
+- **[✅ Migration Checklist](./docs/v3/CHECKLIST.md)** - v3.0 migration task tracking
+- **[⚙️ Guides](./docs/guides/)** - Developer guides, API docs, architecture
 
 ### Essential Docs
 
-- [**Getting Started Guide**](docs/04-TECHNICAL-IMPLEMENTATION/guides/START_HERE.md) - Complete setup walkthrough
+- [**Installation Guide**](docs/guides/INSTALLATION.md) - Complete setup walkthrough
+- [**Quick Start**](docs/guides/QUICKSTART.md) - Analyze your first sample in 60 seconds
 - [**Contributing**](CONTRIBUTING.md) - How to contribute to the project
 - [**Code of Conduct**](CODE_OF_CONDUCT.md) - Community guidelines
 - [**Changelog**](CHANGELOG.md) - Version history and updates
@@ -123,7 +122,7 @@ For advanced users, SampleMind includes a modern terminal UI with:
 python -m samplemind.interfaces.tui.main
 ```
 
-📖 **Learn more:** [Textual Migration Guide](docs/04-TECHNICAL-IMPLEMENTATION/guides/TEXTUAL_MIGRATION.md)
+📖 **Learn more:** [TUI Migration Guide](docs/guides/TUI_MIGRATION.md)
 
 ---
 
@@ -138,7 +137,7 @@ python -m samplemind.interfaces.tui.main
 | **Google Gemini** | Gemini 2.0 Flash | 2 (Fast) | Streaming, multimodal queries | ~1-2s |
 | **OpenAI GPT** | GPT-4o | 3 (Agents) | Agent workflows, tool use | ~2-5s |
 
-> **Phase 15 target models:** `claude-3-7-sonnet-20250219`, `gemini-2.0-flash`, `gpt-4o` — see [`docs/active/models/AI_PROVIDER_UPGRADE_LOG.md`](docs/active/models/AI_PROVIDER_UPGRADE_LOG.md)
+> **Phase 15 target models:** `claude-3-7-sonnet-20250219`, `gemini-2.0-flash`, `gpt-4o` — see [`docs/v3/AI_PROVIDERS.md`](docs/v3/AI_PROVIDERS.md)
 
 ### Audio Processing Pipeline
 
@@ -354,7 +353,7 @@ make dev
 
 - [**Contributing Guidelines**](CONTRIBUTING.md) - How to contribute
 - [**Code of Conduct**](CODE_OF_CONDUCT.md) - Community standards
-- [**Development Guide**](docs/04-TECHNICAL-IMPLEMENTATION/guides/DEVELOPMENT.md) - Developer setup
+- [**Development Guide**](docs/guides/DEVELOPMENT.md) - Developer setup
 
 ---
 
@@ -368,9 +367,9 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 - **[Documentation Hub](docs/)** - Complete documentation
 - **[Changelog](CHANGELOG.md)** — Full version history
-- **[Roadmap](docs/02-ROADMAPS/)** — Future development plans
-- **[Phase 15 Migration Plan](docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md)** — v3.0 upgrade checklist
-- **[Current Status](docs/02-ROADMAPS/CURRENT_STATUS.md)** — Real-time project state
+- **[Roadmap](docs/v3/ROADMAP.md)** — Alpha/Beta release roadmap (132 tasks)
+- **[Migration Checklist](docs/v3/CHECKLIST.md)** — v3.0 migration task tracking
+- **[Current Status](docs/v3/STATUS.md)** — Real-time project state
 
 ---
 
