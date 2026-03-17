@@ -1,104 +1,74 @@
-# 🚀 SampleMind AI v6 - Quick Start Guide
+# 🚀 SampleMind AI — Quick Start Guide
 
-## ✅ Complete CLI with Gemini AI - Ready to Use!
-
-Your **complete AI-powered music production CLI** is fully configured and ready to analyze audio!
+> **Version:** 3.0.0-alpha | **Updated:** 2026-03-17 | **Time to first analysis:** ~60 seconds
 
 ---
 
-## 🎯 Start in 30 Seconds
+## Start in 60 Seconds
 
-### Option 1: Interactive CLI
+### 1. Launch the CLI
+
 ```bash
-./start_cli.sh
+cd SampleMind-AI---Beta
+source .venv/bin/activate   # activate virtual environment
+python main.py              # launch interactive CLI
 ```
 
-### Option 2: Quick Demo
+### 2. Analyze Your First Sample
+
 ```bash
-./start_cli.sh --demo
+# From the CLI menu, select "Analyze Single File"
+# Or run directly:
+python main.py analyze path/to/your/sample.wav
 ```
 
-### Option 3: Verify Setup
+### 3. Batch Process a Folder
+
 ```bash
-./start_cli.sh --verify
-```
-
----
-
-## 🎵 Quick Commands
-
-### Analyze Single File
-```bash
-./start_cli.sh analyze test_audio_samples/test_chord_120bpm.wav
-```
-
-### Batch Process Folder
-```bash
-./start_cli.sh batch ./my_music
-```
-
-### Interactive Menu
-```bash
-./start_cli.sh
+python main.py batch ./my_samples/
 ```
 
 ---
 
 ## 📊 What You Get
 
-### **AI-Powered Analysis with Gemini 2.5 Pro:**
+### AI-Powered Analysis (4 Providers)
 
-✅ **Genre Classification** (95%+ accuracy)
-- Primary genre, subgenres, style influences
-- Historical context and era
+| Provider | Model | Specialization | Speed |
+|----------|-------|---------------|-------|
+| **Ollama** | `qwen2.5:7b-instruct` | Quick analysis (offline, no API key) | <100 ms |
+| **Anthropic** | `claude-3-7-sonnet-20250219` | Deep analysis, production coaching | ~3 s |
+| **Google** | `gemini-2.0-flash` | Genre classification, streaming | ~1 s |
+| **OpenAI** | `gpt-4o` | Agent workflows, tool use | ~2 s |
 
-✅ **Emotional Analysis**
-- Mood identification
-- Valence (Sad to Happy): -1 to +1
-- Arousal (Calm to Energetic): 0 to 1
+### Analysis Output Includes
 
-✅ **Music Theory**
-- Harmonic progressions
-- Modal analysis
-- Rhythmic complexity
-- Structural breakdown
-
-✅ **Production Analysis**
-- Mix quality assessment
-- Frequency balance
-- Stereo field
-- Dynamic processing
-
-✅ **FL Studio Integration**
-- Plugin recommendations
-- Effect chain setup
-- Mixer routing
-- Automation tips
-
-✅ **Creative Suggestions**
-- Remix ideas
-- Arrangement tips
-- Instrumentation
-- Commercial potential
+✅ **Audio Features** — BPM, key (with Camelot notation), duration, time signature
+✅ **Spectral Analysis** — MFCC, chroma, spectral centroid/bandwidth/rolloff
+✅ **Genre Classification** — Primary genre, subgenres, confidence scores
+✅ **Mood Detection** — Valence (sad→happy), arousal (calm→energetic)
+✅ **Production Analysis** — Mix quality, frequency balance, dynamic range
+✅ **FL Studio Integration** — Plugin recommendations, effect chains, mixer routing
+✅ **Creative Suggestions** — Remix ideas, arrangement tips, similar references
 
 ---
 
-## 🎨 Interactive Menu Features
+## 🎨 Interactive CLI Menu
 
 ```
-🎵 SAMPLEMIND AI v6 - Main Menu
+🎵 SAMPLEMIND AI — Main Menu
 
-1. 🎯 Analyze Single File          - AI analysis of audio
-2. 📁 Batch Process Directory      - Multiple files with AI
-3. 📁 Analyze Folder Samples       - All audio in folder
-4. 🔍 Scan & Preview              - Preview directory
-5. ⚙️ Configuration                - Settings & preferences
-6. 📊 System Status                - Performance stats
-7. 🤖 AI Provider Settings         - Gemini/OpenAI config
-8. 💡 Production Tips              - Coaching & advice
-9. 🎛️ FL Studio Integration        - DAW-specific tools
-A. 📈 Session Analytics            - Current session stats
-0. 🚪 Exit
+ 1. 🎯 Analyze Single File          — AI-powered audio analysis
+ 2. 📁 Batch Process Directory      — Analyze multiple files
+ 3. 📁 Analyze Folder Samples       — All audio in a folder
+ 4. 🔍 Scan & Preview              — Preview directory contents
+ 5. ⚙️  Configuration               — Settings & preferences
+ 6. 📊 System Status                — Performance metrics
+ 7. 🤖 AI Provider Settings         — Configure Claude/Gemini/GPT/Ollama
+ 8. 💡 Production Tips              — AI coaching & advice
+ 9. 🎛️  FL Studio Integration        — DAW-specific tools
+ A. 📈 Session Analytics            — Current session stats
+ 0. 🚪 Exit
 ```
 
 ---
@@ -106,29 +76,27 @@ A. 📈 Session Analytics            - Current session stats
 ## 📈 Example Analysis
 
 ```bash
-./start_cli.sh analyze test_audio_samples/test_chord_120bpm.wav
+python main.py analyze samples/my_beat.wav
 ```
 
-**Output:**
 ```
-🎵 Analyzing: test_chord_120bpm.wav
+🎵 Analyzing: my_beat.wav
 
 📋 File Information
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📁 File:         test_chord_120bpm.wav
-⏱️ Duration:      5.00s
+📁 File:         my_beat.wav
+⏱️  Duration:     5.00 s
 🎵 Tempo:        120.2 BPM
-🎼 Key:          C major
-🤖 AI Provider:  google_ai
-⚡ Model:        gemini-2.5-pro
-⏱️ Processing:    ~50s
+🎼 Key:          C major (8B Camelot)
+🤖 AI Provider:  anthropic
+⚡ Model:        claude-3-7-sonnet-20250219
+⏱️  Processing:   ~3 s
 
-🤖 Gemini AI Analysis
+🤖 AI Analysis
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 This is a punchy, groove-centric electronic music loop,
 defined by a tightly compressed low-end and a compelling,
-syncopated rhythm. The C major key provides an accessible,
-subtly uplifting harmonic foundation...
+syncopated rhythm...
 
 🎛️ FL Studio Recommendations
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -136,83 +104,84 @@ subtly uplifting harmonic foundation...
 • Fruity Limiter: Aggressive sidechaining
 • Gross Beat: Rhythmic gating and stutter effects
 • Fruity Parametric EQ 2: Surgical EQ cuts
-• Wave Candy: Visual monitoring of stereo field
 ```
 
 ---
 
 ## 🔑 Configuration
 
-### API Keys (Already Set)
-```bash
-# Gemini 2.5 Pro (PRIMARY - Priority 1)
-GOOGLE_AI_API_KEY=AIzaSyDz7cVY4_urIGYBIIqxwY3zvYyXbMAIl64
+### API Keys
 
-# OpenAI GPT-5 (FALLBACK - Priority 2)
-OPENAI_API_KEY=sk-proj-...
+Set your API keys in `.env` (copy from `.env.example`):
+
+```bash
+cp .env.example .env
 ```
+
+Edit `.env` with your keys:
+
+```bash
+# At least one AI provider is needed (Ollama requires no key)
+ANTHROPIC_API_KEY=sk-ant-your-key-here      # Claude (primary)
+GOOGLE_API_KEY=your-google-key-here          # Gemini (fast)
+OPENAI_API_KEY=sk-proj-your-key-here         # GPT-4o (agents)
+
+# Ollama — no API key needed, just run: ollama serve
+OLLAMA_HOST=http://localhost:11434
+```
+
+> ⚠️ **Never commit API keys to version control.** The `.env` file is already in `.gitignore`.
 
 ### AI Provider Priority
-1. **Gemini 2.5 Pro** - PRIMARY (faster, cheaper)
-2. **OpenAI GPT-5** - FALLBACK (if Gemini fails)
+
+```
+Priority 0: Ollama   → OFFLINE/INSTANT — quick analysis (<100 ms, no API key)
+Priority 1: Claude   → PRIMARY         — deep analysis, extended thinking
+Priority 2: Gemini   → FAST            — genre/rhythm, streaming, multimodal
+Priority 3: GPT-4o   → AGENTS          — tool use, agent workflows
+```
 
 ---
 
-## 💰 Cost & Performance
+## 💰 Cost Estimates
 
-### Gemini 2.5 Pro
-- ⚡ Response time: ~50 seconds
-- 💰 Cost per analysis: ~$0.04-0.05
-- 🎯 Accuracy: 95%+ genre classification
-- 🔄 Rate limit: 60 requests/minute
-
-### OpenAI GPT-5 (Fallback)
-- ⚡ Response time: ~30 seconds
-- 💰 Cost per analysis: ~$0.10-0.15
-- 🔄 Rate limit: 60 requests/minute
+| Provider | Model | Cost per Analysis | Speed |
+|----------|-------|-------------------|-------|
+| **Ollama** | qwen2.5:7b | **Free** (local) | <100 ms |
+| **Google** | gemini-2.0-flash | ~$0.01–0.02 | ~1 s |
+| **Anthropic** | claude-3-7-sonnet | ~$0.03–0.05 | ~3 s |
+| **OpenAI** | gpt-4o | ~$0.05–0.10 | ~2 s |
 
 ---
 
-## 📚 Available Scripts
+## 🖥️ Alternative Interfaces
 
-| Script | Command | Description |
-|--------|---------|-------------|
-| **Start CLI** | `./start_cli.sh` | Interactive menu |
-| **Demo** | `./start_cli.sh --demo` | Run demo with test files |
-| **Verify** | `./start_cli.sh --verify` | Check setup |
-| **Analyze** | `./start_cli.sh analyze <file>` | Quick analysis |
-| **Batch** | `./start_cli.sh batch <dir>` | Process folder |
+### Terminal UI (TUI)
 
----
-
-## 🎛️ Production Features
-
-### 1. **Genre-Specific Tips**
 ```bash
-./start_cli.sh
-# Select: 8 (Production Tips) → 6 (Genre-Specific Advice)
-# Choose: house, techno, trap, pop, rock, jazz, ambient
+python -m samplemind.interfaces.tui.main
 ```
 
-### 2. **FL Studio Preset Generation**
+Features: 13 interactive screens, waveform visualization, keyboard navigation, 6 themes.
+
+### REST API
+
 ```bash
-./start_cli.sh
-# Select: 9 (FL Studio) → 1 (Generate Presets)
-# Analyze audio → Get FL Studio preset recommendations
+make dev   # starts FastAPI on http://localhost:8000
+
+# API docs available at:
+# http://localhost:8000/api/docs     (Swagger UI)
+# http://localhost:8000/api/redoc    (ReDoc)
 ```
 
-### 3. **AI Production Coaching**
-```bash
-./start_cli.sh
-# Select: 8 (Production Tips) → 7 (AI Coaching)
-# Ask Gemini specific production questions
-```
+### Python Library
 
-### 4. **Batch Processing**
-```bash
-./start_cli.sh
-# Select: 2 (Batch Process)
-# Choose folder → Get analysis for all audio files
+```python
+from samplemind.core.engine.audio_engine import AudioEngine, AnalysisLevel
+
+engine = AudioEngine()
+result = await engine.analyze("sample.wav", level=AnalysisLevel.PROFESSIONAL)
+print(f"BPM: {result.tempo}, Key: {result.key}")
 ```
 
 ---
@@ -220,80 +189,40 @@ OPENAI_API_KEY=sk-proj-...
 ## 🔧 Troubleshooting
 
 ### Missing Dependencies
+
 ```bash
 source .venv/bin/activate
-pip install mutagen openai google-generativeai typer rich questionary
+pip install -e ".[dev]"
 ```
 
-### API Key Issues
-```bash
-# Check keys are loaded
-./start_cli.sh --verify
-
-# Re-export if needed
-export GOOGLE_AI_API_KEY=your_key_here
-```
-
-### Clear Cache
-```bash
-rm -rf ~/.samplemind/config/ai_config.json
-```
-
----
-
-## 📖 Documentation
-
-- **[GEMINI_CLI_GUIDE.md](GEMINI_CLI_GUIDE.md)** - Complete usage guide
-- **[SETUP_COMPLETE.md](SETUP_COMPLETE.md)** - Setup summary
-- **[CLAUDE.md](CLAUDE.md)** - Development guide
-
----
-
-## 🎯 Next Steps
-
-1. **Verify everything works:**
-   ```bash
-   ./start_cli.sh --verify
-   ```
-
-2. **Run the demo:**
-   ```bash
-   ./start_cli.sh --demo
-   ```
-
-3. **Start the interactive CLI:**
-   ```bash
-   ./start_cli.sh
-   ```
-
-4. **Analyze your music:**
-   ```bash
-   ./start_cli.sh analyze your_song.wav
-   ```
-
----
-
-## ✨ Key Features Summary
-
-✅ **Gemini 2.5 Pro Integration** - PRIMARY AI provider
-✅ **Complete Audio Analysis** - Librosa-powered feature extraction
-✅ **Interactive CLI** - Beautiful Rich terminal UI
-✅ **FL Studio Integration** - DAW-specific recommendations
-✅ **Batch Processing** - Analyze multiple files
-✅ **Production Coaching** - AI-powered advice
-✅ **Cost Optimization** - Gemini cheaper than OpenAI
-✅ **Automatic Fallback** - OpenAI if Gemini fails
-
----
-
-## 🚀 Start Now!
+### Ollama Not Responding
 
 ```bash
-./start_cli.sh
+# Check if running
+curl http://localhost:11434/api/tags
+
+# Start if needed
+ollama serve &
 ```
 
-**Your complete AI-powered music production assistant is ready!** 🎵🤖✨
+### No AI Providers Configured
+
+```bash
+# Use Ollama (free, offline, no API key needed)
+ollama serve &
+ollama pull qwen2.5:7b-instruct
+```
 
 ---
 
-*For detailed instructions, see [GEMINI_CLI_GUIDE.md](GEMINI_CLI_GUIDE.md)*
+## 📚 Next Steps
+
+1. 📖 **[CLI Reference](CLI.md)** — Full command reference (200+ commands)
+2. 🌐 **[API Documentation](API.md)** — REST endpoint reference
+3. 🤖 **[AI Setup Guide](AI_SETUP.md)** — Detailed provider configuration
+4. 🎛️ **[Plugin Guide](PLUGINS.md)** — FL Studio & Ableton integration
+5. 🏗️ **[Architecture](ARCHITECTURE.md)** — System design overview
+
+---
+
+*SampleMind AI v3.0 — AI-Powered Music Production Platform*
