@@ -84,7 +84,7 @@ except ImportError:
 
 ### 2. TUI Screens Migration (High priority — Phase 15 P4)
 
-`textual ^0.87.0` is in `pyproject.toml` but the 13 TUI screens have not been updated for the new API. Tracked in `docs/active/ui-ux/TUI_V3_UPGRADE_NOTES.md`.
+`textual ^0.87.0` is in `pyproject.toml` but the 13 TUI screens have not been updated for the new API. Tracked in `docs/v3/TUI_NOTES.md`.
 
 ### 3. Dependencies to Install
 

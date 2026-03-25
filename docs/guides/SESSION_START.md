@@ -1,14 +1,14 @@
 # SampleMind AI — Session Start Guide
 
 > Read this at the start of every Claude Code / Copilot / Codex session.
-> **Phase:** 15 — v3.0 Migration | **Last Updated:** 2026-03-07
+> **Phase:** 15 — v3.0 Migration | **Last Updated:** 2026-03-17
 
 ---
 
 ## 3-Step Session Startup
 
 ```bash
-cd ~/Projects/SampleMind-AI---Beta
+cd SampleMind-AI---Beta
 git pull
 source .venv/bin/activate
 ```
@@ -16,10 +16,10 @@ source .venv/bin/activate
 Then check current state:
 
 ```bash
-# Claude Code — read in this order:
-/read docs/active/INDEX.md
-/read docs/02-ROADMAPS/CURRENT_STATUS.md
-/read docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md
+# Read in this order:
+# 1. docs/v3/STATUS.md — current project state
+# 2. docs/v3/CHECKLIST.md — what to work on next
+# 3. docs/v3/ROADMAP.md — full alpha/beta release plan
 ```
 
 ---
@@ -63,8 +63,8 @@ make test           # verify nothing broke
 ### P1 Next Priorities
 
 - [ ] **P1-TUI** — Migrate 13 Textual screens to `^0.87.0` API
-  - Guide: `docs/active/ui-ux/TUI_V3_UPGRADE_NOTES.md`
-  - Guide: `docs/04-TECHNICAL-IMPLEMENTATION/guides/TEXTUAL_MIGRATION.md`
+  - Guide: `docs/v3/TUI_NOTES.md`
+  - Guide: `docs/guides/TUI_MIGRATION.md`
 - [ ] **P1-011** — Integrate `demucs` into `audio_engine.py` (dep is installed, needs code)
 - [ ] **P1-012** — Integrate `pedalboard` effects into CLI + API
 - [ ] **P1-016** — Wire `faster-whisper` for local audio transcription
@@ -72,7 +72,7 @@ make test           # verify nothing broke
 ### P2 Next
 
 - [ ] Scaffold `apps/web/` — `cd apps && npx create-next-app@latest web`
-- [ ] Reference: `docs/active/features/WEB_UI_SPEC.md`
+- [ ] Reference: `docs/v3/WEB_UI.md`
 
 ---
 
@@ -94,8 +94,8 @@ make test-unit
 
 ```bash
 # 1. Read the migration guide
-/read docs/active/ui-ux/TUI_V3_UPGRADE_NOTES.md
-/read docs/04-TECHNICAL-IMPLEMENTATION/guides/TEXTUAL_MIGRATION.md
+# See: docs/v3/TUI_NOTES.md
+# See: docs/guides/TUI_MIGRATION.md
 
 # 2. Read + update one screen at a time
 /read src/samplemind/interfaces/tui/screens/main_screen.py
@@ -124,7 +124,7 @@ make test-unit
 
 ```bash
 # Requires: Node.js 20+
-/read docs/active/features/WEB_UI_SPEC.md
+# See: docs/v3/WEB_UI.md
 cd apps
 npx create-next-app@latest web --typescript --tailwind --app
 cd web && npm install
@@ -137,7 +137,7 @@ npm run dev  # → localhost:3000
 # LangGraph + openai-agents are in pyproject.toml
 # Target location:
 mkdir -p src/samplemind/integrations/agents/
-/read docs/active/architecture/V3_ARCHITECTURE_DECISIONS.md
+# See: docs/v3/ARCHITECTURE.md
 ```
 
 ---
@@ -196,9 +196,9 @@ make quality          # ruff + mypy + bandit
 make test-unit
 
 # 3. Update status
-# Edit: docs/02-ROADMAPS/CURRENT_STATUS.md
-# Edit: docs/active/roadmap/PHASE_15_PROGRESS.md
-# Edit: docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md — tick off completed items
+# Edit: docs/v3/STATUS.md
+# Edit: docs/v3/PHASE15.md
+# Edit: docs/v3/CHECKLIST.md — tick off completed items
 
 # 4. Commit and push
 git add <changed files>
@@ -235,4 +235,4 @@ git push origin main
 
 ---
 
-*SESSION_START_GUIDE.md v2.0 — Updated 2026-03-07 (Session 3). Reflects P0+P1 migration complete.*
+*SESSION_START_GUIDE.md v3.0 — Updated 2026-03-17. Reflects documentation overhaul and new v3 doc structure.*
