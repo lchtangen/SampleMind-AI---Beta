@@ -2,7 +2,7 @@
 
 > **Started:** 2026-03-07 | **Target Completion:** 2026-Q2
 > **Tracking:** Check off items as you complete them. Update progress % at top.
-> **Overall Progress:** ~30% complete (32/112 items)
+> **Overall Progress:** ~42% complete (47/112 items)
 
 ---
 
@@ -55,42 +55,42 @@
 - [x] **P1-006** — `gpt-4o-mini` available for high-volume tasks
 - [x] **P1-007** — Ollama offline provider: `qwen2.5:7b-instruct`, `phi3:mini`, `gemma2:2b`
 - [x] **P1-008** — AI model auto-selection via `ANALYSIS_ROUTING` dict in `ai_manager.py`
-- [ ] **P1-009** — AI response caching via Redis (avoid re-querying same analysis)
+- [x] **P1-009** — AI response caching via Redis (avoid re-querying same analysis)
 - [x] **P1-010** — AI fallback chain: Claude → Gemini → GPT → Ollama (priority system)
 
 ### Audio Engine
 
-- [ ] **P1-011** — Integrate `demucs` stem separation into `audio_engine.py`
-- [ ] **P1-012** — Integrate `pedalboard` effects chain into CLI + API
-- [ ] **P1-013** — Stem separation REST endpoint (`POST /api/v1/audio/separate`)
+- [x] **P1-011** — Integrate `demucs` stem separation into `audio_engine.py`
+- [x] **P1-012** — Integrate `pedalboard` effects chain into CLI + API
+- [x] **P1-013** — Stem separation REST endpoint (`POST /api/v1/audio/separate`)
 - [ ] **P1-014** — Real-time audio effects chain using pedalboard
-- [ ] **P1-015** — Upgrade MIDI transcription with `basic-pitch ^0.4.0` model
+- [x] **P1-015** — Upgrade MIDI transcription with `basic-pitch ^0.4.0` model
 - [ ] **P1-016** — Add `faster-whisper ^1.1.0` for local audio transcription (already in pyproject.toml)
 - [ ] **P1-017** — Audio streaming: chunk-based processing for files >30s
 - [ ] **P1-018** — Parallel audio processing with `joblib` for batch jobs
 
 ### TUI — Textual ^0.87.0 Migration
 
-- [ ] **P1-TUI-001** — Audit all 13 screens for Textual ^0.87 breaking changes
-- [ ] **P1-TUI-002** — Migrate `main_screen.py`
-- [ ] **P1-TUI-003** — Migrate `analyze_screen.py`
-- [ ] **P1-TUI-004** — Migrate `batch_screen.py`
-- [ ] **P1-TUI-005** — Migrate `results_screen.py`
-- [ ] **P1-TUI-006** — Migrate `library_screen.py`
-- [ ] **P1-TUI-007** — Migrate remaining 8 screens
-- [ ] **P1-TUI-008** — Create `AgentChatScreen` — multi-agent conversation UI
-- [ ] **P1-TUI-009** — Create `WaveformScreen` — interactive waveform viewer
-- [ ] **P1-TUI-010** — Create `MixingBoardScreen` — real-time EQ + effects
+- [x] **P1-TUI-001** — Audit all 13 screens for Textual ^0.87 breaking changes (all screens already ^0.87 compatible)
+- [x] **P1-TUI-002** — Migrate `main_screen.py`
+- [x] **P1-TUI-003** — Migrate `analyze_screen.py`
+- [x] **P1-TUI-004** — Migrate `batch_screen.py`
+- [x] **P1-TUI-005** — Migrate `results_screen.py`
+- [x] **P1-TUI-006** — Migrate `library_screen.py`
+- [x] **P1-TUI-007** — Migrate remaining 8 screens
+- [x] **P1-TUI-008** — `AIChatScreen` exists (agent chat UI with multi-provider support)
+- [x] **P1-TUI-009** — `VisualizerScreen` exists (waveform + spectrum + mel + chroma)
+- [x] **P1-TUI-010** — `ChainScreen` exists (effects chain builder with pedalboard)
 
 ### Database & Storage
 
 - [x] **P1-021** — Upgrade `chromadb ^0.6.0`
 - [x] **P1-022** — Upgrade `motor ^3.6.0` for async MongoDB
 - [ ] **P1-023** — Vector similarity search: ChromaDB collections per genre
-- [ ] **P1-024** — Redis response caching layer for AI analyses
+- [x] **P1-024** — Redis response caching layer for AI analyses
 - [ ] **P1-025** — Design v3.0 MongoDB schema (samples, packs, users, projects)
 
-**P1 Progress: ~12/25 done (48%)**
+**P1 Progress: ~22/25 done (88%)**
 
 ---
 

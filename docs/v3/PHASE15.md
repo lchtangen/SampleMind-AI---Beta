@@ -174,4 +174,47 @@ None. All P0 + P1 code changes are complete in this session.
 
 ---
 
+### 2026-03-25 — Session 4 (P1 completion — audio engine, TUI audit, caching)
+
+**Completed:**
+
+**Bug fixes:**
+- `src/samplemind/interfaces/api/routes/similarity.py` — fixed missing `await` on `query_similar()` in `batch_similarity_search` (line ~180)
+
+**TUI Textual ^0.87 audit (P1-TUI-001 through P1-TUI-010):**
+- Audited all 15 TUI screens — all already use Textual ^0.87 compatible patterns
+- CSS `$primary`/`$accent`/`$foreground` references are valid theme variable refs in ^0.87 (not definitions)
+- No `yield from super().compose()` or deprecated `compute_*` patterns found
+- "New" screens from PHASE15.md docs already existed:
+  - `AIChatScreen` (ai_chat_screen.py) — multi-provider AI chat with streaming
+  - `VisualizerScreen` (visualizer_screen.py) — waveform + spectrum + mel + chroma
+  - `ChainScreen` (chain_screen.py) — pedalboard effects chain builder
+
+**AudioEngine integrations (P1-011, P1-015):**
+- `src/samplemind/core/engine/audio_engine.py` — added `separate_stems()` async method (wraps existing `StemSeparator` from `ai/separation/demucs_separator.py`)
+- `src/samplemind/core/engine/audio_engine.py` — added `transcribe_midi()` async method (wraps existing `MidiConverter` from `ai/midi/basic_pitch_converter.py`)
+- Both use lazy imports so heavy deps (demucs, basic-pitch) only load on demand
+
+**Audio API routes (P1-012, P1-013, P1-015):**
+- `src/samplemind/interfaces/api/routes/audio.py` — added 3 new self-contained endpoints:
+  - `POST /audio/separate` — Demucs 6-stem separation with optional file save
+  - `POST /audio/effects` — Pedalboard chain (compressor, EQ, reverb, gain) via `EffectsConfig`
+  - `POST /audio/transcribe-midi` — basic-pitch MIDI transcription with optional .mid save
+
+**Redis AI response caching (P1-009, P1-024):**
+- `src/samplemind/core/cache/redis_cache.py` — added `AIResponseCache` class with SHA-256 keying on `(file_hash, analysis_type, provider)`, graceful Redis-unavailable fallback, `connect_ai_cache()` / `get_ai_cache()` singletons
+- `src/samplemind/integrations/ai_manager.py` — `analyze_music()` now checks cache before provider call, stores successful results; all cache errors are swallowed non-fatally
+
+**Progress update:**
+- `docs/v3/CHECKLIST.md` — 32 → 47 items complete (~30% → ~42%)
+
+**Not yet started (next sessions):**
+- P1-017: Audio streaming for large files (>30s chunk processing)
+- P1-023: ChromaDB per-genre collections
+- P1-025: MongoDB v3.0 schema
+- P2: Next.js 15 web platform scaffold
+- P3: Multi-agent system (LangGraph)
+
+---
+
 *Update this file at the end of each coding session.*

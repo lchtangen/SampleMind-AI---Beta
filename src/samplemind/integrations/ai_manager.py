@@ -501,6 +501,8 @@ class SampleMindAIManager:
         Returns:
             UnifiedAnalysisResult with comprehensive analysis
         """
+        from dataclasses import asdict
+
         start_time = time.time()
 
         if not self.load_balancer:
@@ -511,11 +513,52 @@ class SampleMindAIManager:
             analysis_type, preferred_provider
         )
 
+        # ── Redis AI response cache check (P1-009) ────────────────────────────
+        _ai_cache = None
+        _cache_key: Optional[str] = None
+        file_hash = audio_features.get("file_hash", "")
+        if file_hash:
+            try:
+                from samplemind.core.cache.redis_cache import get_ai_cache, AIResponseCache
+                _ai_cache = get_ai_cache()
+                if _ai_cache.is_available:
+                    _cache_key = AIResponseCache.make_key(
+                        file_hash=file_hash,
+                        analysis_type=analysis_type.value,
+                        provider=selected_provider.value,
+                    )
+                    cached_result = await _ai_cache.get(_cache_key)
+                    if cached_result is not None:
+                        logger.info(
+                            f"AI cache hit — {analysis_type.value}/{selected_provider.value}"
+                        )
+                        # Reconstruct UnifiedAnalysisResult from cached dict
+                        cached_result["provider"] = AIProvider(cached_result.get("provider", selected_provider.value))
+                        cached_result["analysis_type"] = AnalysisType(cached_result.get("analysis_type", analysis_type.value))
+                        return UnifiedAnalysisResult(**{
+                            k: v for k, v in cached_result.items()
+                            if k in UnifiedAnalysisResult.__dataclass_fields__
+                        })
+            except Exception as cache_exc:
+                logger.debug(f"AI cache lookup skipped: {cache_exc}")
+        # ─────────────────────────────────────────────────────────────────────
+
         try:
             # Perform analysis with selected provider
             result = await self._analyze_with_provider(
                 selected_provider, audio_features, analysis_type, user_context
             )
+
+            # ── Store successful result in cache (P1-024) ─────────────────────
+            if _ai_cache is not None and _cache_key and _ai_cache.is_available:
+                try:
+                    result_dict = asdict(result)
+                    result_dict["provider"] = result.provider.value
+                    result_dict["analysis_type"] = result.analysis_type.value
+                    await _ai_cache.set(_cache_key, result_dict)
+                except Exception as store_exc:
+                    logger.debug(f"AI cache store skipped: {store_exc}")
+            # ─────────────────────────────────────────────────────────────────
 
             # Update success metrics
             self._update_provider_stats(

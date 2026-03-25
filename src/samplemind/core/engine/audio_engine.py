@@ -1160,6 +1160,71 @@ class AudioEngine:
         self.executor.shutdown(wait=True)
         logger.info("🔴 Audio Engine shutdown complete")
 
+    # -------------------------------------------------------------------------
+    # Stem Separation (demucs integration — P1-011)
+    # -------------------------------------------------------------------------
+
+    async def separate_stems(
+        self,
+        file_path: str | Path,
+        model: str = "htdemucs_6s",
+        output_dir: str | Path | None = None,
+    ):
+        """
+        Separate audio into individual stems using Demucs htdemucs_6s.
+
+        Stems returned: drums, bass, vocals, piano, guitar, other.
+        Heavy model inference runs in a background thread so this coroutine
+        stays non-blocking.
+
+        Args:
+            file_path:  Path to the source audio file.
+            model:      Demucs model name (default: ``"htdemucs_6s"``).
+            output_dir: Optional directory to write stem WAV files.
+
+        Returns:
+            :class:`samplemind.ai.separation.demucs_separator.SeparationResult`
+        """
+        from samplemind.ai.separation.demucs_separator import StemSeparator
+
+        separator = StemSeparator(model_name=model)
+        return await separator.separate(file_path, output_dir=output_dir)
+
+    # -------------------------------------------------------------------------
+    # MIDI Transcription (basic-pitch integration — P1-015)
+    # -------------------------------------------------------------------------
+
+    async def transcribe_midi(
+        self,
+        file_path: str | Path,
+        output_dir: str | Path | None = None,
+        onset_threshold: float = 0.5,
+        frame_threshold: float = 0.3,
+    ):
+        """
+        Transcribe pitched audio into MIDI notes using basic-pitch.
+
+        Runs inference in a background thread; returns a
+        :class:`samplemind.ai.midi.basic_pitch_converter.MidiConversionResult`
+        containing detected notes and an optional MIDI file path.
+
+        Args:
+            file_path:         Path to the audio file.
+            output_dir:        Directory to write the ``.mid`` file (optional).
+            onset_threshold:   Note onset sensitivity (0–1, default 0.5).
+            frame_threshold:   Per-frame activation threshold (0–1, default 0.3).
+
+        Returns:
+            :class:`samplemind.ai.midi.basic_pitch_converter.MidiConversionResult`
+        """
+        from samplemind.ai.midi.basic_pitch_converter import MidiConverter
+
+        converter = MidiConverter(
+            onset_threshold=onset_threshold,
+            frame_threshold=frame_threshold,
+        )
+        return await converter.convert(file_path, output_dir=output_dir)
+
 
 # FL Studio Plugin Integration Utilities
 class FLStudioIntegration:

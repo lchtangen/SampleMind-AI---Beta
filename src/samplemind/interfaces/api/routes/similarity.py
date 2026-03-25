@@ -177,7 +177,7 @@ async def batch_similarity_search(
 
         try:
             features = audio_engine.analyze_audio(temp_path)
-            similar = query_similar(features.to_dict(), n_results=limit)
+            similar = await query_similar(features.to_dict(), n_results=limit)
 
             results[file.filename] = [
                 {"file_id": item["id"], "similarity": item.get("similarity", 0.0)}

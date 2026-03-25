@@ -567,3 +567,237 @@ async def list_audio_files(
 
     logger.info(f"Retrieved {len(result)} audio files for page {page}")
     return result
+
+
+# ---------------------------------------------------------------------------
+# Stem Separation (P1-013) — demucs htdemucs_6s
+# ---------------------------------------------------------------------------
+
+
+class StemSeparationResponse(BaseModel):
+    """Response for stem separation endpoint."""
+
+    source_file: str
+    model: str
+    stems: List[str]
+    output_dir: Optional[str] = None
+    processing_time_s: float
+    mock: bool = False
+
+
+@router.post(
+    "/separate",
+    response_model=StemSeparationResponse,
+    summary="Separate audio into stems",
+    description="""
+    Separate a full audio track into up to 6 stems using Demucs htdemucs_6s.
+
+    Stems: drums, bass, vocals, piano, guitar, other.
+    Output WAV files are written to a temp directory when save_stems=true.
+    """,
+    tags=["Audio Processing"],
+)
+async def separate_audio_stems(
+    file: UploadFile = File(...),
+    model: str = Query("htdemucs_6s", description="Demucs model name"),
+    save_stems: bool = Query(False, description="Write stem WAV files to disk"),
+) -> StemSeparationResponse:
+    """Run Demucs 6-stem source separation on the uploaded file."""
+    import tempfile
+
+    from samplemind.core.engine.audio_engine import AudioEngine
+
+    temp_path = Path(f"/tmp/{file.filename}")
+    with open(temp_path, "wb") as f:
+        f.write(await file.read())
+
+    engine = AudioEngine()
+    output_dir = Path(tempfile.mkdtemp(prefix="sm_stems_")) if save_stems else None
+
+    try:
+        result = await engine.separate_stems(temp_path, model=model, output_dir=output_dir)
+        return StemSeparationResponse(
+            source_file=file.filename or "",
+            model=result.model_name,
+            stems=result.stem_names,
+            output_dir=str(result.output_dir) if result.output_dir else None,
+            processing_time_s=result.processing_time,
+            mock=result.mock,
+        )
+    finally:
+        if temp_path.exists():
+            temp_path.unlink()
+
+
+# ---------------------------------------------------------------------------
+# Effects Chain (P1-012) — pedalboard
+# ---------------------------------------------------------------------------
+
+
+class EffectsConfig(BaseModel):
+    """Pedalboard effects chain configuration."""
+
+    reverb_room_size: float = Field(0.3, ge=0.0, le=1.0)
+    reverb_wet_level: float = Field(0.2, ge=0.0, le=1.0)
+    compressor_threshold_db: float = Field(-20.0, le=0.0)
+    compressor_ratio: float = Field(2.0, ge=1.0, le=20.0)
+    eq_low_gain_db: float = Field(0.0, ge=-24.0, le=24.0)
+    eq_mid_gain_db: float = Field(0.0, ge=-24.0, le=24.0)
+    eq_high_gain_db: float = Field(0.0, ge=-24.0, le=24.0)
+    gain_db: float = Field(0.0, ge=-60.0, le=24.0)
+
+
+class EffectsResponse(BaseModel):
+    """Response for effects processing endpoint."""
+
+    source_file: str
+    output_file: str
+    effects_applied: List[str]
+    processing_time_s: float
+
+
+@router.post(
+    "/effects",
+    response_model=EffectsResponse,
+    summary="Apply pedalboard effects chain",
+    description="Apply reverb, compression, EQ, and gain to an uploaded audio file.",
+    tags=["Audio Processing"],
+)
+async def apply_audio_effects(
+    file: UploadFile = File(...),
+    config: EffectsConfig = Depends(),
+) -> EffectsResponse:
+    """Apply a configurable pedalboard effects chain to the uploaded audio."""
+    import time
+
+    try:
+        import pedalboard
+        import soundfile as sf
+        import numpy as np
+    except ImportError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"pedalboard not installed: {exc}",
+        )
+
+    temp_in = Path(f"/tmp/sm_fx_in_{file.filename}")
+    temp_out = Path(f"/tmp/sm_fx_out_{file.filename}")
+
+    with open(temp_in, "wb") as f:
+        f.write(await file.read())
+
+    start = time.time()
+    effects_applied: List[str] = []
+
+    try:
+        audio, sr = sf.read(str(temp_in))
+        if audio.ndim == 1:
+            audio = audio[:, np.newaxis]
+
+        board = pedalboard.Pedalboard()
+
+        if config.compressor_ratio > 1.0 or config.compressor_threshold_db < 0:
+            board.append(
+                pedalboard.Compressor(
+                    threshold_db=config.compressor_threshold_db,
+                    ratio=config.compressor_ratio,
+                )
+            )
+            effects_applied.append("Compressor")
+
+        # Simple EQ via HighShelfFilter + LowShelfFilter
+        if config.eq_low_gain_db != 0.0:
+            board.append(pedalboard.LowShelfFilter(gain_db=config.eq_low_gain_db, cutoff_frequency_hz=200))
+            effects_applied.append("EQ Low Shelf")
+        if config.eq_high_gain_db != 0.0:
+            board.append(pedalboard.HighShelfFilter(gain_db=config.eq_high_gain_db, cutoff_frequency_hz=8000))
+            effects_applied.append("EQ High Shelf")
+
+        if config.reverb_wet_level > 0.0:
+            board.append(
+                pedalboard.Reverb(
+                    room_size=config.reverb_room_size,
+                    wet_level=config.reverb_wet_level,
+                )
+            )
+            effects_applied.append("Reverb")
+
+        if config.gain_db != 0.0:
+            board.append(pedalboard.Gain(gain_db=config.gain_db))
+            effects_applied.append("Gain")
+
+        processed = board(audio.T, sr).T
+        sf.write(str(temp_out), processed, sr)
+
+        return EffectsResponse(
+            source_file=file.filename or "",
+            output_file=temp_out.name,
+            effects_applied=effects_applied,
+            processing_time_s=time.time() - start,
+        )
+    finally:
+        if temp_in.exists():
+            temp_in.unlink()
+
+
+# ---------------------------------------------------------------------------
+# MIDI Transcription (P1-015) — basic-pitch
+# ---------------------------------------------------------------------------
+
+
+class MidiTranscribeResponse(BaseModel):
+    """Response for MIDI transcription endpoint."""
+
+    source_file: str
+    note_count: int
+    pitch_range: List[int]
+    midi_path: Optional[str] = None
+    processing_time_s: float
+    summary: str
+    mock: bool = False
+
+
+@router.post(
+    "/transcribe-midi",
+    response_model=MidiTranscribeResponse,
+    summary="Transcribe audio to MIDI",
+    description="Detect pitched notes in audio and return MIDI note events using basic-pitch.",
+    tags=["Audio Processing"],
+)
+async def transcribe_audio_to_midi(
+    file: UploadFile = File(...),
+    onset_threshold: float = Query(0.5, ge=0.0, le=1.0),
+    frame_threshold: float = Query(0.3, ge=0.0, le=1.0),
+    save_midi: bool = Query(False, description="Write .mid file to disk"),
+) -> MidiTranscribeResponse:
+    """Transcribe pitched audio into MIDI note events via basic-pitch."""
+    import tempfile
+
+    from samplemind.core.engine.audio_engine import AudioEngine
+
+    temp_path = Path(f"/tmp/sm_midi_{file.filename}")
+    with open(temp_path, "wb") as f:
+        f.write(await file.read())
+
+    engine = AudioEngine()
+    output_dir = Path(tempfile.mkdtemp(prefix="sm_midi_")) if save_midi else None
+
+    try:
+        result = await engine.transcribe_midi(
+            temp_path,
+            output_dir=output_dir,
+            onset_threshold=onset_threshold,
+            frame_threshold=frame_threshold,
+        )
+        return MidiTranscribeResponse(
+            source_file=file.filename or "",
+            note_count=result.note_count,
+            pitch_range=list(result.pitch_range),
+            midi_path=str(result.midi_path) if result.midi_path else None,
+            processing_time_s=result.processing_time,
+            summary=result.to_summary(),
+            mock=result.mock,
+        )
+    finally:
+        if temp_path.exists():
+            temp_path.unlink()

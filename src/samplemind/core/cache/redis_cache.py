@@ -479,6 +479,114 @@ class RateLimitCache:
         return max(0, max_requests - int(current))
 
 
+class AIResponseCache:
+    """
+    Specialised cache for AI provider analysis results (P1-009, P1-024).
+
+    Cache key = SHA-256(file_hash + ":" + analysis_type + ":" + provider)
+    This guarantees the same audio + same analysis type + same provider always
+    hits the same bucket, while changes to any dimension bust the cache.
+
+    Falls back gracefully when Redis is unavailable so the rest of the system
+    keeps working without caching.
+
+    Usage::
+
+        cache = AIResponseCache()
+        await cache.connect()
+
+        key = cache.make_key(file_hash="abc123", analysis_type="comprehensive", provider="anthropic")
+        cached = await cache.get(key)
+        if cached is None:
+            result = await run_expensive_analysis(...)
+            await cache.set(key, result)
+    """
+
+    TTL_ANALYSIS = 86_400  # 24 h — analysis results rarely become stale
+    TTL_QUICK = 3_600      # 1 h  — quick queries
+
+    def __init__(
+        self,
+        redis_url: str = "redis://localhost:6379/0",
+        key_prefix: str = "samplemind:ai:",
+    ) -> None:
+        self._cache: Optional[RedisCache] = None
+        self._redis_url = redis_url
+        self._key_prefix = key_prefix
+        self._available = False
+
+    async def connect(self) -> None:
+        """Connect to Redis.  Silently marks cache unavailable on failure."""
+        try:
+            self._cache = RedisCache(
+                redis_url=self._redis_url,
+                default_ttl=self.TTL_ANALYSIS,
+                key_prefix=self._key_prefix,
+            )
+            await self._cache.connect()
+            self._available = True
+            logger.info("AIResponseCache: connected to Redis")
+        except Exception as exc:
+            logger.warning(f"AIResponseCache: Redis unavailable ({exc}) — caching disabled")
+            self._available = False
+
+    @staticmethod
+    def make_key(file_hash: str, analysis_type: str, provider: str) -> str:
+        """Return a stable SHA-256 cache key from the three cache dimensions."""
+        raw = f"{file_hash}:{analysis_type.lower()}:{provider.lower()}"
+        return hashlib.sha256(raw.encode()).hexdigest()
+
+    async def get(self, cache_key: str) -> Optional[Dict[str, Any]]:
+        """Return cached AI result or *None* on miss / unavailable."""
+        if not self._available or self._cache is None:
+            return None
+        return await self._cache.get(f"ai:{cache_key}")
+
+    async def set(
+        self,
+        cache_key: str,
+        response: Dict[str, Any],
+        ttl: int = TTL_ANALYSIS,
+    ) -> None:
+        """Store an AI result.  Errors are swallowed so callers never fail."""
+        if not self._available or self._cache is None:
+            return
+        try:
+            await self._cache.set(f"ai:{cache_key}", response, ttl=ttl)
+        except Exception as exc:
+            logger.warning(f"AIResponseCache.set failed: {exc}")
+
+    async def invalidate(self, cache_key: str) -> None:
+        """Remove a specific cached result."""
+        if not self._available or self._cache is None:
+            return
+        await self._cache.delete(f"ai:{cache_key}")
+
+    @property
+    def is_available(self) -> bool:
+        return self._available
+
+
+# Lazy singleton — call get_ai_cache() anywhere after connect_ai_cache() has run
+_ai_cache_instance: Optional[AIResponseCache] = None
+
+
+async def connect_ai_cache(redis_url: str = "redis://localhost:6379/0") -> AIResponseCache:
+    """Initialise and connect the AI response cache singleton."""
+    global _ai_cache_instance
+    _ai_cache_instance = AIResponseCache(redis_url=redis_url)
+    await _ai_cache_instance.connect()
+    return _ai_cache_instance
+
+
+def get_ai_cache() -> AIResponseCache:
+    """Return the connected AIResponseCache singleton (or a disconnected stub)."""
+    if _ai_cache_instance is None:
+        # Return an offline stub rather than crashing callers
+        return AIResponseCache()
+    return _ai_cache_instance
+
+
 # Example usage
 """
 from src.samplemind.core.config import settings
