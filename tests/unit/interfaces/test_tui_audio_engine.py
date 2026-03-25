@@ -149,8 +149,7 @@ class TestAudioCache:
 
         # Hit
         await cache.get(temp_audio_file)
-        # Miss
-        await cache.get(temp_audio_file)
+        # Manually inject a miss to simulate 1 hit : 1 miss
         cache.miss_count += 1
 
         hit_rate = cache.get_hit_rate()
@@ -165,10 +164,12 @@ class TestAudioCache:
         features2 = Mock(spec=AudioFeatures)
         features3 = Mock(spec=AudioFeatures)
 
-        # Add 3 items to cache with max size 2
-        await cache.set(temp_audio_file, features1)
-        await cache.set(temp_audio_file + "2", features2)
-        await cache.set(temp_audio_file + "3", features3)
+        # Add 3 items to cache with max size 2 using distinct keys
+        cache.cache["key1"] = (features1, 0.0)
+        cache.cache["key2"] = (features2, 0.0)
+        # Adding a 3rd item via set with a mocked hash should trigger eviction
+        with patch.object(AudioCache, "_hash_file", return_value="key3"):
+            await cache.set(temp_audio_file, features3)
 
         # Cache should have 2 items (oldest evicted)
         assert len(cache.cache) == 2
@@ -296,11 +297,11 @@ class TestTUIAudioEngine:
         def progress_callback(current: int, total: int):
             progress_updates.append((current, total))
 
-        # Create temporary audio files
+        # Create temporary audio files with unique content to avoid cache hash collisions
         temp_files = []
         for i in range(3):
             with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
-                f.write(b"fake audio data")
+                f.write(f"fake audio data {i}".encode())
                 temp_files.append(f.name)
 
         try:

@@ -74,7 +74,7 @@ async def find_similar_audio(
         features = audio_engine.analyze_audio(temp_path)
 
         # Query similar files from ChromaDB
-        similar_files = query_similar(features.to_dict(), n_results=limit)
+        similar_files = await query_similar(features.to_dict(), n_results=limit)
 
         # Filter by similarity threshold
         results = []
@@ -129,7 +129,7 @@ async def index_audio_file(
         features = audio_engine.analyze_audio(temp_path)
 
         # Add to ChromaDB
-        file_id = add_audio_to_collection(
+        file_id = await add_audio_to_collection(
             file_path=str(temp_path),
             features=features.to_dict(),
             metadata=metadata or {},
@@ -145,7 +145,7 @@ async def index_audio_file(
 @router.get("/stats")
 async def get_similarity_stats() -> dict:
     """Get statistics about indexed audio files"""
-    stats = get_collection_stats()
+    stats = await get_collection_stats()
     return {
         "total_indexed": stats.get("count", 0),
         "collection_name": stats.get("name", "audio_features"),

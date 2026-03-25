@@ -158,3 +158,4 @@ sm-control.local.sh
 .semantic_cache/
 .test_favorites/
 .test_sessions/
+.mypy_cache/
