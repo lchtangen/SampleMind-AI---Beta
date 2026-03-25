@@ -186,6 +186,41 @@ async def query_similar(
         return {"ids": [], "distances": [], "metadatas": []}
 
 
+async def add_audio_to_collection(
+    file_path: str,
+    features: Dict[str, Any],
+    metadata: Optional[Dict[str, Any]] = None,
+) -> str:
+    """Add an audio file to the ChromaDB collection by its features dict.
+
+    Derives a stable file_id from the path, converts the features dict into
+    a flat float embedding, and delegates to add_embedding.
+
+    Returns the generated file_id.
+    """
+    import hashlib
+    import json
+
+    file_id = hashlib.sha256(file_path.encode()).hexdigest()[:16]
+
+    # Build a reproducible float embedding from the features dict
+    embedding: List[float] = []
+    for value in features.values():
+        if isinstance(value, (int, float)):
+            embedding.append(float(value))
+        elif isinstance(value, list):
+            embedding.extend(float(v) for v in value if isinstance(v, (int, float)))
+
+    if not embedding:
+        embedding = [0.0]  # ChromaDB requires at least one dimension
+
+    combined_metadata = {"file_path": file_path}
+    combined_metadata.update(metadata or {})
+
+    await add_embedding(file_id, embedding, combined_metadata)
+    return file_id
+
+
 async def delete_embedding(file_id: str) -> bool:
     """Delete audio embedding from ChromaDB"""
     try:

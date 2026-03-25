@@ -14,8 +14,13 @@ from samplemind.core.processing.stem_separation import (
 
 
 def _check_demucs_available():
-    """Check if demucs is available"""
-    return importlib.util.find_spec("demucs") is not None
+    """Check if demucs and its required audio backend are available."""
+    if importlib.util.find_spec("demucs") is None:
+        return False
+    # demucs ≥4.1 requires torchcodec via torchaudio; verify the backend loads
+    if importlib.util.find_spec("torchcodec") is None:
+        return False
+    return True
 
 
 class TestStemSeparationEngine:
@@ -75,8 +80,9 @@ class TestStemSeparationEngine:
         # Should not raise
         StemSeparationEngine._assert_dependency()
 
+    @patch("samplemind.core.processing.stem_separation.shutil.which", return_value=None)
     @patch("samplemind.core.processing.stem_separation.importlib.util.find_spec")
-    def test_assert_dependency_missing(self, mock_find_spec):
+    def test_assert_dependency_missing(self, mock_find_spec, mock_which):
         """Test dependency check when demucs is missing"""
         mock_find_spec.return_value = None
 

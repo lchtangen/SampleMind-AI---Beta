@@ -170,7 +170,7 @@ class TestGoogleAIMusicProducerInit:
         """genai.configure() must NOT be called in v3.0"""
         with (
             patch("google.genai.Client") as mock_client_cls,
-            patch("google.genai.configure") as mock_configure,
+            patch("google.genai.configure", create=True) as mock_configure,
         ):
             mock_client_cls.return_value = MagicMock()
             GoogleAIMusicProducer(api_key="test")

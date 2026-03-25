@@ -2,9 +2,9 @@ name: Full CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   workflow_dispatch:
 
 env:
@@ -34,31 +34,36 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+          enable-cache: true
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.12"
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt -r requirements-test.txt -r requirements-db.txt
+        run: uv sync
 
       - name: Run database migrations
         run: |
-          # Wait for PostgreSQL to be ready
           timeout 30 bash -c 'until pg_isready -h localhost -p 5433 -U test_user -d test_samplemind; do sleep 1; done'
-          # Run migrations or initialization scripts here
 
       - name: Run tests
         env:
           TEST_DATABASE_URL: postgresql://test_user:test_password@localhost:5433/test_samplemind
         run: |
-          python -m pytest tests/ -v --cov=./ --cov-report=xml
+          uv run pytest tests/ -v -n auto --dist=loadfile \
+            --cov=src/samplemind --cov-report=xml --cov-report=term-missing \
+            --timeout=60
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
@@ -73,20 +78,20 @@ jobs:
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to Docker Hub
         if: github.ref == 'refs/heads/main'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push API image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
@@ -105,7 +110,7 @@ jobs:
     environment: staging
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
@@ -114,12 +119,8 @@ jobs:
           known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
 
       - name: Deploy to Staging Server
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
         run: |
-          # Add your deployment script here
           echo "Deploying to staging..."
-          # Example: ssh user@staging-server "cd /app && git pull && docker-compose up -d"
 
   deploy-production:
     name: Deploy to Production
@@ -129,7 +130,7 @@ jobs:
     environment: production
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
@@ -138,12 +139,8 @@ jobs:
           known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
 
       - name: Deploy to Production
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
         run: |
-          # Add your production deployment script here
           echo "Deploying to production..."
-          # Example: ssh user@production-server "cd /app && git pull && docker-compose -f docker-compose.prod.yml up -d --build"
 
   notify:
     name: Notify Status

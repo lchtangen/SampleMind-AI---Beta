@@ -121,6 +121,7 @@ class ForensicsAnalyzer:
     """Analyze audio for processing artifacts and quality issues"""
 
     def __init__(self, sample_rate: int = 44100) -> None:
+        _ensure_deps()
         self.sample_rate = sample_rate
 
     async def analyze(self, audio_path: Path) -> ForensicsResult:

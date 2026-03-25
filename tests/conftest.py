@@ -18,11 +18,6 @@ from pathlib import Path
 from typing import Dict, Any, List
 from unittest.mock import AsyncMock, MagicMock
 
-# Add project root to Python path so `src` package resolves
-sys.path.insert(0, str(Path(__file__).parent.parent))
-# Also add the modern src directory to prefer latest modules for `samplemind` imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-
 from samplemind.core.engine.audio_engine import (
     AudioEngine,
     AnalysisLevel,
@@ -248,7 +243,7 @@ def real_openai_producer():
 # ============================================================================
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def test_mongodb():
     """Provide test MongoDB connection"""
     # This would connect to test database
@@ -270,7 +265,7 @@ async def test_mongodb():
     return mock_db
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def test_redis():
     """Provide test Redis connection"""
     mock_redis = MagicMock()
@@ -283,7 +278,7 @@ async def test_redis():
     return mock_redis
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def test_chromadb():
     """Provide test ChromaDB connection"""
     mock_chroma = MagicMock()

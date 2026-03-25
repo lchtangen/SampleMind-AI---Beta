@@ -296,7 +296,15 @@ class AIClassifier:
         if energy < 0.01:  # Too quiet
             return 0.3
 
-        return 0.9
+        score = 0.9
+        if features.sample_rate and features.sample_rate < 22050:
+            score -= 0.3
+        if features.bit_depth and features.bit_depth < 16:
+            score -= 0.3
+        bw = self._get_feature_mean(features.spectral_bandwidth)
+        if bw is not None and bw < 1000:
+            score -= 0.2
+        return max(0.0, score)
 
     def _categorize_tempo(self, features: AudioFeatures) -> str:
         bpm = features.tempo
@@ -338,14 +346,16 @@ class AIClassifier:
 
     def _get_cache_key(self, features: AudioFeatures) -> str:
         """Generate a cache key from features."""
-        # Simple hash of duration + tempo + random logic for now
-        # Here we assume features come from a file and might have path.
-        if hasattr(features, "path") and features.path:
+        if hasattr(features, "path") and getattr(features, "path", None):
             return hashlib.md5(str(features.path).encode()).hexdigest()
-        return hashlib.md5(str(features.duration).encode()).hexdigest()
+        if features.file_hash:
+            return hashlib.md5(features.file_hash.encode()).hexdigest()
+        return hashlib.md5(
+            f"{features.duration}:{features.tempo}:{features.sample_rate}".encode()
+        ).hexdigest()
 
     def _cache_result(self, key: str, result: ClassificationResult) -> None:
-        if len(self._cache) > self.cache_size:
+        if len(self._cache) >= self.cache_size:
             self._cache.pop(next(iter(self._cache)))
         self._cache[key] = result
 

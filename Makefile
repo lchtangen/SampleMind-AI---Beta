@@ -1,131 +1,132 @@
 # SampleMind AI — Development Automation
-.PHONY: help setup dev test lint format typecheck security docs clean deploy
+.PHONY: help setup setup-dev install install-dev sync dev test lint format typecheck \
+        security quality clean build setup-db install-models upgrade \
+        test-unit test-integration test-cov test-fast polish polish-fix
 
-# Python virtual environment
-VENV = .venv
-PYTHON = $(VENV)/bin/python
-PIP = $(VENV)/bin/pip
+UV = uv
+PYTHON = uv run python
+PYTEST = uv run pytest
+RUFF = uv run ruff
+BLACK = uv run black
+MYPY = uv run mypy
 
 help: ## Show this help message
-	@echo "SampleMind AI — Development Commands"
-	@echo "====================================="
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
+		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-setup: ## Setup development environment
-	@echo "Setting up SampleMind AI development environment..."
-	python3 -m venv $(VENV)
-	$(PIP) install --upgrade pip
-	$(PIP) install poetry
-	$(VENV)/bin/poetry install
-	@echo "Development environment ready!"
+# ── Environment ──────────────────────────────────────────────────────────────
 
-setup-dev: setup install-models setup-db ## Complete development setup
+setup: ## Create venv and install all dependencies (including dev)
+	$(UV) sync
+	@echo "✅ Environment ready. Use 'uv run <cmd>' or activate .venv."
 
-install-models: ## Download and install AI models
+setup-dev: setup install-models setup-db ## Full dev setup (deps + models + databases)
+
+sync: ## Sync dependencies from lockfile (fast, no resolution)
+	$(UV) sync
+
+install: ## Install production dependencies only
+	$(UV) sync --no-dev
+
+install-dev: ## Install dev dependencies
+	$(UV) sync
+
+upgrade: ## Upgrade all dependencies and regenerate lockfile
+	$(UV) lock --upgrade
+	$(UV) sync
+	@echo "✅ Dependencies upgraded. Run 'make test' to verify."
+
+install-models: ## Download Ollama AI models
 	@echo "🤖 Installing AI models..."
 	ollama pull phi3:mini
 	ollama pull qwen2.5:7b-instruct
 	ollama pull gemma2:2b
 	@echo "✅ AI models installed!"
 
-setup-db: ## Setup development databases
-	@echo "🗄️ Setting up databases..."
+setup-db: ## Start development databases via Docker
 	docker-compose up -d mongodb redis chromadb
 	@echo "✅ Databases ready!"
 
-dev: ## Start development server
-	@echo "Starting SampleMind AI development server..."
-	$(PYTHON) -m uvicorn src.samplemind.server.main:app --reload --host 0.0.0.0 --port 8000
+# ── Development ───────────────────────────────────────────────────────────────
 
-upgrade-deps: ## Upgrade all dependencies to v3.0 targets
-	$(VENV)/bin/poetry update
-	@echo "Dependencies upgraded. Run 'make test' to verify."
+dev: ## Start FastAPI development server
+	$(UV) run uvicorn samplemind.server.main:app --reload --host 0.0.0.0 --port 8000
 
-install-dev: ## Install dev dependencies
-	$(VENV)/bin/poetry install --with dev
-
-dev-full: ## Start full development stack
+dev-full: ## Start full stack (databases + API server)
 	docker-compose up -d
-	@echo "🌟 Full development stack running at http://localhost:8000"
+	$(UV) run uvicorn samplemind.server.main:app --reload --host 0.0.0.0 --port 8000
+
+cli: ## Run the CLI
+	$(UV) run python main.py
+
+tui: ## Run the TUI
+	$(UV) run python -m samplemind.interfaces.tui.main
+
+# ── Testing ───────────────────────────────────────────────────────────────────
 
 test: ## Run all tests
-	@echo "🧪 Running tests..."
-	$(PYTHON) -m pytest tests/ -v --cov=src --cov-report=term-missing
+	$(PYTEST) tests/ -v
 
-lint: ## Run linting
-	@echo "🔍 Running linters..."
-	$(PYTHON) -m ruff check .
-	$(PYTHON) -m mypy src/
+test-unit: ## Run unit tests only
+	$(PYTEST) tests/unit/ -v
 
-format: ## Format code
-	@echo "🎨 Formatting code..."
-	$(PYTHON) -m black .
-	$(PYTHON) -m isort .
+test-integration: ## Run integration tests only
+	$(PYTEST) tests/integration/ -v
 
-security: ## Run security checks
-	@echo "🛡️ Running security scans..."
-	$(PYTHON) -m bandit -r src/
-	$(PYTHON) -m safety check
+test-fast: ## Run fast tests (skip slow)
+	$(PYTEST) tests/ -v -m "not slow"
+
+test-cov: ## Run tests with HTML coverage report (parallel)
+	$(PYTEST) tests/ -n auto --dist=loadfile --cov=src/samplemind --cov-report=html --cov-report=term-missing
+	@echo "✅ Coverage report: htmlcov/index.html"
+
+test-parallel: ## Run unit tests in parallel with pytest-xdist (fastest)
+	$(PYTEST) tests/unit/ -n auto --dist=loadfile --no-cov -q
+
+test-smoke: ## Smoke test: unit tests, fail-fast, no coverage
+	$(PYTEST) tests/unit/ -x --no-cov -q --timeout=30
+
+test-watch: ## Auto-rerun unit tests on file changes (dev inner loop)
+	$(UV) run ptw tests/unit/ src/ -- -x --tb=short --no-cov -q
+
+# ── Code Quality ──────────────────────────────────────────────────────────────
+
+lint: ## Run ruff + mypy
+	$(RUFF) check .
+	$(MYPY) src/
+
+format: ## Format code with black + isort
+	$(BLACK) .
+	$(UV) run isort .
+
+security: ## Run bandit security scan
+	$(UV) run bandit -r src/ -ll
 
 quality: lint security ## Run all quality checks
+
+polish: ## Analyse code quality
+	$(PYTHON) scripts/polish_codebase.py
+
+polish-fix: ## Auto-fix code quality issues
+	$(BLACK) src/ tests/
+	$(UV) run isort src/ tests/
+	$(RUFF) check --fix src/ tests/
+
+typecheck: ## Run mypy type checking
+	$(MYPY) src/
+
+# ── Build & Deploy ────────────────────────────────────────────────────────────
 
 build: ## Build Docker image
 	docker build -t samplemind-ai:latest .
 
-clean: ## Clean temporary files
-	@echo "🧹 Cleaning temporary files..."
+build-pkg: ## Build Python package
+	$(UV) build
+
+clean: ## Remove cache and build artifacts
 	find . -type f -name "*.pyc" -delete
 	find . -type d -name "__pycache__" -delete
 	find . -type d -name ".pytest_cache" -delete
-	rm -rf dist/ build/ *.egg-info/
-
-doctor: ## Check system health
-	$(PYTHON) -m src.core.utils.doctor
-
-# ============================================================================
-# BETA RELEASE QUALITY TARGETS
-# ============================================================================
-
-polish: ## Run comprehensive code polish analysis
-	@echo "✨ Analyzing code quality for beta release..."
-	$(PYTHON) scripts/polish_codebase.py
-
-polish-fix: ## Auto-fix code quality issues
-	@echo "🔧 Auto-fixing code quality issues..."
-	$(PYTHON) -m black src/ tests/
-	$(PYTHON) -m isort src/ tests/
-	$(PYTHON) -m ruff check --fix src/ tests/
-
-test-cov: ## Run tests with detailed coverage report
-	@echo "📊 Running tests with coverage analysis..."
-	$(PYTHON) -m pytest tests/ -v \
-		--cov=src \
-		--cov-report=html \
-		--cov-report=term-missing \
-		--cov-report=json
-	@echo "✅ Coverage report generated in htmlcov/"
-
-test-unit: ## Run only unit tests
-	@echo "🧪 Running unit tests..."
-	$(PYTHON) -m pytest tests/unit/ -v
-
-test-integration: ## Run only integration tests
-	@echo "🔗 Running integration tests..."
-	$(PYTHON) -m pytest tests/integration/ -v
-
-test-fast: ## Run fast tests only
-	@echo "⚡ Running fast tests..."
-	$(PYTHON) -m pytest tests/ -v -m "not slow"
-
-typecheck: ## Run type checking with mypy
-	@echo "🔍 Running type checker..."
-	$(PYTHON) -m mypy src/ --show-error-codes
-
-validate: polish test-cov typecheck security ## Full validation for beta release
-	@echo "✅ Full validation complete!"
-
-pre-commit: format lint test-fast ## Run pre-commit checks
-	@echo "✅ Pre-commit checks passed!"
-
-pre-release: validate ## Prepare for beta release
-	@echo "🚀 Beta release preparation complete!"
+	find . -type d -name ".ruff_cache" -delete
+	find . -type d -name "*.egg-info" -delete
+	rm -rf dist/ build/ htmlcov/ .coverage

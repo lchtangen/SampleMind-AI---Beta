@@ -131,6 +131,7 @@ class TestAIClassifier:
             rms_energy=[0.30] * 10,
             spectral_centroid=[2000.0] * 10,
             tempo=140.0,
+            mode="minor",
         )
 
         mood, confidence = classifier._classify_mood(features)
@@ -208,7 +209,7 @@ class TestAIClassifier:
             duration=2.0,
             sample_rate=44100,
             channels=2,
-            tempo=150.0,  # Fast tempo
+            tempo=130.0,  # Fast tempo, techno range
             spectral_centroid=[2500.0] * 10,
             rms_energy=[0.20] * 10,
             bit_depth=24,

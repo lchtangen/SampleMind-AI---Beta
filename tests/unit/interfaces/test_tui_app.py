@@ -70,13 +70,13 @@ class TestTUIApp:
         """Test that analyze screen has keyboard bindings"""
         screen = AnalyzeScreen()
         assert screen.BINDINGS is not None
-        assert "escape" in [binding[0] for binding in screen.BINDINGS]
+        assert "escape" in [binding.key for binding in screen.BINDINGS]
 
     def test_batch_screen_bindings(self):
         """Test that batch screen has keyboard bindings"""
         screen = BatchScreen()
         assert screen.BINDINGS is not None
-        assert "escape" in [binding[0] for binding in screen.BINDINGS]
+        assert "escape" in [binding.key for binding in screen.BINDINGS]
 
 
 class TestTUIMenuWidget:

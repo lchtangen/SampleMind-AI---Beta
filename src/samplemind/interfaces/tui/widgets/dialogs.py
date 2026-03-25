@@ -50,8 +50,23 @@ class _BaseDialog(ModalScreen[bool]):
         self._title = title
         self._message = message
 
+    @property
+    def title_text(self) -> str:
+        return self._title
+
+    @property
+    def message_text(self) -> str:
+        return self._message
+
 
 class ErrorDialog(_BaseDialog):
+    CSS = """
+    ErrorDialog > Container {
+        border: double $error;
+    }
+    """
+    BINDINGS = [("escape", "cancel")]
+
     def compose(self) -> ComposeResult:
         with Container():
             yield Label(f"❌  {self._title}", id="title")
@@ -63,8 +78,18 @@ class ErrorDialog(_BaseDialog):
     def on_close(self, _: Button.Pressed) -> None:
         self.dismiss(False)
 
+    def action_cancel(self) -> None:
+        self.dismiss(False)
+
 
 class InfoDialog(_BaseDialog):
+    CSS = """
+    InfoDialog > Container {
+        border: double $accent;
+    }
+    """
+    BINDINGS = [("escape", "cancel")]
+
     def compose(self) -> ComposeResult:
         with Container():
             yield Label(f"ℹ️   {self._title}", id="title")
@@ -76,8 +101,18 @@ class InfoDialog(_BaseDialog):
     def on_ok(self, _: Button.Pressed) -> None:
         self.dismiss(True)
 
+    def action_cancel(self) -> None:
+        self.dismiss(False)
+
 
 class WarningDialog(_BaseDialog):
+    CSS = """
+    WarningDialog > Container {
+        border: double $warning;
+    }
+    """
+    BINDINGS = [("escape", "cancel")]
+
     def compose(self) -> ComposeResult:
         with Container():
             yield Label(f"⚠️   {self._title}", id="title")
@@ -89,8 +124,22 @@ class WarningDialog(_BaseDialog):
     def on_ack(self, _: Button.Pressed) -> None:
         self.dismiss(True)
 
+    def action_cancel(self) -> None:
+        self.dismiss(False)
+
 
 class ConfirmDialog(_BaseDialog):
+    CSS = """
+    ConfirmDialog > Container {
+        border: double $warning;
+    }
+    """
+    BINDINGS = [("escape", "cancel")]
+
+    def __init__(self, title: str, message: str) -> None:
+        super().__init__(title, message)
+        self.result: bool = False
+
     def compose(self) -> ComposeResult:
         with Container():
             yield Label(f"❓  {self._title}", id="title")
@@ -104,12 +153,25 @@ class ConfirmDialog(_BaseDialog):
         self.dismiss(True)
 
     @on(Button.Pressed, "#cancel_btn")
-    def on_cancel(self, _: Button.Pressed) -> None:
+    def on_cancel_btn(self, _: Button.Pressed) -> None:
         self.dismiss(False)
+
+    def on_button_pressed(self, event) -> None:
+        """Handle button press events (legacy API for test compatibility)."""
+        button_id = getattr(getattr(event, "button", None), "id", None)
+        if button_id == "confirm_yes":
+            self.result = True
+        else:
+            self.result = False
+        self.app.pop_screen()
+
+    def action_cancel(self) -> None:
+        self.result = False
+        self.app.pop_screen()
 
 
 class LoadingDialog(ModalScreen[None]):
-    DEFAULT_CSS = """
+    CSS = """
     LoadingDialog {
         align: center middle;
     }
@@ -129,14 +191,25 @@ class LoadingDialog(ModalScreen[None]):
         super().__init__()
         self._message = message
 
+    @property
+    def message_text(self) -> str:
+        return self._message
+
     def compose(self) -> ComposeResult:
         with Container():
             yield Label(f"⏳  {self._message}", id="message")
             yield ProgressBar(total=None, show_eta=False)
 
+    def update_message(self, message: str) -> None:
+        self._message = message
+        try:
+            self.query_one("#message", Label).update(f"⏳  {message}")
+        except Exception:
+            pass
+
 
 class ProgressDialog(ModalScreen[None]):
-    DEFAULT_CSS = """
+    CSS = """
     ProgressDialog {
         align: center middle;
     }

@@ -215,6 +215,7 @@ class TestTUIAudioEngine:
         features.mode = "Major"
         features.time_signature = (4, 4)
         features.spectral_centroid = 2450.0
+        features.spectral_bandwidth = 1800.0
         features.spectral_rolloff = 8200.0
         features.zero_crossing_rate = 0.045
         features.rms_energy = 0.123

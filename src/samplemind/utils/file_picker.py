@@ -448,7 +448,7 @@ class CrossPlatformFilePicker:
                     )
                 elif choice == "q" or choice == "quit":
                     return None
-            except (KeyboardInterrupt, EOFError):
+            except (KeyboardInterrupt, EOFError, OSError):
                 print("\n❌ Cancelled")
                 return None
 
@@ -564,7 +564,7 @@ class CrossPlatformFilePicker:
                 path = Path(path_str).expanduser()
                 if path.exists() and path.is_file():
                     return path
-        except (KeyboardInterrupt, EOFError):
+        except (KeyboardInterrupt, EOFError, OSError):
             pass
         return None
 
@@ -576,7 +576,7 @@ class CrossPlatformFilePicker:
                 path = Path(path_str).expanduser()
                 if path.exists() and path.is_dir():
                     return path
-        except (KeyboardInterrupt, EOFError):
+        except (KeyboardInterrupt, EOFError, OSError):
             pass
         return None
 

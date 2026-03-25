@@ -1,8 +1,11 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
+
+# Install UV from official image
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
 
-# Install system dependencies
+# System dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
@@ -11,17 +14,12 @@ RUN apt-get update && apt-get install -y \
     portaudio19-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry
-RUN pip install poetry
+# Install Python dependencies first (better layer caching)
+COPY pyproject.toml uv.lock ./
 
-# Copy dependency files
-COPY pyproject.toml ./
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 
-# Install dependencies
-ENV POETRY_CACHE_DIR=/root/.cache/pypoetry
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR \
-    poetry config virtualenvs.create false \
-    && poetry install --without dev --no-root
+RUN uv sync --no-dev --frozen
 
 # Copy application code
 COPY src/ ./src/
@@ -31,7 +29,7 @@ COPY config/ ./config/
 RUN useradd -m -u 1000 samplemind
 USER samplemind
 
-ENV PYTHONPATH="${PYTHONPATH}:/app/src"
+ENV PATH="/app/.venv/bin:$PATH"
 
 # Expose port
 EXPOSE 8000

@@ -60,6 +60,9 @@ async def ai_analyze(
             # (API does this automatically, CLI might need explicit call)
             if hasattr(features, 'save'):
                 features.save(file)
+    except Exception as e:
+        console.print(f"[red]Error during AI analysis: {e}[/red]")
+        raise typer.Exit(1)
 
 
 @app.command("search")
@@ -123,23 +126,6 @@ async def ai_search(
         )
 
     console.print(table)
-
-
-            result = {
-                "file": str(file),
-                "duration": features.duration,
-                "tempo": features.tempo,
-                "key": features.key,
-                "mode": features.mode,
-                "ai_analysis": "Comprehensive AI analysis complete",
-                "provider": "Gemini 3 Flash"
-            }
-
-            utils.output_result(result, format, "AI Analysis Results", output)
-
-    except Exception as e:
-        utils.handle_error(e, "ai:analyze")
-        raise typer.Exit(1)
 
 
 @app.command("classify")
