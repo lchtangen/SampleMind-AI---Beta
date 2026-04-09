@@ -1,10 +1,10 @@
 """WebSocket endpoints for real-time updates"""
 
-from typing import Dict
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+import asyncio
 import json
 import logging
-import asyncio
+
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ class ConnectionManager:
     """
 
     def __init__(self) -> None:
-        self.active_connections: Dict[str, WebSocket] = {}
+        self.active_connections: dict[str, WebSocket] = {}
 
     async def connect(self, client_id: str, websocket: WebSocket):
         await websocket.accept()
@@ -130,7 +130,9 @@ async def agent_pipeline_websocket(websocket: WebSocket, session_id: str):
         try:
             payload = json.loads(raw)
         except json.JSONDecodeError:
-            await websocket.send_json({"type": "error", "message": "Invalid JSON payload"})
+            await websocket.send_json(
+                {"type": "error", "message": "Invalid JSON payload"}
+            )
             return
 
         file_path = payload.get("file_path", "")
@@ -190,3 +192,90 @@ async def agent_pipeline_websocket(websocket: WebSocket, session_id: str):
         logger.info("Agent WebSocket client %s disconnected", session_id)
     finally:
         manager.disconnect(session_id)
+
+
+# ---------------------------------------------------------------------------
+# Phase 16: Redis-backed Celery agent progress stream
+# ---------------------------------------------------------------------------
+
+import os  # noqa: E402
+
+
+def _get_redis_sync():  # type: ignore[return]
+    """Return a redis.Redis client or None if unavailable."""
+    try:
+        import redis  # type: ignore
+
+        url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+        return redis.from_url(url, decode_responses=True)
+    except Exception:
+        return None
+
+
+@router.websocket("/ws/agent/{task_id}")
+async def agent_task_progress(websocket: WebSocket, task_id: str):
+    """
+    Stream Celery agent-task progress events over WebSocket.
+
+    Polls the Redis list ``agent_progress:{task_id}`` every 500 ms and
+    forwards every new JSON event to the client.
+
+    Event schema::
+
+        {"stage": "tagging", "pct": 40, "message": "Running CLAP...", "ts": 1234567890.0}
+
+    The connection is closed automatically when ``pct == 100`` or
+    ``stage == "error"``.
+
+    Usage::
+
+        wscat -c ws://localhost:8000/api/v1/ws/agent/<task_id>
+    """
+    await websocket.accept()
+    logger.info("Agent progress stream opened for task %s", task_id)
+
+    redis_key = f"agent_progress:{task_id}"
+    r = await asyncio.get_event_loop().run_in_executor(None, _get_redis_sync)
+
+    # Index of the next event to read from the Redis list
+    cursor = 0
+
+    try:
+        while True:
+            if r is not None:
+                try:
+                    # Fetch all events from cursor onwards (non-blocking)
+                    raw_events = await asyncio.get_event_loop().run_in_executor(
+                        None, lambda: r.lrange(redis_key, cursor, -1)
+                    )
+                except Exception as redis_exc:
+                    logger.debug("Redis lrange failed: %s", redis_exc)
+                    raw_events = []
+            else:
+                raw_events = []
+
+            for raw in raw_events:
+                try:
+                    event = json.loads(raw)
+                except json.JSONDecodeError:
+                    event = {"stage": "unknown", "pct": 0, "message": raw}
+
+                await websocket.send_json(event)
+                cursor += 1
+
+                pct = event.get("pct", 0)
+                stage = event.get("stage", "")
+                if pct >= 100 or stage == "error":
+                    logger.info("Agent task %s finished (stage=%s pct=%s)", task_id, stage, pct)
+                    return
+
+            await asyncio.sleep(0.5)
+
+    except WebSocketDisconnect:
+        logger.info("Agent progress client disconnected for task %s", task_id)
+    except Exception as exc:
+        logger.error("Agent progress stream error for task %s: %s", task_id, exc)
+        try:
+            await websocket.send_json({"stage": "error", "pct": 0, "message": str(exc)})
+        except Exception:
+            pass
