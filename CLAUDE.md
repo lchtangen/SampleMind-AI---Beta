@@ -1,9 +1,9 @@
-# SampleMind AI — Beta (Phase 15 Active)
+# SampleMind AI — Beta (Phase 16 Active)
 AI-powered music production platform. Python 3.12. FastMCP. Multi-provider AI.
 
 ## Current Phase
-Phase 15 — v3.0 Migration: Textual TUI ^0.87 + Next.js 15 web UI.
-Track: docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md
+Phase 16 — Web UI completions + Agent pipeline + Production hardening.
+Track: docs/v3/CHECKLIST.md
 
 ## Key Commands
 - Start:   python main.py
@@ -19,9 +19,10 @@ Track: docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md
 
 ## Critical Files
 - src/samplemind/       — main package
-- docs/02-ROADMAPS/     — current roadmaps and status
+- docs/v3/              — current roadmaps and status (CHECKLIST.md, STATUS.md)
 - tests/unit/           — 120+ unit tests
-- plugins/ableton/      — Ableton Live plugin
+- apps/web/             — Next.js 15 web UI (108 TS files, largely built)
+- app/                  — Tauri v2 + Svelte 5 desktop scaffold
 
 ## Setup
 python3 -m venv .venv && source .venv/bin/activate && pip install -e .[dev]

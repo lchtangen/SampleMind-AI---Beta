@@ -1,260 +1,122 @@
-# 🎯 SampleMind AI — Current Status
+# SampleMind AI — Current Status
 
-**Last Updated:** 2026-03-07 (Session 3 — P0+P1 migration: all AI providers, deps, version strings, tests)
-**Version:** `2.1.0-beta` → migrating to `3.0.0`
-**Active Phase:** Phase 15 — v3.0 Migration & Next-Level Upgrade
-**Overall Progress:** Phase 14 Complete ✅ | Phase 15 In Progress 🚀
+**Last Updated:** 2026-04-09 (Phase 16 — Web UI + Agent Pipeline + Production Hardening)
+**Version:** 0.3.0
+**Active Phase:** Phase 16
+**Overall Progress:** ~67% complete (~75/112 checklist items)
 
 ---
 
-## 📊 Phase Completion Summary
+## Phase Completion Summary
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 1–10 | Foundation, CLI, Audio Engine, DB, Auth, TUI | ✅ Complete |
-| 11 | Performance Optimization + CLI Polish | ✅ Complete |
-| 12 | UX Polish, Accessibility, Performance Tuning | ✅ Complete |
-| 13 | Effects CLI, DAW Plugins (FL Studio/Ableton), VST3 | ✅ Complete |
-| 14 | Analytics (PostHog), GitHub Setup, Community Launch | ✅ Complete |
-| **15** | **v3.0 Migration — AI Models, Deps, Architecture Upgrade** | 🚀 **Started 2026-03-07** |
+| 1–10 | Foundation, CLI, Audio Engine, DB, Auth, TUI | Complete |
+| 11 | Performance Optimization + CLI Polish | Complete |
+| 12 | UX Polish, Accessibility, Performance Tuning | Complete |
+| 13 | Effects CLI, DAW Plugins (FL Studio/Ableton), VST3 | Complete |
+| 14 | Analytics (PostHog), GitHub Setup, Community Launch | Complete |
+| 15 | v3.0 Migration — FAISS Search, LiteLLM, Curation, Cloud, Analytics, Marketplace, AI Generation, Tauri | Complete |
+| **16** | **Web UI completions + Agent pipeline + Production hardening** | **Active** |
 
 ---
 
-## ✅ What's Fully Working (as of Phase 14)
+## What Is Fully Working (as of Phase 15 complete)
 
-### Core Audio Engine
-- LibROSA-based analysis: BPM, key, MFCC, chroma, spectral features
-- Advanced audio loader with multi-format support (WAV, MP3, FLAC, OGG, AAC)
-- Batch processing with progress tracking
-- Multi-level caching (memory + disk + ChromaDB vector)
-- Analysis levels: BASIC, STANDARD, DETAILED, PROFESSIONAL
-- Similarity search via ChromaDB embeddings
+### FastAPI Backend (12 registered routers)
+- Health, Auth, Settings, Cloud Sync, Tasks, Audio, AI, Search, Batch, Collections, WebSocket, Billing
+- Analytics: BPM histogram, key heatmap, genre breakdown, energy pie, summary
+- Marketplace: Stripe Connect publish + purchase + R2 CDN delivery
+- FAISS semantic search: GET /api/v1/ai/faiss + POST /api/v1/ai/faiss/build
+- Curation: POST /curate/playlist, GET /curate/gaps, POST /curate/energy-arc
 
-### CLI Interface (`src/samplemind/interfaces/cli/menu.py`)
-- Full interactive menu with Rich/Typer (~2255 lines)
-- All major commands: analyze, batch, search, effects, library, compare
-- Effects chain CLI (Phase 13) — reverb, EQ, compression, saturation
-- Shell completions: bash, zsh, fish
-- Plugin management via `plugins/installer.py`
-- Cross-platform: Linux, macOS, Windows
+### Semantic Search
+- FAISS IndexFlatIP with 512-dim CLAP embeddings (laion/clap-htsat-unfused)
+- MFCC fallback when CLAP unavailable
+- Persistence: ~/.samplemind/faiss/index.bin + metadata.json
+- CLI: commands/search.py (index_app + search_app) — NOT YET WIRED in menu.py
 
-### TUI Interface (`src/samplemind/interfaces/tui/`)
-- Textual-based, **13 implemented screens** (verified on disk)
-- Screens: Main, Analyze, Batch, Results, Favorites, Settings, Comparison, Search, Tagging, Performance, Library, Effects Chain (`chain_screen.py`), Classification (`classification_screen.py`)
-- Integrations: FL Studio, audio playback, AI coach, performance monitor, library browser, plugin manager, keyboard shortcuts, session management
+### AI Curation
+- PlaylistGenerator: energy arc ordering (build/drop/plateau/tension), Camelot Wheel harmonic scoring
+- GapAnalyzer: statistical library coverage analysis + LiteLLM suggestions
 
-### DAW Plugins
-- **FL Studio:** Python wrapper + C++ native plugin (`plugins/fl_studio/cpp/`)
-- **Ableton Live:** REST backend + JS bridge (`plugins/ableton/`)
-- **Plugin Installer:** Cross-DAW setup (`plugins/installer.py`, `scripts/install-plugins.sh`)
-- **VST3 Bridge:** C++ wrapper with Python embedding
+### Cloud + Storage
+- Supabase Auth: email/password + magic link + JWT verify + token refresh
+- Cloudflare R2: boto3 S3-compatible, presigned URLs, CDN support
+- Supabase Realtime: multi-device library sync (last-write-wins)
+- Tortoise ORM: TortoiseUser/Library/Sample/AnalysisResult/Pack/Playlist models
 
-### API Layer (FastAPI)
-- Router layer: `src/samplemind/interfaces/api/`
-- Server entrypoint: `src/samplemind/server/`
-- **Note:** `src/samplemind/api/` does NOT exist — docs that reference this path are wrong
-- JWT authentication, WebSocket support, auto-generated docs at `/api/docs`
-- MongoDB (Motor ^3.3.1 / Beanie), Redis, ChromaDB integration
+### AI Providers (LiteLLM Router)
+- Primary: claude-sonnet-4-6
+- Fast: gemini-2.5-flash
+- Agents: gpt-4o
+- Offline: ollama/qwen2.5-coder:7b
 
-### Analytics & Monitoring (Phase 14)
-- PostHog analytics integration
-- GitHub Actions CI/CD pipeline
-- Performance metrics dashboard
-- Cross-platform verification suite
+### Classification & ML
+- Ensemble: SVM + XGBoost + KNN soft-voting (confidence < 0.60 -> active learning queue)
+- Multi-label genre: 400+ taxonomy
+- Mood: Russell circumplex (dark/euphoric/aggressive/chill/melancholic/epic)
+- Instrument: 128-class GM
 
-### Documentation
-- 60+ documentation files across 5 organized directories
-- CLI reference (62K — most comprehensive)
-- API documentation (24K)
-- Phase completion reports (11–14)
-- Business strategy docs
-- Technical implementation guides
+### AI Generation
+- MusicGen: Meta AudioCraft text-to-audio (mock WAV fallback when GPU unavailable)
+- Style Transfer: demucs stem separation + librosa time-stretch/pitch-shift
 
----
+### Agents (LangGraph)
+- build_graph(): StateGraph with 6 nodes (router -> analysis -> tagging -> mixing -> recommendations -> aggregator)
+- analysis_agent.py, tagging_agent.py, mixing_agent.py, recommendation_agent.py, pack_builder_agent.py
 
-## 🚀 Phase 15 — v3.0 Migration (Started 2026-03-07)
+### Web UI (apps/web/ — 108 TS files)
+- Pages built: dashboard, library, upload, login, settings, gallery, analysis/[id], collections
+- Components: AIChatWindow, AdvancedWaveform, AudioAnalysisVisualizer, AudioControls, AIConfidenceMeter, AnalysisProgress, MusicTheoryCard
+- Stack: Next.js 15, React Three Fiber, wavesurfer.js v7, framer-motion, Tailwind, zod, lucide-react
 
-### Priority 0 — Foundation (This Week)
-- [ ] Upgrade `CLAUDE.md` to v3.0 context ✅ Done
-- [ ] Update `CURRENT_STATUS.md` ✅ Done (this file)
-- [ ] Upgrade `pyproject.toml` dependencies to 2026 versions ⏳
-- [ ] Create `V3_MIGRATION_CHECKLIST.md` ✅ Done
-- [ ] Create `SESSION_START_GUIDE.md` ✅ Done
+### Desktop App
+- Tauri v2 + Svelte 5 scaffold in app/
+- 7 typed Tauri commands wired to FastAPI sidecar
 
-### Priority 1 — AI Models & Providers (Week 1)
-- [ ] Upgrade `anthropic` `^0.7.0` → `^0.40.0` (Claude 3.7 Sonnet)
-- [ ] Upgrade `openai` `^1.3.0` → `^1.58.0` (o3, Agents SDK, Audio API)
-- [ ] Upgrade `google-generativeai` `^0.3.0` → `^0.8.0` (Gemini 2.0 Flash)
-- [ ] Update `SampleMindAIManager` for new provider APIs
-- [ ] Add `claude-3-7-sonnet-20250219` as primary model
-- [ ] Add `gemini-2.0-flash` as fast model
+### TUI
+- 13 Textual ^0.87 screens
+- AI Chat, Visualizer, Effects Chain, Classification screens
 
-### Priority 2 — Audio Engine Upgrades (Week 1-2)
-- [ ] Upgrade `torch` `^2.1.0` → `^2.5.0`
-- [ ] Upgrade `transformers` `^4.35.0` → `^4.47.0`
-- [ ] Re-enable `basic-pitch = "^0.4.0"` (MIDI transcription)
-- [ ] Add `demucs = "^4.0.0"` (htdemucs 6-stem separation)
-- [ ] Add `pedalboard = "^0.9.0"` (Spotify audio effects)
-- [ ] Integrate `microsoft/BEATs` audio classifier
-- [ ] Integrate `openai/whisper-large-v3` for transcription
-- [ ] Add `pyaudio` for real-time audio I/O
-
-### Priority 3 — Multi-Agent Architecture (Week 2)
-- [ ] Add `langgraph = "^0.2.0"` for agent orchestration
-- [ ] Add `langchain-core = "^0.3.0"` for agent tooling
-- [ ] Design `AgentOrchestrator` class in `src/samplemind/integrations/agents/`
-- [ ] Implement specialized agents: AnalysisAgent, RecommendationAgent, MixingAgent
-- [ ] Build agent routing layer in `SampleMindAIManager`
-
-### Priority 4 — TUI v3 (Week 2-3)
-- [ ] Upgrade `textual` `^0.44.0` → `^0.87.0`
-- [ ] Update all TUI screens for new Textual API
-- [ ] Add new screens: AgentChatScreen, WaveformScreen, MixingBoardScreen
-- [ ] Implement proper design system with CSS variables
-- [ ] Add animated waveform widget
-- [ ] Add real-time spectrum analyzer widget
-- [ ] Dark/light theme polish
-- [ ] WCAG 2.1 AA compliance audit
-
-### Priority 5 — Web UI Foundation (Week 3-4)
-- [ ] Initialize `apps/web/` with Next.js 15 + React 19
-- [ ] Set up Tailwind CSS v4 + shadcn/ui
-- [ ] Implement Zustand v5 + TanStack Query v5
-- [ ] Build landing page with feature showcase
-- [ ] Build audio upload + analysis page
-- [ ] Build sample library browser
-- [ ] Integrate Wavesurfer.js v7 for waveform display
-- [ ] API client generation from FastAPI OpenAPI spec
-
-### Priority 6 — DAW Plugin v2 (Week 4+)
-- [ ] JUCE-based VST3 native plugin
-- [ ] Improved FL Studio real-time sync
-- [ ] Ableton MIDI clip generation from analysis
-- [ ] Logic Pro integration planning
-- [ ] AU (Audio Unit) plugin for macOS
-
-### Priority 7 — Platform & Infrastructure (Ongoing)
-- [ ] Upgrade test coverage from 30% → 80%+
-- [ ] Add `opentelemetry` distributed tracing
-- [ ] Cloud storage integration (S3/GCS)
-- [ ] Sample marketplace MVP
-- [ ] User accounts + cloud sync
-- [ ] Docker multi-stage build optimization
-- [ ] GitHub Actions: full CI/CD with test gates
+### Transcription
+- WhisperTranscriber: faster-whisper, lazy load, mock fallback, TranscriptionResult dataclass
 
 ---
 
-## 🔧 Services & Infrastructure
+## Known Gaps (Phase 16 active work)
+
+| # | Gap | Step | Priority |
+|---|-----|------|----------|
+| 1 | apps/web/src/lib/ missing (no API client) | 3 | HIGH |
+| 2 | apps/web/src/app/search/ missing | 4 | HIGH |
+| 3 | apps/web/src/app/analytics/ missing | 5 | HIGH |
+| 4 | core/tasks/agent_tasks.py missing | 6 | HIGH |
+| 5 | /ws/agent/{task_id} WebSocket missing | 7 | MEDIUM |
+| 6 | Test coverage ~30% (target 50%) | 8 | MEDIUM |
+| 7 | slowapi not wired in main.py | 9 | MEDIUM |
+| 8 | CI coverage gate missing | 10 | LOW |
+| 9 | FAISS search CLI not wired in menu.py | 2 | HIGH |
+| 10 | aerich.ini missing | 2 | MEDIUM |
+
+---
+
+## Services & Infrastructure
 
 | Service | Port | Status | Notes |
 |---------|------|--------|-------|
-| CLI (primary product) | — | ✅ Working | `python main.py` |
-| TUI | — | ✅ Working | `python -m src.samplemind.interfaces.tui.main` |
-| FastAPI Server | 8000 | ✅ Working | `make dev` |
-| API Docs | 8000/api/docs | ✅ Auto-generated | Swagger UI |
-| MongoDB | 27017 | ✅ Docker | `docker-compose up -d` |
-| Redis | 6379 | ✅ Docker | Session + cache |
-| ChromaDB | 8002 | ✅ Docker | Vector search |
-| Celery Worker | — | ✅ Working | Batch jobs |
-| Flower Monitor | 5555 | ✅ Working | Task monitoring |
-| Ollama | 11434 | ✅ Working | Offline AI models |
+| CLI (primary product) | — | Working | python main.py |
+| TUI | — | Working | textual run src/samplemind/interfaces/tui/main.py |
+| FastAPI Server | 8000 | Working | make dev |
+| API Docs | 8000/api/docs | Auto-generated | Swagger UI |
+| MongoDB | 27017 | Docker | docker-compose up -d |
+| Redis | 6379 | Docker | Session + cache + Celery broker |
+| ChromaDB | 8002 | Docker | Vector search |
+| Celery Worker | — | Working | Batch jobs (audio_tasks.py) |
+| Ollama | 11434 | Working | Offline AI models |
+| Next.js Web | 3000 | Built (needs search/analytics pages) | pnpm dev in apps/web/ |
+| Tauri Desktop | — | Scaffold only | pnpm tauri dev in app/ |
 
 ---
 
-## 📁 Project Structure (Actual)
-
-```
-SampleMind-AI---Beta/
-├── src/samplemind/
-│   ├── __init__.py              ✅ Lazy imports, version
-│   ├── core/
-│   │   ├── engine/
-│   │   │   └── audio_engine.py  ✅ Main audio processing
-│   │   ├── loader.py            ✅ AdvancedAudioLoader
-│   │   ├── library/
-│   │   │   └── pack_creator.py  ✅ Sample pack creation
-│   │   └── database/
-│   │       └── chroma.py        ✅ ChromaDB manager
-│   ├── integrations/
-│   │   ├── ai_manager.py        ✅ Multi-provider AI routing
-│   │   └── daw/
-│   │       ├── fl_studio_plugin.py   ✅ FL Studio
-│   │       └── __init__.py          ✅ DAW exports
-│   ├── interfaces/
-│   │   ├── cli/
-│   │   │   ├── menu.py          ✅ Main CLI (~2255 lines)
-│   │   │   └── commands/
-│   │   │       └── effects.py   ✅ Effects CLI (Phase 13)
-│   │   ├── tui/
-│   │   │   ├── app.py           ✅ Textual app
-│   │   │   ├── main.py          ✅ Entry point
-│   │   │   └── screens/         ✅ 11 screens
-│   │   └── __init__.py          ⚠️ Stub (1 line)
-│   └── utils/                   ✅ Utilities
-├── plugins/
-│   ├── fl_studio_plugin.py      ✅ FL Studio Python wrapper
-│   ├── fl_studio/
-│   │   ├── cpp/
-│   │   │   ├── samplemind_wrapper.h    ✅ C++ header
-│   │   │   └── samplemind_wrapper.cpp  ✅ C++ impl (486 lines)
-│   │   └── CMakeLists.txt       ✅ Build config
-│   ├── ableton/
-│   │   ├── python_backend.py    ✅ REST backend
-│   │   └── communication.js     ✅ JS bridge
-│   └── installer.py             ✅ Cross-DAW installer
-├── tests/
-│   ├── unit/                    ✅ 81 tests (~30% coverage)
-│   └── integration/             ⚠️ Needs expansion
-├── docs/                        ✅ 60+ documentation files
-├── completions/                 ✅ bash, zsh, fish
-├── scripts/                     ✅ Setup + launch scripts
-├── config/                      ✅ Configuration files
-├── data/                        ✅ Sample data + databases
-├── pyproject.toml               ⚠️ Needs major dep upgrade
-├── CLAUDE.md                    ✅ Updated 2026-03-07
-└── main.py                      ✅ CLI entry point
-```
-
----
-
-## 📐 Key Metrics
-
-| Metric | Current | Target (v3.0) |
-|--------|---------|---------------|
-| Python version | 3.11+ | 3.11–3.12 |
-| Test coverage | ~30% | 80%+ |
-| CLI commands | 20+ | 30+ |
-| TUI screens | 11 | 15+ |
-| AI providers | 4 (OpenAI, Anthropic, Google, Ollama) | 6+ |
-| DAW plugins | 2 (FL Studio, Ableton) | 4 (+ Logic, Standalone VST3) |
-| API endpoints | 20+ | 40+ |
-| Documentation files | 60+ | 80+ |
-| Dep versions current | ❌ Outdated | ✅ 2026 latest |
-
----
-
-## 🐛 Known Issues (Active)
-
-| # | Issue | Severity | Fix |
-|---|-------|----------|-----|
-| 1 | `anthropic ^0.7.0` — 33 versions behind | 🔴 Critical | Upgrade to ^0.40.0 |
-| 2 | `openai ^1.3.0` — missing Agents SDK, gpt-4o | 🔴 Critical | Upgrade to ^1.58.0 |
-| 3 | `google-generativeai ^0.3.0` — deprecated package | 🔴 Critical | Rename to `google-genai ^0.8.0` |
-| 4 | `textual ^0.44.0` — 43 minor versions behind | 🔴 Critical | Upgrade to ^0.87.0 |
-| 5 | `demucs` not in pyproject.toml | 🟠 High | ADD (not upgrade) to pyproject.toml |
-| 6 | `pedalboard` not in pyproject.toml | 🟠 High | ADD (not upgrade) to pyproject.toml |
-| 7 | `basic-pitch` commented out | 🟠 High | Re-enable + upgrade to ^0.4.0 |
-| 8 | `numpy` capped `<2.0.0` | 🟠 High | Upgrade to `>=2.0.0` (with torch+transformers) |
-| 9 | `torch ^2.1.0`, `transformers ^4.35.0` outdated | 🟠 High | Upgrade to ^2.5.0 / ^4.47.0 |
-| 10 | scipy monkey-patch in `__init__.py` | 🟡 Medium | Fix: upgrade librosa to ^0.11.0, then remove patch |
-| 11 | `main.py` still says "v6.0.0" in docstring + --version | 🟡 Medium | Update to "2.1.0-beta" / "3.0.0" |
-| 12 | `interfaces/__init__.py` says "v6" | 🟡 Medium | Update comment, version strings |
-| 13 | `pyproject.toml` scripts entry has wrong path | 🟡 Medium | Fix `src.interfaces.cli.main:app` path |
-| 14 | Test coverage only 30% | 🟠 High | Add tests — target 80% |
-| 15 | No Web UI | 🟠 High | Phase 15: Next.js 15 scaffold |
-| 16 | CLI startup ~2s (target <1s) | 🟡 Medium | Lazy import optimization |
-| 17 | `fastapi ^0.104.1`, `motor ^3.3.1` outdated | 🟡 Medium | Upgrade to ^0.115.0 / ^3.6.0 |
-
----
-
-*Updated by Copilot Agent on 2026-03-07 12:55:53. Update this file at the end of each coding session.*
+*Updated: 2026-04-09 — Reflects Phase 15 completion + Phase 16 active gaps.*
