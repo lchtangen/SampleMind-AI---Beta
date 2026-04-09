@@ -57,6 +57,7 @@ from .commands import (
     pack,
     recent,
     reporting,
+    search,
     similarity,
     stems,
     sync,
@@ -161,8 +162,7 @@ def status():
 @app.command()
 def version():
     """Show version information"""
-    console.print(
-        """
+    console.print("""
 [bold cyan]SampleMind AI v2.1.0-beta[/bold cyan]
 [dim]Professional Audio Analysis & Library Management[/dim]
 
@@ -185,8 +185,7 @@ def version():
 
 [bold]Repository:[/bold]
   https://github.com/your-org/samplemind-ai
-    """
-    )
+    """)
 
 
 # ============================================================================
@@ -255,6 +254,18 @@ def register_command_groups():
         effects.app,
         name="effects",
         help="🎛️  Audio Effects - Professional effects & presets",
+    )
+
+    # Register Phase 11 Semantic Search (FAISS + CLAP)
+    app.add_typer(
+        search.app,
+        name="semantic",
+        help="🔎 Semantic search — natural language + audio query (FAISS/CLAP)",
+    )
+    app.add_typer(
+        search.index_app,
+        name="index",
+        help="🗂️  FAISS index management — rebuild, stats, add",
     )
 
 
