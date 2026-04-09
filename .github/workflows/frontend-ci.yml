@@ -4,12 +4,12 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - 'frontend/web/**'
+      - 'apps/web/**'
       - '.github/workflows/frontend-ci.yml'
   pull_request:
     branches: [main, develop]
     paths:
-      - 'frontend/web/**'
+      - 'apps/web/**'
 
 env:
   NODE_VERSION: '20'

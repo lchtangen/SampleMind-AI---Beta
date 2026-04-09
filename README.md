@@ -3,17 +3,19 @@
 > **AI-Powered Music Production Platform**
 > Advanced audio analysis, intelligent sample organization, and creative assistance powered by Anthropic Claude, Google Gemini, OpenAI, and local AI models.
 
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Version](https://img.shields.io/badge/version-2.1.0--beta-orange.svg)](CHANGELOG.md)
-[![Phase 15](https://img.shields.io/badge/phase-15%20v3.0%20migration-blueviolet.svg)](docs/02-ROADMAPS/CURRENT_STATUS.md)
+[![Version](https://img.shields.io/badge/version-3.0.0--beta-orange.svg)](CHANGELOG.md)
+[![Phase 16](https://img.shields.io/badge/phase-16%20active-blueviolet.svg)](docs/v3/CHECKLIST.md)
 [![Tests](https://img.shields.io/badge/tests-120%2B-brightgreen.svg)](tests/)
+[![Coverage](https://img.shields.io/codecov/c/github/lchtangen/SampleMind-AI---Beta?label=coverage)](https://codecov.io/gh/lchtangen/SampleMind-AI---Beta)
+[![Backend CI](https://github.com/lchtangen/SampleMind-AI---Beta/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/lchtangen/SampleMind-AI---Beta/actions/workflows/backend-ci.yml)
+[![Frontend CI](https://github.com/lchtangen/SampleMind-AI---Beta/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/lchtangen/SampleMind-AI---Beta/actions/workflows/frontend-ci.yml)
 [![AI Providers](https://img.shields.io/badge/AI_providers-4%20(Claude%20%7C%20Gemini%20%7C%20GPT--4o%20%7C%20Ollama)-blue.svg)](docs/active/models/AI_PROVIDER_UPGRADE_LOG.md)
 
-> **⚡ Phase 15 — v3.0 Migration: P0+P1 Complete**
+> **⚡ Phase 16 — Web UI + Agent Pipeline + Production Hardening: Steps 1-10 complete
 > All AI provider SDKs upgraded (Claude 3.7 Sonnet, Gemini 2.0 Flash, GPT-4o, Ollama). Next: Textual ^0.87 TUI migration + Next.js 15 web UI.
-> See [`docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md`](docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md) for the full plan.
 
 ---
 
