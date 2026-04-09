@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
 import { AnalyticsProvider } from '@/components/analytics-provider';
+import QueryProvider from '@/components/providers/QueryProvider';
 
 export const metadata: Metadata = {
   title: 'SampleMind AI - Next-Gen Music Production',
@@ -45,6 +46,7 @@ export default function RootLayout({
         "text-text-primary",
         inter.variable
       )}>
+        <QueryProvider>
         <AnalyticsProvider>
           <ThemeProvider
             attribute="class"
@@ -80,6 +82,7 @@ export default function RootLayout({
           </div>
         </ThemeProvider>
         </AnalyticsProvider>
+        </QueryProvider>
       </body>
     </html>
   );

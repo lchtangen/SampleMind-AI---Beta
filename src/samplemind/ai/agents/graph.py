@@ -1,11 +1,12 @@
 """
-SampleMind LangGraph Agent Graph — Phase 15 / v3.0
+SampleMind LangGraph Agent Graph — Phase 16 / v3.0
 
-Orchestrates the multi-agent pipeline:
+Orchestrates the multi-agent pipeline (7 nodes):
 
   Entry → Router → AnalysisAgent
                  → TaggingAgent
                  → MixingAgent
+                 → QualityAgent      ← NEW (P3-006)
                  → RecommendationAgent
                  → PackBuilderAgent
                  → Aggregator → END
@@ -26,8 +27,8 @@ Usage:
 from __future__ import annotations
 
 import logging
+from collections.abc import AsyncIterator
 from pathlib import Path
-from typing import AsyncIterator, Optional
 
 from samplemind.ai.agents.state import AudioAnalysisState
 
@@ -35,6 +36,7 @@ logger = logging.getLogger(__name__)
 
 
 # ── Router node ───────────────────────────────────────────────────────────────
+
 
 def router_node(state: AudioAnalysisState) -> AudioAnalysisState:
     """
@@ -65,6 +67,7 @@ def router_node(state: AudioAnalysisState) -> AudioAnalysisState:
 
 # ── Aggregator node ───────────────────────────────────────────────────────────
 
+
 def aggregator_node(state: AudioAnalysisState) -> AudioAnalysisState:
     """
     Combine all agent outputs into a unified final_report.
@@ -75,6 +78,7 @@ def aggregator_node(state: AudioAnalysisState) -> AudioAnalysisState:
         "analysis": state.get("analysis_result", {}),
         "tags": state.get("tags", {}),
         "mixing_recommendations": state.get("mixing_recommendations", {}),
+        "quality_flags": state.get("quality_flags", {}),
         "similar_samples": state.get("similar_samples", []),
         "pack_manifest": state.get("pack_manifest", {}),
         "errors": state.get("errors", []),
@@ -89,6 +93,7 @@ def aggregator_node(state: AudioAnalysisState) -> AudioAnalysisState:
 
 # ── Graph builder ─────────────────────────────────────────────────────────────
 
+
 def build_graph():
     """
     Build and compile the LangGraph StateGraph.
@@ -102,16 +107,18 @@ def build_graph():
         from samplemind.ai.agents.analysis_agent import analysis_agent
         from samplemind.ai.agents.mixing_agent import mixing_agent
         from samplemind.ai.agents.pack_builder_agent import pack_builder_agent
+        from samplemind.ai.agents.quality_agent import quality_agent
         from samplemind.ai.agents.recommendation_agent import recommendation_agent
         from samplemind.ai.agents.tagging_agent import tagging_agent
 
         graph = StateGraph(AudioAnalysisState)
 
-        # Register nodes
+        # Register nodes (7-node pipeline)
         graph.add_node("router", router_node)
         graph.add_node("analysis", analysis_agent)
         graph.add_node("tagging", tagging_agent)
         graph.add_node("mixing", mixing_agent)
+        graph.add_node("quality", quality_agent)  # P3-006
         graph.add_node("recommendations", recommendation_agent)
         graph.add_node("pack_builder", pack_builder_agent)
         graph.add_node("aggregator", aggregator_node)
@@ -121,7 +128,8 @@ def build_graph():
         graph.add_edge("router", "analysis")
         graph.add_edge("analysis", "tagging")
         graph.add_edge("tagging", "mixing")
-        graph.add_edge("mixing", "recommendations")
+        graph.add_edge("mixing", "quality")  # quality gate
+        graph.add_edge("quality", "recommendations")
         graph.add_edge("recommendations", "pack_builder")
         graph.add_edge("pack_builder", "aggregator")
         graph.add_edge("aggregator", END)
@@ -137,10 +145,11 @@ def build_graph():
 
 # ── Convenience runners ───────────────────────────────────────────────────────
 
+
 def run_analysis_pipeline(
     file_path: str,
-    user_id: Optional[str] = None,
-    session_id: Optional[str] = None,
+    user_id: str | None = None,
+    session_id: str | None = None,
     analysis_depth: str = "standard",
 ) -> AudioAnalysisState:
     """
@@ -181,8 +190,8 @@ def run_analysis_pipeline(
 
 async def stream_analysis_pipeline(
     file_path: str,
-    user_id: Optional[str] = None,
-    session_id: Optional[str] = None,
+    user_id: str | None = None,
+    session_id: str | None = None,
     analysis_depth: str = "standard",
 ) -> AsyncIterator[AudioAnalysisState]:
     """
@@ -206,5 +215,5 @@ async def stream_analysis_pipeline(
         "progress_pct": 0,
     }
     async for chunk in app.astream(initial_state):
-        for node_name, node_state in chunk.items():
+        for _node_name, node_state in chunk.items():
             yield node_state

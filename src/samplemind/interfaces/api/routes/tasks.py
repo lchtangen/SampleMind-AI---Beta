@@ -4,11 +4,13 @@ Submit, query, and monitor background tasks via Celery
 """
 
 import logging
+from typing import Any
 
 from celery.result import AsyncResult
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from samplemind.core.auth import get_current_active_user
+from samplemind.core.exceptions import AgentPipelineError, ValidationError
 
 # Celery app imports
 from samplemind.core.tasks import celery_app
@@ -35,24 +37,47 @@ async def submit_audio_analysis(
     """
     Submit a single audio file for background analysis
     """
-    # Submit task to celery
-    result = celery_app.send_task(
-        "samplemind.core.tasks.audio_tasks.process_audio_analysis",
-        kwargs={
-            "file_id": request.file_id,
-            "file_path": request.file_path,
-            "user_id": request.user_id or current_user.user_id,
-            "analysis_options": request.analysis_options or {},
-        },
-        queue="audio_processing",
-        routing_key="audio.process",
-    )
-
-    logger.info(f"Submitted analysis task {result.id} for file {request.file_id}")
-
-    return TaskSubmitResponse(
-        task_id=result.id, status="submitted", message="Audio analysis task submitted"
-    )
+    try:
+        result = celery_app.send_task(
+            "samplemind.core.tasks.audio_tasks.process_audio_analysis",
+            kwargs={
+                "file_id": request.file_id,
+                "file_path": request.file_path,
+                "user_id": request.user_id or current_user.user_id,
+                "analysis_options": request.analysis_options or {},
+            },
+            queue="audio_processing",
+            routing_key="audio.process",
+        )
+        logger.info(
+            "Audio analysis task submitted",
+            extra={"task_id": result.id, "file_id": request.file_id},
+        )
+        return TaskSubmitResponse(
+            task_id=result.id,
+            status="submitted",
+            message="Audio analysis task submitted",
+        )
+    except ValidationError as exc:
+        logger.warning(
+            "Invalid analysis request",
+            extra={"file_id": request.file_id, "error": str(exc)},
+        )
+        raise HTTPException(status_code=400, detail=f"Invalid request: {exc}")
+    except AgentPipelineError as exc:
+        logger.error(
+            "Celery task submission failed",
+            extra={"file_id": request.file_id},
+            exc_info=True,
+        )
+        raise HTTPException(status_code=500, detail="Task submission failed")
+    except Exception as exc:
+        logger.error(
+            "Unexpected error submitting analysis task",
+            extra={"file_id": request.file_id, "error_type": type(exc).__name__},
+            exc_info=True,
+        )
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/analyze/batch", response_model=TaskSubmitResponse)
@@ -62,27 +87,47 @@ async def submit_batch_audio_analysis(
     """
     Submit multiple audio files for background batch processing
     """
-    result = celery_app.send_task(
-        "samplemind.core.tasks.audio_tasks.batch_process_audio_files",
-        kwargs={
-            "batch_id": request.batch_id,
-            "file_infos": request.file_infos,
-            "user_id": request.user_id or current_user.user_id,
-            "analysis_options": request.analysis_options or {},
-        },
-        queue="audio_processing",
-        routing_key="audio.process",
-    )
-
-    logger.info(
-        f"Submitted batch task {result.id} with {len(request.file_infos)} files"
-    )
-
-    return TaskSubmitResponse(
-        task_id=result.id,
-        status="submitted",
-        message="Batch audio analysis task submitted",
-    )
+    try:
+        result = celery_app.send_task(
+            "samplemind.core.tasks.audio_tasks.batch_process_audio_files",
+            kwargs={
+                "batch_id": request.batch_id,
+                "file_infos": request.file_infos,
+                "user_id": request.user_id or current_user.user_id,
+                "analysis_options": request.analysis_options or {},
+            },
+            queue="audio_processing",
+            routing_key="audio.process",
+        )
+        logger.info(
+            "Batch audio analysis task submitted",
+            extra={"task_id": result.id, "batch_size": len(request.file_infos)},
+        )
+        return TaskSubmitResponse(
+            task_id=result.id,
+            status="submitted",
+            message="Batch audio analysis task submitted",
+        )
+    except ValidationError as exc:
+        logger.warning(
+            "Invalid batch request",
+            extra={"batch_id": request.batch_id, "error": str(exc)},
+        )
+        raise HTTPException(status_code=400, detail=f"Invalid request: {exc}")
+    except AgentPipelineError as exc:
+        logger.error(
+            "Batch task submission failed",
+            extra={"batch_id": request.batch_id, "batch_size": len(request.file_infos)},
+            exc_info=True,
+        )
+        raise HTTPException(status_code=500, detail="Batch submission failed")
+    except Exception as exc:
+        logger.error(
+            "Unexpected error submitting batch task",
+            extra={"batch_id": request.batch_id, "error_type": type(exc).__name__},
+            exc_info=True,
+        )
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/{task_id}", response_model=TaskStatusResponse)
@@ -170,7 +215,7 @@ async def get_queue_stats(current_user=Depends(get_current_active_user)):
     try:
         # Kombu connection via celery_app
         with celery_app.pool.acquire(block=True) as conn:
-            channel = conn.channel()
+            conn.channel()
             queues = []
             for q in celery_app.conf.task_queues:
                 try:
@@ -196,7 +241,9 @@ async def get_queue_stats(current_user=Depends(get_current_active_user)):
 # Phase 16: LangGraph agent pipeline endpoint
 # ---------------------------------------------------------------------------
 
-from pydantic import BaseModel  # noqa: E402 (already imported at module level by FastAPI)
+from pydantic import (
+    BaseModel,  # noqa: E402 (already imported at module level by FastAPI)
+)
 
 
 class AgentAnalysisRequest(BaseModel):
@@ -210,7 +257,9 @@ class AgentTaskResponse(BaseModel):
     file_path: str
 
 
-@router.post("/analyze-agent", response_model=AgentTaskResponse, tags=["Tasks", "Agents"])
+@router.post(
+    "/analyze-agent", response_model=AgentTaskResponse, tags=["Tasks", "Agents"]
+)
 async def submit_agent_analysis(request: AgentAnalysisRequest) -> AgentTaskResponse:
     """
     Queue a full LangGraph multi-agent analysis pipeline for a single audio file.
@@ -237,4 +286,7 @@ async def submit_agent_analysis(request: AgentAnalysisRequest) -> AgentTaskRespo
     except Exception as exc:
         logger.exception("Failed to queue agent analysis: %s", exc)
         from fastapi import HTTPException
-        raise HTTPException(status_code=500, detail=f"Failed to queue task: {exc}") from exc
+
+        raise HTTPException(
+            status_code=500, detail=f"Failed to queue task: {exc}"
+        ) from exc

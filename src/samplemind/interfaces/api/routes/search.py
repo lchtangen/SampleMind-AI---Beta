@@ -1,10 +1,10 @@
 import logging
-from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from samplemind.core.database.chroma import query_similar
+from samplemind.core.exceptions import SearchIndexError, ValidationError
 from samplemind.interfaces.api.dependencies import get_app_state
 
 router = APIRouter(prefix="/search", tags=["Search"])
@@ -23,8 +23,8 @@ class SearchResult(BaseModel):
 
     file_id: str
     score: float
-    filename: Optional[str] = None
-    metadata: Optional[dict] = None
+    filename: str | None = None
+    metadata: dict | None = None
 
 
 class SearchRequest(BaseModel):
@@ -47,7 +47,7 @@ class SearchResponse(BaseModel):
         total_found: Total number of matching results found
     """
 
-    results: List[SearchResult]
+    results: list[SearchResult]
     total_found: int
 
 
@@ -109,9 +109,26 @@ async def semantic_search(request: SearchRequest):
 
         return SearchResponse(results=search_results, total_found=len(search_results))
 
-    except Exception as e:
-        logger.error(f"Search failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    except ValidationError as exc:
+        logger.warning(
+            "Search validation failed",
+            extra={"query": request.query, "error": str(exc)},
+        )
+        raise HTTPException(status_code=400, detail=f"Invalid request: {exc}")
+    except SearchIndexError as exc:
+        logger.error(
+            "Search index error",
+            extra={"query": request.query},
+            exc_info=True,
+        )
+        raise HTTPException(status_code=500, detail="Search engine unavailable")
+    except Exception as exc:
+        logger.error(
+            "Unexpected error in search",
+            extra={"query": request.query, "error_type": type(exc).__name__},
+            exc_info=True,
+        )
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # ── FAISS-powered semantic search endpoints (Phase 11) ────────────────────────
@@ -119,20 +136,22 @@ async def semantic_search(request: SearchRequest):
 
 class FAISSSearchResult(BaseModel):
     """Single FAISS semantic search result."""
+
     index_id: int
     path: str
     filename: str
     score: float
-    bpm: Optional[float] = None
-    key: Optional[str] = None
-    energy: Optional[str] = None
+    bpm: float | None = None
+    key: str | None = None
+    energy: str | None = None
     genre_labels: list[str] = []
     mood_labels: list[str] = []
-    sample_id: Optional[str] = None
+    sample_id: str | None = None
 
 
 class FAISSSearchResponse(BaseModel):
     """FAISS search response."""
+
     query: str
     results: list[FAISSSearchResult]
     total: int
@@ -181,9 +200,29 @@ async def faiss_text_search(
             total=len(results),
             index_size=idx.size,
         )
+    except ValidationError as exc:
+        logger.warning(
+            "FAISS search validation failed",
+            extra={"query": q, "limit": limit, "error": str(exc)},
+        )
+        raise HTTPException(status_code=400, detail=f"Invalid parameters: {exc}")
+    except SearchIndexError as exc:
+        logger.error(
+            "FAISS index failed",
+            extra={"query": q},
+            exc_info=True,
+        )
+        raise HTTPException(status_code=500, detail="Search failed")
+    except TimeoutError as exc:
+        logger.error("FAISS search timeout", extra={"query": q}, exc_info=True)
+        raise HTTPException(status_code=504, detail="Request timeout")
     except Exception as exc:
-        logger.error("FAISS search failed: %s", exc)
-        raise HTTPException(status_code=500, detail=str(exc))
+        logger.error(
+            "Unexpected error in FAISS search",
+            extra={"query": q, "error_type": type(exc).__name__},
+            exc_info=True,
+        )
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/faiss/build")
@@ -196,7 +235,7 @@ async def faiss_build_index(
     This is a blocking operation — for large libraries use the CLI:
       samplemind index rebuild
     """
-    from samplemind.core.search.faiss_index import get_index, FAISSIndex
+    from samplemind.core.search.faiss_index import FAISSIndex
 
     try:
         idx = FAISSIndex()
@@ -204,8 +243,33 @@ async def faiss_build_index(
         idx.save()
         # Update global singleton
         import samplemind.core.search.faiss_index as _fi
+
         _fi._global_index = idx
         return {"status": "ok", "indexed": idx.size}
+    except ValidationError as exc:
+        logger.warning(
+            "FAISS build validation failed",
+            extra={"path_count": len(paths), "error": str(exc)},
+        )
+        raise HTTPException(status_code=400, detail=f"Invalid paths: {exc}")
+    except SearchIndexError as exc:
+        logger.error(
+            "FAISS index build failed",
+            extra={"path_count": len(paths)},
+            exc_info=True,
+        )
+        raise HTTPException(status_code=500, detail="Index build failed")
+    except TimeoutError as exc:
+        logger.error(
+            "FAISS build timeout",
+            extra={"path_count": len(paths)},
+            exc_info=True,
+        )
+        raise HTTPException(status_code=504, detail="Request timeout")
     except Exception as exc:
-        logger.error("FAISS build failed: %s", exc)
-        raise HTTPException(status_code=500, detail=str(exc))
+        logger.error(
+            "Unexpected error building FAISS index",
+            extra={"path_count": len(paths), "error_type": type(exc).__name__},
+            exc_info=True,
+        )
+        raise HTTPException(status_code=500, detail="Internal server error")

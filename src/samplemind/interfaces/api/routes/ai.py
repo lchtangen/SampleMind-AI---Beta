@@ -1,10 +1,12 @@
 """AI integration endpoints"""
 
 import logging
+from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
+from samplemind.core.exceptions import AgentPipelineError, ValidationError
 from samplemind.integrations.ai_manager import AIProvider
 from samplemind.interfaces.api.dependencies import get_app_state
 from samplemind.interfaces.api.rate_limiter import limit as rate_limit
@@ -84,7 +86,9 @@ class GapReportResponse(BaseModel):
 
 @router.post("/curate/playlist")
 @rate_limit("100/minute")
-async def generate_playlist(request: Request, body: PlaylistRequest) -> PlaylistResponse:
+async def generate_playlist(
+    request: Request, body: PlaylistRequest
+) -> PlaylistResponse:
     """
     Generate an AI-curated playlist with a specific mood and energy arc.
 
@@ -111,9 +115,33 @@ async def generate_playlist(request: Request, body: PlaylistRequest) -> Playlist
             narrative=playlist.narrative,
             model_used=playlist.model_used,
         )
+    except ValidationError as exc:
+        logger.warning(
+            "Playlist validation failed",
+            extra={"mood": body.mood, "error": str(exc)},
+        )
+        raise HTTPException(status_code=400, detail=f"Invalid parameters: {exc}")
+    except AgentPipelineError as exc:
+        logger.error(
+            "Playlist generation pipeline failed",
+            extra={"mood": body.mood, "energy_arc": body.energy_arc},
+            exc_info=True,
+        )
+        raise HTTPException(status_code=500, detail="Playlist generation failed")
+    except TimeoutError as exc:
+        logger.error(
+            "Playlist generation timeout",
+            extra={"duration_minutes": body.duration_minutes},
+            exc_info=True,
+        )
+        raise HTTPException(status_code=504, detail="Request timeout")
     except Exception as exc:
-        logger.error("Playlist generation failed: %s", exc)
-        raise HTTPException(status_code=500, detail=str(exc))
+        logger.error(
+            "Unexpected error in playlist generation",
+            extra={"error_type": type(exc).__name__},
+            exc_info=True,
+        )
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/curate/gaps")
@@ -192,9 +220,29 @@ async def library_gap_analysis(
             summary=report.summary,
             model_used=report.model_used,
         )
+    except ValidationError as exc:
+        logger.warning(
+            "Gap analysis validation failed",
+            extra={"limit": limit, "error": str(exc)},
+        )
+        raise HTTPException(status_code=400, detail=f"Invalid parameters: {exc}")
+    except AgentPipelineError as exc:
+        logger.error(
+            "Gap analysis pipeline failed",
+            extra={"sample_count": len(sample_library)},
+            exc_info=True,
+        )
+        raise HTTPException(status_code=500, detail="Gap analysis failed")
+    except TimeoutError as exc:
+        logger.error("Gap analysis timeout", exc_info=True)
+        raise HTTPException(status_code=504, detail="Request timeout")
     except Exception as exc:
-        logger.error("Gap analysis failed: %s", exc)
-        raise HTTPException(status_code=500, detail=str(exc))
+        logger.error(
+            "Unexpected error in gap analysis",
+            extra={"error_type": type(exc).__name__},
+            exc_info=True,
+        )
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/curate/energy-arc")
@@ -237,7 +285,9 @@ async def suggest_energy_arc(
     energy_vals = {"low": 0, "mid": 1, "high": 2}
     e_nums = [energy_vals.get(e, 1) for e in energies]
     trend = (
-        sum(b - a for a, b in zip(e_nums[:-1], e_nums[1:], strict=False)) if len(e_nums) > 1 else 0
+        sum(b - a for a, b in zip(e_nums[:-1], e_nums[1:], strict=False))
+        if len(e_nums) > 1
+        else 0
     )
     suggested_arc: EnergyArc = "plateau"
     if trend > len(e_nums) * 0.3:
