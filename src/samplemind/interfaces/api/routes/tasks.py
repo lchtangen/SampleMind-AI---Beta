@@ -3,27 +3,25 @@ Task Management Routes
 Submit, query, and monitor background tasks via Celery
 """
 
-import os
-from typing import Dict, Any, List
-from fastapi import APIRouter, Depends, HTTPException, status
 import logging
 
-from samplemind.interfaces.api.schemas.tasks import (
-    TaskSubmitRequest,
-    BatchTaskSubmitRequest,
-    TaskSubmitResponse,
-    TaskStatusResponse,
-    TaskListResponse,
-    WorkersStatusResponse,
-    WorkerInfo,
-    QueueStatsResponse,
-    QueueStats,
-)
+from celery.result import AsyncResult
+from fastapi import APIRouter, Depends
+
 from samplemind.core.auth import get_current_active_user
 
 # Celery app imports
 from samplemind.core.tasks import celery_app
-from celery.result import AsyncResult
+from samplemind.interfaces.api.schemas.tasks import (
+    BatchTaskSubmitRequest,
+    QueueStats,
+    QueueStatsResponse,
+    TaskStatusResponse,
+    TaskSubmitRequest,
+    TaskSubmitResponse,
+    WorkerInfo,
+    WorkersStatusResponse,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -192,3 +190,51 @@ async def get_queue_stats(current_user=Depends(get_current_active_user)):
     except Exception as e:
         logger.warning(f"Could not fetch queue stats: {e}")
         return QueueStatsResponse(queues=[], total_queues=0)
+
+
+# ---------------------------------------------------------------------------
+# Phase 16: LangGraph agent pipeline endpoint
+# ---------------------------------------------------------------------------
+
+from pydantic import BaseModel  # noqa: E402 (already imported at module level by FastAPI)
+
+
+class AgentAnalysisRequest(BaseModel):
+    file_path: str
+    analysis_depth: str = "standard"
+
+
+class AgentTaskResponse(BaseModel):
+    task_id: str
+    status: str = "queued"
+    file_path: str
+
+
+@router.post("/analyze-agent", response_model=AgentTaskResponse, tags=["Tasks", "Agents"])
+async def submit_agent_analysis(request: AgentAnalysisRequest) -> AgentTaskResponse:
+    """
+    Queue a full LangGraph multi-agent analysis pipeline for a single audio file.
+
+    The task ID can be used with ``GET /ws/agent/{task_id}`` to stream
+    step-by-step progress events via WebSocket.
+
+    Returns:
+        task_id: Use this with /ws/agent/{task_id} for real-time progress.
+    """
+    try:
+        from samplemind.core.tasks.agent_tasks import run_analysis_agent
+
+        task = run_analysis_agent.delay(
+            request.file_path,
+            analysis_depth=request.analysis_depth,
+        )
+        logger.info("Queued agent analysis task %s for %s", task.id, request.file_path)
+        return AgentTaskResponse(
+            task_id=task.id,
+            status="queued",
+            file_path=request.file_path,
+        )
+    except Exception as exc:
+        logger.exception("Failed to queue agent analysis: %s", exc)
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"Failed to queue task: {exc}") from exc

@@ -4,8 +4,9 @@ Configures Celery with Redis as broker and result backend
 """
 
 import os
+
 from celery import Celery
-from kombu import Queue, Exchange
+from kombu import Exchange, Queue
 
 # Get Redis URL from environment or use default
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
@@ -19,6 +20,7 @@ celery_app = Celery(
     backend=CELERY_RESULT_BACKEND,
     include=[
         "samplemind.core.tasks.audio_tasks",
+        "samplemind.core.tasks.agent_tasks",
     ],
 )
 
