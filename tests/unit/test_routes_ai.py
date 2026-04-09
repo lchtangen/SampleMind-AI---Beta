@@ -121,7 +121,8 @@ def test_generate_playlist_generator_error(client: TestClient):
         resp = client.post("/ai/curate/playlist", json={"mood": "chill"})
 
     assert resp.status_code == 500
-    assert "boom" in resp.json()["detail"]
+    # Route catches RuntimeError in generic handler → detail is "Internal server error"
+    assert "internal server error" in resp.json()["detail"].lower()
 
 
 def test_generate_playlist_defaults(client: TestClient):
