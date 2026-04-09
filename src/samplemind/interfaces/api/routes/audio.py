@@ -11,8 +11,9 @@ import uuid
 from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
+import soundfile as sf
 from fastapi import (
     APIRouter,
     BackgroundTasks,
@@ -20,13 +21,13 @@ from fastapi import (
     File,
     HTTPException,
     Query,
+    Request,
     UploadFile,
     status,
 )
-from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
-from samplemind.core.engine.audio_engine import AdvancedFeatureExtractor, AudioProcessor
+from samplemind.core.engine.audio_engine import AdvancedFeatureExtractor
 from samplemind.core.processing.audio_pipeline import AudioFormat, AudioPipeline
 from samplemind.interfaces.api.config import get_settings
 from samplemind.interfaces.api.dependencies import get_app_state
@@ -34,10 +35,10 @@ from samplemind.interfaces.api.exceptions import (
     FileValidationError,
     ResourceNotFoundError,
 )
+from samplemind.interfaces.api.rate_limiter import limit as rate_limit
 from samplemind.interfaces.api.schemas.audio import (
     AudioAnalysisRequest,
     AudioAnalysisResponse,
-    AudioFeatureExtractionResponse,
     AudioFileMetadata,
     AudioProcessRequest,
     AudioProcessResponse,
@@ -47,8 +48,30 @@ from samplemind.interfaces.api.schemas.audio import (
 # Configure logging
 logger = logging.getLogger(__name__)
 
-logger = logging.getLogger(__name__)
 router = APIRouter()
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Helper Functions
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def get_audio_duration(file_path: Path | str) -> float:
+    """Get duration of audio file in seconds.
+
+    Args:
+        file_path: Path to audio file
+
+    Returns:
+        Duration in seconds
+    """
+    try:
+        file_path = Path(file_path)
+        info = sf.info(str(file_path))
+        return info.duration
+    except Exception as e:
+        logger.error(f"Error getting audio duration for {file_path}: {e}")
+        return 0.0
 
 
 @router.post(
@@ -77,7 +100,7 @@ async def upload_audio(
     settings = get_settings()
 
     # Validate file type
-    if not file.content_type.lower() in [f"audio/{fmt.value}" for fmt in AudioFormat]:
+    if file.content_type.lower() not in [f"audio/{fmt.value}" for fmt in AudioFormat]:
         logger.warning(
             f"Upload rejected: Unsupported file type {file.content_type} for file {file.filename}"
         )
@@ -370,8 +393,8 @@ async def process_uploaded_file(file_path: Path, file_id: str):
 
 
 def process_audio_file(
-    input_path: Path, output_path: Path, steps: Dict[str, Any]
-) -> Dict[str, Any]:
+    input_path: Path, output_path: Path, steps: dict[str, Any]
+) -> dict[str, Any]:
     """Process an audio file with the given processing steps"""
     start_time = time.time()
 
@@ -403,14 +426,14 @@ async def analyze_audio_file(
     analysis_level: str = "standard",
     include_ai: bool = False,
     save_results: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Analyze an audio file and return features"""
     start_time = time.time()
     settings = get_settings()
 
     try:
         # Initialize audio engine
-        audio_engine = get_app_state("audio_engine")
+        get_app_state("audio_engine")
         ai_manager = get_app_state("ai_manager") if include_ai else None
 
         # Load and preprocess audio
@@ -495,7 +518,7 @@ async def analyze_audio_file(
 
 @router.get(
     "/list",
-    response_model=List[AudioFileMetadata],
+    response_model=list[AudioFileMetadata],
     summary="List uploaded audio files",
     description="""
            Get a paginated list of uploaded audio files with metadata.
@@ -509,7 +532,7 @@ async def analyze_audio_file(
 async def list_audio_files(
     page: int = Query(1, ge=1, description="Page number (1-based)"),
     page_size: int = Query(50, ge=1, le=100, description="Number of items per page"),
-    file_type: Optional[str] = Query(
+    file_type: str | None = Query(
         None, description="Filter by file type (e.g., 'wav', 'mp3')"
     ),
 ) -> None:
@@ -579,8 +602,8 @@ class StemSeparationResponse(BaseModel):
 
     source_file: str
     model: str
-    stems: List[str]
-    output_dir: Optional[str] = None
+    stems: list[str]
+    output_dir: str | None = None
     processing_time_s: float
     mock: bool = False
 
@@ -597,7 +620,9 @@ class StemSeparationResponse(BaseModel):
     """,
     tags=["Audio Processing"],
 )
+@rate_limit("10/minute")
 async def separate_audio_stems(
+    request: Request,
     file: UploadFile = File(...),
     model: str = Query("htdemucs_6s", description="Demucs model name"),
     save_stems: bool = Query(False, description="Write stem WAV files to disk"),
@@ -615,7 +640,9 @@ async def separate_audio_stems(
     output_dir = Path(tempfile.mkdtemp(prefix="sm_stems_")) if save_stems else None
 
     try:
-        result = await engine.separate_stems(temp_path, model=model, output_dir=output_dir)
+        result = await engine.separate_stems(
+            temp_path, model=model, output_dir=output_dir
+        )
         return StemSeparationResponse(
             source_file=file.filename or "",
             model=result.model_name,
@@ -652,7 +679,7 @@ class EffectsResponse(BaseModel):
 
     source_file: str
     output_file: str
-    effects_applied: List[str]
+    effects_applied: list[str]
     processing_time_s: float
 
 
@@ -671,9 +698,9 @@ async def apply_audio_effects(
     import time
 
     try:
+        import numpy as np
         import pedalboard
         import soundfile as sf
-        import numpy as np
     except ImportError as exc:
         raise HTTPException(
             status_code=503,
@@ -687,7 +714,7 @@ async def apply_audio_effects(
         f.write(await file.read())
 
     start = time.time()
-    effects_applied: List[str] = []
+    effects_applied: list[str] = []
 
     try:
         audio, sr = sf.read(str(temp_in))
@@ -707,10 +734,18 @@ async def apply_audio_effects(
 
         # Simple EQ via HighShelfFilter + LowShelfFilter
         if config.eq_low_gain_db != 0.0:
-            board.append(pedalboard.LowShelfFilter(gain_db=config.eq_low_gain_db, cutoff_frequency_hz=200))
+            board.append(
+                pedalboard.LowShelfFilter(
+                    gain_db=config.eq_low_gain_db, cutoff_frequency_hz=200
+                )
+            )
             effects_applied.append("EQ Low Shelf")
         if config.eq_high_gain_db != 0.0:
-            board.append(pedalboard.HighShelfFilter(gain_db=config.eq_high_gain_db, cutoff_frequency_hz=8000))
+            board.append(
+                pedalboard.HighShelfFilter(
+                    gain_db=config.eq_high_gain_db, cutoff_frequency_hz=8000
+                )
+            )
             effects_applied.append("EQ High Shelf")
 
         if config.reverb_wet_level > 0.0:
@@ -750,8 +785,8 @@ class MidiTranscribeResponse(BaseModel):
 
     source_file: str
     note_count: int
-    pitch_range: List[int]
-    midi_path: Optional[str] = None
+    pitch_range: list[int]
+    midi_path: str | None = None
     processing_time_s: float
     summary: str
     mock: bool = False

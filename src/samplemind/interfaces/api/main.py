@@ -5,19 +5,35 @@ Main entry point for the REST API backend
 """
 
 import logging
-import os
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from pathlib import Path
-from typing import AsyncGenerator
 
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+# ---------------------------------------------------------------------------
+# Rate limiting (slowapi — graceful degradation if not installed)
+# ---------------------------------------------------------------------------
+try:
+    from slowapi import _rate_limit_exceeded_handler
+    from slowapi.errors import RateLimitExceeded
+    from slowapi.middleware import SlowAPIMiddleware
+
+    from .rate_limiter import limiter
+
+    _SLOWAPI_AVAILABLE = limiter is not None
+except ImportError:  # pragma: no cover
+    limiter = None  # type: ignore[assignment]
+    _SLOWAPI_AVAILABLE = False
+    _pre_log = __import__("logging").getLogger(__name__)
+    _pre_log.warning("slowapi not installed — rate limiting disabled (run: pip install slowapi)")
+
 from . import __version__
 from .config import get_settings
 from .exceptions import SampleMindException
+from .middleware.analytics import AnalyticsMiddleware
 from .middleware.auth import SimpleAuthMiddleware
 from .routes import (
     ai,
@@ -32,12 +48,9 @@ from .routes import (
     tasks,
     websocket,
 )
-from .routes import (
-    settings as settings_router,
-)
 from .routes import analytics as analytics_router
 from .routes import marketplace as marketplace_router
-from .middleware.analytics import AnalyticsMiddleware
+from .routes import settings as settings_router
 
 # Configure logging
 logging.basicConfig(
@@ -296,6 +309,15 @@ def create_application() -> FastAPI:
         openapi_url="/api/openapi.json",
     )
 
+    # ---------------------------------------------------------------------------
+    # Rate limiting — attach limiter state + middleware
+    # ---------------------------------------------------------------------------
+    if _SLOWAPI_AVAILABLE:
+        app.state.limiter = limiter
+        app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+        app.add_middleware(SlowAPIMiddleware)
+        logger.info("✓ slowapi rate limiting enabled (200 req/min default)")
+
     # Register Custom Middleware
     # Note: Middleware is added in reverse order (last added runs first)
     # Order (from inner to outer): Auth → Analytics → CORS
@@ -349,7 +371,9 @@ def create_application() -> FastAPI:
     app.include_router(websocket.router, prefix="/api/v1", tags=["websocket"])
     app.include_router(billing.router, prefix="/api/v1", tags=["billing"])
     app.include_router(analytics_router.router, prefix="/api/v1", tags=["analytics"])
-    app.include_router(marketplace_router.router, prefix="/api/v1", tags=["marketplace"])
+    app.include_router(
+        marketplace_router.router, prefix="/api/v1", tags=["marketplace"]
+    )
 
     @app.get("/", include_in_schema=False)
     async def root():

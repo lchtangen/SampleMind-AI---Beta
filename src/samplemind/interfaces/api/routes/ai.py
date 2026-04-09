@@ -1,23 +1,24 @@
 """AI integration endpoints"""
 
 import logging
-from typing import List, Optional
-from fastapi import APIRouter, HTTPException
+
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
+
+from samplemind.integrations.ai_manager import AIProvider
+from samplemind.interfaces.api.dependencies import get_app_state
+from samplemind.interfaces.api.rate_limiter import limit as rate_limit
 from samplemind.interfaces.api.schemas.ai import (
     AIProviderInfo,
-    AIAnalysisRequest,
-    AIAnalysisResponse,
 )
-from samplemind.interfaces.api.dependencies import get_app_state
-from samplemind.integrations.ai_manager import AIProvider
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/providers", response_model=List[AIProviderInfo])
-async def list_ai_providers():
+@router.get("/providers", response_model=list[AIProviderInfo])
+@rate_limit("100/minute")
+async def list_ai_providers(request: Request):
     """List available AI providers and their status"""
     ai_manager = get_app_state("ai_manager")
 
@@ -56,7 +57,7 @@ class PlaylistRequest(BaseModel):
     mood: str = "dark"
     energy_arc: str = "build"  # build | drop | plateau | tension
     duration_minutes: float = 30.0
-    samples: Optional[list[dict]] = None  # if None, queries FAISS
+    samples: list[dict] | None = None  # if None, queries FAISS
 
 
 class PlaylistResponse(BaseModel):
@@ -82,7 +83,8 @@ class GapReportResponse(BaseModel):
 
 
 @router.post("/curate/playlist")
-async def generate_playlist(body: PlaylistRequest) -> PlaylistResponse:
+@rate_limit("100/minute")
+async def generate_playlist(request: Request, body: PlaylistRequest) -> PlaylistResponse:
     """
     Generate an AI-curated playlist with a specific mood and energy arc.
 
@@ -115,7 +117,9 @@ async def generate_playlist(body: PlaylistRequest) -> PlaylistResponse:
 
 
 @router.get("/curate/gaps")
+@rate_limit("100/minute")
 async def library_gap_analysis(
+    request: Request,
     limit: int = 100,
 ) -> GapReportResponse:
     """
@@ -157,16 +161,26 @@ async def library_gap_analysis(
     try:
         report = await analyzer.analyze(sample_library)
         critical = [
-            {"dimension": g.dimension, "value": g.value,
-             "current_pct": g.current_pct, "deficit": g.deficit,
-             "suggestion": g.suggestion}
-            for g in report.gaps if g.severity == "critical"
+            {
+                "dimension": g.dimension,
+                "value": g.value,
+                "current_pct": g.current_pct,
+                "deficit": g.deficit,
+                "suggestion": g.suggestion,
+            }
+            for g in report.gaps
+            if g.severity == "critical"
         ]
         moderate = [
-            {"dimension": g.dimension, "value": g.value,
-             "current_pct": g.current_pct, "deficit": g.deficit,
-             "suggestion": g.suggestion}
-            for g in report.gaps if g.severity == "moderate"
+            {
+                "dimension": g.dimension,
+                "value": g.value,
+                "current_pct": g.current_pct,
+                "deficit": g.deficit,
+                "suggestion": g.suggestion,
+            }
+            for g in report.gaps
+            if g.severity == "moderate"
         ]
         return GapReportResponse(
             total_samples=report.total_samples,
@@ -184,7 +198,9 @@ async def library_gap_analysis(
 
 
 @router.post("/curate/energy-arc")
+@rate_limit("100/minute")
 async def suggest_energy_arc(
+    request: Request,
     sample_ids: list[str],
 ) -> dict:
     """
@@ -192,8 +208,8 @@ async def suggest_energy_arc(
 
     Returns samples reordered for maximum energy flow.
     """
+    from samplemind.ai.curation.playlist_generator import EnergyArc, PlaylistGenerator
     from samplemind.core.search.faiss_index import get_index
-    from samplemind.ai.curation.playlist_generator import PlaylistGenerator, EnergyArc
 
     idx = get_index()
     entries_by_path = {e.path: e for e in idx._entries}
@@ -202,14 +218,16 @@ async def suggest_energy_arc(
     for sid in sample_ids:
         entry = entries_by_path.get(sid)
         if entry:
-            samples.append({
-                "filename": entry.filename,
-                "path": entry.path,
-                "bpm": entry.bpm,
-                "key": entry.key,
-                "energy": entry.energy,
-                "duration_s": 30.0,
-            })
+            samples.append(
+                {
+                    "filename": entry.filename,
+                    "path": entry.path,
+                    "bpm": entry.bpm,
+                    "key": entry.key,
+                    "energy": entry.energy,
+                    "duration_s": 30.0,
+                }
+            )
 
     if not samples:
         return {"ordered": [], "suggested_arc": "plateau"}
@@ -218,7 +236,9 @@ async def suggest_energy_arc(
     energies = [s.get("energy", "mid") for s in samples]
     energy_vals = {"low": 0, "mid": 1, "high": 2}
     e_nums = [energy_vals.get(e, 1) for e in energies]
-    trend = sum(b - a for a, b in zip(e_nums[:-1], e_nums[1:])) if len(e_nums) > 1 else 0
+    trend = (
+        sum(b - a for a, b in zip(e_nums[:-1], e_nums[1:], strict=False)) if len(e_nums) > 1 else 0
+    )
     suggested_arc: EnergyArc = "plateau"
     if trend > len(e_nums) * 0.3:
         suggested_arc = "build"
