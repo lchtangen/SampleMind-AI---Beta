@@ -119,10 +119,42 @@ async def stripe_webhook(
     if update:
         background_tasks.add_task(_apply_subscription_update, update)
 
+    # Marketplace pack purchase fulfillment
+    event_type = event.get("type") if isinstance(event, dict) else getattr(event, "type", None)
+    if event_type == "checkout.session.completed":
+        session_data = event.get("data", {}).get("object", {}) if isinstance(event, dict) else getattr(getattr(event, "data", None), "object", {})
+        meta = session_data.get("metadata", {}) if isinstance(session_data, dict) else {}
+        if meta.get("platform") == "samplemind_marketplace":
+            background_tasks.add_task(
+                _fulfill_marketplace_purchase,
+                session_id=session_data.get("id", ""),
+                buyer_user_id=meta.get("buyer_user_id", ""),
+                listing_id=meta.get("listing_id", ""),
+            )
+
     return JSONResponse({"received": True})
 
 
 # ── Background task ───────────────────────────────────────────────────────────
+
+
+async def _fulfill_marketplace_purchase(
+    session_id: str,
+    buyer_user_id: str,
+    listing_id: str,
+) -> None:
+    """Generate a signed R2 download URL and record the pack purchase."""
+    if not listing_id or not buyer_user_id:
+        return
+    try:
+        from samplemind.interfaces.api.routes.marketplace import fulfill_pack_purchase
+        url = await fulfill_pack_purchase(session_id, buyer_user_id, listing_id)
+        if url:
+            logger.info("Pack download URL generated for user=%s listing=%s", buyer_user_id, listing_id)
+        else:
+            logger.warning("No R2 URL generated for listing=%s (R2 may not be configured)", listing_id)
+    except Exception as exc:
+        logger.error("Marketplace fulfillment failed for session=%s: %s", session_id, exc)
 
 
 async def _apply_subscription_update(update: dict) -> None:

@@ -35,6 +35,8 @@ from .routes import (
 from .routes import (
     settings as settings_router,
 )
+from .routes import analytics as analytics_router
+from .routes import marketplace as marketplace_router
 from .middleware.analytics import AnalyticsMiddleware
 
 # Configure logging
@@ -109,6 +111,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         except Exception as e:
             logger.warning(f"ChromaDB not available: {e}")
             set_app_state("chromadb", False)
+
+        # Tortoise ORM (SQLite/PostgreSQL for Phase 11–16 features)
+        try:
+            from samplemind.core.database.tortoise_models import init_tortoise
+
+            await init_tortoise()
+            set_app_state("tortoise", True)
+            logger.info("✓ Tortoise ORM initialized")
+        except Exception as e:
+            logger.warning(f"Tortoise ORM not available: {e}")
+            set_app_state("tortoise", False)
 
     except Exception as e:
         logger.warning(f"Database initialization warning: {e}")
@@ -245,6 +258,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         except Exception as e:
             logger.error(f"Error closing Redis: {e}")
 
+    if get_app_state("tortoise"):
+        try:
+            from samplemind.core.database.tortoise_models import close_tortoise
+
+            await close_tortoise()
+            logger.info("✓ Tortoise ORM closed")
+        except Exception as e:
+            logger.error(f"Error closing Tortoise ORM: {e}")
+
     # Close audio engine and AI manager
     audio_engine = get_app_state("audio_engine")
     if audio_engine:
@@ -326,6 +348,8 @@ def create_application() -> FastAPI:
     app.include_router(collections.router, prefix="/api/v1", tags=["collections"])
     app.include_router(websocket.router, prefix="/api/v1", tags=["websocket"])
     app.include_router(billing.router, prefix="/api/v1", tags=["billing"])
+    app.include_router(analytics_router.router, prefix="/api/v1", tags=["analytics"])
+    app.include_router(marketplace_router.router, prefix="/api/v1", tags=["marketplace"])
 
     @app.get("/", include_in_schema=False)
     async def root():

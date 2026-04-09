@@ -112,3 +112,100 @@ async def semantic_search(request: SearchRequest):
     except Exception as e:
         logger.error(f"Search failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── FAISS-powered semantic search endpoints (Phase 11) ────────────────────────
+
+
+class FAISSSearchResult(BaseModel):
+    """Single FAISS semantic search result."""
+    index_id: int
+    path: str
+    filename: str
+    score: float
+    bpm: Optional[float] = None
+    key: Optional[str] = None
+    energy: Optional[str] = None
+    genre_labels: list[str] = []
+    mood_labels: list[str] = []
+    sample_id: Optional[str] = None
+
+
+class FAISSSearchResponse(BaseModel):
+    """FAISS search response."""
+    query: str
+    results: list[FAISSSearchResult]
+    total: int
+    index_size: int
+
+
+@router.get("/faiss")
+async def faiss_text_search(
+    q: str,
+    limit: int = 20,
+) -> FAISSSearchResponse:
+    """
+    Semantic sample search using CLAP embeddings + FAISS index.
+
+    Finds samples matching a natural language description.
+    Falls back to MFCC-based search if CLAP model unavailable.
+
+    Example: GET /api/v1/ai/search/faiss?q=dark+trap+kick&limit=10
+    """
+    from samplemind.core.search.faiss_index import get_index
+
+    idx = get_index()
+    if idx.is_empty:
+        return FAISSSearchResponse(query=q, results=[], total=0, index_size=0)
+
+    try:
+        raw_results = idx.search_text(q, top_k=min(limit, 100))
+        results = [
+            FAISSSearchResult(
+                index_id=r.index_id,
+                path=r.path,
+                filename=r.filename,
+                score=r.score,
+                bpm=r.metadata.get("bpm"),
+                key=r.metadata.get("key"),
+                energy=r.metadata.get("energy"),
+                genre_labels=r.metadata.get("genre_labels", []),
+                mood_labels=r.metadata.get("mood_labels", []),
+                sample_id=r.metadata.get("sample_id"),
+            )
+            for r in raw_results
+        ]
+        return FAISSSearchResponse(
+            query=q,
+            results=results,
+            total=len(results),
+            index_size=idx.size,
+        )
+    except Exception as exc:
+        logger.error("FAISS search failed: %s", exc)
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.post("/faiss/build")
+async def faiss_build_index(
+    paths: list[str],
+) -> dict:
+    """
+    Build or rebuild the FAISS index from a list of audio file paths.
+
+    This is a blocking operation — for large libraries use the CLI:
+      samplemind index rebuild
+    """
+    from samplemind.core.search.faiss_index import get_index, FAISSIndex
+
+    try:
+        idx = FAISSIndex()
+        idx.build(audio_paths=paths)
+        idx.save()
+        # Update global singleton
+        import samplemind.core.search.faiss_index as _fi
+        _fi._global_index = idx
+        return {"status": "ok", "indexed": idx.size}
+    except Exception as exc:
+        logger.error("FAISS build failed: %s", exc)
+        raise HTTPException(status_code=500, detail=str(exc))
