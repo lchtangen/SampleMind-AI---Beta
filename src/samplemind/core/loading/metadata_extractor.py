@@ -8,7 +8,7 @@ and generic containers.
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import mutagen
 
@@ -21,9 +21,9 @@ class MetadataExtractor:
     """Extract comprehensive metadata from audio files"""
 
     @staticmethod
-    def extract_metadata(file_path: Path, audio_format: AudioFormat) -> Dict[str, Any]:
+    def extract_metadata(file_path: Path, audio_format: AudioFormat) -> dict[str, Any]:
         """Extract all available tag and technical metadata."""
-        metadata: Dict[str, Any] = {}
+        metadata: dict[str, Any] = {}
 
         try:
             audio_file = mutagen.File(str(file_path))
@@ -68,7 +68,7 @@ class MetadataExtractor:
     # ── Helpers ────────────────────────────────────────────────────────────────
 
     @staticmethod
-    def _get_tag(audio_file: Any, tag_names: List[str]) -> Optional[str]:
+    def _get_tag(audio_file: Any, tag_names: list[str]) -> str | None:
         """Return the first matching tag value, coerced to str."""
         for tag_name in tag_names:
             if tag_name in audio_file:
@@ -80,7 +80,7 @@ class MetadataExtractor:
         return None
 
     @staticmethod
-    def _get_year(audio_file: Any) -> Optional[int]:
+    def _get_year(audio_file: Any) -> int | None:
         """Extract year from TDRC / TYER / DATE / ©day tags."""
         year_tags = ["TDRC", "TYER", "DATE", "\xa9day"]
         for tag in year_tags:
@@ -95,7 +95,7 @@ class MetadataExtractor:
         return None
 
     @staticmethod
-    def _get_track_number(audio_file: Any) -> Optional[int]:
+    def _get_track_number(audio_file: Any) -> int | None:
         """Extract track number, handling 'N/Total' format."""
         track_tags = ["TRCK", "TRACKNUMBER", "trkn"]
         for tag in track_tags:

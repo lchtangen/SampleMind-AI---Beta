@@ -2,15 +2,14 @@
 Integration tests for batch audio processing functionality.
 """
 
-import os
-import pytest
 import tempfile
-import numpy as np
-from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+import pytest
 from samplemind.audio.processor import (
-    AudioProcessor,
     AudioFormat,
+    AudioProcessor,
     BitDepth,
     ChannelMode,
 )
@@ -82,7 +81,7 @@ class TestBatchProcessing:
         processor.progress_callback = progress_callback
 
         # Process batch
-        results = processor.process_batch(
+        processor.process_batch(
             input_paths=TEST_FILES,
             output_dir=temp_dir / "with_progress",
             output_format=AudioFormat.WAV,

@@ -12,7 +12,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "src"))
 
 from samplemind.interfaces.tui.app import SampleMindTUI
-from samplemind.interfaces.tui.screens import MainScreen, AnalyzeScreen, BatchScreen
+from samplemind.interfaces.tui.screens import AnalyzeScreen, BatchScreen, MainScreen
 
 
 class TestTUIApp:

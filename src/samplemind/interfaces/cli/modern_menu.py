@@ -13,16 +13,14 @@ Professional, interactive menu interface with:
 
 import asyncio
 import os
-import sys
 import uuid
-from enum import Enum
-from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
 from dataclasses import dataclass
+from enum import Enum
+from typing import Any
 
 try:
     import questionary
-    from questionary import Choice, prompt
+    from questionary import Choice
 
     QUESTIONARY_AVAILABLE = True
 except ImportError:
@@ -30,19 +28,13 @@ except ImportError:
 
 from rich.console import Console
 from rich.panel import Panel
-from rich.table import Table
-from rich.text import Text
-from rich.layout import Layout
-from rich.progress import Progress, SpinnerColumn, TextColumn
-from rich.live import Live
-from rich.align import Align
 from rich.style import Style
-import typer
+from rich.table import Table
+
+from samplemind.utils.log_context import RequestContext
 
 # Import logging
 from samplemind.utils.logging_config import setup_logging
-from samplemind.utils.error_handler import handle_errors
-from samplemind.utils.log_context import RequestContext, request_id, command_name
 
 # Rich console
 console = Console()
@@ -82,9 +74,9 @@ class MenuItem:
     description: str
     icon: str
     action_type: MenuActionType
-    action: Optional[Any] = None  # Command name, submenu, or function
-    shortcut: Optional[str] = None
-    help_text: Optional[str] = None
+    action: Any | None = None  # Command name, submenu, or function
+    shortcut: str | None = None
+    help_text: str | None = None
 
 
 class ThemeManager:
@@ -234,14 +226,14 @@ class KeyboardShortcuts:
     }
 
     def __init__(self) -> None:
-        self.custom_shortcuts: Dict[str, str] = {}
+        self.custom_shortcuts: dict[str, str] = {}
 
     def get_shortcut_help(self) -> str:
         """Get formatted shortcut help text"""
         help_text = "Navigation: ↑↓ (or jk)  │  Select: Enter  │  Back: Esc  │  Search: /  │  Theme: t  │  Quit: q"
         return help_text
 
-    def register_custom_shortcut(self, name: str, keys: List[str]):
+    def register_custom_shortcut(self, name: str, keys: list[str]):
         """Register a custom keyboard shortcut"""
         self.custom_shortcuts[name] = keys
 
@@ -275,17 +267,17 @@ class ModernMenu:
         self.enable_shortcuts = enable_shortcuts
 
         # Menu state
-        self.menu_stack: List[str] = []  # Breadcrumb navigation
+        self.menu_stack: list[str] = []  # Breadcrumb navigation
         self.current_menu = "main"
         self.session_id = str(uuid.uuid4())[:8]
 
         # Menus (command groups)
-        self.menus: Dict[str, List[MenuItem]] = self._initialize_menus()
+        self.menus: dict[str, list[MenuItem]] = self._initialize_menus()
 
         # Initialize logging
         setup_logging()
 
-    def _initialize_menus(self) -> Dict[str, List[MenuItem]]:
+    def _initialize_menus(self) -> dict[str, list[MenuItem]]:
         """Initialize all menu structures with all 200+ commands"""
 
         menus = {
@@ -888,7 +880,7 @@ License: MIT
                     return "quit"
 
                 # Pause before returning
-                input(f"\n[dim]Press Enter to continue...[/dim]")
+                input("\n[dim]Press Enter to continue...[/dim]")
 
             except Exception as e:
                 console.print(
@@ -913,7 +905,7 @@ License: MIT
             return
 
         # Prepare choices for questionary
-        choices = [
+        [
             Choice(
                 f"{item.icon} {item.label}", value=i, short=f"{item.icon} {item.label}"
             )

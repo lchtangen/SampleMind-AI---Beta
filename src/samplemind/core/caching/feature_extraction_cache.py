@@ -12,12 +12,11 @@ Strategy:
 """
 
 import hashlib
-import json
 import logging
 import time
-from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
 from collections import OrderedDict
+from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -58,10 +57,10 @@ class FeatureExtractionCache:
             self.cache_dir.mkdir(parents=True, exist_ok=True)
 
         # In-memory cache with LRU eviction
-        self.memory_cache: OrderedDict[str, Tuple[Dict, float]] = OrderedDict()
+        self.memory_cache: OrderedDict[str, tuple[dict, float]] = OrderedDict()
 
         # File metadata tracking (path -> (mtime, hash))
-        self.file_metadata: Dict[str, Tuple[float, str]] = {}
+        self.file_metadata: dict[str, tuple[float, str]] = {}
 
         # Statistics
         self.memory_hits = 0
@@ -111,7 +110,7 @@ class FeatureExtractionCache:
 
     def get(
         self, file_path: str, analysis_level: str = "standard"
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Get cached features for audio file.
 
@@ -165,7 +164,7 @@ class FeatureExtractionCache:
         return None
 
     def set(
-        self, file_path: str, features: Dict[str, Any], analysis_level: str = "standard"
+        self, file_path: str, features: dict[str, Any], analysis_level: str = "standard"
     ) -> bool:
         """
         Cache extracted features for audio file.
@@ -203,7 +202,7 @@ class FeatureExtractionCache:
             logger.error(f"Failed to cache features: {e}")
             return False
 
-    def _add_to_memory_cache(self, cache_key: str, features: Dict) -> None:
+    def _add_to_memory_cache(self, cache_key: str, features: dict) -> None:
         """Add features to memory cache with LRU eviction."""
         # If already exists, remove it (to move to end)
         if cache_key in self.memory_cache:
@@ -250,7 +249,7 @@ class FeatureExtractionCache:
             logger.warning(f"Cache validation failed: {e}")
             return False
 
-    def _load_from_disk(self, disk_path: Path) -> Optional[Dict[str, Any]]:
+    def _load_from_disk(self, disk_path: Path) -> dict[str, Any] | None:
         """Load features from disk cache."""
         try:
             data = np.load(disk_path, allow_pickle=True)
@@ -263,7 +262,7 @@ class FeatureExtractionCache:
             logger.warning(f"Failed to load from disk: {e}")
             return None
 
-    def _save_to_disk(self, disk_path: Path, features: Dict[str, Any]) -> None:
+    def _save_to_disk(self, disk_path: Path, features: dict[str, Any]) -> None:
         """Save features to disk cache."""
         try:
             # Convert numpy arrays and prepare for storage
@@ -302,7 +301,7 @@ class FeatureExtractionCache:
             f"Invalidated {len(cache_keys_to_remove)} cache entries for {file_path}"
         )
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get cache statistics."""
         total_hits = self.memory_hits + self.disk_hits
         total_requests = total_hits + self.misses
@@ -341,7 +340,7 @@ class FeatureExtractionCache:
 
 
 # Global instance
-_feature_cache: Optional[FeatureExtractionCache] = None
+_feature_cache: FeatureExtractionCache | None = None
 
 
 def init_feature_cache(**kwargs) -> FeatureExtractionCache:

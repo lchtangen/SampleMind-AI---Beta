@@ -16,18 +16,17 @@ Usage:
     samplemind similar:compare a.wav b.wav      # Compare two files
 """
 
-import typer
-from typing import Optional
 from pathlib import Path
-from rich.console import Console
-from rich.table import Table
+
+import typer
 from rich.progress import (
+    BarColumn,
     Progress,
     SpinnerColumn,
-    TextColumn,
-    BarColumn,
     TaskProgressColumn,
+    TextColumn,
 )
+from rich.table import Table
 
 from . import utils
 
@@ -50,13 +49,13 @@ def similar_find(
     min_similarity: float = typer.Option(
         0.5, "--min", help="Minimum similarity (0.0-1.0)"
     ),
-    tempo_min: Optional[float] = typer.Option(
+    tempo_min: float | None = typer.Option(
         None, "--tempo-min", help="Filter: minimum BPM"
     ),
-    tempo_max: Optional[float] = typer.Option(
+    tempo_max: float | None = typer.Option(
         None, "--tempo-max", help="Filter: maximum BPM"
     ),
-    key: Optional[str] = typer.Option(
+    key: str | None = typer.Option(
         None, "--key", "-k", help="Filter: musical key (e.g., 'C', 'Am')"
     ),
 ) -> None:
@@ -67,12 +66,12 @@ def similar_find(
             console.print(f"[red]Error: File not found: {file}[/red]")
             raise typer.Exit(1)
 
-        console.print(f"[bold cyan]Finding Similar Samples[/bold cyan]")
+        console.print("[bold cyan]Finding Similar Samples[/bold cyan]")
         console.print(f"  Query: [green]{file.name}[/green]")
         console.print()
 
         # Build filters
-        filters = {}
+        filters: dict[str, Any] = {}
         if tempo_min is not None or tempo_max is not None:
             filters["tempo"] = {}
             if tempo_min is not None:
@@ -158,7 +157,7 @@ def similar_index(
             console.print(f"[red]Error: Not a directory: {folder}[/red]")
             raise typer.Exit(1)
 
-        console.print(f"[bold cyan]Indexing Audio Library[/bold cyan]")
+        console.print("[bold cyan]Indexing Audio Library[/bold cyan]")
         console.print(f"  Folder: [green]{folder}[/green]")
         console.print(f"  Recursive: [yellow]{'Yes' if recursive else 'No'}[/yellow]")
         console.print()
@@ -227,7 +226,7 @@ def similar_compare(
             console.print(f"[red]Error: File not found: {file2}[/red]")
             raise typer.Exit(1)
 
-        console.print(f"[bold cyan]Comparing Audio Files[/bold cyan]")
+        console.print("[bold cyan]Comparing Audio Files[/bold cyan]")
         console.print(f"  File 1: [green]{file1.name}[/green]")
         console.print(f"  File 2: [green]{file2.name}[/green]")
         console.print()

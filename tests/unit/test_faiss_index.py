@@ -96,7 +96,10 @@ def test_faiss_add_increments_size():
     fake_idx = _fake_faiss_index()
     embedder = _mock_embedder()
 
-    with patch("samplemind.core.search.faiss_index.FAISSIndex._get_or_create_index", return_value=fake_idx):
+    with patch(
+        "samplemind.core.search.faiss_index.FAISSIndex._get_or_create_index",
+        return_value=fake_idx,
+    ):
         index = FAISSIndex.__new__(FAISSIndex)
         index._dir = Path(tempfile.mkdtemp())
         index._index_path = index._dir / "index.bin"
@@ -117,7 +120,10 @@ def test_faiss_add_multiple():
     fake_idx = _fake_faiss_index()
     embedder = _mock_embedder()
 
-    with patch("samplemind.core.search.faiss_index.FAISSIndex._get_or_create_index", return_value=fake_idx):
+    with patch(
+        "samplemind.core.search.faiss_index.FAISSIndex._get_or_create_index",
+        return_value=fake_idx,
+    ):
         index = FAISSIndex.__new__(FAISSIndex)
         index._dir = Path(tempfile.mkdtemp())
         index._index_path = index._dir / "index.bin"

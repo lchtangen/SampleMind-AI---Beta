@@ -21,7 +21,10 @@ def _sine_low(sr=22050, duration=1.0) -> np.ndarray:
 
 def test_gm_instrument_table_complete():
     """Verify all 128 GM programs are present in the table."""
-    from samplemind.ai.classification.instrument_detector import GM_INSTRUMENTS, _GM_BY_PROGRAM
+    from samplemind.ai.classification.instrument_detector import (
+        _GM_BY_PROGRAM,
+        GM_INSTRUMENTS,
+    )
 
     assert len(GM_INSTRUMENTS) == 128
     programs = {prog for prog, _, _ in GM_INSTRUMENTS}
@@ -58,7 +61,7 @@ def test_detect_low_frequency_suggests_bass():
 
     # At least one result should come from Bass family (programs 32–39)
     bass_programs = set(range(32, 40))
-    has_bass = any(p in bass_programs for p in result.midi_programs)
+    any(p in bass_programs for p in result.midi_programs)
     # We're lenient — heuristic may not always hit, but it must not crash
     assert result is not None
 
@@ -88,6 +91,9 @@ def test_instrument_result_primary_matches_first():
 
 
 def test_clap_prompts_length():
-    from samplemind.ai.classification.instrument_detector import _CLAP_PROMPTS, GM_INSTRUMENTS
+    from samplemind.ai.classification.instrument_detector import (
+        _CLAP_PROMPTS,
+        GM_INSTRUMENTS,
+    )
 
     assert len(_CLAP_PROMPTS) == len(GM_INSTRUMENTS) == 128

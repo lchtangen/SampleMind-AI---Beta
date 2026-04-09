@@ -3,11 +3,11 @@ Advanced Search and Filter Engine for SampleMind TUI
 Support for complex queries with filters and fuzzy matching
 """
 
-import re
 import logging
-from typing import List, Dict, Optional, Any, Callable
+import re
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -71,8 +71,8 @@ class SearchQuery:
     def __init__(self, query_string: str = "") -> None:
         """Initialize search query from string"""
         self.query_string = query_string
-        self.filters: List[SearchFilter] = []
-        self.text_search: Optional[str] = None
+        self.filters: list[SearchFilter] = []
+        self.text_search: str | None = None
         self.fuzzy_enabled = False
 
         if query_string:
@@ -134,7 +134,7 @@ class SearchQuery:
         # Default: exact match
         self.filters.append(SearchFilter(field, FilterOperator.EQUALS, value_str))
 
-    def matches_item(self, item: Dict[str, Any]) -> bool:
+    def matches_item(self, item: dict[str, Any]) -> bool:
         """Check if item matches all filters"""
         if not self.filters:
             return True
@@ -152,16 +152,16 @@ class SearchEngine:
 
     def __init__(self) -> None:
         """Initialize search engine"""
-        self.saved_searches: Dict[str, SearchQuery] = {}
+        self.saved_searches: dict[str, SearchQuery] = {}
 
     def search(
         self,
-        items: List[Dict[str, Any]],
+        items: list[dict[str, Any]],
         query: str,
-        fields: Optional[List[str]] = None,
+        fields: list[str] | None = None,
         fuzzy: bool = False,
         threshold: float = 0.8,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Search items with query and optional fuzzy matching
 
@@ -203,7 +203,7 @@ class SearchEngine:
         return results
 
     def _text_search(
-        self, item: Dict[str, Any], text: str, fields: Optional[List[str]] = None
+        self, item: dict[str, Any], text: str, fields: list[str] | None = None
     ) -> bool:
         """Check if item contains text"""
         search_fields = fields or list(item.keys())
@@ -218,9 +218,9 @@ class SearchEngine:
 
     def _fuzzy_search(
         self,
-        item: Dict[str, Any],
+        item: dict[str, Any],
         text: str,
-        fields: Optional[List[str]] = None,
+        fields: list[str] | None = None,
         threshold: float = 0.8,
     ) -> bool:
         """Check if item matches text with fuzzy matching"""
@@ -261,11 +261,11 @@ class SearchEngine:
         self.saved_searches[name] = SearchQuery(query)
         logger.info(f"Saved search: {name}")
 
-    def get_saved_search(self, name: str) -> Optional[SearchQuery]:
+    def get_saved_search(self, name: str) -> SearchQuery | None:
         """Get a saved search"""
         return self.saved_searches.get(name)
 
-    def list_saved_searches(self) -> List[str]:
+    def list_saved_searches(self) -> list[str]:
         """List all saved searches"""
         return list(self.saved_searches.keys())
 
@@ -283,7 +283,7 @@ class QueryBuilder:
 
     def __init__(self) -> None:
         """Initialize query builder"""
-        self.conditions: List[str] = []
+        self.conditions: list[str] = []
 
     def add_tempo_range(self, min_tempo: float, max_tempo: float) -> "QueryBuilder":
         """Add tempo range filter"""
@@ -315,7 +315,7 @@ class QueryBuilder:
 
 
 # Global singleton instance
-_search_engine: Optional[SearchEngine] = None
+_search_engine: SearchEngine | None = None
 
 
 def get_search_engine() -> SearchEngine:

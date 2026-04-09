@@ -4,9 +4,9 @@ Real-time production tips, genre-specific advice, and suggestions
 """
 
 import logging
-from typing import Optional, List, Dict, Any
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -51,8 +51,8 @@ class ProductionTip:
     description: str
     genre: GenreType
     difficulty: int  # 1-5
-    related_feature: Optional[str] = None
-    example: Optional[str] = None
+    related_feature: str | None = None
+    example: str | None = None
 
 
 @dataclass
@@ -61,11 +61,11 @@ class GenreAdvice:
 
     genre: GenreType
     tempo_range: tuple  # (min, max)
-    key_recommendations: List[str]
-    typical_instruments: List[str]
-    production_techniques: List[str]
-    mixing_tips: List[str]
-    sample_characteristics: List[str]
+    key_recommendations: list[str]
+    typical_instruments: list[str]
+    production_techniques: list[str]
+    mixing_tips: list[str]
+    sample_characteristics: list[str]
 
 
 @dataclass
@@ -84,7 +84,7 @@ class AICoach:
     """Real-time AI coaching system for music production"""
 
     # Production tips database
-    PRODUCTION_TIPS: Dict[GenreType, List[ProductionTip]] = {
+    PRODUCTION_TIPS: dict[GenreType, list[ProductionTip]] = {
         GenreType.TECHNO: [
             ProductionTip(
                 category=ProductionTipCategory.ARRANGEMENT,
@@ -160,7 +160,7 @@ class AICoach:
     }
 
     # Genre advice database
-    GENRE_ADVICE: Dict[GenreType, GenreAdvice] = {
+    GENRE_ADVICE: dict[GenreType, GenreAdvice] = {
         GenreType.TECHNO: GenreAdvice(
             genre=GenreType.TECHNO,
             tempo_range=(120, 130),
@@ -232,10 +232,10 @@ class AICoach:
 
     def __init__(self) -> None:
         """Initialize AI coach"""
-        self.tips_shown: List[str] = []
-        self.current_context: Dict[str, Any] = {}
+        self.tips_shown: list[str] = []
+        self.current_context: dict[str, Any] = {}
 
-    def detect_genre(self, features: Dict[str, Any]) -> GenreType:
+    def detect_genre(self, features: dict[str, Any]) -> GenreType:
         """
         Detect genre based on audio features
 
@@ -248,7 +248,7 @@ class AICoach:
         tempo = features.get("tempo", 0)
         energy = features.get("energy", 0)
         spectral_centroid = features.get("spectral_centroid", 0)
-        zero_crossing_rate = features.get("zero_crossing_rate", 0)
+        features.get("zero_crossing_rate", 0)
 
         # Simple heuristic-based genre detection
         if 120 <= tempo <= 130 and energy > 0.6 and spectral_centroid < 3000:
@@ -266,9 +266,9 @@ class AICoach:
         self,
         genre: GenreType = GenreType.UNKNOWN,
         difficulty_level: int = 2,
-        category: Optional[ProductionTipCategory] = None,
+        category: ProductionTipCategory | None = None,
         limit: int = 3,
-    ) -> List[ProductionTip]:
+    ) -> list[ProductionTip]:
         """
         Get production tips
 
@@ -307,7 +307,7 @@ class AICoach:
 
         return tips[:limit]
 
-    def get_genre_advice(self, genre: GenreType) -> Optional[GenreAdvice]:
+    def get_genre_advice(self, genre: GenreType) -> GenreAdvice | None:
         """
         Get genre-specific advice
 
@@ -320,8 +320,8 @@ class AICoach:
         return self.GENRE_ADVICE.get(genre)
 
     def suggest_sample_pairings(
-        self, current_sample: Dict[str, Any], available_samples: List[Dict[str, Any]]
-    ) -> List[SamplePairing]:
+        self, current_sample: dict[str, Any], available_samples: list[dict[str, Any]]
+    ) -> list[SamplePairing]:
         """
         Suggest compatible sample pairings
 
@@ -337,7 +337,7 @@ class AICoach:
         current_energy = current_sample.get("energy", 0.5)
         current_name = current_sample.get("name", "Unknown")
 
-        pairings: List[SamplePairing] = []
+        pairings: list[SamplePairing] = []
 
         for sample in available_samples:
             sample_tempo = sample.get("tempo", 120)
@@ -390,7 +390,7 @@ class AICoach:
         pairings.sort(key=lambda x: x.compatibility_score, reverse=True)
         return pairings[:5]
 
-    def get_context_tips(self, context: Dict[str, Any], limit: int = 3) -> List[str]:
+    def get_context_tips(self, context: dict[str, Any], limit: int = 3) -> list[str]:
         """
         Get context-aware tips
 
@@ -401,7 +401,7 @@ class AICoach:
         Returns:
             List of tip strings
         """
-        tips: List[str] = []
+        tips: list[str] = []
         analyzed_count = context.get("analyzed_count", 0)
         current_genre = context.get("current_genre", GenreType.UNKNOWN)
         user_level = context.get("user_level", "beginner")
@@ -485,7 +485,7 @@ class AICoach:
 
 
 # Global singleton instance
-_ai_coach: Optional[AICoach] = None
+_ai_coach: AICoach | None = None
 
 
 def get_ai_coach() -> AICoach:

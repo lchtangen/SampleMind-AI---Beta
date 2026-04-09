@@ -1,6 +1,7 @@
 """Common schemas used across the API"""
 
-from typing import Optional, Dict, Any
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -9,7 +10,7 @@ class ErrorResponse(BaseModel):
 
     error: str
     message: str
-    details: Optional[Dict[str, Any]] = None
+    details: dict[str, Any] | None = None
 
 
 class HealthCheckResponse(BaseModel):
@@ -18,7 +19,7 @@ class HealthCheckResponse(BaseModel):
     status: str = "healthy"
     version: str
     environment: str
-    components: Dict[str, str] = Field(default_factory=dict)
+    components: dict[str, str] = Field(default_factory=dict)
 
 
 class PaginationParams(BaseModel):

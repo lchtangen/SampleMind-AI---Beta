@@ -8,9 +8,9 @@ Tests cover:
 - Library cleanup (dedupe, cleanup, verify)
 """
 
+from unittest.mock import patch
+
 import pytest
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
 from typer.testing import CliRunner
 
 pytestmark = [pytest.mark.unit, pytest.mark.cli]

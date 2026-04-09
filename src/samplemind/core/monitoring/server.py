@@ -5,11 +5,9 @@ This module provides an HTTP server that exposes metrics in Prometheus format.
 """
 
 import asyncio
-import json
 import signal
 import time
 from http import HTTPStatus
-from typing import Any, Dict, Optional
 
 from aiohttp import web
 from loguru import logger
@@ -28,8 +26,8 @@ class MonitoringServer:
         self.host = host
         self.port = port
         self.app = web.Application()
-        self.runner: Optional[web.AppRunner] = None
-        self.site: Optional[web.TCPSite] = None
+        self.runner: web.AppRunner | None = None
+        self.site: web.TCPSite | None = None
 
         # Setup routes
         self.app.router.add_get("/metrics", self.handle_metrics)
@@ -88,7 +86,7 @@ class MonitoringServer:
 
 def start_monitoring_server(
     monitor: Monitor, host: str = "0.0.0.0", port: int = 8000, run_async: bool = False
-) -> Optional[MonitoringServer]:
+) -> MonitoringServer | None:
     """
     Start the monitoring server.
 

@@ -2,8 +2,7 @@
 
 import logging
 import uuid
-from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Any
 
 from samplemind.core.database.mongo import Analysis, Favorite, UserSettings
 from samplemind.core.database.repositories.analysis_repository import (
@@ -22,10 +21,10 @@ logger = logging.getLogger(__name__)
 class TUIDatabase:
     """High-level database interface for TUI screens"""
 
-    def __init__(self, user_id: Optional[str] = None) -> None:
+    def __init__(self, user_id: str | None = None) -> None:
         """Initialize TUI database with optional user ID"""
         self.user_id = user_id or "default_user"
-        self._settings: Optional[UserSettings] = None
+        self._settings: UserSettings | None = None
 
     async def initialize(self) -> None:
         """Initialize database connection and settings"""
@@ -44,12 +43,12 @@ class TUIDatabase:
     async def save_analysis_result(
         self,
         file_path: str,
-        features: Dict[str, Any],
+        features: dict[str, Any],
         analysis_level: str = "STANDARD",
         processing_time: float = 0.0,
-        ai_summary: Optional[str] = None,
-        production_tips: Optional[List[str]] = None,
-        spectral_features: Optional[Dict[str, Any]] = None,
+        ai_summary: str | None = None,
+        production_tips: list[str] | None = None,
+        spectral_features: dict[str, Any] | None = None,
     ) -> str:
         """Save analysis result to database and return analysis_id"""
         try:
@@ -83,7 +82,7 @@ class TUIDatabase:
                 else features.duration
             )
 
-            analysis = await AnalysisRepository.create(
+            await AnalysisRepository.create(
                 analysis_id=analysis_id,
                 file_id=file_id,
                 tempo=tempo,
@@ -106,7 +105,7 @@ class TUIDatabase:
             logger.error(f"❌ Failed to save analysis result: {e}")
             raise
 
-    async def get_analysis_result(self, analysis_id: str) -> Optional[Analysis]:
+    async def get_analysis_result(self, analysis_id: str) -> Analysis | None:
         """Retrieve analysis result by ID"""
         try:
             return await AnalysisRepository.get_by_id(analysis_id)
@@ -114,7 +113,7 @@ class TUIDatabase:
             logger.error(f"❌ Failed to retrieve analysis: {e}")
             return None
 
-    async def get_recent_analyses(self, limit: int = 10) -> List[Analysis]:
+    async def get_recent_analyses(self, limit: int = 10) -> list[Analysis]:
         """Get recently analyzed files"""
         try:
             # Get recent analyses by user (would need to extend repo)
@@ -130,12 +129,12 @@ class TUIDatabase:
     # ============================================================================
 
     async def add_favorite(
-        self, analysis_id: str, file_name: str, notes: Optional[str] = None
+        self, analysis_id: str, file_name: str, notes: str | None = None
     ) -> str:
         """Add analysis to favorites and return favorite_id"""
         try:
             favorite_id = str(uuid.uuid4())
-            favorite = await FavoriteRepository.create(
+            await FavoriteRepository.create(
                 favorite_id=favorite_id,
                 analysis_id=analysis_id,
                 file_name=file_name,
@@ -159,7 +158,7 @@ class TUIDatabase:
             logger.error(f"❌ Failed to remove favorite: {e}")
             return False
 
-    async def get_favorite_by_analysis_id(self, analysis_id: str) -> Optional[Favorite]:
+    async def get_favorite_by_analysis_id(self, analysis_id: str) -> Favorite | None:
         """Check if analysis is favorited"""
         try:
             return await FavoriteRepository.get_by_analysis_id(analysis_id)
@@ -167,7 +166,7 @@ class TUIDatabase:
             logger.error(f"❌ Failed to check favorite status: {e}")
             return None
 
-    async def get_all_favorites(self, limit: int = 50) -> List[Favorite]:
+    async def get_all_favorites(self, limit: int = 50) -> list[Favorite]:
         """Get all favorites for user"""
         try:
             return await FavoriteRepository.get_by_user(
@@ -177,7 +176,7 @@ class TUIDatabase:
             logger.error(f"❌ Failed to retrieve favorites: {e}")
             return []
 
-    async def get_rated_favorites(self, min_rating: int = 3) -> List[Favorite]:
+    async def get_rated_favorites(self, min_rating: int = 3) -> list[Favorite]:
         """Get favorites with minimum rating"""
         try:
             return await FavoriteRepository.get_by_rating(self.user_id, min_rating)
@@ -185,7 +184,7 @@ class TUIDatabase:
             logger.error(f"❌ Failed to retrieve rated favorites: {e}")
             return []
 
-    async def get_recent_favorites(self, limit: int = 10) -> List[Favorite]:
+    async def get_recent_favorites(self, limit: int = 10) -> list[Favorite]:
         """Get recently added favorites"""
         try:
             return await FavoriteRepository.get_recent(self.user_id, limit)
@@ -271,7 +270,7 @@ class TUIDatabase:
             logger.error(f"❌ Failed to update export format: {e}")
             return False
 
-    async def export_settings(self) -> Dict[str, Any]:
+    async def export_settings(self) -> dict[str, Any]:
         """Export all settings as dictionary"""
         try:
             return await SettingsRepository.export_settings(self.user_id)
@@ -293,11 +292,11 @@ class TUIDatabase:
     # UTILITY METHODS
     # ============================================================================
 
-    async def get_session_summary(self) -> Dict[str, Any]:
+    async def get_session_summary(self) -> dict[str, Any]:
         """Get summary of session data (analyses, favorites, etc.)"""
         try:
             recent_analyses = await self.get_recent_analyses(limit=5)
-            favorites = await self.get_all_favorites(limit=5)
+            await self.get_all_favorites(limit=5)
             favorites_count = await self.count_favorites()
             settings = await self.get_settings()
 
@@ -313,14 +312,14 @@ class TUIDatabase:
             logger.error(f"❌ Failed to get session summary: {e}")
             return {}
 
-    async def search_by_tags(self, tags: List[str]) -> List[Analysis]:
+    async def search_by_tags(self, tags: list[str]) -> list[Analysis]:
         """Search analyses by tags (future enhancement)"""
         # This would be implemented when Analysis model includes tags
         # For now, return empty list as placeholder
         logger.info(f"🔍 Searching by tags: {tags}")
         return []
 
-    async def get_analysis_stats(self) -> Dict[str, Any]:
+    async def get_analysis_stats(self) -> dict[str, Any]:
         """Get statistics about user's analyses"""
         try:
             analyses = await self.get_recent_analyses(limit=1000)
@@ -360,10 +359,10 @@ class TUIDatabase:
 
 
 # Global singleton instance
-_tui_database: Optional[TUIDatabase] = None
+_tui_database: TUIDatabase | None = None
 
 
-def get_tui_database(user_id: Optional[str] = None) -> TUIDatabase:
+def get_tui_database(user_id: str | None = None) -> TUIDatabase:
     """Get or create TUI database singleton"""
     global _tui_database
     if _tui_database is None:
@@ -371,7 +370,7 @@ def get_tui_database(user_id: Optional[str] = None) -> TUIDatabase:
     return _tui_database
 
 
-async def initialize_tui_database(user_id: Optional[str] = None) -> TUIDatabase:
+async def initialize_tui_database(user_id: str | None = None) -> TUIDatabase:
     """Initialize TUI database singleton"""
     global _tui_database
     _tui_database = TUIDatabase(user_id)

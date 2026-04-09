@@ -4,17 +4,16 @@ End-to-End Tests for SampleMind Plugin System
 Tests complete workflows integrating installer, backend, and API client
 """
 
-import pytest
 import sys
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
-import asyncio
-import json
+from unittest.mock import Mock, patch
+
+import pytest
 
 # Add plugins directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "plugins"))
 
-from installer import Platform, DAW, DAWDetector, PluginInstaller
+from installer import DAW, DAWDetector, Platform, PluginInstaller
 
 
 class TestPluginInstallationWorkflow:
@@ -57,7 +56,7 @@ class TestPluginInstallationWorkflow:
             / "Max Instrument",
         }
 
-        for daw_type, daw_path in daw_dirs.items():
+        for _daw_type, daw_path in daw_dirs.items():
             daw_path.mkdir(parents=True)
 
         return {
@@ -279,11 +278,6 @@ class TestBackendAPIWorkflow:
         """Test complete analysis workflow: upload → analyze → display results"""
         # Step 1: Upload audio file (mock)
         # In real scenario: file selection from HTML
-        mock_file = {
-            "name": "test.wav",
-            "size": 1024000,
-            "type": "audio/wav",
-        }
 
         # Step 2: Send to backend for analysis
         # In real scenario: api.analyzeAudio(file, 'STANDARD')
@@ -361,7 +355,7 @@ class TestIntegrationScenarios:
     def test_plugin_installer_integration(self, tmp_path):
         """Test plugin installer can be imported and initialized"""
         # Should not raise any import errors
-        from installer import DAWDetector, PluginInstaller, Platform
+        from installer import DAWDetector, PluginInstaller
 
         detector = DAWDetector()
         assert detector is not None

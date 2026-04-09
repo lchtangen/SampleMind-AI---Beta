@@ -41,6 +41,7 @@ PROGRESS_TTL = 3600  # seconds
 # Redis helper (lazy import so Redis is not required at import time)
 # ---------------------------------------------------------------------------
 
+
 def _get_redis():  # type: ignore[return]
     """Return a redis.Redis client, or None if Redis is unavailable."""
     try:
@@ -63,7 +64,9 @@ def _push_progress(
     if r is None:
         return
     key = PROGRESS_KEY_TEMPLATE.format(task_id=task_id)
-    event = json.dumps({"stage": stage, "pct": pct, "message": message, "ts": time.time()})
+    event = json.dumps(
+        {"stage": stage, "pct": pct, "message": message, "ts": time.time()}
+    )
     try:
         r.rpush(key, event)
         r.expire(key, PROGRESS_TTL)
@@ -74,6 +77,7 @@ def _push_progress(
 # ---------------------------------------------------------------------------
 # Celery task
 # ---------------------------------------------------------------------------
+
 
 @celery_app.task(
     bind=True,
@@ -113,7 +117,9 @@ def run_analysis_agent(
 
     def push(stage: str, pct: int, message: str) -> None:
         _push_progress(r, task_id, stage, pct, message)
-        self.update_state(state="PROGRESS", meta={"stage": stage, "pct": pct, "message": message})
+        self.update_state(
+            state="PROGRESS", meta={"stage": stage, "pct": pct, "message": message}
+        )
 
     push("routing", 5, f"Validating file: {Path(file_path).name}")
 

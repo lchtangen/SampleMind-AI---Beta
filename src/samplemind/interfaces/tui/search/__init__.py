@@ -1,11 +1,11 @@
 """TUI Search module - Advanced search and filter engine"""
 
 from samplemind.interfaces.tui.search.search_engine import (
-    SearchEngine,
-    SearchQuery,
-    QueryBuilder,
-    SearchFilter,
     FilterOperator,
+    QueryBuilder,
+    SearchEngine,
+    SearchFilter,
+    SearchQuery,
     get_search_engine,
 )
 

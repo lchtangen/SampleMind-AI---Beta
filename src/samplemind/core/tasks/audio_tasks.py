@@ -5,9 +5,8 @@ Background tasks for audio analysis, batch processing, and embeddings
 
 import asyncio
 import logging
-from pathlib import Path
-from typing import Dict, List, Any, Optional
 from datetime import datetime, timedelta
+from typing import Any
 
 from celery import Task, group
 from celery.exceptions import SoftTimeLimitExceeded
@@ -48,9 +47,9 @@ def process_audio_analysis(
     self,
     file_id: str,
     file_path: str,
-    user_id: Optional[str] = None,
-    analysis_options: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    user_id: str | None = None,
+    analysis_options: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """
     Process audio file analysis in background
 
@@ -126,8 +125,8 @@ def process_audio_analysis(
 
         # Save to database
         from samplemind.core.database.repositories import (
-            AudioRepository,
             AnalysisRepository,
+            AudioRepository,
         )
 
         # Create analysis record
@@ -188,10 +187,10 @@ def process_audio_analysis(
 def batch_process_audio_files(
     self,
     batch_id: str,
-    file_infos: List[Dict[str, Any]],
-    user_id: Optional[str] = None,
-    analysis_options: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    file_infos: list[dict[str, Any]],
+    user_id: str | None = None,
+    analysis_options: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """
     Process multiple audio files in parallel
 
@@ -289,8 +288,8 @@ def batch_process_audio_files(
     name="samplemind.core.tasks.audio_tasks.generate_audio_embeddings",
 )
 def generate_audio_embeddings(
-    self, file_id: str, file_path: str, audio_features: Dict[str, Any]
-) -> Dict[str, Any]:
+    self, file_id: str, file_path: str, audio_features: dict[str, Any]
+) -> dict[str, Any]:
     """
     Generate and store audio embeddings for similarity search
 
@@ -402,8 +401,6 @@ def cleanup_old_results() -> None:
 
         # Delete results older than 30 days
         cutoff_date = datetime.utcnow() - timedelta(days=30)
-
-        from samplemind.core.database.repositories import AnalysisRepository
 
         # This would need a method in the repository
         # For now, just log

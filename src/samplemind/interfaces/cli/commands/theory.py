@@ -17,12 +17,11 @@ Usage:
     samplemind theory:scale "C major"            # Show C major scale
 """
 
-import typer
-from typing import Optional
 from pathlib import Path
-from rich.console import Console
-from rich.table import Table
+
+import typer
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
 
 from . import utils
 
@@ -52,7 +51,7 @@ def theory_key(
             console.print(f"[red]Error: File not found: {file}[/red]")
             raise typer.Exit(1)
 
-        console.print(f"[bold cyan]Key Detection[/bold cyan]")
+        console.print("[bold cyan]Key Detection[/bold cyan]")
         console.print(f"  File: [green]{file.name}[/green]")
         console.print()
 
@@ -123,7 +122,7 @@ def theory_chords(
             console.print(f"[red]Error: File not found: {file}[/red]")
             raise typer.Exit(1)
 
-        console.print(f"[bold cyan]Chord Progression Analysis[/bold cyan]")
+        console.print("[bold cyan]Chord Progression Analysis[/bold cyan]")
         console.print(f"  File: [green]{file.name}[/green]")
         console.print()
 
@@ -223,7 +222,7 @@ def theory_harmony(
             console.print(f"[red]Error: File not found: {file}[/red]")
             raise typer.Exit(1)
 
-        console.print(f"[bold cyan]Full Harmonic Analysis[/bold cyan]")
+        console.print("[bold cyan]Full Harmonic Analysis[/bold cyan]")
         console.print(f"  File: [green]{file.name}[/green]")
         console.print()
 
@@ -304,7 +303,7 @@ def theory_scale(
 ) -> None:
     """Show scale notes for a given key"""
     try:
-        from ....core.analysis.chord_templates import NOTE_NAMES, NOTE_TO_PC
+        from ....core.analysis.chord_templates import NOTE_TO_PC
 
         # Parse key
         key = key.strip()
@@ -323,9 +322,7 @@ def theory_scale(
             mode_str = parts[1].lower()
             mode = "minor" if mode_str in ["minor", "min", "m"] else "major"
         else:
-            console.print(
-                f"[red]Error: Invalid key format. Use 'C major' or 'Am'[/red]"
-            )
+            console.print("[red]Error: Invalid key format. Use 'C major' or 'Am'[/red]")
             raise typer.Exit(1)
 
         # Get root pitch class
@@ -354,7 +351,7 @@ def theory_scale(
         table.add_column("Degree", style="dim")
         table.add_column("Note", style="cyan")
 
-        for degree, note in zip(degrees, scale_notes):
+        for degree, note in zip(degrees, scale_notes, strict=False):
             table.add_row(degree, note)
 
         console.print(table)

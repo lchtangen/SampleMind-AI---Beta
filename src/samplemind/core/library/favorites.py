@@ -12,10 +12,10 @@ Allows users to:
 
 import json
 import logging
-from pathlib import Path
-from typing import Dict, List, Optional, Any
 from datetime import datetime
 from enum import Enum
+from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +37,8 @@ class Sample:
         id: str,
         filename: str,
         path: str,
-        metadata: Optional[Dict] = None,
-        added_at: Optional[str] = None,
+        metadata: dict | None = None,
+        added_at: str | None = None,
     ):
         self.id = id
         self.filename = filename
@@ -46,7 +46,7 @@ class Sample:
         self.metadata = metadata or {}
         self.added_at = added_at or datetime.now().isoformat()
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary"""
         return {
             "id": self.id,
@@ -57,7 +57,7 @@ class Sample:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict) -> "Sample":
+    def from_dict(cls, data: dict) -> "Sample":
         """Create from dictionary"""
         return cls(
             id=data["id"],
@@ -77,8 +77,8 @@ class Collection:
         name: str,
         collection_type: CollectionType = CollectionType.CUSTOM,
         description: str = "",
-        metadata: Optional[Dict] = None,
-        created_at: Optional[str] = None,
+        metadata: dict | None = None,
+        created_at: str | None = None,
     ):
         self.id = id
         self.name = name
@@ -86,7 +86,7 @@ class Collection:
         self.description = description
         self.metadata = metadata or {}
         self.created_at = created_at or datetime.now().isoformat()
-        self.samples: Dict[str, Sample] = {}
+        self.samples: dict[str, Sample] = {}
 
     def add_sample(self, sample: Sample) -> bool:
         """Add sample to collection"""
@@ -108,15 +108,15 @@ class Collection:
         logger.debug(f"Removed {sample_id} from {self.name}")
         return True
 
-    def get_sample(self, sample_id: str) -> Optional[Sample]:
+    def get_sample(self, sample_id: str) -> Sample | None:
         """Get sample by ID"""
         return self.samples.get(sample_id)
 
-    def list_samples(self) -> List[Sample]:
+    def list_samples(self) -> list[Sample]:
         """Get all samples in collection"""
         return list(self.samples.values())
 
-    def search_samples(self, query: str) -> List[Sample]:
+    def search_samples(self, query: str) -> list[Sample]:
         """Search samples by filename or metadata"""
         query_lower = query.lower()
         results = []
@@ -128,7 +128,7 @@ class Collection:
                 continue
 
             # Search metadata values
-            for key, value in sample.metadata.items():
+            for _key, value in sample.metadata.items():
                 if isinstance(value, str) and query_lower in value.lower():
                     results.append(sample)
                     break
@@ -139,7 +139,7 @@ class Collection:
         """Get number of samples in collection"""
         return len(self.samples)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary"""
         return {
             "id": self.id,
@@ -152,7 +152,7 @@ class Collection:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict) -> "Collection":
+    def from_dict(cls, data: dict) -> "Collection":
         """Create from dictionary"""
         collection = cls(
             id=data["id"],
@@ -191,7 +191,7 @@ class FavoritesManager:
         """
         self.storage_dir = Path(storage_dir)
         self.storage_dir.mkdir(parents=True, exist_ok=True)
-        self.collections: Dict[str, Collection] = {}
+        self.collections: dict[str, Collection] = {}
         self._init_favorites_collection()
         self._load_collections()
 
@@ -212,7 +212,7 @@ class FavoritesManager:
         name: str,
         description: str = "",
         collection_type: CollectionType = CollectionType.CUSTOM,
-        metadata: Optional[Dict] = None,
+        metadata: dict | None = None,
     ) -> Collection:
         """
         Create a new collection.
@@ -247,13 +247,13 @@ class FavoritesManager:
         logger.info(f"Created collection: {name}")
         return collection
 
-    def get_collection(self, collection_id: str) -> Optional[Collection]:
+    def get_collection(self, collection_id: str) -> Collection | None:
         """Get collection by ID"""
         return self.collections.get(collection_id)
 
     def list_collections(
-        self, collection_type: Optional[CollectionType] = None
-    ) -> List[Collection]:
+        self, collection_type: CollectionType | None = None
+    ) -> list[Collection]:
         """
         List collections.
 
@@ -362,7 +362,7 @@ class FavoritesManager:
 
         return success
 
-    def search_all_collections(self, query: str) -> Dict[str, List[Sample]]:
+    def search_all_collections(self, query: str) -> dict[str, list[Sample]]:
         """
         Search across all collections.
 
@@ -406,7 +406,7 @@ class FavoritesManager:
             logger.error(f"Failed to export collection: {e}")
             return False
 
-    def import_collection(self, import_path: str) -> Optional[Collection]:
+    def import_collection(self, import_path: str) -> Collection | None:
         """
         Import collection from JSON file.
 
@@ -417,7 +417,7 @@ class FavoritesManager:
             Imported collection or None
         """
         try:
-            with open(import_path, "r") as f:
+            with open(import_path) as f:
                 data = json.load(f)
 
             collection = Collection.from_dict(data)
@@ -430,7 +430,7 @@ class FavoritesManager:
             logger.error(f"Failed to import collection: {e}")
             return None
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get collections statistics"""
         total_samples = sum(c.get_size() for c in self.collections.values())
 
@@ -462,7 +462,7 @@ class FavoritesManager:
         """Load all collections from disk"""
         for json_file in self.storage_dir.glob("*.json"):
             try:
-                with open(json_file, "r") as f:
+                with open(json_file) as f:
                     data = json.load(f)
 
                 collection = Collection.from_dict(data)
@@ -485,7 +485,7 @@ class FavoritesManager:
 
 
 # Global favorites manager instance
-_favorites_manager: Optional[FavoritesManager] = None
+_favorites_manager: FavoritesManager | None = None
 
 
 def init_favorites(storage_dir: str = ".samplemind/collections") -> FavoritesManager:

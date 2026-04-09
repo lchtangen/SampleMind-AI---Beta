@@ -3,11 +3,10 @@ Keyboard Shortcut Manager for SampleMind TUI
 Customizable keyboard bindings with conflict detection
 """
 
-import logging
 import json
-from typing import Optional, Dict, List, Set, Tuple
-from pathlib import Path
+import logging
 from enum import Enum
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +88,7 @@ EMACS_SHORTCUTS = {
 class ShortcutManager:
     """Manages keyboard shortcuts"""
 
-    def __init__(self, config_dir: Optional[str] = None) -> None:
+    def __init__(self, config_dir: str | None = None) -> None:
         """
         Initialize shortcut manager
 
@@ -102,7 +101,7 @@ class ShortcutManager:
         self.config_dir = Path(config_dir)
         self.config_dir.mkdir(parents=True, exist_ok=True)
 
-        self.shortcuts: Dict[str, List[str]] = DEFAULT_SHORTCUTS.copy()
+        self.shortcuts: dict[str, list[str]] = DEFAULT_SHORTCUTS.copy()
         self.binding_style = BindingStyle.DEFAULT
         self.config_file = self.config_dir / "shortcuts.json"
 
@@ -129,7 +128,7 @@ class ShortcutManager:
 
         logger.info(f"Set binding style to: {style.value}")
 
-    def get_shortcut(self, action: str) -> Optional[List[str]]:
+    def get_shortcut(self, action: str) -> list[str] | None:
         """
         Get shortcuts for an action
 
@@ -141,7 +140,7 @@ class ShortcutManager:
         """
         return self.shortcuts.get(action)
 
-    def get_primary_shortcut(self, action: str) -> Optional[str]:
+    def get_primary_shortcut(self, action: str) -> str | None:
         """
         Get primary (first) shortcut for an action
 
@@ -154,7 +153,7 @@ class ShortcutManager:
         shortcuts = self.shortcuts.get(action, [])
         return shortcuts[0] if shortcuts else None
 
-    def set_shortcut(self, action: str, keys: List[str]) -> bool:
+    def set_shortcut(self, action: str, keys: list[str]) -> bool:
         """
         Set shortcut for action
 
@@ -224,7 +223,7 @@ class ShortcutManager:
         logger.info(f"Removed shortcut {key} from {action}")
         return True
 
-    def detect_conflicts(self, action: str, keys: List[str]) -> List[Tuple[str, str]]:
+    def detect_conflicts(self, action: str, keys: list[str]) -> list[tuple[str, str]]:
         """
         Detect shortcut conflicts
 
@@ -245,7 +244,7 @@ class ShortcutManager:
 
         return conflicts
 
-    def find_conflict(self, key: str) -> Optional[str]:
+    def find_conflict(self, key: str) -> str | None:
         """
         Find what action a key is currently bound to
 
@@ -261,11 +260,11 @@ class ShortcutManager:
 
         return None
 
-    def get_all_shortcuts(self) -> Dict[str, List[str]]:
+    def get_all_shortcuts(self) -> dict[str, list[str]]:
         """Get all shortcuts"""
         return self.shortcuts.copy()
 
-    def get_actions(self) -> List[str]:
+    def get_actions(self) -> list[str]:
         """Get all available actions"""
         return list(self.shortcuts.keys())
 
@@ -304,7 +303,7 @@ class ShortcutManager:
             return
 
         try:
-            with open(self.config_file, "r") as f:
+            with open(self.config_file) as f:
                 config = json.load(f)
 
             # Load binding style
@@ -362,7 +361,7 @@ class ShortcutManager:
             True if successful
         """
         try:
-            with open(file_path, "r") as f:
+            with open(file_path) as f:
                 config = json.load(f)
 
             # Validate before applying
@@ -429,10 +428,10 @@ class ShortcutManager:
 
 
 # Global shortcut manager instance
-_shortcut_manager: Optional[ShortcutManager] = None
+_shortcut_manager: ShortcutManager | None = None
 
 
-def get_shortcut_manager(config_dir: Optional[str] = None) -> ShortcutManager:
+def get_shortcut_manager(config_dir: str | None = None) -> ShortcutManager:
     """Get or create shortcut manager singleton"""
     global _shortcut_manager
     if _shortcut_manager is None:

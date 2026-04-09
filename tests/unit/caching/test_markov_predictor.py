@@ -1,12 +1,12 @@
 """Unit tests for Markov chain predictor."""
 
-import pytest
 import time
 
+import pytest
+
 from samplemind.core.caching.markov_predictor import (
-    Prediction,
-    PredictionResult,
     MarkovPredictor,
+    Prediction,
 )
 from samplemind.core.caching.usage_patterns import (
     UsageEvent,
@@ -209,10 +209,10 @@ class TestMarkovPredictor:
         )
 
         # Record 10 predictions: 7 correct, 3 incorrect
-        for i in range(7):
+        for _i in range(7):
             predictor.evaluate_prediction(pred, was_correct=True)
 
-        for i in range(3):
+        for _i in range(3):
             predictor.evaluate_prediction(pred, was_correct=False)
 
         accuracy = predictor.get_accuracy()
@@ -233,10 +233,10 @@ class TestMarkovPredictor:
         )
 
         # Add 20 predictions
-        for i in range(15):
+        for _i in range(15):
             predictor.evaluate_prediction(pred, was_correct=True)
 
-        for i in range(5):
+        for _i in range(5):
             predictor.evaluate_prediction(pred, was_correct=False)
 
         recent = predictor.get_recent_accuracy(window=10)
@@ -362,8 +362,8 @@ class TestMarkovPredictor:
     def test_global_instance(self):
         """Test global predictor instance"""
         from samplemind.core.caching.markov_predictor import (
-            init_predictor,
             get_predictor,
+            init_predictor,
         )
 
         # Initialize

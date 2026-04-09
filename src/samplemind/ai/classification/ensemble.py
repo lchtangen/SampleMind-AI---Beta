@@ -31,7 +31,7 @@ from __future__ import annotations
 import json
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal, NamedTuple
 
@@ -42,10 +42,15 @@ logger = logging.getLogger(__name__)
 Task = Literal["energy", "mood_simplified", "instrument_simplified"]
 EnergyLabel = Literal["low", "mid", "high"]
 MoodLabel = Literal["dark", "chill", "aggressive", "euphoric", "melancholic", "neutral"]
-InstrumentLabel = Literal["loop", "hihat", "kick", "snare", "bass", "pad", "lead", "sfx", "unknown"]
+InstrumentLabel = Literal[
+    "loop", "hihat", "kick", "snare", "bass", "pad", "lead", "sfx", "unknown"
+]
 
 UNCERTAINTY_THRESHOLD = 0.60
-ACTIVE_LEARNING_DIR = Path(os.getenv("SAMPLEMIND_DATA_DIR", Path.home() / ".samplemind")) / "active_learning"
+ACTIVE_LEARNING_DIR = (
+    Path(os.getenv("SAMPLEMIND_DATA_DIR", Path.home() / ".samplemind"))
+    / "active_learning"
+)
 
 
 class PredictionResult(NamedTuple):
@@ -68,7 +73,7 @@ class EnsembleClassifier:
     """
 
     def __init__(self) -> None:
-        self._models: dict[str, dict] = {}   # task → {model_name: fitted_model}
+        self._models: dict[str, dict] = {}  # task → {model_name: fitted_model}
         self._label_encoders: dict[str, object] = {}
         self._classes: dict[str, list[str]] = {}
         ACTIVE_LEARNING_DIR.mkdir(parents=True, exist_ok=True)
@@ -80,7 +85,7 @@ class EnsembleClassifier:
         X: np.ndarray,
         y: list[str],
         task: Task,
-    ) -> "EnsembleClassifier":
+    ) -> EnsembleClassifier:
         """
         Fit the ensemble on feature matrix X and string labels y.
 
@@ -134,7 +139,9 @@ class EnsembleClassifier:
         try:
             from sklearn.neighbors import KNeighborsClassifier
 
-            knn = KNeighborsClassifier(n_neighbors=min(7, len(y)), weights="distance", metric="cosine")
+            knn = KNeighborsClassifier(
+                n_neighbors=min(7, len(y)), weights="distance", metric="cosine"
+            )
             knn.fit(X, y_enc)
             models["knn"] = knn
             logger.debug("KNN fitted for task=%s", task)
@@ -145,7 +152,9 @@ class EnsembleClassifier:
             raise RuntimeError(f"All models failed to fit for task={task}")
 
         self._models[task] = models
-        logger.info("Ensemble fitted for task=%s with models: %s", task, list(models.keys()))
+        logger.info(
+            "Ensemble fitted for task=%s with models: %s", task, list(models.keys())
+        )
         return self
 
     # ── Inference ─────────────────────────────────────────────────────────────
@@ -166,9 +175,7 @@ class EnsembleClassifier:
         models = self._models.get(task, {})
 
         if not models or not classes:
-            raise ValueError(
-                f"Ensemble not trained for task={task}. Call fit() first."
-            )
+            raise ValueError(f"Ensemble not trained for task={task}. Call fit() first.")
 
         # Collect probability distributions from each model
         all_probs: list[np.ndarray] = []
@@ -191,7 +198,7 @@ class EnsembleClassifier:
         label = classes[best_idx]
         confidence = float(avg_probs[best_idx])
 
-        prob_dict = {cls: float(p) for cls, p in zip(classes, avg_probs)}
+        prob_dict = {cls: float(p) for cls, p in zip(classes, avg_probs, strict=False)}
         is_uncertain = confidence < UNCERTAINTY_THRESHOLD
 
         if is_uncertain:
@@ -224,7 +231,7 @@ class EnsembleClassifier:
     ) -> None:
         """Append uncertain sample to the active learning queue."""
         record = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "task": task,
             "predicted_label": predicted_label,
             "confidence": confidence,

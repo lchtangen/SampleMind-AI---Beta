@@ -15,7 +15,6 @@ import os
 from tortoise import fields
 from tortoise.models import Model
 
-
 # ── Core domain models ────────────────────────────────────────────────────────
 
 
@@ -48,8 +47,8 @@ class TortoiseUser(Model):
     last_login = fields.DatetimeField(null=True)
 
     # Reverse relations
-    samples: fields.ReverseRelation["TortoiseSample"]
-    libraries: fields.ReverseRelation["TortoiseLibrary"]
+    samples: fields.ReverseRelation[TortoiseSample]
+    libraries: fields.ReverseRelation[TortoiseLibrary]
 
     class Meta:
         table = "users_v3"
@@ -79,7 +78,7 @@ class TortoiseLibrary(Model):
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)
 
-    samples: fields.ReverseRelation["TortoiseSample"]
+    samples: fields.ReverseRelation[TortoiseSample]
 
     class Meta:
         table = "libraries_v3"
@@ -115,19 +114,19 @@ class TortoiseSample(Model):
 
     # Audio features (from AudioEngine)
     bpm = fields.FloatField(null=True)
-    key = fields.CharField(max_length=10, null=True)        # e.g. "Am", "C"
+    key = fields.CharField(max_length=10, null=True)  # e.g. "Am", "C"
     camelot_key = fields.CharField(max_length=5, null=True)  # e.g. "8A"
-    energy = fields.CharField(max_length=10, null=True)      # low/mid/high
+    energy = fields.CharField(max_length=10, null=True)  # low/mid/high
     loudness_lufs = fields.FloatField(null=True)
     spectral_centroid = fields.FloatField(null=True)
     zero_crossing_rate = fields.FloatField(null=True)
 
     # AI classification (from Phase 17/18 classifiers)
-    genre_labels = fields.JSONField(default=list)        # ["trap", "dark", "hip-hop"]
-    mood_labels = fields.JSONField(default=list)         # ["dark", "aggressive"]
-    instrument_labels = fields.JSONField(default=list)   # ["kick", "808"]
-    valence = fields.FloatField(null=True)   # Russell circumplex: -1 to 1
-    arousal = fields.FloatField(null=True)   # Russell circumplex: -1 to 1
+    genre_labels = fields.JSONField(default=list)  # ["trap", "dark", "hip-hop"]
+    mood_labels = fields.JSONField(default=list)  # ["dark", "aggressive"]
+    instrument_labels = fields.JSONField(default=list)  # ["kick", "808"]
+    valence = fields.FloatField(null=True)  # Russell circumplex: -1 to 1
+    arousal = fields.FloatField(null=True)  # Russell circumplex: -1 to 1
 
     # Fingerprint (from AudioFingerprinter)
     fingerprint_hash = fields.CharField(max_length=64, null=True, index=True)

@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +62,7 @@ if _FASTMCP_AVAILABLE:
     def analyze_audio(
         file_path: str,
         depth: str = "standard",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Run the full SampleMind analysis pipeline on an audio file.
 
@@ -86,8 +86,8 @@ if _FASTMCP_AVAILABLE:
     def find_similar(
         file_path: str,
         top_k: int = 5,
-        library_dir: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
+        library_dir: str | None = None,
+    ) -> list[dict[str, Any]]:
         """
         Find samples similar to the given audio file using vector embeddings.
 
@@ -123,9 +123,9 @@ if _FASTMCP_AVAILABLE:
     @mcp.tool()
     def get_ai_coaching(
         question: str,
-        file_path: Optional[str] = None,
+        file_path: str | None = None,
         provider: str = "auto",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Get AI music production coaching from Claude, Gemini, or GPT-4o.
 
@@ -141,11 +141,14 @@ if _FASTMCP_AVAILABLE:
 
         from samplemind.integrations.ai_manager import AnalysisType, SampleMindAIManager
 
-        audio_features: Dict[str, Any] = {"user_message": question}
+        audio_features: dict[str, Any] = {"user_message": question}
 
         if file_path and Path(file_path).exists():
             try:
-                from samplemind.core.engine.audio_engine import AnalysisLevel, AudioEngine
+                from samplemind.core.engine.audio_engine import (
+                    AnalysisLevel,
+                    AudioEngine,
+                )
 
                 engine = AudioEngine()
                 features = engine.analyze_file(file_path, level=AnalysisLevel.STANDARD)
@@ -185,7 +188,7 @@ if _FASTMCP_AVAILABLE:
     # ── Tool: tag_audio ──────────────────────────────────────────────────────
 
     @mcp.tool()
-    def tag_audio(file_path: str) -> Dict[str, Any]:
+    def tag_audio(file_path: str) -> dict[str, Any]:
         """
         Generate multi-label genre, mood, energy, and instrument tags for an audio file.
 
@@ -229,7 +232,7 @@ if _FASTMCP_AVAILABLE:
         folder_path: str,
         pack_name: str = "My Pack",
         max_files: int = 50,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Analyze a folder of samples and generate a structured pack manifest.
 

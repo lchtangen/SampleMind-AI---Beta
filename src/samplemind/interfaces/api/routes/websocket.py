@@ -266,7 +266,9 @@ async def agent_task_progress(websocket: WebSocket, task_id: str):
                 pct = event.get("pct", 0)
                 stage = event.get("stage", "")
                 if pct >= 100 or stage == "error":
-                    logger.info("Agent task %s finished (stage=%s pct=%s)", task_id, stage, pct)
+                    logger.info(
+                        "Agent task %s finished (stage=%s pct=%s)", task_id, stage, pct
+                    )
                     return
 
             await asyncio.sleep(0.5)

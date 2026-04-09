@@ -14,8 +14,8 @@ Features:
 """
 
 import logging
-from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
+
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ class LayeringAnalysis:
     phase_status: str  # "in-phase", "phase-cancellation", "orthogonal"
 
     # Frequency analysis
-    frequency_masks: List[FrequencyMask]
+    frequency_masks: list[FrequencyMask]
     has_masking: bool
 
     # Transient analysis
@@ -69,7 +69,7 @@ class LayeringAnalysis:
     loudness_ratio: float
 
     # Recommendations
-    recommended_actions: List[str]
+    recommended_actions: list[str]
 
     def to_dict(self) -> dict:
         """Convert to dictionary"""
@@ -210,7 +210,7 @@ class LayeringAnalyzer:
         audio1: np.ndarray,
         audio2: np.ndarray,
         sample_rate: int,
-    ) -> List[FrequencyMask]:
+    ) -> list[FrequencyMask]:
         """Detect frequency masking issues"""
         masks = []
 
@@ -266,7 +266,7 @@ class LayeringAnalyzer:
         audio1: np.ndarray,
         audio2: np.ndarray,
         sample_rate: int,
-    ) -> Tuple[float, bool]:
+    ) -> tuple[float, bool]:
         """Analyze transient timing and conflicts"""
         # Simple onset detection using energy envelope
         window_size = int(0.01 * sample_rate)  # 10ms windows
@@ -301,7 +301,7 @@ class LayeringAnalyzer:
         self,
         audio1: np.ndarray,
         audio2: np.ndarray,
-    ) -> Tuple[float, float]:
+    ) -> tuple[float, float]:
         """Analyze loudness relationship"""
         rms1 = np.sqrt(np.mean(audio1**2))
         rms2 = np.sqrt(np.mean(audio2**2))
@@ -353,10 +353,10 @@ class LayeringAnalyzer:
     def _generate_recommendations(
         self,
         phase_corr: float,
-        frequency_masks: List[FrequencyMask],
+        frequency_masks: list[FrequencyMask],
         transient_offset: float,
         loudness_diff: float,
-    ) -> List[str]:
+    ) -> list[str]:
         """Generate actionable recommendations"""
         recommendations = []
 

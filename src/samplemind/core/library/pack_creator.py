@@ -12,16 +12,15 @@ import json
 import logging
 import shutil
 import zipfile
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
-from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
 
-class PackTemplate(str, Enum):
+class PackTemplate(StrEnum):
     """Sample pack templates"""
 
     DRUMS = "drums"  # Kick, snare, hihat, percussion, fills
@@ -40,17 +39,17 @@ class PackMetadata:
     author: str = "Unknown"  # Pack creator name
     description: str = ""  # Pack description
     genre: str = ""  # Primary genre
-    bpm: Optional[float] = None  # Suggested tempo
-    key: Optional[str] = None  # Musical key
+    bpm: float | None = None  # Suggested tempo
+    key: str | None = None  # Musical key
     created_date: str = field(default_factory=lambda: datetime.now().isoformat())
     updated_date: str = field(default_factory=lambda: datetime.now().isoformat())
     sample_count: int = 0  # Number of samples
     total_size_mb: float = 0.0  # Total pack size
     license: str = "Creative Commons"  # License type
-    tags: List[str] = field(default_factory=list)
-    cover_art: Optional[Path] = None  # Cover image path
+    tags: list[str] = field(default_factory=list)
+    cover_art: Path | None = None  # Cover image path
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary"""
         data = asdict(self)
         if self.cover_art:
@@ -73,9 +72,9 @@ class SampleInfo:
     sample_rate: int
     bit_depth: int
     channels: int
-    bpm: Optional[float] = None
-    key: Optional[str] = None
-    tags: List[str] = field(default_factory=list)
+    bpm: float | None = None
+    key: str | None = None
+    tags: list[str] = field(default_factory=list)
     description: str = ""
     file_size_mb: float = 0.0
 
@@ -126,7 +125,7 @@ class SamplePackCreator:
         template: PackTemplate = PackTemplate.CUSTOM,
         author: str = "Unknown",
         description: str = "",
-        output_dir: Optional[Path] = None,
+        output_dir: Path | None = None,
     ) -> "SamplePack":
         """
         Create a new sample pack.
@@ -169,7 +168,7 @@ class SamplePackCreator:
         source_folder: Path,
         template: PackTemplate = PackTemplate.CUSTOM,
         author: str = "Unknown",
-        output_dir: Optional[Path] = None,
+        output_dir: Path | None = None,
     ) -> "SamplePack":
         """
         Create pack from existing folder structure.
@@ -210,7 +209,7 @@ class SamplePack:
         self.pack_dir = pack_dir
         self.template = template
         self.metadata = metadata
-        self.samples: Dict[str, SampleInfo] = {}
+        self.samples: dict[str, SampleInfo] = {}
 
         self.pack_dir.mkdir(parents=True, exist_ok=True)
 
@@ -287,7 +286,7 @@ class SamplePack:
     def add_sample(
         self,
         file_path: Path,
-        destination_folder: Optional[str] = None,
+        destination_folder: str | None = None,
     ) -> bool:
         """
         Add a single sample to the pack.
@@ -366,7 +365,7 @@ class SamplePack:
                 )
                 tempo = librosa.feature.tempo(onset_envelope=onset_env, sr=sr)[0]
                 sample_info.bpm = tempo
-            except:
+            except Exception:
                 pass
 
             return sample_info
@@ -426,7 +425,7 @@ class SamplePack:
     def _calculate_total_size(self) -> None:
         """Calculate total pack size"""
         total_size = 0
-        for root, dirs, files in self.pack_dir.walk():
+        for root, _dirs, files in self.pack_dir.walk():
             for file in files:
                 file_path = Path(root) / file
                 total_size += file_path.stat().st_size
@@ -511,7 +510,7 @@ class SamplePack:
         logger.info(f"Exported pack to directory: {dest_dir}")
         return dest_dir
 
-    def get_summary(self) -> Dict:
+    def get_summary(self) -> dict:
         """Get pack summary"""
         return {
             "name": self.name,

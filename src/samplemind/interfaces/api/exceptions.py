@@ -2,7 +2,7 @@
 Custom exceptions for SampleMind AI Backend
 """
 
-from typing import Optional, Dict, Any
+from typing import Any
 
 
 class SampleMindException(Exception):
@@ -13,7 +13,7 @@ class SampleMindException(Exception):
         message: str,
         status_code: int = 500,
         error_type: str = "api_error",
-        details: Optional[Dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
     ):
         self.message = message
         self.status_code = status_code
@@ -25,7 +25,7 @@ class SampleMindException(Exception):
 class FileValidationError(SampleMindException):
     """File validation failed"""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(self, message: str, details: dict[str, Any] | None = None) -> None:
         super().__init__(
             message=message,
             status_code=400,
@@ -37,7 +37,7 @@ class FileValidationError(SampleMindException):
 class AudioProcessingError(SampleMindException):
     """Audio processing failed"""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(self, message: str, details: dict[str, Any] | None = None) -> None:
         super().__init__(
             message=message,
             status_code=500,
@@ -50,7 +50,7 @@ class AIProviderError(SampleMindException):
     """AI provider request failed"""
 
     def __init__(
-        self, message: str, provider: str, details: Optional[Dict[str, Any]] = None
+        self, message: str, provider: str, details: dict[str, Any] | None = None
     ) -> None:
         details = details or {}
         details["provider"] = provider
@@ -77,7 +77,7 @@ class ResourceNotFoundError(SampleMindException):
 class RateLimitError(SampleMindException):
     """Rate limit exceeded"""
 
-    def __init__(self, retry_after: Optional[int] = None) -> None:
+    def __init__(self, retry_after: int | None = None) -> None:
         details = {}
         if retry_after:
             details["retry_after"] = retry_after
@@ -93,7 +93,7 @@ class RateLimitError(SampleMindException):
 class StorageError(SampleMindException):
     """File storage operation failed"""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(self, message: str, details: dict[str, Any] | None = None) -> None:
         super().__init__(
             message=message,
             status_code=500,

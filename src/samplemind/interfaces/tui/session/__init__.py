@@ -1,9 +1,9 @@
 """TUI Session module - Session management and project handling"""
 
 from samplemind.interfaces.tui.session.session_manager import (
+    AnalyzedFile,
     SessionManager,
     SessionSnapshot,
-    AnalyzedFile,
     get_session_manager,
 )
 

@@ -7,8 +7,8 @@ Tracks user events, features usage, and performance metrics
 import logging
 import os
 from datetime import datetime
-from typing import Any, Dict, Optional
 from enum import Enum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class EventType(Enum):
 class PostHogAnalytics:
     """PostHog analytics client for tracking events and metrics"""
 
-    def __init__(self, api_key: Optional[str] = None, host: Optional[str] = None):
+    def __init__(self, api_key: str | None = None, host: str | None = None):
         """Initialize PostHog analytics client"""
         self.enabled = False
         self.api_key = api_key or os.getenv("POSTHOG_API_KEY", "")
@@ -75,8 +75,8 @@ class PostHogAnalytics:
     def capture(
         self,
         event_name: str,
-        user_id: Optional[str] = None,
-        properties: Optional[Dict[str, Any]] = None,
+        user_id: str | None = None,
+        properties: dict[str, Any] | None = None,
         **kwargs,
     ) -> None:
         """Capture an event with optional properties"""
@@ -103,7 +103,7 @@ class PostHogAnalytics:
             logger.debug(f"Error capturing event '{event_name}': {e}")
 
     def identify_user(
-        self, user_id: str, properties: Optional[Dict[str, Any]] = None
+        self, user_id: str, properties: dict[str, Any] | None = None
     ) -> None:
         """Identify a user and set their properties"""
         if not self.enabled or not self.client:
@@ -117,7 +117,7 @@ class PostHogAnalytics:
 
     def track_audio_upload(
         self,
-        user_id: Optional[str],
+        user_id: str | None,
         file_size: int,
         duration_seconds: float,
         format: str,
@@ -134,7 +134,7 @@ class PostHogAnalytics:
         )
 
     def track_batch_upload(
-        self, user_id: Optional[str], file_count: int, total_size: int, **kwargs
+        self, user_id: str | None, file_count: int, total_size: int, **kwargs
     ) -> None:
         """Track batch upload start"""
         self.capture(
@@ -147,12 +147,12 @@ class PostHogAnalytics:
 
     def track_analysis(
         self,
-        user_id: Optional[str],
+        user_id: str | None,
         analysis_level: str,
         duration_ms: float,
         file_size: int,
         success: bool = True,
-        error: Optional[str] = None,
+        error: str | None = None,
         **kwargs,
     ) -> None:
         """Track audio analysis"""
@@ -175,7 +175,7 @@ class PostHogAnalytics:
 
     def track_search(
         self,
-        user_id: Optional[str],
+        user_id: str | None,
         search_type: str,  # 'semantic', 'library', 'similar'
         result_count: int,
         query_time_ms: float,
@@ -199,7 +199,7 @@ class PostHogAnalytics:
         )
 
     def track_feature_usage(
-        self, user_id: Optional[str], feature_name: str, **kwargs
+        self, user_id: str | None, feature_name: str, **kwargs
     ) -> None:
         """Track feature usage (effect, MIDI generation, etc.)"""
         self.capture(
@@ -218,7 +218,7 @@ class PostHogAnalytics:
         )
 
     def track_export(
-        self, user_id: Optional[str], export_format: str, file_size: int, **kwargs
+        self, user_id: str | None, export_format: str, file_size: int, **kwargs
     ) -> None:
         """Track file export"""
         self.capture(
@@ -239,7 +239,7 @@ class PostHogAnalytics:
 
 
 # Global analytics instance
-_analytics_instance: Optional[PostHogAnalytics] = None
+_analytics_instance: PostHogAnalytics | None = None
 
 
 def get_analytics() -> PostHogAnalytics:
@@ -251,7 +251,7 @@ def get_analytics() -> PostHogAnalytics:
 
 
 def init_analytics(
-    api_key: Optional[str] = None, host: Optional[str] = None
+    api_key: str | None = None, host: str | None = None
 ) -> PostHogAnalytics:
     """Initialize analytics with custom settings"""
     global _analytics_instance

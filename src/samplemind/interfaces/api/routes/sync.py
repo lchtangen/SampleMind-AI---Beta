@@ -5,7 +5,6 @@ Manages cloud synchronization endpoints
 
 import logging
 from datetime import datetime
-from typing import Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -173,7 +172,7 @@ async def queue_sync_event(
     document_id: str,
     action: str,
     data: dict,
-    device_id: Optional[str] = None,
+    device_id: str | None = None,
     current_user=Depends(get_current_active_user),
 ) -> None:
     """
@@ -247,7 +246,7 @@ async def queue_sync_event(
 
 @router.get("/changes")
 async def get_remote_changes(
-    since: Optional[str] = None,
+    since: str | None = None,
     limit: int = 100,
     current_user=Depends(get_current_active_user),
 ) -> None:
@@ -268,10 +267,9 @@ async def get_remote_changes(
             )
 
         # Parse since timestamp
-        since_dt = None
         if since:
             try:
-                since_dt = datetime.fromisoformat(since)
+                datetime.fromisoformat(since)
             except ValueError:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,

@@ -4,9 +4,9 @@ Support for 8 built-in themes with customization
 """
 
 import logging
-from typing import Dict, Optional, Any, List
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -153,7 +153,7 @@ THEME_MONOKAI = ThemeColors(
 )
 
 # Theme registry
-THEMES: Dict[ThemeName, ThemeColors] = {
+THEMES: dict[ThemeName, ThemeColors] = {
     ThemeName.DARK: THEME_DARK,
     ThemeName.LIGHT: THEME_LIGHT,
     ThemeName.CYBERPUNK: THEME_CYBERPUNK,
@@ -193,7 +193,7 @@ class ThemeManager:
         logger.info(f"Theme changed to: {theme_name.value}")
         return self.current_colors
 
-    def set_theme_by_name(self, theme_name: str) -> Optional[ThemeColors]:
+    def set_theme_by_name(self, theme_name: str) -> ThemeColors | None:
         """Set theme by string name"""
         try:
             theme = ThemeName(theme_name.lower())
@@ -210,7 +210,7 @@ class ThemeManager:
         """Get current theme name"""
         return self.current_theme.value
 
-    def get_all_themes(self) -> List[str]:
+    def get_all_themes(self) -> list[str]:
         """Get list of all available themes"""
         return [t.value for t in ThemeName]
 
@@ -320,7 +320,7 @@ Static {{
         ]
         return "\n".join(lines)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get theme statistics"""
         return {
             "current_theme": self.current_theme.value,
@@ -330,7 +330,7 @@ Static {{
 
 
 # Global singleton instance
-_theme_manager: Optional[ThemeManager] = None
+_theme_manager: ThemeManager | None = None
 
 
 def get_theme_manager(default_theme: ThemeName = ThemeName.DARK) -> ThemeManager:

@@ -5,7 +5,7 @@ Play, pause, seek, and control audio playback
 
 import logging
 import threading
-from typing import Optional, List, Callable
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
 
@@ -53,7 +53,7 @@ class AudioPlayer:
     """Audio playback and transport control"""
 
     def __init__(
-        self, audio_data: Optional[List[float]] = None, sample_rate: int = 44100
+        self, audio_data: list[float] | None = None, sample_rate: int = 44100
     ) -> None:
         """
         Initialize audio player
@@ -68,14 +68,14 @@ class AudioPlayer:
         self.stats = PlaybackStats()
 
         # Callbacks
-        self.on_state_change: Optional[Callable] = None
-        self.on_position_change: Optional[Callable] = None
+        self.on_state_change: Callable | None = None
+        self.on_position_change: Callable | None = None
 
         # sounddevice playback thread
-        self._playback_thread: Optional[threading.Thread] = None
+        self._playback_thread: threading.Thread | None = None
         self._stop_event = threading.Event()
 
-    def load_audio(self, audio_data: List[float], sample_rate: int = 44100) -> None:
+    def load_audio(self, audio_data: list[float], sample_rate: int = 44100) -> None:
         """Load audio data"""
         self.audio_data = audio_data
         self.sample_rate = sample_rate
@@ -321,11 +321,11 @@ class AudioPlayer:
 
 
 # Global singleton instance
-_audio_player: Optional[AudioPlayer] = None
+_audio_player: AudioPlayer | None = None
 
 
 def get_audio_player(
-    audio_data: Optional[List[float]] = None, sample_rate: int = 44100
+    audio_data: list[float] | None = None, sample_rate: int = 44100
 ) -> AudioPlayer:
     """Get or create audio player singleton"""
     global _audio_player

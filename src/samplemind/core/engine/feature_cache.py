@@ -7,9 +7,8 @@ results to improve performance for repeated analyses.
 
 import hashlib
 import json
-import os
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 import numpy as np
 from loguru import logger
@@ -34,7 +33,7 @@ class FeatureCache:
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         logger.info(f"Initialized feature cache at {self.cache_dir.absolute()}")
 
-    def _get_cache_key(self, audio_data: np.ndarray, params: Dict[str, Any]) -> str:
+    def _get_cache_key(self, audio_data: np.ndarray, params: dict[str, Any]) -> str:
         """
         Generate a unique cache key for the given audio data and parameters.
 
@@ -62,8 +61,8 @@ class FeatureCache:
         return self.cache_dir / f"{key}.npz"
 
     def get(
-        self, audio_data: np.ndarray, params: Dict[str, Any]
-    ) -> Optional[Dict[str, Any]]:
+        self, audio_data: np.ndarray, params: dict[str, Any]
+    ) -> dict[str, Any] | None:
         """
         Get cached features for the given audio data and parameters.
 
@@ -98,7 +97,7 @@ class FeatureCache:
             return None
 
     def set(
-        self, audio_data: np.ndarray, params: Dict[str, Any], features: Dict[str, Any]
+        self, audio_data: np.ndarray, params: dict[str, Any], features: dict[str, Any]
     ) -> None:
         """
         Cache features for the given audio data and parameters.

@@ -4,18 +4,16 @@ Find similar audio files using vector embeddings and ChromaDB
 """
 
 from pathlib import Path
-from typing import List, Optional
-from fastapi import APIRouter, UploadFile, File, HTTPException, Query
-from pydantic import BaseModel
-import numpy as np
 
-from samplemind.core.engine.audio_engine import AudioEngine
+from fastapi import APIRouter, File, Query, UploadFile
+from pydantic import BaseModel
+
 from samplemind.core.database.chroma import (
     add_audio_to_collection,
-    query_similar,
     get_collection_stats,
+    query_similar,
 )
-
+from samplemind.core.engine.audio_engine import AudioEngine
 
 router = APIRouter(prefix="/similarity", tags=["Similarity Search"])
 
@@ -34,7 +32,7 @@ class SimilaritySearchResponse(BaseModel):
 
     query_file: str
     total_results: int
-    results: List[SimilarityResult]
+    results: list[SimilarityResult]
     search_time_ms: float
 
 
@@ -106,7 +104,7 @@ async def find_similar_audio(
 
 @router.post("/index")
 async def index_audio_file(
-    file: UploadFile = File(...), metadata: Optional[dict] = None
+    file: UploadFile = File(...), metadata: dict | None = None
 ) -> dict:
     """
     Index an audio file for similarity search
@@ -155,7 +153,7 @@ async def get_similarity_stats() -> dict:
 
 @router.post("/batch-search")
 async def batch_similarity_search(
-    files: List[UploadFile] = File(...), limit: int = Query(5, ge=1, le=50)
+    files: list[UploadFile] = File(...), limit: int = Query(5, ge=1, le=50)
 ) -> dict:
     """
     Find similar files for multiple reference files

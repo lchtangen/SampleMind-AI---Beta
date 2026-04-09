@@ -11,13 +11,14 @@ Provides comprehensive logging using Loguru with:
 
 import sys
 from pathlib import Path
-from typing import Optional, Any
+from typing import Any
+
 from loguru import logger
 
 
 def setup_logging(
     log_level: str = "INFO",
-    log_dir: Optional[Path] = None,
+    log_dir: Path | None = None,
     enable_console: bool = True,
     enable_file: bool = True,
     enable_json: bool = False,
@@ -138,7 +139,7 @@ def setup_logging(
         )
 
     logger.info(
-        f"Logging initialized",
+        "Logging initialized",
         extra={
             "level": log_level,
             "log_dir": str(log_dir),
@@ -235,7 +236,7 @@ class AudioLogger:
     def analysis_start(file_path: str, level: str) -> None:
         """Log start of audio analysis."""
         logger.info(
-            f"Audio analysis started",
+            "Audio analysis started",
             extra={"file_path": file_path, "level": level},
         )
 
@@ -243,7 +244,7 @@ class AudioLogger:
     def analysis_complete(file_path: str, duration_ms: float, features: dict) -> None:
         """Log completed audio analysis."""
         logger.info(
-            f"Audio analysis completed",
+            "Audio analysis completed",
             extra={
                 "file_path": file_path,
                 "duration_ms": duration_ms,
@@ -255,7 +256,7 @@ class AudioLogger:
     def analysis_error(file_path: str, error: str) -> None:
         """Log audio analysis error."""
         logger.error(
-            f"Audio analysis failed",
+            "Audio analysis failed",
             extra={"file_path": file_path, "error": error},
         )
 
@@ -267,7 +268,7 @@ class AILogger:
     def request_start(provider: str, model: str, **kwargs) -> None:
         """Log start of AI request."""
         logger.info(
-            f"AI request started",
+            "AI request started",
             extra={"provider": provider, "model": model, **kwargs},
         )
 
@@ -277,7 +278,7 @@ class AILogger:
     ) -> None:
         """Log completed AI request."""
         logger.info(
-            f"AI request completed",
+            "AI request completed",
             extra={
                 "provider": provider,
                 "response_time_ms": response_time_ms,
@@ -290,7 +291,7 @@ class AILogger:
     def request_error(provider: str, error: str, **kwargs) -> None:
         """Log AI request error."""
         logger.error(
-            f"AI request failed",
+            "AI request failed",
             extra={"provider": provider, "error": error, **kwargs},
         )
 
@@ -312,15 +313,13 @@ class DatabaseLogger:
     @staticmethod
     def query_start(operation: str, **kwargs) -> None:
         """Log start of database query."""
-        logger.debug(
-            f"Database query started", extra={"operation": operation, **kwargs}
-        )
+        logger.debug("Database query started", extra={"operation": operation, **kwargs})
 
     @staticmethod
     def query_complete(operation: str, duration_ms: float, rows: int = 0) -> None:
         """Log completed database query."""
         logger.debug(
-            f"Database query completed",
+            "Database query completed",
             extra={"operation": operation, "duration_ms": duration_ms, "rows": rows},
         )
 
@@ -328,7 +327,7 @@ class DatabaseLogger:
     def query_error(operation: str, error: str) -> None:
         """Log database query error."""
         logger.error(
-            f"Database query failed",
+            "Database query failed",
             extra={"operation": operation, "error": error},
         )
 
@@ -340,19 +339,19 @@ class CacheLogger:
     def hit(key: str, size_bytes: int) -> None:
         """Log cache hit."""
         logger.debug(
-            f"Cache hit",
+            "Cache hit",
             extra={"key": key, "size_bytes": size_bytes},
         )
 
     @staticmethod
     def miss(key: str) -> None:
         """Log cache miss."""
-        logger.debug(f"Cache miss", extra={"key": key})
+        logger.debug("Cache miss", extra={"key": key})
 
     @staticmethod
     def store(key: str, size_bytes: int) -> None:
         """Log cache store."""
-        logger.debug(f"Cache store", extra={"key": key, "size_bytes": size_bytes})
+        logger.debug("Cache store", extra={"key": key, "size_bytes": size_bytes})
 
     @staticmethod
     def evict(reason: str, freed_bytes: int) -> None:

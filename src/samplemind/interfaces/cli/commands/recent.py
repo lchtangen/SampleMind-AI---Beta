@@ -12,21 +12,18 @@ Usage:
 """
 
 from pathlib import Path
-from typing import Optional
-from datetime import datetime
 
 import typer
 from rich.console import Console
 from rich.table import Table
-from rich.panel import Panel
 
 from samplemind.core.history.recent_files import (
-    get_recent_files,
-    get_recent_file_by_index,
-    search_recent_files,
     export_recent_files,
-    get_recent_files_stats,
     get_manager,
+    get_recent_file_by_index,
+    get_recent_files,
+    get_recent_files_stats,
+    search_recent_files,
 )
 
 from . import utils
@@ -165,7 +162,7 @@ def search_command(
 @app.command("export")
 @utils.with_error_handling
 def export_command(
-    output: Optional[Path] = typer.Option(
+    output: Path | None = typer.Option(
         None,
         "--output",
         "-o",
@@ -175,7 +172,7 @@ def export_command(
     """Export recent files as JSON"""
     output_path = output or Path("recent_files.json")
 
-    json_data = export_recent_files(output_path)
+    export_recent_files(output_path)
 
     console.print(f"[green]✅ Exported {len(get_recent_files())} recent files[/green]")
     console.print(f"[cyan]📄 Saved to: {output_path.absolute()}[/cyan]")

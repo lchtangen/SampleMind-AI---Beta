@@ -29,22 +29,27 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, Optional
+from datetime import UTC
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
-SyncEventType = str  # "sample_added" | "sample_deleted" | "sample_updated" | "library_reset"
+SyncEventType = (
+    str  # "sample_added" | "sample_deleted" | "sample_updated" | "library_reset"
+)
 
 
 @dataclass
 class SyncEvent:
     """A library change event broadcast via Supabase Realtime."""
+
     event_type: SyncEventType
     user_id: str
-    sample_id: Optional[str]
+    sample_id: str | None
     metadata: dict
-    server_timestamp: Optional[str]
+    server_timestamp: str | None
 
 
 class RealtimeSync:
@@ -66,6 +71,7 @@ class RealtimeSync:
     def _get_client(self) -> Any:
         try:
             from samplemind.integrations.supabase_client import get_supabase
+
             return get_supabase()
         except Exception:
             return None
@@ -115,7 +121,9 @@ class RealtimeSync:
 
     async def push_sample_added(self, sample_id: str, metadata: dict) -> bool:
         """Broadcast a sample-added event to other devices."""
-        return await self._broadcast("sample_added", sample_id=sample_id, metadata=metadata)
+        return await self._broadcast(
+            "sample_added", sample_id=sample_id, metadata=metadata
+        )
 
     async def push_sample_deleted(self, sample_id: str) -> bool:
         """Broadcast a sample-deleted event to other devices."""
@@ -123,25 +131,27 @@ class RealtimeSync:
 
     async def push_sample_updated(self, sample_id: str, metadata: dict) -> bool:
         """Broadcast a sample-updated event to other devices."""
-        return await self._broadcast("sample_updated", sample_id=sample_id, metadata=metadata)
+        return await self._broadcast(
+            "sample_updated", sample_id=sample_id, metadata=metadata
+        )
 
     async def _broadcast(
         self,
         event_type: SyncEventType,
-        sample_id: Optional[str] = None,
-        metadata: Optional[dict] = None,
+        sample_id: str | None = None,
+        metadata: dict | None = None,
     ) -> bool:
         if not self._subscription or not self._client:
             return False
         try:
-            from datetime import datetime, timezone
+            from datetime import datetime
 
             payload = {
                 "event_type": event_type,
                 "user_id": self.user_id,
                 "sample_id": sample_id,
                 "metadata": metadata or {},
-                "server_timestamp": datetime.now(timezone.utc).isoformat(),
+                "server_timestamp": datetime.now(UTC).isoformat(),
             }
             await asyncio.get_event_loop().run_in_executor(
                 None,
@@ -201,11 +211,22 @@ class RealtimeSync:
 
             elif event.event_type == "sample_updated" and event.sample_id:
                 update_fields = {
-                    k: v for k, v in event.metadata.items()
-                    if k in {"bpm", "key", "energy", "genre_labels", "mood_labels", "user_tags"}
+                    k: v
+                    for k, v in event.metadata.items()
+                    if k
+                    in {
+                        "bpm",
+                        "key",
+                        "energy",
+                        "genre_labels",
+                        "mood_labels",
+                        "user_tags",
+                    }
                 }
                 if update_fields:
-                    await TortoiseSample.filter(id=event.sample_id).update(**update_fields)
+                    await TortoiseSample.filter(id=event.sample_id).update(
+                        **update_fields
+                    )
                     logger.debug("Sync: updated sample %s", event.sample_id)
 
         except Exception as exc:
@@ -279,17 +300,19 @@ class RealtimeSync:
             pushed = 0
             for sample in samples:
                 try:
-                    self._client.table("samples").upsert({
-                        "id": sample.id,
-                        "user_id": self.user_id,
-                        "filename": sample.filename,
-                        "file_path": sample.file_path,
-                        "bpm": sample.bpm,
-                        "key": sample.key,
-                        "energy": sample.energy,
-                        "genre_labels": sample.genre_labels,
-                        "mood_labels": sample.mood_labels,
-                    }).execute()
+                    self._client.table("samples").upsert(
+                        {
+                            "id": sample.id,
+                            "user_id": self.user_id,
+                            "filename": sample.filename,
+                            "file_path": sample.file_path,
+                            "bpm": sample.bpm,
+                            "key": sample.key,
+                            "energy": sample.energy,
+                            "genre_labels": sample.genre_labels,
+                            "mood_labels": sample.mood_labels,
+                        }
+                    ).execute()
                     pushed += 1
                 except Exception as exc:
                     logger.debug("Sample push failed (%s): %s", sample.id, exc)

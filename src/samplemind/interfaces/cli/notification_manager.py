@@ -12,9 +12,8 @@ Falls back to terminal notifications if desktop unavailable.
 """
 
 import logging
-from typing import Optional, Literal
-from enum import Enum
 from datetime import datetime
+from enum import Enum
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +80,7 @@ class NotificationManager:
         title: str,
         message: str,
         notification_type: NotificationType = NotificationType.INFO,
-        timeout: Optional[int] = None,
+        timeout: int | None = None,
         app_name: str = "SampleMind AI",
     ) -> bool:
         """
@@ -315,7 +314,7 @@ class NotificationManager:
 
 
 # Global notification manager instance
-_notification_manager: Optional[NotificationManager] = None
+_notification_manager: NotificationManager | None = None
 
 
 def init_notifications(

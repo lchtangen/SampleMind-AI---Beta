@@ -2,10 +2,10 @@
 
 from samplemind.interfaces.tui.ai.ai_coach import (
     AICoach,
+    GenreAdvice,
     GenreType,
     ProductionTip,
     ProductionTipCategory,
-    GenreAdvice,
     SamplePairing,
     get_ai_coach,
 )

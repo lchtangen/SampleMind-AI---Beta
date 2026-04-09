@@ -32,7 +32,6 @@ from __future__ import annotations
 import logging
 import os
 from dataclasses import dataclass
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +39,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SupabaseSession:
     """Auth session returned after successful sign-in."""
+
     access_token: str
     refresh_token: str
     user_id: str
@@ -50,9 +50,10 @@ class SupabaseSession:
 @dataclass
 class SupabaseUser:
     """Minimal Supabase user record."""
+
     id: str
     email: str
-    email_confirmed_at: Optional[str]
+    email_confirmed_at: str | None
     created_at: str
 
 
@@ -85,7 +86,10 @@ def get_supabase() -> object | None:
         from supabase import create_client
 
         _client = create_client(url, key)
-        logger.info("✓ Supabase client initialized (project: %s)", url.split("//")[-1].split(".")[0])
+        logger.info(
+            "✓ Supabase client initialized (project: %s)",
+            url.split("//")[-1].split(".")[0],
+        )
         return _client
     except ImportError:
         logger.warning("supabase SDK not installed — run: uv add supabase")
@@ -112,7 +116,7 @@ class SupabaseAuth:
     def available(self) -> bool:
         return self._client is not None
 
-    async def sign_up(self, email: str, password: str) -> Optional[SupabaseSession]:
+    async def sign_up(self, email: str, password: str) -> SupabaseSession | None:
         """Register a new user and return a session."""
         if not self._client:
             return None
@@ -125,7 +129,7 @@ class SupabaseAuth:
 
     async def sign_in_with_email(
         self, email: str, password: str
-    ) -> Optional[SupabaseSession]:
+    ) -> SupabaseSession | None:
         """Sign in with email + password."""
         if not self._client:
             return None
@@ -160,7 +164,7 @@ class SupabaseAuth:
             logger.debug("Supabase sign_out: %s", exc)
             return False
 
-    async def verify_token(self, access_token: str) -> Optional[str]:
+    async def verify_token(self, access_token: str) -> str | None:
         """
         Verify a JWT access token and return the Supabase user ID.
 
@@ -178,9 +182,7 @@ class SupabaseAuth:
             logger.debug("Token verification failed: %s", exc)
             return None
 
-    async def refresh_session(
-        self, refresh_token: str
-    ) -> Optional[SupabaseSession]:
+    async def refresh_session(self, refresh_token: str) -> SupabaseSession | None:
         """Refresh an expired access token using the refresh token."""
         if not self._client:
             return None
@@ -191,7 +193,7 @@ class SupabaseAuth:
             logger.error("Supabase refresh failed: %s", exc)
             return None
 
-    async def get_user(self, access_token: str) -> Optional[SupabaseUser]:
+    async def get_user(self, access_token: str) -> SupabaseUser | None:
         """Return the Supabase user record for a valid token."""
         if not self._client:
             return None
@@ -211,7 +213,7 @@ class SupabaseAuth:
             return None
 
     @staticmethod
-    def _parse_session(response: object) -> Optional[SupabaseSession]:
+    def _parse_session(response: object) -> SupabaseSession | None:
         """Parse a Supabase AuthResponse into SupabaseSession."""
         try:
             session = getattr(response, "session", None)
@@ -243,8 +245,9 @@ async def sync_supabase_user(supabase_user_id: str, email: str) -> str:
         The internal user ID (TortoiseUser.id).
     """
     try:
-        from samplemind.core.database.tortoise_models import TortoiseUser
         import hashlib
+
+        from samplemind.core.database.tortoise_models import TortoiseUser
 
         # Derive a stable internal ID from Supabase UUID
         internal_id = hashlib.sha256(supabase_user_id.encode()).hexdigest()[:20]

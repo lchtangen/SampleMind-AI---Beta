@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from textual import on
 from textual.app import ComposeResult
+from textual.containers import Horizontal
 from textual.message import Message
 from textual.widget import Widget
-from textual.widgets import Button, Collapsible, Label, ProgressBar, Static
-from textual.containers import Horizontal, Vertical
+from textual.widgets import Collapsible, Label, Static
 
 
 class SampleCard(Widget):
@@ -38,7 +37,7 @@ class SampleCard(Widget):
     """
 
     class Clicked(Message):
-        def __init__(self, card: "SampleCard") -> None:
+        def __init__(self, card: SampleCard) -> None:
             super().__init__()
             self.card = card
 

@@ -4,10 +4,8 @@ Quick type hints fixer for common patterns
 Adds type hints to functions missing them
 """
 
-import ast
 import sys
 from pathlib import Path
-from typing import List, Tuple
 
 
 def add_return_none_hints(file_path: Path) -> int:
@@ -31,7 +29,7 @@ def add_return_none_hints(file_path: Path) -> int:
         if line.strip().startswith("def ") and "->" not in line and ":" in line:
             # Check if it's a simple one-liner or has body
             if i + 1 < len(lines):
-                next_line = lines[i + 1]
+                lines[i + 1]
                 # Skip if already has return type
                 if "->" in line:
                     i += 1

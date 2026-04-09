@@ -4,13 +4,13 @@ Unit tests for MultiLabelGenreClassifier (Step 17).
 
 from __future__ import annotations
 
-import math
-
 import numpy as np
 import pytest
 
 
-def _sine_wave(freq: float = 440.0, sr: int = 22050, duration: float = 2.0) -> np.ndarray:
+def _sine_wave(
+    freq: float = 440.0, sr: int = 22050, duration: float = 2.0
+) -> np.ndarray:
     """Generate a simple sine wave for testing."""
     t = np.linspace(0, duration, int(sr * duration), endpoint=False)
     return 0.5 * np.sin(2 * np.pi * freq * t).astype(np.float32)
@@ -63,7 +63,6 @@ def test_classify_heuristic_high_bpm():
     """High BPM signal should suggest dance/electronic genres."""
     pytest.importorskip("librosa")
 
-    import librosa
     from samplemind.ai.classification.multi_label_genre import MultiLabelGenreClassifier
 
     # Create a ~130 BPM pulse signal (sparse clicks every ~0.46s)

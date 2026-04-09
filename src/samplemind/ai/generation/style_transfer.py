@@ -42,7 +42,6 @@ import os
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -56,24 +55,50 @@ DEMUCS_MODEL = os.getenv("DEMUCS_MODEL", "htdemucs")
 
 # Camelot Wheel semitone offsets from C for key transposition
 _KEY_SEMITONES: dict[str, int] = {
-    "C": 0, "C#": 1, "Db": 1, "D": 2, "D#": 3, "Eb": 3,
-    "E": 4, "F": 5, "F#": 6, "Gb": 6, "G": 7, "G#": 8,
-    "Ab": 8, "A": 9, "A#": 10, "Bb": 10, "B": 11,
+    "C": 0,
+    "C#": 1,
+    "Db": 1,
+    "D": 2,
+    "D#": 3,
+    "Eb": 3,
+    "E": 4,
+    "F": 5,
+    "F#": 6,
+    "Gb": 6,
+    "G": 7,
+    "G#": 8,
+    "Ab": 8,
+    "A": 9,
+    "A#": 10,
+    "Bb": 10,
+    "B": 11,
     # Minor variants (same root note for transposition)
-    "Cm": 0, "C#m": 1, "Dm": 2, "D#m": 3, "Ebm": 3,
-    "Em": 4, "Fm": 5, "F#m": 6, "Gm": 7, "G#m": 8,
-    "Am": 9, "A#m": 10, "Bbm": 10, "Bm": 11,
+    "Cm": 0,
+    "C#m": 1,
+    "Dm": 2,
+    "D#m": 3,
+    "Ebm": 3,
+    "Em": 4,
+    "Fm": 5,
+    "F#m": 6,
+    "Gm": 7,
+    "G#m": 8,
+    "Am": 9,
+    "A#m": 10,
+    "Bbm": 10,
+    "Bm": 11,
 }
 
 
 @dataclass
 class StyleTransferResult:
     """Result from a style transfer operation."""
+
     output_path: str
     reference_path: str
     target_path: str
-    target_bpm: Optional[int]
-    target_key: Optional[str]
+    target_bpm: int | None
+    target_key: str | None
     stems_used: list[str]
     processing_time_s: float
     warnings: list[str] = field(default_factory=list)
@@ -96,11 +121,11 @@ class StyleTransferService:
         self,
         reference_path: str,
         target_path: str,
-        target_bpm: Optional[int] = None,
-        target_key: Optional[str] = None,
+        target_bpm: int | None = None,
+        target_key: str | None = None,
         stems: list[str] = ("drums", "bass", "other"),
-        stem_gains: Optional[dict[str, float]] = None,
-        output_filename: Optional[str] = None,
+        stem_gains: dict[str, float] | None = None,
+        output_filename: str | None = None,
     ) -> StyleTransferResult:
         """
         Apply style transfer from reference to target.
@@ -154,11 +179,11 @@ class StyleTransferService:
         self,
         reference_path: str,
         target_path: str,
-        target_bpm: Optional[int],
-        target_key: Optional[str],
+        target_bpm: int | None,
+        target_key: str | None,
         stems: list[str],
         stem_gains: dict[str, float],
-        output_filename: Optional[str],
+        output_filename: str | None,
         warnings: list[str],
     ) -> str:
         try:
@@ -171,7 +196,9 @@ class StyleTransferService:
             import librosa
             import soundfile as sf
         except ImportError:
-            warnings.append("librosa/soundfile not available — returning original target")
+            warnings.append(
+                "librosa/soundfile not available — returning original target"
+            )
             return target_path
 
         # ── Load reference ────────────────────────────────────────────────────
@@ -237,11 +264,11 @@ class StyleTransferService:
 
     def _separate_stems(
         self,
-        audio: "np.ndarray",
+        audio: np.ndarray,
         sr: int,
         stems: list[str],
         warnings: list[str],
-    ) -> dict[str, "np.ndarray"]:
+    ) -> dict[str, np.ndarray]:
         """
         Separate audio into stems using demucs.
 
@@ -249,13 +276,14 @@ class StyleTransferService:
         """
         try:
             import torch
-            from demucs.pretrained import get_model  # type: ignore
             from demucs.apply import apply_model  # type: ignore
+            from demucs.pretrained import get_model  # type: ignore
 
             model = get_model(DEMUCS_MODEL)
             model.eval()
 
-            import numpy as np
+            import numpy as np  # noqa: F401
+
             # demucs expects (batch, channels, samples) float32 tensor
             tensor = torch.from_numpy(audio.astype("float32")).unsqueeze(0)
             with torch.no_grad():
@@ -269,9 +297,13 @@ class StyleTransferService:
             if result:
                 return result
         except ImportError:
-            warnings.append(f"demucs not available — using full reference mix (install: pip install demucs)")
+            warnings.append(
+                "demucs not available — using full reference mix (install: pip install demucs)"
+            )
         except Exception as exc:
-            warnings.append(f"demucs separation failed: {exc} — using full reference mix")
+            warnings.append(
+                f"demucs separation failed: {exc} — using full reference mix"
+            )
 
         # Fallback: return full mix as 'other'
         return {"other": audio}
@@ -280,20 +312,22 @@ class StyleTransferService:
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 
-def _detect_key(mono: "np.ndarray", sr: int) -> Optional[str]:
+def _detect_key(mono: np.ndarray, sr: int) -> str | None:
     """Estimate key using librosa chroma features + major/minor template matching."""
     try:
-        import numpy as np
         import librosa
+        import numpy as np
 
         chroma = librosa.feature.chroma_cqt(y=mono, sr=sr)
         chroma_mean = np.mean(chroma, axis=1)
 
         # Major/minor correlation templates
-        major_template = np.array([6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52,
-                                    5.19, 2.39, 3.66, 2.29, 2.88])
-        minor_template = np.array([6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54,
-                                    4.75, 3.98, 2.69, 3.34, 3.17])
+        major_template = np.array(
+            [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88]
+        )
+        minor_template = np.array(
+            [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17]
+        )
 
         notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
         best_score = -1.0
@@ -313,7 +347,7 @@ def _detect_key(mono: "np.ndarray", sr: int) -> Optional[str]:
         return None
 
 
-def _semitone_shift(source_key: Optional[str], target_key: Optional[str]) -> int:
+def _semitone_shift(source_key: str | None, target_key: str | None) -> int:
     """Calculate the semitone shift needed to transpose from source_key to target_key."""
     if not source_key or not target_key:
         return 0

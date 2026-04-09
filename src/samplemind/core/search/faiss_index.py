@@ -36,7 +36,7 @@ from __future__ import annotations
 import json
 import logging
 import os
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import NamedTuple
 
@@ -48,7 +48,9 @@ logger = logging.getLogger(__name__)
 
 CLAP_MODEL_ID = "laion/clap-htsat-unfused"
 EMBEDDING_DIM = 512
-DEFAULT_INDEX_DIR = Path(os.getenv("SAMPLEMIND_DATA_DIR", Path.home() / ".samplemind")) / "faiss"
+DEFAULT_INDEX_DIR = (
+    Path(os.getenv("SAMPLEMIND_DATA_DIR", Path.home() / ".samplemind")) / "faiss"
+)
 FALLBACK_MFCC_N = 20  # MFCCs when CLAP unavailable
 
 
@@ -57,16 +59,18 @@ FALLBACK_MFCC_N = 20  # MFCCs when CLAP unavailable
 
 class SearchResult(NamedTuple):
     """A single search result from the FAISS index."""
-    index_id: int       # FAISS internal ID
-    path: str           # Audio file path
+
+    index_id: int  # FAISS internal ID
+    path: str  # Audio file path
     filename: str
-    score: float        # Cosine similarity [0, 1]
-    metadata: dict      # BPM, key, genre_labels, etc.
+    score: float  # Cosine similarity [0, 1]
+    metadata: dict  # BPM, key, genre_labels, etc.
 
 
 @dataclass
 class IndexEntry:
     """Metadata stored alongside each FAISS vector."""
+
     index_id: int
     path: str
     filename: str
@@ -75,7 +79,7 @@ class IndexEntry:
     key: str | None = None
     energy: str | None = None
     genre_labels: list[str] = None  # type: ignore[assignment]
-    mood_labels: list[str] = None   # type: ignore[assignment]
+    mood_labels: list[str] = None  # type: ignore[assignment]
 
     def __post_init__(self) -> None:
         if self.genre_labels is None:
@@ -140,8 +144,8 @@ class CLAPEmbedder:
     # ── CLAP implementations ──────────────────────────────────────────────────
 
     def _clap_audio_embed(self, audio_path: str, sample_rate: int) -> np.ndarray:
-        import torch
         import soundfile as sf
+        import torch
 
         audio, sr = sf.read(audio_path, dtype="float32")
         if audio.ndim > 1:
@@ -188,7 +192,7 @@ class CLAPEmbedder:
     def _text_hash_embed(self, text: str) -> np.ndarray:
         """Deterministic keyword hash vector (poor quality, last resort)."""
         vec = np.zeros(EMBEDDING_DIM, dtype=np.float32)
-        for i, ch in enumerate(text.lower()):
+        for _i, ch in enumerate(text.lower()):
             vec[hash(ch) % EMBEDDING_DIM] += 1.0
         return _normalize(vec)
 
@@ -236,9 +240,7 @@ class FAISSIndex:
                 index = faiss.IndexFlatIP(EMBEDDING_DIM)
                 self._index = faiss.IndexIDMap(index)
             except ImportError:
-                raise RuntimeError(
-                    "faiss-cpu not installed — run: uv add faiss-cpu"
-                )
+                raise RuntimeError("faiss-cpu not installed — run: uv add faiss-cpu")
         return self._index
 
     def build(
@@ -246,7 +248,7 @@ class FAISSIndex:
         audio_paths: list[str],
         metadata_list: list[dict] | None = None,
         show_progress: bool = True,
-    ) -> "FAISSIndex":
+    ) -> FAISSIndex:
         """
         Build the FAISS index from a list of audio file paths.
 
@@ -285,18 +287,23 @@ class FAISSIndex:
                 self._entries.append(entry)
 
                 if show_progress and n > 10 and i % max(1, n // 10) == 0:
-                    logger.info("FAISS build: %d/%d (%.0f%%)", i + 1, n, (i + 1) / n * 100)
+                    logger.info(
+                        "FAISS build: %d/%d (%.0f%%)", i + 1, n, (i + 1) / n * 100
+                    )
 
             except Exception as exc:
                 logger.warning("Skipping %s: %s", path, exc)
 
         if embeddings:
-            import faiss
 
             vectors = np.stack(embeddings).astype(np.float32)
             faiss_ids = np.array(ids, dtype=np.int64)
             index.add_with_ids(vectors, faiss_ids)  # type: ignore[union-attr]
-            logger.info("✓ FAISS index built: %d vectors (%d-dim)", len(embeddings), EMBEDDING_DIM)
+            logger.info(
+                "✓ FAISS index built: %d vectors (%d-dim)",
+                len(embeddings),
+                EMBEDDING_DIM,
+            )
 
         return self
 
@@ -311,7 +318,6 @@ class FAISSIndex:
         Returns:
             The assigned index_id.
         """
-        import faiss
 
         index = self._get_or_create_index()
         index_id = len(self._entries)
@@ -348,7 +354,9 @@ class FAISSIndex:
         emb = self._embedder.embed_audio(audio_path)
         return self._search_embedding(emb, top_k=top_k)
 
-    def search_by_embedding(self, embedding: np.ndarray, top_k: int = 20) -> list[SearchResult]:
+    def search_by_embedding(
+        self, embedding: np.ndarray, top_k: int = 20
+    ) -> list[SearchResult]:
         """Search by precomputed embedding vector."""
         return self._search_embedding(embedding, top_k=top_k)
 
@@ -361,24 +369,26 @@ class FAISSIndex:
 
         scores, ids = self._index.search(vec, k)  # type: ignore[union-attr]
         results = []
-        for score, idx in zip(scores[0], ids[0]):
+        for score, idx in zip(scores[0], ids[0], strict=False):
             if idx < 0 or idx >= len(self._entries):
                 continue
             entry = self._entries[idx]
-            results.append(SearchResult(
-                index_id=entry.index_id,
-                path=entry.path,
-                filename=entry.filename,
-                score=float(score),
-                metadata={
-                    "bpm": entry.bpm,
-                    "key": entry.key,
-                    "energy": entry.energy,
-                    "genre_labels": entry.genre_labels,
-                    "mood_labels": entry.mood_labels,
-                    "sample_id": entry.sample_id,
-                },
-            ))
+            results.append(
+                SearchResult(
+                    index_id=entry.index_id,
+                    path=entry.path,
+                    filename=entry.filename,
+                    score=float(score),
+                    metadata={
+                        "bpm": entry.bpm,
+                        "key": entry.key,
+                        "energy": entry.energy,
+                        "genre_labels": entry.genre_labels,
+                        "mood_labels": entry.mood_labels,
+                        "sample_id": entry.sample_id,
+                    },
+                )
+            )
         return results
 
     # ── Persistence ───────────────────────────────────────────────────────────
@@ -393,7 +403,11 @@ class FAISSIndex:
             faiss.write_index(self._index, str(self._index_path))
             meta = [asdict(e) for e in self._entries]
             self._meta_path.write_text(json.dumps(meta, indent=2))
-            logger.info("✓ FAISS index saved: %s (%d entries)", self._index_path, len(self._entries))
+            logger.info(
+                "✓ FAISS index saved: %s (%d entries)",
+                self._index_path,
+                len(self._entries),
+            )
         except Exception as exc:
             logger.error("Failed to save FAISS index: %s", exc)
 

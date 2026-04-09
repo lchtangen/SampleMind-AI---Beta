@@ -11,18 +11,15 @@ Provides comprehensive harmonic analysis of audio files including:
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+
 import numpy as np
 
 from .chord_templates import (
     NOTE_NAMES,
-    CHORD_TEMPLATES,
-    CHORD_SYMBOLS,
-    KEY_PROFILES,
-    get_chord_template,
-    get_chord_name,
-    get_roman_numeral,
     detect_key_from_chroma,
+    get_chord_name,
+    get_chord_template,
+    get_roman_numeral,
 )
 
 logger = logging.getLogger(__name__)
@@ -54,7 +51,7 @@ class Modulation:
     time: float  # Time of modulation in seconds
     from_key: str  # Previous key (e.g., "C major")
     to_key: str  # New key (e.g., "G major")
-    pivot_chord: Optional[str] = None  # Pivot chord if detected
+    pivot_chord: str | None = None  # Pivot chord if detected
 
 
 @dataclass
@@ -65,18 +62,18 @@ class HarmonicAnalysis:
     key_root: int  # Key root pitch class
     key_mode: str  # "major" or "minor"
     key_confidence: float  # Key detection confidence
-    chord_progression: List[ChordEvent] = field(default_factory=list)
-    modulations: List[Modulation] = field(default_factory=list)
+    chord_progression: list[ChordEvent] = field(default_factory=list)
+    modulations: list[Modulation] = field(default_factory=list)
     harmonic_rhythm: float = 0.0  # Average chord changes per bar
     duration: float = 0.0  # Total duration analyzed
 
     @property
-    def chord_sequence(self) -> List[str]:
+    def chord_sequence(self) -> list[str]:
         """Simple list of chord names"""
         return [c.chord for c in self.chord_progression]
 
     @property
-    def roman_sequence(self) -> List[str]:
+    def roman_sequence(self) -> list[str]:
         """Simple list of Roman numerals"""
         return [c.roman_numeral for c in self.chord_progression]
 
@@ -164,7 +161,7 @@ class MusicTheoryAnalyzer:
             duration=duration,
         )
 
-    def detect_key(self, file_path: Path) -> Tuple[str, float]:
+    def detect_key(self, file_path: Path) -> tuple[str, float]:
         """
         Detect only the key of an audio file.
 
@@ -187,7 +184,7 @@ class MusicTheoryAnalyzer:
 
         return key_name, confidence
 
-    def detect_chords(self, file_path: Path) -> List[ChordEvent]:
+    def detect_chords(self, file_path: Path) -> list[ChordEvent]:
         """
         Detect only the chord progression.
 
@@ -214,7 +211,7 @@ class MusicTheoryAnalyzer:
         sr: int,
         key_root: int,
         key_mode: str,
-    ) -> List[ChordEvent]:
+    ) -> list[ChordEvent]:
         """
         Internal chord detection from chroma features.
 
@@ -322,7 +319,7 @@ class MusicTheoryAnalyzer:
         sr: int,
         initial_key_root: int,
         initial_key_mode: str,
-    ) -> List[Modulation]:
+    ) -> list[Modulation]:
         """
         Detect key modulations within the piece.
 
@@ -375,7 +372,7 @@ class MusicTheoryAnalyzer:
 
         return modulations
 
-    def get_scale_notes(self, key_root: int, key_mode: str) -> List[str]:
+    def get_scale_notes(self, key_root: int, key_mode: str) -> list[str]:
         """
         Get the notes in a scale.
 

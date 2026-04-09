@@ -5,12 +5,13 @@ Real-time monitoring of CPU, memory, cache, and query performance
 
 import logging
 import time
-import psutil
-from typing import Optional, Dict, Any, List, Deque
-from dataclasses import dataclass, field
 from collections import deque
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
+from typing import Any
+
+import psutil
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ class PerformanceMetric:
     metric_type: MetricType
     timestamp: datetime = field(default_factory=datetime.now)
     value: float = 0.0
-    label: Optional[str] = None
+    label: str | None = None
 
     def __str__(self) -> str:
         return f"{self.metric_type.value}: {self.value:.2f} @ {self.timestamp.strftime('%H:%M:%S')}"
@@ -72,13 +73,13 @@ class PerformanceMonitor:
             max_history: Maximum history size for deques
         """
         self.max_history = max_history
-        self.metrics: Deque[PerformanceMetric] = deque(maxlen=max_history)
-        self.cpu_samples: Deque[float] = deque(maxlen=60)  # 1 minute of CPU samples
-        self.memory_samples: Deque[float] = deque(maxlen=60)
-        self.cache_hits: Deque[PerformanceMetric] = deque(maxlen=300)
-        self.cache_misses: Deque[PerformanceMetric] = deque(maxlen=300)
-        self.query_times: Deque[float] = deque(maxlen=100)
-        self.analysis_times: Deque[float] = deque(maxlen=100)
+        self.metrics: deque[PerformanceMetric] = deque(maxlen=max_history)
+        self.cpu_samples: deque[float] = deque(maxlen=60)  # 1 minute of CPU samples
+        self.memory_samples: deque[float] = deque(maxlen=60)
+        self.cache_hits: deque[PerformanceMetric] = deque(maxlen=300)
+        self.cache_misses: deque[PerformanceMetric] = deque(maxlen=300)
+        self.query_times: deque[float] = deque(maxlen=100)
+        self.analysis_times: deque[float] = deque(maxlen=100)
 
         self.start_time = time.time()
         self.process = psutil.Process()
@@ -90,7 +91,7 @@ class PerformanceMonitor:
         self,
         metric_type: MetricType,
         value: float,
-        label: Optional[str] = None,
+        label: str | None = None,
     ) -> None:
         """
         Record a performance metric
@@ -224,7 +225,7 @@ class PerformanceMonitor:
 
         return stats
 
-    def get_cpu_trend(self, points: int = 10) -> List[float]:
+    def get_cpu_trend(self, points: int = 10) -> list[float]:
         """
         Get CPU trend as list
 
@@ -241,7 +242,7 @@ class PerformanceMonitor:
             return [cpu_list[i * step] for i in range(points)]
         return cpu_list
 
-    def get_memory_trend(self, points: int = 10) -> List[float]:
+    def get_memory_trend(self, points: int = 10) -> list[float]:
         """
         Get memory trend as list
 
@@ -257,7 +258,7 @@ class PerformanceMonitor:
             return [mem_list[i * step] for i in range(points)]
         return mem_list
 
-    def get_query_performance(self) -> Dict[str, float]:
+    def get_query_performance(self) -> dict[str, float]:
         """
         Get query performance metrics
 
@@ -275,7 +276,7 @@ class PerformanceMonitor:
             "count": len(query_list),
         }
 
-    def get_analysis_performance(self) -> Dict[str, float]:
+    def get_analysis_performance(self) -> dict[str, float]:
         """
         Get analysis performance metrics
 
@@ -308,7 +309,7 @@ class PerformanceMonitor:
         secs = int(seconds % 60)
         return f"{hours:02d}:{minutes:02d}:{secs:02d}"
 
-    def get_health_score(self) -> Dict[str, Any]:
+    def get_health_score(self) -> dict[str, Any]:
         """
         Calculate overall health score (0-100)
 
@@ -369,7 +370,7 @@ class PerformanceMonitor:
 
 
 # Global singleton instance
-_monitor: Optional[PerformanceMonitor] = None
+_monitor: PerformanceMonitor | None = None
 
 
 def get_performance_monitor() -> PerformanceMonitor:

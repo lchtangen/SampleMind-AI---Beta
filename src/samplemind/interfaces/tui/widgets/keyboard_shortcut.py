@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from textual.app import ComposeResult
+from textual.containers import Horizontal
 from textual.widget import Widget
 from textual.widgets import Label
-from textual.containers import Horizontal
 
 
 class KeyboardShortcut(Widget):

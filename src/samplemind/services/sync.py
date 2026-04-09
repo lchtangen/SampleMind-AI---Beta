@@ -3,12 +3,9 @@ Sync Service
 Manages synchronization between local library and cloud storage.
 """
 
-import asyncio
 import hashlib
 import logging
-import os
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from .storage import FileMetadata, StorageProvider
 
@@ -33,7 +30,7 @@ def calculate_file_hash(
 
 
 def files_differ(
-    local_path: Path, remote_metadata: Optional[FileMetadata], use_hash: bool = False
+    local_path: Path, remote_metadata: FileMetadata | None, use_hash: bool = False
 ) -> bool:
     """
     Check if local file differs from remote version.
@@ -91,7 +88,7 @@ class SyncManager:
 
     async def sync_library(
         self, library_path: Path, direction: str = "both"
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         """
         Sync local library with storage.
 
@@ -162,7 +159,7 @@ class SyncManager:
 
         return count
 
-    async def _sync_down(self, root: Path, remote_files: List[str]) -> int:
+    async def _sync_down(self, root: Path, remote_files: list[str]) -> int:
         count = 0
 
         for remote_path in remote_files:
@@ -213,7 +210,7 @@ class SyncManager:
             # Ideally we'd use dependency injection, but for now specific imports
             from samplemind.core.engine.audio_engine import AudioFeatures
 
-            with open(json_path, "r") as f:
+            with open(json_path) as f:
                 data = json.load(f)
 
             if "neural_embedding" in data and data["neural_embedding"]:

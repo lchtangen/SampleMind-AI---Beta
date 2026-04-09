@@ -7,16 +7,13 @@ pytest.skip(
     allow_module_level=True,
 )
 
+
 import numpy as np
-import librosa
-from pathlib import Path
-import os
-import tempfile
 
 from src.samplemind.core.engine.audio_engine import (
-    AudioProcessor,
     AdvancedFeatureExtractor,
     AudioFeatures,
+    AudioProcessor,
 )
 
 

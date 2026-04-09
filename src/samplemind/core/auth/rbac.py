@@ -3,12 +3,10 @@ Role-Based Access Control (RBAC) System
 Defines user roles and permissions for SampleMind AI
 """
 
-from enum import Enum
-from typing import List, Set, Optional
-from pydantic import BaseModel
+from enum import StrEnum
 
 
-class UserRole(str, Enum):
+class UserRole(StrEnum):
     """User role definitions"""
 
     FREE = "free"
@@ -18,7 +16,7 @@ class UserRole(str, Enum):
     ADMIN = "admin"
 
 
-class Permission(str, Enum):
+class Permission(StrEnum):
     """System permissions"""
 
     # Audio permissions
@@ -55,7 +53,7 @@ class Permission(str, Enum):
 
 
 # Role to permissions mapping
-ROLE_PERMISSIONS: dict[UserRole, Set[Permission]] = {
+ROLE_PERMISSIONS: dict[UserRole, set[Permission]] = {
     UserRole.FREE: {
         Permission.AUDIO_UPLOAD,
         Permission.AUDIO_ANALYZE,
@@ -124,7 +122,7 @@ ROLE_PERMISSIONS: dict[UserRole, Set[Permission]] = {
     },
     UserRole.ADMIN: {
         # All permissions
-        *[p for p in Permission],
+        *list(Permission),
     },
 }
 
@@ -133,7 +131,7 @@ class RBACService:
     """Service for role-based access control"""
 
     @staticmethod
-    def get_permissions_for_role(role: UserRole) -> Set[Permission]:
+    def get_permissions_for_role(role: UserRole) -> set[Permission]:
         """Get all permissions for a given role"""
         return ROLE_PERMISSIONS.get(role, set())
 
@@ -144,13 +142,13 @@ class RBACService:
         return permission in role_perms
 
     @staticmethod
-    def has_any_permission(role: UserRole, permissions: List[Permission]) -> bool:
+    def has_any_permission(role: UserRole, permissions: list[Permission]) -> bool:
         """Check if a role has any of the specified permissions"""
         role_perms = ROLE_PERMISSIONS.get(role, set())
         return any(perm in role_perms for perm in permissions)
 
     @staticmethod
-    def has_all_permissions(role: UserRole, permissions: List[Permission]) -> bool:
+    def has_all_permissions(role: UserRole, permissions: list[Permission]) -> bool:
         """Check if a role has all of the specified permissions"""
         role_perms = ROLE_PERMISSIONS.get(role, set())
         return all(perm in role_perms for perm in permissions)

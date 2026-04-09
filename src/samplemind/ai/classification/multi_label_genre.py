@@ -25,13 +25,11 @@ import logging
 import math
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
 from samplemind.core.analysis.genre_classifier import (
     GENRE_TAXONOMY,
-    GenreResult,
     normalize_genre,
 )
 
@@ -40,24 +38,41 @@ logger = logging.getLogger(__name__)
 # ── Camelot Wheel ─────────────────────────────────────────────────────────────
 # Maps (key, scale) → Camelot position string (e.g. "8A", "3B")
 
-_CAMELOT: Dict[Tuple[str, str], str] = {
-    ("C", "major"): "8B",  ("C", "minor"): "5A",
-    ("C#", "major"): "3B", ("C#", "minor"): "12A",
-    ("Db", "major"): "3B", ("Db", "minor"): "12A",
-    ("D", "major"): "10B", ("D", "minor"): "7A",
-    ("D#", "major"): "5B", ("D#", "minor"): "2A",
-    ("Eb", "major"): "5B", ("Eb", "minor"): "2A",
-    ("E", "major"): "12B", ("E", "minor"): "9A",
-    ("F", "major"): "7B",  ("F", "minor"): "4A",
-    ("F#", "major"): "2B", ("F#", "minor"): "11A",
-    ("Gb", "major"): "2B", ("Gb", "minor"): "11A",
-    ("G", "major"): "9B",  ("G", "minor"): "6A",
-    ("G#", "major"): "4B", ("G#", "minor"): "1A",
-    ("Ab", "major"): "4B", ("Ab", "minor"): "1A",
-    ("A", "major"): "11B", ("A", "minor"): "8A",
-    ("A#", "major"): "6B", ("A#", "minor"): "3A",
-    ("Bb", "major"): "6B", ("Bb", "minor"): "3A",
-    ("B", "major"): "1B",  ("B", "minor"): "10A",
+_CAMELOT: dict[tuple[str, str], str] = {
+    ("C", "major"): "8B",
+    ("C", "minor"): "5A",
+    ("C#", "major"): "3B",
+    ("C#", "minor"): "12A",
+    ("Db", "major"): "3B",
+    ("Db", "minor"): "12A",
+    ("D", "major"): "10B",
+    ("D", "minor"): "7A",
+    ("D#", "major"): "5B",
+    ("D#", "minor"): "2A",
+    ("Eb", "major"): "5B",
+    ("Eb", "minor"): "2A",
+    ("E", "major"): "12B",
+    ("E", "minor"): "9A",
+    ("F", "major"): "7B",
+    ("F", "minor"): "4A",
+    ("F#", "major"): "2B",
+    ("F#", "minor"): "11A",
+    ("Gb", "major"): "2B",
+    ("Gb", "minor"): "11A",
+    ("G", "major"): "9B",
+    ("G", "minor"): "6A",
+    ("G#", "major"): "4B",
+    ("G#", "minor"): "1A",
+    ("Ab", "major"): "4B",
+    ("Ab", "minor"): "1A",
+    ("A", "major"): "11B",
+    ("A", "minor"): "8A",
+    ("A#", "major"): "6B",
+    ("A#", "minor"): "3A",
+    ("Bb", "major"): "6B",
+    ("Bb", "minor"): "3A",
+    ("B", "major"): "1B",
+    ("B", "minor"): "10A",
 }
 
 
@@ -70,7 +85,7 @@ def camelot_key(key: str, scale: str) -> str:
 # Semantic text prompts corresponding to every genre in the taxonomy.
 # The CLAP model scores audio embeddings against these text embeddings.
 
-_CLAP_GENRE_PROMPTS: List[str] = [f"a {g} music sample" for g in GENRE_TAXONOMY]
+_CLAP_GENRE_PROMPTS: list[str] = [f"a {g} music sample" for g in GENRE_TAXONOMY]
 
 
 # ── Result dataclass ──────────────────────────────────────────────────────────
@@ -81,9 +96,9 @@ class MultiLabelGenreResult:
     """Multi-label genre classification result with Camelot key info."""
 
     # All genres above threshold, ordered by confidence (highest first)
-    all_genres: List[str] = field(default_factory=list)
+    all_genres: list[str] = field(default_factory=list)
     # Raw sigmoid scores for every detected genre
-    scores: Dict[str, float] = field(default_factory=dict)
+    scores: dict[str, float] = field(default_factory=dict)
 
     # Convenience — top-1 genre
     primary_genre: str = "Unknown"
@@ -155,14 +170,14 @@ class MultiLabelGenreClassifier:
         heuristic_scores = self._heuristic_scores(y, sr)
 
         # Stage 2: CLAP (optional)
-        clap_scores: Dict[str, float] = {}
+        clap_scores: dict[str, float] = {}
         if self.use_clap:
             clap_scores = self._clap_scores(y, sr)
 
         # Blend
         if clap_scores:
             all_genres = set(heuristic_scores) | set(clap_scores)
-            blended: Dict[str, float] = {
+            blended: dict[str, float] = {
                 g: 0.6 * clap_scores.get(g, 0.0) + 0.4 * heuristic_scores.get(g, 0.0)
                 for g in all_genres
             }
@@ -171,19 +186,21 @@ class MultiLabelGenreClassifier:
             blended = heuristic_scores
 
         # Apply sigmoid to map arbitrary scores → [0, 1]
-        sigmoid_scores: Dict[str, float] = {
-            g: _sigmoid(s) for g, s in blended.items()
-        }
+        sigmoid_scores: dict[str, float] = {g: _sigmoid(s) for g, s in blended.items()}
 
         # Filter by threshold and sort
         above_threshold = {
             g: s for g, s in sigmoid_scores.items() if s >= self.threshold
         }
-        sorted_genres = sorted(above_threshold, key=lambda g: above_threshold[g], reverse=True)
+        sorted_genres = sorted(
+            above_threshold, key=lambda g: above_threshold[g], reverse=True
+        )
         top_genres = sorted_genres[: self.top_k]
 
         result.all_genres = [normalize_genre(g) for g in top_genres]
-        result.scores = {normalize_genre(g): round(above_threshold[g], 4) for g in top_genres}
+        result.scores = {
+            normalize_genre(g): round(above_threshold[g], 4) for g in top_genres
+        }
         result.primary_genre = result.all_genres[0] if result.all_genres else "Unknown"
         result.primary_confidence = result.scores.get(result.primary_genre, 0.0)
 
@@ -210,7 +227,7 @@ class MultiLabelGenreClassifier:
     # ── Private helpers ───────────────────────────────────────────────────────
 
     @staticmethod
-    def _detect_key_scale(y: np.ndarray, sr: int) -> Tuple[str, str]:
+    def _detect_key_scale(y: np.ndarray, sr: int) -> tuple[str, str]:
         """Simple chroma-based key and major/minor detection."""
         try:
             import librosa
@@ -218,18 +235,35 @@ class MultiLabelGenreClassifier:
             chroma = librosa.feature.chroma_stft(y=y, sr=sr)
             chroma_mean = np.mean(chroma, axis=1)
             key_idx = int(np.argmax(chroma_mean))
-            key_names = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+            key_names = [
+                "C",
+                "C#",
+                "D",
+                "D#",
+                "E",
+                "F",
+                "F#",
+                "G",
+                "G#",
+                "A",
+                "A#",
+                "B",
+            ]
             key = key_names[key_idx]
 
             # Minor heuristic: if min of chroma at (key_idx - 3) % 12 > 0.8 * root
             minor_idx = (key_idx + 9) % 12  # relative minor root
-            scale = "minor" if chroma_mean[minor_idx] > 0.8 * chroma_mean[key_idx] else "major"
+            scale = (
+                "minor"
+                if chroma_mean[minor_idx] > 0.8 * chroma_mean[key_idx]
+                else "major"
+            )
             return key, scale
         except Exception:
             return "", ""
 
     @staticmethod
-    def _heuristic_scores(y: np.ndarray, sr: int) -> Dict[str, float]:
+    def _heuristic_scores(y: np.ndarray, sr: int) -> dict[str, float]:
         """Feature-rule scoring (same logic as GenreClassifier._heuristic_classify)."""
         try:
             import librosa
@@ -244,11 +278,13 @@ class MultiLabelGenreClassifier:
         except Exception:
             return {}
 
-        scores: Dict[str, float] = {}
+        scores: dict[str, float] = {}
 
         # BPM-based genre rules
         if 118 <= bpm <= 136:
-            scores.update({"House": 0.7, "Tech House": 0.6, "Deep House": 0.55, "EDM": 0.5})
+            scores.update(
+                {"House": 0.7, "Tech House": 0.6, "Deep House": 0.55, "EDM": 0.5}
+            )
         if 128 <= bpm <= 145:
             scores.update({"Techno": 0.6, "Trance": 0.55})
         if 160 <= bpm <= 185:
@@ -256,7 +292,9 @@ class MultiLabelGenreClassifier:
         if 130 <= bpm <= 160:
             scores.update({"Dubstep": 0.4, "Future Bass": 0.45})
         if 60 <= bpm <= 100:
-            scores.update({"Hip-Hop": 0.55, "R&B": 0.45, "Boom Bap": 0.4, "Trap Soul": 0.35})
+            scores.update(
+                {"Hip-Hop": 0.55, "R&B": 0.45, "Boom Bap": 0.4, "Trap Soul": 0.35}
+            )
         if 130 <= bpm <= 150:
             scores.update({"Trap": 0.5, "Cloud Rap": 0.35})
         if 148 <= bpm <= 180:
@@ -285,7 +323,7 @@ class MultiLabelGenreClassifier:
         max_s = max(scores.values()) if scores else 1.0
         return {g: s / max(max_s, 1e-9) for g, s in scores.items()}
 
-    def _clap_scores(self, y: np.ndarray, sr: int) -> Dict[str, float]:
+    def _clap_scores(self, y: np.ndarray, sr: int) -> dict[str, float]:
         """
         Score genres using CLAP audio embeddings (requires `transformers` + `torch`).
 
@@ -304,6 +342,7 @@ class MultiLabelGenreClassifier:
             # Resample to 48kHz (CLAP expectation)
             try:
                 import librosa
+
                 y_48k = librosa.resample(y, orig_sr=sr, target_sr=48000)
             except Exception:
                 y_48k = y

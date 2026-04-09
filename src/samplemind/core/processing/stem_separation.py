@@ -7,7 +7,7 @@ import sys
 import tempfile
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 
 from .exceptions import OptionalDependencyError
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 _DEFAULT_STEMS = ("vocals", "drums", "bass", "other")
 
 
-class StemQuality(str, Enum):
+class StemQuality(StrEnum):
     """Quality presets for stem separation"""
 
     FAST = "fast"  # Quick, lower quality
@@ -25,7 +25,7 @@ class StemQuality(str, Enum):
     HIGH = "high"  # Best quality, slower
 
 
-class StemBackend(str, Enum):
+class StemBackend(StrEnum):
     """Available stem separation backends"""
 
     DEMUCS = "demucs"

@@ -3,24 +3,23 @@ SQLAlchemy Database Models
 Complete data relationships for SampleMind AI
 """
 
+from datetime import datetime
+
 from sqlalchemy import (
-    Column,
-    String,
-    Integer,
-    Float,
     Boolean,
+    Column,
     DateTime,
-    Text,
+    Float,
     ForeignKey,
     Index,
-    CheckConstraint,
+    Integer,
+    String,
+    Text,
     UniqueConstraint,
 )
-from sqlalchemy.dialects.postgresql import JSONB, ARRAY
-from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.sql import func
-from datetime import datetime
-from typing import Optional, List
 
 Base = declarative_base()
 
@@ -287,7 +286,6 @@ class AuditLog(Base):
 # MongoDB Models (using Beanie ODM)
 from beanie import Document
 from pydantic import Field
-from typing import Optional, List
 
 
 class AudioFile(Document):
@@ -306,18 +304,18 @@ class AudioFile(Document):
     format: str
 
     # Audio Features
-    tempo: Optional[float] = None
-    key: Optional[str] = None
-    energy: Optional[float] = None
-    danceability: Optional[float] = None
+    tempo: float | None = None
+    key: str | None = None
+    energy: float | None = None
+    danceability: float | None = None
 
     # Metadata
-    title: Optional[str] = None
-    artist: Optional[str] = None
-    album: Optional[str] = None
-    genre: Optional[str] = None
-    tags: List[str] = Field(default_factory=list)
-    description: Optional[str] = None
+    title: str | None = None
+    artist: str | None = None
+    album: str | None = None
+    genre: str | None = None
+    tags: list[str] = Field(default_factory=list)
+    description: str | None = None
 
     # Status
     processing_status: str = "pending"  # pending, processing, completed, failed
@@ -326,10 +324,10 @@ class AudioFile(Document):
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
-    deleted_at: Optional[datetime] = None
+    deleted_at: datetime | None = None
 
     # Collections
-    collection_ids: List[str] = Field(default_factory=list)
+    collection_ids: list[str] = Field(default_factory=list)
 
     # Additional metadata
     metadata: dict = Field(default_factory=dict)
@@ -361,12 +359,12 @@ class AnalysisResult(Document):
     results: dict
 
     # Processing Info
-    model_version: Optional[str] = None
-    processing_time_ms: Optional[float] = None
+    model_version: str | None = None
+    processing_time_ms: float | None = None
 
     # Status
     status: str = "completed"  # pending, processing, completed, failed
-    error: Optional[str] = None
+    error: str | None = None
 
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -400,13 +398,13 @@ class BatchJob(Document):
     progress_percent: float = 0.0
 
     # Results
-    results: List[dict] = Field(default_factory=list)
-    errors: List[dict] = Field(default_factory=list)
+    results: list[dict] = Field(default_factory=list)
+    errors: list[dict] = Field(default_factory=list)
 
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
 
     class Settings:
         """MongoDB collection settings for BatchJob"""
@@ -425,6 +423,7 @@ async def init_mongodb_models():
     """Initialize Beanie with MongoDB models"""
     from beanie import init_beanie
     from motor.motor_asyncio import AsyncIOMotorClient
+
     from src.samplemind.core.config import settings
 
     client = AsyncIOMotorClient(settings.mongodb_url)
@@ -445,14 +444,14 @@ class UserRepository:
     """User data access layer"""
 
     @staticmethod
-    async def get_by_id(session, user_id: str) -> Optional[User]:
+    async def get_by_id(session, user_id: str) -> User | None:
         from sqlalchemy import select
 
         result = await session.execute(select(User).where(User.id == user_id))
         return result.scalar_one_or_none()
 
     @staticmethod
-    async def get_by_email(session, email: str) -> Optional[User]:
+    async def get_by_email(session, email: str) -> User | None:
         from sqlalchemy import select
 
         result = await session.execute(select(User).where(User.email == email))
@@ -485,16 +484,16 @@ class AudioFileRepository:
     """Audio file data access layer"""
 
     @staticmethod
-    async def get_by_id(audio_id: str) -> Optional[AudioFile]:
+    async def get_by_id(audio_id: str) -> AudioFile | None:
         return await AudioFile.find_one(AudioFile.file_id == audio_id)
 
     @staticmethod
     async def get_by_user(
         user_id: str, skip: int = 0, limit: int = 50
-    ) -> List[AudioFile]:
+    ) -> list[AudioFile]:
         return (
             await AudioFile.find(
-                AudioFile.user_id == user_id, AudioFile.deleted_at == None
+                AudioFile.user_id == user_id, AudioFile.deleted_at is None
             )
             .sort(-AudioFile.created_at)
             .skip(skip)
@@ -524,7 +523,7 @@ from src.samplemind.core.config import settings
 async def main():
     # PostgreSQL (SQLAlchemy)
     engine = create_async_engine(settings.database_url_async)
-    
+
     async with AsyncSession(engine) as session:
         # Create user
         user = await UserRepository.create(session, {
@@ -534,12 +533,12 @@ async def main():
             "hashed_password": "...",
             "role": "free"
         })
-        
+
         await session.commit()
-    
+
     # MongoDB (Beanie)
     await init_mongodb_models()
-    
+
     # Create audio file
     audio = await AudioFileRepository.create({
         "file_id": "audio_123",

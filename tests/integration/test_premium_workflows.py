@@ -16,14 +16,14 @@ import numpy as np
 import pytest
 import soundfile as sf
 
-from samplemind.core.engine.audio_engine import AudioEngine, AnalysisLevel
-from samplemind.core.tagging.ai_tagger import get_tagger
-from samplemind.core.tagging.tag_vocabulary import get_vocabulary
+from samplemind.core.database import chroma as chroma_db
+from samplemind.core.engine.audio_engine import AnalysisLevel, AudioEngine
+from samplemind.core.processing.groove_extractor import GrooveExtractor
+from samplemind.core.processing.layering_analyzer import LayeringAnalyzer
 from samplemind.core.processing.loudness_analyzer import LoudnessAnalyzer
 from samplemind.core.processing.mastering_analyzer import MasteringAnalyzer
-from samplemind.core.processing.layering_analyzer import LayeringAnalyzer
-from samplemind.core.processing.groove_extractor import GrooveExtractor
-from samplemind.core.database import chroma as chroma_db
+from samplemind.core.tagging.ai_tagger import get_tagger
+from samplemind.core.tagging.tag_vocabulary import get_vocabulary
 
 
 class TestTaggingWorkflow:
@@ -63,14 +63,14 @@ class TestTaggingWorkflow:
         try:
             client = chroma_db.get_chroma_client()
             client.delete_collection("test_tags")
-        except:
+        except Exception:
             pass
 
         import shutil
 
         try:
             shutil.rmtree(self.temp_dir)
-        except:
+        except Exception:
             pass
 
     def test_tagging_from_analysis(self):
@@ -151,7 +151,7 @@ class TestMasteringWorkflow:
 
         try:
             shutil.rmtree(self.temp_dir)
-        except:
+        except Exception:
             pass
 
     def test_loudness_analysis(self):
@@ -290,7 +290,7 @@ class TestGrooveWorkflow:
         beat_times = np.array([0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5])
         swing = np.array([0, 0.08, 0, 0.08, 0, 0.08, 0, 0.08])  # Swing on offbeats
 
-        for beat_time, swing_amt in zip(beat_times, swing):
+        for beat_time, swing_amt in zip(beat_times, swing, strict=False):
             kick_pos = int((beat_time + swing_amt) * sr)
             kick_len = int(0.1 * sr)  # 100ms kick
             if kick_pos + kick_len < len(audio):
@@ -307,7 +307,7 @@ class TestGrooveWorkflow:
 
         try:
             shutil.rmtree(self.temp_dir)
-        except:
+        except Exception:
             pass
 
     def test_groove_extraction(self):
@@ -385,7 +385,7 @@ class TestMultiFeatureWorkflow:
 
         try:
             shutil.rmtree(self.temp_dir)
-        except:
+        except Exception:
             pass
 
     def test_complete_analysis_tagging_and_mastering(self):

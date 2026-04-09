@@ -12,11 +12,11 @@ Allows users to:
 
 import json
 import logging
-from pathlib import Path
-from typing import Dict, List, Optional, Any
+import uuid
 from datetime import datetime
 from enum import Enum
-import uuid
+from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -38,10 +38,10 @@ class AnalysisResult:
         file_id: str,
         filename: str,
         filepath: str,
-        features: Optional[Dict] = None,
+        features: dict | None = None,
         analysis_level: str = "standard",
         duration: float = 0.0,
-        timestamp: Optional[str] = None,
+        timestamp: str | None = None,
     ):
         self.file_id = file_id
         self.filename = filename
@@ -51,7 +51,7 @@ class AnalysisResult:
         self.duration = duration
         self.timestamp = timestamp or datetime.now().isoformat()
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary"""
         return {
             "file_id": self.file_id,
@@ -64,7 +64,7 @@ class AnalysisResult:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict) -> "AnalysisResult":
+    def from_dict(cls, data: dict) -> "AnalysisResult":
         """Create from dictionary"""
         return cls(
             file_id=data["file_id"],
@@ -82,10 +82,10 @@ class Session:
 
     def __init__(
         self,
-        session_id: Optional[str] = None,
+        session_id: str | None = None,
         name: str = "Untitled Session",
         description: str = "",
-        created_at: Optional[str] = None,
+        created_at: str | None = None,
     ):
         self.session_id = session_id or str(uuid.uuid4())[:8]
         self.name = name
@@ -93,10 +93,10 @@ class Session:
         self.created_at = created_at or datetime.now().isoformat()
         self.modified_at = datetime.now().isoformat()
         self.status = SessionStatus.ACTIVE
-        self.results: Dict[str, AnalysisResult] = {}
-        self.notes: List[str] = []
-        self.tags: List[str] = []
-        self.metadata: Dict[str, Any] = {}
+        self.results: dict[str, AnalysisResult] = {}
+        self.notes: list[str] = []
+        self.tags: list[str] = []
+        self.metadata: dict[str, Any] = {}
 
     def add_result(self, result: AnalysisResult) -> bool:
         """Add analysis result to session"""
@@ -118,11 +118,11 @@ class Session:
         self._update_modified()
         return True
 
-    def get_result(self, file_id: str) -> Optional[AnalysisResult]:
+    def get_result(self, file_id: str) -> AnalysisResult | None:
         """Get analysis result by ID"""
         return self.results.get(file_id)
 
-    def list_results(self) -> List[AnalysisResult]:
+    def list_results(self) -> list[AnalysisResult]:
         """Get all results in session"""
         return list(self.results.values())
 
@@ -131,7 +131,7 @@ class Session:
         self.notes.append(f"[{datetime.now().isoformat()}] {note}")
         self._update_modified()
 
-    def get_notes(self) -> List[str]:
+    def get_notes(self) -> list[str]:
         """Get all session notes"""
         return self.notes.copy()
 
@@ -156,7 +156,7 @@ class Session:
         """Update modification timestamp"""
         self.modified_at = datetime.now().isoformat()
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get session statistics"""
         if not self.results:
             return {"total_files": 0, "total_duration": 0.0, "average_duration": 0.0}
@@ -175,7 +175,7 @@ class Session:
             "results_by_level": self._count_by_level(),
         }
 
-    def _count_by_level(self) -> Dict[str, int]:
+    def _count_by_level(self) -> dict[str, int]:
         """Count results by analysis level"""
         counts = {}
         for result in self.results.values():
@@ -183,7 +183,7 @@ class Session:
             counts[level] = counts.get(level, 0) + 1
         return counts
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert session to dictionary"""
         return {
             "session_id": self.session_id,
@@ -199,7 +199,7 @@ class Session:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict) -> "Session":
+    def from_dict(cls, data: dict) -> "Session":
         """Create session from dictionary"""
         session = cls(
             session_id=data.get("session_id"),
@@ -243,14 +243,14 @@ class SessionManager:
         """
         self.storage_dir = Path(storage_dir)
         self.storage_dir.mkdir(parents=True, exist_ok=True)
-        self.sessions: Dict[str, Session] = {}
-        self.current_session: Optional[Session] = None
+        self.sessions: dict[str, Session] = {}
+        self.current_session: Session | None = None
         self._load_sessions()
 
         logger.info(f"Session manager initialized at {self.storage_dir.absolute()}")
 
     def create_session(
-        self, name: str, description: str = "", metadata: Optional[Dict] = None
+        self, name: str, description: str = "", metadata: dict | None = None
     ) -> Session:
         """
         Create a new session.
@@ -272,13 +272,13 @@ class SessionManager:
         logger.info(f"Created session: {name} ({session.session_id})")
         return session
 
-    def get_session(self, session_id: str) -> Optional[Session]:
+    def get_session(self, session_id: str) -> Session | None:
         """Get session by ID"""
         return self.sessions.get(session_id)
 
     def list_sessions(
-        self, status: Optional[SessionStatus] = None, limit: int = 20
-    ) -> List[Session]:
+        self, status: SessionStatus | None = None, limit: int = 20
+    ) -> list[Session]:
         """
         List sessions.
 
@@ -371,7 +371,7 @@ class SessionManager:
 
     def search_sessions(
         self, query: str, search_results: bool = True, search_notes: bool = True
-    ) -> List[Session]:
+    ) -> list[Session]:
         """
         Search sessions by name, description, notes, or results.
 
@@ -436,7 +436,7 @@ class SessionManager:
             logger.error(f"Failed to export session: {e}")
             return False
 
-    def import_session(self, import_path: str) -> Optional[Session]:
+    def import_session(self, import_path: str) -> Session | None:
         """
         Import session from JSON file.
 
@@ -447,7 +447,7 @@ class SessionManager:
             Imported session or None
         """
         try:
-            with open(import_path, "r") as f:
+            with open(import_path) as f:
                 data = json.load(f)
 
             session = Session.from_dict(data)
@@ -475,7 +475,7 @@ class SessionManager:
         """Load all sessions from disk"""
         for json_file in self.storage_dir.glob("*.json"):
             try:
-                with open(json_file, "r") as f:
+                with open(json_file) as f:
                     data = json.load(f)
 
                 session = Session.from_dict(data)
@@ -497,7 +497,7 @@ class SessionManager:
 
 
 # Global session manager instance
-_session_manager: Optional[SessionManager] = None
+_session_manager: SessionManager | None = None
 
 
 def init_sessions(storage_dir: str = ".samplemind/sessions") -> SessionManager:

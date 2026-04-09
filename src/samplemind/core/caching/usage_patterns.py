@@ -6,14 +6,10 @@ for use by the Markov predictor. Stores data in Redis with TTL.
 """
 
 import asyncio
-import json
-import time
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass, field, asdict
-from datetime import datetime, timedelta
-from collections import defaultdict
 import logging
+import time
+from collections import defaultdict
+from dataclasses import asdict, dataclass, field
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +28,7 @@ class UsageEvent:
     file_size_bytes: int = 0
     duration_seconds: float = 0.0
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary"""
         return asdict(self)
 
@@ -42,7 +38,7 @@ class TransitionMatrix:
     """Order-2 Markov chain transition matrix"""
 
     # state_1 -> state_2 -> count
-    transitions: Dict[str, Dict[str, int]] = field(
+    transitions: dict[str, dict[str, int]] = field(
         default_factory=lambda: defaultdict(lambda: defaultdict(int))
     )
     # Total transitions for normalization
@@ -68,7 +64,7 @@ class TransitionMatrix:
 
         return count / total if total > 0 else 0.0
 
-    def get_top_n_transitions(self, state: str, n: int = 5) -> List[Tuple[str, float]]:
+    def get_top_n_transitions(self, state: str, n: int = 5) -> list[tuple[str, float]]:
         """Get top n most likely next states from given state"""
         if state not in self.transitions:
             return []
@@ -84,7 +80,7 @@ class TransitionMatrix:
 
         return probs[:n]
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization"""
         return {
             "transitions": {k: dict(v) for k, v in self.transitions.items()},
@@ -115,17 +111,17 @@ class UsagePatternTracker:
         self.redis_cache = redis_cache
 
         # In-memory state
-        self.events: List[UsageEvent] = []
+        self.events: list[UsageEvent] = []
         self.transition_matrix = TransitionMatrix()
 
         # Statistics
         self.total_hits = 0
         self.total_misses = 0
-        self.processing_times: List[float] = []
+        self.processing_times: list[float] = []
 
         # Current state tracking
-        self._last_state: Optional[str] = None
-        self._state_history: List[str] = []
+        self._last_state: str | None = None
+        self._state_history: list[str] = []
 
         logger.info("Usage pattern tracker initialized")
 
@@ -180,7 +176,7 @@ class UsagePatternTracker:
         except Exception as e:
             logger.error(f"Failed to persist event to Redis: {e}")
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """Get current statistics"""
         total_requests = self.total_hits + self.total_misses
         hit_ratio = (
@@ -204,13 +200,13 @@ class UsagePatternTracker:
             "state_history_length": len(self._state_history),
         }
 
-    def get_recent_events(self, limit: int = 10) -> List[UsageEvent]:
+    def get_recent_events(self, limit: int = 10) -> list[UsageEvent]:
         """Get most recent events"""
         return self.events[-limit:]
 
     def get_transition_probabilities(
         self, state: str, top_n: int = 5
-    ) -> List[Tuple[str, float]]:
+    ) -> list[tuple[str, float]]:
         """
         Get most likely next states from given state.
 
@@ -223,7 +219,7 @@ class UsagePatternTracker:
         """
         return self.transition_matrix.get_top_n_transitions(state, top_n)
 
-    def export_transition_matrix(self) -> Dict:
+    def export_transition_matrix(self) -> dict:
         """Export transition matrix for inspection"""
         return self.transition_matrix.to_dict()
 
@@ -240,7 +236,7 @@ class UsagePatternTracker:
 
     def get_workflow_patterns(
         self, min_frequency: int = 2
-    ) -> List[Tuple[List[str], int]]:
+    ) -> list[tuple[list[str], int]]:
         """
         Get common workflow patterns (sequences of states).
 
@@ -250,7 +246,7 @@ class UsagePatternTracker:
         Returns:
             List of (pattern, count) tuples sorted by frequency
         """
-        patterns: Dict[Tuple[str, ...], int] = defaultdict(int)
+        patterns: dict[tuple[str, ...], int] = defaultdict(int)
 
         # Look for 3-state sequences
         for i in range(len(self._state_history) - 2):
@@ -273,7 +269,7 @@ class UsagePatternTracker:
 
         return common_patterns
 
-    def predict_next_states(self, current_state: str, depth: int = 3) -> List[Dict]:
+    def predict_next_states(self, current_state: str, depth: int = 3) -> list[dict]:
         """
         Predict next states using Markov chain.
 
@@ -317,7 +313,7 @@ class UsagePatternTracker:
 
 
 # Global instance
-_tracker_instance: Optional[UsagePatternTracker] = None
+_tracker_instance: UsagePatternTracker | None = None
 
 
 def init_tracker(redis_cache=None) -> UsagePatternTracker:

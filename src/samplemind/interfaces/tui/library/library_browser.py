@@ -3,14 +3,13 @@ Audio Library Browser System for SampleMind TUI
 Directory navigation, file browsing, duplicate detection
 """
 
-import logging
-import os
 import hashlib
-from typing import Optional, List, Dict, Set, Tuple, Any
-from dataclasses import dataclass
-from pathlib import Path
-from enum import Enum
+import logging
 from collections import defaultdict
+from dataclasses import dataclass
+from enum import Enum
+from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -36,12 +35,12 @@ class AudioFileInfo:
     name: str
     size: int  # bytes
     modified_time: float
-    duration: Optional[float] = None  # seconds
-    sample_rate: Optional[int] = None
-    channels: Optional[int] = None
+    duration: float | None = None  # seconds
+    sample_rate: int | None = None
+    channels: int | None = None
     format: str = "wav"
     is_selected: bool = False
-    file_hash: Optional[str] = None  # SHA-256 hash for duplicate detection
+    file_hash: str | None = None  # SHA-256 hash for duplicate detection
 
     def format_size(self) -> str:
         """Format file size nicely"""
@@ -67,7 +66,7 @@ class LibraryStats:
     total_files: int = 0
     total_size: int = 0  # bytes
     total_duration: float = 0.0  # seconds
-    file_formats: Dict[str, int] = None  # format -> count
+    file_formats: dict[str, int] = None  # format -> count
     duplicate_groups: int = 0
     duplicate_files: int = 0
     average_file_size: float = 0.0
@@ -100,7 +99,7 @@ class LibraryBrowser:
     AUDIO_FORMATS = {".wav", ".mp3", ".flac", ".ogg", ".aac", ".m4a", ".aiff", ".wv"}
     DUPLICATE_CHECK_SIZE = 8192  # Read first 8KB for fast checking
 
-    def __init__(self, root_path: Optional[str] = None) -> None:
+    def __init__(self, root_path: str | None = None) -> None:
         """
         Initialize library browser
 
@@ -114,16 +113,16 @@ class LibraryBrowser:
 
         self.root_path = Path(root_path)
         self.current_path = self.root_path
-        self.files: List[AudioFileInfo] = []
-        self.all_files: Dict[str, AudioFileInfo] = {}
+        self.files: list[AudioFileInfo] = []
+        self.all_files: dict[str, AudioFileInfo] = {}
         self.sort_option = SortOption.NAME_ASC
-        self.filter_format: Optional[str] = None
-        self.file_hashes: Dict[str, List[str]] = defaultdict(list)  # hash -> [paths]
-        self.duplicates: List[List[AudioFileInfo]] = []
+        self.filter_format: str | None = None
+        self.file_hashes: dict[str, list[str]] = defaultdict(list)  # hash -> [paths]
+        self.duplicates: list[list[AudioFileInfo]] = []
 
     def scan_directory(
-        self, path: Optional[str] = None, recursive: bool = True
-    ) -> List[AudioFileInfo]:
+        self, path: str | None = None, recursive: bool = True
+    ) -> list[AudioFileInfo]:
         """
         Scan directory for audio files
 
@@ -173,7 +172,7 @@ class LibraryBrowser:
 
         return self.files
 
-    def _create_file_info(self, file_path: Path) -> Optional[AudioFileInfo]:
+    def _create_file_info(self, file_path: Path) -> AudioFileInfo | None:
         """Create AudioFileInfo from file path"""
         try:
             stat = file_path.stat()
@@ -189,7 +188,7 @@ class LibraryBrowser:
             logger.error(f"Error creating file info for {file_path}: {e}")
             return None
 
-    def detect_duplicates(self) -> List[List[AudioFileInfo]]:
+    def detect_duplicates(self) -> list[list[AudioFileInfo]]:
         """
         Detect duplicate files by content hash
 
@@ -243,7 +242,7 @@ class LibraryBrowser:
         stats = LibraryStats()
         stats.total_files = len(self.files)
 
-        format_counts: Dict[str, int] = defaultdict(int)
+        format_counts: dict[str, int] = defaultdict(int)
         total_size = 0
         total_duration = 0.0
         files_with_duration = 0
@@ -270,7 +269,7 @@ class LibraryBrowser:
 
         return stats
 
-    def filter_by_format(self, format_str: str) -> List[AudioFileInfo]:
+    def filter_by_format(self, format_str: str) -> list[AudioFileInfo]:
         """
         Filter files by format
 
@@ -286,7 +285,7 @@ class LibraryBrowser:
 
     def filter_by_size(
         self, min_size: int = 0, max_size: int = int(1e9)
-    ) -> List[AudioFileInfo]:
+    ) -> list[AudioFileInfo]:
         """
         Filter files by size
 
@@ -301,7 +300,7 @@ class LibraryBrowser:
 
     def filter_by_duration(
         self, min_duration: float = 0, max_duration: float = float("inf")
-    ) -> List[AudioFileInfo]:
+    ) -> list[AudioFileInfo]:
         """
         Filter files by duration
 
@@ -320,7 +319,7 @@ class LibraryBrowser:
             or not f.duration
         ]
 
-    def search_files(self, query: str) -> List[AudioFileInfo]:
+    def search_files(self, query: str) -> list[AudioFileInfo]:
         """
         Search files by name
 
@@ -333,7 +332,7 @@ class LibraryBrowser:
         query_lower = query.lower()
         return [f for f in self.files if query_lower in f.name.lower()]
 
-    def sort_files(self, option: SortOption) -> List[AudioFileInfo]:
+    def sort_files(self, option: SortOption) -> list[AudioFileInfo]:
         """
         Sort files
 
@@ -369,8 +368,8 @@ class LibraryBrowser:
         self.sort_files(self.sort_option)
 
     def get_directory_tree(
-        self, path: Optional[str] = None, depth: int = 3
-    ) -> Dict[str, Any]:
+        self, path: str | None = None, depth: int = 3
+    ) -> dict[str, Any]:
         """
         Get directory tree structure
 
@@ -467,10 +466,10 @@ class LibraryBrowser:
 
 
 # Global singleton instance
-_browser: Optional[LibraryBrowser] = None
+_browser: LibraryBrowser | None = None
 
 
-def get_library_browser(root_path: Optional[str] = None) -> LibraryBrowser:
+def get_library_browser(root_path: str | None = None) -> LibraryBrowser:
     """Get or create library browser singleton"""
     global _browser
     if _browser is None:

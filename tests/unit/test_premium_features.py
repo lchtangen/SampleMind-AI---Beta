@@ -9,23 +9,23 @@ Tests for:
 - Groove Template Extraction
 """
 
-import pytest
-import numpy as np
 from pathlib import Path
 
-# Import modules to test
-from samplemind.core.tagging.tag_vocabulary import get_vocabulary, TagConfidence
-from samplemind.core.tagging.ai_tagger import AITagger, get_tagger
+import numpy as np
+import pytest
+
+from samplemind.core.history.recent_files import RecentFilesManager
+from samplemind.core.processing.groove_extractor import GrooveExtractor, GrooveTemplate
+from samplemind.core.processing.layering_analyzer import LayeringAnalyzer
 from samplemind.core.processing.loudness_analyzer import (
-    LoudnessAnalyzer,
     LoudnessAnalysis,
+    LoudnessAnalyzer,
 )
 from samplemind.core.processing.mastering_analyzer import MasteringAnalyzer
-from samplemind.core.processing.layering_analyzer import LayeringAnalyzer
-from samplemind.core.processing.groove_extractor import GrooveExtractor, GrooveTemplate
-from samplemind.core.history.recent_files import RecentFilesManager, RecentFile
-from datetime import datetime
+from samplemind.core.tagging.ai_tagger import get_tagger
 
+# Import modules to test
+from samplemind.core.tagging.tag_vocabulary import TagConfidence, get_vocabulary
 
 # ============================================================================
 # TAG VOCABULARY TESTS

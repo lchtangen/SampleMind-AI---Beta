@@ -2,15 +2,12 @@
 """Sample Layering Analysis Commands"""
 
 from pathlib import Path
-from typing import Optional
-import asyncio
 
 import typer
-from rich.console import Console
 from rich.table import Table
-from rich.panel import Panel
 
 from samplemind.core.processing.layering_analyzer import LayeringAnalyzer
+
 from . import utils
 
 app = typer.Typer(help="🔀 Sample layering & phase analysis", no_args_is_help=True)
@@ -21,8 +18,8 @@ console = utils.console
 @utils.with_error_handling
 @utils.async_command
 async def analyze_layering(
-    file1: Optional[Path] = typer.Argument(None, help="First audio file"),
-    file2: Optional[Path] = typer.Argument(None, help="Second audio file"),
+    file1: Path | None = typer.Argument(None, help="First audio file"),
+    file2: Path | None = typer.Argument(None, help="Second audio file"),
 ) -> None:
     """Analyze compatibility of two samples for layering"""
     try:
@@ -52,7 +49,7 @@ async def analyze_layering(
             return
 
         console.print()
-        console.print(f"[bold cyan]🔀 Layering Analysis[/bold cyan]")
+        console.print("[bold cyan]🔀 Layering Analysis[/bold cyan]")
         console.print(f"[cyan]Sample 1: {file1.name}[/cyan]")
         console.print(f"[cyan]Sample 2: {file2.name}[/cyan]\n")
 

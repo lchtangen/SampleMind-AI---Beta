@@ -11,14 +11,13 @@ VST3 requires C++ wrapper (JUCE or similar).
 This module provides the Python logic layer.
 """
 
-import logging
 import json
-from pathlib import Path
-from typing import Dict, Any, Optional, List
-from dataclasses import dataclass, asdict
+import logging
+from dataclasses import asdict, dataclass
 from enum import Enum
+from pathlib import Path
 from threading import Thread
-import asyncio
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -53,12 +52,12 @@ class VST3SampleData:
 
     file_path: str
     duration: float
-    bpm: Optional[float] = None
-    key: Optional[str] = None
-    genre: Optional[str] = None
-    mood: Optional[str] = None
+    bpm: float | None = None
+    key: str | None = None
+    genre: str | None = None
+    mood: str | None = None
     energy: float = 0.5
-    ai_tags: List[str] = None
+    ai_tags: list[str] = None
     quality_score: float = 0.0
 
     def __post_init__(self) -> None:
@@ -107,9 +106,9 @@ class VST3Plugin:
             VST3ParameterID.AI_PROVIDER.value: 0,  # Gemini
             VST3ParameterID.VERBOSE_LOGGING.value: 0.0,  # Disabled
         }
-        self.loaded_samples: Dict[str, VST3SampleData] = {}
-        self.suggestions_queue: List[str] = []
-        self.analysis_thread: Optional[Thread] = None
+        self.loaded_samples: dict[str, VST3SampleData] = {}
+        self.suggestions_queue: list[str] = []
+        self.analysis_thread: Thread | None = None
         self.web_server_running = False
         self.web_server_port = 8765
 
@@ -270,8 +269,8 @@ class VST3Plugin:
             if self.web_server_running:
                 return
 
-            from http.server import HTTPServer, BaseHTTPRequestHandler
             import threading
+            from http.server import BaseHTTPRequestHandler, HTTPServer
 
             class WebUIHandler(BaseHTTPRequestHandler):
                 """Simple web UI handler"""
@@ -381,7 +380,7 @@ class VST3Plugin:
         self.web_server_running = False
         logger.info("Web UI stopped")
 
-    def get_plugin_info(self) -> Dict[str, Any]:
+    def get_plugin_info(self) -> dict[str, Any]:
         """Get plugin information"""
         return {
             "name": self.NAME,
@@ -397,7 +396,7 @@ class VST3Plugin:
 
 
 # Global instance
-_vst3_plugin: Optional[VST3Plugin] = None
+_vst3_plugin: VST3Plugin | None = None
 
 
 def get_vst3_plugin() -> VST3Plugin:

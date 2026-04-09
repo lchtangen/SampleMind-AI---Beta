@@ -10,7 +10,7 @@ Native FL Studio plugin for real-time audio analysis and sample management:
 
 import logging
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +56,7 @@ class FLStudioSampleMindPlugin:
         # Analysis cache
         self.cache_enabled = True
         self.cache_size_mb = 100
-        self.cached_analyses: Dict[str, Any] = {}
+        self.cached_analyses: dict[str, Any] = {}
 
         logger.info(f"Initialized {self.plugin_name} v{self.plugin_version}")
 
@@ -129,7 +129,7 @@ class FLStudioSampleMindPlugin:
             logger.error(f"Failed to load sample: {e}")
             return False
 
-    def search_samples(self, query: str) -> List[Dict[str, Any]]:
+    def search_samples(self, query: str) -> list[dict[str, Any]]:
         """
         Search sample library for matching samples.
 
@@ -153,7 +153,7 @@ class FLStudioSampleMindPlugin:
 
     def get_similar_samples(
         self, file_path: str, limit: int = 10
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Find samples similar to the given file.
 
@@ -189,7 +189,7 @@ class FLStudioSampleMindPlugin:
     # ANALYSIS DISPLAY
     # ========================================================================
 
-    def get_analysis_summary(self) -> Dict[str, Any]:
+    def get_analysis_summary(self) -> dict[str, Any]:
         """Get summary of current analysis"""
         if not self.analysis_result:
             return {}
@@ -204,7 +204,7 @@ class FLStudioSampleMindPlugin:
             "duration": self.analysis_result.get("duration_seconds"),
         }
 
-    def get_waveform_data(self) -> Optional[List[float]]:
+    def get_waveform_data(self) -> list[float] | None:
         """
         Get waveform data for display.
 
@@ -241,7 +241,7 @@ class FLStudioSampleMindPlugin:
             logger.error(f"Failed to get waveform: {e}")
             return None
 
-    def get_spectrogram_data(self) -> Optional[List[List[float]]]:
+    def get_spectrogram_data(self) -> list[list[float]] | None:
         """
         Get spectrogram data for visualization.
 
@@ -277,7 +277,7 @@ class FLStudioSampleMindPlugin:
     # BATCH PROCESSING
     # ========================================================================
 
-    def analyze_batch(self, file_paths: List[str]) -> int:
+    def analyze_batch(self, file_paths: list[str]) -> int:
         """
         Batch analyze multiple samples.
 
@@ -326,7 +326,7 @@ class FLStudioSampleMindPlugin:
         # Allow drops everywhere in plugin window
         return True
 
-    def on_drop(self, x: int, y: int, file_paths: List[str]) -> bool:
+    def on_drop(self, x: int, y: int, file_paths: list[str]) -> bool:
         """
         Called when files are dropped on plugin.
 
@@ -355,7 +355,7 @@ class FLStudioSampleMindPlugin:
     # STATE MANAGEMENT
     # ========================================================================
 
-    def get_state(self) -> Dict[str, Any]:
+    def get_state(self) -> dict[str, Any]:
         """Get plugin state for saving"""
         return {
             "current_sample": str(self.current_sample) if self.current_sample else None,
@@ -366,7 +366,7 @@ class FLStudioSampleMindPlugin:
             "waveform_visible": self.waveform_visible,
         }
 
-    def set_state(self, state: Dict[str, Any]) -> bool:
+    def set_state(self, state: dict[str, Any]) -> bool:
         """Restore plugin state"""
         try:
             if "current_sample" in state and state["current_sample"]:
@@ -417,7 +417,7 @@ class FLStudioSampleMindPlugin:
     # INFORMATION
     # ========================================================================
 
-    def get_info(self) -> Dict[str, str]:
+    def get_info(self) -> dict[str, str]:
         """Get plugin information"""
         return {
             "name": self.plugin_name,

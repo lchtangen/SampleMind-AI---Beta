@@ -4,16 +4,16 @@ Production-ready backup, restore, and point-in-time recovery
 """
 
 import asyncio
-import subprocess
+import gzip
+import json
+import logging
+import shutil
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional, List, Dict, Any
-import logging
-import gzip
-import shutil
+from typing import Any
+
 import boto3
 from google.cloud import storage as gcs
-import json
 
 logger = logging.getLogger(__name__)
 
@@ -26,9 +26,9 @@ class BackupConfig:
         backup_dir: str = "./backups",
         retention_days: int = 30,
         compress: bool = True,
-        cloud_storage: Optional[str] = None,  # 's3', 'gcs', or None
-        s3_bucket: Optional[str] = None,
-        gcs_bucket: Optional[str] = None,
+        cloud_storage: str | None = None,  # 's3', 'gcs', or None
+        s3_bucket: str | None = None,
+        gcs_bucket: str | None = None,
     ):
         self.backup_dir = Path(backup_dir)
         self.backup_dir.mkdir(parents=True, exist_ok=True)
@@ -50,7 +50,7 @@ class DatabaseBackup:
         logger.info(f"Backup system initialized: dir={config.backup_dir}")
 
     async def create_backup(
-        self, database_url: str, backup_name: Optional[str] = None
+        self, database_url: str, backup_name: str | None = None
     ) -> Path:
         """
         Create full database backup
@@ -197,14 +197,14 @@ class DatabaseBackup:
                 error_msg = stderr.decode()
                 logger.warning(f"Restore completed with warnings: {error_msg}")
 
-            logger.info(f"Restore completed successfully")
+            logger.info("Restore completed successfully")
             return True
 
         except Exception as e:
             logger.error(f"Restore failed: {e}")
             raise
 
-    async def list_backups(self) -> List[Dict[str, Any]]:
+    async def list_backups(self) -> list[dict[str, Any]]:
         """List all available backups"""
         backups = []
 
@@ -343,7 +343,7 @@ class DatabaseBackup:
 
     # Helper methods
 
-    def _parse_db_url(self, database_url: str) -> Dict[str, Any]:
+    def _parse_db_url(self, database_url: str) -> dict[str, Any]:
         """Parse PostgreSQL connection URL"""
         # postgresql://user:password@host:port/database
         from urllib.parse import urlparse
@@ -362,7 +362,7 @@ class DatabaseBackup:
         """Compress backup file with gzip"""
         compressed_file = backup_file.with_suffix(backup_file.suffix + ".gz")
 
-        logger.info(f"Compressing backup...")
+        logger.info("Compressing backup...")
 
         with open(backup_file, "rb") as f_in:
             with gzip.open(compressed_file, "wb", compresslevel=6) as f_out:
@@ -405,7 +405,7 @@ class DatabaseBackup:
             ExtraArgs={"StorageClass": "STANDARD_IA"},  # Infrequent access
         )
 
-        logger.info(f"Upload complete")
+        logger.info("Upload complete")
 
     async def _upload_to_gcs(self, backup_file: Path):
         """Upload to Google Cloud Storage"""
@@ -417,9 +417,9 @@ class DatabaseBackup:
 
         blob.upload_from_filename(str(backup_file))
 
-        logger.info(f"Upload complete")
+        logger.info("Upload complete")
 
-    async def _save_backup_metadata(self, backup_file: Path, db_info: Dict[str, Any]):
+    async def _save_backup_metadata(self, backup_file: Path, db_info: dict[str, Any]):
         """Save backup metadata"""
         metadata = {
             "filename": backup_file.name,
@@ -434,7 +434,7 @@ class DatabaseBackup:
         with open(metadata_file, "w") as f:
             json.dump(metadata, f, indent=2)
 
-    async def _drop_database(self, db_info: Dict[str, Any]):
+    async def _drop_database(self, db_info: dict[str, Any]):
         """Drop database (careful!)"""
         cmd = [
             "dropdb",
@@ -458,7 +458,7 @@ class DatabaseBackup:
 
         await process.communicate()
 
-    async def _create_database(self, db_info: Dict[str, Any]):
+    async def _create_database(self, db_info: dict[str, Any]):
         """Create new database"""
         cmd = [
             "createdb",
@@ -505,22 +505,22 @@ async def main():
         cloud_storage="s3",
         s3_bucket="samplemind-backups"
     )
-    
+
     backup_system = DatabaseBackup(config)
-    
+
     # Create backup
     backup_file = await backup_system.create_backup(settings.database_url)
     print(f"Backup created: {backup_file}")
-    
+
     # List backups
     backups = await backup_system.list_backups()
     for backup in backups:
         print(f"- {backup['filename']}: {backup['size']}")
-    
+
     # Cleanup old backups
     deleted = await backup_system.cleanup_old_backups()
     print(f"Deleted {deleted} old backups")
-    
+
     # Verify backup
     is_valid = await backup_system.verify_backup(backup_file)
     print(f"Backup valid: {is_valid}")

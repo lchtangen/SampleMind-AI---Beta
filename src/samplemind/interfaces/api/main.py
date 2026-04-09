@@ -28,7 +28,9 @@ except ImportError:  # pragma: no cover
     limiter = None  # type: ignore[assignment]
     _SLOWAPI_AVAILABLE = False
     _pre_log = __import__("logging").getLogger(__name__)
-    _pre_log.warning("slowapi not installed — rate limiting disabled (run: pip install slowapi)")
+    _pre_log.warning(
+        "slowapi not installed — rate limiting disabled (run: pip install slowapi)"
+    )
 
 from . import __version__
 from .config import get_settings

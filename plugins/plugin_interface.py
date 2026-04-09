@@ -10,15 +10,15 @@ Foundation for all SampleMind DAW plugins:
 
 import logging
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from enum import Enum
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Callable
+from enum import StrEnum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class ParameterType(str, Enum):
+class ParameterType(StrEnum):
     """Parameter data types"""
 
     FLOAT = "float"  # Float parameter (0-1)
@@ -36,9 +36,9 @@ class Parameter:
     name: str  # Parameter name
     param_type: ParameterType  # Parameter type
     default_value: Any  # Default value
-    min_value: Optional[float] = None  # Minimum (for numeric)
-    max_value: Optional[float] = None  # Maximum (for numeric)
-    choices: List[str] = field(default_factory=list)  # Choices (for choice type)
+    min_value: float | None = None  # Minimum (for numeric)
+    max_value: float | None = None  # Maximum (for numeric)
+    choices: list[str] = field(default_factory=list)  # Choices (for choice type)
     label: str = ""  # Display label
     description: str = ""  # Parameter description
     automation_enabled: bool = True  # Allow automation
@@ -89,11 +89,11 @@ class Preset:
     name: str
     description: str = ""
     author: str = "Unknown"
-    parameters: Dict[str, Any] = field(default_factory=dict)
+    parameters: dict[str, Any] = field(default_factory=dict)
     created_date: str = ""
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary"""
         return {
             "name": self.name,
@@ -129,7 +129,6 @@ class AudioBuffer:
 
     def apply_gain(self, gain_db: float) -> None:
         """Apply gain to entire buffer"""
-        import numpy as np
 
         gain_linear = 10 ** (gain_db / 20.0)
         self.data *= gain_linear
@@ -160,13 +159,13 @@ class SampleMindPlugin(ABC):
         self.block_size = 512
 
         # Parameters
-        self.parameters: Dict[str, Parameter] = {}
-        self.presets: Dict[str, Preset] = {}
-        self.current_preset: Optional[Preset] = None
+        self.parameters: dict[str, Parameter] = {}
+        self.presets: dict[str, Preset] = {}
+        self.current_preset: Preset | None = None
 
         # Callbacks
-        self.param_changed_callbacks: List[Callable[[str, Any], None]] = []
-        self.preset_changed_callbacks: List[Callable[[str], None]] = []
+        self.param_changed_callbacks: list[Callable[[str, Any], None]] = []
+        self.preset_changed_callbacks: list[Callable[[str], None]] = []
 
         logger.info(f"Initialized plugin: {plugin_name} v{plugin_version}")
 
@@ -232,7 +231,7 @@ class SampleMindPlugin(ABC):
             return True
         return False
 
-    def get_parameter(self, param_id: str) -> Optional[Any]:
+    def get_parameter(self, param_id: str) -> Any | None:
         """Get parameter value"""
         if param_id in self.parameters:
             return self.parameters[param_id].current_value
@@ -312,8 +311,8 @@ class SampleMindPlugin(ABC):
 
     def process_block(
         self,
-        input_data: List[List[float]],
-        output_data: List[List[float]],
+        input_data: list[list[float]],
+        output_data: list[list[float]],
     ) -> None:
         """
         Process audio block (called by DAW).
@@ -348,7 +347,7 @@ class SampleMindPlugin(ABC):
     # STATE MANAGEMENT
     # ========================================================================
 
-    def get_state(self) -> Dict[str, Any]:
+    def get_state(self) -> dict[str, Any]:
         """Get plugin state for saving"""
         return {
             "parameters": {
@@ -358,7 +357,7 @@ class SampleMindPlugin(ABC):
             "current_preset": self.current_preset.name if self.current_preset else None,
         }
 
-    def set_state(self, state: Dict[str, Any]) -> bool:
+    def set_state(self, state: dict[str, Any]) -> bool:
         """Restore plugin state"""
         try:
             if "parameters" in state:
@@ -377,7 +376,7 @@ class SampleMindPlugin(ABC):
     # INFORMATION
     # ========================================================================
 
-    def get_info(self) -> Dict[str, str]:
+    def get_info(self) -> dict[str, str]:
         """Get plugin information"""
         return {
             "name": self.plugin_name,

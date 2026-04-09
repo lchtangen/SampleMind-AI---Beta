@@ -7,8 +7,9 @@ across multiple CPU cores or machines using Dask.
 
 import os
 import time
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 import dask
 import dask.bag as db
@@ -16,9 +17,8 @@ import numpy as np
 from dask.distributed import Client, LocalCluster, get_worker
 from loguru import logger
 
-from ..monitoring.monitor import AudioProcessingMetrics, Monitor
+from ..monitoring.monitor import Monitor
 from .audio_engine import AdvancedFeatureExtractor
-from .feature_cache import cache
 
 
 class DistributedAudioProcessor:
@@ -36,7 +36,7 @@ class DistributedAudioProcessor:
         memory_limit: str = "4GB",
         local_dir: str = "./dask-worker-space",
         use_cache: bool = True,
-        monitor: Optional[Monitor] = None,
+        monitor: Monitor | None = None,
     ):
         """
         Initialize the distributed processor.
@@ -121,12 +121,12 @@ class DistributedAudioProcessor:
 
     def process_audio_files(
         self,
-        file_paths: List[Union[str, Path]],
+        file_paths: list[str | Path],
         feature_type: str = "all",
         level: str = "standard",
         batch_size: int = 10,
-        progress_callback: Optional[Callable[[int, int], None]] = None,
-    ) -> Dict[str, Any]:
+        progress_callback: Callable[[int, int], None] | None = None,
+    ) -> dict[str, Any]:
         """
         Process multiple audio files in parallel.
 
@@ -233,7 +233,7 @@ class DistributedAudioProcessor:
 
             return results
 
-        except Exception as e:
+        except Exception:
             # Record error metric
             self.monitor.audio_metrics.record_processing_time(
                 file_path="batch",
@@ -245,7 +245,7 @@ class DistributedAudioProcessor:
 
     def _process_single_file(
         self, file_path: str, feature_type: str, level: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Process a single audio file.
 
@@ -394,7 +394,7 @@ class DistributedAudioProcessor:
                 },
             }
 
-    def _load_audio(self, file_path: str) -> Tuple[np.ndarray, int]:
+    def _load_audio(self, file_path: str) -> tuple[np.ndarray, int]:
         """
         Load an audio file with error handling and metrics.
 
@@ -456,13 +456,13 @@ class DistributedAudioProcessor:
 
 
 def process_audio_files_parallel(
-    file_paths: List[Union[str, Path]],
+    file_paths: list[str | Path],
     n_workers: int = -1,
     feature_type: str = "all",
     level: str = "standard",
     use_cache: bool = True,
     **kwargs,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Process multiple audio files in parallel using a temporary Dask cluster.
 

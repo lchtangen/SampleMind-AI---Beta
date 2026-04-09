@@ -8,7 +8,7 @@ from textual import on, work
 from textual.app import ComposeResult
 from textual.reactive import reactive
 from textual.widget import Widget
-from textual.widgets import Button, Collapsible, RichLog, Input
+from textual.widgets import Button, Collapsible, Input, RichLog
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +72,7 @@ class AICoachWidget(Widget):
     def _query_ai(self, message: str) -> None:
         try:
             import asyncio
+
             from samplemind.integrations.ai_manager import SampleMindAIManager
 
             loop = asyncio.new_event_loop()

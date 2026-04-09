@@ -16,7 +16,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +69,7 @@ class TranscriptionResult:
     language_probability: float = 0.0
 
     # Segments with timestamps
-    segments: List[TranscriptionSegment] = field(default_factory=list)
+    segments: list[TranscriptionSegment] = field(default_factory=list)
 
     # Performance metadata
     model_name: str = ""
@@ -185,7 +185,7 @@ class WhisperTranscriber:
     async def transcribe(
         self,
         audio_path: str | Path,
-        language: Optional[str] = None,
+        language: str | None = None,
         beam_size: int = 5,
         vad_filter: bool = True,
     ) -> TranscriptionResult:
@@ -233,7 +233,7 @@ class WhisperTranscriber:
     def transcribe_sync(
         self,
         audio_path: str | Path,
-        language: Optional[str] = None,
+        language: str | None = None,
         beam_size: int = 5,
         vad_filter: bool = True,
     ) -> TranscriptionResult:
@@ -249,12 +249,12 @@ class WhisperTranscriber:
     def _run_transcription(
         self,
         path: str,
-        language: Optional[str],
+        language: str | None,
         beam_size: int,
         vad_filter: bool,
     ) -> TranscriptionResult:
         """CPU-bound transcription work executed in a thread pool."""
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "beam_size": beam_size,
             "vad_filter": vad_filter,
         }
@@ -263,8 +263,8 @@ class WhisperTranscriber:
 
         segments_iter, info = self._model.transcribe(path, **kwargs)
 
-        full_text_parts: List[str] = []
-        segments: List[TranscriptionSegment] = []
+        full_text_parts: list[str] = []
+        segments: list[TranscriptionSegment] = []
         for seg in segments_iter:
             full_text_parts.append(seg.text)
             segments.append(

@@ -6,12 +6,11 @@ This script automates the documentation cleanup and reorganization process
 according to the DOCUMENTATION_CLEANUP_PLAN.md.
 """
 
+import argparse
+import logging
 import os
 import shutil
 from pathlib import Path
-from typing import List, Dict
-import argparse
-import logging
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -157,7 +156,7 @@ class DocumentationCleaner:
                 for source_file in source_files:
                     source_path = self.project_root / source_file
                     if source_path.exists():
-                        with open(source_path, "r", encoding="utf-8") as f:
+                        with open(source_path, encoding="utf-8") as f:
                             content = f.read()
                             combined_content.append(f"\n## From {source_file}\n")
                             combined_content.append(content)
@@ -195,7 +194,7 @@ class DocumentationCleaner:
 
 ## Platform Guides
 - [Linux Setup](guides/platform-guides/linux.md)
-- [macOS Setup](guides/platform-guides/macos.md) 
+- [macOS Setup](guides/platform-guides/macos.md)
 - [Windows Setup](guides/platform-guides/windows.md)
 
 ## Reference

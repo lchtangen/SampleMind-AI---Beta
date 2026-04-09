@@ -2,7 +2,6 @@
 
 import uuid
 from datetime import datetime
-from typing import Any, List, Optional
 
 from samplemind.core.database.mongo import AudioCollection, AudioFile
 
@@ -14,12 +13,16 @@ class CollectionRepository:
     async def create(
         user_id: str,
         name: str,
-        description: Optional[str] = None,
+        description: str | None = None,
         is_public: bool = False,
-        tags: List[str] = [],
-        metadata: dict = {},
+        tags: list[str] = None,
+        metadata: dict = None,
     ) -> AudioCollection:
         """Create new collection"""
+        if metadata is None:
+            metadata = {}
+        if tags is None:
+            tags = []
         collection = AudioCollection(
             collection_id=str(uuid.uuid4()),
             user_id=user_id,
@@ -35,7 +38,7 @@ class CollectionRepository:
         return collection
 
     @staticmethod
-    async def get_by_id(collection_id: str) -> Optional[AudioCollection]:
+    async def get_by_id(collection_id: str) -> AudioCollection | None:
         """Get collection by ID"""
         return await AudioCollection.find_one(
             AudioCollection.collection_id == collection_id
@@ -44,7 +47,7 @@ class CollectionRepository:
     @staticmethod
     async def get_by_user(
         user_id: str, skip: int = 0, limit: int = 100
-    ) -> List[AudioCollection]:
+    ) -> list[AudioCollection]:
         """List collections for a user"""
         return (
             await AudioCollection.find(AudioCollection.user_id == user_id)
@@ -55,7 +58,7 @@ class CollectionRepository:
         )
 
     @staticmethod
-    async def update(collection_id: str, **kwargs) -> Optional[AudioCollection]:
+    async def update(collection_id: str, **kwargs) -> AudioCollection | None:
         """Update collection fields"""
         collection = await AudioCollection.find_one(
             AudioCollection.collection_id == collection_id
@@ -85,7 +88,7 @@ class CollectionRepository:
         return False
 
     @staticmethod
-    async def get_collection_items(collection_id: str) -> List[AudioFile]:
+    async def get_collection_items(collection_id: str) -> list[AudioFile]:
         """Get all audio files in a collection"""
         return (
             await AudioFile.find({"collection_ids": collection_id})

@@ -1,11 +1,11 @@
 """TUI Plugins module - Plugin architecture and management"""
 
 from samplemind.interfaces.tui.plugins.plugin_base import (
-    TUIPlugin,
-    PluginMetadata,
-    PluginHook,
     HookHandler,
     HookSystem,
+    PluginHook,
+    PluginMetadata,
+    TUIPlugin,
     get_hook_system,
 )
 from samplemind.interfaces.tui.plugins.plugin_manager import (

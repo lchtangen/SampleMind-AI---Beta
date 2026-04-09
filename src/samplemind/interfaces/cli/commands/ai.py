@@ -14,12 +14,11 @@ Usage:
     samplemind ai:config:temperature 0.7      # Configure AI
 """
 
-import typer
-from typing import Optional
 from pathlib import Path
-from rich.console import Console
-from rich.table import Table
+
+import typer
 from rich.panel import Panel
+from rich.table import Table
 
 from . import utils
 
@@ -35,18 +34,19 @@ console = utils.console
 # SECTION 1: AI ANALYSIS (10 commands)
 # ============================================================================
 
+
 @app.command("analyze")
 @utils.with_error_handling
 @utils.async_command
 async def ai_analyze(
     file: Path = typer.Argument(..., help="Audio file"),
     format: str = typer.Option("table", "--format", "-f"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """AI-powered comprehensive analysis"""
     try:
         with utils.ProgressTracker("🤖 AI analyzing"):
-            ai_manager = await utils.get_ai_manager()
+            await utils.get_ai_manager()
             engine = await utils.get_audio_engine()
 
             # Enable Neural Engine if available
@@ -58,7 +58,7 @@ async def ai_analyze(
 
             # Save sidecar manually if running from CLI to ensure persistence
             # (API does this automatically, CLI might need explicit call)
-            if hasattr(features, 'save'):
+            if hasattr(features, "save"):
                 features.save(file)
     except Exception as e:
         console.print(f"[red]Error during AI analysis: {e}[/red]")
@@ -84,7 +84,9 @@ async def ai_search(
         engine = await utils.get_audio_engine()
 
         if not engine.neural_extractor:
-            console.print("[red]Neural Engine not available. Cannot perform semantic search.[/red]")
+            console.print(
+                "[red]Neural Engine not available. Cannot perform semantic search.[/red]"
+            )
             return
 
         # Generate text embedding
@@ -103,7 +105,9 @@ async def ai_search(
     metadatas = results.get("metadatas", [])
 
     if not ids:
-        console.print("[yellow]No matches found. Try analyzing some files first.[/yellow]")
+        console.print(
+            "[yellow]No matches found. Try analyzing some files first.[/yellow]"
+        )
         return
 
     table = Table(title=f"Semantic Search Results: '{query}'")
@@ -119,11 +123,7 @@ async def ai_search(
         filename = meta.get("filename", file_id)
         bpm = meta.get("tempo", "?")
 
-        table.add_row(
-            f"{score:.1f}%",
-            str(filename),
-            f"{bpm} bpm"
-        )
+        table.add_row(f"{score:.1f}%", str(filename), f"{bpm} bpm")
 
     console.print(table)
 
@@ -132,14 +132,18 @@ async def ai_search(
 @utils.with_error_handling
 def ai_classify(
     file: Path = typer.Argument(..., help="Audio file"),
-    confidence: bool = typer.Option(False, "--confidence", help="Show confidence scores"),
+    confidence: bool = typer.Option(
+        False, "--confidence", help="Show confidence scores"
+    ),
 ) -> None:
     """AI audio classification (genre, mood, instrument)"""
     try:
         with utils.ProgressTracker("🎵 Classifying"):
             pass
 
-        table = Table(title="AI Classification", show_header=True, header_style="bold cyan")
+        table = Table(
+            title="AI Classification", show_header=True, header_style="bold cyan"
+        )
         table.add_column("Category", style="cyan")
         table.add_column("Result", style="green")
         if confidence:
@@ -194,7 +198,11 @@ def ai_suggest(
         with utils.ProgressTracker("🔍 Finding similar samples"):
             pass
 
-        table = Table(title=f"Similar Samples (Top {count})", show_header=True, header_style="bold cyan")
+        table = Table(
+            title=f"Similar Samples (Top {count})",
+            show_header=True,
+            header_style="bold cyan",
+        )
         table.add_column("Name", style="cyan")
         table.add_column("Similarity", justify="right", style="green")
         table.add_column("BPM", justify="right")
@@ -217,21 +225,39 @@ def ai_suggest(
 @utils.with_error_handling
 def ai_coach(
     file: Path = typer.Argument(..., help="Audio file to analyze"),
-    category: str = typer.Option("general", "--category", help="Coaching category (general|mixing|mastering|sound-design)"),
+    category: str = typer.Option(
+        "general",
+        "--category",
+        help="Coaching category (general|mixing|mastering|sound-design)",
+    ),
 ) -> None:
     """AI production coaching for your track"""
     try:
         with utils.ProgressTracker("💡 AI Coach analyzing"):
             pass
 
-        console.print("[bold cyan]🤖 AI Production Coach - Tips for Your Track[/bold cyan]\n")
+        console.print(
+            "[bold cyan]🤖 AI Production Coach - Tips for Your Track[/bold cyan]\n"
+        )
 
         tips = [
-            ("Dynamic Range", "Your track could benefit from more dynamic contrast. Try adding a 4-bar intro with just drums."),
-            ("EQ Balance", "Boost 3-5kHz slightly for more presence and clarity in the mix."),
-            ("Compression", "Add light compression (3:1, 20ms attack) to glue the drums together."),
+            (
+                "Dynamic Range",
+                "Your track could benefit from more dynamic contrast. Try adding a 4-bar intro with just drums.",
+            ),
+            (
+                "EQ Balance",
+                "Boost 3-5kHz slightly for more presence and clarity in the mix.",
+            ),
+            (
+                "Compression",
+                "Add light compression (3:1, 20ms attack) to glue the drums together.",
+            ),
             ("Reverb", "The vocals feel dry. Try a 2.5s reverb at 15% wet for depth."),
-            ("Stereo Width", "Great use of stereo! Bass is mono - keep it centered for clarity."),
+            (
+                "Stereo Width",
+                "Great use of stereo! Bass is mono - keep it centered for clarity.",
+            ),
         ]
 
         for title, tip in tips:
@@ -275,21 +301,25 @@ def ai_preset(
 @utils.with_error_handling
 def ai_mastering(
     file: Path = typer.Argument(..., help="Audio file"),
-    reference: Optional[Path] = typer.Option(None, "--reference", help="Reference track"),
+    reference: Path | None = typer.Option(None, "--reference", help="Reference track"),
 ) -> None:
     """AI mastering suggestions and analysis"""
     try:
         with utils.ProgressTracker("🎛️  AI Mastering analysis"):
             pass
 
-        table = Table(title="Mastering Suggestions", show_header=True, header_style="bold cyan")
+        table = Table(
+            title="Mastering Suggestions", show_header=True, header_style="bold cyan"
+        )
         table.add_column("Parameter", style="cyan")
         table.add_column("Current", style="yellow")
         table.add_column("Suggested", style="green")
         table.add_column("Impact")
 
         table.add_row("Loudness (LUFS)", "-14 LUFS", "-13 LUFS", "↑ 1dB more punch")
-        table.add_row("Limiting", "None", "Soft knee ceiling @ -1dB", "Prevent clipping")
+        table.add_row(
+            "Limiting", "None", "Soft knee ceiling @ -1dB", "Prevent clipping"
+        )
         table.add_row("EQ", "Flat", "+2dB @ 3kHz", "More clarity")
         table.add_row("Stereo Width", "1.0", "1.1", "Wider sound")
 
@@ -310,7 +340,9 @@ def ai_reference(
         with utils.ProgressTracker("📊 Analyzing reference"):
             pass
 
-        table = Table(title="Reference Track Analysis", show_header=True, header_style="bold cyan")
+        table = Table(
+            title="Reference Track Analysis", show_header=True, header_style="bold cyan"
+        )
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
 
@@ -386,6 +418,7 @@ def ai_mix_tips(
 # SECTION 2: PROVIDER MANAGEMENT (8 commands)
 # ============================================================================
 
+
 @app.command("provider")
 @utils.with_error_handling
 def ai_provider():
@@ -409,7 +442,9 @@ def ai_provider():
 def ai_provider_list():
     """List available AI providers"""
     try:
-        table = Table(title="Available AI Providers", show_header=True, header_style="bold cyan")
+        table = Table(
+            title="Available AI Providers", show_header=True, header_style="bold cyan"
+        )
         table.add_column("Provider", style="cyan")
         table.add_column("Models", style="green")
         table.add_column("Status", justify="center")
@@ -418,7 +453,9 @@ def ai_provider_list():
         table.add_row("Google Gemini", "3-flash, 3-pro", "✓ Active", "~400ms")
         table.add_row("OpenAI GPT", "4, 4-turbo", "✓ Configured", "~600ms")
         table.add_row("Anthropic Claude", "3-opus, 3-sonnet", "✗ Not configured", "-")
-        table.add_row("Local (Ollama)", "phi3, qwen2.5, gemma2", "✓ Available", "~200ms")
+        table.add_row(
+            "Local (Ollama)", "phi3, qwen2.5, gemma2", "✓ Available", "~200ms"
+        )
 
         console.print(table)
 
@@ -430,7 +467,9 @@ def ai_provider_list():
 @app.command("provider:set")
 @utils.with_error_handling
 def ai_provider_set(
-    provider: str = typer.Argument(..., help="Provider name (gemini|openai|anthropic|ollama)"),
+    provider: str = typer.Argument(
+        ..., help="Provider name (gemini|openai|anthropic|ollama)"
+    ),
 ) -> None:
     """Set default AI provider"""
     try:
@@ -449,8 +488,10 @@ def ai_provider_set(
 def ai_model():
     """Show active AI model"""
     try:
-        console.print(f"[cyan]Active Model:[/cyan] [bold green]gemini-3-flash[/bold green]")
-        console.print(f"[cyan]Provider:[/cyan] Google Gemini")
+        console.print(
+            "[cyan]Active Model:[/cyan] [bold green]gemini-3-flash[/bold green]"
+        )
+        console.print("[cyan]Provider:[/cyan] Google Gemini")
 
     except Exception as e:
         utils.handle_error(e, "ai:model")
@@ -464,7 +505,9 @@ def ai_model_list(
 ) -> None:
     """List available AI models"""
     try:
-        table = Table(title="Available AI Models", show_header=True, header_style="bold cyan")
+        table = Table(
+            title="Available AI Models", show_header=True, header_style="bold cyan"
+        )
         table.add_column("Model", style="cyan")
         table.add_column("Provider", style="green")
         table.add_column("Type")
@@ -503,14 +546,18 @@ def ai_model_set(
 @app.command("key:test")
 @utils.with_error_handling
 def ai_key_test(
-    provider: str = typer.Option("all", "--provider", "-p", help="Test specific provider"),
+    provider: str = typer.Option(
+        "all", "--provider", "-p", help="Test specific provider"
+    ),
 ) -> None:
     """Test API key connectivity"""
     try:
         with utils.ProgressTracker("Testing API connections"):
             pass
 
-        table = Table(title="API Key Status", show_header=True, header_style="bold cyan")
+        table = Table(
+            title="API Key Status", show_header=True, header_style="bold cyan"
+        )
         table.add_column("Provider", style="cyan")
         table.add_column("Status", justify="center")
         table.add_column("Latency")
@@ -533,7 +580,9 @@ def ai_usage(
 ) -> None:
     """Show AI API usage and quotas"""
     try:
-        table = Table(title="AI Usage Statistics", show_header=True, header_style="bold cyan")
+        table = Table(
+            title="AI Usage Statistics", show_header=True, header_style="bold cyan"
+        )
         table.add_column("Provider", style="cyan")
         table.add_column("Requests Today", justify="right", style="green")
         table.add_column("Tokens Used", justify="right")
@@ -552,6 +601,7 @@ def ai_usage(
 # ============================================================================
 # SECTION 3: CONFIGURATION (8 commands)
 # ============================================================================
+
 
 @app.command("config")
 @utils.with_error_handling
@@ -588,7 +638,7 @@ def ai_config_temperature(
             pass
 
         console.print(f"[green]✓ Temperature set to {value}[/green]")
-        console.print(f"[dim]Lower = more deterministic, Higher = more creative[/dim]")
+        console.print("[dim]Lower = more deterministic, Higher = more creative[/dim]")
 
     except Exception as e:
         utils.handle_error(e, "ai:config:temperature")
@@ -709,12 +759,15 @@ def ai_config_reset():
 # SECTION 4: FEATURES (4 commands)
 # ============================================================================
 
+
 @app.command("features")
 @utils.with_error_handling
 def ai_features():
     """List available AI features"""
     try:
-        table = Table(title="Available AI Features", show_header=True, header_style="bold cyan")
+        table = Table(
+            title="Available AI Features", show_header=True, header_style="bold cyan"
+        )
         table.add_column("Feature", style="cyan")
         table.add_column("Status", justify="center")
         table.add_column("Provider")
@@ -777,7 +830,7 @@ def ai_features_test(
         with utils.ProgressTracker(f"Testing {feature}"):
             pass
 
-        console.print(f"[green]✓ Feature test passed[/green]")
+        console.print("[green]✓ Feature test passed[/green]")
 
     except Exception as e:
         utils.handle_error(e, "ai:features:test")

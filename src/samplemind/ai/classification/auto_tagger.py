@@ -6,7 +6,6 @@ automatically tag samples based on their audio content.
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from samplemind.core.engine.audio_engine import AudioFeatures
 
@@ -32,7 +31,7 @@ class AutoTagger:
         audio_features: AudioFeatures,
         file_path: Path,
         override_existing: bool = False,
-    ) -> List[str]:
+    ) -> list[str]:
         """Auto-tag a single sample based on its features.
 
         Args:
@@ -55,10 +54,10 @@ class AutoTagger:
 
     async def bulk_auto_tag(
         self,
-        file_paths: List[Path],
+        file_paths: list[Path],
         get_features_fn,
-        progress_callback: Optional[callable] = None,
-    ) -> Dict[Path, List[str]]:
+        progress_callback: callable | None = None,
+    ) -> dict[Path, list[str]]:
         """Automatically tag multiple samples.
 
         Args:
@@ -93,7 +92,7 @@ class AutoTagger:
 
         return results
 
-    def _generate_tags_from_classification(self, classification) -> List[str]:
+    def _generate_tags_from_classification(self, classification) -> list[str]:
         """Generate tags from classification result."""
         tags = []
 
@@ -125,7 +124,7 @@ class AutoTagger:
     def get_confidence_report(
         self,
         audio_features: AudioFeatures,
-    ) -> Dict[str, Dict[str, float]]:
+    ) -> dict[str, dict[str, float]]:
         """Get a detailed confidence report for an audio sample.
 
         Args:

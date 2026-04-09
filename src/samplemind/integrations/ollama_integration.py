@@ -17,7 +17,7 @@ import os
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 try:
     import ollama
@@ -44,8 +44,8 @@ class OllamaMusicAnalysis:
     """Result from Ollama local music analysis"""
 
     summary: str = ""
-    production_tips: List[str] = field(default_factory=list)
-    creative_ideas: List[str] = field(default_factory=list)
+    production_tips: list[str] = field(default_factory=list)
+    creative_ideas: list[str] = field(default_factory=list)
     model_used: OllamaModel = OllamaModel.QWEN_2_5_7B
     processing_time: float = 0.0
     timestamp: float = field(default_factory=time.time)
@@ -64,7 +64,7 @@ class OllamaMusicProducer:
 
     def __init__(
         self,
-        host: Optional[str] = None,
+        host: str | None = None,
         default_model: OllamaModel = OllamaModel.QWEN_2_5_7B,
     ) -> None:
         if not OLLAMA_AVAILABLE:
@@ -78,8 +78,8 @@ class OllamaMusicProducer:
 
     async def analyze_music_comprehensive(
         self,
-        audio_features: Dict[str, Any],
-        user_context: Optional[Dict[str, Any]] = None,
+        audio_features: dict[str, Any],
+        user_context: dict[str, Any] | None = None,
     ) -> OllamaMusicAnalysis:
         """
         Perform quick music analysis with a local Ollama model.
@@ -113,7 +113,7 @@ class OllamaMusicProducer:
             raise
 
     def _build_prompt(
-        self, features: Dict[str, Any], context: Optional[Dict[str, Any]]
+        self, features: dict[str, Any], context: dict[str, Any] | None
     ) -> str:
         """Build a concise prompt for local model inference"""
         tempo = features.get("tempo", "unknown")
@@ -141,9 +141,9 @@ class OllamaMusicProducer:
 
     async def analyze_audio_with_description(
         self,
-        audio_features: Dict[str, Any],
-        stem_description: Optional[str] = None,
-        user_context: Optional[Dict[str, Any]] = None,
+        audio_features: dict[str, Any],
+        stem_description: str | None = None,
+        user_context: dict[str, Any] | None = None,
     ) -> OllamaMusicAnalysis:
         """
         Audio-aware analysis that incorporates pre-extracted feature descriptions.

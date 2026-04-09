@@ -8,9 +8,9 @@ Supports:
 - OpenAI GPT (Fallback): Emergency backup
 """
 
+from .ai_manager import AIProvider, AIProviderConfig, AnalysisType, SampleMindAIManager
 from .google_ai_integration import GoogleAIMusicProducer
 from .openai_integration import OpenAIMusicProducer
-from .ai_manager import SampleMindAIManager, AIProviderConfig, AIProvider, AnalysisType
 
 try:
     from .anthropic_integration import AnthropicMusicProducer

@@ -16,10 +16,9 @@ Features:
 
 import json
 import logging
-from pathlib import Path
-from typing import List, Optional, Dict, Tuple
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from dataclasses import dataclass, asdict, field
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +37,7 @@ class RecentFile:
     size_bytes: int = 0
     duration_seconds: float = 0.0
     analysis_level: str = "STANDARD"  # BASIC, STANDARD, DETAILED, PROFESSIONAL
-    tags: List[str] = field(default_factory=list)  # Auto-assigned tags
+    tags: list[str] = field(default_factory=list)  # Auto-assigned tags
 
     @property
     def path_obj(self) -> Path:
@@ -105,14 +104,14 @@ class RecentFilesManager:
         self.config_dir = Path.home() / ".samplemind"
         self.config_dir.mkdir(parents=True, exist_ok=True)
         self.history_file = self.config_dir / "recent_files.json"
-        self._files: List[RecentFile] = []
+        self._files: list[RecentFile] = []
         self._load()
 
     def _load(self) -> None:
         """Load recent files from disk"""
         if self.history_file.exists():
             try:
-                with open(self.history_file, "r") as f:
+                with open(self.history_file) as f:
                     data = json.load(f)
                     self._files = [RecentFile.from_dict(item) for item in data]
                     logger.debug(f"Loaded {len(self._files)} recent files")
@@ -136,7 +135,7 @@ class RecentFilesManager:
         self,
         file_path: Path,
         analysis_level: str = "STANDARD",
-        tags: Optional[List[str]] = None,
+        tags: list[str] | None = None,
     ) -> None:
         """
         Add a file to recent history
@@ -178,7 +177,7 @@ class RecentFilesManager:
         # Save to disk
         self._save()
 
-    def get_all(self) -> List[RecentFile]:
+    def get_all(self) -> list[RecentFile]:
         """Get all recent files (in order of recency)"""
         # Filter out files that no longer exist
         valid_files = [f for f in self._files if f.is_valid()]
@@ -190,7 +189,7 @@ class RecentFilesManager:
 
         return valid_files
 
-    def get_by_index(self, index: int) -> Optional[RecentFile]:
+    def get_by_index(self, index: int) -> RecentFile | None:
         """
         Get recent file by index (1-based)
 
@@ -205,7 +204,7 @@ class RecentFilesManager:
             return files[index - 1]
         return None
 
-    def get_most_recent(self) -> Optional[RecentFile]:
+    def get_most_recent(self) -> RecentFile | None:
         """Get the most recently analyzed file"""
         files = self.get_all()
         return files[0] if files else None
@@ -235,7 +234,7 @@ class RecentFilesManager:
 
         return False
 
-    def search(self, query: str) -> List[RecentFile]:
+    def search(self, query: str) -> list[RecentFile]:
         """
         Search recent files by name, path, or tags
 
@@ -258,7 +257,7 @@ class RecentFilesManager:
 
         return results
 
-    def export(self, output_path: Optional[Path] = None) -> str:
+    def export(self, output_path: Path | None = None) -> str:
         """
         Export recent files as JSON
 
@@ -276,7 +275,7 @@ class RecentFilesManager:
 
         return json_str
 
-    def stats(self) -> Dict[str, any]:
+    def stats(self) -> dict[str, any]:
         """Get statistics about recent files"""
         files = self.get_all()
 
@@ -308,7 +307,7 @@ class RecentFilesManager:
 # GLOBAL INSTANCE
 # ============================================================================
 
-_manager: Optional[RecentFilesManager] = None
+_manager: RecentFilesManager | None = None
 
 
 def get_manager() -> RecentFilesManager:
@@ -327,44 +326,44 @@ def get_manager() -> RecentFilesManager:
 def add_recent_file(
     file_path: Path,
     analysis_level: str = "STANDARD",
-    tags: Optional[List[str]] = None,
+    tags: list[str] | None = None,
 ) -> None:
     """Add a file to recent history"""
     manager = get_manager()
     manager.add(file_path, analysis_level, tags)
 
 
-def get_recent_files() -> List[RecentFile]:
+def get_recent_files() -> list[RecentFile]:
     """Get all recent files"""
     manager = get_manager()
     return manager.get_all()
 
 
-def get_recent_file_by_index(index: int) -> Optional[RecentFile]:
+def get_recent_file_by_index(index: int) -> RecentFile | None:
     """Get recent file by index (1-based)"""
     manager = get_manager()
     return manager.get_by_index(index)
 
 
-def get_most_recent_file() -> Optional[RecentFile]:
+def get_most_recent_file() -> RecentFile | None:
     """Get most recently analyzed file"""
     manager = get_manager()
     return manager.get_most_recent()
 
 
-def search_recent_files(query: str) -> List[RecentFile]:
+def search_recent_files(query: str) -> list[RecentFile]:
     """Search recent files"""
     manager = get_manager()
     return manager.search(query)
 
 
-def export_recent_files(output_path: Optional[Path] = None) -> str:
+def export_recent_files(output_path: Path | None = None) -> str:
     """Export recent files as JSON"""
     manager = get_manager()
     return manager.export(output_path)
 
 
-def get_recent_files_stats() -> Dict[str, any]:
+def get_recent_files_stats() -> dict[str, any]:
     """Get statistics about recent files"""
     manager = get_manager()
     return manager.stats()
@@ -409,6 +408,6 @@ if __name__ == "__main__":
 
     # Show stats
     stats = manager.stats()
-    print(f"\n📊 Statistics:")
+    print("\n📊 Statistics:")
     print(f"  Total files: {stats['total_files']}")
     print(f"  Total size: {stats['total_size_mb']:.2f} MB")

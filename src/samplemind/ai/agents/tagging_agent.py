@@ -9,7 +9,7 @@ Generates a rich tag set from audio features using:
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 from samplemind.ai.agents.state import AudioAnalysisState
 
@@ -35,15 +35,15 @@ def tagging_agent(state: AudioAnalysisState) -> AudioAnalysisState:
     Node: Generate multi-label tags from audio features and analysis.
     """
     features = state.get("audio_features", {})
-    analysis = state.get("analysis_result", {})
+    state.get("analysis_result", {})
 
-    updates: Dict[str, Any] = {
+    updates: dict[str, Any] = {
         "current_stage": "tagging",
         "progress_pct": 55,
         "messages": state.get("messages", []) + ["🏷️ Generating tags…"],
     }
 
-    tags: Dict[str, Any] = {
+    tags: dict[str, Any] = {
         "genre": [],
         "mood": [],
         "energy": "medium",
@@ -55,7 +55,7 @@ def tagging_agent(state: AudioAnalysisState) -> AudioAnalysisState:
 
     # ── BPM-based genre suggestions ──────────────────────────────────────────
     bpm = features.get("bpm") or 0.0
-    genre_suggestions: List[str] = []
+    genre_suggestions: list[str] = []
     for (lo, hi), genres in _BPM_GENRE_MAP:
         if lo <= bpm < hi:
             genre_suggestions.extend(genres)
@@ -105,11 +105,17 @@ def tagging_agent(state: AudioAnalysisState) -> AudioAnalysisState:
     file_path = state.get("file_path", "")
     if file_path:
         try:
-            from samplemind.ai.classification.multi_label_genre import MultiLabelGenreClassifier
+            from samplemind.ai.classification.instrument_detector import (
+                InstrumentDetector,
+            )
             from samplemind.ai.classification.mood_detector import MoodDetector
-            from samplemind.ai.classification.instrument_detector import InstrumentDetector
+            from samplemind.ai.classification.multi_label_genre import (
+                MultiLabelGenreClassifier,
+            )
 
-            genre_clf = MultiLabelGenreClassifier(threshold=0.30, top_k=5, use_clap=False)
+            genre_clf = MultiLabelGenreClassifier(
+                threshold=0.30, top_k=5, use_clap=False
+            )
             genre_result = genre_clf.classify_file(file_path)
             if genre_result.all_genres:
                 tags["genre"] = genre_result.all_genres
@@ -133,12 +139,14 @@ def tagging_agent(state: AudioAnalysisState) -> AudioAnalysisState:
             logger.warning("AI classifiers skipped: %s", exc)
 
     # ── Combine into flat raw_labels list ────────────────────────────────────
-    tags["raw_labels"] = list(dict.fromkeys(
-        tags["genre"]
-        + tags["mood"]
-        + [tags["energy"], tags["bpm_range"]]
-        + tags["instrument_hints"]
-    ))
+    tags["raw_labels"] = list(
+        dict.fromkeys(
+            tags["genre"]
+            + tags["mood"]
+            + [tags["energy"], tags["bpm_range"]]
+            + tags["instrument_hints"]
+        )
+    )
 
     updates["tags"] = tags
     updates["messages"] = state.get("messages", []) + ["✅ Tags generated"]

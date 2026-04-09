@@ -1,11 +1,11 @@
 """Batch export capabilities for analysis results"""
 
-import json
 import csv
+import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class ResultExporter:
     # Supported formats
     FORMATS = ["JSON", "CSV", "YAML", "Markdown"]
 
-    def __init__(self, output_dir: Optional[str] = None) -> None:
+    def __init__(self, output_dir: str | None = None) -> None:
         """
         Initialize exporter
 
@@ -39,9 +39,9 @@ class ResultExporter:
 
     async def export_to_json(
         self,
-        features: Dict[str, Any],
+        features: dict[str, Any],
         file_name: str,
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
     ) -> str:
         """Export analysis to JSON format"""
         try:
@@ -66,9 +66,9 @@ class ResultExporter:
 
     async def export_to_csv(
         self,
-        features: Dict[str, Any],
+        features: dict[str, Any],
         file_name: str,
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
     ) -> str:
         """Export analysis to CSV format"""
         try:
@@ -94,9 +94,9 @@ class ResultExporter:
 
     async def export_to_yaml(
         self,
-        features: Dict[str, Any],
+        features: dict[str, Any],
         file_name: str,
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
     ) -> str:
         """Export analysis to YAML format"""
         if not YAML_AVAILABLE:
@@ -126,9 +126,9 @@ class ResultExporter:
 
     async def export_to_markdown(
         self,
-        features: Dict[str, Any],
+        features: dict[str, Any],
         file_name: str,
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
     ) -> str:
         """Export analysis to Markdown format"""
         try:
@@ -155,9 +155,9 @@ class ResultExporter:
 
     async def export_batch_to_json(
         self,
-        analyses: List[Dict[str, Any]],
+        analyses: list[dict[str, Any]],
         batch_name: str,
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
     ) -> str:
         """Export batch of analyses to JSON"""
         try:
@@ -185,9 +185,9 @@ class ResultExporter:
 
     async def export_batch_to_csv(
         self,
-        analyses: List[Dict[str, Any]],
+        analyses: list[dict[str, Any]],
         batch_name: str,
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
     ) -> str:
         """Export batch of analyses to CSV"""
         try:
@@ -202,7 +202,7 @@ class ResultExporter:
                 flat_analyses.append(flat)
                 all_keys.update(flat.keys())
 
-            all_keys = sorted(list(all_keys))
+            all_keys = sorted(all_keys)
 
             with open(output_path, "w", newline="") as f:
                 writer = csv.DictWriter(f, fieldnames=all_keys)
@@ -221,9 +221,9 @@ class ResultExporter:
 
     async def export_batch_to_yaml(
         self,
-        analyses: List[Dict[str, Any]],
+        analyses: list[dict[str, Any]],
         batch_name: str,
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
     ) -> str:
         """Export batch of analyses to YAML"""
         if not YAML_AVAILABLE:
@@ -254,22 +254,22 @@ class ResultExporter:
 
     async def export_batch_to_markdown(
         self,
-        analyses: List[Dict[str, Any]],
+        analyses: list[dict[str, Any]],
         batch_name: str,
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
     ) -> str:
         """Export batch of analyses to Markdown"""
         try:
             output_path = output_path or self.output_dir / f"{batch_name}_batch.md"
             output_path = Path(output_path)
 
-            md_content = f"# Batch Analysis Report\n\n"
+            md_content = "# Batch Analysis Report\n\n"
             md_content += (
                 f"**Export Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
             )
             md_content += f"**Batch Name:** {batch_name}\n"
             md_content += f"**Total Files:** {len(analyses)}\n\n"
-            md_content += f"---\n\n"
+            md_content += "---\n\n"
 
             for idx, analysis in enumerate(analyses, 1):
                 flat_features = self._flatten_features(analysis)
@@ -298,7 +298,7 @@ class ResultExporter:
     # ============================================================================
 
     @staticmethod
-    def _flatten_features(features: Dict[str, Any], prefix: str = "") -> Dict[str, Any]:
+    def _flatten_features(features: dict[str, Any], prefix: str = "") -> dict[str, Any]:
         """Flatten nested dictionary for CSV/Markdown export"""
         flat = {}
 
@@ -322,12 +322,12 @@ class ResultExporter:
         return flat
 
     @staticmethod
-    def _generate_markdown(file_name: str, features: Dict[str, Any]) -> str:
+    def _generate_markdown(file_name: str, features: dict[str, Any]) -> str:
         """Generate Markdown formatted report"""
-        md = f"# Analysis Report\n\n"
+        md = "# Analysis Report\n\n"
         md += f"**File:** {file_name}\n"
         md += f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-        md += f"---\n\n"
+        md += "---\n\n"
 
         md += "## Analysis Results\n\n"
         md += "| Property | Value |\n"
@@ -339,16 +339,16 @@ class ResultExporter:
             md += f"| {formatted_key} | {value} |\n"
 
         md += "\n---\n\n"
-        md += f"*Report generated by SampleMind AI*\n"
+        md += "*Report generated by SampleMind AI*\n"
 
         return md
 
     async def export(
         self,
-        features: Dict[str, Any],
+        features: dict[str, Any],
         file_name: str,
         format_type: str = "JSON",
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
     ) -> str:
         """
         Export to specified format
@@ -379,10 +379,10 @@ class ResultExporter:
 
     async def export_batch(
         self,
-        analyses: List[Dict[str, Any]],
+        analyses: list[dict[str, Any]],
         batch_name: str,
         format_type: str = "JSON",
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
     ) -> str:
         """
         Export batch to specified format
@@ -413,7 +413,7 @@ class ResultExporter:
                 f"Unsupported format: {format_type}. Supported: {self.FORMATS}"
             )
 
-    def get_supported_formats(self) -> List[str]:
+    def get_supported_formats(self) -> list[str]:
         """Get list of supported export formats"""
         return self.FORMATS.copy()
 

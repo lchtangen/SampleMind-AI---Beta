@@ -14,11 +14,8 @@ Usage:
 """
 
 from pathlib import Path
-from typing import Optional
 
 import typer
-from rich.console import Console
-from rich.panel import Panel
 from rich.table import Table
 
 from samplemind.ai.classification.classifier import AIClassifier
@@ -44,7 +41,7 @@ console = utils.console
 @app.command("organize")
 @utils.with_error_handling
 def library_organize(
-    folder: Optional[Path] = typer.Argument(None, help="Library folder to organize"),
+    folder: Path | None = typer.Argument(None, help="Library folder to organize"),
     by: str = typer.Option(
         "{genre}/{bpm}/{key}/{filename}", "--pattern", "-p", help="Organization pattern"
     ),
@@ -173,7 +170,7 @@ def library_scan(
             ]
         )
 
-        console.print(f"[bold cyan]📁 Library Scan Results[/bold cyan]")
+        console.print("[bold cyan]📁 Library Scan Results[/bold cyan]")
 
         with utils.ProgressTracker(f"Scanning {folder.name}"):
             pass
@@ -187,7 +184,7 @@ def library_scan(
             "Total Size", f"{sum(f.stat().st_size for f in files) / 1e9:.2f} GB"
         )
         table.add_row(
-            "Audio Formats", f"{len(set(f.suffix.lower() for f in files))} types"
+            "Audio Formats", f"{len({f.suffix.lower() for f in files})} types"
         )
 
         console.print(table)
@@ -218,7 +215,7 @@ def library_import(
             for file in files:
                 console.print(f"  ✓ {file.name}")
 
-        console.print(f"\n[green]✓ Import complete[/green]")
+        console.print("\n[green]✓ Import complete[/green]")
 
     except Exception as e:
         utils.handle_error(e, "library:import")
@@ -294,16 +291,16 @@ def library_sync(
         stats = {"uploaded": 0, "downloaded": 0, "errors": 0}
 
         # Using context manager for spinner
-        with utils.ProgressTracker(f"Syncing files..."):
+        with utils.ProgressTracker("Syncing files..."):
             stats = await manager.sync_library(folder, direction)
 
-        console.print(f"\n[bold green]✓ Sync Complete[/bold green]")
+        console.print("\n[bold green]✓ Sync Complete[/bold green]")
         console.print(f"  Uploaded: {stats.get('uploaded', 0)}")
         console.print(f"  Downloaded: {stats.get('downloaded', 0)}")
         if stats.get("errors", 0) > 0:
             console.print(f"  [red]Errors: {stats.get('errors')}[/red]")
         else:
-            console.print(f"  Errors: 0")
+            console.print("  Errors: 0")
 
     try:
         asyncio.run(_run_sync())
@@ -337,7 +334,7 @@ def library_stats(
             "Avg Size",
             f"{total_size * 1e9 / len(files) / 1e6:.1f} MB" if files else "N/A",
         )
-        table.add_row("Formats", str(len(set(f.suffix.lower() for f in files))))
+        table.add_row("Formats", str(len({f.suffix.lower() for f in files})))
 
         console.print(table)
 
@@ -358,7 +355,7 @@ def library_size(
         files = utils.get_audio_files(folder)
         total_size = sum(f.stat().st_size for f in files) / 1e9
 
-        console.print(f"[bold]Library Size Analysis[/bold]")
+        console.print("[bold]Library Size Analysis[/bold]")
         console.print(f"[cyan]Location:[/cyan] {folder}")
         console.print(
             f"[cyan]Total Size:[/cyan] [bold green]{total_size:.2f} GB[/bold green]"
@@ -507,7 +504,7 @@ def library_restore(
         with utils.ProgressTracker("Restoring backup"):
             pass
 
-        console.print(f"[green]✓ Restore complete[/green]")
+        console.print("[green]✓ Restore complete[/green]")
 
     except Exception as e:
         utils.handle_error(e, "library:restore")
@@ -625,10 +622,10 @@ def library_filter_bpm(
         max_bpm = max_bpm or min_bpm + 10
         console.print(f"[cyan]Filter BPM: {min_bpm}-{max_bpm}[/cyan]")
 
-        with utils.ProgressTracker(f"Filtering by BPM"):
+        with utils.ProgressTracker("Filtering by BPM"):
             pass
 
-        console.print(f"[green]✓ Filter complete[/green]")
+        console.print("[green]✓ Filter complete[/green]")
 
     except Exception as e:
         utils.handle_error(e, "library:filter:bpm")
@@ -899,7 +896,7 @@ def collection_show(
     try:
         console.print(f"[bold cyan]Collection: {name}[/bold cyan]\n")
 
-        table = Table(title=f"Contents", show_header=True, header_style="bold cyan")
+        table = Table(title="Contents", show_header=True, header_style="bold cyan")
         table.add_column("Name", style="cyan")
         table.add_column("BPM", justify="right")
         table.add_column("Key", justify="center")
@@ -932,7 +929,7 @@ def collection_delete(
         with utils.ProgressTracker("Deleting"):
             pass
 
-        console.print(f"[green]✓ Collection deleted[/green]")
+        console.print("[green]✓ Collection deleted[/green]")
 
     except Exception as e:
         utils.handle_error(e, "collection:delete")
@@ -943,7 +940,7 @@ def collection_delete(
 @utils.with_error_handling
 def collection_export(
     name: str = typer.Argument(..., help="Collection name"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
     format: str = typer.Option("json", "--format", "-f"),
 ) -> None:
     """Export collection to file"""
@@ -1032,36 +1029,46 @@ def library_dedupe(
     folder: Path = typer.Argument(
         Path.home() / "SampleMind" / "Library", help="Library folder"
     ),
-    remove: bool = typer.Option(False, "--remove", help="Remove duplicates (keeps first found)"),
-    threshold: float = typer.Option(0.95, "--threshold", help="Similarity threshold (0–1)"),
+    remove: bool = typer.Option(
+        False, "--remove", help="Remove duplicates (keeps first found)"
+    ),
+    threshold: float = typer.Option(
+        0.95, "--threshold", help="Similarity threshold (0–1)"
+    ),
 ) -> None:
     """Find (and optionally remove) near-duplicate audio files via perceptual fingerprinting."""
     try:
         from samplemind.core.analysis.fingerprinter import AudioFingerprinter
 
         files = utils.get_audio_files(folder)
-        console.print(f"[cyan]Scanning {len(files)} files for duplicates (threshold={threshold})[/cyan]")
+        console.print(
+            f"[cyan]Scanning {len(files)} files for duplicates (threshold={threshold})[/cyan]"
+        )
 
         fingerprinter = AudioFingerprinter()
         fingerprints: dict[str, str] = {}  # fingerprint → first file path
         duplicates: list[tuple[str, str]] = []  # (duplicate_path, original_path)
 
         try:
-            import librosa
+
             _librosa_available = True
         except ImportError:
             _librosa_available = False
-            console.print("[yellow]⚠ librosa not installed — using SHA-256 exact match only[/yellow]")
+            console.print(
+                "[yellow]⚠ librosa not installed — using SHA-256 exact match only[/yellow]"
+            )
 
         for f in files:
             try:
                 if _librosa_available:
                     import librosa as _librosa
+
                     y, sr = _librosa.load(str(f), sr=22050, mono=True)
                     result = fingerprinter.fingerprint(y, sr)
                     fp = result.fingerprint
                 else:
                     import hashlib
+
                     fp = hashlib.sha256(Path(f).read_bytes()).hexdigest()
 
                 if fp in fingerprints:
@@ -1090,7 +1097,9 @@ def library_dedupe(
         if remove:
             console.print(f"[green]✓ Removed {removed} duplicate(s)[/green]")
         else:
-            console.print("[dim]Tip: use --remove to delete duplicates (keeps first found)[/dim]")
+            console.print(
+                "[dim]Tip: use --remove to delete duplicates (keeps first found)[/dim]"
+            )
 
     except Exception as e:
         utils.handle_error(e, "library:dedupe")

@@ -3,8 +3,9 @@ Password Hashing and Verification
 Uses bcrypt for secure password hashing
 """
 
-import bcrypt
 import logging
+
+import bcrypt
 
 logger = logging.getLogger(__name__)
 

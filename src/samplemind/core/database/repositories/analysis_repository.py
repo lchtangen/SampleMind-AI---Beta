@@ -1,6 +1,7 @@
 """Analysis repository"""
 
-from typing import Optional, List, Dict, Any
+from typing import Any
+
 from samplemind.core.database.mongo import Analysis
 
 
@@ -14,19 +15,19 @@ class AnalysisRepository:
         tempo: float,
         key: str,
         mode: str,
-        time_signature: List[int],
+        time_signature: list[int],
         duration: float,
         analysis_level: str,
         processing_time: float,
-        user_id: Optional[str] = None,
-        spectral_features: Optional[Dict[str, Any]] = None,
-        ai_provider: Optional[str] = None,
-        ai_model: Optional[str] = None,
-        ai_summary: Optional[str] = None,
-        ai_detailed: Optional[Dict[str, Any]] = None,
-        production_tips: Optional[List[str]] = None,
-        creative_ideas: Optional[List[str]] = None,
-        fl_studio_recommendations: Optional[List[str]] = None,
+        user_id: str | None = None,
+        spectral_features: dict[str, Any] | None = None,
+        ai_provider: str | None = None,
+        ai_model: str | None = None,
+        ai_summary: str | None = None,
+        ai_detailed: dict[str, Any] | None = None,
+        production_tips: list[str] | None = None,
+        creative_ideas: list[str] | None = None,
+        fl_studio_recommendations: list[str] | None = None,
     ) -> Analysis:
         """Create new analysis record"""
         analysis = Analysis(
@@ -53,19 +54,19 @@ class AnalysisRepository:
         return analysis
 
     @staticmethod
-    async def get_by_id(analysis_id: str) -> Optional[Analysis]:
+    async def get_by_id(analysis_id: str) -> Analysis | None:
         """Get analysis by ID"""
         return await Analysis.find_one(Analysis.analysis_id == analysis_id)
 
     @staticmethod
-    async def get_by_file_id(file_id: str) -> Optional[Analysis]:
+    async def get_by_file_id(file_id: str) -> Analysis | None:
         """Get analysis by file ID"""
         return await Analysis.find_one(Analysis.file_id == file_id)
 
     @staticmethod
     async def get_by_user(
         user_id: str, skip: int = 0, limit: int = 50
-    ) -> List[Analysis]:
+    ) -> list[Analysis]:
         """Get all analyses for a user"""
         return (
             await Analysis.find(Analysis.user_id == user_id)

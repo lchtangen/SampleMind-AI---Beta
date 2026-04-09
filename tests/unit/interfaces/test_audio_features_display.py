@@ -8,11 +8,6 @@ Tests cover:
 - Edge cases and boundary conditions
 """
 
-import pytest
-from unittest.mock import Mock
-
-from samplemind.core.engine.audio_engine import AudioFeatures
-
 
 class MockAudioFeatures:
     """Mock AudioFeatures for testing."""
@@ -107,7 +102,7 @@ class TestTempoFormatting:
             (400, True),  # Fast electronic
         ]
 
-        for tempo, should_be_valid in test_tempos:
+        for tempo, _should_be_valid in test_tempos:
             # All should format successfully
             formatted = f"{tempo:.1f} BPM"
             assert "BPM" in formatted
@@ -313,7 +308,7 @@ class TestFeatureArrayFormatting:
         """Test formatting chroma features."""
         chroma = [0.08] * 12
         notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
-        formatted = [(note, val) for note, val in zip(notes, chroma)]
+        formatted = [(note, val) for note, val in zip(notes, chroma, strict=False)]
         assert len(formatted) == 12
 
 
@@ -353,7 +348,7 @@ class TestFormattingConsistency:
         """Test consistent decimal place formatting."""
         values = [1.1, 2.22, 3.333, 4.4444]
         formatted_1dp = [f"{v:.1f}" for v in values]
-        formatted_2dp = [f"{v:.2f}" for v in values]
+        [f"{v:.2f}" for v in values]
 
         # Check consistency
         assert len(formatted_1dp) == 4
@@ -370,9 +365,9 @@ class TestFormattingConsistency:
     def test_unicode_symbol_consistency(self):
         """Test unicode symbol handling."""
         # Test BPM symbol
-        tempo_str = f"120.0 BPM"
+        tempo_str = "120.0 BPM"
         assert "BPM" in tempo_str
 
         # Test note symbols could use unicode
-        key_str = f"C# Major"
+        key_str = "C# Major"
         assert "#" in key_str or "♯" in key_str or "#" in key_str

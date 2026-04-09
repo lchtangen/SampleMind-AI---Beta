@@ -4,27 +4,25 @@ Pytest configuration and fixtures for SampleMind AI testing
 Provides comprehensive test fixtures for audio processing, AI integration, and database testing
 """
 
-import pytest
-import pytest_asyncio
 import asyncio
-import tempfile
-import shutil
-import numpy as np
-import soundfile as sf
 import json
 import os
-import sys
+import shutil
+import tempfile
 from pathlib import Path
-from typing import Dict, Any, List
 from unittest.mock import AsyncMock, MagicMock
 
+import numpy as np
+import pytest
+import pytest_asyncio
+import soundfile as sf
+
 from samplemind.core.engine.audio_engine import (
-    AudioEngine,
     AnalysisLevel,
+    AudioEngine,
     AudioFeatures,
 )
-from samplemind.integrations.openai_integration import OpenAIMusicProducer, OpenAIModel
-
+from samplemind.integrations.openai_integration import OpenAIModel, OpenAIMusicProducer
 
 # ============================================================================
 # Scope Configuration
@@ -412,7 +410,8 @@ def performance_timer():
 @pytest_asyncio.fixture
 async def api_client():
     """FastAPI test client for integration tests"""
-    from httpx import AsyncClient, ASGITransport
+    from httpx import ASGITransport, AsyncClient
+
     from samplemind.interfaces.api.main import app
 
     async with AsyncClient(

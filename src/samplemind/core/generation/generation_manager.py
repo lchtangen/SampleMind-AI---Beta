@@ -12,21 +12,18 @@ Strategy:
 - AI suggestions → analyze context (key, tempo, genre) → recommend from library
 """
 
-import asyncio
 import logging
 import time
 import uuid
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
-
-import numpy as np
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class GenerationMode(str, Enum):
+class GenerationMode(StrEnum):
     """Available generation modes"""
 
     TEXT_TO_SAMPLE = "text_to_sample"  # Find samples matching text description
@@ -35,7 +32,7 @@ class GenerationMode(str, Enum):
     STEM_REMIX = "stem_remix"  # Remix stems from multiple sources
 
 
-class GenerationStatus(str, Enum):
+class GenerationStatus(StrEnum):
     """Status of a generation request"""
 
     PENDING = "pending"
@@ -52,12 +49,12 @@ class GenerationRequest:
     id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
     mode: GenerationMode = GenerationMode.TEXT_TO_SAMPLE
     prompt: str = ""
-    source_audio: Optional[Path] = None
-    parameters: Dict[str, Any] = field(default_factory=dict)
+    source_audio: Path | None = None
+    parameters: dict[str, Any] = field(default_factory=dict)
     status: GenerationStatus = GenerationStatus.PENDING
     created_at: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert generation request to dictionary"""
         return {
             "id": self.id,
@@ -76,13 +73,13 @@ class GenerationResult:
 
     request_id: str
     mode: GenerationMode
-    matches: List[Dict[str, Any]] = field(default_factory=list)
-    variations: List[Path] = field(default_factory=list)
-    suggestions: List[Dict[str, Any]] = field(default_factory=list)
+    matches: list[dict[str, Any]] = field(default_factory=list)
+    variations: list[Path] = field(default_factory=list)
+    suggestions: list[dict[str, Any]] = field(default_factory=list)
     processing_time: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert generation result to dictionary"""
         return {
             "request_id": self.request_id,
@@ -106,12 +103,12 @@ class GenerationManager:
     - AI providers (Gemini/Ollama) for intelligent suggestions
     """
 
-    def __init__(self, library_path: Optional[Path] = None) -> None:
+    def __init__(self, library_path: Path | None = None) -> None:
         self.library_path = library_path
         self._neural_engine = None
         self._stem_engine = None
-        self._requests: Dict[str, GenerationRequest] = {}
-        self._results: Dict[str, GenerationResult] = {}
+        self._requests: dict[str, GenerationRequest] = {}
+        self._results: dict[str, GenerationResult] = {}
         logger.info("GenerationManager initialized")
 
     @property
@@ -207,9 +204,9 @@ class GenerationManager:
 
         # Search library using embeddings via ChromaDB
         try:
-            from ..similarity.similarity_db import SimilarityDB
+            from ..similarity.similarity_db import SimilarityDatabase
 
-            db = SimilarityDB()
+            db = SimilarityDatabase()
             matches = await db.search_by_embedding(
                 embedding=text_embedding,
                 n_results=request.parameters.get("num_results", 10),
@@ -251,7 +248,7 @@ class GenerationManager:
 
         # Generate variation suggestions based on audio analysis
         try:
-            from ..engine.audio_engine import AudioEngine, AnalysisLevel
+            from ..engine.audio_engine import AnalysisLevel, AudioEngine
 
             engine = AudioEngine()
             features = engine.analyze_audio(source, level=AnalysisLevel.STANDARD)
@@ -359,7 +356,7 @@ class GenerationManager:
         result.metadata["stem_types"] = stem_types
         return result
 
-    def _suggest_transforms(self, features, variation_index: int) -> List[Dict]:
+    def _suggest_transforms(self, features, variation_index: int) -> list[dict]:
         """Suggest audio transforms for creating variations"""
         transforms = [
             [
@@ -394,7 +391,7 @@ class GenerationManager:
         ]
         return transforms[variation_index % len(transforms)]
 
-    def _get_compatible_keys(self, key: str) -> List[str]:
+    def _get_compatible_keys(self, key: str) -> list[str]:
         """Get harmonically compatible keys using circle of fifths"""
         circle = ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"]
         try:
@@ -411,7 +408,7 @@ class GenerationManager:
         except (ValueError, IndexError):
             return ["C", "G", "Am"]
 
-    def _suggest_processing_chain(self, genre: str) -> List[Dict]:
+    def _suggest_processing_chain(self, genre: str) -> list[dict]:
         """Suggest processing chain based on genre"""
         chains = {
             "electronic": [
@@ -432,17 +429,17 @@ class GenerationManager:
         }
         return chains.get(genre, chains["electronic"])
 
-    def get_request_status(self, request_id: str) -> Optional[Dict]:
+    def get_request_status(self, request_id: str) -> dict | None:
         """Get status of a generation request"""
         request = self._requests.get(request_id)
         if request:
             return request.to_dict()
         return None
 
-    def get_result(self, request_id: str) -> Optional[GenerationResult]:
+    def get_result(self, request_id: str) -> GenerationResult | None:
         """Get result of a completed generation request"""
         return self._results.get(request_id)
 
-    def list_requests(self) -> List[Dict]:
+    def list_requests(self) -> list[dict]:
         """List all generation requests"""
         return [r.to_dict() for r in self._requests.values()]

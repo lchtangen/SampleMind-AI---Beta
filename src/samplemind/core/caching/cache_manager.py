@@ -5,11 +5,11 @@ Extends the basic Redis cache with intelligent eviction policies
 and adaptive time-to-live management based on access patterns.
 """
 
-import time
-from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass, field
-from collections import defaultdict, OrderedDict
 import logging
+import time
+from collections import OrderedDict
+from dataclasses import dataclass, field
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class CacheEntry:
     created_at: float
     last_accessed: float
     access_count: int = 0
-    access_history: List[float] = field(default_factory=list)
+    access_history: list[float] = field(default_factory=list)
     ttl: int = 3600  # Time-to-live in seconds
     size_bytes: int = 0
 
@@ -95,7 +95,7 @@ class AdvancedCacheManager:
         self.adaptive_ttl = adaptive_ttl
 
         # Local entry tracking
-        self.entries: Dict[str, CacheEntry] = OrderedDict()
+        self.entries: dict[str, CacheEntry] = OrderedDict()
 
         # Statistics
         self.hits = 0
@@ -112,7 +112,7 @@ class AdvancedCacheManager:
             f"(max_memory={max_memory_mb}MB, k={k}, adaptive_ttl={adaptive_ttl})"
         )
 
-    async def get(self, key: str) -> Optional[Any]:
+    async def get(self, key: str) -> Any | None:
         """
         Get value from cache with eviction checks.
 
@@ -155,8 +155,8 @@ class AdvancedCacheManager:
         self,
         key: str,
         value: Any,
-        ttl: Optional[int] = None,
-        size_bytes: Optional[int] = None,
+        ttl: int | None = None,
+        size_bytes: int | None = None,
     ) -> bool:
         """
         Set value in cache with automatic eviction.
@@ -233,7 +233,7 @@ class AdvancedCacheManager:
             return
 
         # Calculate eviction scores for each entry
-        scores: List[Tuple[str, float]] = []
+        scores: list[tuple[str, float]] = []
 
         for key, entry in self.entries.items():
             # LRU-K score combines recency and frequency
@@ -299,7 +299,7 @@ class AdvancedCacheManager:
 
         return self.hits / total
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """Get cache statistics"""
         cache_size_mb = self._get_cache_size() / 1024 / 1024
 
@@ -316,7 +316,7 @@ class AdvancedCacheManager:
             ),
         }
 
-    def get_top_accessed(self, limit: int = 10) -> List[Dict]:
+    def get_top_accessed(self, limit: int = 10) -> list[dict]:
         """Get most accessed entries"""
         sorted_entries = sorted(
             self.entries.items(), key=lambda x: x[1].access_count, reverse=True
@@ -338,7 +338,7 @@ class AdvancedCacheManager:
 
         return result
 
-    def get_oldest_entries(self, limit: int = 10) -> List[Dict]:
+    def get_oldest_entries(self, limit: int = 10) -> list[dict]:
         """Get oldest entries (candidates for eviction)"""
         sorted_entries = sorted(self.entries.items(), key=lambda x: x[1].created_at)
 
@@ -379,7 +379,7 @@ class AdvancedCacheManager:
 
 
 # Global instance
-_manager_instance: Optional[AdvancedCacheManager] = None
+_manager_instance: AdvancedCacheManager | None = None
 
 
 def init_manager(redis_cache=None, **kwargs) -> AdvancedCacheManager:

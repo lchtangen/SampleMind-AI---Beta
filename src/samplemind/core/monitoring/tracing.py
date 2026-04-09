@@ -22,8 +22,8 @@ from __future__ import annotations
 
 import logging
 import os
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Generator, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -40,13 +40,13 @@ except ImportError:
     _OTEL_AVAILABLE = False
     trace = None  # type: ignore[assignment]
 
-_tracer: Optional[object] = None
+_tracer: object | None = None
 
 
 def setup_tracing(
     service_name: str = "samplemind-api",
     service_version: str = "3.0.0",
-    otlp_endpoint: Optional[str] = None,
+    otlp_endpoint: str | None = None,
 ) -> bool:
     """
     Initialize OpenTelemetry tracing.
@@ -84,7 +84,9 @@ def setup_tracing(
     endpoint = otlp_endpoint or os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "")
     if endpoint:
         try:
-            from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+            from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
+                OTLPSpanExporter,
+            )
 
             otlp_exporter = OTLPSpanExporter(endpoint=endpoint)
             provider.add_span_processor(BatchSpanProcessor(otlp_exporter))
@@ -142,7 +144,7 @@ def _setup_sentry() -> None:
         sentry_sdk.init(
             dsn=dsn,
             environment=os.getenv("ENVIRONMENT", "development"),
-            release=f"samplemind@3.0.0",
+            release="samplemind@3.0.0",
             traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.1")),
             integrations=[
                 FastApiIntegration(transaction_style="endpoint"),

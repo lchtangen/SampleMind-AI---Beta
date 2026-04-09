@@ -13,10 +13,10 @@ Components:
 - AdvancedCacheManager: LRU-K eviction and adaptive TTL
 """
 
-from .usage_patterns import UsagePatternTracker
-from .markov_predictor import MarkovPredictor
-from .cache_warmer import CacheWarmer
 from .cache_manager import AdvancedCacheManager
+from .cache_warmer import CacheWarmer
+from .markov_predictor import MarkovPredictor
+from .usage_patterns import UsagePatternTracker
 
 __all__ = [
     "UsagePatternTracker",

@@ -6,13 +6,14 @@ with thermal throttling and priority queue management.
 """
 
 import asyncio
-import psutil
-import time
-from typing import Dict, List, Optional, Callable, Coroutine
-from dataclasses import dataclass
-from pathlib import Path
-from enum import Enum
 import logging
+import time
+from collections.abc import Callable
+from dataclasses import dataclass
+from enum import Enum
+from pathlib import Path
+
+import psutil
 
 logger = logging.getLogger(__name__)
 
@@ -109,7 +110,7 @@ class CacheWarmer:
 
         # Task management
         self.task_queue: asyncio.PriorityQueue = asyncio.PriorityQueue()
-        self.active_tasks: Dict[str, asyncio.Task] = {}
+        self.active_tasks: dict[str, asyncio.Task] = {}
         self.completed_tasks: set = set()
 
         # State
@@ -122,9 +123,9 @@ class CacheWarmer:
         self.stats = WarmupStats()
 
         # Callbacks
-        self.on_warmup_start: Optional[Callable] = None
-        self.on_warmup_complete: Optional[Callable] = None
-        self.on_warmup_failed: Optional[Callable] = None
+        self.on_warmup_start: Callable | None = None
+        self.on_warmup_complete: Callable | None = None
+        self.on_warmup_failed: Callable | None = None
 
         logger.info(
             f"Cache warmer initialized "
@@ -315,7 +316,7 @@ class CacheWarmer:
             logger.warning(f"Failed to check system resources: {e}")
             return True  # Continue on error
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """Get warmup statistics"""
         return {
             "total_tasks": self.stats.total_tasks,
@@ -353,7 +354,7 @@ class CacheWarmer:
 
 
 # Global instance
-_warmer_instance: Optional[CacheWarmer] = None
+_warmer_instance: CacheWarmer | None = None
 
 
 def init_warmer(

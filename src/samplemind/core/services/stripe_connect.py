@@ -33,7 +33,6 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -48,11 +47,10 @@ class StripeConnectService:
 
     def _get_stripe(self):
         if not self._stripe_key:
-            raise RuntimeError(
-                "STRIPE_SECRET_KEY not set — Stripe Connect unavailable"
-            )
+            raise RuntimeError("STRIPE_SECRET_KEY not set — Stripe Connect unavailable")
         try:
             import stripe
+
             stripe.api_key = self._stripe_key
             return stripe
         except ImportError:
@@ -85,7 +83,9 @@ class StripeConnectService:
             return account.id
 
         account_id = await loop.run_in_executor(None, _create)
-        logger.info("✓ Stripe Connect account created: %s (user: %s)", account_id, user_id)
+        logger.info(
+            "✓ Stripe Connect account created: %s (user: %s)", account_id, user_id
+        )
         return account_id
 
     async def create_account_link(
@@ -146,7 +146,7 @@ class StripeConnectService:
         pack_name: str,
         description: str,
         price_usd: float,
-        metadata: Optional[dict] = None,
+        metadata: dict | None = None,
     ) -> tuple[str, str]:
         """
         Create a Stripe Product + one-time Price for a pack listing.
@@ -202,7 +202,7 @@ class StripeConnectService:
         listing_id: str,
         success_url: str,
         cancel_url: str,
-        connected_account_id: Optional[str] = None,
+        connected_account_id: str | None = None,
     ) -> tuple[str, str]:
         """
         Create a Stripe Checkout Session for buying a pack.
@@ -248,7 +248,9 @@ class StripeConnectService:
         session_id, url = await loop.run_in_executor(None, _create)
         logger.info(
             "✓ Checkout session created: %s (buyer: %s, listing: %s)",
-            session_id, buyer_user_id, listing_id,
+            session_id,
+            buyer_user_id,
+            listing_id,
         )
         return session_id, url
 

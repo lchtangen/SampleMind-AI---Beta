@@ -1,0 +1,103 @@
+Checking black formatting...
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/agents/state.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/__init__.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/agents/mixing_agent.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/agents/tagging_agent.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/agents/graph.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/agents/analysis_agent.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/classification/ensemble.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/classification/mood_detector.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/agents/tool_use.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/classification/multi_label_genre.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/curation/gap_analyzer.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/classification/instrument_detector.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/generation/musicgen.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/curation/playlist_generator.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/generation/style_transfer.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/query_optimizer.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/connection_pool.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/cache/redis_cache.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/tortoise_models.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/search.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/monitoring/tracing.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/packs/pack_builder.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/services/stripe_connect.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/services/stripe.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/search/faiss_index.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/integrations/anthropic_integration.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/integrations/supabase_client.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/integrations/litellm_router.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/integrations/realtime_sync.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/interfaces/api/routes/ai.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/interfaces/api/main.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/interfaces/api/routes/analytics.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/interfaces/api/routes/billing.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/interfaces/api/routes/batch.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/interfaces/api/routes/search.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/interfaces/api/routes/similarity.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/interfaces/api/routes/websocket.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/integrations/google_ai_integration.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/interfaces/api/routes/audio.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/interfaces/api/routes/marketplace.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/integrations/ai_manager.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/interfaces/cli/commands/search.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/interfaces/cli/commands/ai.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/interfaces/cli/debug.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/interfaces/cli/health.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/interfaces/cli/typer_app.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/interfaces/cli/commands/library.py
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/server/main.py
+error: cannot format /home/lchtangen/projects/ai/SampleMind-AI---Beta/tests/audio/test_audio_conversion.py: Cannot parse for target version Python 3.12: 77:11:         """Test conversion to in-memory bytes."
+would reformat /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/utils/error_handler.py
+
+Checking isort import sorting...
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/__init__.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/exceptions.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/utils/log_context.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/utils/__init__.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/utils/file_picker.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/utils/logging_config.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/utils/error_handler.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/server/mcp_server.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/classification/mood_detector.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/classification/instrument_detector.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/embeddings/ast_classifier.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/agents/tagging_agent.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/agents/__init__.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/agents/tool_use.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/agents/analysis_agent.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/generation/musicgen.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/ai/generation/style_transfer.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/config.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/tasks/__init__.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/tasks/audio_tasks.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/tasks/celery_app.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/services/stripe.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/connection_pool.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/backup.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/redis_client.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/query_optimizer.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/__init__.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/search.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/models.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/tortoise_models.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/chroma.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/repositories/favorite_repository.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/repositories/analysis_repository.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/repositories/__init__.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/repositories/settings_repository.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/repositories/audio_repository.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/repositories/batch_repository.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/repositories/user_repository.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/database/repositories/api_key_repository.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/similarity/similarity_db.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/similarity/__init__.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/models/user.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/library/favorites.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/library/__init__.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/library/pack_creator.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/processing/loudness_analyzer.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/processing/audio_effects.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/processing/audio_pipeline.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/processing/__init__.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/core/processing/groove_extractor.py Imports are incorrectly sorted and/or formatted.

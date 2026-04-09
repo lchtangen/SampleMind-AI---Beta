@@ -1,16 +1,17 @@
 import os
-import numpy as np
-import pytest
-import soundfile as sf
-from pathlib import Path
-from scipy import signal
 
 # Add the project root to the Python path
 import sys
+from pathlib import Path
+
+import numpy as np
+import pytest
+import soundfile as sf
+from scipy import signal
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from samplemind.audio.effects import NoiseReduction, AudioEffectsProcessor
+from samplemind.audio.effects import NoiseReduction
 from samplemind.audio.processor import AudioProcessor
 
 # Test parameters

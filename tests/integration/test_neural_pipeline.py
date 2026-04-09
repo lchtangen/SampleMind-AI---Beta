@@ -10,28 +10,25 @@ Tests the complete end-to-end neural audio analysis pipeline:
 - Generation manager integration
 """
 
-import asyncio
 import tempfile
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 import pytest
 import soundfile as sf
 
+from samplemind.core.database import chroma as chroma_db
 from samplemind.core.engine.audio_engine import (
-    AudioEngine,
     AnalysisLevel,
-    AudioFeatures,
+    AudioEngine,
 )
 from samplemind.core.engine.neural_engine import NeuralFeatureExtractor
-from samplemind.core.database import chroma as chroma_db
 from samplemind.core.generation.generation_manager import (
     GenerationManager,
     GenerationMode,
     GenerationRequest,
 )
-from samplemind.integrations.ai_manager import SampleMindAIManager, AnalysisType
+from samplemind.integrations.ai_manager import AnalysisType, SampleMindAIManager
 
 
 class TestNeuralPipeline:
@@ -67,7 +64,7 @@ class TestNeuralPipeline:
         try:
             client = chroma_db.get_chroma_client()
             client.delete_collection("test_embeddings")
-        except:
+        except Exception:
             pass
 
         # Clean up temp files
@@ -75,7 +72,7 @@ class TestNeuralPipeline:
             import shutil
 
             shutil.rmtree(self.temp_dir)
-        except:
+        except Exception:
             pass
 
     def test_audio_engine_produces_neural_embedding(self):

@@ -7,7 +7,7 @@ This module provides audio similarity search capabilities using:
 - Efficient querying with filters (BPM, key, genre)
 """
 
-from .embedding_engine import AudioEmbeddingEngine, AudioEmbedding
+from .embedding_engine import AudioEmbedding, AudioEmbeddingEngine
 from .similarity_db import SimilarityDatabase, SimilarityResult
 
 __all__ = [

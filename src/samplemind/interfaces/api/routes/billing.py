@@ -10,7 +10,6 @@ Endpoints:
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, status
 from fastapi.responses import JSONResponse
@@ -33,7 +32,7 @@ class CheckoutRequest(BaseModel):
     plan: str  # "pro" or "team"
     success_url: str
     cancel_url: str
-    name: Optional[str] = None
+    name: str | None = None
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
@@ -120,10 +119,18 @@ async def stripe_webhook(
         background_tasks.add_task(_apply_subscription_update, update)
 
     # Marketplace pack purchase fulfillment
-    event_type = event.get("type") if isinstance(event, dict) else getattr(event, "type", None)
+    event_type = (
+        event.get("type") if isinstance(event, dict) else getattr(event, "type", None)
+    )
     if event_type == "checkout.session.completed":
-        session_data = event.get("data", {}).get("object", {}) if isinstance(event, dict) else getattr(getattr(event, "data", None), "object", {})
-        meta = session_data.get("metadata", {}) if isinstance(session_data, dict) else {}
+        session_data = (
+            event.get("data", {}).get("object", {})
+            if isinstance(event, dict)
+            else getattr(getattr(event, "data", None), "object", {})
+        )
+        meta = (
+            session_data.get("metadata", {}) if isinstance(session_data, dict) else {}
+        )
         if meta.get("platform") == "samplemind_marketplace":
             background_tasks.add_task(
                 _fulfill_marketplace_purchase,
@@ -148,13 +155,23 @@ async def _fulfill_marketplace_purchase(
         return
     try:
         from samplemind.interfaces.api.routes.marketplace import fulfill_pack_purchase
+
         url = await fulfill_pack_purchase(session_id, buyer_user_id, listing_id)
         if url:
-            logger.info("Pack download URL generated for user=%s listing=%s", buyer_user_id, listing_id)
+            logger.info(
+                "Pack download URL generated for user=%s listing=%s",
+                buyer_user_id,
+                listing_id,
+            )
         else:
-            logger.warning("No R2 URL generated for listing=%s (R2 may not be configured)", listing_id)
+            logger.warning(
+                "No R2 URL generated for listing=%s (R2 may not be configured)",
+                listing_id,
+            )
     except Exception as exc:
-        logger.error("Marketplace fulfillment failed for session=%s: %s", session_id, exc)
+        logger.error(
+            "Marketplace fulfillment failed for session=%s: %s", session_id, exc
+        )
 
 
 async def _apply_subscription_update(update: dict) -> None:

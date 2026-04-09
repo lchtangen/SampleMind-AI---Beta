@@ -19,17 +19,16 @@ Usage (inside an agent node):
 
 from __future__ import annotations
 
-import asyncio
 import hashlib
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 # ── Tool schemas (Claude tool_use format) ────────────────────────────────────
 
-SAMPLEMIND_TOOLS: List[Dict[str, Any]] = [
+SAMPLEMIND_TOOLS: list[dict[str, Any]] = [
     {
         "name": "analyze_audio",
         "description": (
@@ -142,13 +141,13 @@ SAMPLEMIND_TOOLS: List[Dict[str, Any]] = [
 _CACHE_TTL = 3600  # 1 hour
 
 
-def _cache_key(tool_name: str, tool_input: Dict[str, Any]) -> str:
+def _cache_key(tool_name: str, tool_input: dict[str, Any]) -> str:
     """Deterministic cache key from tool name + sorted JSON args."""
     payload = json.dumps({"tool": tool_name, "args": tool_input}, sort_keys=True)
     return "sm:tool:" + hashlib.sha256(payload.encode()).hexdigest()
 
 
-def _try_get_cache(key: str) -> Optional[Dict[str, Any]]:
+def _try_get_cache(key: str) -> dict[str, Any] | None:
     """Non-blocking Redis GET. Returns None if Redis unavailable."""
     try:
         import redis as sync_redis
@@ -163,7 +162,7 @@ def _try_get_cache(key: str) -> Optional[Dict[str, Any]]:
     return None
 
 
-def _try_set_cache(key: str, value: Dict[str, Any]) -> None:
+def _try_set_cache(key: str, value: dict[str, Any]) -> None:
     """Non-blocking Redis SET with TTL. Silently skips if Redis unavailable."""
     try:
         import redis as sync_redis
@@ -178,7 +177,7 @@ def _try_set_cache(key: str, value: Dict[str, Any]) -> None:
 # ── Tool dispatcher ───────────────────────────────────────────────────────────
 
 
-def _execute_tool(tool_name: str, tool_input: Dict[str, Any]) -> Dict[str, Any]:
+def _execute_tool(tool_name: str, tool_input: dict[str, Any]) -> dict[str, Any]:
     """
     Execute a SampleMind tool by name and return a JSON-serializable result.
     Checks the Redis cache before executing and stores the result after.
@@ -190,7 +189,7 @@ def _execute_tool(tool_name: str, tool_input: Dict[str, Any]) -> Dict[str, Any]:
         return cached
 
     logger.info("Cache MISS — executing tool=%s args=%s", tool_name, tool_input)
-    result: Dict[str, Any]
+    result: dict[str, Any]
 
     try:
         if tool_name == "analyze_audio":
@@ -222,9 +221,9 @@ def _execute_tool(tool_name: str, tool_input: Dict[str, Any]) -> Dict[str, Any]:
             }
 
         elif tool_name == "get_recommendations":
-            from samplemind.core.engine.audio_engine import AnalysisLevel, AudioEngine
             from samplemind.ai.agents.mixing_agent import mixing_agent
             from samplemind.ai.agents.state import AudioAnalysisState
+            from samplemind.core.engine.audio_engine import AnalysisLevel, AudioEngine
 
             engine = AudioEngine()
             features = engine.analyze_file(
@@ -245,9 +244,9 @@ def _execute_tool(tool_name: str, tool_input: Dict[str, Any]) -> Dict[str, Any]:
             result = out.get("mixing_recommendations", {})
 
         elif tool_name == "tag_sample":
-            from samplemind.core.engine.audio_engine import AnalysisLevel, AudioEngine
-            from samplemind.ai.agents.tagging_agent import tagging_agent
             from samplemind.ai.agents.state import AudioAnalysisState
+            from samplemind.ai.agents.tagging_agent import tagging_agent
+            from samplemind.core.engine.audio_engine import AnalysisLevel, AudioEngine
 
             engine = AudioEngine()
             features = engine.analyze_file(
@@ -298,7 +297,7 @@ def run_tool_use_loop(
     model: str = "claude-sonnet-4-6",
     max_tokens: int = 4096,
     max_rounds: int = 5,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Run a synchronous Claude tool_use conversation loop.
 
@@ -324,8 +323,8 @@ def run_tool_use_loop(
         return {"text": "Anthropic SDK not installed.", "tool_calls": []}
 
     client = Anthropic()
-    messages: List[Dict[str, Any]] = [{"role": "user", "content": user_prompt}]
-    all_tool_calls: List[Dict[str, Any]] = []
+    messages: list[dict[str, Any]] = [{"role": "user", "content": user_prompt}]
+    all_tool_calls: list[dict[str, Any]] = []
 
     for round_num in range(max_rounds):
         response = client.messages.create(
@@ -337,8 +336,8 @@ def run_tool_use_loop(
         )
 
         # Collect text content from response
-        text_parts: List[str] = []
-        tool_use_blocks: List[Any] = []
+        text_parts: list[str] = []
+        tool_use_blocks: list[Any] = []
 
         for block in response.content:
             if block.type == "text":
@@ -357,7 +356,7 @@ def run_tool_use_loop(
         messages.append({"role": "assistant", "content": response.content})
 
         # Execute each tool call and build tool_result blocks
-        tool_results: List[Dict[str, Any]] = []
+        tool_results: list[dict[str, Any]] = []
         for block in tool_use_blocks:
             tool_result = _execute_tool(block.name, block.input)
             all_tool_calls.append(
@@ -374,7 +373,11 @@ def run_tool_use_loop(
                 "Round %d — tool=%s result_keys=%s",
                 round_num + 1,
                 block.name,
-                list(tool_result.keys()) if isinstance(tool_result, dict) else "non-dict",
+                (
+                    list(tool_result.keys())
+                    if isinstance(tool_result, dict)
+                    else "non-dict"
+                ),
             )
 
         # Feed tool results back to Claude

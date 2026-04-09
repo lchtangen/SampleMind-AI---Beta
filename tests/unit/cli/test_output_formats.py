@@ -12,12 +12,12 @@ Tests cover:
 - Stream output
 """
 
-import pytest
 import json
-import csv
-import yaml
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
+
+import pytest
+import yaml
 from typer.testing import CliRunner
 
 pytestmark = [pytest.mark.unit, pytest.mark.cli]
@@ -80,7 +80,7 @@ class TestJSONOutputFormat:
             if json_str:
                 data = json.loads(json_str)
                 assert isinstance(data, dict)
-        except:
+        except Exception:
             # If extraction fails, at least check exit code
             assert result.exit_code == 0
 
@@ -275,7 +275,7 @@ class TestYAMLOutputFormat:
         try:
             data = yaml.safe_load(result.stdout)
             assert isinstance(data, dict)
-        except:
+        except Exception:
             # If parse fails, at least check exit code
             assert result.exit_code == 0
 
@@ -460,7 +460,7 @@ class TestOutputFileHandling:
         ) as mock_analyze:
             mock_analyze.return_value = {"tempo": 120.0}
 
-            result = runner.invoke(
+            runner.invoke(
                 app, ["analyze:full", str(audio_file), "--output", str(output_file)]
             )
 
@@ -484,7 +484,7 @@ class TestOutputFileHandling:
             ) as mock_analyze:
                 mock_analyze.return_value = {"tempo": 120.0}
 
-                result = runner.invoke(
+                runner.invoke(
                     app, ["analyze:full", str(audio_file), "--output", str(output_file)]
                 )
 

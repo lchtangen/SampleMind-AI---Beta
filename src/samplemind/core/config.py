@@ -3,11 +3,10 @@ Application Configuration
 Loads all environment variables and provides type-safe settings
 """
 
-from pydantic_settings import BaseSettings
-from pydantic import Field, field_validator
-from typing import List, Optional
 import secrets
-from pathlib import Path
+
+from pydantic import Field, field_validator
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -34,7 +33,7 @@ class Settings(BaseSettings):
     )
 
     @property
-    def allowed_origins_list(self) -> List[str]:
+    def allowed_origins_list(self) -> list[str]:
         """Parse comma-separated origins into list"""
         return [origin.strip() for origin in self.allowed_origins.split(",")]
 
@@ -73,28 +72,22 @@ class Settings(BaseSettings):
     # ========================================================================
 
     # Google OAuth2
-    google_client_id: Optional[str] = Field(default=None, env="GOOGLE_CLIENT_ID")
-    google_client_secret: Optional[str] = Field(
-        default=None, env="GOOGLE_CLIENT_SECRET"
-    )
+    google_client_id: str | None = Field(default=None, env="GOOGLE_CLIENT_ID")
+    google_client_secret: str | None = Field(default=None, env="GOOGLE_CLIENT_SECRET")
     google_redirect_uri: str = Field(
         default="http://localhost:3000/auth/google/callback", env="GOOGLE_REDIRECT_URI"
     )
 
     # GitHub OAuth2
-    github_client_id: Optional[str] = Field(default=None, env="GITHUB_CLIENT_ID")
-    github_client_secret: Optional[str] = Field(
-        default=None, env="GITHUB_CLIENT_SECRET"
-    )
+    github_client_id: str | None = Field(default=None, env="GITHUB_CLIENT_ID")
+    github_client_secret: str | None = Field(default=None, env="GITHUB_CLIENT_SECRET")
     github_redirect_uri: str = Field(
         default="http://localhost:3000/auth/github/callback", env="GITHUB_REDIRECT_URI"
     )
 
     # Spotify OAuth2
-    spotify_client_id: Optional[str] = Field(default=None, env="SPOTIFY_CLIENT_ID")
-    spotify_client_secret: Optional[str] = Field(
-        default=None, env="SPOTIFY_CLIENT_SECRET"
-    )
+    spotify_client_id: str | None = Field(default=None, env="SPOTIFY_CLIENT_ID")
+    spotify_client_secret: str | None = Field(default=None, env="SPOTIFY_CLIENT_SECRET")
     spotify_redirect_uri: str = Field(
         default="http://localhost:3000/auth/spotify/callback",
         env="SPOTIFY_REDIRECT_URI",
@@ -114,7 +107,7 @@ class Settings(BaseSettings):
 
     # Redis
     redis_url: str = Field(default="redis://localhost:6379/0", env="REDIS_URL")
-    redis_password: Optional[str] = Field(default=None, env="REDIS_PASSWORD")
+    redis_password: str | None = Field(default=None, env="REDIS_PASSWORD")
     redis_max_connections: int = Field(default=50, env="REDIS_MAX_CONNECTIONS")
 
     # MongoDB
@@ -135,39 +128,35 @@ class Settings(BaseSettings):
     storage_provider: str = Field(default="local", env="STORAGE_PROVIDER")
 
     # Google Cloud Storage
-    gcs_bucket_name: Optional[str] = Field(default=None, env="GCS_BUCKET_NAME")
-    gcs_project_id: Optional[str] = Field(default=None, env="GCS_PROJECT_ID")
-    gcs_credentials_path: Optional[str] = Field(
-        default=None, env="GCS_CREDENTIALS_PATH"
-    )
+    gcs_bucket_name: str | None = Field(default=None, env="GCS_BUCKET_NAME")
+    gcs_project_id: str | None = Field(default=None, env="GCS_PROJECT_ID")
+    gcs_credentials_path: str | None = Field(default=None, env="GCS_CREDENTIALS_PATH")
 
     # AWS S3
-    aws_access_key_id: Optional[str] = Field(default=None, env="AWS_ACCESS_KEY_ID")
-    aws_secret_access_key: Optional[str] = Field(
-        default=None, env="AWS_SECRET_ACCESS_KEY"
-    )
+    aws_access_key_id: str | None = Field(default=None, env="AWS_ACCESS_KEY_ID")
+    aws_secret_access_key: str | None = Field(default=None, env="AWS_SECRET_ACCESS_KEY")
     aws_region: str = Field(default="us-west-2", env="AWS_REGION")
-    s3_bucket_name: Optional[str] = Field(default=None, env="S3_BUCKET_NAME")
+    s3_bucket_name: str | None = Field(default=None, env="S3_BUCKET_NAME")
 
     # CDN
     cdn_enabled: bool = Field(default=False, env="CDN_ENABLED")
-    cdn_url: Optional[str] = Field(default=None, env="CDN_URL")
+    cdn_url: str | None = Field(default=None, env="CDN_URL")
 
     # ========================================================================
     # AI/ML PROVIDERS
     # ========================================================================
 
     # Google Gemini
-    google_ai_api_key: Optional[str] = Field(default=None, env="GOOGLE_AI_API_KEY")
+    google_ai_api_key: str | None = Field(default=None, env="GOOGLE_AI_API_KEY")
     google_ai_model: str = Field(default="gemini-pro", env="GOOGLE_AI_MODEL")
 
     # OpenAI
-    openai_api_key: Optional[str] = Field(default=None, env="OPENAI_API_KEY")
+    openai_api_key: str | None = Field(default=None, env="OPENAI_API_KEY")
     openai_model: str = Field(default="gpt-4o", env="OPENAI_MODEL")
-    openai_org_id: Optional[str] = Field(default=None, env="OPENAI_ORG_ID")
+    openai_org_id: str | None = Field(default=None, env="OPENAI_ORG_ID")
 
     # Anthropic Claude
-    anthropic_api_key: Optional[str] = Field(default=None, env="ANTHROPIC_API_KEY")
+    anthropic_api_key: str | None = Field(default=None, env="ANTHROPIC_API_KEY")
     anthropic_model: str = Field(
         default="claude-3-5-sonnet-20241022", env="ANTHROPIC_MODEL"
     )
@@ -177,7 +166,7 @@ class Settings(BaseSettings):
     ollama_model: str = Field(default="llama3.1:8b", env="OLLAMA_MODEL")
 
     # Hugging Face
-    huggingface_api_key: Optional[str] = Field(default=None, env="HUGGINGFACE_API_KEY")
+    huggingface_api_key: str | None = Field(default=None, env="HUGGINGFACE_API_KEY")
 
     # ========================================================================
     # CELERY TASK QUEUE
@@ -201,8 +190,8 @@ class Settings(BaseSettings):
 
     smtp_host: str = Field(default="smtp.gmail.com", env="SMTP_HOST")
     smtp_port: int = Field(default=587, env="SMTP_PORT")
-    smtp_username: Optional[str] = Field(default=None, env="SMTP_USERNAME")
-    smtp_password: Optional[str] = Field(default=None, env="SMTP_PASSWORD")
+    smtp_username: str | None = Field(default=None, env="SMTP_USERNAME")
+    smtp_password: str | None = Field(default=None, env="SMTP_PASSWORD")
     smtp_from_email: str = Field(default="noreply@samplemind.ai", env="SMTP_FROM_EMAIL")
     smtp_from_name: str = Field(default="SampleMind AI", env="SMTP_FROM_NAME")
 
@@ -221,7 +210,7 @@ class Settings(BaseSettings):
     # ========================================================================
 
     # Sentry
-    sentry_dsn: Optional[str] = Field(default=None, env="SENTRY_DSN")
+    sentry_dsn: str | None = Field(default=None, env="SENTRY_DSN")
     sentry_environment: str = Field(default="development", env="SENTRY_ENVIRONMENT")
     sentry_traces_sample_rate: float = Field(
         default=0.1, env="SENTRY_TRACES_SAMPLE_RATE"
@@ -235,19 +224,17 @@ class Settings(BaseSettings):
     # STRIPE PAYMENT PROCESSING
     # ========================================================================
 
-    stripe_publishable_key: Optional[str] = Field(
+    stripe_publishable_key: str | None = Field(
         default=None, env="STRIPE_PUBLISHABLE_KEY"
     )
-    stripe_secret_key: Optional[str] = Field(default=None, env="STRIPE_SECRET_KEY")
-    stripe_webhook_secret: Optional[str] = Field(
-        default=None, env="STRIPE_WEBHOOK_SECRET"
-    )
+    stripe_secret_key: str | None = Field(default=None, env="STRIPE_SECRET_KEY")
+    stripe_webhook_secret: str | None = Field(default=None, env="STRIPE_WEBHOOK_SECRET")
 
     # Subscription Price IDs
     stripe_price_free: str = Field(default="price_free", env="STRIPE_PRICE_FREE")
-    stripe_price_pro: Optional[str] = Field(default=None, env="STRIPE_PRICE_PRO")
-    stripe_price_studio: Optional[str] = Field(default=None, env="STRIPE_PRICE_STUDIO")
-    stripe_price_enterprise: Optional[str] = Field(
+    stripe_price_pro: str | None = Field(default=None, env="STRIPE_PRICE_PRO")
+    stripe_price_studio: str | None = Field(default=None, env="STRIPE_PRICE_STUDIO")
+    stripe_price_enterprise: str | None = Field(
         default=None, env="STRIPE_PRICE_ENTERPRISE"
     )
 
@@ -255,9 +242,9 @@ class Settings(BaseSettings):
     # ANALYTICS & TRACKING
     # ========================================================================
 
-    ga_tracking_id: Optional[str] = Field(default=None, env="GA_TRACKING_ID")
-    mixpanel_token: Optional[str] = Field(default=None, env="MIXPANEL_TOKEN")
-    posthog_api_key: Optional[str] = Field(default=None, env="POSTHOG_API_KEY")
+    ga_tracking_id: str | None = Field(default=None, env="GA_TRACKING_ID")
+    mixpanel_token: str | None = Field(default=None, env="MIXPANEL_TOKEN")
+    posthog_api_key: str | None = Field(default=None, env="POSTHOG_API_KEY")
     posthog_host: str = Field(default="https://app.posthog.com", env="POSTHOG_HOST")
 
     # ========================================================================

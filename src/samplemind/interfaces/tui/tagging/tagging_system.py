@@ -4,9 +4,9 @@ Multi-file tagging, categories, and AI-powered suggestions
 """
 
 import logging
-from typing import List, Dict, Set, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -141,10 +141,10 @@ class Tag:
 
     name: str
     category: TagCategory
-    description: Optional[str] = None
-    color: Optional[str] = None  # For UI rendering
+    description: str | None = None
+    color: str | None = None  # For UI rendering
     frequency: int = field(default=0)  # How many times used
-    created_at: Optional[str] = None
+    created_at: str | None = None
 
 
 @dataclass
@@ -152,10 +152,10 @@ class TaggingProfile:
     """Profile of tags for an analysis"""
 
     analysis_id: str
-    tags: Set[str] = field(default_factory=set)
-    custom_tags: Set[str] = field(default_factory=set)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    notes: Optional[str] = None
+    tags: set[str] = field(default_factory=set)
+    custom_tags: set[str] = field(default_factory=set)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    notes: str | None = None
 
 
 class TaggingSystem:
@@ -163,9 +163,9 @@ class TaggingSystem:
 
     def __init__(self) -> None:
         """Initialize tagging system"""
-        self.profiles: Dict[str, TaggingProfile] = {}
-        self.all_tags: Dict[str, Tag] = {}
-        self.tag_index: Dict[str, Set[str]] = {}  # Tag name -> analysis IDs
+        self.profiles: dict[str, TaggingProfile] = {}
+        self.all_tags: dict[str, Tag] = {}
+        self.tag_index: dict[str, set[str]] = {}  # Tag name -> analysis IDs
 
         # Initialize predefined tags
         self._initialize_predefined_tags()
@@ -203,7 +203,7 @@ class TaggingSystem:
 
         return self.profiles[analysis_id]
 
-    def get_profile(self, analysis_id: str) -> Optional[TaggingProfile]:
+    def get_profile(self, analysis_id: str) -> TaggingProfile | None:
         """Get tagging profile"""
         return self.profiles.get(analysis_id)
 
@@ -272,7 +272,7 @@ class TaggingSystem:
     def add_tags_batch(
         self,
         analysis_id: str,
-        tags: List[str],
+        tags: list[str],
         category: TagCategory = TagCategory.CUSTOM,
     ) -> int:
         """Add multiple tags at once"""
@@ -284,7 +284,7 @@ class TaggingSystem:
         logger.info(f"Added {count} tags to {analysis_id}")
         return count
 
-    def get_all_tags(self, analysis_id: str) -> Set[str]:
+    def get_all_tags(self, analysis_id: str) -> set[str]:
         """Get all tags for analysis"""
         profile = self.get_profile(analysis_id)
         if not profile:
@@ -294,7 +294,7 @@ class TaggingSystem:
 
     def get_tags_by_category(
         self, analysis_id: str, category: TagCategory
-    ) -> List[str]:
+    ) -> list[str]:
         """Get tags for specific category"""
         profile = self.get_profile(analysis_id)
         if not profile:
@@ -311,11 +311,11 @@ class TaggingSystem:
 
         return tags
 
-    def search_by_tag(self, tag_name: str) -> List[str]:
+    def search_by_tag(self, tag_name: str) -> list[str]:
         """Find all analyses with a specific tag"""
         return list(self.tag_index.get(tag_name, set()))
 
-    def search_by_tags(self, tags: List[str], match_all: bool = False) -> List[str]:
+    def search_by_tags(self, tags: list[str], match_all: bool = False) -> list[str]:
         """Find analyses with tags (AND or OR logic)"""
         if not tags:
             return []
@@ -333,13 +333,13 @@ class TaggingSystem:
                 result |= self.tag_index.get(tag, set())
             return list(result)
 
-    def suggest_tags(self, keywords: str) -> List[str]:
+    def suggest_tags(self, keywords: str) -> list[str]:
         """Suggest tags based on keywords"""
         keywords_lower = keywords.lower().split()
         suggestions = []
 
         # Search through all tags
-        for tag_key, tag in self.all_tags.items():
+        for _tag_key, tag in self.all_tags.items():
             tag_name = tag.name
             for keyword in keywords_lower:
                 if keyword in tag_name:
@@ -350,7 +350,7 @@ class TaggingSystem:
         suggestions.sort(key=lambda x: (-x[1], x[0]))
         return [tag[0] for tag in suggestions]
 
-    def get_tag_statistics(self) -> Dict[str, Any]:
+    def get_tag_statistics(self) -> dict[str, Any]:
         """Get tagging statistics"""
         total_tags = len(self.all_tags)
         total_custom_tags = sum(len(p.custom_tags) for p in self.profiles.values())
@@ -368,7 +368,7 @@ class TaggingSystem:
             "most_used_tags": [(tag.name, tag.frequency) for _, tag in most_used],
         }
 
-    def get_tag_list(self, category: Optional[TagCategory] = None) -> List[str]:
+    def get_tag_list(self, category: TagCategory | None = None) -> list[str]:
         """Get list of available tags"""
         if category:
             return TAG_CATEGORIES.get(category, [])
@@ -378,7 +378,7 @@ class TaggingSystem:
                 all_tags.extend(tags)
             return all_tags
 
-    def export_tags(self, analysis_id: str) -> Dict[str, Any]:
+    def export_tags(self, analysis_id: str) -> dict[str, Any]:
         """Export tags for analysis"""
         profile = self.get_profile(analysis_id)
         if not profile:
@@ -392,7 +392,7 @@ class TaggingSystem:
             "metadata": profile.metadata,
         }
 
-    def import_tags(self, analysis_id: str, data: Dict[str, Any]) -> bool:
+    def import_tags(self, analysis_id: str, data: dict[str, Any]) -> bool:
         """Import tags for analysis"""
         profile = self.create_profile(analysis_id)
 
@@ -417,7 +417,7 @@ class TaggingSystem:
 
 
 # Global singleton instance
-_tagging_system: Optional[TaggingSystem] = None
+_tagging_system: TaggingSystem | None = None
 
 
 def get_tagging_system() -> TaggingSystem:

@@ -3,33 +3,31 @@ Authentication Routes
 User registration, login, token refresh, and profile management
 """
 
-from datetime import datetime
-from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Body
-from fastapi.security import OAuth2PasswordRequestForm
-import uuid
 import logging
+import uuid
+from datetime import datetime
 
-from samplemind.interfaces.api.schemas.auth import (
-    UserRegisterRequest,
-    UserLoginRequest,
-    TokenResponse,
-    RefreshTokenRequest,
-    ChangePasswordRequest,
-    UserResponse,
-    UserProfileUpdate,
-    MessageResponse,
-)
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
+
 from samplemind.core.auth import (
     create_access_token,
     create_refresh_token,
-    verify_token,
+    get_current_active_user,
     hash_password,
     verify_password,
-    get_current_user,
-    get_current_active_user,
+    verify_token,
 )
 from samplemind.core.database.repositories import UserRepository
+from samplemind.interfaces.api.schemas.auth import (
+    ChangePasswordRequest,
+    MessageResponse,
+    RefreshTokenRequest,
+    TokenResponse,
+    UserProfileUpdate,
+    UserRegisterRequest,
+    UserResponse,
+)
 
 logger = logging.getLogger(__name__)
 

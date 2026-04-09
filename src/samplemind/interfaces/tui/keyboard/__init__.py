@@ -1,8 +1,8 @@
 """TUI Keyboard module - Keyboard shortcuts and input handling"""
 
 from samplemind.interfaces.tui.keyboard.shortcut_manager import (
-    ShortcutManager,
     BindingStyle,
+    ShortcutManager,
     get_shortcut_manager,
 )
 

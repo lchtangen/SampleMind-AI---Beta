@@ -1,13 +1,12 @@
 """Unit tests for forensics analyzer."""
 
-import pytest
 import numpy as np
-from scipy import signal as scipy_signal
+import pytest
 
 from samplemind.core.processing.forensics_analyzer import (
-    ForensicsAnalyzer,
     CompressionAnalysis,
     DistortionAnalysis,
+    ForensicsAnalyzer,
 )
 
 
@@ -161,8 +160,8 @@ class TestForensicsAnalyzer:
     def test_global_instance(self):
         """Test global analyzer instance"""
         from samplemind.core.processing.forensics_analyzer import (
-            init_analyzer,
             get_analyzer,
+            init_analyzer,
         )
 
         analyzer1 = init_analyzer()

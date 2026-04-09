@@ -1,13 +1,13 @@
 """Unit tests for usage pattern tracking."""
 
-import pytest
 import time
-from pathlib import Path
+
+import pytest
 
 from samplemind.core.caching.usage_patterns import (
+    TransitionMatrix,
     UsageEvent,
     UsagePatternTracker,
-    TransitionMatrix,
 )
 
 
@@ -273,7 +273,7 @@ class TestUsagePatternTracker:
         tracker = UsagePatternTracker()
 
         # Create repeating workflow pattern
-        for iteration in range(3):
+        for _iteration in range(3):
             files = ["a", "b", "c"]
             for file_id in files:
                 event = UsageEvent(
@@ -346,7 +346,7 @@ class TestUsagePatternTracker:
 
     def test_global_instance(self):
         """Test global tracker instance"""
-        from samplemind.core.caching.usage_patterns import init_tracker, get_tracker
+        from samplemind.core.caching.usage_patterns import get_tracker, init_tracker
 
         # Initialize
         tracker1 = init_tracker()

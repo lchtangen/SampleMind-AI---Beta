@@ -17,8 +17,8 @@ Reference: https://en.wikipedia.org/wiki/LUFS
 """
 
 import logging
-from typing import Dict, Optional, Tuple
 from dataclasses import dataclass
+
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -188,7 +188,7 @@ class LoudnessAnalyzer:
 
         # Gate audio at -70 LUFS threshold
         rms = np.sqrt(np.mean(audio**2, axis=0))
-        rms_db = 20 * np.log10(rms + 1e-10)
+        20 * np.log10(rms + 1e-10)
 
         # Calculate loudness in LUFS
         # Reference: -23 LUFS = 1 Pa (1 Pa RMS = 0 dBFS in digital audio)
@@ -317,7 +317,7 @@ class LoudnessAnalyzer:
         self,
         analysis: LoudnessAnalysis,
         target_platform: str = "spotify",
-    ) -> Dict[str, any]:
+    ) -> dict[str, any]:
         """
         Generate mastering recommendations
 
@@ -374,12 +374,12 @@ def analyze_audio_loudness(
     return analyzer.analyze_loudness(audio, sample_rate)
 
 
-def get_platform_target(platform: str) -> Optional[Dict]:
+def get_platform_target(platform: str) -> dict | None:
     """Get loudness target for a platform"""
     return PLATFORM_TARGETS.get(platform.lower())
 
 
-def get_all_platform_targets() -> Dict[str, Dict]:
+def get_all_platform_targets() -> dict[str, dict]:
     """Get all platform targets"""
     return PLATFORM_TARGETS.copy()
 

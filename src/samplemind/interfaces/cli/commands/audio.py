@@ -13,29 +13,28 @@ Usage:
     samplemind stems:separate <file>         # Separate stems with Demucs
 """
 
-import typer
 import shutil
-from typing import Optional, List
+from enum import StrEnum
 from pathlib import Path
-from enum import Enum
-from rich.console import Console
-from rich.table import Table
+
+import typer
 from rich.progress import (
+    BarColumn,
     Progress,
     SpinnerColumn,
-    TextColumn,
-    BarColumn,
     TaskProgressColumn,
+    TextColumn,
 )
+from rich.table import Table
 
-from . import utils
 from ....core.processing.stem_separation import (
     StemSeparationEngine,
     StemSeparationResult,
 )
+from . import utils
 
 
-class StemQuality(str, Enum):
+class StemQuality(StrEnum):
     """Quality presets for stem separation"""
 
     FAST = "fast"
@@ -64,12 +63,12 @@ console = utils.console
 @utils.with_error_handling
 def convert_wav(
     file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Convert audio to WAV"""
     try:
         output_file = output or file.with_suffix(".wav")
-        with utils.ProgressTracker(f"Converting to WAV"):
+        with utils.ProgressTracker("Converting to WAV"):
             pass
 
         console.print(f"[green]✓ Converted to {output_file.name}[/green]")
@@ -84,7 +83,7 @@ def convert_wav(
 def convert_mp3(
     file: Path = typer.Argument(...),
     bitrate: int = typer.Option(320, "--bitrate"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Convert audio to MP3"""
     try:
@@ -103,7 +102,7 @@ def convert_mp3(
 @utils.with_error_handling
 def convert_flac(
     file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Convert audio to FLAC"""
     try:
@@ -122,7 +121,7 @@ def convert_flac(
 @utils.with_error_handling
 def convert_ogg(
     file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Convert audio to OGG"""
     try:
@@ -141,7 +140,7 @@ def convert_ogg(
 @utils.with_error_handling
 def convert_aiff(
     file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Convert audio to AIFF"""
     try:
@@ -160,7 +159,7 @@ def convert_aiff(
 @utils.with_error_handling
 def convert_m4a(
     file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Convert audio to M4A"""
     try:
@@ -208,7 +207,7 @@ def convert_batch(
 def audio_normalize(
     file: Path = typer.Argument(...),
     loudness: float = typer.Option(-14.0, "--loudness", "-l", help="Target LUFS"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Normalize audio loudness (LUFS)"""
     try:
@@ -229,7 +228,7 @@ def audio_normalize(
 def audio_trim(
     file: Path = typer.Argument(...),
     threshold: float = typer.Option(-40, "--threshold", help="Silence threshold (dB)"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Trim silence from beginning and end"""
     try:
@@ -237,7 +236,7 @@ def audio_trim(
         with utils.ProgressTracker("Trimming silence"):
             pass
 
-        console.print(f"[green]✓ Silence trimmed[/green]")
+        console.print("[green]✓ Silence trimmed[/green]")
         console.print(f"[cyan]Output:[/cyan] {output_file.name}")
 
     except Exception as e:
@@ -251,7 +250,7 @@ def audio_fade(
     file: Path = typer.Argument(...),
     fade_in: float = typer.Option(0.5, "--in", help="Fade in duration (s)"),
     fade_out: float = typer.Option(0.5, "--out", help="Fade out duration (s)"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Add fade in/out"""
     try:
@@ -259,7 +258,7 @@ def audio_fade(
         with utils.ProgressTracker(f"Adding fade ({fade_in}s in, {fade_out}s out)"):
             pass
 
-        console.print(f"[green]✓ Fades applied[/green]")
+        console.print("[green]✓ Fades applied[/green]")
         console.print(f"[cyan]Output:[/cyan] {output_file.name}")
 
     except Exception as e:
@@ -272,7 +271,7 @@ def audio_fade(
 def audio_split(
     file: Path = typer.Argument(...),
     duration: float = typer.Option(30, "--duration", help="Segment duration (s)"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Split audio into segments"""
     try:
@@ -280,7 +279,7 @@ def audio_split(
         with utils.ProgressTracker(f"Splitting into {duration}s segments"):
             pass
 
-        console.print(f"[green]✓ Split complete[/green]")
+        console.print("[green]✓ Split complete[/green]")
         console.print(f"[cyan]Output folder:[/cyan] {output_dir.name}")
 
     except Exception as e:
@@ -312,7 +311,7 @@ def audio_join(
 def audio_speed(
     file: Path = typer.Argument(...),
     factor: float = typer.Argument(..., help="Speed factor (1.0=100%, 1.5=150%)"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Change audio speed without pitch change"""
     try:
@@ -333,7 +332,7 @@ def audio_speed(
 def audio_pitch(
     file: Path = typer.Argument(...),
     semitones: float = typer.Argument(..., help="Pitch shift (semitones)"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Change audio pitch"""
     try:
@@ -353,7 +352,7 @@ def audio_pitch(
 @utils.with_error_handling
 def audio_reverse(
     file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Reverse audio"""
     try:
@@ -361,7 +360,7 @@ def audio_reverse(
         with utils.ProgressTracker("Reversing audio"):
             pass
 
-        console.print(f"[green]✓ Audio reversed[/green]")
+        console.print("[green]✓ Audio reversed[/green]")
         console.print(f"[cyan]Output:[/cyan] {output_file.name}")
 
     except Exception as e:
@@ -384,16 +383,14 @@ def stems_separate(
         "-m",
         help="Demucs model (mdx, mdx_extra, mdx_q, htdemucs)",
     ),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output directory"
-    ),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output directory"),
     quality: StemQuality = typer.Option(
         StemQuality.STANDARD,
         "--quality",
         "-q",
         help="Quality preset (fast/standard/high)",
     ),
-    device: Optional[str] = typer.Option(
+    device: str | None = typer.Option(
         None, "--device", "-d", help="Device (cpu, cuda, mps)"
     ),
 ) -> None:
@@ -413,7 +410,7 @@ def stems_separate(
         output_dir = output or file.parent / f"{file.stem}_stems"
         output_dir = Path(output_dir).expanduser().resolve()
 
-        console.print(f"[bold cyan]Stem Separation[/bold cyan]")
+        console.print("[bold cyan]Stem Separation[/bold cyan]")
         console.print(f"  Input: [green]{file.name}[/green]")
         console.print(f"  Model: [yellow]{effective_model}[/yellow]")
         console.print(f"  Quality: [yellow]{quality.value}[/yellow]")
@@ -451,7 +448,7 @@ def stems_separate(
         final_output.mkdir(parents=True, exist_ok=True)
 
         console.print()
-        console.print(f"[green]✓ Stems separated successfully![/green]")
+        console.print("[green]✓ Stems separated successfully![/green]")
         console.print(f"[cyan]Output folder:[/cyan] {final_output}")
 
         # List generated stems
@@ -470,9 +467,9 @@ def stems_separate(
 def _extract_single_stem(
     file: Path,
     stem_type: str,
-    output: Optional[Path],
+    output: Path | None,
     quality: StemQuality,
-    device: Optional[str],
+    device: str | None,
     command_name: str,
 ) -> None:
     """Helper function to extract a single stem type"""
@@ -525,7 +522,7 @@ def _extract_single_stem(
             console.print(f"[green]✓ {stem_type.title()} extracted[/green]")
             console.print(f"[cyan]Output:[/cyan] {output_file}")
         else:
-            console.print(f"[red]Error: Stem file not generated[/red]")
+            console.print("[red]Error: Stem file not generated[/red]")
             raise typer.Exit(1)
     else:
         console.print(f"[red]Error: {stem_type} stem not available[/red]")
@@ -536,13 +533,11 @@ def _extract_single_stem(
 @utils.with_error_handling
 def stems_vocals(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output file path"
-    ),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file path"),
     quality: StemQuality = typer.Option(
         StemQuality.FAST, "--quality", "-q", help="Quality preset"
     ),
-    device: Optional[str] = typer.Option(
+    device: str | None = typer.Option(
         None, "--device", "-d", help="Device (cpu, cuda, mps)"
     ),
 ) -> None:
@@ -558,13 +553,11 @@ def stems_vocals(
 @utils.with_error_handling
 def stems_drums(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output file path"
-    ),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file path"),
     quality: StemQuality = typer.Option(
         StemQuality.FAST, "--quality", "-q", help="Quality preset"
     ),
-    device: Optional[str] = typer.Option(
+    device: str | None = typer.Option(
         None, "--device", "-d", help="Device (cpu, cuda, mps)"
     ),
 ) -> None:
@@ -580,13 +573,11 @@ def stems_drums(
 @utils.with_error_handling
 def stems_bass(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output file path"
-    ),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file path"),
     quality: StemQuality = typer.Option(
         StemQuality.STANDARD, "--quality", "-q", help="Quality preset"
     ),
-    device: Optional[str] = typer.Option(
+    device: str | None = typer.Option(
         None, "--device", "-d", help="Device (cpu, cuda, mps)"
     ),
 ) -> None:
@@ -602,13 +593,11 @@ def stems_bass(
 @utils.with_error_handling
 def stems_other(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output file path"
-    ),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file path"),
     quality: StemQuality = typer.Option(
         StemQuality.STANDARD, "--quality", "-q", help="Quality preset"
     ),
-    device: Optional[str] = typer.Option(
+    device: str | None = typer.Option(
         None, "--device", "-d", help="Device (cpu, cuda, mps)"
     ),
 ) -> None:
@@ -624,13 +613,11 @@ def stems_other(
 @utils.with_error_handling
 def stems_batch(
     folder: Path = typer.Argument(..., help="Folder containing audio files"),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output directory"
-    ),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output directory"),
     quality: StemQuality = typer.Option(
         StemQuality.STANDARD, "--quality", "-q", help="Quality preset"
     ),
-    device: Optional[str] = typer.Option(
+    device: str | None = typer.Option(
         None, "--device", "-d", help="Device (cpu, cuda, mps)"
     ),
     extensions: str = typer.Option(
@@ -658,7 +645,7 @@ def stems_batch(
 
         preset = QUALITY_PRESETS[quality]
 
-        console.print(f"[bold cyan]Batch Stem Separation[/bold cyan]")
+        console.print("[bold cyan]Batch Stem Separation[/bold cyan]")
         console.print(f"  Folder: [green]{folder}[/green]")
         console.print(f"  Files: [yellow]{len(audio_files)}[/yellow]")
         console.print(f"  Quality: [yellow]{quality.value}[/yellow]")
@@ -707,7 +694,7 @@ def stems_batch(
                 progress.advance(task)
 
         console.print()
-        console.print(f"[green]✓ Batch separation complete![/green]")
+        console.print("[green]✓ Batch separation complete![/green]")
         console.print(f"[cyan]Output:[/cyan] {output_dir}")
 
     except Exception as e:
@@ -728,7 +715,7 @@ def audio_duration(
     """Get audio duration"""
     try:
         console.print(f"[bold]{file.name}[/bold]")
-        console.print(f"[cyan]Duration:[/cyan] [bold green]2:34[/bold green]")
+        console.print("[cyan]Duration:[/cyan] [bold green]2:34[/bold green]")
 
     except Exception as e:
         utils.handle_error(e, "audio:duration")
@@ -767,7 +754,7 @@ def audio_validate(
         with utils.ProgressTracker("Validating"):
             pass
 
-        console.print(f"[green]✓ Audio file valid[/green]")
+        console.print("[green]✓ Audio file valid[/green]")
 
     except Exception as e:
         utils.handle_error(e, "audio:validate")

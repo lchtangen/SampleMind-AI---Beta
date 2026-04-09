@@ -3,11 +3,11 @@ Full-Text Search and Vector Similarity Search
 Production-ready search implementation with PostgreSQL + pgvector
 """
 
-from typing import List, Optional, Dict, Any, Tuple
-from sqlalchemy import text, select, and_, or_
-from sqlalchemy.ext.asyncio import AsyncSession
-import numpy as np
 from dataclasses import dataclass
+from typing import Any
+
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @dataclass
@@ -16,11 +16,11 @@ class SearchResult:
 
     id: str
     title: str
-    description: Optional[str]
+    description: str | None
     score: float
     resource_type: str
-    metadata: Dict[str, Any]
-    highlight: Optional[str] = None
+    metadata: dict[str, Any]
+    highlight: str | None = None
 
 
 class FullTextSearch:
@@ -36,26 +36,20 @@ class FullTextSearch:
         Should be called during migration or setup
         """
         # Create GIN index for full-text search on audio files
-        await session.execute(
-            text(
-                """
-            CREATE INDEX IF NOT EXISTS idx_audio_files_fts 
+        await session.execute(text("""
+            CREATE INDEX IF NOT EXISTS idx_audio_files_fts
             ON audio_files USING GIN(
-                to_tsvector('english', 
-                    COALESCE(title, '') || ' ' || 
+                to_tsvector('english',
+                    COALESCE(title, '') || ' ' ||
                     COALESCE(description, '') || ' ' ||
                     COALESCE(tags::text, '')
                 )
             )
-        """
-            )
-        )
+        """))
 
         # Create GIN index for collections
-        await session.execute(
-            text(
-                """
-            CREATE INDEX IF NOT EXISTS idx_collections_fts 
+        await session.execute(text("""
+            CREATE INDEX IF NOT EXISTS idx_collections_fts
             ON audio_collections USING GIN(
                 to_tsvector('english',
                     COALESCE(name, '') || ' ' ||
@@ -63,19 +57,13 @@ class FullTextSearch:
                     COALESCE(tags::text, '')
                 )
             )
-        """
-            )
-        )
+        """))
 
         # Create trigram index for fuzzy matching
-        await session.execute(
-            text(
-                """
-            CREATE INDEX IF NOT EXISTS idx_audio_files_title_trgm 
+        await session.execute(text("""
+            CREATE INDEX IF NOT EXISTS idx_audio_files_title_trgm
             ON audio_files USING GIN(title gin_trgm_ops)
-        """
-            )
-        )
+        """))
 
         await session.commit()
 
@@ -83,11 +71,11 @@ class FullTextSearch:
     async def search_audio_files(
         session: AsyncSession,
         query: str,
-        user_id: Optional[str] = None,
+        user_id: str | None = None,
         limit: int = 50,
         offset: int = 0,
         min_score: float = 0.1,
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         """
         Full-text search across audio files
 
@@ -103,15 +91,14 @@ class FullTextSearch:
             List of search results with scores
         """
         # Build search query with ranking
-        sql = text(
-            """
-            SELECT 
+        sql = text("""
+            SELECT
                 id,
                 title,
                 description,
                 ts_rank(
-                    to_tsvector('english', 
-                        COALESCE(title, '') || ' ' || 
+                    to_tsvector('english',
+                        COALESCE(title, '') || ' ' ||
                         COALESCE(description, '') || ' ' ||
                         COALESCE(tags::text, '')
                     ),
@@ -120,17 +107,17 @@ class FullTextSearch:
                 ts_headline('english', description, plainto_tsquery('english', :query)) as highlight,
                 metadata
             FROM audio_files
-            WHERE 
-                to_tsvector('english', 
-                    COALESCE(title, '') || ' ' || 
+            WHERE
+                to_tsvector('english',
+                    COALESCE(title, '') || ' ' ||
                     COALESCE(description, '') || ' ' ||
                     COALESCE(tags::text, '')
                 ) @@ plainto_tsquery('english', :query)
                 AND (:user_id IS NULL OR user_id = :user_id)
                 AND deleted_at IS NULL
             HAVING ts_rank(
-                to_tsvector('english', 
-                    COALESCE(title, '') || ' ' || 
+                to_tsvector('english',
+                    COALESCE(title, '') || ' ' ||
                     COALESCE(description, '') || ' ' ||
                     COALESCE(tags::text, '')
                 ),
@@ -138,8 +125,7 @@ class FullTextSearch:
             ) >= :min_score
             ORDER BY score DESC
             LIMIT :limit OFFSET :offset
-        """
-        )
+        """)
 
         result = await session.execute(
             sql,
@@ -175,7 +161,7 @@ class FullTextSearch:
         table: str = "audio_files",
         threshold: float = 0.3,
         limit: int = 20,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Fuzzy search using trigram similarity
         Great for handling typos and partial matches
@@ -191,9 +177,8 @@ class FullTextSearch:
         Returns:
             List of results with similarity scores
         """
-        sql = text(
-            f"""
-            SELECT 
+        sql = text(f"""
+            SELECT
                 id,
                 {field},
                 similarity({field}, :query) as score
@@ -201,8 +186,7 @@ class FullTextSearch:
             WHERE similarity({field}, :query) > :threshold
             ORDER BY score DESC
             LIMIT :limit
-        """
-        )
+        """)
 
         result = await session.execute(
             sql, {"query": query, "threshold": threshold, "limit": limit}
@@ -220,7 +204,7 @@ class FullTextSearch:
         field: str = "title",
         table: str = "audio_files",
         limit: int = 10,
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Autocomplete suggestions using prefix matching
 
@@ -234,15 +218,13 @@ class FullTextSearch:
         Returns:
             List of suggestions
         """
-        sql = text(
-            f"""
+        sql = text(f"""
             SELECT DISTINCT {field}
             FROM {table}
             WHERE {field} ILIKE :prefix || '%'
             ORDER BY {field}
             LIMIT :limit
-        """
-        )
+        """)
 
         result = await session.execute(sql, {"prefix": prefix, "limit": limit})
 
@@ -262,39 +244,31 @@ class VectorSearch:
         Should be called during migration
         """
         # HNSW index for approximate nearest neighbor search
-        await session.execute(
-            text(
-                """
-            CREATE INDEX IF NOT EXISTS idx_audio_embeddings_hnsw 
-            ON audio_embeddings 
+        await session.execute(text("""
+            CREATE INDEX IF NOT EXISTS idx_audio_embeddings_hnsw
+            ON audio_embeddings
             USING hnsw (embedding vector_cosine_ops)
             WITH (m = 16, ef_construction = 64)
-        """
-            )
-        )
+        """))
 
         # IVFFlat index (alternative, good for larger datasets)
-        await session.execute(
-            text(
-                """
-            CREATE INDEX IF NOT EXISTS idx_audio_embeddings_ivfflat 
-            ON audio_embeddings 
+        await session.execute(text("""
+            CREATE INDEX IF NOT EXISTS idx_audio_embeddings_ivfflat
+            ON audio_embeddings
             USING ivfflat (embedding vector_cosine_ops)
             WITH (lists = 100)
-        """
-            )
-        )
+        """))
 
         await session.commit()
 
     @staticmethod
     async def similarity_search(
         session: AsyncSession,
-        query_vector: List[float],
+        query_vector: list[float],
         limit: int = 10,
         distance_metric: str = "cosine",
-        filters: Optional[Dict[str, Any]] = None,
-    ) -> List[Tuple[str, float]]:
+        filters: dict[str, Any] | None = None,
+    ) -> list[tuple[str, float]]:
         """
         Find similar items using vector similarity
 
@@ -327,17 +301,15 @@ class VectorSearch:
             if conditions:
                 filter_sql = "WHERE " + " AND ".join(conditions)
 
-        sql = text(
-            f"""
-            SELECT 
+        sql = text(f"""
+            SELECT
                 audio_id,
                 embedding {operator} :vector::vector as distance
             FROM audio_embeddings
             {filter_sql}
             ORDER BY embedding {operator} :vector::vector
             LIMIT :limit
-        """
-        )
+        """)
 
         result = await session.execute(sql, params)
 
@@ -346,9 +318,9 @@ class VectorSearch:
     @staticmethod
     async def batch_similarity_search(
         session: AsyncSession,
-        query_vectors: List[List[float]],
+        query_vectors: list[list[float]],
         limit_per_query: int = 10,
-    ) -> Dict[int, List[Tuple[str, float]]]:
+    ) -> dict[int, list[tuple[str, float]]]:
         """
         Batch similarity search for multiple query vectors
         More efficient than individual queries
@@ -376,11 +348,11 @@ class VectorSearch:
     async def hybrid_search(
         session: AsyncSession,
         text_query: str,
-        query_vector: List[float],
+        query_vector: list[float],
         text_weight: float = 0.5,
         vector_weight: float = 0.5,
         limit: int = 20,
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         """
         Hybrid search combining full-text and vector similarity
         Best of both worlds: semantic + keyword matching
@@ -398,10 +370,9 @@ class VectorSearch:
         """
         vector_str = f"[{','.join(map(str, query_vector))}]"
 
-        sql = text(
-            """
+        sql = text("""
             WITH text_scores AS (
-                SELECT 
+                SELECT
                     id,
                     ts_rank(
                         to_tsvector('english', COALESCE(title, '') || ' ' || COALESCE(description, '')),
@@ -412,18 +383,18 @@ class VectorSearch:
                     @@ plainto_tsquery('english', :text_query)
             ),
             vector_scores AS (
-                SELECT 
+                SELECT
                     audio_id as id,
                     1 - (embedding <=> :vector::vector) as vector_score
                 FROM audio_embeddings
                 ORDER BY embedding <=> :vector::vector
                 LIMIT 100
             )
-            SELECT 
+            SELECT
                 COALESCE(t.id, v.id) as id,
                 af.title,
                 af.description,
-                (COALESCE(t.text_score, 0) * :text_weight + 
+                (COALESCE(t.text_score, 0) * :text_weight +
                  COALESCE(v.vector_score, 0) * :vector_weight) as combined_score,
                 af.metadata
             FROM text_scores t
@@ -431,8 +402,7 @@ class VectorSearch:
             JOIN audio_files af ON af.id = COALESCE(t.id, v.id)
             ORDER BY combined_score DESC
             LIMIT :limit
-        """
-        )
+        """)
 
         result = await session.execute(
             sql,
@@ -480,39 +450,31 @@ class SearchOptimizer:
         await session.execute(text("VACUUM ANALYZE audio_embeddings"))
 
     @staticmethod
-    async def get_search_stats(session: AsyncSession) -> Dict[str, Any]:
+    async def get_search_stats(session: AsyncSession) -> dict[str, Any]:
         """Get search performance statistics"""
         stats = {}
 
         # Table sizes
-        result = await session.execute(
-            text(
-                """
-            SELECT 
+        result = await session.execute(text("""
+            SELECT
                 schemaname,
                 tablename,
                 pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size
             FROM pg_tables
             WHERE tablename IN ('audio_files', 'audio_embeddings', 'audio_collections')
-        """
-            )
-        )
+        """))
         stats["table_sizes"] = [dict(row._mapping) for row in result.fetchall()]
 
         # Index usage
-        result = await session.execute(
-            text(
-                """
-            SELECT 
+        result = await session.execute(text("""
+            SELECT
                 indexrelname as index_name,
                 idx_scan as times_used,
                 pg_size_pretty(pg_relation_size(indexrelid)) as size
             FROM pg_stat_user_indexes
             WHERE schemaname = 'public'
             ORDER BY idx_scan DESC
-        """
-            )
-        )
+        """))
         stats["index_usage"] = [dict(row._mapping) for row in result.fetchall()]
 
         return stats
@@ -532,7 +494,7 @@ async def search_example():
             user_id="user_123",
             limit=20
         )
-        
+
         # Vector similarity search
         query_embedding = [0.1, 0.2, ..., 0.9]  # 768-dim vector
         similar_items = await VectorSearch.similarity_search(
@@ -541,7 +503,7 @@ async def search_example():
             limit=10,
             distance_metric="cosine"
         )
-        
+
         # Hybrid search
         hybrid_results = await VectorSearch.hybrid_search(
             session,

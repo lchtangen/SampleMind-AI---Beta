@@ -3,10 +3,10 @@ FastAPI Authentication Dependencies
 OAuth2 password bearer and user retrieval
 """
 
-from typing import Optional
+import logging
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-import logging
 
 from .jwt_handler import verify_token
 
@@ -86,7 +86,7 @@ async def get_current_active_user(user=Depends(get_current_user)):
     return user
 
 
-async def get_optional_user(token: Optional[str] = Depends(oauth2_scheme)):
+async def get_optional_user(token: str | None = Depends(oauth2_scheme)):
     """
     Get current user if authenticated, None otherwise
     Useful for endpoints that work both authenticated and unauthenticated

@@ -19,7 +19,6 @@ Usage::
 import json
 import logging
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -35,10 +34,14 @@ app = typer.Typer(help="Semantic search + FAISS index management")
 
 @app.command("query")
 def semantic_query(
-    query: str = typer.Argument(..., help="Natural language description (e.g. 'dark trap kick')"),
+    query: str = typer.Argument(
+        ..., help="Natural language description (e.g. 'dark trap kick')"
+    ),
     top: int = typer.Option(20, "--top", "-n", help="Number of results to return"),
     json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
-    min_score: float = typer.Option(0.0, "--min-score", help="Minimum similarity score [0-1]"),
+    min_score: float = typer.Option(
+        0.0, "--min-score", help="Minimum similarity score [0-1]"
+    ),
 ) -> None:
     """Search sample library with a text description using CLAP embeddings."""
     from samplemind.core.search.faiss_index import get_index
@@ -75,7 +78,9 @@ def semantic_query(
         console.print(f"[yellow]No results found for:[/yellow] {query}")
         return
 
-    table = Table(title=f'Search: "{query}"', show_header=True, header_style="bold cyan")
+    table = Table(
+        title=f'Search: "{query}"', show_header=True, header_style="bold cyan"
+    )
     table.add_column("#", style="dim", width=4)
     table.add_column("Filename", min_width=30)
     table.add_column("Score", justify="right", width=7)
@@ -90,7 +95,9 @@ def semantic_query(
         key_str = meta.get("key") or "—"
         energy_str = meta.get("energy") or "—"
         genres = ", ".join(meta.get("genre_labels", [])[:3]) or "—"
-        score_color = "green" if r.score > 0.7 else ("yellow" if r.score > 0.4 else "red")
+        score_color = (
+            "green" if r.score > 0.7 else ("yellow" if r.score > 0.4 else "red")
+        )
         table.add_row(
             str(i),
             r.filename,
@@ -113,13 +120,19 @@ index_app = typer.Typer(help="FAISS index management")
 
 @index_app.command("rebuild")
 def index_rebuild(
-    folder: Optional[Path] = typer.Argument(None, help="Folder to index (default: all libraries)"),
-    extensions: str = typer.Option("wav,aiff,mp3,flac,ogg", help="Comma-separated audio extensions"),
-    force: bool = typer.Option(False, "--force", "-f", help="Rebuild even if index exists"),
+    folder: Path | None = typer.Argument(
+        None, help="Folder to index (default: all libraries)"
+    ),
+    extensions: str = typer.Option(
+        "wav,aiff,mp3,flac,ogg", help="Comma-separated audio extensions"
+    ),
+    force: bool = typer.Option(
+        False, "--force", "-f", help="Rebuild even if index exists"
+    ),
 ) -> None:
     """Build or rebuild the FAISS semantic index from audio files."""
-    from samplemind.core.search.faiss_index import FAISSIndex
     import samplemind.core.search.faiss_index as _fi
+    from samplemind.core.search.faiss_index import FAISSIndex
 
     exts = {f".{e.strip().lstrip('.')}" for e in extensions.split(",")}
 
@@ -157,17 +170,19 @@ def index_rebuild(
 @index_app.command("stats")
 def index_stats() -> None:
     """Show FAISS index statistics."""
-    from samplemind.core.search.faiss_index import get_index, DEFAULT_INDEX_DIR
+    from samplemind.core.search.faiss_index import DEFAULT_INDEX_DIR, get_index
 
     idx = get_index(auto_load=True)
 
     console.print("\n[bold cyan]FAISS Index Statistics[/bold cyan]")
     console.print(f"  Index path:   {DEFAULT_INDEX_DIR}")
     console.print(f"  Total vectors: [bold]{idx.size}[/bold]")
-    console.print(f"  Embedding dim: 512 (CLAP)")
+    console.print("  Embedding dim: 512 (CLAP)")
 
     if idx.is_empty:
-        console.print("\n[yellow]Index is empty. Run:[/yellow] samplemind index rebuild <folder>")
+        console.print(
+            "\n[yellow]Index is empty. Run:[/yellow] samplemind index rebuild <folder>"
+        )
     else:
         console.print("\n[green]✓ Index is ready for semantic search[/green]")
 

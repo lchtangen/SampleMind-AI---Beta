@@ -15,14 +15,6 @@ Covers:
 
 from __future__ import annotations
 
-import hashlib
-import json
-from typing import Any, Dict
-from unittest.mock import MagicMock, patch
-
-import pytest
-
-
 # ── State schema ──────────────────────────────────────────────────────────────
 
 
@@ -116,7 +108,14 @@ def test_tagging_agent_energy_levels():
     for rms, expected_energy in [(0.01, "low"), (0.08, "medium"), (0.25, "high")]:
         result = tagging_agent(
             {
-                "audio_features": {"bpm": 120.0, "key": "C", "scale": "major", "rms_energy": rms, "spectral_centroid": 2500, "duration": 4.0},
+                "audio_features": {
+                    "bpm": 120.0,
+                    "key": "C",
+                    "scale": "major",
+                    "rms_energy": rms,
+                    "spectral_centroid": 2500,
+                    "duration": 4.0,
+                },
                 "messages": [],
                 "errors": [],
             }
@@ -127,17 +126,59 @@ def test_tagging_agent_energy_levels():
 def test_tagging_agent_major_vs_minor_mood():
     from samplemind.ai.agents.tagging_agent import tagging_agent
 
-    major = tagging_agent({"audio_features": {"bpm": 128.0, "key": "C", "scale": "major", "rms_energy": 0.1, "spectral_centroid": 2500, "duration": 4.0}, "messages": [], "errors": []})
-    minor = tagging_agent({"audio_features": {"bpm": 128.0, "key": "A", "scale": "minor", "rms_energy": 0.1, "spectral_centroid": 2500, "duration": 4.0}, "messages": [], "errors": []})
+    major = tagging_agent(
+        {
+            "audio_features": {
+                "bpm": 128.0,
+                "key": "C",
+                "scale": "major",
+                "rms_energy": 0.1,
+                "spectral_centroid": 2500,
+                "duration": 4.0,
+            },
+            "messages": [],
+            "errors": [],
+        }
+    )
+    minor = tagging_agent(
+        {
+            "audio_features": {
+                "bpm": 128.0,
+                "key": "A",
+                "scale": "minor",
+                "rms_energy": 0.1,
+                "spectral_centroid": 2500,
+                "duration": 4.0,
+            },
+            "messages": [],
+            "errors": [],
+        }
+    )
 
     assert "dark" in major["tags"]["mood"] or "melancholic" not in major["tags"]["mood"]
-    assert any("dark" in m or "melancholic" in m or "emotional" in m for m in minor["tags"]["mood"])
+    assert any(
+        "dark" in m or "melancholic" in m or "emotional" in m
+        for m in minor["tags"]["mood"]
+    )
 
 
 def test_tagging_agent_raw_labels_no_duplicates():
     from samplemind.ai.agents.tagging_agent import tagging_agent
 
-    result = tagging_agent({"audio_features": {"bpm": 130.0, "key": "G", "scale": "minor", "rms_energy": 0.12, "spectral_centroid": 3500, "duration": 8.0}, "messages": [], "errors": []})
+    result = tagging_agent(
+        {
+            "audio_features": {
+                "bpm": 130.0,
+                "key": "G",
+                "scale": "minor",
+                "rms_energy": 0.12,
+                "spectral_centroid": 3500,
+                "duration": 8.0,
+            },
+            "messages": [],
+            "errors": [],
+        }
+    )
     labels = result["tags"]["raw_labels"]
     assert len(labels) == len(set(labels)), "raw_labels must not contain duplicates"
 
@@ -185,9 +226,25 @@ def test_pack_builder_manifest_structure():
     result = pack_builder_agent(
         {
             "file_path": "/samples/kick_01.wav",
-            "audio_features": {"bpm": 128.0, "key": "C", "scale": "major", "rms_energy": 0.2, "duration": 1.5},
-            "tags": {"genre": ["House"], "mood": ["Energetic"], "energy": "high", "instrument_hints": ["kick"], "raw_labels": []},
-            "mixing_recommendations": {"camelot_position": "8B", "compatible_camelot_keys": ["7B", "9B"], "bpm_compatible_range": "120–136"},
+            "audio_features": {
+                "bpm": 128.0,
+                "key": "C",
+                "scale": "major",
+                "rms_energy": 0.2,
+                "duration": 1.5,
+            },
+            "tags": {
+                "genre": ["House"],
+                "mood": ["Energetic"],
+                "energy": "high",
+                "instrument_hints": ["kick"],
+                "raw_labels": [],
+            },
+            "mixing_recommendations": {
+                "camelot_position": "8B",
+                "compatible_camelot_keys": ["7B", "9B"],
+                "bpm_compatible_range": "120–136",
+            },
             "analysis_result": {"summary": "Punchy kick"},
             "messages": [],
             "errors": [],
@@ -198,7 +255,10 @@ def test_pack_builder_manifest_structure():
     assert "suggested_filename" in manifest
     assert "folder_path" in manifest
     assert manifest["metadata"]["bpm"] == 128.0
-    assert "house" in manifest["folder_path"].lower() or "unknown" in manifest["folder_path"].lower()
+    assert (
+        "house" in manifest["folder_path"].lower()
+        or "unknown" in manifest["folder_path"].lower()
+    )
     assert "readme_template" in manifest
 
 
@@ -258,7 +318,13 @@ def test_samplemind_tools_schema():
     """All tools have required Anthropic tool schema fields."""
     from samplemind.ai.agents.tool_use import SAMPLEMIND_TOOLS
 
-    required_names = {"analyze_audio", "search_similar", "get_recommendations", "tag_sample", "build_pack"}
+    required_names = {
+        "analyze_audio",
+        "search_similar",
+        "get_recommendations",
+        "tag_sample",
+        "build_pack",
+    }
     tool_names = {t["name"] for t in SAMPLEMIND_TOOLS}
     assert required_names == tool_names
 

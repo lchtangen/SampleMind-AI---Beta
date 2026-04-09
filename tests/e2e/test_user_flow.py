@@ -3,7 +3,7 @@ End-to-end tests for user flows using Playwright
 """
 
 import pytest
-from playwright.async_api import async_playwright, Page, expect
+from playwright.async_api import async_playwright, expect
 
 
 @pytest.mark.e2e

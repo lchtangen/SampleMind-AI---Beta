@@ -3,14 +3,15 @@ OAuth2 Integration for Google and GitHub
 Enables social login for SampleMind AI
 """
 
-from typing import Optional, Dict, Any
-from pydantic import BaseModel, HttpUrl
-from enum import Enum
-import httpx
 from datetime import datetime
+from enum import StrEnum
+from typing import Any
+
+import httpx
+from pydantic import BaseModel
 
 
-class OAuthProvider(str, Enum):
+class OAuthProvider(StrEnum):
     """Supported OAuth providers"""
 
     GOOGLE = "google"
@@ -31,7 +32,7 @@ class OAuthConfig(BaseModel):
 
 
 # OAuth Provider Configurations
-OAUTH_PROVIDERS: Dict[OAuthProvider, Dict[str, Any]] = {
+OAUTH_PROVIDERS: dict[OAuthProvider, dict[str, Any]] = {
     OAuthProvider.GOOGLE: {
         "authorization_url": "https://accounts.google.com/o/oauth2/v2/auth",
         "token_url": "https://oauth2.googleapis.com/token",
@@ -59,9 +60,9 @@ class OAuthUser(BaseModel):
     provider: OAuthProvider
     provider_user_id: str
     email: str
-    name: Optional[str] = None
-    avatar_url: Optional[str] = None
-    raw_data: Dict[str, Any] = {}
+    name: str | None = None
+    avatar_url: str | None = None
+    raw_data: dict[str, Any] = {}
 
 
 class OAuthService:
@@ -100,7 +101,7 @@ class OAuthService:
 
         return f"{base_url}?{query_string}"
 
-    async def exchange_code_for_token(self, code: str) -> Dict[str, Any]:
+    async def exchange_code_for_token(self, code: str) -> dict[str, Any]:
         """
         Exchange authorization code for access token
 
@@ -156,7 +157,7 @@ class OAuthService:
         # Parse user data based on provider
         return self._parse_user_data(user_data)
 
-    def _parse_user_data(self, data: Dict[str, Any]) -> OAuthUser:
+    def _parse_user_data(self, data: dict[str, Any]) -> OAuthUser:
         """Parse provider-specific user data into standard format"""
 
         if self.provider == OAuthProvider.GOOGLE:
@@ -212,9 +213,9 @@ class OAuthLinkService:
         Returns:
             True if successful
         """
-        from datetime import datetime
-        from samplemind.core.database import get_db
         import logging
+
+        from samplemind.core.database import get_db
 
         try:
             db = await get_db()
@@ -248,15 +249,16 @@ class OAuthLinkService:
     @staticmethod
     async def get_user_by_oauth(
         provider: OAuthProvider, provider_user_id: str
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Find user ID by OAuth provider account
 
         Returns:
             User ID if found, None otherwise
         """
-        from samplemind.core.database import get_db
         import logging
+
+        from samplemind.core.database import get_db
 
         try:
             db = await get_db()
@@ -277,8 +279,9 @@ class OAuthLinkService:
     @staticmethod
     async def unlink_oauth_account(user_id: str, provider: OAuthProvider) -> bool:
         """Unlink an OAuth provider from user account"""
-        from samplemind.core.database import get_db
         import logging
+
+        from samplemind.core.database import get_db
 
         try:
             db = await get_db()
@@ -320,16 +323,16 @@ async def handle_callback(code: str):
     # Exchange code for token
     token_data = await oauth_service.exchange_code_for_token(code)
     access_token = token_data["access_token"]
-    
+
     # Get user info
     oauth_user = await oauth_service.get_user_info(access_token)
-    
+
     # Check if user exists
     user_id = await OAuthLinkService.get_user_by_oauth(
         oauth_user.provider,
         oauth_user.provider_user_id
     )
-    
+
     if user_id:
         # Existing user - log them in
         return create_session(user_id)

@@ -13,12 +13,10 @@ Usage:
     samplemind meta:batch:tag <folder>       # Batch tag update
 """
 
-import typer
-from typing import Optional
 from pathlib import Path
-from rich.console import Console
+
+import typer
 from rich.table import Table
-from rich.panel import Panel
 
 from . import utils
 
@@ -105,7 +103,7 @@ def meta_show_custom(file: Path = typer.Argument(...)):
 @utils.with_error_handling
 def meta_export(
     file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
     format: str = typer.Option("json", "--format", "-f"),
 ) -> None:
     """Export metadata to file"""
@@ -158,7 +156,7 @@ def meta_validate(
         with utils.ProgressTracker("Validating"):
             pass
 
-        console.print(f"[green]✓ Metadata valid[/green]")
+        console.print("[green]✓ Metadata valid[/green]")
 
     except Exception as e:
         utils.handle_error(e, "meta:validate")

@@ -11,7 +11,7 @@ Core enums and dataclasses used throughout the audio loading pipeline:
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 
@@ -74,30 +74,30 @@ class AudioMetadata:
     duration: float
     sample_rate: int
     channels: int
-    bit_depth: Optional[int] = None
-    bitrate: Optional[int] = None
+    bit_depth: int | None = None
+    bitrate: int | None = None
 
     # Musical metadata
-    title: Optional[str] = None
-    artist: Optional[str] = None
-    album: Optional[str] = None
-    genre: Optional[str] = None
-    year: Optional[int] = None
-    track_number: Optional[int] = None
-    bpm: Optional[float] = None
-    key: Optional[str] = None
+    title: str | None = None
+    artist: str | None = None
+    album: str | None = None
+    genre: str | None = None
+    year: int | None = None
+    track_number: int | None = None
+    bpm: float | None = None
+    key: str | None = None
 
     # Technical metadata
-    codec: Optional[str] = None
-    encoder: Optional[str] = None
-    encoding_settings: Dict[str, Any] = field(default_factory=dict)
+    codec: str | None = None
+    encoder: str | None = None
+    encoding_settings: dict[str, Any] = field(default_factory=dict)
 
     # Processing metadata
     load_time: float = 0.0
     strategy_used: LoadingStrategy = LoadingStrategy.BALANCED
     normalization_applied: bool = False
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert metadata to dictionary"""
         result = {}
         for key, value in self.__dict__.items():
@@ -110,7 +110,7 @@ class AudioMetadata:
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "AudioMetadata":
+    def from_dict(cls, data: dict[str, Any]) -> "AudioMetadata":
         """Create metadata from dictionary"""
         data = dict(data)
         if "file_path" in data:
@@ -128,7 +128,7 @@ class LoadedAudio:
 
     audio_data: np.ndarray
     metadata: AudioMetadata
-    chunks: Optional[List[np.ndarray]] = None  # For streaming
+    chunks: list[np.ndarray] | None = None  # For streaming
     is_stereo: bool = False
     peak_amplitude: float = 0.0
     rms_level: float = 0.0

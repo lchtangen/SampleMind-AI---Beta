@@ -4,11 +4,10 @@ Learn user patterns, suggest next steps, auto-organize
 """
 
 import logging
-from typing import Optional, List, Dict, Set, Tuple, Any
+from collections import defaultdict
 from dataclasses import dataclass, field
-from collections import defaultdict, Counter
-from datetime import datetime, timedelta
-import json
+from datetime import datetime
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -17,9 +16,9 @@ logger = logging.getLogger(__name__)
 class UsagePattern:
     """Pattern of sample usage"""
 
-    sample_pair: Tuple[str, str]  # (sample1, sample2)
+    sample_pair: tuple[str, str]  # (sample1, sample2)
     frequency: int = 0
-    last_used: Optional[datetime] = None
+    last_used: datetime | None = None
     co_occurrence_count: int = 0
     confidence_score: float = 0.0  # 0-1
 
@@ -30,7 +29,7 @@ class WorkflowSuggestion:
 
     action: str  # "analyze_next", "organize", "export", etc.
     reason: str
-    suggested_samples: List[str] = field(default_factory=list)
+    suggested_samples: list[str] = field(default_factory=list)
     confidence: float = 0.0  # 0-1
 
 
@@ -40,8 +39,8 @@ class WorkflowTemplate:
 
     name: str
     description: str
-    steps: List[Dict[str, Any]]  # Ordered workflow steps
-    tags: List[str] = field(default_factory=list)
+    steps: list[dict[str, Any]]  # Ordered workflow steps
+    tags: list[str] = field(default_factory=list)
     usage_count: int = 0
 
 
@@ -50,15 +49,15 @@ class WorkflowAssistant:
 
     def __init__(self) -> None:
         """Initialize workflow assistant"""
-        self.usage_patterns: Dict[Tuple[str, str], UsagePattern] = {}
-        self.sample_usage_history: List[Tuple[str, datetime]] = []
-        self.workflow_history: List[Dict[str, Any]] = []
-        self.templates: Dict[str, WorkflowTemplate] = {}
+        self.usage_patterns: dict[tuple[str, str], UsagePattern] = {}
+        self.sample_usage_history: list[tuple[str, datetime]] = []
+        self.workflow_history: list[dict[str, Any]] = []
+        self.templates: dict[str, WorkflowTemplate] = {}
         self.user_skill_level = "intermediate"
         self.min_pattern_frequency = 3  # Minimum times pair seen
 
     def learn_sample_usage(
-        self, current_sample: str, previous_samples: List[str]
+        self, current_sample: str, previous_samples: list[str]
     ) -> None:
         """
         Learn sample pairing patterns
@@ -91,10 +90,10 @@ class WorkflowAssistant:
 
     def get_workflow_suggestions(
         self,
-        current_samples: List[str],
+        current_samples: list[str],
         analyzed_count: int,
-        context: Dict[str, Any] = None,
-    ) -> List[WorkflowSuggestion]:
+        context: dict[str, Any] = None,
+    ) -> list[WorkflowSuggestion]:
         """
         Get workflow suggestions
 
@@ -106,7 +105,7 @@ class WorkflowAssistant:
         Returns:
             List of suggestions
         """
-        suggestions: List[WorkflowSuggestion] = []
+        suggestions: list[WorkflowSuggestion] = []
 
         if context is None:
             context = {}
@@ -156,8 +155,8 @@ class WorkflowAssistant:
         return suggestions[:3]  # Return top 3
 
     def suggest_next_samples(
-        self, current_samples: List[str], limit: int = 5
-    ) -> List[Tuple[str, float]]:
+        self, current_samples: list[str], limit: int = 5
+    ) -> list[tuple[str, float]]:
         """
         Suggest next samples to analyze based on patterns
 
@@ -168,7 +167,7 @@ class WorkflowAssistant:
         Returns:
             List of (sample, score) tuples
         """
-        suggestions: Dict[str, float] = {}
+        suggestions: dict[str, float] = {}
 
         for current in current_samples[-2:]:  # Check recent samples
             for pair, pattern in self.usage_patterns.items():
@@ -187,7 +186,7 @@ class WorkflowAssistant:
         )
         return sorted_suggestions[:limit]
 
-    def auto_organize_samples(self, samples: List[str]) -> Dict[str, List[str]]:
+    def auto_organize_samples(self, samples: list[str]) -> dict[str, list[str]]:
         """
         Auto-organize samples by detected patterns
 
@@ -197,7 +196,7 @@ class WorkflowAssistant:
         Returns:
             Dictionary of organization (category -> samples)
         """
-        organization: Dict[str, List[str]] = defaultdict(list)
+        organization: dict[str, list[str]] = defaultdict(list)
 
         # Group by detected pairs/clusters
         placed = set()
@@ -221,7 +220,7 @@ class WorkflowAssistant:
 
         return dict(organization)
 
-    def get_smart_template(self, workflow_type: str) -> Optional[WorkflowTemplate]:
+    def get_smart_template(self, workflow_type: str) -> WorkflowTemplate | None:
         """
         Get smart template for workflow type
 
@@ -332,7 +331,7 @@ class WorkflowAssistant:
 
         return templates.get(workflow_type)
 
-    def record_workflow_step(self, step_type: str, data: Dict[str, Any]) -> None:
+    def record_workflow_step(self, step_type: str, data: dict[str, Any]) -> None:
         """
         Record a workflow step
 
@@ -347,7 +346,7 @@ class WorkflowAssistant:
         }
         self.workflow_history.append(workflow_entry)
 
-    def replay_workflow(self, limit: int = 10) -> List[Dict[str, Any]]:
+    def replay_workflow(self, limit: int = 10) -> list[dict[str, Any]]:
         """
         Get recent workflow steps for replay
 
@@ -359,7 +358,7 @@ class WorkflowAssistant:
         """
         return self.workflow_history[-limit:]
 
-    def get_workflow_statistics(self) -> Dict[str, Any]:
+    def get_workflow_statistics(self) -> dict[str, Any]:
         """Get workflow statistics"""
         if not self.usage_patterns:
             return {}
@@ -382,16 +381,16 @@ class WorkflowAssistant:
         }
 
     def _get_pattern_based_suggestions(
-        self, current_samples: List[str]
-    ) -> List[WorkflowSuggestion]:
+        self, current_samples: list[str]
+    ) -> list[WorkflowSuggestion]:
         """Get suggestions based on learned patterns"""
-        suggestions: List[WorkflowSuggestion] = []
+        suggestions: list[WorkflowSuggestion] = []
 
         if not current_samples or not self.usage_patterns:
             return suggestions
 
         # Find samples commonly used together
-        common_partners: Dict[str, float] = {}
+        common_partners: dict[str, float] = {}
         for current in current_samples:
             for pair, pattern in self.usage_patterns.items():
                 if current in pair and pattern.frequency >= self.min_pattern_frequency:
@@ -431,7 +430,7 @@ class WorkflowAssistant:
 
 
 # Global singleton instance
-_workflow_assistant: Optional[WorkflowAssistant] = None
+_workflow_assistant: WorkflowAssistant | None = None
 
 
 def get_workflow_assistant() -> WorkflowAssistant:

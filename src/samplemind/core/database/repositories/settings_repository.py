@@ -1,6 +1,7 @@
 """User settings repository"""
 
-from typing import Optional, Dict, Any
+from typing import Any
+
 from samplemind.core.database.mongo import UserSettings
 
 
@@ -23,7 +24,7 @@ class SettingsRepository:
     }
 
     @staticmethod
-    async def get_or_create(user_id: Optional[str] = None) -> UserSettings:
+    async def get_or_create(user_id: str | None = None) -> UserSettings:
         """Get or create default settings for user"""
         existing = await UserSettings.find_one(UserSettings.user_id == user_id)
         if existing:
@@ -38,12 +39,12 @@ class SettingsRepository:
         return settings
 
     @staticmethod
-    async def get(user_id: Optional[str] = None) -> Optional[UserSettings]:
+    async def get(user_id: str | None = None) -> UserSettings | None:
         """Get user settings"""
         return await UserSettings.find_one(UserSettings.user_id == user_id)
 
     @staticmethod
-    async def update(user_id: Optional[str], **kwargs) -> UserSettings:
+    async def update(user_id: str | None, **kwargs) -> UserSettings:
         """Update user settings"""
         settings = await SettingsRepository.get_or_create(user_id)
 
@@ -56,24 +57,24 @@ class SettingsRepository:
         return settings
 
     @staticmethod
-    async def update_analysis_level(user_id: Optional[str], level: str) -> UserSettings:
+    async def update_analysis_level(user_id: str | None, level: str) -> UserSettings:
         """Update default analysis level"""
         return await SettingsRepository.update(user_id, default_analysis_level=level)
 
     @staticmethod
-    async def update_theme(user_id: Optional[str], theme: str) -> UserSettings:
+    async def update_theme(user_id: str | None, theme: str) -> UserSettings:
         """Update theme preference"""
         return await SettingsRepository.update(user_id, theme=theme)
 
     @staticmethod
     async def update_export_format(
-        user_id: Optional[str], format_type: str
+        user_id: str | None, format_type: str
     ) -> UserSettings:
         """Update default export format"""
         return await SettingsRepository.update(user_id, export_format=format_type)
 
     @staticmethod
-    async def toggle_cache(user_id: Optional[str]) -> UserSettings:
+    async def toggle_cache(user_id: str | None) -> UserSettings:
         """Toggle cache enabled/disabled"""
         settings = await SettingsRepository.get_or_create(user_id)
         return await SettingsRepository.update(
@@ -81,7 +82,7 @@ class SettingsRepository:
         )
 
     @staticmethod
-    async def toggle_auto_save(user_id: Optional[str]) -> UserSettings:
+    async def toggle_auto_save(user_id: str | None) -> UserSettings:
         """Toggle auto-save results"""
         settings = await SettingsRepository.get_or_create(user_id)
         return await SettingsRepository.update(
@@ -89,23 +90,21 @@ class SettingsRepository:
         )
 
     @staticmethod
-    async def set_cache_size(user_id: Optional[str], size: int) -> UserSettings:
+    async def set_cache_size(user_id: str | None, size: int) -> UserSettings:
         """Set max cache size"""
         if size < 10 or size > 1000:
             raise ValueError("Cache size must be between 10 and 1000")
         return await SettingsRepository.update(user_id, max_cache_size=size)
 
     @staticmethod
-    async def set_parallel_workers(
-        user_id: Optional[str], workers: int
-    ) -> UserSettings:
+    async def set_parallel_workers(user_id: str | None, workers: int) -> UserSettings:
         """Set batch parallel workers"""
         if workers < 1 or workers > 32:
             raise ValueError("Parallel workers must be between 1 and 32")
         return await SettingsRepository.update(user_id, batch_parallel_workers=workers)
 
     @staticmethod
-    async def reset_to_defaults(user_id: Optional[str]) -> UserSettings:
+    async def reset_to_defaults(user_id: str | None) -> UserSettings:
         """Reset all settings to defaults"""
         settings = await SettingsRepository.get_or_create(user_id)
         for key, value in SettingsRepository.DEFAULT_SETTINGS.items():
@@ -114,7 +113,7 @@ class SettingsRepository:
         return settings
 
     @staticmethod
-    async def export_settings(user_id: Optional[str]) -> Dict[str, Any]:
+    async def export_settings(user_id: str | None) -> dict[str, Any]:
         """Export settings as dictionary"""
         settings = await SettingsRepository.get_or_create(user_id)
         return {
@@ -133,7 +132,7 @@ class SettingsRepository:
         }
 
     @staticmethod
-    async def delete(user_id: Optional[str]) -> bool:
+    async def delete(user_id: str | None) -> bool:
         """Delete user settings"""
         settings = await UserSettings.find_one(UserSettings.user_id == user_id)
         if settings:

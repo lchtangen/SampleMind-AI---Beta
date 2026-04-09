@@ -20,14 +20,14 @@ import logging
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Production-relevant music class labels
 # ---------------------------------------------------------------------------
-MUSIC_CLASSES: List[str] = [
+MUSIC_CLASSES: list[str] = [
     "kick",
     "snare",
     "hi_hat_closed",
@@ -105,10 +105,10 @@ def _ensure_librosa() -> bool:
 class CNNClassificationResult:
     """Result from CNNAudioClassifier.classify()."""
 
-    top_predictions: List[Tuple[str, float]]
+    top_predictions: list[tuple[str, float]]
     """Ordered list of (label, confidence) pairs, highest confidence first."""
 
-    all_scores: List[Tuple[str, float]]
+    all_scores: list[tuple[str, float]]
     """Full score vector for all 29 classes."""
 
     audio_path: Path
@@ -180,7 +180,7 @@ class CNNAudioClassifier:
     N_MELS: int = 128  # mel bands (== 1-D input length after mean-pooling)
     HOP_LENGTH: int = 512
 
-    def __init__(self, weights_path: Optional[Path] = None) -> None:
+    def __init__(self, weights_path: Path | None = None) -> None:
         self.weights_path = Path(weights_path) if weights_path else None
         self._model: Any = None
         self._device: Any = None
@@ -252,7 +252,9 @@ class CNNAudioClassifier:
             logits = self._model(features)  # (1, num_classes)
             probs = _torch.softmax(logits, dim=-1)[0].cpu().tolist()
 
-        all_scores = sorted(zip(MUSIC_CLASSES, probs), key=lambda x: x[1], reverse=True)
+        all_scores = sorted(
+            zip(MUSIC_CLASSES, probs, strict=False), key=lambda x: x[1], reverse=True
+        )
         top_k_list = all_scores[:top_k]
 
         return CNNClassificationResult(

@@ -1,10 +1,9 @@
 """Unit tests for mastering module."""
 
 import numpy as np
-import pytest
 
-from samplemind.ai.mastering.mastering_engine import MasteringEngine, GENRE_PRESETS
-from samplemind.ai.mastering.processing_chain import MasteringChain, ProcessingStep
+from samplemind.ai.mastering.mastering_engine import GENRE_PRESETS, MasteringEngine
+from samplemind.ai.mastering.processing_chain import MasteringChain
 from samplemind.ai.mastering.reference_analyzer import (
     MasteringProfile,
     ReferenceAnalyzer,

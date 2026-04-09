@@ -2,14 +2,12 @@
 """Groove Extraction Commands"""
 
 from pathlib import Path
-from typing import Optional
-import asyncio
 
 import typer
-from rich.console import Console
 from rich.table import Table
 
 from samplemind.core.processing.groove_extractor import GrooveExtractor
+
 from . import utils
 
 app = typer.Typer(
@@ -22,12 +20,10 @@ console = utils.console
 @utils.with_error_handling
 @utils.async_command
 async def extract_groove(
-    file: Optional[Path] = typer.Argument(
-        None, help="Audio file to extract groove from"
-    ),
-    name: Optional[str] = typer.Option(None, "--name", "-n", help="Groove name"),
-    tempo: Optional[float] = typer.Option(None, "--tempo", "-t", help="Tempo in BPM"),
-    save_path: Optional[Path] = typer.Option(
+    file: Path | None = typer.Argument(None, help="Audio file to extract groove from"),
+    name: str | None = typer.Option(None, "--name", "-n", help="Groove name"),
+    tempo: float | None = typer.Option(None, "--tempo", "-t", help="Tempo in BPM"),
+    save_path: Path | None = typer.Option(
         None, "--save", "-s", help="Save groove to file"
     ),
 ) -> None:
@@ -49,7 +45,7 @@ async def extract_groove(
             return
 
         console.print()
-        console.print(f"[bold cyan]🎵 Groove Extraction[/bold cyan]")
+        console.print("[bold cyan]🎵 Groove Extraction[/bold cyan]")
         console.print(f"[cyan]File: {file.name}[/cyan]\n")
 
         # Extract
@@ -72,7 +68,7 @@ async def extract_groove(
             groove.save(save_path)
             console.print(f"\n[green]✅ Groove saved to {save_path}[/green]")
         else:
-            console.print(f"\n[dim]Use --save to save the groove template[/dim]")
+            console.print("\n[dim]Use --save to save the groove template[/dim]")
 
     except utils.CLIError as e:
         utils.handle_error(e, "groove:extract")
@@ -83,7 +79,7 @@ async def extract_groove(
 @utils.with_error_handling
 def apply_groove(
     groove_file: Path = typer.Argument(..., help="Groove template file"),
-    midi_file: Optional[Path] = typer.Option(
+    midi_file: Path | None = typer.Option(
         None, "--midi", "-m", help="MIDI file to apply groove to"
     ),
 ) -> None:

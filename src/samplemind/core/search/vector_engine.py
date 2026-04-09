@@ -14,7 +14,6 @@ try:
     import chromadb
     import librosa
     import torch
-    from chromadb.config import Settings
     from transformers import ClapModel, ClapProcessor
 except ImportError:
     # Handle missing deps gracefully (e.g. for lightweight installs)

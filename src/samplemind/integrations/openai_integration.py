@@ -8,19 +8,18 @@ powered by OpenAI's GPT-4o model. Used as Priority 3 (agents/fallback).
 """
 
 import asyncio
+import base64
+import hashlib
 import json
 import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
-import base64
-import hashlib
+from typing import Any
 
-import openai
-from openai import OpenAI, AsyncOpenAI
 import numpy as np
+from openai import AsyncOpenAI, OpenAI
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -63,21 +62,21 @@ class OpenAIMusicAnalysis:
 
     # Core Analysis
     summary: str = ""
-    detailed_analysis: Dict[str, Any] = field(default_factory=dict)
+    detailed_analysis: dict[str, Any] = field(default_factory=dict)
 
     # Production Insights
-    production_tips: List[str] = field(default_factory=list)
-    fl_studio_recommendations: List[str] = field(default_factory=list)
-    effect_suggestions: List[Dict[str, Any]] = field(default_factory=list)
+    production_tips: list[str] = field(default_factory=list)
+    fl_studio_recommendations: list[str] = field(default_factory=list)
+    effect_suggestions: list[dict[str, Any]] = field(default_factory=list)
 
     # Creative Suggestions
-    creative_ideas: List[str] = field(default_factory=list)
-    arrangement_suggestions: List[str] = field(default_factory=list)
+    creative_ideas: list[str] = field(default_factory=list)
+    arrangement_suggestions: list[str] = field(default_factory=list)
 
     # Technical Analysis
-    harmonic_analysis: Dict[str, Any] = field(default_factory=dict)
-    rhythmic_analysis: Dict[str, Any] = field(default_factory=dict)
-    spectral_analysis: Dict[str, Any] = field(default_factory=dict)
+    harmonic_analysis: dict[str, Any] = field(default_factory=dict)
+    rhythmic_analysis: dict[str, Any] = field(default_factory=dict)
+    spectral_analysis: dict[str, Any] = field(default_factory=dict)
 
     # Scores and Ratings
     creativity_score: float = 0.0
@@ -99,9 +98,9 @@ class AdvancedMusicPromptEngine:
 
     def create_analysis_prompt(
         self,
-        audio_features: Dict[str, Any],
+        audio_features: dict[str, Any],
         analysis_type: MusicAnalysisType,
-        user_context: Optional[Dict[str, Any]] = None,
+        user_context: dict[str, Any] | None = None,
     ) -> str:
         """Create sophisticated prompt for music analysis"""
 
@@ -153,7 +152,7 @@ Please provide a comprehensive response in JSON format with the following struct
 
         return final_prompt.strip()
 
-    def _load_base_prompts(self) -> Dict[MusicAnalysisType, str]:
+    def _load_base_prompts(self) -> dict[MusicAnalysisType, str]:
         """Load base prompts for different analysis types"""
         return {
             MusicAnalysisType.QUICK_ANALYSIS: """
@@ -187,7 +186,7 @@ Focus on achieving professional sound quality and competitive loudness.
             """,
         }
 
-    def _load_context_enhancers(self) -> Dict[str, str]:
+    def _load_context_enhancers(self) -> dict[str, str]:
         """Load context enhancers for different scenarios"""
         return {
             "beginner": "Explain technical terms and provide educational context.",
@@ -198,7 +197,7 @@ Focus on achieving professional sound quality and competitive loudness.
             "home_studio": "Consider home studio limitations and solutions.",
         }
 
-    def _format_audio_features(self, features: Dict[str, Any]) -> str:
+    def _format_audio_features(self, features: dict[str, Any]) -> str:
         """Format audio features for prompt inclusion"""
         formatted = []
 
@@ -233,7 +232,7 @@ Focus on achieving professional sound quality and competitive loudness.
 
         return "\n".join(formatted)
 
-    def _format_user_context(self, context: Dict[str, Any]) -> str:
+    def _format_user_context(self, context: dict[str, Any]) -> str:
         """Format user context for prompt inclusion"""
         formatted = ["USER CONTEXT:"]
 
@@ -289,10 +288,10 @@ class OpenAIMusicProducer:
 
     async def analyze_music_comprehensive(
         self,
-        audio_features: Dict[str, Any],
+        audio_features: dict[str, Any],
         analysis_type: MusicAnalysisType = MusicAnalysisType.COMPREHENSIVE_ANALYSIS,
-        model: Optional[OpenAIModel] = None,
-        user_context: Optional[Dict[str, Any]] = None,
+        model: OpenAIModel | None = None,
+        user_context: dict[str, Any] | None = None,
         use_cache: bool = True,
     ) -> OpenAIMusicAnalysis:
         """
@@ -406,10 +405,10 @@ class OpenAIMusicProducer:
 
     def analyze_music_sync(
         self,
-        audio_features: Dict[str, Any],
+        audio_features: dict[str, Any],
         analysis_type: MusicAnalysisType = MusicAnalysisType.COMPREHENSIVE_ANALYSIS,
-        model: Optional[OpenAIModel] = None,
-        user_context: Optional[Dict[str, Any]] = None,
+        model: OpenAIModel | None = None,
+        user_context: dict[str, Any] | None = None,
     ) -> OpenAIMusicAnalysis:
         """Synchronous version of music analysis"""
         return asyncio.run(
@@ -420,8 +419,8 @@ class OpenAIMusicProducer:
 
     async def get_production_coaching(
         self,
-        audio_features: Dict[str, Any],
-        current_issues: List[str],
+        audio_features: dict[str, Any],
+        current_issues: list[str],
         skill_level: str = "intermediate",
     ) -> OpenAIMusicAnalysis:
         """Get personalized production coaching"""
@@ -438,7 +437,7 @@ class OpenAIMusicProducer:
         )
 
     async def get_fl_studio_optimization(
-        self, audio_features: Dict[str, Any], current_plugins: List[str] = None
+        self, audio_features: dict[str, Any], current_plugins: list[str] = None
     ) -> OpenAIMusicAnalysis:
         """Get FL Studio specific optimization advice"""
         user_context = {
@@ -455,10 +454,10 @@ class OpenAIMusicProducer:
 
     async def batch_analyze(
         self,
-        audio_features_list: List[Dict[str, Any]],
+        audio_features_list: list[dict[str, Any]],
         analysis_type: MusicAnalysisType = MusicAnalysisType.COMPREHENSIVE_ANALYSIS,
         max_concurrent: int = 5,
-    ) -> List[OpenAIMusicAnalysis]:
+    ) -> list[OpenAIMusicAnalysis]:
         """Batch analyze multiple tracks with concurrency control"""
         semaphore = asyncio.Semaphore(max_concurrent)
 
@@ -488,7 +487,7 @@ class OpenAIMusicProducer:
         self,
         file_path: Path,
         analysis_prompt: str,
-        model: Optional[OpenAIModel] = None,
+        model: OpenAIModel | None = None,
     ) -> OpenAIMusicAnalysis:
         """
         Submit an audio file directly to GPT-4o Audio Preview for analysis.
@@ -551,7 +550,7 @@ class OpenAIMusicProducer:
             logger.error(f"Audio file submission failed: {e}")
             raise
 
-    def get_usage_stats(self) -> Dict[str, Any]:
+    def get_usage_stats(self) -> dict[str, Any]:
         """Get usage statistics and performance metrics"""
         return {
             **self.usage_stats,
@@ -567,7 +566,7 @@ class OpenAIMusicProducer:
 
     def _generate_cache_key(
         self,
-        audio_features: Dict[str, Any],
+        audio_features: dict[str, Any],
         analysis_type: MusicAnalysisType,
         model: OpenAIModel,
     ) -> str:
@@ -606,6 +605,7 @@ class OpenAIMusicProducer:
 def create_openai_producer_from_env() -> OpenAIMusicProducer:
     """Create OpenAI producer from environment variables"""
     import os
+
     from dotenv import load_dotenv
 
     load_dotenv()
@@ -622,16 +622,6 @@ if __name__ == "__main__":
 
     async def example_usage():
         # Example audio features (would come from audio_engine.py)
-        sample_features = {
-            "tempo": 128.0,
-            "key": "C",
-            "mode": "major",
-            "duration": 180.0,
-            "sample_rate": 44100,
-            "spectral_centroid": [2500.0] * 100,
-            "rms_energy": [0.5] * 100,
-            "pitch_class_distribution": [0.1] * 12,
-        }
 
         try:
             # Create producer (would use real API key)

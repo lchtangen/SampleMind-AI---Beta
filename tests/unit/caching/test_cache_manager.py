@@ -1,12 +1,13 @@
 """Unit tests for advanced cache manager."""
 
-import pytest
 import asyncio
 import time
 
+import pytest
+
 from samplemind.core.caching.cache_manager import (
-    CacheEntry,
     AdvancedCacheManager,
+    CacheEntry,
 )
 
 
@@ -320,7 +321,7 @@ class TestAdvancedCacheManager:
     @pytest.mark.asyncio
     async def test_global_instance(self):
         """Test global manager instance"""
-        from samplemind.core.caching.cache_manager import init_manager, get_manager
+        from samplemind.core.caching.cache_manager import get_manager, init_manager
 
         # Initialize
         manager1 = init_manager(max_memory_mb=512)

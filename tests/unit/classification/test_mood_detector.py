@@ -20,7 +20,9 @@ def test_quadrant_mapping():
     assert _quadrant(0.5, -0.5) == "high_valence_low_arousal"
     assert _quadrant(-0.5, 0.5) == "low_valence_high_arousal"
     assert _quadrant(-0.5, -0.5) == "low_valence_low_arousal"
-    assert _quadrant(0.0, 0.0) == "high_valence_high_arousal"  # origin → high/high by convention
+    assert (
+        _quadrant(0.0, 0.0) == "high_valence_high_arousal"
+    )  # origin → high/high by convention
 
 
 def test_detect_returns_result():
@@ -68,10 +70,13 @@ def test_high_rms_high_arousal():
 
 
 def test_production_hints_present():
-    from samplemind.ai.classification.mood_detector import MOOD_PRODUCTION_HINTS, _MOOD_LABELS
+    from samplemind.ai.classification.mood_detector import (
+        _MOOD_LABELS,
+        MOOD_PRODUCTION_HINTS,
+    )
 
     # Every mood in _MOOD_LABELS should have a production hint
-    for quadrant, labels in _MOOD_LABELS.items():
+    for _quadrant, labels in _MOOD_LABELS.items():
         for mood in labels:
             assert mood in MOOD_PRODUCTION_HINTS, f"No hint for mood={mood}"
 

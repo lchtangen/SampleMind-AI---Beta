@@ -7,11 +7,11 @@ and a Prometheus-compatible monitoring server.
 
 try:
     from .monitor import (
+        AudioProcessingMetrics,
+        Metric,
+        MetricType,
         Monitor,
         SystemMetricsCollector,
-        AudioProcessingMetrics,
-        MetricType,
-        Metric,
     )
     from .server import MonitoringServer
 

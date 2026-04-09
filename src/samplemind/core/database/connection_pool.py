@@ -3,21 +3,22 @@ Database Connection Pooling & Performance Monitoring
 Production-optimized connection management
 """
 
-from sqlalchemy.ext.asyncio import (
-    create_async_engine,
-    AsyncSession,
-    async_sessionmaker,
-    AsyncEngine,
-)
-from sqlalchemy.pool import QueuePool, NullPool
-from sqlalchemy import event, text
-from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Optional, Dict, Any
-import time
 import logging
+import time
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from datetime import datetime
-import asyncio
+from typing import Any
+
+from sqlalchemy import event, text
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
+from sqlalchemy.pool import QueuePool
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +30,8 @@ class QueryStats:
     query: str
     duration_ms: float
     timestamp: datetime
-    connection_id: Optional[str] = None
-    error: Optional[str] = None
+    connection_id: str | None = None
+    error: str | None = None
 
 
 @dataclass
@@ -251,7 +252,7 @@ class DatabaseConnectionPool:
             slow_queries=self.query_stats[-10:],  # Last 10 slow queries
         )
 
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """
         Perform database health check
 
@@ -271,15 +272,11 @@ class DatabaseConnectionPool:
                 db_version = version_result.scalar()
 
                 # Check active connections
-                conn_result = await session.execute(
-                    text(
-                        """
-                    SELECT count(*) 
-                    FROM pg_stat_activity 
+                conn_result = await session.execute(text("""
+                    SELECT count(*)
+                    FROM pg_stat_activity
                     WHERE datname = current_database()
-                """
-                    )
-                )
+                """))
                 active_connections = conn_result.scalar()
 
             response_time_ms = (time.time() - start_time) * 1000
@@ -309,7 +306,7 @@ class DatabaseConnectionPool:
             :limit
         ]
 
-    async def get_query_analytics(self) -> Dict[str, Any]:
+    async def get_query_analytics(self) -> dict[str, Any]:
         """Get query performance analytics"""
         if not self.query_stats:
             return {
@@ -335,7 +332,7 @@ class DatabaseConnectionPool:
 
 
 # Global connection pool instance
-_connection_pool: Optional[DatabaseConnectionPool] = None
+_connection_pool: DatabaseConnectionPool | None = None
 
 
 async def init_connection_pool(database_url: str, **kwargs) -> DatabaseConnectionPool:
@@ -366,21 +363,21 @@ async def main():
         max_overflow=40,
         slow_query_threshold_ms=1000.0
     )
-    
+
     # Use pool
     async with pool.get_session() as session:
         result = await session.execute(text("SELECT * FROM users LIMIT 10"))
         users = result.fetchall()
-    
+
     # Check health
     health = await pool.health_check()
     print(health)
-    
+
     # Get stats
     stats = await pool.get_pool_stats()
     print(f"Active connections: {stats.checked_out}")
     print(f"Average query time: {stats.avg_query_time_ms:.2f}ms")
-    
+
     # Cleanup
     await pool.close()
 """

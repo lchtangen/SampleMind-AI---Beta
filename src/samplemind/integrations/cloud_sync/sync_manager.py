@@ -3,18 +3,18 @@ Cloud Sync Manager
 Manages cloud synchronization with offline-first support
 """
 
-import logging
 import asyncio
+import logging
 import uuid
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, List, Optional, Any
-from enum import Enum
+from enum import StrEnum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class SyncAction(str, Enum):
+class SyncAction(StrEnum):
     """Sync actions"""
 
     CREATE = "create"
@@ -31,7 +31,7 @@ class SyncEvent:
     collection: str  # 'samples', 'analyses', 'workspaces'
     document_id: str
     action: str  # 'create', 'update', 'delete'
-    data: Dict[str, Any]
+    data: dict[str, Any]
     timestamp: datetime
     device_id: str
     version: int
@@ -41,7 +41,7 @@ class OfflineQueue:
     """Manages offline operation queue"""
 
     def __init__(self, max_size: int = 1000) -> None:
-        self.queue: List[SyncEvent] = []
+        self.queue: list[SyncEvent] = []
         self.max_size = max_size
 
     def add_event(self, event: SyncEvent) -> bool:
@@ -56,7 +56,7 @@ class OfflineQueue:
         )
         return True
 
-    def get_pending(self, limit: int = 100) -> List[SyncEvent]:
+    def get_pending(self, limit: int = 100) -> list[SyncEvent]:
         """Get pending events"""
         return self.queue[:limit]
 
@@ -85,7 +85,7 @@ class ConflictResolver:
 
     @staticmethod
     def resolve_conflict(
-        local_doc: Dict[str, Any], remote_event: SyncEvent
+        local_doc: dict[str, Any], remote_event: SyncEvent
     ) -> SyncEvent:
         """
         Resolve conflict using last-write-wins strategy
@@ -149,9 +149,9 @@ class CloudSyncManager:
         self.enable_auto_sync = enable_auto_sync
 
         # State management
-        self.sync_enabled: Dict[str, bool] = {}
-        self.sync_workers: Dict[str, asyncio.Task] = {}
-        self.offline_queues: Dict[str, OfflineQueue] = {}
+        self.sync_enabled: dict[str, bool] = {}
+        self.sync_workers: dict[str, asyncio.Task] = {}
+        self.offline_queues: dict[str, OfflineQueue] = {}
 
     async def enable_sync(self, user_id: str) -> bool:
         """
@@ -244,9 +244,9 @@ class CloudSyncManager:
         collection: str,
         document_id: str,
         action: str,
-        data: Dict[str, Any],
+        data: dict[str, Any],
         device_id: str,
-    ) -> Optional[SyncEvent]:
+    ) -> SyncEvent | None:
         """
         Queue a sync event
 
@@ -290,7 +290,7 @@ class CloudSyncManager:
             logger.error(f"Error queuing event: {str(e)}", exc_info=True)
             return None
 
-    async def sync(self, user_id: str) -> Dict[str, Any]:
+    async def sync(self, user_id: str) -> dict[str, Any]:
         """
         Perform manual sync for user
 
@@ -539,8 +539,8 @@ class CloudSyncManager:
             raise
 
     async def _fetch_remote_changes(
-        self, user_id: str, since: Optional[datetime] = None
-    ) -> List[SyncEvent]:
+        self, user_id: str, since: datetime | None = None
+    ) -> list[SyncEvent]:
         """
         Fetch sync events from S3 created after `since`.
 
@@ -550,11 +550,11 @@ class CloudSyncManager:
         if not self.s3:
             return []
 
-        import json as _json
         import asyncio
+        import json as _json
 
         prefix = f"sync/{user_id}/"
-        changes: List[SyncEvent] = []
+        changes: list[SyncEvent] = []
 
         try:
             loop = asyncio.get_running_loop()
@@ -605,7 +605,7 @@ class CloudSyncManager:
 
         return changes
 
-    async def _get_last_sync_time(self, user_id: str) -> Optional[datetime]:
+    async def _get_last_sync_time(self, user_id: str) -> datetime | None:
         """Get last sync timestamp from database"""
         try:
             if self.redis:
@@ -629,7 +629,7 @@ class CloudSyncManager:
         except Exception as e:
             logger.warning(f"Failed to set last sync time: {str(e)}")
 
-    def get_sync_status(self, user_id: str) -> Dict[str, Any]:
+    def get_sync_status(self, user_id: str) -> dict[str, Any]:
         """Get sync status for user"""
         return {
             "enabled": self.sync_enabled.get(user_id, False),

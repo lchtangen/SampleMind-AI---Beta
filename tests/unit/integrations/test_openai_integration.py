@@ -3,16 +3,15 @@
 Unit tests for OpenAI integration
 """
 
-import os
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-import asyncio
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
 
 from samplemind.integrations.openai_integration import (
-    OpenAIMusicProducer,
-    OpenAIModel,
     MusicAnalysisType,
+    OpenAIModel,
     OpenAIMusicAnalysis,
+    OpenAIMusicProducer,
 )
 
 

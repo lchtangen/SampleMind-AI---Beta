@@ -11,16 +11,17 @@ Provides:
 
 import logging
 import traceback
-from typing import Optional, Callable, Any, Dict, List, TypeVar
+from collections.abc import Callable
 from enum import Enum
-from pathlib import Path
 from functools import wraps
+from pathlib import Path
+from typing import Any, TypeVar
 
+import typer
 from rich.console import Console
 from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.table import Table
-import typer
 
 logger = logging.getLogger(__name__)
 console = Console()
@@ -98,9 +99,9 @@ class SampleMindError(Exception):
         message: str,
         category: ErrorCategory = ErrorCategory.UNKNOWN,
         severity: ErrorSeverity = ErrorSeverity.ERROR,
-        context: Optional[str] = None,
-        suggestions: Optional[List[str]] = None,
-        recovery_options: Optional[Dict[str, Callable]] = None,
+        context: str | None = None,
+        suggestions: list[str] | None = None,
+        recovery_options: dict[str, Callable] | None = None,
     ):
         self.message = message
         self.category = category
@@ -114,9 +115,7 @@ class SampleMindError(Exception):
 class AudioFileError(SampleMindError):
     """Error loading or processing audio file"""
 
-    def __init__(
-        self, message: str, file_path: Optional[Path] = None, **kwargs
-    ) -> None:
+    def __init__(self, message: str, file_path: Path | None = None, **kwargs) -> None:
         kwargs["category"] = ErrorCategory.FILE_NOT_FOUND
         kwargs["severity"] = ErrorSeverity.ERROR
         if file_path:
@@ -173,11 +172,11 @@ class ErrorRecoveryStrategy:
     def __init__(self, error: SampleMindError) -> None:
         self.error = error
 
-    def get_suggestions(self) -> List[str]:
+    def get_suggestions(self) -> list[str]:
         """Get actionable suggestions for this error"""
         return self.error.suggestions
 
-    def get_recovery_options(self) -> Dict[str, Callable]:
+    def get_recovery_options(self) -> dict[str, Callable]:
         """Get recovery options for this error"""
         return self.error.recovery_options
 
@@ -189,7 +188,7 @@ class ErrorRecoveryStrategy:
 class FileNotFoundRecovery(ErrorRecoveryStrategy):
     """Recovery for file not found errors"""
 
-    def get_suggestions(self) -> List[str]:
+    def get_suggestions(self) -> list[str]:
         """Get recovery suggestions for file not found errors.
 
         Returns:
@@ -202,7 +201,7 @@ class FileNotFoundRecovery(ErrorRecoveryStrategy):
             "Check file permissions (you may need sudo)",
         ]
 
-    def get_recovery_options(self) -> Dict[str, Callable]:
+    def get_recovery_options(self) -> dict[str, Callable]:
         """Get interactive recovery options for file not found errors.
 
         Returns:
@@ -231,7 +230,7 @@ class FileNotFoundRecovery(ErrorRecoveryStrategy):
 class InsufficientMemoryRecovery(ErrorRecoveryStrategy):
     """Recovery for memory errors"""
 
-    def get_suggestions(self) -> List[str]:
+    def get_suggestions(self) -> list[str]:
         """Get recovery suggestions for memory errors.
 
         Returns:
@@ -259,7 +258,7 @@ class InsufficientMemoryRecovery(ErrorRecoveryStrategy):
 class APIErrorRecovery(ErrorRecoveryStrategy):
     """Recovery for API/network errors"""
 
-    def get_suggestions(self) -> List[str]:
+    def get_suggestions(self) -> list[str]:
         """Get recovery suggestions for API/network errors.
 
         Returns:
@@ -273,7 +272,7 @@ class APIErrorRecovery(ErrorRecoveryStrategy):
             "Wait a few seconds and retry",
         ]
 
-    def get_recovery_options(self) -> Dict[str, Callable]:
+    def get_recovery_options(self) -> dict[str, Callable]:
         """Get interactive recovery options for API errors.
 
         Returns:
@@ -355,7 +354,7 @@ def display_error(error: SampleMindError, verbose: bool = False) -> None:
         )
 
 
-def handle_error_interactive(error: SampleMindError) -> Optional[Any]:
+def handle_error_interactive(error: SampleMindError) -> Any | None:
     """Handle error interactively with recovery options"""
 
     display_error(error)
@@ -382,7 +381,7 @@ def handle_error_interactive(error: SampleMindError) -> Optional[Any]:
     console.print("\n[bold]Recovery Options:[/bold]")
     for i, option_name in enumerate(options.keys(), 1):
         console.print(f"  [{i}] {option_name}")
-    console.print(f"  [0] Cancel")
+    console.print("  [0] Cancel")
 
     try:
         choice = typer.prompt("Select option", type=int)
@@ -493,13 +492,13 @@ class ErrorContext:
     def __init__(
         self,
         operation: str,
-        recovery_options: Optional[Dict[str, Callable]] = None,
+        recovery_options: dict[str, Callable] | None = None,
         fallback_value: Any = None,
     ):
         self.operation = operation
         self.recovery_options = recovery_options or {}
         self.fallback_value = fallback_value
-        self.error: Optional[Exception] = None
+        self.error: Exception | None = None
 
     def __enter__(self) -> None:
         return self
@@ -526,7 +525,7 @@ class ErrorContext:
 
         # Handle recovery
         if self.recovery_options:
-            result = handle_error_interactive(exc_val)
+            handle_error_interactive(exc_val)
             return True  # Suppress exception
 
         return False  # Re-raise exception
@@ -616,11 +615,11 @@ def ensure_readable(file_path: Path) -> Path:
 # ============================================================================
 
 
-def diagnose_system() -> Dict[str, Any]:
+def diagnose_system() -> dict[str, Any]:
     """Diagnose system capabilities"""
-    import sys
     import platform
     import shutil
+    import sys
 
     return {
         "platform": platform.system(),
@@ -675,7 +674,7 @@ class GracefulDegradation:
             return fallback_func()
 
     @staticmethod
-    def optional_feature(feature_func: Callable, feature_name: str) -> Optional[Any]:
+    def optional_feature(feature_func: Callable, feature_name: str) -> Any | None:
         """Try optional feature, continue if unavailable"""
         try:
             return feature_func()
@@ -690,7 +689,7 @@ class GracefulDegradation:
 # ============================================================================
 
 
-def setup_error_logging(log_file: Optional[Path] = None) -> None:
+def setup_error_logging(log_file: Path | None = None) -> None:
     """Setup comprehensive error logging"""
 
     if log_file:

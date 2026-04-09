@@ -11,7 +11,7 @@ Follows the lazy-load + mock-fallback pattern from neural_engine.py.
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -67,12 +67,8 @@ def _ensure_ast() -> bool:
         return True
     try:
         import torch as _t
-        from transformers import (
-            ASTForAudioClassification as _AST,
-        )
-        from transformers import (
-            AutoFeatureExtractor as _AFE,
-        )
+        from transformers import ASTForAudioClassification as _AST
+        from transformers import AutoFeatureExtractor as _AFE
 
         _torch = _t
         _ASTForAudioClassification = _AST
@@ -181,7 +177,7 @@ class ASTClassifier:
         audio_path: str | Path,
         top_k: int = 10,
         music_only: bool = False,
-    ) -> List[AudioLabel]:
+    ) -> list[AudioLabel]:
         """
         Classify audio into AudioSet categories.
 
@@ -200,9 +196,9 @@ class ASTClassifier:
 
     def classify_batch(
         self,
-        paths: List[str | Path],
+        paths: list[str | Path],
         top_k: int = 10,
-    ) -> List[List[AudioLabel]]:
+    ) -> list[list[AudioLabel]]:
         """Classify multiple files."""
         return [self.classify(p, top_k) for p in paths]
 
@@ -215,7 +211,7 @@ class ASTClassifier:
 
     def _classify_file(
         self, audio_path: Path, top_k: int, music_only: bool
-    ) -> List[AudioLabel]:
+    ) -> list[AudioLabel]:
         try:
             import librosa
 
@@ -233,7 +229,7 @@ class ASTClassifier:
                 logits = self._model(**inputs).logits
                 probs = _torch.sigmoid(logits).squeeze(0).cpu().numpy()
 
-            id2label: Dict[int, str] = self._model.config.id2label
+            id2label: dict[int, str] = self._model.config.id2label
             results = [
                 AudioLabel(label=id2label[i], score=float(probs[i]), label_id=i)
                 for i in range(len(probs))
@@ -249,7 +245,7 @@ class ASTClassifier:
             logger.error(f"AST inference failed: {exc}")
             return self._mock_labels(top_k)
 
-    def _mock_labels(self, top_k: int) -> List[AudioLabel]:
+    def _mock_labels(self, top_k: int) -> list[AudioLabel]:
         mock = [
             AudioLabel("Music", 0.95),
             AudioLabel("Drum", 0.82),

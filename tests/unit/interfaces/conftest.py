@@ -6,8 +6,9 @@ without requiring full dependency installation.
 """
 
 import sys
-import pytest
 from pathlib import Path
+
+import pytest
 
 # Add src to path for imports
 project_root = Path(__file__).parent.parent.parent.parent
@@ -17,7 +18,7 @@ sys.path.insert(0, str(project_root / "src"))
 @pytest.fixture
 def mock_audio_engine():
     """Provide mock AudioEngine for testing."""
-    from unittest.mock import Mock, AsyncMock
+    from unittest.mock import Mock
 
     engine = Mock()
     engine.analyze_audio = Mock()

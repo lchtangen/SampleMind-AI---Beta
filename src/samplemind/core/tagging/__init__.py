@@ -10,20 +10,19 @@ Modules:
 - tag_extractor: Extract tags from audio features
 """
 
-from .tag_vocabulary import (
-    TagVocabulary,
-    TagConfidence,
-    get_vocabulary,
-    GENRES,
-    MOODS,
-    INSTRUMENTS,
-    ENERGY_LEVELS,
-    DESCRIPTORS,
-)
-
 from .ai_tagger import (
     AITagger,
     get_tagger,
+)
+from .tag_vocabulary import (
+    DESCRIPTORS,
+    ENERGY_LEVELS,
+    GENRES,
+    INSTRUMENTS,
+    MOODS,
+    TagConfidence,
+    TagVocabulary,
+    get_vocabulary,
 )
 
 __version__ = "1.0.0"

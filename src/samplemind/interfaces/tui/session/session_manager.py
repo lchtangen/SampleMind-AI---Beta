@@ -3,13 +3,13 @@ Session Management System for SampleMind TUI
 Save and restore session state, manage projects
 """
 
-import logging
 import json
-from typing import Optional, Dict, List, Any
-from pathlib import Path
-from dataclasses import dataclass, asdict, field
-from datetime import datetime
+import logging
 import uuid
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -22,11 +22,11 @@ class AnalyzedFile:
     name: str
     analysis_id: str
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     notes: str = ""
     rating: int = 0
     favorite: bool = False
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -40,29 +40,29 @@ class SessionSnapshot:
     description: str = ""
 
     # Session content
-    analyzed_files: List[AnalyzedFile] = field(default_factory=list)
-    favorite_files: List[str] = field(default_factory=list)  # File paths
-    pinned_files: List[str] = field(default_factory=list)
+    analyzed_files: list[AnalyzedFile] = field(default_factory=list)
+    favorite_files: list[str] = field(default_factory=list)  # File paths
+    pinned_files: list[str] = field(default_factory=list)
     notes: str = ""
 
     # UI state
     current_screen: str = "main"
     search_query: str = ""
-    active_filters: Dict[str, Any] = field(default_factory=dict)
+    active_filters: dict[str, Any] = field(default_factory=dict)
 
     # Settings snapshot
-    settings: Dict[str, Any] = field(default_factory=dict)
+    settings: dict[str, Any] = field(default_factory=dict)
     theme: str = "dark"
 
     # Metadata
     version: str = "1.0"
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class SessionManager:
     """Manages session saving and restoration"""
 
-    def __init__(self, session_dir: Optional[str] = None) -> None:
+    def __init__(self, session_dir: str | None = None) -> None:
         """
         Initialize session manager
 
@@ -75,7 +75,7 @@ class SessionManager:
         self.session_dir = Path(session_dir)
         self.session_dir.mkdir(parents=True, exist_ok=True)
 
-        self.current_session: Optional[SessionSnapshot] = None
+        self.current_session: SessionSnapshot | None = None
         self.auto_save_enabled = True
         self.auto_save_interval = 300  # 5 minutes
 
@@ -95,7 +95,7 @@ class SessionManager:
         logger.info(f"Created new session: {name}")
         return session
 
-    def save_session(self, session: Optional[SessionSnapshot] = None) -> bool:
+    def save_session(self, session: SessionSnapshot | None = None) -> bool:
         """
         Save session to file
 
@@ -149,7 +149,7 @@ class SessionManager:
             logger.error(f"Error saving session: {e}")
             return False
 
-    def load_session(self, session_id: str) -> Optional[SessionSnapshot]:
+    def load_session(self, session_id: str) -> SessionSnapshot | None:
         """
         Load session from file
 
@@ -166,7 +166,7 @@ class SessionManager:
                 logger.warning(f"Session file not found: {session_file}")
                 return None
 
-            with open(session_file, "r") as f:
+            with open(session_file) as f:
                 session_data = json.load(f)
 
             # Reconstruct session
@@ -199,7 +199,7 @@ class SessionManager:
             logger.error(f"Error loading session: {e}")
             return None
 
-    def get_all_sessions(self) -> List[SessionSnapshot]:
+    def get_all_sessions(self) -> list[SessionSnapshot]:
         """
         Get all available sessions
 
@@ -210,7 +210,7 @@ class SessionManager:
 
         for session_file in self.session_dir.glob("*.json"):
             try:
-                with open(session_file, "r") as f:
+                with open(session_file) as f:
                     session_data = json.load(f)
 
                 session = SessionSnapshot(
@@ -256,7 +256,7 @@ class SessionManager:
             return False
 
     def add_analyzed_file(
-        self, path: str, analysis_id: str, tags: Optional[List[str]] = None
+        self, path: str, analysis_id: str, tags: list[str] | None = None
     ) -> None:
         """
         Add analyzed file to current session
@@ -316,8 +316,8 @@ class SessionManager:
         self.current_session.notes = note
 
     def get_session_statistics(
-        self, session: Optional[SessionSnapshot] = None
-    ) -> Dict[str, Any]:
+        self, session: SessionSnapshot | None = None
+    ) -> dict[str, Any]:
         """
         Get session statistics
 
@@ -338,16 +338,14 @@ class SessionManager:
             "total_favorites": len(session.favorite_files),
             "total_pinned": len(session.pinned_files),
             "file_formats": self._count_formats(session.analyzed_files),
-            "total_tags": len(
-                set(tag for f in session.analyzed_files for tag in f.tags)
-            ),
+            "total_tags": len({tag for f in session.analyzed_files for tag in f.tags}),
             "session_duration": self._calculate_duration(
                 session.created_at, session.modified_at
             ),
         }
 
     def export_session(
-        self, session: Optional[SessionSnapshot] = None, file_path: Optional[str] = None
+        self, session: SessionSnapshot | None = None, file_path: str | None = None
     ) -> bool:
         """
         Export session to file
@@ -373,9 +371,9 @@ class SessionManager:
         return self.save_session(session)
 
     @staticmethod
-    def _count_formats(files: List[AnalyzedFile]) -> Dict[str, int]:
+    def _count_formats(files: list[AnalyzedFile]) -> dict[str, int]:
         """Count file formats"""
-        formats: Dict[str, int] = {}
+        formats: dict[str, int] = {}
         for file in files:
             ext = Path(file.path).suffix.lower()
             formats[ext] = formats.get(ext, 0) + 1
@@ -394,10 +392,10 @@ class SessionManager:
 
 
 # Global session manager instance
-_session_manager: Optional[SessionManager] = None
+_session_manager: SessionManager | None = None
 
 
-def get_session_manager(session_dir: Optional[str] = None) -> SessionManager:
+def get_session_manager(session_dir: str | None = None) -> SessionManager:
     """Get or create session manager singleton"""
     global _session_manager
     if _session_manager is None:

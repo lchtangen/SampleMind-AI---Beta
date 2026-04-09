@@ -7,10 +7,10 @@ Features:
 - Cache statistics and monitoring
 """
 
+import hashlib
 import logging
 import os
-import hashlib
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import chromadb
 
@@ -34,7 +34,7 @@ _query_cache_hits = 0
 _query_cache_misses = 0
 
 
-def _cache_embedding_hash(embedding: List[float]) -> str:
+def _cache_embedding_hash(embedding: list[float]) -> str:
     """Generate hash for embedding vector."""
     import json
 
@@ -94,7 +94,7 @@ def get_collection() -> Any:
 
 
 async def add_embedding(
-    file_id: str, embedding: List[float], metadata: Optional[Dict[str, Any]] = None
+    file_id: str, embedding: list[float], metadata: dict[str, Any] | None = None
 ) -> bool:
     """Add audio embedding to ChromaDB"""
     try:
@@ -113,11 +113,11 @@ async def add_embedding(
 
 
 async def query_similar(
-    embedding: List[float],
+    embedding: list[float],
     n_results: int = 10,
-    where: Optional[Dict[str, Any]] = None,
+    where: dict[str, Any] | None = None,
     use_cache: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Query similar audio samples with caching support.
 
@@ -135,7 +135,6 @@ async def query_similar(
     # Generate cache key
     cache_key = None
     if use_cache and where is None:  # Only cache queries without filters
-        import json
 
         embedding_hash = _cache_embedding_hash(embedding)
         cache_key = f"query:{embedding_hash}:n{n_results}"
@@ -188,8 +187,8 @@ async def query_similar(
 
 async def add_audio_to_collection(
     file_path: str,
-    features: Dict[str, Any],
-    metadata: Optional[Dict[str, Any]] = None,
+    features: dict[str, Any],
+    metadata: dict[str, Any] | None = None,
 ) -> str:
     """Add an audio file to the ChromaDB collection by its features dict.
 
@@ -199,12 +198,11 @@ async def add_audio_to_collection(
     Returns the generated file_id.
     """
     import hashlib
-    import json
 
     file_id = hashlib.sha256(file_path.encode()).hexdigest()[:16]
 
     # Build a reproducible float embedding from the features dict
-    embedding: List[float] = []
+    embedding: list[float] = []
     for value in features.values():
         if isinstance(value, (int, float)):
             embedding.append(float(value))
@@ -233,7 +231,7 @@ async def delete_embedding(file_id: str) -> bool:
         return False
 
 
-async def get_collection_stats() -> Dict[str, Any]:
+async def get_collection_stats() -> dict[str, Any]:
     """Get collection statistics"""
     try:
         collection = get_collection()
@@ -247,7 +245,7 @@ async def get_collection_stats() -> Dict[str, Any]:
         return {"count": 0, "name": "unknown", "metadata": {}}
 
 
-def get_query_cache_stats() -> Dict[str, Any]:
+def get_query_cache_stats() -> dict[str, Any]:
     """Get query cache statistics."""
     global _query_cache, _query_cache_hits, _query_cache_misses
 
@@ -275,7 +273,7 @@ def clear_query_cache() -> None:
     logger.info(f"Cleared query cache ({cache_size} entries)")
 
 
-def invalidate_query_cache_for_embedding(embedding: List[float]) -> None:
+def invalidate_query_cache_for_embedding(embedding: list[float]) -> None:
     """Invalidate cache entries for a specific embedding."""
     global _query_cache
 

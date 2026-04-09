@@ -4,8 +4,6 @@ Unit tests for AudioFingerprinter (Step 19).
 
 from __future__ import annotations
 
-import hashlib
-
 import numpy as np
 import pytest
 
@@ -52,7 +50,9 @@ def test_fingerprint_different_signals():
     fp = AudioFingerprinter()
     y1 = _white_noise(seed=1)
     y2 = _white_noise(seed=2)
-    assert fp.fingerprint(y1, 22050).fingerprint != fp.fingerprint(y2, 22050).fingerprint
+    assert (
+        fp.fingerprint(y1, 22050).fingerprint != fp.fingerprint(y2, 22050).fingerprint
+    )
 
 
 def test_fingerprint_no_near_duplicates_initial():
@@ -73,9 +73,9 @@ def test_fingerprint_and_search_without_db(tmp_path):
     pytest.importorskip("librosa")
     import asyncio
 
-    from samplemind.core.analysis.fingerprinter import AudioFingerprinter
-    import librosa
     import soundfile as sf
+
+    from samplemind.core.analysis.fingerprinter import AudioFingerprinter
 
     # Create a real WAV file
     y = _white_noise()
@@ -93,12 +93,13 @@ def test_fingerprint_near_duplicate_detection():
     """Simulate a near-duplicate DB returning one hit."""
     pytest.importorskip("librosa")
     import asyncio
-    from unittest.mock import MagicMock
-
-    from samplemind.core.analysis.fingerprinter import AudioFingerprinter, NearDuplicate
-    import soundfile as sf
     import tempfile
     from pathlib import Path
+    from unittest.mock import MagicMock
+
+    import soundfile as sf
+
+    from samplemind.core.analysis.fingerprinter import AudioFingerprinter
 
     y = _white_noise(seed=99)
 

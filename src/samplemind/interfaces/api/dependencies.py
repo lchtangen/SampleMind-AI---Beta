@@ -1,6 +1,6 @@
 """Dependency injection for FastAPI"""
 
-from typing import Any, Optional
+from typing import Any
 
 # Global state storage (initialized in main.py lifespan)
 _app_state = {}
@@ -11,7 +11,7 @@ def set_app_state(key: str, value: Any):
     _app_state[key] = value
 
 
-def get_app_state(key: str) -> Optional[Any]:
+def get_app_state(key: str) -> Any | None:
     """Get application state (for dependency injection)"""
     return _app_state.get(key)
 

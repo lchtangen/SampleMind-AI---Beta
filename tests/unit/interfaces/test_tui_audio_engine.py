@@ -10,23 +10,20 @@ Tests cover:
 - Error handling for invalid files
 """
 
-import asyncio
-import hashlib
 import os
 import tempfile
-from pathlib import Path
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import Mock, patch
 
 import pytest
 
+from samplemind.core.engine.audio_engine import AnalysisLevel, AudioFeatures
 from samplemind.interfaces.tui.audio_engine_bridge import (
-    TUIAudioEngine,
     AudioCache,
     SessionStats,
+    TUIAudioEngine,
     get_tui_engine,
     reset_tui_engine,
 )
-from samplemind.core.engine.audio_engine import AudioFeatures, AnalysisLevel
 
 
 class TestSessionStats:
@@ -334,7 +331,7 @@ class TestTUIAudioEngine:
         engine = TUIAudioEngine()
 
         temp_files = []
-        for i in range(3):
+        for _i in range(3):
             with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
                 f.write(b"fake audio data")
                 temp_files.append(f.name)

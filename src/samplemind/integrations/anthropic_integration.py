@@ -10,14 +10,13 @@ This module provides claude-sonnet-4-6 integration optimized for:
 - Deep music theory explanations
 """
 
-import asyncio
+import json
 import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-import json
+from typing import Any
 
 try:
     from anthropic import Anthropic, AsyncAnthropic
@@ -35,14 +34,14 @@ class ClaudeModel(Enum):
     """Available Claude models — v3.0 (2026-04)"""
 
     # Current generation (PRIMARY)
-    CLAUDE_SONNET_4_6 = "claude-sonnet-4-6"          # PRIMARY — latest, best overall
-    CLAUDE_OPUS_4_6 = "claude-opus-4-6"              # Most capable, highest cost
-    CLAUDE_HAIKU_4_5 = "claude-haiku-4-5-20251001"   # Fastest, lowest cost
+    CLAUDE_SONNET_4_6 = "claude-sonnet-4-6"  # PRIMARY — latest, best overall
+    CLAUDE_OPUS_4_6 = "claude-opus-4-6"  # Most capable, highest cost
+    CLAUDE_HAIKU_4_5 = "claude-haiku-4-5-20251001"  # Fastest, lowest cost
 
     # Previous generation (fallback)
     CLAUDE_3_7_SONNET = "claude-3-7-sonnet-20250219"  # extended thinking
     CLAUDE_3_5_SONNET = "claude-3-5-sonnet-20241022"  # legacy fallback
-    CLAUDE_3_5_HAIKU = "claude-3-5-haiku-20241022"    # legacy fast
+    CLAUDE_3_5_HAIKU = "claude-3-5-haiku-20241022"  # legacy fast
 
 
 class AnthropicAnalysisType(Enum):
@@ -66,24 +65,24 @@ class AnthropicMusicAnalysis:
     detailed_analysis: str
 
     # Production Coaching
-    production_tips: List[str] = field(default_factory=list)
-    technique_explanations: List[Dict[str, str]] = field(default_factory=list)
-    workflow_optimizations: List[str] = field(default_factory=list)
+    production_tips: list[str] = field(default_factory=list)
+    technique_explanations: list[dict[str, str]] = field(default_factory=list)
+    workflow_optimizations: list[str] = field(default_factory=list)
 
     # Creative Suggestions
-    creative_ideas: List[str] = field(default_factory=list)
-    arrangement_suggestions: List[str] = field(default_factory=list)
-    genre_fusion_ideas: List[str] = field(default_factory=list)
+    creative_ideas: list[str] = field(default_factory=list)
+    arrangement_suggestions: list[str] = field(default_factory=list)
+    genre_fusion_ideas: list[str] = field(default_factory=list)
 
     # FL Studio Specific
-    fl_studio_recommendations: List[str] = field(default_factory=list)
-    plugin_chains: List[Dict[str, Any]] = field(default_factory=list)
-    mixer_setup: Dict[str, Any] = field(default_factory=dict)
+    fl_studio_recommendations: list[str] = field(default_factory=list)
+    plugin_chains: list[dict[str, Any]] = field(default_factory=list)
+    mixer_setup: dict[str, Any] = field(default_factory=dict)
 
     # Music Theory
-    harmonic_analysis: Dict[str, Any] = field(default_factory=dict)
-    modal_analysis: List[str] = field(default_factory=list)
-    chord_progressions: List[str] = field(default_factory=list)
+    harmonic_analysis: dict[str, Any] = field(default_factory=dict)
+    modal_analysis: list[str] = field(default_factory=list)
+    chord_progressions: list[str] = field(default_factory=list)
 
     # Metadata
     model_used: ClaudeModel = ClaudeModel.CLAUDE_SONNET_4_6
@@ -106,7 +105,7 @@ class AnthropicMusicProducer:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         default_model: ClaudeModel = ClaudeModel.CLAUDE_SONNET_4_6,
         max_tokens: int = 8096,
         temperature: float = 1.0,
@@ -148,9 +147,9 @@ class AnthropicMusicProducer:
 
     async def analyze_music_comprehensive(
         self,
-        audio_features: Dict[str, Any],
+        audio_features: dict[str, Any],
         analysis_type: AnthropicAnalysisType = AnthropicAnalysisType.COMPREHENSIVE_ANALYSIS,
-        user_context: Optional[Dict[str, Any]] = None,
+        user_context: dict[str, Any] | None = None,
     ) -> AnthropicMusicAnalysis:
         """
         Perform comprehensive music analysis with Claude
@@ -211,9 +210,9 @@ class AnthropicMusicProducer:
 
     def _build_prompt(
         self,
-        audio_features: Dict[str, Any],
+        audio_features: dict[str, Any],
         analysis_type: AnthropicAnalysisType,
-        user_context: Optional[Dict[str, Any]],
+        user_context: dict[str, Any] | None,
     ) -> str:
         """Build specialized prompt for Claude based on analysis type"""
 
@@ -434,7 +433,7 @@ Provide your response as a structured JSON object with these keys:
         else:
             self.stats["error_count"] += 1
 
-    def get_performance_stats(self) -> Dict[str, Any]:
+    def get_performance_stats(self) -> dict[str, Any]:
         """Get performance statistics"""
         return {
             **self.stats,
@@ -459,7 +458,7 @@ Provide your response as a structured JSON object with these keys:
         self,
         file_path: Path,
         analysis_prompt: str,
-        model: Optional[ClaudeModel] = None,
+        model: ClaudeModel | None = None,
     ) -> AnthropicMusicAnalysis:
         """
         Submit an audio file via the Anthropic Files API and analyse it with Claude.
@@ -538,8 +537,8 @@ Provide your response as a structured JSON object with these keys:
 
 # Convenience function for quick analysis
 async def analyze_with_claude(
-    audio_features: Dict[str, Any],
-    api_key: Optional[str] = None,
+    audio_features: dict[str, Any],
+    api_key: str | None = None,
     analysis_type: AnthropicAnalysisType = AnthropicAnalysisType.COMPREHENSIVE_ANALYSIS,
 ) -> AnthropicMusicAnalysis:
     """

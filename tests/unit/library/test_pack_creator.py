@@ -80,7 +80,7 @@ class TestPackCreator:
         # Setup return values
         mock_sf.info.return_value.samplerate = 44100
         mock_sf.info.return_value.channels = 2
-        mock_sf_info_subtype = MagicMock()
+        MagicMock()
         # Mock string split for subtype
         mock_sf.info.return_value.subtype_info = "PCM_24"
 

@@ -10,16 +10,10 @@ Tests cover:
 - Error handling
 """
 
+from unittest.mock import patch
+
 import pytest
-from pathlib import Path
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typer.testing import CliRunner
-
-from samplemind.exceptions import (
-    AudioFileError,
-    FileNotFoundError as SampleMindFileNotFoundError,
-)
-
 
 pytestmark = [pytest.mark.unit, pytest.mark.cli]
 

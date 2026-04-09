@@ -1,12 +1,11 @@
 """Advanced multi-level caching system (L1/L2/L3) for TUI"""
 
-import asyncio
-import logging
 import hashlib
 import json
+import logging
 from collections import OrderedDict
-from typing import Any, Optional, Dict, List
-from datetime import datetime, timedelta
+from datetime import timedelta
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -51,8 +50,8 @@ class AdvancedCache:
         }
 
         # Redis/MongoDB references (will be set externally)
-        self.redis_cache: Optional[Any] = None
-        self.mongo_db: Optional[Any] = None
+        self.redis_cache: Any | None = None
+        self.mongo_db: Any | None = None
 
     # ============================================================================
     # KEY MANAGEMENT
@@ -76,7 +75,7 @@ class AdvancedCache:
     # L1 CACHE (MEMORY)
     # ============================================================================
 
-    def _l1_get(self, key: str) -> Optional[Any]:
+    def _l1_get(self, key: str) -> Any | None:
         """Get from L1 memory cache"""
         if key in self.l1_cache:
             # Move to end (LRU pattern)
@@ -118,7 +117,7 @@ class AdvancedCache:
     # MULTI-LEVEL CACHE OPERATIONS
     # ============================================================================
 
-    async def get(self, namespace: str, identifier: str) -> Optional[Any]:
+    async def get(self, namespace: str, identifier: str) -> Any | None:
         """Get value from cache (L1 → L2 → L3)"""
         self.stats["total_requests"] += 1
         key = self._generate_key(namespace, identifier)
@@ -166,7 +165,7 @@ class AdvancedCache:
         namespace: str,
         identifier: str,
         value: Any,
-        tags: Optional[List[str]] = None,
+        tags: list[str] | None = None,
     ) -> None:
         """Set value in cache (L1 + L2 + L3)"""
         key = self._generate_key(namespace, identifier)
@@ -239,7 +238,7 @@ class AdvancedCache:
     # L2 CACHE (REDIS) - Stub methods
     # ============================================================================
 
-    async def _l2_get(self, key: str) -> Optional[Any]:
+    async def _l2_get(self, key: str) -> Any | None:
         """Get from Redis (requires external setup)"""
         if not self.redis_cache:
             return None
@@ -247,7 +246,7 @@ class AdvancedCache:
         return None
 
     async def _l2_set(
-        self, key: str, value: Any, tags: Optional[List[str]] = None
+        self, key: str, value: Any, tags: list[str] | None = None
     ) -> None:
         """Set in Redis (requires external setup)"""
         if not self.redis_cache:
@@ -270,7 +269,7 @@ class AdvancedCache:
     # L3 CACHE (MONGODB) - Stub methods
     # ============================================================================
 
-    async def _l3_get(self, key: str) -> Optional[Any]:
+    async def _l3_get(self, key: str) -> Any | None:
         """Get from MongoDB (requires external setup)"""
         if not self.mongo_db:
             return None
@@ -278,7 +277,7 @@ class AdvancedCache:
         return None
 
     async def _l3_set(
-        self, key: str, value: Any, tags: Optional[List[str]] = None
+        self, key: str, value: Any, tags: list[str] | None = None
     ) -> None:
         """Set in MongoDB (requires external setup)"""
         if not self.mongo_db:
@@ -318,7 +317,7 @@ class AdvancedCache:
             return 0.0
         return round((self.stats["l1_hits"] / total_l1) * 100, 1)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get cache statistics"""
         return {
             "total_requests": self.stats["total_requests"],
@@ -368,7 +367,7 @@ class AdvancedCache:
 
 
 # Global singleton instance
-_advanced_cache: Optional[AdvancedCache] = None
+_advanced_cache: AdvancedCache | None = None
 
 
 def get_advanced_cache(

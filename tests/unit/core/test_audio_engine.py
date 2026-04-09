@@ -3,20 +3,19 @@
 Unit tests for core audio engine functionality
 """
 
-import pytest
-import numpy as np
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+
+import numpy as np
+import pytest
 import soundfile as sf
 
 from samplemind.core.engine.audio_engine import (
+    AdvancedFeatureExtractor,
+    AnalysisLevel,
     AudioEngine,
     AudioFeatures,
-    AnalysisLevel,
-    AudioFormat,
     AudioProcessor,
-    AdvancedFeatureExtractor,
 )
 
 

@@ -1,0 +1,864 @@
+Python Version: Python 3.13.12
+Virtual Env: /home/lchtangen/projects/ai/SampleMind-AI---Beta/.venv/bin/python
+OS: Linux
+Arch: x86_64
+
+Installed Tools:
+  - ruff: ruff 0.15.10
+  - mypy: mypy 1.20.0 (compiled: yes)
+  - pytest: pytest 9.0.3
+
+Project Structure:
+/home/lchtangen/projects/ai/SampleMind-AI---Beta
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/.ruff_cache
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/.ruff_cache/0.15.10
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/.devcontainer
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/.vscode
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/docs
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/docs/strategy
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/docs/archive
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/docs/guides
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/docs/v3
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/.claude
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/scripts
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/scripts/setup
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/completions
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/completions/fish
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/completions/zsh
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/completions/powershell
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/completions/bash
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/tests
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/tests/unit
+Checking core imports...
+✓ numpy
+✓ scipy
+✓ pydantic
+✓ pytest
+✓ ruff
+✓ mypy
+✓ black
+✓ isort
+Running ruff check...
+379	B008 	function-call-in-default-argument
+295	B904 	raise-without-from-inside-except
+ 75	F841 	unused-variable
+ 40	W293 	blank-line-with-whitespace
+ 38	F821 	undefined-name
+ 36	W291 	trailing-whitespace
+ 26	B007 	unused-loop-control-variable
+ 21	E722 	bare-except
+ 20	UP042	replace-str-enum
+ 16	F401 	unused-import
+ 13	E402 	module-import-not-at-top-of-file
+ 11	B905 	zip-without-explicit-strict
+  7	E712 	true-false-comparison
+  4	C401 	unnecessary-generator-set
+  3	B006 	mutable-argument-default
+  3	E741 	ambiguous-variable-name
+  2	B017 	assert-raises-exception
+  2	C414 	unnecessary-double-cast-or-process
+  2	F811 	redefined-while-unused
+  2	UP047	non-pep695-generic-function
+  1	C416 	unnecessary-comprehension
+  1	E711 	none-comparison
+  1	F402 	import-shadowed-by-loop-var
+  1	F823 	undefined-local
+Found 999 errors.
+No fixes available (226 hidden fixes can be enabled with the `--unsafe-fixes` option).
+Checking black formatting...
+All done! ✨ 🍰 ✨
+409 files would be left unchanged.
+
+Checking isort import sorting...
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/interfaces/cli/commands/__init__.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/interfaces/api/main.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/tests/audio/test_audio_conversion.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/tests/audio/test_audio_processor.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/tests/audio/test_audio_processor_integration.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/tests/integration/test_batch_processing.py Imports are incorrectly sorted and/or formatted.
+Running mypy type checker...
+src/samplemind/ai/generation/style_transfer.py:229: error: Argument 2 to "_detect_key" has incompatible type "int | float"; expected "int"  [arg-type]
+src/samplemind/ai/generation/style_transfer.py:267: error: Name "np" is not defined  [name-defined]
+src/samplemind/ai/generation/style_transfer.py:271: error: Name "np" is not defined  [name-defined]
+src/samplemind/ai/generation/style_transfer.py:315: error: Name "np" is not defined  [name-defined]
+src/samplemind/ai/classification/multi_label_genre.py:224: error: Argument 2 to "_detect_key_scale" of "MultiLabelGenreClassifier" has incompatible type "int | float"; expected "int"  [arg-type]
+src/samplemind/ai/classification/multi_label_genre.py:225: error: Argument 2 to "classify" of "MultiLabelGenreClassifier" has incompatible type "int | float"; expected "int"  [arg-type]
+src/samplemind/ai/classification/multi_label_genre.py:273: error: Argument 1 to "float" has incompatible type "generic[Any] | complex | str | bytes | memoryview[int]"; expected "str | Buffer | SupportsFloat | SupportsIndex"  [arg-type]
+src/samplemind/ai/classification/multi_label_genre.py:273: error: Value of type "builtins.bool | numpy.bool[builtins.bool] | int | integer[Any] | float | floating[Any] | ndarray[tuple[Any, ...], dtype[Any]]" is not indexable  [index]
+src/samplemind/ai/classification/mood_detector.py:160: error: Unsupported operand types for * ("float" and "None")  [operator]
+src/samplemind/ai/classification/mood_detector.py:160: note: Right operand is of type "float | None"
+src/samplemind/ai/classification/mood_detector.py:189: error: Argument 2 to "detect" of "MoodDetector" has incompatible type "int | float"; expected "int"  [arg-type]
+src/samplemind/ai/classification/mood_detector.py:211: error: Argument 1 to "float" has incompatible type "generic[Any] | complex | str | bytes | memoryview[int]"; expected "str | Buffer | SupportsFloat | SupportsIndex"  [arg-type]
+src/samplemind/ai/classification/mood_detector.py:211: error: Value of type "builtins.bool | numpy.bool[builtins.bool] | int | integer[Any] | float | floating[Any] | ndarray[tuple[Any, ...], dtype[Any]]" is not indexable  [index]
+src/samplemind/ai/classification/instrument_detector.py:302: error: Argument 2 to "detect" of "InstrumentDetector" has incompatible type "int | float"; expected "int"  [arg-type]
+src/samplemind/ai/classification/cnn_classifier.py:135: error: Name "nn.Module" is not defined  [name-defined]
+src/samplemind/core/similarity/similarity_db.py:156: error: Incompatible default for parameter "extensions" (default has type "None", parameter has type "list[str]")  [assignment]
+src/samplemind/core/similarity/similarity_db.py:156: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+src/samplemind/core/similarity/similarity_db.py:156: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+src/samplemind/core/engine/audio_engine.py:39: error: Name "NeuralFeatureExtractor" already defined (possibly by an import)  [no-redef]
+src/samplemind/core/engine/audio_engine.py:41: error: Cannot assign to a type  [misc]
+src/samplemind/core/engine/audio_engine.py:41: error: Incompatible types in assignment (expression has type "None", variable has type "type[NeuralFeatureExtractor]")  [assignment]
+src/samplemind/core/engine/audio_engine.py:155: error: Unsupported operand types for - ("float" and "SupportsDunderLT[Any]")  [operator]
+src/samplemind/core/engine/audio_engine.py:155: error: Unsupported operand types for - ("float" and "SupportsDunderGT[Any]")  [operator]
+src/samplemind/core/engine/audio_engine.py:155: note: Right operand is of type "SupportsDunderLT[Any] | SupportsDunderGT[Any]"
+src/samplemind/core/engine/audio_engine.py:729: error: List item 0 has incompatible type "floating[Any]"; expected "float"  [list-item]
+src/samplemind/core/engine/audio_engine.py:730: error: List item 1 has incompatible type "floating[Any]"; expected "float"  [list-item]
+src/samplemind/core/engine/audio_engine.py:731: error: List item 2 has incompatible type "floating[Any]"; expected "float"  [list-item]
+src/samplemind/core/engine/audio_engine.py:732: error: List item 3 has incompatible type "floating[Any]"; expected "float"  [list-item]
+src/samplemind/core/engine/audio_engine.py:747: error: Need type annotation for "feature_cache" (hint: "feature_cache: dict[<type>, <type>] = ...")  [var-annotated]
+src/samplemind/core/engine/audio_engine.py:753: error: Function "NeuralFeatureExtractor" could always be true in boolean context  [truthy-function]
+src/samplemind/core/engine/audio_engine.py:764: error: Need type annotation for "analysis_times" (hint: "analysis_times: list[<type>] = ...")  [var-annotated]
+src/samplemind/core/engine/audio_engine.py:1076: error: Argument 1 to "append" of "list" has incompatible type "tuple[str, SupportsDunderLT[Any] | SupportsDunderGT[Any]]"; expected "tuple[str, float]"  [arg-type]
+src/samplemind/core/engine/audio_engine.py:1085: error: Incompatible types in assignment (expression has type "float", variable has type "int")  [assignment]
+src/samplemind/core/engine/audio_engine.py:1086: error: Incompatible types in assignment (expression has type "float", variable has type "int")  [assignment]
+src/samplemind/core/analysis/harmonic_analyzer.py:196: error: Unexpected keyword argument "y" for "analyze" of "MusicTheoryAnalyzer"  [call-arg]
+src/samplemind/core/analysis/harmonic_analyzer.py:196: note: "analyze" defined in "src.samplemind.core.analysis.music_theory"
+src/samplemind/core/analysis/harmonic_analyzer.py:196: error: Unexpected keyword argument "sr" for "analyze" of "MusicTheoryAnalyzer"  [call-arg]
+src/samplemind/core/analysis/harmonic_analyzer.py:240: error: Argument 2 to "analyze" of "HarmonicAnalyzer" has incompatible type "int | float"; expected "int"  [arg-type]
+src/samplemind/core/analysis/harmonic_analyzer.py:275: error: Unpacking a string is disallowed  [str-unpack]
+src/samplemind/core/analysis/harmonic_analyzer.py:277: error: Argument 2 to "roll" has incompatible type "str"; expected "SupportsIndex | Sequence[SupportsIndex]"  [arg-type]
+src/samplemind/core/analysis/harmonic_analyzer.py:286: error: Incompatible types in assignment (expression has type "str", variable has type "int")  [assignment]
+src/samplemind/core/auth/permissions.py:31: error: Name "Any" is not defined  [name-defined]
+src/samplemind/core/auth/permissions.py:31: note: Did you forget to import it from "typing"? (Suggestion: "from typing import Any")
+src/samplemind/core/auth/permissions.py:52: error: Name "Any" is not defined  [name-defined]
+src/samplemind/core/auth/permissions.py:52: note: Did you forget to import it from "typing"? (Suggestion: "from typing import Any")
+src/samplemind/core/auth/permissions.py:79: error: Name "Any" is not defined  [name-defined]
+src/samplemind/core/auth/permissions.py:79: note: Did you forget to import it from "typing"? (Suggestion: "from typing import Any")
+src/samplemind/core/auth/permissions.py:98: error: Name "Any" is not defined  [name-defined]
+src/samplemind/core/auth/permissions.py:98: note: Did you forget to import it from "typing"? (Suggestion: "from typing import Any")
+src/samplemind/core/auth/permissions.py:127: error: Name "Any" is not defined  [name-defined]
+src/samplemind/core/auth/permissions.py:127: note: Did you forget to import it from "typing"? (Suggestion: "from typing import Any")
+src/samplemind/interfaces/cli/commands/utils.py:90: error: Library stubs not installed for "yaml"  [import-untyped]
+src/samplemind/interfaces/cli/commands/utils.py:90: note: Hint: "python3 -m pip install types-PyYAML"
+src/samplemind/interfaces/cli/commands/utils.py:165: error: "None" has no attribute "__enter__"  [attr-defined]
+src/samplemind/interfaces/cli/commands/utils.py:169: error: "None" has no attribute "__exit__"  [attr-defined]
+src/samplemind/interfaces/cli/commands/utils.py:239: error: No return value expected  [return-value]
+src/samplemind/interfaces/cli/commands/utils.py:241: error: Incompatible return value type (got "_Wrapped[[VarArg(Any), KwArg(Any)], T, [VarArg(Any), KwArg(Any)], None]", expected "Callable[..., T]")  [return-value]
+src/samplemind/interfaces/cli/commands/utils.py:241: note: "_Wrapped[[VarArg(Any), KwArg(Any)], T, [VarArg(Any), KwArg(Any)], None].__call__" has type "def __call__(self, *args: Any, **kwargs: Any) -> None"
+src/samplemind/interfaces/cli/commands/utils.py:251: error: No return value expected  [return-value]
+src/samplemind/interfaces/cli/commands/utils.py:259: error: Incompatible return value type (got "_Wrapped[[VarArg(Any), KwArg(Any)], T, [VarArg(Any), KwArg(Any)], None]", expected "Callable[..., T]")  [return-value]
+src/samplemind/interfaces/cli/commands/utils.py:259: note: "_Wrapped[[VarArg(Any), KwArg(Any)], T, [VarArg(Any), KwArg(Any)], None].__call__" has type "def __call__(self, *args: Any, **kwargs: Any) -> None"
+src/samplemind/interfaces/cli/commands/utils.py:272: error: No return value expected  [return-value]
+src/samplemind/interfaces/cli/commands/utils.py:274: error: Incompatible return value type (got "_Wrapped[[VarArg(Any), KwArg(Any)], T, [VarArg(Any), KwArg(Any)], None]", expected "Callable[..., T]")  [return-value]
+src/samplemind/interfaces/cli/commands/utils.py:274: note: "_Wrapped[[VarArg(Any), KwArg(Any)], T, [VarArg(Any), KwArg(Any)], None].__call__" has type "def __call__(self, *args: Any, **kwargs: Any) -> None"
+src/samplemind/interfaces/cli/commands/utils.py:400: error: "create_progress_bar" does not return a value (it only ever returns None)  [func-returns-value]
+src/samplemind/interfaces/cli/commands/utils.py:412: error: Value of type "Coroutine[Any, Any, dict[str, Any]]" is not indexable  [index]
+src/samplemind/interfaces/cli/commands/utils.py:412: note: Maybe you forgot to use "await"?
+src/samplemind/core/generation/generation_manager.py:121: error: Incompatible types in assignment (expression has type "NeuralFeatureExtractor", variable has type "None")  [assignment]
+src/samplemind/core/generation/generation_manager.py:134: error: Incompatible types in assignment (expression has type "StemSeparationEngine", variable has type "None")  [assignment]
+src/samplemind/core/generation/generation_manager.py:210: error: "SimilarityDatabase" has no attribute "search_by_embedding"  [attr-defined]
+src/samplemind/core/generation/generation_manager.py:317: error: Incompatible types in assignment (expression has type "list[object]", variable has type "list[dict[str, Any]]")  [assignment]
+src/samplemind/core/generation/generation_manager.py:348: error: Unsupported target for indexed assignment ("Collection[str]")  [index]
+src/samplemind/core/engine/distributed_processor.py:72: error: No return value expected  [return-value]
+src/samplemind/core/engine/distributed_processor.py:108: error: "None" has no attribute "dashboard_link"  [attr-defined]
+src/samplemind/core/engine/distributed_processor.py:333: error: "AdvancedFeatureExtractor" has no attribute "_extract_chroma_features"; maybe "extract_tonal_features", "extract_spectral_features", or "extract_mfcc_features"?  [attr-defined]
+src/samplemind/core/engine/distributed_processor.py:442: error: Incompatible return value type (got "tuple[ndarray[tuple[Any, ...], dtype[Any]], int | float]", expected "tuple[ndarray[tuple[Any, ...], dtype[Any]], int]")  [return-value]
+src/samplemind/core/engine/distributed_processor.py:486: error: "None" has no attribute "process_audio_files"  [attr-defined]
+src/samplemind/core/engine/cloud_processor.py:103: error: No return value expected  [return-value]
+src/samplemind/core/engine/cloud_processor.py:136: error: "None" has no attribute "dashboard_link"  [attr-defined]
+src/samplemind/core/engine/cloud_processor.py:181: error: "None" has no attribute "scale"  [attr-defined]
+src/samplemind/core/engine/cloud_processor.py:184: error: "None" has no attribute "dashboard_link"  [attr-defined]
+src/samplemind/core/engine/cloud_processor.py:251: error: "None" has no attribute "process_files"  [attr-defined]
+src/samplemind/core/processing/audio_pipeline.py:89: error: Incompatible types in assignment (expression has type "ndarray[tuple[Any, ...], dtype[Any]]", variable has type "None")  [assignment]
+src/samplemind/core/processing/audio_pipeline.py:89: error: Incompatible types in assignment (expression has type "int | float", variable has type "None")  [assignment]
+src/samplemind/core/processing/audio_pipeline.py:97: error: Incompatible types in assignment (expression has type "AudioMetadata", variable has type "None")  [assignment]
+src/samplemind/core/processing/audio_pipeline.py:300: error: Argument 1 to "resample" of "AudioPipeline" has incompatible type "float | None"; expected "int | None"  [arg-type]
+src/samplemind/interfaces/cli/commands/similarity.py:74: error: Name "Any" is not defined  [name-defined]
+src/samplemind/interfaces/cli/commands/similarity.py:74: note: Did you forget to import it from "typing"? (Suggestion: "from typing import Any")
+src/samplemind/interfaces/cli/commands/daw.py:229: error: Incompatible types in assignment (expression has type "TextIOWrapper[_WrappedBuffer]", variable has type "Path")  [assignment]
+src/samplemind/interfaces/cli/commands/daw.py:230: error: Argument 2 to "dump" has incompatible type "Path"; expected "SupportsWrite[str]"  [arg-type]
+src/samplemind/interfaces/cli/commands/audio.py:432: error: Argument "model" to "StemSeparationEngine" has incompatible type "object"; expected "str"  [arg-type]
+src/samplemind/interfaces/cli/commands/audio.py:434: error: Argument "shifts" to "StemSeparationEngine" has incompatible type "object"; expected "int"  [arg-type]
+src/samplemind/interfaces/cli/commands/audio.py:435: error: Argument "overlap" to "StemSeparationEngine" has incompatible type "object"; expected "float"  [arg-type]
+src/samplemind/interfaces/cli/commands/audio.py:500: error: Argument "model" to "StemSeparationEngine" has incompatible type "object"; expected "str"  [arg-type]
+src/samplemind/interfaces/cli/commands/audio.py:502: error: Argument "shifts" to "StemSeparationEngine" has incompatible type "object"; expected "int"  [arg-type]
+src/samplemind/interfaces/cli/commands/audio.py:503: error: Argument "overlap" to "StemSeparationEngine" has incompatible type "object"; expected "float"  [arg-type]
+src/samplemind/interfaces/cli/commands/audio.py:655: error: Argument "model" to "StemSeparationEngine" has incompatible type "object"; expected "str"  [arg-type]
+src/samplemind/interfaces/cli/commands/audio.py:657: error: Argument "shifts" to "StemSeparationEngine" has incompatible type "object"; expected "int"  [arg-type]
+src/samplemind/interfaces/cli/commands/audio.py:658: error: Argument "overlap" to "StemSeparationEngine" has incompatible type "object"; expected "float"  [arg-type]
+Found 616 errors in 102 files (checked 322 source files)
+
+(Type checking may have timed out after 60s - check detailed log)
+Collecting available tests...
+ImportError while loading conftest '/home/lchtangen/projects/ai/SampleMind-AI---Beta/tests/conftest.py'.
+tests/conftest.py:20: in <module>
+    from samplemind.core.engine.audio_engine import (
+E   ModuleNotFoundError: No module named 'samplemind'
+Running unit tests (timeout: 120s)...
+ImportError while loading conftest '/home/lchtangen/projects/ai/SampleMind-AI---Beta/tests/conftest.py'.
+tests/conftest.py:20: in <module>
+    from samplemind.core.engine.audio_engine import (
+E   ModuleNotFoundError: No module named 'samplemind'
+Running document validation...
+INFO: 🔍 Starting documentation validation...
+# Documentation Validation Report
+
+## Summary
+- Total files: 266
+- Errors found: 628
+- Warnings: 0
+- Broken links: 611
+
+## Quality Metrics
+- Average file size: 12939 characters
+- Files with examples: 201/266
+- Files with TOC: 125/266
+
+## Errors
+❌ Broken link: LICENSE (from .github/README.md)
+❌ Missing main header: .venv/lib/python3.13/site-packages/fastapi/.agents/skills/fastapi/SKILL.md
+❌ Missing main header: .venv/lib/python3.13/site-packages/idna-3.11.dist-info/licenses/LICENSE.md
+❌ Missing main header: .venv/lib/python3.13/site-packages/lazy_loader-0.5.dist-info/licenses/LICENSE.md
+❌ Missing main header: .venv/lib/python3.13/site-packages/numpy/random/LICENSE.md
+❌ Missing main header: .venv/lib/python3.13/site-packages/numpy-2.4.4.dist-info/licenses/numpy/_core/src/npysort/x86-simd-sort/LICENSE.md
+❌ Missing main header: .venv/lib/python3.13/site-packages/numpy-2.4.4.dist-info/licenses/numpy/fft/pocketfft/LICENSE.md
+❌ Missing main header: .venv/lib/python3.13/site-packages/numpy-2.4.4.dist-info/licenses/numpy/random/LICENSE.md
+❌ Missing main header: .venv/lib/python3.13/site-packages/pip/_vendor/idna/LICENSE.md
+❌ Missing main header: .venv/lib/python3.13/site-packages/pip-26.0.1.dist-info/licenses/src/pip/_vendor/idna/LICENSE.md
+❌ Missing main header: .venv/lib/python3.13/site-packages/scipy/fft/_pocketfft/LICENSE.md
+❌ Missing main header: .venv/lib/python3.13/site-packages/sklearn/externals/array_api_compat/README.md
+❌ Missing main header: .venv/lib/python3.13/site-packages/sklearn/externals/array_api_extra/README.md
+❌ Missing main header: .venv/lib/python3.13/site-packages/starlette-1.0.0.dist-info/licenses/LICENSE.md
+❌ Broken link: docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md (from README.md)
+❌ Broken link: docs/04-TECHNICAL-IMPLEMENTATION/guides/START_HERE.md (from README.md)
+❌ Broken link: ./docs/00-INDEX/README.md (from README.md)
+❌ Broken link: ./docs/00-INDEX/PHASE_STATUS_DASHBOARD.md (from README.md)
+❌ Broken link: ./docs/00-INDEX/PHASE_NAVIGATION_GUIDE.md (from README.md)
+❌ Broken link: ./docs/01-PHASES/ (from README.md)
+❌ Broken link: ./docs/02-ROADMAPS/ (from README.md)
+❌ Broken link: ./docs/03-BUSINESS-STRATEGY/ (from README.md)
+❌ Broken link: ./docs/04-TECHNICAL-IMPLEMENTATION/ (from README.md)
+❌ Broken link: docs/04-TECHNICAL-IMPLEMENTATION/guides/START_HERE.md (from README.md)
+❌ Broken link: docs/04-TECHNICAL-IMPLEMENTATION/guides/TEXTUAL_MIGRATION.md (from README.md)
+❌ Broken link: docs/active/models/AI_PROVIDER_UPGRADE_LOG.md (from README.md)
+❌ Broken link: docs/04-TECHNICAL-IMPLEMENTATION/guides/DEVELOPMENT.md (from README.md)
+❌ Broken link: docs/02-ROADMAPS/ (from README.md)
+❌ Broken link: docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md (from README.md)
+❌ Broken link: docs/02-ROADMAPS/CURRENT_STATUS.md (from README.md)
+❌ Broken link: docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md (from README.md)
+❌ Broken link: docs/04-TECHNICAL-IMPLEMENTATION/guides/START_HERE.md (from README.md)
+❌ Broken link: ./docs/00-INDEX/README.md (from README.md)
+❌ Broken link: ./docs/00-INDEX/PHASE_STATUS_DASHBOARD.md (from README.md)
+❌ Broken link: ./docs/00-INDEX/PHASE_NAVIGATION_GUIDE.md (from README.md)
+❌ Broken link: ./docs/01-PHASES/ (from README.md)
+❌ Broken link: ./docs/02-ROADMAPS/ (from README.md)
+❌ Broken link: ./docs/03-BUSINESS-STRATEGY/ (from README.md)
+❌ Broken link: ./docs/04-TECHNICAL-IMPLEMENTATION/ (from README.md)
+❌ Broken link: docs/04-TECHNICAL-IMPLEMENTATION/guides/START_HERE.md (from README.md)
+❌ Broken link: docs/04-TECHNICAL-IMPLEMENTATION/guides/TEXTUAL_MIGRATION.md (from README.md)
+❌ Broken link: docs/active/models/AI_PROVIDER_UPGRADE_LOG.md (from README.md)
+❌ Broken link: docs/04-TECHNICAL-IMPLEMENTATION/guides/DEVELOPMENT.md (from README.md)
+❌ Broken link: docs/02-ROADMAPS/ (from README.md)
+❌ Broken link: docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md (from README.md)
+❌ Broken link: docs/02-ROADMAPS/CURRENT_STATUS.md (from README.md)
+❌ Broken link: 04_ANIMATIONS.md (from docs/archive/legacy/03-business/01_DESIGN_LANGUAGE.md)
+❌ Broken link: 05_COMPONENT_LIBRARY.md (from docs/archive/legacy/03-business/01_DESIGN_LANGUAGE.md)
+❌ Broken link: 06_PERFORMANCE.md (from docs/archive/legacy/03-business/01_DESIGN_LANGUAGE.md)
+❌ Broken link: 02_AUDIO_CLASSIFICATION.md (from docs/archive/legacy/03-business/01_MODEL_STACK.md)
+❌ Broken link: 03_CNN_TRAINING.md (from docs/archive/legacy/03-business/01_MODEL_STACK.md)
+❌ Broken link: ../architecture/01_BACKEND.md (from docs/archive/legacy/03-business/01_MODEL_STACK.md)
+❌ Broken link: ai_models/01_MODEL_STACK.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: ai_models/02_AUDIO_CLASSIFICATION.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: ai_models/03_CNN_TRAINING.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: ai_models/04_MLOPS.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: design_system/01_DESIGN_LANGUAGE.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: design_system/02_GLASSMORPHISM.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: design_system/03_COLORS_TYPOGRAPHY.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: design_system/04_ANIMATIONS.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: architecture/01_BACKEND.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: architecture/02_FRONTEND.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: architecture/03_DATABASE.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: architecture/04_API.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: architecture/05_SCALABILITY.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: business/01_REVENUE_MODEL.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: business/02_MARKET_ANALYSIS.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: business/03_FINANCIAL_PROJECTIONS.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: business/04_GTM_STRATEGY.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: implementation/01_MVP_PHASE.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: implementation/02_BETA_PHASE.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: implementation/03_LAUNCH_PHASE.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: implementation/04_GROWTH_PHASE.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: docs/01_USER_DOCS.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: docs/02_DEV_DOCS.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: docs/03_VIDEO_TUTORIALS.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: docs/04_API_REFERENCE.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: architecture/README.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: implementation/00_DEV_SETUP.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: docs/CODING_STANDARDS.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: business/01_REVENUE_MODEL.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: business/02_MARKET_ANALYSIS.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: business/03_FINANCIAL_PROJECTIONS.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: design_system/01_DESIGN_LANGUAGE.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: design_system/02_GLASSMORPHISM.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: design_system/04_ANIMATIONS.md (from docs/archive/legacy/03-business/MASTER_BLUEPRINT.md)
+❌ Broken link: ../01-PHASES/10-PHASE-10-PLANNED/PHASE_10_PLAN.md (from docs/archive/legacy/03-business/README.md)
+❌ Broken link: ../01-PHASES/10-PHASE-10-PLANNED/PHASE_10_ROADMAP.md (from docs/archive/legacy/03-business/README.md)
+❌ Broken link: computer:///mnt/user-data/outputs/SAMPLEMIND_TECHNICAL_IMPLEMENTATION_ROADMAP_2025-2027.md (from docs/archive/legacy/03-business/SAMPLEMIND_PHASE3_DEPLOYMENT_PART2.md)
+❌ Broken link: computer:///mnt/user-data/outputs/SAMPLEMIND_PHASE2_CNN_TRAINING.md (from docs/archive/legacy/03-business/SAMPLEMIND_PHASE3_DEPLOYMENT_PART2.md)
+❌ Broken link: computer:///mnt/user-data/outputs/SAMPLEMIND_PHASE2_CYBERPUNK_UI_DESIGN.md (from docs/archive/legacy/03-business/SAMPLEMIND_PHASE3_DEPLOYMENT_PART2.md)
+❌ Broken link: computer:///mnt/user-data/outputs/SAMPLEMIND_PHASE2_UI_ADVANCED.md (from docs/archive/legacy/03-business/SAMPLEMIND_PHASE3_DEPLOYMENT_PART2.md)
+❌ Broken link: computer:///mnt/user-data/outputs/SAMPLEMIND_PHASE2_3D_VISUALIZATIONS_PART1.md (from docs/archive/legacy/03-business/SAMPLEMIND_PHASE3_DEPLOYMENT_PART2.md)
+❌ Broken link: computer:///mnt/user-data/outputs/SAMPLEMIND_PHASE2_3D_VISUALIZATIONS_PART2.md (from docs/archive/legacy/03-business/SAMPLEMIND_PHASE3_DEPLOYMENT_PART2.md)
+❌ Broken link: computer:///mnt/user-data/outputs/SAMPLEMIND_PHASE3_GOOGLE_AI_INTEGRATION.md (from docs/archive/legacy/03-business/SAMPLEMIND_PHASE3_DEPLOYMENT_PART2.md)
+❌ Broken link: computer:///mnt/user-data/outputs/SAMPLEMIND_PHASE3_DEPLOYMENT_PART1.md (from docs/archive/legacy/03-business/SAMPLEMIND_PHASE3_DEPLOYMENT_PART2.md)
+❌ Broken link: computer:///mnt/user-data/outputs/SAMPLEMIND_PHASE3_DEPLOYMENT_PART2.md (from docs/archive/legacy/03-business/SAMPLEMIND_PHASE3_DEPLOYMENT_PART2.md)
+❌ Missing main header: docs/archive/legacy/03-business/🚀 Complete AI Model Stack for SampleMind AI_ Bluep.md
+❌ Broken link: ../../discussions?discussions_q=category%3AQ%26A (from docs/archive/legacy/BETA_FAQ.md)
+❌ Broken link: ../../discussions?discussions_q=category%3ATroubleshooting (from docs/archive/legacy/BETA_FAQ.md)
+❌ Broken link: ./PRIVACY.md (from docs/archive/legacy/BETA_FAQ.md)
+❌ Broken link: ../LICENSE (from docs/archive/legacy/BETA_FAQ.md)
+❌ Broken link: ../../discussions?discussions_q=category%3ATroubleshooting (from docs/archive/legacy/BETA_FAQ.md)
+❌ Broken link: ../../discussions?discussions_q=category%3A%22Ideas+%26+Features%22 (from docs/archive/legacy/BETA_FAQ.md)
+❌ Broken link: ../../discussions (from docs/archive/legacy/BETA_FAQ.md)
+❌ Broken link: ../../issues (from docs/archive/legacy/BETA_FAQ.md)
+❌ Broken link: ../../discussions (from docs/archive/legacy/BETA_FAQ.md)
+❌ Broken link: ../../discussions?discussions_q=category%3AQ%26A (from docs/archive/legacy/BETA_FAQ.md)
+❌ Broken link: ../../discussions (from docs/archive/legacy/BETA_FAQ.md)
+❌ Broken link: ../../issues (from docs/archive/legacy/BETA_FAQ.md)
+❌ Broken link: ../CODE_OF_CONDUCT.md (from docs/archive/legacy/BETA_FAQ.md)
+❌ Broken link: ./PRIVACY.md (from docs/archive/legacy/BETA_FAQ.md)
+❌ Broken link: ../GUIDES/quickstart.md (from docs/archive/legacy/BETA_TESTING_GUIDE.md)
+❌ Broken link: ../GUIDES/cli_reference.md (from docs/archive/legacy/BETA_TESTING_GUIDE.md)
+❌ Broken link: ../GUIDES/web_ui_guide.md (from docs/archive/legacy/BETA_TESTING_GUIDE.md)
+❌ Broken link: ../PRIVACY.md (from docs/archive/legacy/BETA_TESTING_GUIDE.md)
+❌ Broken link: ../../discussions?discussions_q=category%3ATroubleshooting (from docs/archive/legacy/BETA_TROUBLESHOOTING.md)
+❌ Broken link: ../../discussions (from docs/archive/legacy/BETA_TROUBLESHOOTING.md)
+❌ Broken link: ../../issues (from docs/archive/legacy/BETA_TROUBLESHOOTING.md)
+❌ Broken link: ../../discussions (from docs/archive/legacy/BETA_TROUBLESHOOTING.md)
+❌ Broken link: ../../discussions?discussions_q=category%3ATroubleshooting (from docs/archive/legacy/BETA_TROUBLESHOOTING.md)
+❌ Broken link: ../../issues (from docs/archive/legacy/BETA_TROUBLESHOOTING.md)
+❌ Broken link: ../../discussions?discussions_q=category%3AQ%26A (from docs/archive/legacy/BETA_TROUBLESHOOTING.md)
+❌ Broken link: GETTING_STARTED.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: TROUBLESHOOTING.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: GETTING_STARTED.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: TROUBLESHOOTING.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: ARCHITECTURE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: API_REFERENCE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_1_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASKS_1_2_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_3_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_4_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_6_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_7_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: ARCHITECTURE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_10_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: API_REFERENCE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_9_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: SECURITY.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: PERFORMANCE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: GETTING_STARTED.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: TROUBLESHOOTING.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: FAQ.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: ARCHITECTURE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: API_REFERENCE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: DATABASE_SCHEMA.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: CONTRIBUTING.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: CODE_STYLE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_10_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_9_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: SECURITY.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: PERFORMANCE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: MONITORING.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_1_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASKS_1_2_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_3_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_4_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_5_FOUNDATION_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_6_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_7_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_9_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_10_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/AUTH_QUICKSTART.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/CELERY_QUICKSTART.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_3_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/AUTH_QUICKSTART.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: API_REFERENCE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_1_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: ARCHITECTURE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: API_REFERENCE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_4_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/CELERY_QUICKSTART.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: MONITORING.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASKS_1_2_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: DATABASE_SCHEMA.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: ARCHITECTURE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_5_FOUNDATION_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_6_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_7_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_10_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_10_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_9_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_9_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: SECURITY.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_3_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_9_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: GETTING_STARTED.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: TROUBLESHOOTING.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: GETTING_STARTED.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: ARCHITECTURE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: API_REFERENCE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_10_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: GETTING_STARTED.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: ARCHITECTURE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_9_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: SECURITY.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: MONITORING.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: PERFORMANCE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: TROUBLESHOOTING.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: GETTING_STARTED.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: TROUBLESHOOTING.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: API_REFERENCE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_10_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: GETTING_STARTED.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: TROUBLESHOOTING.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: ARCHITECTURE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_10_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: API_REFERENCE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: documentation/TASK_9_COMPLETE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: SECURITY.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: MONITORING.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: PERFORMANCE.md (from docs/archive/legacy/DOCUMENTATION_INDEX.md)
+❌ Broken link: API_DOCUMENTATION.md (from docs/archive/legacy/ERROR_HANDLING_GUIDE.md)
+❌ Broken link: CLI_REFERENCE.md (from docs/archive/legacy/ERROR_HANDLING_GUIDE.md)
+❌ Broken link: ../README.md (from docs/archive/legacy/ERROR_HANDLING_GUIDE.md)
+❌ Broken link: main.py (from docs/archive/legacy/GEMINI_CLI_GUIDE.md)
+❌ Broken link: src/samplemind/interfaces/cli/menu.py (from docs/archive/legacy/GEMINI_CLI_GUIDE.md)
+❌ Broken link: src/samplemind/integrations/google_ai_integration.py (from docs/archive/legacy/GEMINI_CLI_GUIDE.md)
+❌ Broken link: src/samplemind/integrations/ai_manager.py (from docs/archive/legacy/GEMINI_CLI_GUIDE.md)
+❌ Broken link: src/samplemind/core/engine/audio_engine.py (from docs/archive/legacy/GEMINI_CLI_GUIDE.md)
+❌ Broken link: demo_gemini_cli.py (from docs/archive/legacy/GEMINI_CLI_GUIDE.md)
+❌ Broken link: QUICKSTART.md (from docs/archive/legacy/LINUX_GUIDE.md)
+❌ Broken link: ../01-PHASES/01-PHASE-01-COMPLETED/ (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/01-PHASE-01-COMPLETED/PHASE_1_PLAN.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/01-PHASE-01-COMPLETED/PHASE_1_IMPLEMENTATION.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/01-PHASE-01-COMPLETED/PHASE_1_PHOENIX_IMPLEMENTATION.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/01-PHASE-01-COMPLETED/PHASE_1_BULK_IMPORTER_PLAN.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/01-PHASE-01-COMPLETED/PHASE_1_COMPLETE.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/02-PHASE-02-COMPLETED/ (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/02-PHASE-02-COMPLETED/PHASE_2_PLAN.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/02-PHASE-02-COMPLETED/PHASE_2_SAMPLE_SUGGESTIONS_PLAN.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/02-PHASE-02-COMPLETED/PHASE_2_VALIDATION.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/02-PHASE-02-COMPLETED/PHASE_2_COMPLETE.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/03-PHASE-03-COMPLETED/ (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/03-PHASE-03-COMPLETED/PHASE_3_PLAN.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/03-PHASE-03-COMPLETED/PHASE_3_IMPLEMENTATION.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/03-PHASE-03-COMPLETED/PHASE_3_COMPLETE.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/04-PHASE-04-PARTIAL/ (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/04-PHASE-04-PARTIAL/PHASE_4_IMPLEMENTATION.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/04-PHASE-04-PARTIAL/PHASE_4_COMPLETION_SUMMARY.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/04-PHASE-04-PARTIAL/sub-phases/PHASE_4_1C_SMART_CACHING.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/04-PHASE-04-PARTIAL/sub-phases/PHASE_4_3_DEFERRED.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/05-PHASE-05-COMPLETED/ (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/05-PHASE-05-COMPLETED/PHASE_5_ARCHITECTURE.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/05-PHASE-05-COMPLETED/PHASE_5_IMPLEMENTATION_SUMMARY.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/05-PHASE-05-COMPLETED/PHASE_5_FINAL_IMPLEMENTATION_STATUS.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/05-PHASE-05-COMPLETED/PHASE_5_QUICK_START.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/05-PHASE-05-COMPLETED/PHASE_5_COMPLETE.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/06-PHASE-06-COMPLETED/ (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/06-PHASE-06-COMPLETED/PHASE_6_IMPLEMENTATION.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/06-PHASE-06-COMPLETED/PHASE_6_COMPLETE.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/07-PHASE-07-COMPLETED/ (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/07-PHASE-07-COMPLETED/PHASE_7_IMPLEMENTATION.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/07-PHASE-07-COMPLETED/PHASE_7_COMPLETE.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/08-PHASE-08-COMPLETED/ (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/08-PHASE-08-COMPLETED/PHASE_8_IMPLEMENTATION.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/08-PHASE-08-COMPLETED/PHASE_8_COMPLETE.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/09-PHASE-09-COMPLETED/ (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/09-PHASE-09-COMPLETED/PHASE_9_IMPLEMENTATION.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/09-PHASE-09-COMPLETED/PHASE_9_COMPLETE.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/10-PHASE-10-COMPLETE/ (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/13-PHASE-13-COMPLETED/ (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/14-PHASE-14-COMPLETED/ (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/15-PHASE-15-IN-PROGRESS/ (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../active/roadmap/PHASE_15_PROGRESS.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../02-ROADMAPS/V3_MIGRATION_CHECKLIST.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../02-ROADMAPS/CURRENT_STATUS.md (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/ (from docs/archive/legacy/MASTER_PHASE_INDEX.md)
+❌ Broken link: ../01-PHASES/05-PHASE-05-COMPLETED/PHASE_5_ARCHITECTURE.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/01-PHASE-01-COMPLETED/PHASE_1_IMPLEMENTATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/01-PHASE-01-COMPLETED/PHASE_1_PHOENIX_IMPLEMENTATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/01-PHASE-01-COMPLETED/PHASE_1_BULK_IMPORTER_PLAN.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/02-PHASE-02-COMPLETED/PHASE_2_SAMPLE_SUGGESTIONS_PLAN.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/04-PHASE-04-PARTIAL/sub-phases/PHASE_4_1C_SMART_CACHING.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/04-PHASE-04-PARTIAL/sub-phases/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/03-PHASE-03-COMPLETED/PHASE_3_IMPLEMENTATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/03-PHASE-03-COMPLETED/PHASE_3_PLAN.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/04-PHASE-04-PARTIAL/business-strategy/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/06-PHASE-06-COMPLETED/PHASE_6_IMPLEMENTATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/05-PHASE-05-COMPLETED/PHASE_5_IMPLEMENTATION_SUMMARY.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/07-PHASE-07-COMPLETED/PHASE_7_IMPLEMENTATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/QA/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/05-PHASE-05-COMPLETED/PHASE_5_QUICK_START.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/api/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/developer_guide/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/09-PHASE-09-COMPLETED/PHASE_9_IMPLEMENTATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/guides/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../03-BUSINESS-STRATEGY/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../02-ROADMAPS/PROJECT_ROADMAP.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../02-ROADMAPS/strategic/STRATEGIC_VISION_2025-2030.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/05-PHASE-05-COMPLETED/PHASE_5_QUICK_START.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/developer_guide/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../../src/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/07-PHASE-07-COMPLETED/PHASE_7_IMPLEMENTATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/QA/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/reference/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/06-PHASE-06-COMPLETED/PHASE_6_IMPLEMENTATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/05-PHASE-05-COMPLETED/PHASE_5_IMPLEMENTATION_SUMMARY.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/technical/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/09-PHASE-09-COMPLETED/PHASE_9_IMPLEMENTATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../PRODUCTION_CHECKLIST.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/guides/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../03-BUSINESS-STRATEGY/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../02-ROADMAPS/NEXT_PHASES_ROADMAP.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../02-ROADMAPS/strategic/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/01-PHASE-01-COMPLETED/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/01-PHASE-01-COMPLETED/PHASE_1_PLAN.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/01-PHASE-01-COMPLETED/PHASE_1_IMPLEMENTATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/01-PHASE-01-COMPLETED/PHASE_1_PHOENIX_IMPLEMENTATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/02-PHASE-02-COMPLETED/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/02-PHASE-02-COMPLETED/PHASE_2_PLAN.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/02-PHASE-02-COMPLETED/PHASE_2_SAMPLE_SUGGESTIONS_PLAN.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/02-PHASE-02-COMPLETED/PHASE_2_VALIDATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/03-PHASE-03-COMPLETED/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/03-PHASE-03-COMPLETED/PHASE_3_PLAN.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/03-PHASE-03-COMPLETED/PHASE_3_IMPLEMENTATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/04-PHASE-04-PARTIAL/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/04-PHASE-04-PARTIAL/PHASE_4_IMPLEMENTATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/04-PHASE-04-PARTIAL/PHASE_4_COMPLETION_SUMMARY.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/04-PHASE-04-PARTIAL/sub-phases/PHASE_4_1C_SMART_CACHING.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/05-PHASE-05-COMPLETED/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/05-PHASE-05-COMPLETED/PHASE_5_ARCHITECTURE.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/05-PHASE-05-COMPLETED/PHASE_5_IMPLEMENTATION_SUMMARY.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/05-PHASE-05-COMPLETED/PHASE_5_QUICK_START.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/06-PHASE-06-COMPLETED/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/06-PHASE-06-COMPLETED/PHASE_6_IMPLEMENTATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/07-PHASE-07-COMPLETED/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/07-PHASE-07-COMPLETED/PHASE_7_IMPLEMENTATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/08-PHASE-08-COMPLETED/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/08-PHASE-08-COMPLETED/PHASE_8_IMPLEMENTATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/09-PHASE-09-COMPLETED/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/09-PHASE-09-COMPLETED/PHASE_9_IMPLEMENTATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/10-PHASE-10-PLANNED/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/05-PHASE-05-COMPLETED/PHASE_5_QUICK_START.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/api/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/developer_guide/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/guides/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/QA/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/reference/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/technical/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../03-BUSINESS-STRATEGY/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../02-ROADMAPS/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../../IMPLEMENTATION_SUMMARY.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../PRODUCTION_CHECKLIST.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../QUICKSTART_PHOENIX_BEGINNER.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../PROJECT_STRUCTURE.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../CURRENT_STATUS.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../NEXT_ACTIONS.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../NEXT_STEPS.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../CURRENT_STATUS.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/api/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/05-PHASE-05-COMPLETED/PHASE_5_ARCHITECTURE.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/04-PHASE-04-PARTIAL/sub-phases/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/01-PHASE-01-COMPLETED/PHASE_1_BULK_IMPORTER_PLAN.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../03-BUSINESS-STRATEGY/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/04-PHASE-04-PARTIAL/sub-phases/PHASE_4_1C_SMART_CACHING.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/guides/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/08-PHASE-08-COMPLETED/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/developer_guide/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/02-PHASE-02-COMPLETED/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/01-PHASE-01-COMPLETED/PHASE_1_PHOENIX_IMPLEMENTATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/06-PHASE-06-COMPLETED/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/01-PHASE-01-COMPLETED/PHASE_1_PHOENIX_IMPLEMENTATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/09-PHASE-09-COMPLETED/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/QA/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/05-PHASE-05-COMPLETED/PHASE_5_QUICK_START.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../02-ROADMAPS/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/09-PHASE-09-COMPLETED/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/developer_guide/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/02-PHASE-02-COMPLETED/PHASE_2_SAMPLE_SUGGESTIONS_PLAN.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/07-PHASE-07-COMPLETED/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/03-PHASE-03-COMPLETED/ (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../01-PHASES/02-PHASE-02-COMPLETED/PHASE_2_VALIDATION.md (from docs/archive/legacy/PHASE_NAVIGATION_GUIDE.md)
+❌ Broken link: ../active/INDEX.md (from docs/archive/legacy/PHASE_STATUS_DASHBOARD.md)
+❌ Broken link: ../02-ROADMAPS/V3_MIGRATION_CHECKLIST.md (from docs/archive/legacy/PHASE_STATUS_DASHBOARD.md)
+❌ Broken link: ../02-ROADMAPS/CURRENT_STATUS.md (from docs/archive/legacy/PHASE_STATUS_DASHBOARD.md)
+❌ Broken link: ../active/roadmap/PHASE_15_PROGRESS.md (from docs/archive/legacy/PHASE_STATUS_DASHBOARD.md)
+❌ Broken link: ../README.md (from docs/archive/legacy/QUICKSTART_PHOENIX_BEGINNER.md)
+❌ Broken link: PHASE_1_PHOENIX_IMPLEMENTATION.md (from docs/archive/legacy/QUICKSTART_PHOENIX_BEGINNER.md)
+❌ Broken link: ./TROUBLESHOOTING.md (from docs/archive/legacy/QUICK_REFERENCE.md)
+❌ Broken link: ./ARCHITECTURE.md (from docs/archive/legacy/QUICK_REFERENCE.md)
+❌ Broken link: ./API_REFERENCE.md (from docs/archive/legacy/QUICK_REFERENCE.md)
+❌ Broken link: ./GETTING_STARTED.md (from docs/archive/legacy/QUICK_REFERENCE.md)
+❌ Broken link: ../guides/README.md (from docs/archive/legacy/README.md)
+❌ Broken link: ../../ARCHITECTURE.md (from docs/archive/legacy/README.md)
+❌ Broken link: ../../API_REFERENCE.md (from docs/archive/legacy/README.md)
+❌ Broken link: ../../DATABASE_SCHEMA.md (from docs/archive/legacy/README.md)
+❌ Broken link: ../guides/README.md (from docs/archive/legacy/README.md)
+❌ Broken link: ../technical/README.md (from docs/archive/legacy/README.md)
+❌ Broken link: ../../API_REFERENCE.md (from docs/archive/legacy/README.md)
+❌ Broken link: ../../ARCHITECTURE.md (from docs/archive/legacy/README.md)
+❌ Broken link: ../README.md (from docs/archive/legacy/README.md)
+❌ Broken link: ../guides/USER_GUIDE.md (from docs/archive/legacy/README.md)
+❌ Broken link: ../../TROUBLESHOOTING.md (from docs/archive/legacy/README.md)
+❌ Broken link: ../README.md (from docs/archive/legacy/README.md)
+❌ Broken link: ../guides/README.md (from docs/archive/legacy/README.md)
+❌ Broken link: ../technical/README.md (from docs/archive/legacy/README.md)
+❌ Broken link: ../../QUICKSTART.md (from docs/archive/legacy/README.md)
+❌ Broken link: ../../GETTING_STARTED.md (from docs/archive/legacy/README.md)
+❌ Broken link: ../../API_REFERENCE.md (from docs/archive/legacy/README.md)
+❌ Broken link: ../../ARCHITECTURE.md (from docs/archive/legacy/README.md)
+❌ Broken link: active/INDEX.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: ../.claude/CLAUDE.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: ../.github/copilot-instructions.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: active/INDEX.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: active/roadmap/PHASE_15_PROGRESS.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: active/roadmap/V3_100_KEYPOINTS.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: active/architecture/V3_ARCHITECTURE_DECISIONS.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: active/devops/DEPENDENCY_UPGRADE_STATUS.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: active/models/AI_PROVIDER_UPGRADE_LOG.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: active/ui-ux/TUI_V3_UPGRADE_NOTES.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: active/features/WEB_UI_SPEC.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: 02-ROADMAPS/CURRENT_STATUS.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: 02-ROADMAPS/V3_MIGRATION_CHECKLIST.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: SESSION_START_GUIDE.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: 00-INDEX/PHASE_STATUS_DASHBOARD.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: CLI_REFERENCE.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: API_DOCUMENTATION.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: 04-TECHNICAL-IMPLEMENTATION/guides/INSTALLATION_GUIDE.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: 04-TECHNICAL-IMPLEMENTATION/guides/AI_INTEGRATION_SETUP.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: 04-TECHNICAL-IMPLEMENTATION/guides/TEXTUAL_MIGRATION.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: 04-TECHNICAL-IMPLEMENTATION/guides/PLUGIN_INSTALLATION_GUIDE.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: 04-TECHNICAL-IMPLEMENTATION/guides/USER_GUIDE.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: 04-TECHNICAL-IMPLEMENTATION/guides/LINUX_GUIDE.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: 04-TECHNICAL-IMPLEMENTATION/guides/MACOS_GUIDE.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: 04-TECHNICAL-IMPLEMENTATION/guides/WINDOWS_GUIDE.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: 04-TECHNICAL-IMPLEMENTATION/technical/audio_processing.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: 04-TECHNICAL-IMPLEMENTATION/technical/OPTIMIZATION_GUIDE.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: 00-INDEX/MASTER_PHASE_INDEX.md (from docs/archive/legacy/README_old.md)
+❌ Broken link: 01-PHASES/ (from docs/archive/legacy/README_old.md)
+❌ Broken link: 01-PHASES/15-PHASE-15-IN-PROGRESS/ (from docs/archive/legacy/README_old.md)
+❌ Broken link: _archive/legacy-phases/ (from docs/archive/legacy/README_old.md)
+❌ Broken link: _archive/legacy-notes/ (from docs/archive/legacy/README_old.md)
+❌ Broken link: _archive/legacy-roadmaps/ (from docs/archive/legacy/README_old.md)
+❌ Broken link: GETTING_STARTED.md (from docs/archive/legacy/START_HERE.md)
+❌ Broken link: ARCHITECTURE.md (from docs/archive/legacy/START_HERE.md)
+❌ Broken link: documentation/TASK_10_COMPLETE.md (from docs/archive/legacy/START_HERE.md)
+❌ Broken link: API_REFERENCE.md (from docs/archive/legacy/START_HERE.md)
+❌ Broken link: TROUBLESHOOTING.md (from docs/archive/legacy/START_HERE.md)
+❌ Broken link: TROUBLESHOOTING.md (from docs/archive/legacy/START_HERE.md)
+❌ Broken link: GETTING_STARTED.md (from docs/archive/legacy/START_HERE.md)
+❌ Broken link: ARCHITECTURE.md (from docs/archive/legacy/START_HERE.md)
+❌ Broken link: documentation/TASK_10_COMPLETE.md (from docs/archive/legacy/START_HERE.md)
+❌ Broken link: ARCHITECTURE.md (from docs/archive/legacy/START_HERE.md)
+❌ Broken link: documentation/TASK_9_COMPLETE.md (from docs/archive/legacy/START_HERE.md)
+❌ Broken link: SECURITY.md (from docs/archive/legacy/START_HERE.md)
+❌ Broken link: TROUBLESHOOTING.md (from docs/archive/legacy/START_HERE.md)
+❌ Broken link: ../../QUICKSTART.md (from docs/archive/legacy/guides_README_old.md)
+❌ Broken link: INSTALLATION_GUIDE.md (from docs/archive/legacy/guides_README_old.md)
+❌ Broken link: INSTALLATION_GUIDE.md (from docs/archive/legacy/guides_README_old.md)
+❌ Broken link: ../reference/QUICK_REFERENCE.md (from docs/archive/legacy/guides_README_old.md)
+❌ Broken link: ../../QUICKSTART.md (from docs/archive/legacy/guides_README_old.md)
+❌ Broken link: INSTALLATION_GUIDE.md (from docs/archive/legacy/guides_README_old.md)
+❌ Broken link: ../../GETTING_STARTED.md (from docs/archive/legacy/guides_README_old.md)
+❌ Broken link: ../../TROUBLESHOOTING.md (from docs/archive/legacy/guides_README_old.md)
+❌ Broken link: INSTALLATION_GUIDE.md (from docs/archive/legacy/guides_README_old.md)
+❌ Broken link: ../technical/README.md (from docs/archive/legacy/guides_README_old.md)
+❌ Broken link: ../../API_REFERENCE.md (from docs/archive/legacy/guides_README_old.md)
+❌ Broken link: ../../ARCHITECTURE.md (from docs/archive/legacy/guides_README_old.md)
+❌ Broken link: ../../DEVELOPMENT.md (from docs/archive/legacy/guides_README_old.md)
+❌ Broken link: V6_TO_PHOENIX_MIGRATION.md (from docs/archive/phases/01-PHASE-01-COMPLETED/PHASE_1_PHOENIX_IMPLEMENTATION.md)
+❌ Broken link: ./PHASE_1_PLAN.md (from docs/archive/phases/01-PHASE-01-COMPLETED/README.md)
+❌ Broken link: ./PHASE_1_IMPLEMENTATION.md (from docs/archive/phases/01-PHASE-01-COMPLETED/README.md)
+❌ Broken link: ./PHASE_1_IMPLEMENTATION.md (from docs/archive/phases/01-PHASE-01-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/MASTER_PHASE_INDEX.md (from docs/archive/phases/01-PHASE-01-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/PHASE_STATUS_DASHBOARD.md (from docs/archive/phases/01-PHASE-01-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/QUICK_REFERENCE.md (from docs/archive/phases/01-PHASE-01-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/README.md (from docs/archive/phases/01-PHASE-01-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/MASTER_PHASE_INDEX.md (from docs/archive/phases/02-PHASE-02-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/PHASE_STATUS_DASHBOARD.md (from docs/archive/phases/02-PHASE-02-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/QUICK_REFERENCE.md (from docs/archive/phases/02-PHASE-02-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/README.md (from docs/archive/phases/02-PHASE-02-COMPLETED/README.md)
+❌ Broken link: ./PHASE_3_PLAN.md (from docs/archive/phases/03-PHASE-03-COMPLETED/README.md)
+❌ Broken link: ./PHASE_3_IMPLEMENTATION.md (from docs/archive/phases/03-PHASE-03-COMPLETED/README.md)
+❌ Broken link: ./PHASE_3_PLAN.md (from docs/archive/phases/03-PHASE-03-COMPLETED/README.md)
+❌ Broken link: ./PHASE_3_IMPLEMENTATION.md (from docs/archive/phases/03-PHASE-03-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/MASTER_PHASE_INDEX.md (from docs/archive/phases/03-PHASE-03-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/PHASE_STATUS_DASHBOARD.md (from docs/archive/phases/03-PHASE-03-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/QUICK_REFERENCE.md (from docs/archive/phases/03-PHASE-03-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/README.md (from docs/archive/phases/03-PHASE-03-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/MASTER_PHASE_INDEX.md (from docs/archive/phases/04-PHASE-04-PARTIAL/README.md)
+❌ Broken link: ../../00-INDEX/PHASE_STATUS_DASHBOARD.md (from docs/archive/phases/04-PHASE-04-PARTIAL/README.md)
+❌ Broken link: ../../00-INDEX/QUICK_REFERENCE.md (from docs/archive/phases/04-PHASE-04-PARTIAL/README.md)
+❌ Broken link: ../../00-INDEX/README.md (from docs/archive/phases/04-PHASE-04-PARTIAL/README.md)
+❌ Broken link: ../../00-INDEX/MASTER_PHASE_INDEX.md (from docs/archive/phases/05-PHASE-05-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/PHASE_STATUS_DASHBOARD.md (from docs/archive/phases/05-PHASE-05-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/QUICK_REFERENCE.md (from docs/archive/phases/05-PHASE-05-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/README.md (from docs/archive/phases/05-PHASE-05-COMPLETED/README.md)
+❌ Broken link: ./PHASE_6_IMPLEMENTATION.md (from docs/archive/phases/06-PHASE-06-COMPLETED/README.md)
+❌ Broken link: ./PHASE_6_IMPLEMENTATION.md (from docs/archive/phases/06-PHASE-06-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/MASTER_PHASE_INDEX.md (from docs/archive/phases/06-PHASE-06-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/PHASE_STATUS_DASHBOARD.md (from docs/archive/phases/06-PHASE-06-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/QUICK_REFERENCE.md (from docs/archive/phases/06-PHASE-06-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/README.md (from docs/archive/phases/06-PHASE-06-COMPLETED/README.md)
+❌ Broken link: ./PHASE_7_IMPLEMENTATION.md (from docs/archive/phases/07-PHASE-07-COMPLETED/README.md)
+❌ Broken link: ./PHASE_7_IMPLEMENTATION.md (from docs/archive/phases/07-PHASE-07-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/MASTER_PHASE_INDEX.md (from docs/archive/phases/07-PHASE-07-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/PHASE_STATUS_DASHBOARD.md (from docs/archive/phases/07-PHASE-07-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/QUICK_REFERENCE.md (from docs/archive/phases/07-PHASE-07-COMPLETED/README.md)
+❌ Broken link: ../../04-TECHNICAL-IMPLEMENTATION/QA/ (from docs/archive/phases/07-PHASE-07-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/README.md (from docs/archive/phases/07-PHASE-07-COMPLETED/README.md)
+❌ Broken link: ./PHASE_8_IMPLEMENTATION.md (from docs/archive/phases/08-PHASE-08-COMPLETED/README.md)
+❌ Broken link: ./PHASE_8_IMPLEMENTATION.md (from docs/archive/phases/08-PHASE-08-COMPLETED/README.md)
+❌ Broken link: ../../04-TECHNICAL-IMPLEMENTATION/api/ (from docs/archive/phases/08-PHASE-08-COMPLETED/README.md)
+❌ Broken link: ../../04-TECHNICAL-IMPLEMENTATION/guides/ (from docs/archive/phases/08-PHASE-08-COMPLETED/README.md)
+❌ Broken link: ../../04-TECHNICAL-IMPLEMENTATION/developer_guide/ (from docs/archive/phases/08-PHASE-08-COMPLETED/README.md)
+❌ Broken link: ../../04-TECHNICAL-IMPLEMENTATION/reference/ (from docs/archive/phases/08-PHASE-08-COMPLETED/README.md)
+❌ Broken link: ../../04-TECHNICAL-IMPLEMENTATION/technical/ (from docs/archive/phases/08-PHASE-08-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/MASTER_PHASE_INDEX.md (from docs/archive/phases/08-PHASE-08-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/PHASE_STATUS_DASHBOARD.md (from docs/archive/phases/08-PHASE-08-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/QUICK_REFERENCE.md (from docs/archive/phases/08-PHASE-08-COMPLETED/README.md)
+❌ Broken link: ../../04-TECHNICAL-IMPLEMENTATION/ (from docs/archive/phases/08-PHASE-08-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/README.md (from docs/archive/phases/08-PHASE-08-COMPLETED/README.md)
+❌ Broken link: ./PHASE_9_IMPLEMENTATION.md (from docs/archive/phases/09-PHASE-09-COMPLETED/README.md)
+❌ Broken link: ./PHASE_9_IMPLEMENTATION.md (from docs/archive/phases/09-PHASE-09-COMPLETED/README.md)
+❌ Broken link: ../../PRODUCTION_CHECKLIST.md (from docs/archive/phases/09-PHASE-09-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/MASTER_PHASE_INDEX.md (from docs/archive/phases/09-PHASE-09-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/PHASE_STATUS_DASHBOARD.md (from docs/archive/phases/09-PHASE-09-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/QUICK_REFERENCE.md (from docs/archive/phases/09-PHASE-09-COMPLETED/README.md)
+❌ Broken link: ../../PRODUCTION_CHECKLIST.md (from docs/archive/phases/09-PHASE-09-COMPLETED/README.md)
+❌ Broken link: ../../04-TECHNICAL-IMPLEMENTATION/guides/ (from docs/archive/phases/09-PHASE-09-COMPLETED/README.md)
+❌ Broken link: ../../00-INDEX/README.md (from docs/archive/phases/09-PHASE-09-COMPLETED/README.md)
+❌ Broken link: RELEASE_NOTES_v2.1.0-beta.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: CHANGELOG.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: tests/unit/cli/README.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: SHELL_COMPLETION_GUIDE.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: RELEASE_NOTES_v2.1.0-beta.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: SHELL_COMPLETION_GUIDE.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: tests/unit/cli/README.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: CHANGELOG.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: RELEASE_NOTES_v2.1.0-beta.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: SHELL_COMPLETION_GUIDE.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: RELEASE_NOTES_v2.1.0-beta.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: SHELL_COMPLETION_GUIDE.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: CONTRIBUTING.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: tests/unit/cli/README.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: CONTRIBUTING.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: LICENSE (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: docs/guides/QUICKSTART.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: docs/guides/INSTALLATION_GUIDE.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: docs/CLI_REFERENCE.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: docs/PROJECT_STRUCTURE.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: docs/PROJECT_ROADMAP.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: SHELL_COMPLETION_GUIDE.md#troubleshooting (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: docs/guides/ (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: CHANGELOG.md (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_COMPLETE_INDEX.md)
+❌ Broken link: pytest.ini (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_TESTING_SUITE_SUMMARY.md)
+❌ Broken link: tests/conftest.py (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_TESTING_SUITE_SUMMARY.md)
+❌ Broken link: src/samplemind/interfaces/cli/ (from docs/archive/phases/10-PHASE-10-COMPLETE/PHASE_10_TESTING_SUITE_SUMMARY.md)
+❌ Broken link: ../../00-INDEX/README.md (from docs/archive/phases/10-PHASE-10-PLANNED/PHASE_10_PLAN.md)
+❌ Broken link: ../../02-ROADMAPS/NEXT_PHASES_ROADMAP.md (from docs/archive/phases/10-PHASE-10-PLANNED/PHASE_10_ROADMAP.md)
+❌ Broken link: ../../03-BUSINESS-STRATEGY/ (from docs/archive/phases/10-PHASE-10-PLANNED/PHASE_10_ROADMAP.md)
+❌ Broken link: ../../03-BUSINESS-STRATEGY/05_SampleMind_Financial_Model_Investment.md (from docs/archive/phases/10-PHASE-10-PLANNED/PHASE_10_ROADMAP.md)
+❌ Broken link: ../../00-INDEX/README.md (from docs/archive/phases/10-PHASE-10-PLANNED/PHASE_10_ROADMAP.md)
+❌ Broken link: ../../02-ROADMAPS/ (from docs/archive/phases/10-PHASE-10-PLANNED/PHASE_10_ROADMAP.md)
+❌ Broken link: ../../00-INDEX/README.md (from docs/archive/phases/10-PHASE-10-PLANNED/README.md)
+❌ Broken link: API_DOCUMENTATION.md (from docs/archive/phases/PHASE_11_COMPLETION_SUMMARY.md)
+❌ Broken link: ERROR_HANDLING_GUIDE.md (from docs/archive/phases/PHASE_11_COMPLETION_SUMMARY.md)
+❌ Broken link: CROSS_PLATFORM_VERIFICATION.md (from docs/archive/phases/PHASE_11_COMPLETION_SUMMARY.md)
+❌ Broken link: CLI_REFERENCE.md (from docs/archive/phases/PHASE_11_COMPLETION_SUMMARY.md)
+❌ Broken link: ../README.md (from docs/archive/phases/PHASE_11_COMPLETION_SUMMARY.md)
+❌ Broken link: ../PLUGIN_INSTALLATION_GUIDE.md (from docs/archive/phases/PHASE_13_RELEASE_DEPLOYMENT_GUIDE.md)
+❌ Broken link: ../README.md (from docs/archive/phases/PHASE_13_RELEASE_DEPLOYMENT_GUIDE.md)
+❌ Broken link: ../PLUGIN_INSTALLATION_GUIDE.md (from docs/archive/phases/PHASE_13_RELEASE_DEPLOYMENT_GUIDE.md)
+❌ Broken link: ../API_REFERENCE.md (from docs/archive/phases/PHASE_13_RELEASE_DEPLOYMENT_GUIDE.md)
+❌ Broken link: ../TROUBLESHOOTING.md (from docs/archive/phases/PHASE_13_RELEASE_DEPLOYMENT_GUIDE.md)
+❌ Broken link: ../CLI_REFERENCE.md (from docs/archive/phases/PHASE_13_RELEASE_DEPLOYMENT_GUIDE.md)
+❌ Broken link: ../CONTRIBUTING.md (from docs/archive/phases/PHASE_13_RELEASE_DEPLOYMENT_GUIDE.md)
+❌ Broken link: ../LICENSE (from docs/archive/phases/PHASE_13_RELEASE_DEPLOYMENT_GUIDE.md)
+❌ Broken link: ../FAQ.md (from docs/archive/phases/PHASE_13_RELEASE_DEPLOYMENT_GUIDE.md)
+❌ Broken link: ../docs/BETA_TESTING_GUIDE.md (from docs/archive/phases/PHASE_14_DAY3_GITHUB_SETUP.md)
+❌ Broken link: ../docs/BETA_TESTING_GUIDE.md (from docs/archive/phases/PHASE_14_DAY3_GITHUB_SETUP.md)
+❌ Broken link: ../docs/TROUBLESHOOTING.md (from docs/archive/phases/PHASE_14_DAY3_GITHUB_SETUP.md)
+❌ Broken link: ../../discussions (from docs/archive/phases/PHASE_14_DAY3_GITHUB_SETUP.md)
+❌ Broken link: ../../issues (from docs/archive/phases/PHASE_14_DAY3_GITHUB_SETUP.md)
+❌ Broken link: ../../discussions?discussions_q=category%3AAnnouncements (from docs/archive/phases/PHASE_14_DAY3_GITHUB_SETUP.md)
+❌ Broken link: ../../discussions?discussions_q=category%3A%22General+Discussion%22 (from docs/archive/phases/PHASE_14_DAY3_GITHUB_SETUP.md)
+❌ Broken link: ../../discussions?discussions_q=category%3A%22Ideas+%26+Features%22 (from docs/archive/phases/PHASE_14_DAY3_GITHUB_SETUP.md)
+❌ Broken link: ../../discussions?discussions_q=category%3AQ%26A (from docs/archive/phases/PHASE_14_DAY3_GITHUB_SETUP.md)
+❌ Broken link: ../../discussions?discussions_q=category%3A%22Show+%26+Tell%22 (from docs/archive/phases/PHASE_14_DAY3_GITHUB_SETUP.md)
+❌ Broken link: ../../discussions?discussions_q=category%3ATroubleshooting (from docs/archive/phases/PHASE_14_DAY3_GITHUB_SETUP.md)
+❌ Broken link: ../CODE_OF_CONDUCT.md (from docs/archive/phases/PHASE_14_DAY3_GITHUB_SETUP.md)
+❌ Broken link: ../docs/FAQ.md (from docs/archive/phases/PHASE_14_DAY3_GITHUB_SETUP.md)
+❌ Broken link: ../docs/BETA_TESTING_GUIDE.md (from docs/archive/phases/PHASE_14_DAY3_GITHUB_SETUP.md)
+❌ Broken link: ../docs/FAQ.md (from docs/archive/phases/PHASE_14_DAY3_GITHUB_SETUP.md)
+❌ Broken link: ../issues (from docs/archive/phases/PHASE_14_DAY3_GITHUB_SETUP.md)
+❌ Broken link: ../../docs/BETA_TESTING_GUIDE.md#faq (from docs/archive/phases/PHASE_14_GITHUB_SETUP.md)
+❌ Broken link: ../../docs/BETA_TESTING_GUIDE.md#faq (from docs/archive/phases/PHASE_14_GITHUB_SETUP.md)
+❌ Broken link: /docs/PHASE_13_USER_QUICK_START.md (from docs/archive/phases/PHASE_14_SETUP_GUIDE.md)
+❌ Broken link: /docs/PHASE_13_FAQ.md (from docs/archive/phases/PHASE_14_SETUP_GUIDE.md)
+❌ Broken link: ../00-INDEX/MASTER_PHASE_INDEX.md (from docs/archive/phases/README.md)
+❌ Broken link: ../00-INDEX/PHASE_STATUS_DASHBOARD.md (from docs/archive/phases/README.md)
+❌ Broken link: ../00-INDEX/QUICK_REFERENCE.md (from docs/archive/phases/README.md)
+❌ Broken link: ../00-INDEX/MASTER_PHASE_INDEX.md (from docs/archive/phases/README.md)
+❌ Broken link: ../00-INDEX/PHASE_STATUS_DASHBOARD.md (from docs/archive/phases/README.md)
+❌ Broken link: ../00-INDEX/ (from docs/archive/phases/README.md)
+❌ Broken link: ../02-ROADMAPS/ (from docs/archive/phases/README.md)
+❌ Broken link: ../03-BUSINESS-STRATEGY/ (from docs/archive/phases/README.md)
+❌ Broken link: ../04-TECHNICAL-IMPLEMENTATION/ (from docs/archive/phases/README.md)
+❌ Broken link: ../00-INDEX/QUICK_REFERENCE.md (from docs/archive/phases/README.md)
+❌ Broken link: ../00-INDEX/README.md (from docs/archive/phases/README.md)
+❌ Broken link: CLI_REFERENCE.md (from docs/guides/API.md)
+❌ Broken link: PROJECT_STRUCTURE.md (from docs/guides/API.md)
+❌ Broken link: USER_GUIDE.md (from docs/guides/INSTALLATION.md)
+❌ Broken link: API_DOCUMENTATION.md (from docs/guides/INSTALLATION.md)
+❌ Broken link: plugins/fl_studio/BUILD.md (from docs/guides/PLUGINS.md)
+❌ Broken link: plugins/fl_studio/BUILD.md (from docs/guides/PLUGINS.md)
+❌ Broken link: plugins/ableton/README.md (from docs/guides/PLUGINS.md)
+❌ Broken link: docs/PHASE_13_2_DAW_PLUGIN_PLAN.md (from docs/guides/PLUGINS.md)
+❌ Broken link: plugins/fl_studio/README.md (from docs/guides/PLUGINS.md)
+❌ Broken link: plugins/ableton/README.md (from docs/guides/PLUGINS.md)
+❌ Broken link: README.md (from docs/guides/PLUGINS.md)
+❌ Broken link: GEMINI_CLI_GUIDE.md (from docs/guides/QUICKSTART.md)
+❌ Broken link: SETUP_COMPLETE.md (from docs/guides/QUICKSTART.md)
+❌ Broken link: CLAUDE.md (from docs/guides/QUICKSTART.md)
+❌ Broken link: GEMINI_CLI_GUIDE.md (from docs/guides/QUICKSTART.md)
+❌ Broken link: ./ARCHITECTURE.md (from docs/strategy/MODERNIZATION-SUMMARY-2026.md)
+❌ Broken link: ./CLAUDE.md (from docs/strategy/MODERNIZATION-SUMMARY-2026.md)
+❌ Broken link: ./.github/copilot-instructions.md (from docs/strategy/MODERNIZATION-SUMMARY-2026.md)
+❌ Broken link: ../../docs/CLI_DEVELOPMENT.md (from tests/unit/cli/README.md)
+❌ Broken link: ../../docs/ERROR_HANDLING.md (from tests/unit/cli/README.md)
+❌ Broken link: ../../tests/README.md (from tests/unit/cli/README.md)
+❌ Broken link: ../../pytest.ini (from tests/unit/cli/README.md)
+❌ Potential duplicate content: .venv/lib/python3.13/site-packages/numpy-2.4.4.dist-info/licenses/numpy/random/LICENSE.md and .venv/lib/python3.13/site-packages/numpy/random/LICENSE.md
+❌ Potential duplicate content: .venv/lib/python3.13/site-packages/pip/_vendor/idna/LICENSE.md and .venv/lib/python3.13/site-packages/idna-3.11.dist-info/licenses/LICENSE.md
+❌ Potential duplicate content: .venv/lib/python3.13/site-packages/pip-26.0.1.dist-info/licenses/src/pip/_vendor/idna/LICENSE.md and .venv/lib/python3.13/site-packages/idna-3.11.dist-info/licenses/LICENSE.md
+
+## Warnings
+✅ No warnings!
+ERROR: ❌ Documentation validation failed with 628 errors and 0 warnings
+
+Running codebase forensics...
+Debug: Forensics Analyzer Import Trace
+[0.0000] Importing processing.exceptions...
+[3.3301] Passed.
+[3.3301] Importing processing.audio_pipeline...
+[3.3301] Passed.
+[3.3301] Importing processing.stem_separation...
+[3.3301] Passed.
+[3.3301] Importing processing.forensics_analyzer...
+[3.3301] Passed.
+Source files count:
+  Python files: 323
+
+Test files count:
+  Test files: 86
+
+Documentation files:
+  Markdown files: 214
+pyproject.toml Summary:
+Project: samplemind-ai
+Version: 0.3.0
+Python: >=3.12
+Dependencies: 67 total
+Dev Dependencies: 17 total

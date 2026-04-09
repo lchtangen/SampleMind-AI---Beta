@@ -11,10 +11,9 @@ Tests cover:
 - Graceful degradation and fallbacks
 """
 
+from unittest.mock import patch
+
 import pytest
-import os
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
 from typer.testing import CliRunner
 
 pytestmark = [pytest.mark.unit, pytest.mark.cli]
@@ -414,9 +413,7 @@ class TestInputValidationErrors:
         runner = CliRunner()
         audio_file = test_audio_samples["120_c_major"]
 
-        with patch(
-            "samplemind.interfaces.cli.commands.utils.find_similar_async"
-        ) as mock_similar:
+        with patch("samplemind.interfaces.cli.commands.utils.find_similar_async"):
             result = runner.invoke(
                 app, ["library:find-similar", str(audio_file), "--limit", "invalid"]
             )
@@ -523,7 +520,7 @@ class TestErrorMessageQuality:
         ) as mock_analyze:
             mock_analyze.side_effect = Exception("Detailed error")
 
-            result = runner.invoke(app, ["analyze:full", str(audio_file), "--verbose"])
+            runner.invoke(app, ["analyze:full", str(audio_file), "--verbose"])
 
         # Verbose mode may show more details
 
@@ -548,7 +545,7 @@ class TestErrorRecoveryAndRetry:
                 {"provider": "ollama", "summary": "Analysis"},
             ]
 
-            result = runner.invoke(app, ["ai:analyze", str(audio_file)])
+            runner.invoke(app, ["ai:analyze", str(audio_file)])
 
         # Should eventually succeed with retry
         # Implementation dependent

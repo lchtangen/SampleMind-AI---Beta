@@ -18,7 +18,7 @@ from pathlib import Path
 # Add src to Python path
 sys.path.append(str(Path(__file__).parent / "src"))
 
-from src.samplemind.interfaces.cli.menu import SampleMindCLI, main as cli_main
+from src.samplemind.interfaces.cli.menu import main as cli_main
 
 
 def parse_args():
@@ -62,11 +62,12 @@ Examples:
 
 async def quick_analyze(file_path: str):
     """Quick file analysis without menu"""
-    from src.samplemind.core.engine.audio_engine import AudioEngine, AnalysisLevel
-    from src.samplemind.core.loader import AdvancedAudioLoader, LoadingStrategy
-    from src.samplemind.integrations.ai_manager import SampleMindAIManager, AnalysisType
     from rich.console import Console
     from rich.progress import Progress, SpinnerColumn, TextColumn
+
+    from src.samplemind.core.engine.audio_engine import AudioEngine
+    from src.samplemind.core.loader import AdvancedAudioLoader
+    from src.samplemind.integrations.ai_manager import AnalysisType, SampleMindAIManager
 
     console = Console()
     file_path = Path(file_path)
@@ -103,14 +104,14 @@ async def quick_analyze(file_path: str):
             )
 
         # Display quick results
-        console.print(f"\n[bold green]✅ Analysis Complete[/bold green]")
+        console.print("\n[bold green]✅ Analysis Complete[/bold green]")
         console.print(
             f"[cyan]Duration:[/cyan] {loaded_audio.get_duration_seconds():.2f}s"
         )
         console.print(f"[cyan]Tempo:[/cyan] {features.tempo:.1f} BPM")
         console.print(f"[cyan]Key:[/cyan] {features.key} {features.mode}")
         console.print(f"[cyan]Provider:[/cyan] {ai_result.provider.value}")
-        console.print(f"\n[bold blue]🤖 AI Summary:[/bold blue]")
+        console.print("\n[bold blue]🤖 AI Summary:[/bold blue]")
         console.print(ai_result.summary)
 
     except Exception as e:
@@ -120,6 +121,7 @@ async def quick_analyze(file_path: str):
 def run_setup_script(script_name: str):
     """Run setup script"""
     import subprocess
+
     from rich.console import Console
 
     console = Console()

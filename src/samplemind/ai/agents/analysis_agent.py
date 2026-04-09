@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from samplemind.ai.agents.state import AudioAnalysisState
 
@@ -28,7 +28,7 @@ def analysis_agent(state: AudioAnalysisState) -> AudioAnalysisState:
     if not file_path:
         return {"errors": state.get("errors", []) + ["AnalysisAgent: no file_path"]}
 
-    updates: Dict[str, Any] = {
+    updates: dict[str, Any] = {
         "current_stage": "analysis",
         "progress_pct": 10,
         "messages": state.get("messages", []) + ["🔬 Analyzing audio features…"],
@@ -50,7 +50,9 @@ def analysis_agent(state: AudioAnalysisState) -> AudioAnalysisState:
             "spectral_centroid": features.spectral_centroid,
             "spectral_bandwidth": features.spectral_bandwidth,
             "zero_crossing_rate": features.zero_crossing_rate,
-            "mfcc_mean": features.mfcc_mean[:5] if features.mfcc_mean is not None else [],
+            "mfcc_mean": (
+                features.mfcc_mean[:5] if features.mfcc_mean is not None else []
+            ),
         }
         updates["audio_features"] = features_dict
         updates["duration"] = features.duration
@@ -67,8 +69,8 @@ def analysis_agent(state: AudioAnalysisState) -> AudioAnalysisState:
     try:
         if analysis_depth == "deep":
             # ── Step 2a: Deep mode — Claude tool_use loop ──────────────────
+
             from samplemind.ai.agents.tool_use import run_tool_use_loop
-            from pathlib import Path
 
             system_prompt = (
                 "You are an expert music production AI. You have access to SampleMind "
@@ -90,7 +92,11 @@ def analysis_agent(state: AudioAnalysisState) -> AudioAnalysisState:
                 max_tokens=4096,
             )
             updates["analysis_result"] = {
-                "summary": tool_result["text"][:500] if tool_result["text"] else "Deep analysis complete",
+                "summary": (
+                    tool_result["text"][:500]
+                    if tool_result["text"]
+                    else "Deep analysis complete"
+                ),
                 "detailed_analysis": tool_result["text"],
                 "provider": "claude-sonnet-4-6 (tool_use)",
                 "tokens": sum(
@@ -102,8 +108,12 @@ def analysis_agent(state: AudioAnalysisState) -> AudioAnalysisState:
 
         else:
             # ── Step 2b: Standard/quick mode — direct AI manager call ──────
-            from samplemind.integrations.ai_manager import AnalysisType, SampleMindAIManager
             import asyncio
+
+            from samplemind.integrations.ai_manager import (
+                AnalysisType,
+                SampleMindAIManager,
+            )
 
             mgr = SampleMindAIManager()
             loop = asyncio.new_event_loop()

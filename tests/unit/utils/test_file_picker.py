@@ -4,20 +4,20 @@ Unit tests for Cross-Platform File Picker
 Tests platform detection, file picker selection, and fallback logic
 """
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-from pathlib import Path
 import sys
+from pathlib import Path
+from unittest.mock import Mock, patch
+
+import pytest
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "src"))
 
 from samplemind.utils.file_picker import (
-    PlatformDetector,
     CrossPlatformFilePicker,
-    MacOSFilePicker,
     LinuxFilePicker,
-    TkinterFilePicker,
+    MacOSFilePicker,
+    PlatformDetector,
     get_file_picker,
     select_audio_file,
     select_directory,
@@ -57,7 +57,7 @@ class TestPlatformDetector:
         mock_which.return_value = "/usr/bin/zenity"
         detector = PlatformDetector()
 
-        assert detector.has_zenity() == True
+        assert detector.has_zenity()
 
     @patch("shutil.which")
     def test_no_zenity(self, mock_which):
@@ -65,7 +65,7 @@ class TestPlatformDetector:
         mock_which.return_value = None
         detector = PlatformDetector()
 
-        assert detector.has_zenity() == False
+        assert not detector.has_zenity()
 
     @patch("shutil.which")
     def test_has_kdialog(self, mock_which):
@@ -73,7 +73,7 @@ class TestPlatformDetector:
         mock_which.return_value = "/usr/bin/kdialog"
         detector = PlatformDetector()
 
-        assert detector.has_kdialog() == True
+        assert detector.has_kdialog()
 
     def test_has_tkinter(self):
         """Test tkinter detection"""
@@ -85,7 +85,6 @@ class TestPlatformDetector:
     @patch.dict("os.environ", {"XDG_CURRENT_DESKTOP": "GNOME"})
     def test_detect_gnome(self):
         """Test GNOME desktop detection"""
-        import os
 
         detector = PlatformDetector()
         desktop = detector.get_desktop_environment()
@@ -236,7 +235,7 @@ class TestCrossPlatformFilePicker:
         mock_run.return_value = mock_result
 
         picker = CrossPlatformFilePicker()
-        result = picker.choose_file(title="Test")
+        picker.choose_file(title="Test")
 
         # Should attempt Zenity
         assert mock_run.called

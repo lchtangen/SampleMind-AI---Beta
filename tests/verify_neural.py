@@ -9,7 +9,10 @@ import numpy as np
 sys.path.append(str(Path(__file__).parent.parent / "src"))
 
 try:
-    from samplemind.core.engine.audio_engine import AudioEngine, AudioFeatures
+    from samplemind.core.engine.audio_engine import (  # noqa: F401
+        AudioEngine,
+        AudioFeatures,
+    )
     from samplemind.core.engine.neural_engine import NeuralFeatureExtractor
 except ImportError:
     print("Failed to import engines. Check python path.")
@@ -48,7 +51,7 @@ def test_standalone_neural():
 
 def test_integrated_pipeline():
     logger.info("\n--- Testing Integrated Pipeline ---")
-    dummy_path = create_dummy_audio("integration_test.wav")
+    create_dummy_audio("integration_test.wav")
 
     engine = AudioEngine(max_workers=1)
 

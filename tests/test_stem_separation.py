@@ -9,16 +9,14 @@ Tests cover:
 - Output validation
 """
 
-import asyncio
 import tempfile
 from pathlib import Path
-from typing import List
 
 import pytest
 
 from samplemind.core.processing.stem_separation import (
-    StemSeparationEngine,
     StemQuality,
+    StemSeparationEngine,
     StemSeparationResult,
 )
 
@@ -106,7 +104,7 @@ class TestBatchProcessing:
         engine = StemSeparationEngine.from_quality(StemQuality.FAST)
 
         # Create mock file list (won't actually process without real audio)
-        mock_files = [
+        [
             Path("track1.wav"),
             Path("track2.wav"),
         ]
@@ -137,7 +135,7 @@ class TestErrorHandling:
 
     def test_invalid_file_format_error(self):
         """Test error handling for invalid file formats"""
-        engine = StemSeparationEngine()
+        StemSeparationEngine()
 
         with tempfile.NamedTemporaryFile(suffix=".txt") as tmp:
             tmp_path = Path(tmp.name)
@@ -160,7 +158,7 @@ class TestQualityPresets:
         """Test that all quality presets have complete config"""
         from samplemind.core.processing.stem_separation import QUALITY_PRESETS
 
-        for quality, config in QUALITY_PRESETS.items():
+        for _quality, config in QUALITY_PRESETS.items():
             assert hasattr(config, "model")
             assert hasattr(config, "shifts")
             assert hasattr(config, "overlap")
@@ -178,7 +176,7 @@ class TestPerformanceBenchmarks:
         import time
 
         start = time.time()
-        engine = StemSeparationEngine.from_quality(StemQuality.STANDARD)
+        StemSeparationEngine.from_quality(StemQuality.STANDARD)
         elapsed = time.time() - start
 
         # Engine initialization should be <100ms
@@ -244,7 +242,7 @@ class TestStemSeparationIntegration:
         if sample_audio is None:
             pytest.skip("No sample audio available")
 
-        engine = StemSeparationEngine.from_quality(StemQuality.STANDARD)
+        StemSeparationEngine.from_quality(StemQuality.STANDARD)
 
         # Would run actual separation here
         # result = engine.separate(sample_audio)

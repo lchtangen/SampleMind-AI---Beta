@@ -1,11 +1,11 @@
 """Unit tests for advanced feature extraction."""
 
-import pytest
 import numpy as np
+import pytest
 
 from samplemind.core.processing.advanced_features import (
-    AdvancedFeatureExtractor,
     AdvancedAudioFeatures,
+    AdvancedFeatureExtractor,
 )
 
 
@@ -166,8 +166,8 @@ class TestAdvancedFeatureExtractor:
     def test_global_instance(self):
         """Test global extractor instance"""
         from samplemind.core.processing.advanced_features import (
-            init_extractor,
             get_extractor,
+            init_extractor,
         )
 
         extractor1 = init_extractor()

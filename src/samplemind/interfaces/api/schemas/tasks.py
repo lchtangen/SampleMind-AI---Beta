@@ -3,9 +3,10 @@ Task Schemas
 Pydantic models for background task requests and responses
 """
 
-from typing import Optional, Dict, Any, List
-from pydantic import BaseModel, Field
 from datetime import datetime
+from typing import Any
+
+from pydantic import BaseModel
 
 
 class TaskSubmitRequest(BaseModel):
@@ -13,17 +14,17 @@ class TaskSubmitRequest(BaseModel):
 
     file_id: str
     file_path: str
-    user_id: Optional[str] = None
-    analysis_options: Optional[Dict[str, Any]] = None
+    user_id: str | None = None
+    analysis_options: dict[str, Any] | None = None
 
 
 class BatchTaskSubmitRequest(BaseModel):
     """Submit multiple files for batch processing"""
 
     batch_id: str
-    file_infos: List[Dict[str, Any]]
-    user_id: Optional[str] = None
-    analysis_options: Optional[Dict[str, Any]] = None
+    file_infos: list[dict[str, Any]]
+    user_id: str | None = None
+    analysis_options: dict[str, Any] | None = None
 
 
 class TaskStatusResponse(BaseModel):
@@ -31,12 +32,12 @@ class TaskStatusResponse(BaseModel):
 
     task_id: str
     status: str  # PENDING, STARTED, PROGRESS, SUCCESS, FAILURE, RETRY
-    result: Optional[Dict[str, Any]] = None
-    progress: Optional[int] = None
-    progress_message: Optional[str] = None
-    error: Optional[str] = None
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
+    result: dict[str, Any] | None = None
+    progress: int | None = None
+    progress_message: str | None = None
+    error: str | None = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
 
 
 class TaskSubmitResponse(BaseModel):
@@ -50,7 +51,7 @@ class TaskSubmitResponse(BaseModel):
 class TaskListResponse(BaseModel):
     """List of tasks"""
 
-    tasks: List[TaskStatusResponse]
+    tasks: list[TaskStatusResponse]
     total: int
 
 
@@ -66,7 +67,7 @@ class WorkerInfo(BaseModel):
 class WorkersStatusResponse(BaseModel):
     """Workers status response"""
 
-    workers: List[WorkerInfo]
+    workers: list[WorkerInfo]
     total_workers: int
 
 
@@ -81,5 +82,5 @@ class QueueStats(BaseModel):
 class QueueStatsResponse(BaseModel):
     """Queue statistics response"""
 
-    queues: List[QueueStats]
+    queues: list[QueueStats]
     total_queues: int

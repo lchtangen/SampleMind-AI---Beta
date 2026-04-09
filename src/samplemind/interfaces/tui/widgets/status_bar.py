@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 from textual.app import ComposeResult
+from textual.containers import Horizontal
 from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Label
-from textual.containers import Horizontal
 
 
 class StatusBar(Widget):

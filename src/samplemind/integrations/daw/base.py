@@ -7,12 +7,12 @@ Each DAW plugin implements this interface for consistent functionality.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from enum import StrEnum
 from pathlib import Path
-from typing import Dict, List, Optional, Any
-from enum import Enum
+from typing import Any
 
 
-class DAWType(str, Enum):
+class DAWType(StrEnum):
     """Supported DAW types"""
 
     FL_STUDIO = "fl_studio"
@@ -26,7 +26,7 @@ class DAWProject:
     """Information about the current DAW project"""
 
     name: str
-    path: Optional[str] = None
+    path: str | None = None
     tempo: float = 120.0
     key: str = "C"
     time_signature: str = "4/4"
@@ -89,7 +89,7 @@ class DAWBridge(ABC):
         pass
 
     @abstractmethod
-    async def get_project_info(self) -> Optional[DAWProject]:
+    async def get_project_info(self) -> DAWProject | None:
         """
         Get current project information.
 
@@ -99,7 +99,7 @@ class DAWBridge(ABC):
         pass
 
     @abstractmethod
-    async def get_channels(self) -> List[DAWChannel]:
+    async def get_channels(self) -> list[DAWChannel]:
         """
         Get all mixer channels.
 
@@ -138,7 +138,7 @@ class DAWBridge(ABC):
         """Get current project tempo"""
         pass
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get bridge status information"""
         return {
             "daw_type": self.daw_type.value,

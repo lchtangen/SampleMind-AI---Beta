@@ -5,12 +5,10 @@ SampleMind AI - Documentation Validation Script
 Validates documentation structure, links, and content quality.
 """
 
-import os
-import re
-from pathlib import Path
-from typing import List, Dict, Set, Tuple
 import argparse
 import logging
+import re
+from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -28,21 +26,21 @@ class DocumentationValidator:
             "duplicate_content": 0,
         }
 
-    def find_markdown_files(self) -> List[Path]:
+    def find_markdown_files(self) -> list[Path]:
         """Find all markdown files in the project"""
         md_files = []
         for pattern in ["*.md", "**/*.md"]:
             md_files.extend(self.project_root.glob(pattern))
         return sorted(md_files)
 
-    def extract_links(self, content: str) -> List[str]:
+    def extract_links(self, content: str) -> list[str]:
         """Extract markdown links from content"""
         # Match [text](link) format
         link_pattern = r"\[([^\]]+)\]\(([^)]+)\)"
         matches = re.findall(link_pattern, content)
         return [match[1] for match in matches]
 
-    def validate_internal_links(self, file_path: Path, content: str) -> List[str]:
+    def validate_internal_links(self, file_path: Path, content: str) -> list[str]:
         """Validate internal markdown links"""
         errors = []
         links = self.extract_links(content)
@@ -71,7 +69,7 @@ class DocumentationValidator:
 
         return errors
 
-    def validate_structure(self, file_path: Path, content: str) -> List[str]:
+    def validate_structure(self, file_path: Path, content: str) -> list[str]:
         """Validate document structure"""
         errors = []
 
@@ -90,7 +88,7 @@ class DocumentationValidator:
 
         return errors
 
-    def check_duplicate_content(self, files_content: Dict[Path, str]) -> List[str]:
+    def check_duplicate_content(self, files_content: dict[Path, str]) -> list[str]:
         """Check for duplicate content across files"""
         errors = []
         content_hashes = {}
@@ -111,7 +109,7 @@ class DocumentationValidator:
 
         return errors
 
-    def validate_required_files(self) -> List[str]:
+    def validate_required_files(self) -> list[str]:
         """Check for required documentation files"""
         required_files = ["README.md", "CONTRIBUTING.md", "LICENSE", "docs/README.md"]
 
@@ -123,7 +121,7 @@ class DocumentationValidator:
 
         return errors
 
-    def check_documentation_coverage(self) -> List[str]:
+    def check_documentation_coverage(self) -> list[str]:
         """Check if key areas have documentation"""
         warnings = []
 
@@ -145,7 +143,7 @@ class DocumentationValidator:
 
         return warnings
 
-    def analyze_documentation_quality(self) -> Dict[str, int]:
+    def analyze_documentation_quality(self) -> dict[str, int]:
         """Analyze overall documentation quality metrics"""
         md_files = self.find_markdown_files()
 
@@ -180,7 +178,7 @@ class DocumentationValidator:
 
         return metrics
 
-    def validate_all(self) -> Dict[str, any]:
+    def validate_all(self) -> dict[str, any]:
         """Run all validation checks"""
         logger.info("🔍 Starting documentation validation...")
 
@@ -228,7 +226,7 @@ class DocumentationValidator:
             "quality": quality_metrics,
         }
 
-    def generate_report(self, results: Dict) -> str:
+    def generate_report(self, results: dict) -> str:
         """Generate validation report"""
         report = f"""# Documentation Validation Report
 

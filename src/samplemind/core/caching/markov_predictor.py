@@ -5,12 +5,9 @@ Uses Order-2 Markov chains to predict the next file/features
 user will need, enabling preemptive cache warming.
 """
 
-import asyncio
-import time
-from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass, field
-from pathlib import Path
 import logging
+import time
+from dataclasses import dataclass, field
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +25,7 @@ class Prediction:
     steps_ahead: int  # How many steps in the future
     timestamp: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary"""
         return {
             "file_id": self.file_id,
@@ -48,11 +45,11 @@ class PredictionResult:
 
     timestamp: float
     current_state: str
-    predictions: List[Prediction] = field(default_factory=list)
+    predictions: list[Prediction] = field(default_factory=list)
     accuracy: float = 0.0  # Accuracy of recent predictions
     model_updated_at: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary"""
         return {
             "timestamp": self.timestamp,
@@ -83,12 +80,12 @@ class MarkovPredictor:
         self.confidence_threshold = confidence_threshold
 
         # Prediction history for accuracy tracking
-        self.prediction_history: List[Dict] = []
+        self.prediction_history: list[dict] = []
         self.correct_predictions = 0
         self.total_predictions = 0
 
         # File metadata cache
-        self.file_metadata: Dict[str, Dict] = {}
+        self.file_metadata: dict[str, dict] = {}
 
         logger.info(f"Markov predictor initialized (threshold={confidence_threshold})")
 
@@ -115,7 +112,7 @@ class MarkovPredictor:
             "duration": duration,
         }
 
-    def predict_next(self, current_state: str, top_n: int = 5) -> List[Prediction]:
+    def predict_next(self, current_state: str, top_n: int = 5) -> list[Prediction]:
         """
         Predict next states the user will access.
 
@@ -170,7 +167,7 @@ class MarkovPredictor:
 
     def predict_with_lookahead(
         self, current_state: str, lookahead_depth: int = 2, top_n: int = 5
-    ) -> List[Prediction]:
+    ) -> list[Prediction]:
         """
         Predict with multiple lookahead steps.
 
@@ -184,7 +181,7 @@ class MarkovPredictor:
         Returns:
             Merged list of predictions weighted by depth
         """
-        all_predictions: Dict[str, Prediction] = {}
+        all_predictions: dict[str, Prediction] = {}
 
         for depth in range(1, lookahead_depth + 1):
             # Get predictions at this depth
@@ -269,7 +266,7 @@ class MarkovPredictor:
 
         return correct / window
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """Get predictor statistics"""
         return {
             "total_predictions": self.total_predictions,
@@ -324,7 +321,7 @@ class MarkovPredictor:
         self.prediction_history.clear()
         logger.info("Predictor statistics reset")
 
-    def export_model(self) -> Dict:
+    def export_model(self) -> dict:
         """Export model state for inspection or persistence"""
         return {
             "stats": self.get_stats(),
@@ -338,7 +335,7 @@ class MarkovPredictor:
 
 
 # Global instance
-_predictor_instance: Optional[MarkovPredictor] = None
+_predictor_instance: MarkovPredictor | None = None
 
 
 def init_predictor(usage_tracker=None, **kwargs) -> MarkovPredictor:

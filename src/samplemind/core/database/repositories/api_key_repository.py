@@ -1,7 +1,7 @@
 """API Key repository"""
 
-from typing import Optional, List
 from datetime import datetime
+
 from samplemind.core.database.mongo import APIKey
 
 
@@ -15,8 +15,8 @@ class APIKeyRepository:
         name: str,
         provider: str,
         key_hash: str,
-        permissions: List[str],
-        created_at: Optional[datetime] = None,
+        permissions: list[str],
+        created_at: datetime | None = None,
         is_active: bool = True,
     ) -> APIKey:
         """Create new API key"""
@@ -34,14 +34,14 @@ class APIKeyRepository:
         return api_key
 
     @staticmethod
-    async def get_by_id(key_id: str) -> Optional[APIKey]:
+    async def get_by_id(key_id: str) -> APIKey | None:
         """Get API key by ID"""
         return await APIKey.find_one(APIKey.key_id == key_id)
 
     @staticmethod
     async def get_by_user_id(
         user_id: str, limit: int = 50, offset: int = 0
-    ) -> Optional[List[APIKey]]:
+    ) -> list[APIKey] | None:
         """Get all API keys for a user"""
         return (
             await APIKey.find(APIKey.user_id == user_id)
@@ -51,12 +51,12 @@ class APIKeyRepository:
         )
 
     @staticmethod
-    async def get_by_hash(key_hash: str) -> Optional[APIKey]:
+    async def get_by_hash(key_hash: str) -> APIKey | None:
         """Get API key by hash"""
         return await APIKey.find_one(APIKey.key_hash == key_hash)
 
     @staticmethod
-    async def update(key_id: str, **kwargs) -> Optional[APIKey]:
+    async def update(key_id: str, **kwargs) -> APIKey | None:
         """Update API key fields"""
         api_key = await APIKey.find_one(APIKey.key_id == key_id)
         if api_key:
@@ -79,7 +79,7 @@ class APIKeyRepository:
         return False
 
     @staticmethod
-    async def toggle_active(key_id: str) -> Optional[APIKey]:
+    async def toggle_active(key_id: str) -> APIKey | None:
         """Toggle API key active status"""
         api_key = await APIKey.find_one(APIKey.key_id == key_id)
         if api_key:
@@ -89,7 +89,7 @@ class APIKeyRepository:
         return api_key
 
     @staticmethod
-    async def update_last_used(key_id: str) -> Optional[APIKey]:
+    async def update_last_used(key_id: str) -> APIKey | None:
         """Update last used timestamp"""
         api_key = await APIKey.find_one(APIKey.key_id == key_id)
         if api_key:

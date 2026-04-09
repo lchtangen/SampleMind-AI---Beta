@@ -4,22 +4,22 @@ Unit tests for AI Manager
 Tests multi-provider AI routing, fallback logic, and result conversion
 """
 
-import pytest
-import asyncio
-from unittest.mock import Mock, patch, MagicMock
-from pathlib import Path
 import sys
+from pathlib import Path
+from unittest.mock import patch
+
+import pytest
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "src"))
 
 from samplemind.integrations.ai_manager import (
-    SampleMindAIManager,
-    AIProvider,
-    AnalysisType,
-    UnifiedAnalysisResult,
-    AIProviderConfig,
     AILoadBalancer,
+    AIProvider,
+    AIProviderConfig,
+    AnalysisType,
+    SampleMindAIManager,
+    UnifiedAnalysisResult,
 )
 
 
@@ -35,14 +35,14 @@ class TestAIProviderConfig:
         assert config.provider == AIProvider.ANTHROPIC
         assert config.api_key == "test_key"
         assert config.priority == 1
-        assert config.enabled == True
+        assert config.enabled
         assert config.total_requests == 0
 
     def test_default_values(self):
         """Test default configuration values"""
         config = AIProviderConfig(provider=AIProvider.OPENAI, api_key="test")
 
-        assert config.enabled == True
+        assert config.enabled
         assert config.priority == 1
         assert config.max_requests_per_minute == 60
         assert config.success_rate == 1.0
@@ -136,7 +136,7 @@ class TestSampleMindAIManager:
         assert len(status) > 0
 
         # Check status structure
-        for provider, info in status.items():
+        for _provider, info in status.items():
             assert "enabled" in info
             assert "priority" in info
             assert "total_requests" in info
@@ -218,11 +218,11 @@ class TestSampleMindAIManager:
 
         # Disable it
         ai_manager.set_provider_enabled(provider, False)
-        assert ai_manager.provider_configs[provider].enabled == False
+        assert not ai_manager.provider_configs[provider].enabled
 
         # Enable it
         ai_manager.set_provider_enabled(provider, True)
-        assert ai_manager.provider_configs[provider].enabled == True
+        assert ai_manager.provider_configs[provider].enabled
 
     def test_set_provider_priority(self, ai_manager):
         """Test changing provider priority"""
@@ -330,8 +330,8 @@ class TestOllamaProvider:
         manager.provider_configs = {}
 
         from samplemind.integrations.ollama_integration import (
-            OllamaMusicAnalysis,
             OllamaModel,
+            OllamaMusicAnalysis,
         )
 
         mock_result = OllamaMusicAnalysis(

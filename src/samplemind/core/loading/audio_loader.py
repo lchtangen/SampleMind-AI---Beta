@@ -13,9 +13,10 @@ import asyncio
 import hashlib
 import logging
 import time
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 import numpy as np
 
@@ -51,9 +52,9 @@ class AdvancedAudioLoader:
         self.metadata_extractor = MetadataExtractor()
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
 
-        self.audio_cache: Dict[str, LoadedAudio] = {}
-        self.metadata_cache: Dict[str, AudioMetadata] = {}
-        self.loading_stats: Dict[str, Any] = {
+        self.audio_cache: dict[str, LoadedAudio] = {}
+        self.metadata_cache: dict[str, AudioMetadata] = {}
+        self.loading_stats: dict[str, Any] = {
             "total_loads": 0,
             "cache_hits": 0,
             "cache_misses": 0,
@@ -70,9 +71,9 @@ class AdvancedAudioLoader:
 
     def load_audio(
         self,
-        file_path: Union[str, Path],
-        strategy: Optional[LoadingStrategy] = None,
-        target_sr: Optional[int] = None,
+        file_path: str | Path,
+        strategy: LoadingStrategy | None = None,
+        target_sr: int | None = None,
         mono: bool = True,
         normalize: bool = True,
         use_cache: bool = True,
@@ -149,8 +150,8 @@ class AdvancedAudioLoader:
 
     async def load_audio_async(
         self,
-        file_path: Union[str, Path],
-        strategy: Optional[LoadingStrategy] = None,
+        file_path: str | Path,
+        strategy: LoadingStrategy | None = None,
         **kwargs: Any,
     ) -> LoadedAudio:
         """Asynchronous wrapper around :meth:`load_audio`."""
@@ -170,11 +171,11 @@ class AdvancedAudioLoader:
 
     def batch_load(
         self,
-        file_paths: List[Union[str, Path]],
-        strategy: Optional[LoadingStrategy] = None,
+        file_paths: list[str | Path],
+        strategy: LoadingStrategy | None = None,
         parallel: bool = True,
-        progress_callback: Optional[Callable[[int, int], None]] = None,
-    ) -> List[LoadedAudio]:
+        progress_callback: Callable[[int, int], None] | None = None,
+    ) -> list[LoadedAudio]:
         """Load multiple audio files, optionally in parallel."""
         logger.info(
             "🔄 Batch loading %d files (parallel=%s)", len(file_paths), parallel
@@ -187,11 +188,11 @@ class AdvancedAudioLoader:
 
     def _batch_load_parallel(
         self,
-        file_paths: List[Union[str, Path]],
+        file_paths: list[str | Path],
         strategy: LoadingStrategy,
-        progress_callback: Optional[Callable[[int, int], None]],
-    ) -> List[LoadedAudio]:
-        results: List[Optional[LoadedAudio]] = [None] * len(file_paths)
+        progress_callback: Callable[[int, int], None] | None,
+    ) -> list[LoadedAudio]:
+        results: list[LoadedAudio | None] = [None] * len(file_paths)
         futures = [
             (i, self.executor.submit(self.load_audio, fp, strategy))
             for i, fp in enumerate(file_paths)
@@ -209,11 +210,11 @@ class AdvancedAudioLoader:
 
     def _batch_load_sequential(
         self,
-        file_paths: List[Union[str, Path]],
+        file_paths: list[str | Path],
         strategy: LoadingStrategy,
-        progress_callback: Optional[Callable[[int, int], None]],
-    ) -> List[LoadedAudio]:
-        results: List[LoadedAudio] = []
+        progress_callback: Callable[[int, int], None] | None,
+    ) -> list[LoadedAudio]:
+        results: list[LoadedAudio] = []
         for i, file_path in enumerate(file_paths):
             try:
                 results.append(self.load_audio(file_path, strategy))
@@ -227,10 +228,10 @@ class AdvancedAudioLoader:
 
     def scan_directory(
         self,
-        directory: Union[str, Path],
+        directory: str | Path,
         recursive: bool = True,
         supported_only: bool = True,
-    ) -> List[Path]:
+    ) -> list[Path]:
         """Return a list of audio file paths found in *directory*."""
         directory = Path(directory)
         if not directory.exists():
@@ -243,13 +244,13 @@ class AdvancedAudioLoader:
             return [f for f in files if self.format_detector.is_supported_format(f)]
         return files
 
-    def get_directory_info(self, directory: Union[str, Path]) -> Dict[str, Any]:
+    def get_directory_info(self, directory: str | Path) -> dict[str, Any]:
         """Return stats about audio files contained in *directory*."""
         audio_files = self.scan_directory(
             directory, recursive=True, supported_only=True
         )
 
-        info: Dict[str, Any] = {
+        info: dict[str, Any] = {
             "total_files": len(audio_files),
             "total_size": 0,
             "format_distribution": {},
@@ -274,8 +275,8 @@ class AdvancedAudioLoader:
         self,
         file_path: Path,
         strategy: LoadingStrategy,
-        target_sr: Optional[int],
-    ) -> Tuple[np.ndarray, int]:
+        target_sr: int | None,
+    ) -> tuple[np.ndarray, int]:
         import librosa  # lazy: heavy dep, only needed at load time
         import soundfile as sf  # lazy: heavy dep
 
@@ -323,7 +324,7 @@ class AdvancedAudioLoader:
         self,
         file_path: Path,
         strategy: LoadingStrategy,
-        target_sr: Optional[int],
+        target_sr: int | None,
         mono: bool,
         normalize: bool,
     ) -> str:
@@ -355,7 +356,7 @@ class AdvancedAudioLoader:
         stats["format_distribution"].setdefault(audio_format.name, 0)
         stats["format_distribution"][audio_format.name] += 1
 
-    def get_loading_stats(self) -> Dict[str, Any]:
+    def get_loading_stats(self) -> dict[str, Any]:
         """Return loading performance statistics."""
         total = self.loading_stats["cache_hits"] + self.loading_stats["cache_misses"]
         hit_rate = self.loading_stats["cache_hits"] / total if total else 0.0
@@ -383,7 +384,7 @@ class AdvancedAudioLoader:
 # ── Factory ────────────────────────────────────────────────────────────────────
 
 
-def create_loader_from_config(config: Dict[str, Any]) -> AdvancedAudioLoader:
+def create_loader_from_config(config: dict[str, Any]) -> AdvancedAudioLoader:
     """Instantiate an :class:`AdvancedAudioLoader` from a config dict."""
     return AdvancedAudioLoader(
         default_strategy=LoadingStrategy(config.get("default_strategy", "balanced")),

@@ -10,7 +10,7 @@ Extract musical information from audio and convert to MIDI:
 
 import logging
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 
 import librosa
@@ -21,7 +21,7 @@ from mido import Message, MidiFile, MidiTrack
 logger = logging.getLogger(__name__)
 
 
-class MIDIExtractionType(str, Enum):
+class MIDIExtractionType(StrEnum):
     """Types of MIDI extraction"""
 
     MELODY = "melody"  # Monophonic melody extraction
@@ -30,7 +30,7 @@ class MIDIExtractionType(str, Enum):
     BASS_LINE = "bass_line"  # Bass line extraction
 
 
-class ChordType(str, Enum):
+class ChordType(StrEnum):
     """Common chord types"""
 
     MAJOR = "major"
@@ -151,7 +151,7 @@ class MIDIGenerator:
 
         # Extract pitch using constant-Q transform
         cqt = librosa.cqt(harmonic, sr=self.sample_rate)
-        cqt_magnitude = np.abs(cqt)
+        np.abs(cqt)
 
         # Get pitch contour
         pitches, confidences = librosa.piptrack(
@@ -165,9 +165,7 @@ class MIDIGenerator:
 
         # Estimate tempo
         onset_env = librosa.onset.onset_strength(y=audio, sr=self.sample_rate)
-        tempogram = librosa.feature.tempogram(
-            onset_envelope=onset_env, sr=self.sample_rate
-        )
+        librosa.feature.tempogram(onset_envelope=onset_env, sr=self.sample_rate)
         tempo = librosa.feature.tempo(onset_envelope=onset_env, sr=self.sample_rate)[0]
 
         # Create MIDI file
@@ -196,7 +194,7 @@ class MIDIGenerator:
         """Convert pitch contour to discrete notes"""
         notes = []
         hop_length = 512
-        frame_length = hop_length * 4
+        hop_length * 4
 
         # Smooth confidence values
         confidences_smooth = librosa.util.normalize(confidences[0])
@@ -308,9 +306,8 @@ class MIDIGenerator:
         sr: int,
     ) -> list[Chord]:
         """Detect chords from chroma features"""
-        chords = []
         hop_length = 512
-        frame_duration = hop_length / sr
+        hop_length / sr
 
         # Common chord templates (semitone offsets from root)
         chord_templates = {

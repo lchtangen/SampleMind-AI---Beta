@@ -3,14 +3,14 @@ Production Redis Caching System
 Multi-level caching with automatic invalidation
 """
 
-import json
-import pickle
-from typing import Any, Optional, List, Dict, Callable
-from functools import wraps
 import hashlib
-import asyncio
-from datetime import timedelta
+import json
 import logging
+import pickle
+from collections.abc import Callable
+from functools import wraps
+from typing import Any
+
 from redis import asyncio as aioredis
 from redis.asyncio import Redis
 from redis.exceptions import RedisError
@@ -63,7 +63,7 @@ class RedisCache:
         self.redis_url = redis_url
         self.default_ttl = default_ttl
         self.key_prefix = key_prefix
-        self._redis: Optional[Redis] = None
+        self._redis: Redis | None = None
 
         # Statistics
         self.hits = 0
@@ -100,7 +100,7 @@ class RedisCache:
         """Generate prefixed cache key"""
         return f"{self.key_prefix}{key}"
 
-    async def get(self, key: str) -> Optional[Any]:
+    async def get(self, key: str) -> Any | None:
         """
         Get value from cache
 
@@ -135,7 +135,7 @@ class RedisCache:
         self,
         key: str,
         value: Any,
-        ttl: Optional[int] = None,
+        ttl: int | None = None,
         nx: bool = False,
         xx: bool = False,
     ) -> bool:
@@ -226,21 +226,21 @@ class RedisCache:
             logger.error(f"Cache decrement error for key {key}: {e}")
             return 0
 
-    async def get_many(self, keys: List[str]) -> Dict[str, Any]:
+    async def get_many(self, keys: list[str]) -> dict[str, Any]:
         """Get multiple values at once"""
         try:
             full_keys = [self._make_key(k) for k in keys]
             values = await self._redis.mget(full_keys)
 
             result = {}
-            for key, data in zip(keys, values):
+            for key, data in zip(keys, values, strict=False):
                 if data:
                     try:
                         result[key] = pickle.loads(data)
-                    except:
+                    except Exception:
                         try:
                             result[key] = json.loads(data)
-                        except:
+                        except Exception:
                             result[key] = data
 
             return result
@@ -249,7 +249,7 @@ class RedisCache:
             logger.error(f"Cache get_many error: {e}")
             return {}
 
-    async def set_many(self, data: Dict[str, Any], ttl: Optional[int] = None) -> bool:
+    async def set_many(self, data: dict[str, Any], ttl: int | None = None) -> bool:
         """Set multiple values at once"""
         try:
             pipe = self._redis.pipeline()
@@ -259,7 +259,7 @@ class RedisCache:
                 full_key = self._make_key(key)
                 try:
                     serialized = pickle.dumps(value)
-                except:
+                except Exception:
                     serialized = json.dumps(value).encode()
 
                 pipe.set(full_key, serialized, ex=ttl)
@@ -306,7 +306,7 @@ class RedisCache:
             logger.error(f"Cache clear error: {e}")
             return False
 
-    async def get_stats(self) -> Dict[str, Any]:
+    async def get_stats(self) -> dict[str, Any]:
         """Get cache statistics"""
         try:
             info = await self._redis.info()
@@ -339,7 +339,7 @@ def cache_key(*args, **kwargs) -> str:
 def cached(
     ttl: int = CacheConfig.DEFAULT_TTL,
     key_prefix: str = "",
-    key_builder: Optional[Callable] = None,
+    key_builder: Callable | None = None,
 ) -> Any:
     """
     Decorator for caching function results
@@ -386,7 +386,7 @@ def cached(
 
 
 # Global cache instance
-_cache_instance: Optional[RedisCache] = None
+_cache_instance: RedisCache | None = None
 
 
 async def init_cache(redis_url: str, **kwargs) -> RedisCache:
@@ -414,12 +414,12 @@ class AudioFeatureCache:
         self.cache = cache
         self.prefix = CacheConfig.AUDIO_FEATURES
 
-    async def get_features(self, audio_id: str) -> Optional[Dict[str, Any]]:
+    async def get_features(self, audio_id: str) -> dict[str, Any] | None:
         """Get cached audio features"""
         return await self.cache.get(f"{self.prefix}{audio_id}")
 
     async def set_features(
-        self, audio_id: str, features: Dict[str, Any], ttl: int = CacheConfig.LONG_TTL
+        self, audio_id: str, features: dict[str, Any], ttl: int = CacheConfig.LONG_TTL
     ) -> bool:
         """Cache audio features"""
         return await self.cache.set(f"{self.prefix}{audio_id}", features, ttl=ttl)
@@ -486,33 +486,33 @@ from src.samplemind.core.config import settings
 async def main():
     # Initialize cache
     cache = await init_cache(settings.redis_url)
-    
+
     # Basic operations
     await cache.set("user:123", {"name": "John"}, ttl=3600)
     user = await cache.get("user:123")
-    
+
     # Batch operations
     await cache.set_many({
         "audio:1": {"duration": 120},
         "audio:2": {"duration": 180}
     })
-    
+
     # Pattern deletion
     await cache.delete_pattern("audio:*")
-    
+
     # Statistics
     stats = await cache.get_stats()
     print(f"Hit rate: {stats['hit_rate_percent']}%")
-    
+
     # Rate limiting
     rate_limiter = RateLimitCache(cache)
     allowed = await rate_limiter.check_rate_limit("user:123", max_requests=100, window_seconds=60)
-    
+
     # Cached function
     @cached(ttl=3600, key_prefix="audio:features:")
     async def get_audio_features(audio_id: str):
         # Expensive operation
         return {"tempo": 120, "key": "C"}
-    
+
     features = await get_audio_features("audio_123")
 """

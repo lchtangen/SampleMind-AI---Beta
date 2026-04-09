@@ -17,7 +17,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +56,7 @@ class StemTrack:
     """A single separated stem."""
 
     name: str  # e.g. "drums"
-    output_path: Optional[Path]  # None for in-memory only
+    output_path: Path | None  # None for in-memory only
     sample_rate: int = 44100
 
 
@@ -64,15 +64,15 @@ class StemTrack:
 class SeparationResult:
     """Full output from StemSeparator."""
 
-    stems: List[StemTrack] = field(default_factory=list)
+    stems: list[StemTrack] = field(default_factory=list)
     model_name: str = DEFAULT_MODEL
     source_path: str = ""
-    output_dir: Optional[Path] = None
+    output_dir: Path | None = None
     processing_time: float = 0.0
     mock: bool = False
 
     @property
-    def stem_names(self) -> List[str]:
+    def stem_names(self) -> list[str]:
         return [s.name for s in self.stems]
 
     def to_description(self) -> str:
@@ -175,7 +175,7 @@ class StemSeparator:
     async def separate(
         self,
         audio_path: str | Path,
-        output_dir: Optional[str | Path] = None,
+        output_dir: str | Path | None = None,
     ) -> SeparationResult:
         """
         Separate a full audio track into stems.
@@ -224,7 +224,7 @@ class StemSeparator:
     def separate_sync(
         self,
         audio_path: str | Path,
-        output_dir: Optional[str | Path] = None,
+        output_dir: str | Path | None = None,
     ) -> SeparationResult:
         """Synchronous wrapper around :meth:`separate`."""
         import asyncio
@@ -236,14 +236,14 @@ class StemSeparator:
     # ------------------------------------------------------------------
 
     def _run_separation(
-        self, audio_path: Path, out_dir: Optional[Path]
-    ) -> List[StemTrack]:
+        self, audio_path: Path, out_dir: Path | None
+    ) -> list[StemTrack]:
         """CPU-bound separation work executed in thread pool."""
         origin, separated = self._separator.separate_audio_file(str(audio_path))
 
-        stems: List[StemTrack] = []
+        stems: list[StemTrack] = []
         for stem_name, waveform in separated.items():
-            stem_path: Optional[Path] = None
+            stem_path: Path | None = None
             if out_dir is not None:
                 out_dir.mkdir(parents=True, exist_ok=True)
                 stem_path = out_dir / f"{audio_path.stem}_{stem_name}.wav"
@@ -264,7 +264,7 @@ class StemSeparator:
     def _mock_result(
         self,
         audio_path: Path,
-        out_dir: Optional[Path],
+        out_dir: Path | None,
         start_time: float,
     ) -> SeparationResult:
         stems = [StemTrack(name=n, output_path=None) for n in STEM_NAMES]

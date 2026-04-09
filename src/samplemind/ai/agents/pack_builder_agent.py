@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from samplemind.ai.agents.state import AudioAnalysisState
 
@@ -26,7 +26,7 @@ def pack_builder_agent(state: AudioAnalysisState) -> AudioAnalysisState:
     mixing = state.get("mixing_recommendations", {}) or {}
     analysis = state.get("analysis_result", {}) or {}
 
-    updates: Dict[str, Any] = {
+    updates: dict[str, Any] = {
         "current_stage": "pack_builder",
         "progress_pct": 92,
         "messages": state.get("messages", []) + ["📦 Building pack manifest…"],

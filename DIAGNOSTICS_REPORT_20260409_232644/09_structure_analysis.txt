@@ -1,0 +1,8 @@
+Source files count:
+  Python files: 323
+
+Test files count:
+  Test files: 86
+
+Documentation files:
+  Markdown files: 214

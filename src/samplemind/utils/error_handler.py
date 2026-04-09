@@ -16,15 +16,15 @@ Usage:
 """
 
 import asyncio
-import sys
+from collections.abc import Callable
 from functools import wraps
-from typing import Callable, Optional, Any
+from typing import Any
+
+from loguru import logger
 from rich.console import Console
 from rich.panel import Panel
-from loguru import logger
 
 from samplemind.exceptions import SampleMindError, UserInterruptedError
-
 
 console = Console()
 
@@ -80,7 +80,7 @@ def display_error(
             )
 
 
-def display_success(message: str, details: Optional[dict] = None) -> None:
+def display_success(message: str, details: dict | None = None) -> None:
     """Display success message."""
     console.print(f"[green]✅ {message}[/green]")
 
@@ -185,7 +185,7 @@ def handle_errors(
                     include_suggestion=False,
                     verbose=verbose_errors,
                 )
-                console.print(f"[dim]Run with --verbose for details[/dim]")
+                console.print("[dim]Run with --verbose for details[/dim]")
 
                 if exit_on_error:
                     raise SystemExit(1)
@@ -235,7 +235,7 @@ def handle_errors(
                     include_suggestion=False,
                     verbose=verbose_errors,
                 )
-                console.print(f"[dim]Run with --verbose for details[/dim]")
+                console.print("[dim]Run with --verbose for details[/dim]")
 
                 if exit_on_error:
                     raise SystemExit(1)
@@ -310,7 +310,7 @@ class ErrorHandling:
 
 def report_error(
     error: Exception,
-    context: Optional[dict] = None,
+    context: dict | None = None,
     suggest_report: bool = False,
 ) -> None:
     """
@@ -366,7 +366,7 @@ def safe_execute(
     """
     try:
         return func(*args, **kwargs)
-    except Exception as e:
+    except Exception:
         if log_errors:
             logger.exception(f"Error executing {func.__name__}")
         return default

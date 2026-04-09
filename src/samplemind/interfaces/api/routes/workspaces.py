@@ -6,7 +6,6 @@ Multi-project organization and management
 import logging
 import uuid
 from datetime import datetime
-from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
@@ -26,14 +25,14 @@ class WorkspaceCreate(BaseModel):
     """Create workspace request"""
 
     name: str = Field(..., min_length=1, max_length=100)
-    description: Optional[str] = Field(None, max_length=500)
+    description: str | None = Field(None, max_length=500)
 
 
 class WorkspaceUpdate(BaseModel):
     """Update workspace request"""
 
-    name: Optional[str] = Field(None, min_length=1, max_length=100)
-    description: Optional[str] = Field(None, max_length=500)
+    name: str | None = Field(None, min_length=1, max_length=100)
+    description: str | None = Field(None, max_length=500)
 
 
 class WorkspaceResponse(BaseModel):
@@ -42,7 +41,7 @@ class WorkspaceResponse(BaseModel):
     workspace_id: str
     user_id: str
     name: str
-    description: Optional[str]
+    description: str | None
     sample_count: int
     created_at: datetime
     updated_at: datetime
@@ -51,7 +50,7 @@ class WorkspaceResponse(BaseModel):
 class WorkspaceDetailResponse(WorkspaceResponse):
     """Detailed workspace response"""
 
-    samples: List[str] = Field(default_factory=list)
+    samples: list[str] = Field(default_factory=list)
 
 
 @router.post("", response_model=WorkspaceResponse, status_code=status.HTTP_201_CREATED)
@@ -85,7 +84,7 @@ async def create_workspace(
         }
 
         # Insert into MongoDB
-        result = await db.workspaces.insert_one(workspace)
+        await db.workspaces.insert_one(workspace)
 
         logger.info(f"✅ Workspace created: {workspace_id} ({request.name})")
 
@@ -375,7 +374,7 @@ async def add_sample_to_workspace(
             }
 
         # Add sample to workspace
-        result = await db.workspaces.update_one(
+        await db.workspaces.update_one(
             {"workspace_id": workspace_id},
             {
                 "$push": {"samples": sample_id},
@@ -439,7 +438,7 @@ async def remove_sample_from_workspace(
             )
 
         # Remove sample from workspace
-        result = await db.workspaces.update_one(
+        await db.workspaces.update_one(
             {"workspace_id": workspace_id},
             {
                 "$pull": {"samples": sample_id},

@@ -12,12 +12,12 @@ import asyncio
 import hashlib
 import os
 import time
-from typing import Callable, Dict, List, Optional, Tuple
+from collections.abc import Callable
 
 from samplemind.core.engine.audio_engine import (
+    AnalysisLevel,
     AudioEngine,
     AudioFeatures,
-    AnalysisLevel,
 )
 
 
@@ -69,12 +69,12 @@ class AudioCache:
 
     def __init__(self, max_size: int = 100) -> None:
         """Initialize cache with maximum size."""
-        self.cache: Dict[str, Tuple[AudioFeatures, float]] = {}
+        self.cache: dict[str, tuple[AudioFeatures, float]] = {}
         self.max_size = max_size
         self.hit_count = 0
         self.miss_count = 0
 
-    async def get(self, file_path: str) -> Optional[AudioFeatures]:
+    async def get(self, file_path: str) -> AudioFeatures | None:
         """Get cached result for file."""
         file_hash = self._hash_file(file_path)
 
@@ -136,7 +136,7 @@ class TUIAudioEngine:
     async def analyze_file(
         self,
         file_path: str,
-        progress_callback: Optional[Callable[[float], None]] = None,
+        progress_callback: Callable[[float], None] | None = None,
         level: AnalysisLevel = AnalysisLevel.STANDARD,
     ) -> AudioFeatures:
         """
@@ -200,10 +200,10 @@ class TUIAudioEngine:
 
     async def analyze_batch(
         self,
-        file_paths: List[str],
-        progress_callback: Optional[Callable[[int, int], None]] = None,
+        file_paths: list[str],
+        progress_callback: Callable[[int, int], None] | None = None,
         level: AnalysisLevel = AnalysisLevel.STANDARD,
-    ) -> List[AudioFeatures]:
+    ) -> list[AudioFeatures]:
         """
         Analyze multiple files with batch progress tracking.
 
@@ -256,7 +256,7 @@ class TUIAudioEngine:
     def _analyze_with_progress(
         self,
         file_path: str,
-        progress_callback: Optional[Callable[[float], None]],
+        progress_callback: Callable[[float], None] | None,
         level: AnalysisLevel,
     ) -> AudioFeatures:
         """
@@ -303,7 +303,7 @@ class TUIAudioEngine:
 
         return result
 
-    def format_features_for_display(self, features: AudioFeatures) -> Dict[str, str]:
+    def format_features_for_display(self, features: AudioFeatures) -> dict[str, str]:
         """
         Format audio features for beautiful TUI display.
 
@@ -358,7 +358,7 @@ class TUIAudioEngine:
             ),
         }
 
-    def get_performance_stats(self) -> Dict[str, any]:
+    def get_performance_stats(self) -> dict[str, any]:
         """
         Get performance metrics for display in performance dashboard.
 
@@ -384,7 +384,7 @@ class TUIAudioEngine:
 
 
 # Module-level singleton instance
-_tui_engine: Optional[TUIAudioEngine] = None
+_tui_engine: TUIAudioEngine | None = None
 
 
 def get_tui_engine() -> TUIAudioEngine:

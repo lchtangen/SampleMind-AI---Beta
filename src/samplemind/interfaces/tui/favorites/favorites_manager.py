@@ -2,12 +2,12 @@
 
 import logging
 import uuid
-from typing import Optional, List, Dict, Any
+from typing import Any
 
+from samplemind.core.database.mongo import Favorite
 from samplemind.core.database.repositories.favorite_repository import (
     FavoriteRepository,
 )
-from samplemind.core.database.mongo import Favorite
 
 logger = logging.getLogger(__name__)
 
@@ -15,17 +15,17 @@ logger = logging.getLogger(__name__)
 class FavoritesManager:
     """High-level favorites management interface for TUI screens"""
 
-    def __init__(self, user_id: Optional[str] = None) -> None:
+    def __init__(self, user_id: str | None = None) -> None:
         """Initialize favorites manager"""
         self.user_id = user_id or "default_user"
 
     async def add_to_favorites(
-        self, analysis_id: str, file_name: str, notes: Optional[str] = None
-    ) -> Optional[str]:
+        self, analysis_id: str, file_name: str, notes: str | None = None
+    ) -> str | None:
         """Add analysis to favorites"""
         try:
             favorite_id = str(uuid.uuid4())
-            favorite = await FavoriteRepository.create(
+            await FavoriteRepository.create(
                 favorite_id=favorite_id,
                 analysis_id=analysis_id,
                 file_name=file_name,
@@ -58,7 +58,7 @@ class FavoritesManager:
             logger.error(f"❌ Failed to check favorite status: {e}")
             return False
 
-    async def get_favorite_by_analysis_id(self, analysis_id: str) -> Optional[Favorite]:
+    async def get_favorite_by_analysis_id(self, analysis_id: str) -> Favorite | None:
         """Get favorite entry by analysis ID"""
         try:
             return await FavoriteRepository.get_by_analysis_id(analysis_id)
@@ -66,7 +66,7 @@ class FavoritesManager:
             logger.error(f"❌ Failed to get favorite: {e}")
             return None
 
-    async def get_all_favorites(self, limit: int = 50) -> List[Favorite]:
+    async def get_all_favorites(self, limit: int = 50) -> list[Favorite]:
         """Get all favorites for user"""
         try:
             return await FavoriteRepository.get_by_user(
@@ -76,7 +76,7 @@ class FavoritesManager:
             logger.error(f"❌ Failed to get favorites: {e}")
             return []
 
-    async def get_favorites_as_rows(self, limit: int = 50) -> List[Dict[str, Any]]:
+    async def get_favorites_as_rows(self, limit: int = 50) -> list[dict[str, Any]]:
         """Get favorites as rows for DataTable"""
         try:
             favorites = await self.get_all_favorites(limit)
@@ -102,7 +102,7 @@ class FavoritesManager:
             logger.error(f"❌ Failed to get favorites as rows: {e}")
             return []
 
-    async def get_recent_favorites(self, limit: int = 10) -> List[Favorite]:
+    async def get_recent_favorites(self, limit: int = 10) -> list[Favorite]:
         """Get recently added favorites"""
         try:
             return await FavoriteRepository.get_recent(self.user_id, limit)
@@ -110,7 +110,7 @@ class FavoritesManager:
             logger.error(f"❌ Failed to get recent favorites: {e}")
             return []
 
-    async def get_rated_favorites(self, min_rating: int = 3) -> List[Favorite]:
+    async def get_rated_favorites(self, min_rating: int = 3) -> list[Favorite]:
         """Get favorites with minimum rating"""
         try:
             return await FavoriteRepository.get_by_rating(self.user_id, min_rating)
@@ -135,9 +135,7 @@ class FavoritesManager:
             logger.error(f"❌ Failed to update rating: {e}")
             return False
 
-    async def update_favorite_notes(
-        self, favorite_id: str, notes: Optional[str]
-    ) -> bool:
+    async def update_favorite_notes(self, favorite_id: str, notes: str | None) -> bool:
         """Update favorite notes"""
         try:
             result = await FavoriteRepository.update_notes(favorite_id, notes)
@@ -157,7 +155,7 @@ class FavoritesManager:
             logger.error(f"❌ Failed to count favorites: {e}")
             return 0
 
-    async def get_favorite_stats(self) -> Dict[str, Any]:
+    async def get_favorite_stats(self) -> dict[str, Any]:
         """Get statistics about favorites"""
         try:
             all_favorites = await self.get_all_favorites(limit=1000)
@@ -183,7 +181,7 @@ class FavoritesManager:
             logger.error(f"❌ Failed to get favorite stats: {e}")
             return {}
 
-    async def export_favorites(self) -> Dict[str, Any]:
+    async def export_favorites(self) -> dict[str, Any]:
         """Export all favorites as dictionary"""
         try:
             favorites = await self.get_all_favorites(limit=1000)
@@ -208,7 +206,7 @@ class FavoritesManager:
             return {}
 
     async def toggle_favorite(
-        self, analysis_id: str, file_name: str, notes: Optional[str] = None
+        self, analysis_id: str, file_name: str, notes: str | None = None
     ) -> bool:
         """Toggle favorite status (add if not favorited, remove if favorited)"""
         try:
@@ -224,10 +222,10 @@ class FavoritesManager:
 
 
 # Global singleton instance
-_favorites_manager: Optional[FavoritesManager] = None
+_favorites_manager: FavoritesManager | None = None
 
 
-def get_favorites_manager(user_id: Optional[str] = None) -> FavoritesManager:
+def get_favorites_manager(user_id: str | None = None) -> FavoritesManager:
     """Get or create favorites manager singleton"""
     global _favorites_manager
     if _favorites_manager is None:

@@ -3,11 +3,10 @@ Tests for semantic search caching functionality.
 Verifies embedding and query result caching performance improvements.
 """
 
-import pytest
-import asyncio
-from pathlib import Path
 import tempfile
-import shutil
+from pathlib import Path
+
+import pytest
 
 from samplemind.core.caching.semantic_cache import SemanticCache
 

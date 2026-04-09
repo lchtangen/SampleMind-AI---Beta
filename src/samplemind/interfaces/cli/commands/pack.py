@@ -2,17 +2,15 @@
 """Sample Pack Creator Commands - Create and manage professional sample packs"""
 
 from pathlib import Path
-from typing import Optional
 
 import typer
-from rich.console import Console
 from rich.table import Table
-from rich.panel import Panel
 
 from samplemind.core.library.pack_creator import (
-    SamplePackCreator,
     PackTemplate,
+    SamplePackCreator,
 )
+
 from . import utils
 
 app = typer.Typer(
@@ -32,13 +30,11 @@ def create_pack(
         "-t",
         help="Pack template: custom, drums, melodic, effects, loops",
     ),
-    author: Optional[str] = typer.Option(
-        None, "--author", "-a", help="Pack author name"
-    ),
-    description: Optional[str] = typer.Option(
+    author: str | None = typer.Option(None, "--author", "-a", help="Pack author name"),
+    description: str | None = typer.Option(
         None, "--description", "-d", help="Pack description"
     ),
-    output: Optional[Path] = typer.Option(
+    output: Path | None = typer.Option(
         None, "--output", "-o", help="Output directory for pack"
     ),
 ) -> None:
@@ -64,7 +60,7 @@ def create_pack(
 
         # Display header
         console.print()
-        console.print(f"[bold cyan]📦 Create Sample Pack[/bold cyan]")
+        console.print("[bold cyan]📦 Create Sample Pack[/bold cyan]")
         console.print(f"[cyan]Name: {name}[/cyan]")
         console.print(f"[cyan]Template: {template_lower}[/cyan]")
         if author:
@@ -82,7 +78,7 @@ def create_pack(
         )
 
         # Display results
-        console.print(f"[green]✓ Pack created successfully![/green]")
+        console.print("[green]✓ Pack created successfully![/green]")
         console.print()
 
         # Show summary
@@ -96,10 +92,10 @@ def create_pack(
         console.print(summary_table)
         console.print()
         console.print(
-            f"[dim]Use: samplemind pack:add <pack_dir> <sample_file> to add samples[/dim]"
+            "[dim]Use: samplemind pack:add <pack_dir> <sample_file> to add samples[/dim]"
         )
         console.print(
-            f"[dim]Use: samplemind pack:export <pack_dir> to export the pack[/dim]"
+            "[dim]Use: samplemind pack:export <pack_dir> to export the pack[/dim]"
         )
 
     except utils.CLIError as e:
@@ -113,8 +109,8 @@ def create_pack(
 @app.command("add")
 @utils.with_error_handling
 def add_samples(
-    pack_dir: Optional[Path] = typer.Argument(None, help="Sample pack directory"),
-    source: Optional[Path] = typer.Option(
+    pack_dir: Path | None = typer.Argument(None, help="Sample pack directory"),
+    source: Path | None = typer.Option(
         None, "--source", "-s", help="Audio file or folder to add"
     ),
     organize: bool = typer.Option(
@@ -153,12 +149,12 @@ def add_samples(
         source = Path(source).resolve()
 
         console.print()
-        console.print(f"[bold cyan]📦 Add Samples to Pack[/bold cyan]")
+        console.print("[bold cyan]📦 Add Samples to Pack[/bold cyan]")
         console.print(f"[cyan]Pack: {pack_dir.name}[/cyan]")
         console.print(f"[cyan]Source: {source.name}[/cyan]\n")
 
         # Load pack
-        from samplemind.core.library.pack_creator import SamplePack, PackMetadata
+        from samplemind.core.library.pack_creator import PackMetadata, SamplePack
 
         # Try to load existing pack metadata
         metadata_file = pack_dir / "pack.json"
@@ -186,9 +182,9 @@ def add_samples(
             # Single file
             success = pack.add_sample(source)
             if success:
-                console.print(f"[green]✓ Added 1 sample[/green]")
+                console.print("[green]✓ Added 1 sample[/green]")
             else:
-                console.print(f"[red]✗ Failed to add sample[/red]")
+                console.print("[red]✗ Failed to add sample[/red]")
                 raise typer.Exit(1)
         else:
             # Folder
@@ -196,7 +192,7 @@ def add_samples(
             if count > 0:
                 console.print(f"[green]✓ Added {count} samples[/green]")
             else:
-                console.print(f"[red]✗ No samples added[/red]")
+                console.print("[red]✗ No samples added[/red]")
                 raise typer.Exit(1)
 
         # Save metadata
@@ -216,8 +212,8 @@ def add_samples(
 @app.command("export")
 @utils.with_error_handling
 def export_pack(
-    pack_dir: Optional[Path] = typer.Argument(None, help="Sample pack directory"),
-    output: Optional[Path] = typer.Option(
+    pack_dir: Path | None = typer.Argument(None, help="Sample pack directory"),
+    output: Path | None = typer.Option(
         None, "--output", "-o", help="Output directory for export"
     ),
     format_type: str = typer.Option(
@@ -251,13 +247,14 @@ def export_pack(
             output = Path.cwd() / "exported_packs"
 
         console.print()
-        console.print(f"[bold cyan]📦 Export Sample Pack[/bold cyan]")
+        console.print("[bold cyan]📦 Export Sample Pack[/bold cyan]")
         console.print(f"[cyan]Pack: {pack_dir.name}[/cyan]")
         console.print(f"[cyan]Format: {format_type.lower()}[/cyan]\n")
 
         # Load pack
-        from samplemind.core.library.pack_creator import SamplePack, PackMetadata
         import json
+
+        from samplemind.core.library.pack_creator import PackMetadata, SamplePack
 
         metadata_file = pack_dir / "pack.json"
         if metadata_file.exists():
@@ -274,7 +271,7 @@ def export_pack(
         # Export
         export_path = pack.export(output, format=format_type.lower())
 
-        console.print(f"[green]✓ Pack exported successfully![/green]")
+        console.print("[green]✓ Pack exported successfully![/green]")
         console.print()
 
         export_table = Table(show_header=False, show_lines=False, padding=(0, 2))
@@ -298,7 +295,7 @@ def export_pack(
 @app.command("info")
 @utils.with_error_handling
 def pack_info(
-    pack_dir: Optional[Path] = typer.Argument(None, help="Sample pack directory"),
+    pack_dir: Path | None = typer.Argument(None, help="Sample pack directory"),
 ) -> None:
     """
     Display information about a sample pack.
@@ -318,11 +315,12 @@ def pack_info(
             raise typer.Exit(1)
 
         console.print()
-        console.print(f"[bold cyan]📦 Pack Information[/bold cyan]\n")
+        console.print("[bold cyan]📦 Pack Information[/bold cyan]\n")
 
         # Load pack metadata
-        from samplemind.core.library.pack_creator import SamplePack, PackMetadata
         import json
+
+        from samplemind.core.library.pack_creator import PackMetadata, SamplePack
 
         metadata_file = pack_dir / "pack.json"
         if metadata_file.exists():

@@ -1,11 +1,9 @@
 """Unit tests for AI classifier module."""
 
-import pytest
 from pathlib import Path
-import numpy as np
 
-from samplemind.ai.classification.classifier import AIClassifier, ClassificationResult
 from samplemind.ai.classification.auto_tagger import AutoTagger
+from samplemind.ai.classification.classifier import AIClassifier, ClassificationResult
 from samplemind.core.engine.audio_engine import AudioFeatures
 
 

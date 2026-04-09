@@ -14,22 +14,20 @@ Provides:
 """
 
 import asyncio
+import hashlib
 import json
 import logging
 import os
 import time
-from pathlib import Path
-from typing import Dict, List, Optional, Union, Any, Tuple, AsyncIterator
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
-import base64
-from concurrent.futures import ThreadPoolExecutor
-import hashlib
+from typing import Any
 
-from google import genai
-from google.genai import types as genai_types
 import numpy as np
 from dotenv import load_dotenv
+from google import genai
+from google.genai import types as genai_types
 
 # Load environment variables
 load_dotenv()
@@ -43,14 +41,14 @@ class GeminiModel(Enum):
     """Available Gemini models for music production — v3.0 (2026-04)"""
 
     # Current generation (PRIMARY)
-    GEMINI_2_5_FLASH = "gemini-2.5-flash"            # PRIMARY — fast, best multimodal
-    GEMINI_2_5_PRO = "gemini-2.5-pro"                # Most capable, high context
+    GEMINI_2_5_FLASH = "gemini-2.5-flash"  # PRIMARY — fast, best multimodal
+    GEMINI_2_5_PRO = "gemini-2.5-pro"  # Most capable, high context
 
     # Previous generation (fallback)
-    GEMINI_2_0_FLASH = "gemini-2.0-flash"            # previous primary
+    GEMINI_2_0_FLASH = "gemini-2.0-flash"  # previous primary
     GEMINI_2_0_FLASH_THINKING = "gemini-2.0-flash-thinking-exp"  # reasoning
-    GEMINI_1_5_PRO = "gemini-1.5-pro"                # legacy high context
-    GEMINI_1_5_FLASH = "gemini-1.5-flash"            # legacy fast
+    GEMINI_1_5_PRO = "gemini-1.5-pro"  # legacy high context
+    GEMINI_1_5_FLASH = "gemini-1.5-flash"  # legacy fast
 
 
 class MusicAnalysisType(Enum):
@@ -88,29 +86,29 @@ class AdvancedMusicAnalysis:
 
     # Genre & Style Analysis
     primary_genre: str = ""
-    secondary_genres: List[str] = field(default_factory=list)
+    secondary_genres: list[str] = field(default_factory=list)
     genre_confidence: float = 0.0
-    style_influences: List[str] = field(default_factory=list)
+    style_influences: list[str] = field(default_factory=list)
     subgenre_classification: str = ""
     era_period: str = ""
     regional_style: str = ""
 
     # Mood & Emotional Analysis
     primary_mood: str = ""
-    emotional_descriptors: List[str] = field(default_factory=list)
+    emotional_descriptors: list[str] = field(default_factory=list)
     energy_level: str = ""
     emotional_intensity: float = 0.0
     valence_score: float = 0.0  # -1 to 1 (negative to positive)
     arousal_score: float = 0.0  # 0 to 1 (calm to energetic)
-    emotional_journey: List[str] = field(default_factory=list)
+    emotional_journey: list[str] = field(default_factory=list)
 
     # Music Theory Analysis
     harmonic_analysis: str = ""
     rhythmic_analysis: str = ""
     melodic_analysis: str = ""
     structural_analysis: str = ""
-    chord_progressions: List[str] = field(default_factory=list)
-    scale_modes: List[str] = field(default_factory=list)
+    chord_progressions: list[str] = field(default_factory=list)
+    scale_modes: list[str] = field(default_factory=list)
     time_signature_analysis: str = ""
     complexity_score: float = 0.0
 
@@ -119,47 +117,47 @@ class AdvancedMusicAnalysis:
     frequency_balance: str = ""
     dynamic_range_analysis: str = ""
     stereo_field_analysis: str = ""
-    production_techniques: List[str] = field(default_factory=list)
+    production_techniques: list[str] = field(default_factory=list)
 
     # Creative Suggestions
-    creative_applications: List[str] = field(default_factory=list)
-    arrangement_ideas: List[str] = field(default_factory=list)
-    instrumentation_suggestions: List[str] = field(default_factory=list)
-    remix_potential: List[str] = field(default_factory=list)
-    collaboration_ideas: List[str] = field(default_factory=list)
+    creative_applications: list[str] = field(default_factory=list)
+    arrangement_ideas: list[str] = field(default_factory=list)
+    instrumentation_suggestions: list[str] = field(default_factory=list)
+    remix_potential: list[str] = field(default_factory=list)
+    collaboration_ideas: list[str] = field(default_factory=list)
 
     # FL Studio Integration
-    fl_plugin_recommendations: List[str] = field(default_factory=list)
-    fl_preset_suggestions: List[str] = field(default_factory=list)
-    fl_effect_chains: List[str] = field(default_factory=list)
-    fl_mixer_routing: Dict[str, Any] = field(default_factory=dict)
-    fl_automation_ideas: List[str] = field(default_factory=list)
-    fl_workflow_tips: List[str] = field(default_factory=list)
+    fl_plugin_recommendations: list[str] = field(default_factory=list)
+    fl_preset_suggestions: list[str] = field(default_factory=list)
+    fl_effect_chains: list[str] = field(default_factory=list)
+    fl_mixer_routing: dict[str, Any] = field(default_factory=dict)
+    fl_automation_ideas: list[str] = field(default_factory=list)
+    fl_workflow_tips: list[str] = field(default_factory=list)
 
     # Professional Insights
     commercial_potential: str = ""
-    target_audience: List[str] = field(default_factory=list)
-    playlist_placement: List[str] = field(default_factory=list)
+    target_audience: list[str] = field(default_factory=list)
+    playlist_placement: list[str] = field(default_factory=list)
     sync_licensing_potential: str = ""
     radio_airplay_assessment: str = ""
 
     # Similarity & Recommendations
-    similar_artists: List[str] = field(default_factory=list)
-    similar_tracks: List[str] = field(default_factory=list)
-    recommended_samples: List[str] = field(default_factory=list)
-    complementary_tracks: List[str] = field(default_factory=list)
+    similar_artists: list[str] = field(default_factory=list)
+    similar_tracks: list[str] = field(default_factory=list)
+    recommended_samples: list[str] = field(default_factory=list)
+    complementary_tracks: list[str] = field(default_factory=list)
 
     # Tags and Metadata
-    ai_generated_tags: List[str] = field(default_factory=list)
-    production_tags: List[str] = field(default_factory=list)
-    mood_tags: List[str] = field(default_factory=list)
-    genre_tags: List[str] = field(default_factory=list)
+    ai_generated_tags: list[str] = field(default_factory=list)
+    production_tags: list[str] = field(default_factory=list)
+    mood_tags: list[str] = field(default_factory=list)
+    genre_tags: list[str] = field(default_factory=list)
 
     # Raw AI Response
     raw_response: str = ""
-    token_usage: Dict[str, int] = field(default_factory=dict)
+    token_usage: dict[str, int] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization"""
         result = {}
         for key, value in self.__dict__.items():
@@ -174,7 +172,7 @@ class AdvancedPromptEngine:
     """Ultra-sophisticated prompt engineering for music AI"""
 
     @staticmethod
-    def create_comprehensive_analysis_prompt(audio_features: Dict[str, Any]) -> str:
+    def create_comprehensive_analysis_prompt(audio_features: dict[str, Any]) -> str:
         """Create the ultimate music analysis prompt"""
         return f"""
 🎵 **ADVANCED MUSIC PRODUCTION AI ANALYSIS** 🎵
@@ -355,7 +353,7 @@ Analyze this sample with the depth and expertise expected from the world's premi
 
     @staticmethod
     def create_real_time_coaching_prompt(
-        audio_features: Dict[str, Any], user_question: str
+        audio_features: dict[str, Any], user_question: str
     ) -> str:
         """Create real-time music production coaching prompt"""
         return f"""
@@ -398,7 +396,7 @@ Respond as if you're sitting right next to them in the studio, providing the exa
 
     @staticmethod
     def create_lyric_composition_prompt(
-        audio_features: Dict[str, Any], theme: str = ""
+        audio_features: dict[str, Any], theme: str = ""
     ) -> str:
         """Create AI-powered lyric composition prompt"""
         return f"""
@@ -449,7 +447,7 @@ class GoogleAIMusicProducer:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         default_model: GeminiModel = GeminiModel.GEMINI_2_5_FLASH,
         max_workers: int = 8,
         enable_caching: bool = True,
@@ -487,10 +485,10 @@ class GoogleAIMusicProducer:
 
     async def analyze_music_comprehensive(
         self,
-        audio_features: Dict[str, Any],
+        audio_features: dict[str, Any],
         analysis_type: MusicAnalysisType = MusicAnalysisType.COMPREHENSIVE_ANALYSIS,
-        model: Optional[GeminiModel] = None,
-        custom_prompt: Optional[str] = None,
+        model: GeminiModel | None = None,
+        custom_prompt: str | None = None,
     ) -> AdvancedMusicAnalysis:
         """
         Ultimate comprehensive music analysis using Google's most advanced AI
@@ -581,9 +579,9 @@ class GoogleAIMusicProducer:
 
     async def real_time_production_coaching(
         self,
-        audio_features: Dict[str, Any],
+        audio_features: dict[str, Any],
         user_question: str,
-        context: Optional[Dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
     ) -> AdvancedMusicAnalysis:
         """Real-time music production coaching and Q&A"""
         prompt = AdvancedPromptEngine.create_real_time_coaching_prompt(
@@ -595,7 +593,7 @@ class GoogleAIMusicProducer:
         )
 
     async def generate_lyrics(
-        self, audio_features: Dict[str, Any], theme: str = "", style: str = ""
+        self, audio_features: dict[str, Any], theme: str = "", style: str = ""
     ) -> AdvancedMusicAnalysis:
         """AI-powered lyric composition based on musical features"""
         prompt = AdvancedPromptEngine.create_lyric_composition_prompt(
@@ -608,9 +606,9 @@ class GoogleAIMusicProducer:
 
     async def batch_analyze_tracks(
         self,
-        audio_features_list: List[Dict[str, Any]],
+        audio_features_list: list[dict[str, Any]],
         analysis_type: MusicAnalysisType = MusicAnalysisType.COMPREHENSIVE_ANALYSIS,
-    ) -> List[AdvancedMusicAnalysis]:
+    ) -> list[AdvancedMusicAnalysis]:
         """Batch analyze multiple tracks with parallel processing"""
         logger.info(f"🔄 Starting batch analysis of {len(audio_features_list)} tracks")
 
@@ -641,7 +639,7 @@ class GoogleAIMusicProducer:
         return processed_results
 
     def _get_analysis_prompt(
-        self, audio_features: Dict[str, Any], analysis_type: MusicAnalysisType
+        self, audio_features: dict[str, Any], analysis_type: MusicAnalysisType
     ) -> str:
         """Get appropriate prompt for analysis type"""
         prompt_map = {
@@ -708,7 +706,7 @@ class GoogleAIMusicProducer:
             )
 
     def _map_response_to_analysis(
-        self, analysis: AdvancedMusicAnalysis, parsed_data: Dict[str, Any]
+        self, analysis: AdvancedMusicAnalysis, parsed_data: dict[str, Any]
     ) -> None:
         """Map parsed JSON response to analysis object fields"""
 
@@ -796,7 +794,7 @@ class GoogleAIMusicProducer:
 
     def _generate_cache_key(
         self,
-        audio_features: Dict[str, Any],
+        audio_features: dict[str, Any],
         analysis_type: MusicAnalysisType,
         model: GeminiModel,
     ) -> str:
@@ -835,7 +833,7 @@ class GoogleAIMusicProducer:
             tokens = getattr(response.usage_metadata, "total_token_count", 0)
             self.total_tokens_used += tokens
 
-    def get_performance_stats(self) -> Dict[str, Any]:
+    def get_performance_stats(self) -> dict[str, Any]:
         """Get comprehensive performance statistics"""
         return {
             "total_analyses": self.analysis_count,

@@ -12,18 +12,14 @@ Usage:
 """
 
 from pathlib import Path
-from typing import Optional, List
-import asyncio
 
 import typer
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
 
+from samplemind.core.history.recent_files import add_recent_file
 from samplemind.core.tagging.ai_tagger import get_tagger
 from samplemind.core.tagging.tag_vocabulary import get_vocabulary
-from samplemind.core.history.recent_files import add_recent_file
 
 from . import utils
 
@@ -44,7 +40,7 @@ console = utils.console
 @utils.with_error_handling
 @utils.async_command
 async def auto_tag(
-    file: Optional[Path] = typer.Argument(None, help="Audio file to tag"),
+    file: Path | None = typer.Argument(None, help="Audio file to tag"),
     interactive: bool = typer.Option(
         False, "--interactive", "-i", help="Launch file picker"
     ),
@@ -147,7 +143,7 @@ async def auto_tag(
 @app.command("vocab")
 @utils.with_error_handling
 def show_vocabulary(
-    category: Optional[str] = typer.Option(
+    category: str | None = typer.Option(
         None, "--category", "-c", help="Show specific category"
     ),
     limit: int = typer.Option(20, "--limit", "-l", help="Number of tags to show"),
@@ -183,7 +179,7 @@ def show_vocabulary(
             )
 
             # Display in columns
-            sorted_tags = sorted(list(tags))[:limit]
+            sorted_tags = sorted(tags)[:limit]
             cols = 4
             for i in range(0, len(sorted_tags), cols):
                 row = sorted_tags[i : i + cols]
@@ -228,7 +224,7 @@ def search_by_tags(
     tag_list = [t.strip() for t in tags.split(",")]
 
     console.print()
-    console.print(f"[bold cyan]🔍 Searching for samples with tags:[/bold cyan]")
+    console.print("[bold cyan]🔍 Searching for samples with tags:[/bold cyan]")
 
     # Display search tags
     for tag in tag_list:
@@ -261,7 +257,7 @@ def search_by_tags(
 @app.command("edit")
 @utils.with_error_handling
 def edit_tags(
-    file: Optional[Path] = typer.Argument(None, help="Audio file to edit tags for"),
+    file: Path | None = typer.Argument(None, help="Audio file to edit tags for"),
     interactive: bool = typer.Option(
         False, "--interactive", "-i", help="Launch file picker"
     ),
@@ -299,7 +295,7 @@ def edit_tags(
 @app.command("batch")
 @utils.with_error_handling
 async def batch_tag(
-    folder: Optional[Path] = typer.Argument(None, help="Folder to batch tag"),
+    folder: Path | None = typer.Argument(None, help="Folder to batch tag"),
     interactive: bool = typer.Option(
         False, "--interactive", "-i", help="Launch folder picker"
     ),
@@ -320,7 +316,7 @@ async def batch_tag(
         folder = selected_folder
 
     console.print()
-    console.print(f"[bold cyan]🏷️  Batch Tagging Folder[/bold cyan]")
+    console.print("[bold cyan]🏷️  Batch Tagging Folder[/bold cyan]")
     console.print(f"[cyan]Folder: {folder}[/cyan]\n")
 
     if dry_run:

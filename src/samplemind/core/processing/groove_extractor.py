@@ -8,12 +8,12 @@ Quantifies "groove feel" including swing, humanization, and timing deviations.
 Can save/load groove templates and apply to MIDI or audio.
 """
 
-import logging
-from typing import Dict, List, Optional
-from dataclasses import dataclass
-import numpy as np
 import json
+import logging
+from dataclasses import dataclass
 from pathlib import Path
+
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -32,8 +32,8 @@ class GrooveTemplate:
     swing_amount: float  # 0-100% (50% = straight, >50% = swung)
     groove_type: str  # "straight", "swing", "shuffle", "jdilla", etc.
     timing_deviation_ms: float  # RMS timing deviation
-    velocity_pattern: List[float]  # Velocity percentages for beats
-    note_timings: List[float]  # Timing of each note relative to grid (ms)
+    velocity_pattern: list[float]  # Velocity percentages for beats
+    note_timings: list[float]  # Timing of each note relative to grid (ms)
     description: str = ""
 
     def to_dict(self) -> dict:
@@ -79,7 +79,7 @@ class GrooveExtractor:
         audio: np.ndarray,
         sample_rate: int = 44100,
         name: str = "extracted_groove",
-        tempo_bpm: Optional[float] = None,
+        tempo_bpm: float | None = None,
     ) -> GrooveTemplate:
         """
         Extract groove template from audio
@@ -193,7 +193,7 @@ class GrooveExtractor:
         audio: np.ndarray,
         onsets: np.ndarray,
         sample_rate: int,
-    ) -> List[float]:
+    ) -> list[float]:
         """Analyze velocity/amplitude pattern around onsets"""
         velocities = []
         window = int(0.05 * sample_rate)  # 50ms window
@@ -215,7 +215,7 @@ class GrooveExtractor:
 
         return velocities
 
-    def _detect_swing(self, note_timings: List[float]) -> float:
+    def _detect_swing(self, note_timings: list[float]) -> float:
         """Detect swing amount (0=straight, 100=maximum swing)"""
         if len(note_timings) < 2:
             return 50.0
@@ -278,7 +278,7 @@ class GrooveApplicator:
     """Applies groove template to MIDI or audio"""
 
     @staticmethod
-    def apply_to_midi(midi_notes: List[Dict], groove: GrooveTemplate) -> List[Dict]:
+    def apply_to_midi(midi_notes: list[dict], groove: GrooveTemplate) -> list[dict]:
         """
         Apply groove timing to MIDI notes
 

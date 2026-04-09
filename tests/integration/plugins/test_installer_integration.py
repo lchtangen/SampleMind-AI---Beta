@@ -4,17 +4,16 @@ Integration tests for Plugin Installer
 Tests complete installation workflows with real file system interactions
 """
 
-import pytest
-import platform
 import sys
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
-import shutil
+from unittest.mock import Mock, patch
+
+import pytest
 
 # Add plugins directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "plugins"))
 
-from installer import Platform, DAW, DAWDetector, PluginInstaller
+from installer import DAW, DAWDetector, Platform, PluginInstaller
 
 
 class TestPluginInstallerIntegration:
@@ -57,7 +56,7 @@ class TestPluginInstallerIntegration:
             / "Max Instrument",
         }
 
-        for daw_type, daw_path in daw_dirs.items():
+        for _daw_type, daw_path in daw_dirs.items():
             daw_path.mkdir(parents=True)
 
         return {

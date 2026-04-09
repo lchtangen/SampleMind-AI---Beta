@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from beanie import Document, init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -12,7 +12,7 @@ from pymongo.errors import ConnectionFailure
 logger = logging.getLogger(__name__)
 
 # Global MongoDB client
-_mongo_client: Optional[AsyncIOMotorClient] = None
+_mongo_client: AsyncIOMotorClient | None = None
 _database = None
 
 
@@ -27,10 +27,10 @@ class AudioFile(Document):
     sample_rate: int
     channels: int
     format: str
-    user_id: Optional[str] = None
+    user_id: str | None = None
     uploaded_at: datetime = Field(default_factory=datetime.utcnow)
-    tags: List[str] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    tags: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
     class Settings:
         """MongoDB collection settings"""
@@ -48,26 +48,26 @@ class Analysis(Document):
 
     analysis_id: str = Field(..., unique=True, index=True)
     file_id: str = Field(..., index=True)
-    user_id: Optional[str] = None
+    user_id: str | None = None
 
     # Audio features
     tempo: float
     key: str
     mode: str
-    time_signature: List[int]
+    time_signature: list[int]
     duration: float
 
     # Spectral features
-    spectral_features: Optional[Dict[str, Any]] = None
+    spectral_features: dict[str, Any] | None = None
 
     # AI analysis
-    ai_provider: Optional[str] = None
-    ai_model: Optional[str] = None
-    ai_summary: Optional[str] = None
-    ai_detailed: Optional[Dict[str, Any]] = None
-    production_tips: List[str] = Field(default_factory=list)
-    creative_ideas: List[str] = Field(default_factory=list)
-    fl_studio_recommendations: List[str] = Field(default_factory=list)
+    ai_provider: str | None = None
+    ai_model: str | None = None
+    ai_summary: str | None = None
+    ai_detailed: dict[str, Any] | None = None
+    production_tips: list[str] = Field(default_factory=list)
+    creative_ideas: list[str] = Field(default_factory=list)
+    fl_studio_recommendations: list[str] = Field(default_factory=list)
 
     # Metadata
     analysis_level: str
@@ -90,13 +90,13 @@ class BatchJob(Document):
     """Batch processing job model"""
 
     batch_id: str = Field(..., unique=True, index=True)
-    user_id: Optional[str] = None
+    user_id: str | None = None
     status: str  # pending, processing, completed, failed
     total_files: int
     completed: int = 0
     failed: int = 0
-    file_ids: List[str] = Field(default_factory=list)
-    results: Dict[str, Any] = Field(default_factory=dict)
+    file_ids: list[str] = Field(default_factory=list)
+    results: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -116,11 +116,11 @@ class Favorite(Document):
     """User favorite analysis model"""
 
     favorite_id: str = Field(..., unique=True, index=True)
-    user_id: Optional[str] = None
+    user_id: str | None = None
     analysis_id: str = Field(..., index=True)
     file_name: str
     added_at: datetime = Field(default_factory=datetime.utcnow)
-    notes: Optional[str] = None
+    notes: str | None = None
     rating: int = Field(default=0, ge=0, le=5)
 
     class Settings:
@@ -139,7 +139,7 @@ class UserSettings(Document):
     """User settings and preferences model"""
 
     settings_id: str = Field(..., unique=True, index=True)
-    user_id: Optional[str] = None
+    user_id: str | None = None
 
     # Feature preferences
     default_analysis_level: str = "STANDARD"
@@ -148,7 +148,7 @@ class UserSettings(Document):
 
     # Export preferences
     export_format: str = "JSON"  # JSON, CSV, YAML, Markdown
-    export_path: Optional[str] = None
+    export_path: str | None = None
 
     # Display preferences
     theme: str = "dark"  # dark, light, cyberpunk, etc.
@@ -186,22 +186,22 @@ class User(Document):
     is_active: bool = True
     is_verified: bool = False
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    last_login: Optional[datetime] = None
+    last_login: datetime | None = None
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
     # User profile
-    avatar_url: Optional[str] = None
-    bio: Optional[str] = None
+    avatar_url: str | None = None
+    bio: str | None = None
 
     # Usage tracking
     total_analyses: int = 0
     total_uploads: int = 0
     storage_used_mb: float = 0.0
     storage_quota_mb: float = 1000.0
-    last_cleanup: Optional[datetime] = None
+    last_cleanup: datetime | None = None
 
     # User preferences
-    preferences: Dict[str, Any] = Field(default_factory=dict)
+    preferences: dict[str, Any] = Field(default_factory=dict)
 
     class Settings:
         """MongoDB collection settings"""
@@ -220,10 +220,10 @@ class AudioCollection(Document):
     collection_id: str = Field(..., unique=True, index=True)
     user_id: str = Field(..., index=True)
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     is_public: bool = False
-    tags: List[str] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    tags: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
     # Stats (denormalized for performance)
     file_count: int = 0
@@ -251,11 +251,11 @@ class APIKey(Document):
     name: str
     provider: str
     key_hash: str = Field(..., unique=True)
-    permissions: List[str] = Field(default_factory=lambda: ["read"])
+    permissions: list[str] = Field(default_factory=lambda: ["read"])
     is_active: bool = True
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
-    last_used: Optional[datetime] = None
+    last_used: datetime | None = None
 
     class Settings:
         """MongoDB collection settings"""

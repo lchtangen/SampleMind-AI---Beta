@@ -4,12 +4,12 @@ Integration tests for Ableton Live Plugin Backend API
 Tests all FastAPI endpoints for audio analysis, search, MIDI generation, etc.
 """
 
-import pytest
 import sys
-from pathlib import Path
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-import json
 from datetime import datetime
+from pathlib import Path
+from unittest.mock import Mock
+
+import pytest
 
 # Add plugins directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "plugins"))
@@ -678,7 +678,7 @@ class TestAbletonBackendAPI:
         import time
 
         # Mock analysis timing
-        start_time = time.time()
+        time.time()
 
         # Simulate analysis
         analysis_response = {
@@ -687,7 +687,7 @@ class TestAbletonBackendAPI:
             "analysis_time_ms": 1250,
         }
 
-        end_time = time.time()
+        time.time()
 
         # Verify response time
         assert analysis_response["analysis_time_ms"] < 2000

@@ -1,0 +1,5 @@
+Collecting available tests...
+ImportError while loading conftest '/home/lchtangen/projects/ai/SampleMind-AI---Beta/tests/conftest.py'.
+tests/conftest.py:20: in <module>
+    from samplemind.core.engine.audio_engine import (
+E   ModuleNotFoundError: No module named 'samplemind'

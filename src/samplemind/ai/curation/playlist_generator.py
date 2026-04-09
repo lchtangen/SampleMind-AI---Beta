@@ -34,8 +34,7 @@ Usage::
 from __future__ import annotations
 
 import logging
-import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Literal
 
 logger = logging.getLogger(__name__)
@@ -45,30 +44,43 @@ ENERGY_ORDER = {"low": 0, "mid": 1, "high": 2}
 
 # Camelot Wheel: adjacent keys are harmonically compatible
 CAMELOT_NEIGHBORS: dict[str, list[str]] = {
-    "1A": ["12A", "2A", "1B"], "2A": ["1A", "3A", "2B"],
-    "3A": ["2A", "4A", "3B"], "4A": ["3A", "5A", "4B"],
-    "5A": ["4A", "6A", "5B"], "6A": ["5A", "7A", "6B"],
-    "7A": ["6A", "8A", "7B"], "8A": ["7A", "9A", "8B"],
-    "9A": ["8A", "10A", "9B"], "10A": ["9A", "11A", "10B"],
-    "11A": ["10A", "12A", "11B"], "12A": ["11A", "1A", "12B"],
-    "1B": ["12B", "2B", "1A"], "2B": ["1B", "3B", "2A"],
-    "3B": ["2B", "4B", "3A"], "4B": ["3B", "5B", "4A"],
-    "5B": ["4B", "6B", "5A"], "6B": ["5B", "7B", "6A"],
-    "7B": ["6B", "8B", "7A"], "8B": ["7B", "9B", "8A"],
-    "9B": ["8B", "10B", "9A"], "10B": ["9B", "11B", "10A"],
-    "11B": ["10B", "12B", "11A"], "12B": ["11B", "1B", "12A"],
+    "1A": ["12A", "2A", "1B"],
+    "2A": ["1A", "3A", "2B"],
+    "3A": ["2A", "4A", "3B"],
+    "4A": ["3A", "5A", "4B"],
+    "5A": ["4A", "6A", "5B"],
+    "6A": ["5A", "7A", "6B"],
+    "7A": ["6A", "8A", "7B"],
+    "8A": ["7A", "9A", "8B"],
+    "9A": ["8A", "10A", "9B"],
+    "10A": ["9A", "11A", "10B"],
+    "11A": ["10A", "12A", "11B"],
+    "12A": ["11A", "1A", "12B"],
+    "1B": ["12B", "2B", "1A"],
+    "2B": ["1B", "3B", "2A"],
+    "3B": ["2B", "4B", "3A"],
+    "4B": ["3B", "5B", "4A"],
+    "5B": ["4B", "6B", "5A"],
+    "6B": ["5B", "7B", "6A"],
+    "7B": ["6B", "8B", "7A"],
+    "8B": ["7B", "9B", "8A"],
+    "9B": ["8B", "10B", "9A"],
+    "10B": ["9B", "11B", "10A"],
+    "11B": ["10B", "12B", "11A"],
+    "12B": ["11B", "1B", "12A"],
 }
 
 
 @dataclass
 class GeneratedPlaylist:
     """Output of PlaylistGenerator.generate()."""
+
     name: str
     mood: str
     energy_arc: str
     duration_s: float
-    samples: list[dict]       # Each dict: filename, path, bpm, key, energy, ...
-    narrative: str            # LiteLLM-generated description
+    samples: list[dict]  # Each dict: filename, path, bpm, key, energy, ...
+    narrative: str  # LiteLLM-generated description
     model_used: str = "rules"
 
 
@@ -85,10 +97,10 @@ def _arc_energy_sequence(arc: EnergyArc, n_slots: int) -> list[str]:
     """
     if arc == "build":
         thirds = n_slots // 3 or 1
-        return (["low"] * thirds + ["mid"] * thirds + ["high"] * (n_slots - 2 * thirds))
+        return ["low"] * thirds + ["mid"] * thirds + ["high"] * (n_slots - 2 * thirds)
     if arc == "drop":
         thirds = n_slots // 3 or 1
-        return (["high"] * thirds + ["mid"] * thirds + ["low"] * (n_slots - 2 * thirds))
+        return ["high"] * thirds + ["mid"] * thirds + ["low"] * (n_slots - 2 * thirds)
     if arc == "plateau":
         return ["mid"] * n_slots
     if arc == "tension":
@@ -221,8 +233,10 @@ class PlaylistGenerator:
         if sample_library:
             # Filter by mood if mood_labels available
             filtered = [
-                s for s in sample_library
-                if not s.get("mood_labels") or mood.lower() in [m.lower() for m in s.get("mood_labels", [])]
+                s
+                for s in sample_library
+                if not s.get("mood_labels")
+                or mood.lower() in [m.lower() for m in s.get("mood_labels", [])]
             ]
             return filtered or sample_library  # fallback: all samples
 
@@ -271,7 +285,9 @@ class PlaylistGenerator:
         # Estimate how many slots we need
         avg_duration = 30.0
         if candidates:
-            durations = [s.get("duration_s", 30.0) for s in candidates if s.get("duration_s")]
+            durations = [
+                s.get("duration_s", 30.0) for s in candidates if s.get("duration_s")
+            ]
             if durations:
                 avg_duration = sum(durations) / len(durations)
 
@@ -317,7 +333,12 @@ class PlaylistGenerator:
     ) -> tuple[str, str]:
         """Generate a narrative description using LiteLLM."""
         if not self._llm_available or not samples:
-            return self._fallback_narrative(mood, energy_arc, len(samples), duration_minutes), "rules"
+            return (
+                self._fallback_narrative(
+                    mood, energy_arc, len(samples), duration_minutes
+                ),
+                "rules",
+            )
 
         sample_summary = "; ".join(
             f"{s['filename']} ({s.get('energy', '?')} energy, {s.get('bpm', '?')} BPM)"
@@ -347,12 +368,15 @@ class PlaylistGenerator:
         except Exception as exc:
             logger.debug("LiteLLM narrative failed: %s", exc)
             self._llm_available = False
-            return self._fallback_narrative(mood, energy_arc, len(samples), duration_minutes), "rules"
+            return (
+                self._fallback_narrative(
+                    mood, energy_arc, len(samples), duration_minutes
+                ),
+                "rules",
+            )
 
     @staticmethod
-    def _fallback_narrative(
-        mood: str, arc: str, count: int, duration: float
-    ) -> str:
+    def _fallback_narrative(mood: str, arc: str, count: int, duration: float) -> str:
         return (
             f"A {duration:.0f}-minute {mood} session with {count} samples, "
             f"following a {arc} energy arc. "

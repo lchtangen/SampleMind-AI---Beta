@@ -1,8 +1,8 @@
 """Batch processing schemas"""
 
-from typing import List, Dict, Any, Optional
-from pydantic import BaseModel, Field
 from datetime import datetime
+
+from pydantic import BaseModel, Field
 
 
 class BatchUploadRequest(BaseModel):
@@ -19,8 +19,8 @@ class BatchFileStatus(BaseModel):
     filename: str
     status: str = Field(description="Status: pending, processing, completed, failed")
     progress: float = Field(0.0, ge=0.0, le=100.0)
-    analysis_id: Optional[str] = None
-    error: Optional[str] = None
+    analysis_id: str | None = None
+    error: str | None = None
 
 
 class BatchStatusResponse(BaseModel):
@@ -34,6 +34,6 @@ class BatchStatusResponse(BaseModel):
     completed: int
     failed: int
     progress: float = Field(0.0, ge=0.0, le=100.0)
-    files: List[BatchFileStatus]
+    files: list[BatchFileStatus]
     created_at: datetime
     updated_at: datetime

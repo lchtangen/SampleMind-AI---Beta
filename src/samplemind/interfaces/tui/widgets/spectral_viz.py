@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import logging
-from enum import auto, Enum
+from enum import Enum, auto
 from typing import TYPE_CHECKING
 
 from textual.app import ComposeResult
+from textual.containers import Horizontal, Vertical
 from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Label, Sparkline
-from textual.containers import Horizontal, Vertical
 
 if TYPE_CHECKING:
     import numpy as np
@@ -86,7 +86,7 @@ class SpectralViz(Widget):
             except Exception as exc:
                 logger.debug("SpectralViz band %d update failed: %s", i, exc)
 
-    def update_chromagram(self, chroma: "np.ndarray | None" = None) -> None:
+    def update_chromagram(self, chroma: np.ndarray | None = None) -> None:
         if chroma is None:
             return
         try:

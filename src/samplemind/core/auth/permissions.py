@@ -2,11 +2,10 @@
 Permission checking middleware and decorators
 """
 
-from functools import wraps
-from typing import List, Optional, Callable
-from fastapi import HTTPException, status, Depends
-from .rbac import Permission, UserRole, RBACService
+from fastapi import Depends, HTTPException, status
+
 from .dependencies import get_current_user
+from .rbac import Permission, RBACService, UserRole
 
 
 class PermissionDenied(HTTPException):
@@ -161,7 +160,8 @@ class RateLimitExceeded(HTTPException):
 
 async def check_upload_limit(current_user=Depends(get_current_user)):
     """Check if user can upload more files today"""
-    from datetime import datetime, timedelta
+    from datetime import datetime
+
     from samplemind.core.database import get_db
 
     user_role = UserRole(current_user.get("role", "free"))
@@ -178,7 +178,7 @@ async def check_upload_limit(current_user=Depends(get_current_user)):
         current_uploads_today = await db.samples.count_documents(
             {"user_id": user_id, "uploaded_at": {"$gte": today_start}}
         )
-    except Exception as e:
+    except Exception:
         # Fallback to 0 if database query fails
         current_uploads_today = 0
 
@@ -210,7 +210,7 @@ async def check_storage_limit(current_user=Depends(get_current_user)):
 
         result = await db.samples.aggregate(pipeline).to_list(1)
         current_storage_mb = (result[0]["total_size"] / (1024 * 1024)) if result else 0
-    except Exception as e:
+    except Exception:
         # Fallback to 0 if database query fails
         current_storage_mb = 0
 

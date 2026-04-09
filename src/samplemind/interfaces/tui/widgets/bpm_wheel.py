@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from textual import on
 from textual.app import ComposeResult
+from textual.containers import Horizontal, Vertical
 from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Button, Digits, Label
-from textual.containers import Horizontal, Vertical
 
 
 class BPMWheel(Widget):

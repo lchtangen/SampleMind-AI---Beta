@@ -1,8 +1,6 @@
-import asyncio
 import json
 import logging
 from dataclasses import asdict, dataclass
-from typing import List, Optional
 
 from fastapi import WebSocket, WebSocketDisconnect
 
@@ -25,7 +23,7 @@ class DAWBridgeServer:
     """
 
     def __init__(self) -> None:
-        self.active_connections: List[WebSocket] = []
+        self.active_connections: list[WebSocket] = []
         self._is_running = False
 
     async def connect(self, websocket: WebSocket):

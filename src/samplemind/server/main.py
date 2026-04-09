@@ -9,6 +9,7 @@ as required by the Dockerfile CMD directive:
 This module re-exports the production FastAPI app from the interfaces layer
 and mounts the DAW bridge WebSocket on a dedicated path.
 """
+
 import json
 import logging
 

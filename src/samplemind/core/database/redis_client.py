@@ -1,16 +1,17 @@
 """Redis client for caching, sessions, and rate limiting"""
 
-import logging
 import json
-from typing import Optional, Any, Dict
+import logging
 from functools import wraps
+from typing import Any
+
 import redis.asyncio as redis
 from redis.exceptions import RedisError
 
 logger = logging.getLogger(__name__)
 
 # Global Redis client
-_redis_client: Optional[redis.Redis] = None
+_redis_client: redis.Redis | None = None
 
 
 async def init_redis(redis_url: str = "redis://localhost:6379"):
@@ -70,7 +71,7 @@ async def cache_set(key: str, value: Any, ttl: int = 3600) -> bool:
         return False
 
 
-async def cache_get(key: str) -> Optional[Any]:
+async def cache_get(key: str) -> Any | None:
     """Get a value from cache"""
     try:
         client = get_redis()
@@ -144,12 +145,12 @@ async def rate_limit_reset(key: str):
 # Session management
 
 
-async def session_set(session_id: str, data: Dict[str, Any], ttl: int = 86400) -> bool:
+async def session_set(session_id: str, data: dict[str, Any], ttl: int = 86400) -> bool:
     """Set session data (default 24 hour TTL)"""
     return await cache_set(f"session:{session_id}", data, ttl)
 
 
-async def session_get(session_id: str) -> Optional[Dict[str, Any]]:
+async def session_get(session_id: str) -> dict[str, Any] | None:
     """Get session data"""
     return await cache_get(f"session:{session_id}")
 

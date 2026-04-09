@@ -142,10 +142,9 @@ class ForensicsAnalyzer:
         # Handle mono/stereo
         if y.ndim == 1:
             y_mono = y
-            y_stereo = np.stack([y, y])
+            np.stack([y, y])
         else:
             y_mono = np.mean(y, axis=0)
-            y_stereo = y
 
         # Run analyses
         compression = self._analyze_compression(y_mono)
@@ -252,7 +251,7 @@ class ForensicsAnalyzer:
 
             # Find affected frequencies
             spec = np.abs(librosa.stft(y))
-            freqs = librosa.fft_frequencies(sr=self.sample_rate)
+            librosa.fft_frequencies(sr=self.sample_rate)
 
             # Clipping affects high frequencies more
             high_freq_energy = np.mean(spec[len(spec) // 2 :])

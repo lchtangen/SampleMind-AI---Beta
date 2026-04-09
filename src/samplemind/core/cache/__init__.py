@@ -19,14 +19,14 @@ import from core.caching for the full predictive system.
 # Re-export the Redis backend at the cache package level for backward compatibility
 # (consumers can import from samplemind.core.cache directly)
 from .backends.redis_backend import (
-    CacheConfig,
-    RedisCache,
     AudioFeatureCache,
+    CacheConfig,
     RateLimitCache,
+    RedisCache,
     cache_key,
     cached,
-    init_cache,
     get_cache,
+    init_cache,
 )
 
 __all__ = [

@@ -9,7 +9,7 @@ Detects audio file formats via:
 
 import mimetypes
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from .models import AudioFormat
 
@@ -18,7 +18,7 @@ class AudioFormatDetector:
     """Intelligent audio format detection"""
 
     @staticmethod
-    def detect_format(file_path: Path) -> Optional[AudioFormat]:
+    def detect_format(file_path: Path) -> AudioFormat | None:
         """Detect audio format from file"""
         if not file_path.exists():
             return None
@@ -60,6 +60,6 @@ class AudioFormatDetector:
         return AudioFormatDetector.detect_format(file_path) is not None
 
     @staticmethod
-    def get_format_info(fmt: AudioFormat) -> Dict[str, Any]:
+    def get_format_info(fmt: AudioFormat) -> dict[str, Any]:
         """Get detailed format information"""
         return fmt.value

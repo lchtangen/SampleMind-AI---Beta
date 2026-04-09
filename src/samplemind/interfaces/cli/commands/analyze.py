@@ -352,7 +352,7 @@ async def analyze_genre(
     """Genre classification"""
     try:
         with utils.ProgressTracker("🎵 Classifying genre"):
-            ai_manager = await utils.get_ai_manager()
+            await utils.get_ai_manager()
             # Genre classification would be done through AI manager
             console.print("[cyan]Genre classification coming soon[/cyan]")
 
@@ -504,7 +504,7 @@ async def analyze_spectral(
     try:
         with utils.ProgressTracker("🌈 Analyzing spectral properties"):
             engine = await utils.get_audio_engine()
-            features = engine.analyze_audio(file, analysis_level="DETAILED")
+            engine.analyze_audio(file, analysis_level="DETAILED")
             console.print("[green]✓ Spectral analysis complete[/green]")
 
     except utils.CLIError as e:
@@ -559,7 +559,7 @@ async def analyze_mfcc(
     try:
         with utils.ProgressTracker(f"📊 Extracting {n_mfcc} MFCC coefficients"):
             engine = await utils.get_audio_engine()
-            features = engine.analyze_audio(file, analysis_level="DETAILED")
+            engine.analyze_audio(file, analysis_level="DETAILED")
             console.print(f"[green]✓ Extracted {n_mfcc} MFCC coefficients[/green]")
 
     except utils.CLIError as e:
@@ -577,7 +577,7 @@ async def analyze_chroma(
     try:
         with utils.ProgressTracker("🎹 Extracting chroma features"):
             engine = await utils.get_audio_engine()
-            features = engine.analyze_audio(file, analysis_level="STANDARD")
+            engine.analyze_audio(file, analysis_level="STANDARD")
             console.print("[green]✓ Chroma features extracted[/green]")
 
     except utils.CLIError as e:
@@ -595,7 +595,7 @@ async def analyze_onset(
     try:
         with utils.ProgressTracker("📍 Detecting onsets"):
             engine = await utils.get_audio_engine()
-            features = engine.analyze_audio(file, analysis_level="DETAILED")
+            engine.analyze_audio(file, analysis_level="DETAILED")
             console.print("[green]✓ Onset detection complete[/green]")
 
     except utils.CLIError as e:
@@ -631,7 +631,7 @@ async def analyze_segments(
     try:
         with utils.ProgressTracker("📋 Detecting segments"):
             engine = await utils.get_audio_engine()
-            features = engine.analyze_audio(file, analysis_level="DETAILED")
+            engine.analyze_audio(file, analysis_level="DETAILED")
             console.print("[green]✓ Segment detection complete[/green]")
 
     except utils.CLIError as e:
@@ -697,7 +697,7 @@ async def analyze_zero_crossing(
     try:
         with utils.ProgressTracker("✨ Computing zero-crossing rate"):
             engine = await utils.get_audio_engine()
-            features = engine.analyze_audio(file, analysis_level="STANDARD")
+            engine.analyze_audio(file, analysis_level="STANDARD")
             console.print("[green]✓ Zero-crossing rate computed[/green]")
 
     except utils.CLIError as e:

@@ -4,11 +4,11 @@ Base classes and interfaces for plugin development
 """
 
 import logging
-from typing import Optional, Dict, Any, Callable, List, Set
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -49,9 +49,9 @@ class PluginMetadata:
     version: str
     author: str
     description: str
-    url: Optional[str] = None
-    dependencies: List[str] = None
-    supported_hooks: List[PluginHook] = None
+    url: str | None = None
+    dependencies: list[str] = None
+    supported_hooks: list[PluginHook] = None
 
     def __post_init__(self) -> None:
         if self.dependencies is None:
@@ -72,10 +72,10 @@ class TUIPlugin(ABC):
         """
         self.metadata = metadata
         self.enabled = False
-        self.config: Dict[str, Any] = {}
+        self.config: dict[str, Any] = {}
 
     @abstractmethod
-    def initialize(self, config: Dict[str, Any]) -> bool:
+    def initialize(self, config: dict[str, Any]) -> bool:
         """
         Initialize the plugin
 
@@ -116,11 +116,11 @@ class TUIPlugin(ABC):
         """Validate plugin dependencies are available"""
         return True
 
-    def get_config_schema(self) -> Dict[str, Any]:
+    def get_config_schema(self) -> dict[str, Any]:
         """Get configuration schema"""
         return {}
 
-    def validate_config(self, config: Dict[str, Any]) -> bool:
+    def validate_config(self, config: dict[str, Any]) -> bool:
         """Validate configuration"""
         return True
 
@@ -162,8 +162,8 @@ class HookSystem:
 
     def __init__(self) -> None:
         """Initialize hook system"""
-        self.hooks: Dict[str, List[HookHandler]] = {}
-        self.hook_history: List[Dict[str, Any]] = []
+        self.hooks: dict[str, list[HookHandler]] = {}
+        self.hook_history: list[dict[str, Any]] = []
 
     def register_hook(
         self,
@@ -218,7 +218,7 @@ class HookSystem:
 
         return False
 
-    def call_hook(self, hook_name: str, *args, **kwargs) -> List[Any]:
+    def call_hook(self, hook_name: str, *args, **kwargs) -> list[Any]:
         """
         Call all handlers for a hook
 
@@ -252,15 +252,15 @@ class HookSystem:
 
         return results
 
-    def get_hook_handlers(self, hook_name: str) -> List[HookHandler]:
+    def get_hook_handlers(self, hook_name: str) -> list[HookHandler]:
         """Get all handlers for a hook"""
         return self.hooks.get(hook_name, [])
 
-    def get_available_hooks(self) -> List[str]:
+    def get_available_hooks(self) -> list[str]:
         """Get list of available hooks"""
         return list(self.hooks.keys())
 
-    def clear_hooks(self, hook_name: Optional[str] = None) -> None:
+    def clear_hooks(self, hook_name: str | None = None) -> None:
         """
         Clear hook handlers
 
@@ -274,7 +274,7 @@ class HookSystem:
 
 
 # Global hook system instance
-_hook_system: Optional[HookSystem] = None
+_hook_system: HookSystem | None = None
 
 
 def get_hook_system() -> HookSystem:

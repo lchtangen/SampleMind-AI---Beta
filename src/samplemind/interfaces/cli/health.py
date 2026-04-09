@@ -10,19 +10,17 @@ Commands:
 """
 
 import os
-import sys
 import shutil
 from pathlib import Path
-from typing import Dict, Any, Optional
+
 import typer
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
 
-from samplemind.utils.logging_config import logger
 from samplemind.utils.error_handler import handle_errors
-
+from samplemind.utils.logging_config import logger
 
 console = Console()
 app = typer.Typer(help="🏥 System health checks and diagnostics")
@@ -109,7 +107,7 @@ async def health_check(
             logger.debug("Database check: OK")
         except Exception as e:
             health_status["database"] = {"status": "⚠️  Not available", "error": str(e)}
-            logger.debug(f"Database check: Optional service unavailable")
+            logger.debug("Database check: Optional service unavailable")
         progress.update(task, completed=True)
 
         # Check Cache
@@ -249,7 +247,7 @@ async def system_status() -> None:
         uptime_seconds = time.time() - boot_time
         uptime_hours = uptime_seconds / 3600
         console.print(f"[cyan]System Uptime:[/cyan] {uptime_hours:.1f} hours")
-    except:
+    except Exception:
         pass
 
     # Get memory usage
@@ -260,7 +258,7 @@ async def system_status() -> None:
         console.print(
             f"[cyan]Memory Usage:[/cyan] {memory.percent:.1f}% ({memory.used / 1024**3:.1f}GB / {memory.total / 1024**3:.1f}GB)"
         )
-    except:
+    except Exception:
         console.print("[dim]Memory info unavailable[/dim]")
 
     # Get disk usage
@@ -303,7 +301,7 @@ async def show_logs(
     console.print(f"[bold blue]📋 Recent Logs ({log_file})[/bold blue]\n")
 
     try:
-        with open(log_file, "r") as f:
+        with open(log_file) as f:
             all_lines = f.readlines()
 
         # Filter by level if specified

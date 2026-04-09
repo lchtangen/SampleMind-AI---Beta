@@ -3,15 +3,15 @@ API Key Generation and Management
 For external developer access to SampleMind AI API
 """
 
-import secrets
 import hashlib
+import secrets
 from datetime import datetime, timedelta
-from typing import Optional, List
+from enum import StrEnum
+
 from pydantic import BaseModel
-from enum import Enum
 
 
-class APIKeyPrefix(str, Enum):
+class APIKeyPrefix(StrEnum):
     """API key prefixes for identification"""
 
     PRODUCTION = "sm_live_"
@@ -19,7 +19,7 @@ class APIKeyPrefix(str, Enum):
     INTERNAL = "sm_internal_"
 
 
-class APIKeyPermission(str, Enum):
+class APIKeyPermission(StrEnum):
     """Permissions that can be granted to API keys"""
 
     READ_AUDIO = "audio:read"
@@ -40,32 +40,32 @@ class APIKey(BaseModel):
     name: str
     key_hash: str  # Never store plain key
     prefix: str  # First 8 chars for identification
-    permissions: List[APIKeyPermission]
+    permissions: list[APIKeyPermission]
 
     created_at: datetime
-    expires_at: Optional[datetime] = None
-    last_used_at: Optional[datetime] = None
+    expires_at: datetime | None = None
+    last_used_at: datetime | None = None
 
     is_active: bool = True
     usage_count: int = 0
     rate_limit_per_minute: int = 60
 
     # Metadata
-    description: Optional[str] = None
+    description: str | None = None
     environment: str = "production"  # production, development, testing
-    ip_whitelist: List[str] = []
+    ip_whitelist: list[str] = []
 
 
 class APIKeyCreate(BaseModel):
     """API Key creation request"""
 
     name: str
-    permissions: List[APIKeyPermission]
-    expires_in_days: Optional[int] = None  # None = no expiration
+    permissions: list[APIKeyPermission]
+    expires_in_days: int | None = None  # None = no expiration
     rate_limit_per_minute: int = 60
-    description: Optional[str] = None
+    description: str | None = None
     environment: str = "production"
-    ip_whitelist: List[str] = []
+    ip_whitelist: list[str] = []
 
 
 class APIKeyResponse(BaseModel):
@@ -75,9 +75,9 @@ class APIKeyResponse(BaseModel):
     key: str  # Only shown once!
     prefix: str
     name: str
-    permissions: List[APIKeyPermission]
+    permissions: list[APIKeyPermission]
     created_at: datetime
-    expires_at: Optional[datetime]
+    expires_at: datetime | None
 
     warning: str = "Store this key securely. It will not be shown again."
 
@@ -88,10 +88,10 @@ class APIKeyPublic(BaseModel):
     key_id: str
     name: str
     prefix: str
-    permissions: List[APIKeyPermission]
+    permissions: list[APIKeyPermission]
     created_at: datetime
-    expires_at: Optional[datetime]
-    last_used_at: Optional[datetime]
+    expires_at: datetime | None
+    last_used_at: datetime | None
     is_active: bool
     usage_count: int
 
@@ -108,7 +108,7 @@ class APIKeyService:
             tuple: (full_key, key_hash)
         """
         # Generate 32 bytes of random data
-        random_bytes = secrets.token_bytes(32)
+        secrets.token_bytes(32)
 
         # Create base64-like key (URL safe)
         key_secret = secrets.token_urlsafe(32)
@@ -178,7 +178,7 @@ class APIKeyService:
         )
 
     @staticmethod
-    def is_key_valid(api_key: APIKey) -> tuple[bool, Optional[str]]:
+    def is_key_valid(api_key: APIKey) -> tuple[bool, str | None]:
         """
         Check if an API key is valid
 

@@ -2,10 +2,9 @@
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import numpy as np
-from scipy import signal
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +14,7 @@ class ProcessingStep:
     """Single processing step in chain."""
 
     name: str
-    parameters: Dict[str, Any]
+    parameters: dict[str, Any]
     enabled: bool = True
 
 
@@ -29,7 +28,7 @@ class MasteringChain:
             sample_rate: Sample rate in Hz
         """
         self.sample_rate = sample_rate
-        self.chain: List[ProcessingStep] = []
+        self.chain: list[ProcessingStep] = []
 
     def add_eq(
         self,
@@ -156,7 +155,7 @@ class MasteringChain:
 
         return processed
 
-    def _apply_eq(self, audio: np.ndarray, params: Dict) -> np.ndarray:
+    def _apply_eq(self, audio: np.ndarray, params: dict) -> np.ndarray:
         """Apply parametric equalization."""
         result = audio.copy()
 
@@ -174,7 +173,7 @@ class MasteringChain:
 
         return result
 
-    def _apply_compressor(self, audio: np.ndarray, params: Dict) -> np.ndarray:
+    def _apply_compressor(self, audio: np.ndarray, params: dict) -> np.ndarray:
         """Apply dynamic range compression."""
         threshold = params["threshold"]
         ratio = params["ratio"]
@@ -228,7 +227,7 @@ class MasteringChain:
         else:
             return np.array(processed_channels)
 
-    def _apply_limiter(self, audio: np.ndarray, params: Dict) -> np.ndarray:
+    def _apply_limiter(self, audio: np.ndarray, params: dict) -> np.ndarray:
         """Apply brickwall limiter (hard clipping)."""
         threshold_linear = 10 ** (params["threshold"] / 20)
 
@@ -237,7 +236,7 @@ class MasteringChain:
 
         return clipped
 
-    def _apply_stereo_width(self, audio: np.ndarray, params: Dict) -> np.ndarray:
+    def _apply_stereo_width(self, audio: np.ndarray, params: dict) -> np.ndarray:
         """Apply stereo width enhancement via mid-side processing."""
         if audio.ndim == 1:
             return audio  # No stereo width for mono

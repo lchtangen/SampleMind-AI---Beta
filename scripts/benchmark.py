@@ -4,13 +4,13 @@ Performance Benchmark for SampleMind AI
 Measures analysis speed, memory usage, and throughput
 """
 
-import time
-import psutil
 import statistics
-from pathlib import Path
-from typing import List, Dict
-from dataclasses import dataclass
 import sys
+import time
+from dataclasses import dataclass
+from pathlib import Path
+
+import psutil
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
@@ -36,10 +36,10 @@ class PerformanceBenchmark:
 
     def __init__(self):
         self.engine = AudioEngine(max_workers=4)
-        self.results: List[BenchmarkResult] = []
+        self.results: list[BenchmarkResult] = []
 
     def benchmark_analysis(
-        self, test_files: List[Path], iterations: int = 3
+        self, test_files: list[Path], iterations: int = 3
     ) -> BenchmarkResult:
         """Benchmark audio analysis speed"""
         print(
@@ -77,10 +77,12 @@ class PerformanceBenchmark:
         return result
 
     def benchmark_parallel(
-        self, test_files: List[Path], workers: List[int] = [1, 2, 4, 8]
-    ) -> Dict[int, BenchmarkResult]:
+        self, test_files: list[Path], workers: list[int] = None
+    ) -> dict[int, BenchmarkResult]:
         """Benchmark parallel processing with different worker counts"""
-        print(f"\n⚡ Benchmarking parallel processing...")
+        if workers is None:
+            workers = [1, 2, 4, 8]
+        print("\n⚡ Benchmarking parallel processing...")
 
         results = {}
 
@@ -111,9 +113,9 @@ class PerformanceBenchmark:
 
     def benchmark_cache(
         self, test_file: Path, iterations: int = 10
-    ) -> Dict[str, BenchmarkResult]:
+    ) -> dict[str, BenchmarkResult]:
         """Benchmark cache performance"""
-        print(f"\n💾 Benchmarking cache performance...")
+        print("\n💾 Benchmarking cache performance...")
 
         # Cold cache
         self.engine.clear_cache()

@@ -1,7 +1,7 @@
 """Settings management for TUI"""
 
 import logging
-from typing import Optional, Dict, Any, List
+from typing import Any
 
 from samplemind.core.database.repositories.settings_repository import (
     SettingsRepository,
@@ -31,11 +31,11 @@ class SettingsManager:
     # Available export formats
     EXPORT_FORMATS = ["JSON", "CSV", "YAML", "Markdown"]
 
-    def __init__(self, user_id: Optional[str] = None) -> None:
+    def __init__(self, user_id: str | None = None) -> None:
         """Initialize settings manager"""
         self.user_id = user_id or "default_user"
 
-    async def get_all_settings(self) -> Dict[str, Any]:
+    async def get_all_settings(self) -> dict[str, Any]:
         """Get all settings"""
         try:
             return await SettingsRepository.export_settings(self.user_id)
@@ -286,15 +286,15 @@ class SettingsManager:
     # VALIDATION
     # ============================================================================
 
-    def get_available_analysis_levels(self) -> List[str]:
+    def get_available_analysis_levels(self) -> list[str]:
         """Get list of available analysis levels"""
         return self.ANALYSIS_LEVELS.copy()
 
-    def get_available_themes(self) -> List[str]:
+    def get_available_themes(self) -> list[str]:
         """Get list of available themes"""
         return self.THEMES.copy()
 
-    def get_available_export_formats(self) -> List[str]:
+    def get_available_export_formats(self) -> list[str]:
         """Get list of available export formats"""
         return self.EXPORT_FORMATS.copy()
 
@@ -302,7 +302,7 @@ class SettingsManager:
     # SETTINGS GROUPS
     # ============================================================================
 
-    async def get_analysis_settings(self) -> Dict[str, Any]:
+    async def get_analysis_settings(self) -> dict[str, Any]:
         """Get analysis-related settings"""
         return {
             "default_analysis_level": await self.get_default_analysis_level(),
@@ -310,7 +310,7 @@ class SettingsManager:
             "max_cache_size": await self.get_cache_size(),
         }
 
-    async def get_display_settings(self) -> Dict[str, Any]:
+    async def get_display_settings(self) -> dict[str, Any]:
         """Get display-related settings"""
         return {
             "theme": await self.get_theme(),
@@ -318,13 +318,13 @@ class SettingsManager:
             "show_waveform": await self.show_waveform(),
         }
 
-    async def get_export_settings(self) -> Dict[str, Any]:
+    async def get_export_settings(self) -> dict[str, Any]:
         """Get export-related settings"""
         return {
             "export_format": await self.get_export_format(),
         }
 
-    async def get_performance_settings(self) -> Dict[str, Any]:
+    async def get_performance_settings(self) -> dict[str, Any]:
         """Get performance-related settings"""
         return {
             "batch_parallel_workers": await self.get_parallel_workers(),
@@ -334,10 +334,10 @@ class SettingsManager:
 
 
 # Global singleton instance
-_settings_manager: Optional[SettingsManager] = None
+_settings_manager: SettingsManager | None = None
 
 
-def get_settings_manager(user_id: Optional[str] = None) -> SettingsManager:
+def get_settings_manager(user_id: str | None = None) -> SettingsManager:
     """Get or create settings manager singleton"""
     global _settings_manager
     if _settings_manager is None:

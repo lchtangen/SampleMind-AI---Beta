@@ -10,11 +10,11 @@ Usage:
     >>> logger.info("Processing request")  # Will include request_id and user_id
 """
 
-from contextvars import ContextVar
-from typing import Optional
 import uuid
-from loguru import logger
+from contextvars import ContextVar
+from typing import Any
 
+from loguru import logger
 
 # ============================================================================
 # Context Variables
@@ -34,11 +34,11 @@ correlation_id: ContextVar[str] = ContextVar("correlation_id", default="")
 
 
 def set_request_context(
-    request_id_val: Optional[str] = None,
-    user_id_val: Optional[str] = None,
-    command_name_val: Optional[str] = None,
-    session_id_val: Optional[str] = None,
-    correlation_id_val: Optional[str] = None,
+    request_id_val: str | None = None,
+    user_id_val: str | None = None,
+    command_name_val: str | None = None,
+    session_id_val: str | None = None,
+    correlation_id_val: str | None = None,
 ) -> str:
     """
     Set request context for tracing.
@@ -131,9 +131,9 @@ class RequestContext:
 
     def __init__(
         self,
-        request_id_val: Optional[str] = None,
-        user_id_val: Optional[str] = None,
-        command_name_val: Optional[str] = None,
+        request_id_val: str | None = None,
+        user_id_val: str | None = None,
+        command_name_val: str | None = None,
         **extra_context,
     ):
         """
@@ -281,7 +281,7 @@ class OperationTimer:
         import time
 
         self._start_time = time.time()
-        log_info(f"Operation started", operation=self.operation)
+        log_info("Operation started", operation=self.operation)
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
@@ -293,13 +293,13 @@ class OperationTimer:
 
             if exc_type is None:
                 log_info(
-                    f"Operation completed",
+                    "Operation completed",
                     operation=self.operation,
                     duration_ms=self.duration_ms,
                 )
             else:
                 log_error(
-                    f"Operation failed",
+                    "Operation failed",
                     operation=self.operation,
                     duration_ms=self.duration_ms,
                     error=str(exc_val),

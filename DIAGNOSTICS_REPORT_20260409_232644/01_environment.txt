@@ -1,0 +1,31 @@
+Python Version: Python 3.13.12
+Virtual Env: /home/lchtangen/projects/ai/SampleMind-AI---Beta/.venv/bin/python
+OS: Linux
+Arch: x86_64
+
+Installed Tools:
+  - ruff: ruff 0.15.10
+  - mypy: mypy 1.20.0 (compiled: yes)
+  - pytest: pytest 9.0.3
+
+Project Structure:
+/home/lchtangen/projects/ai/SampleMind-AI---Beta
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/.ruff_cache
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/.ruff_cache/0.15.10
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/.devcontainer
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/.vscode
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/docs
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/docs/strategy
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/docs/archive
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/docs/guides
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/docs/v3
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/.claude
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/scripts
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/scripts/setup
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/completions
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/completions/fish
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/completions/zsh
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/completions/powershell
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/completions/bash
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/tests
+/home/lchtangen/projects/ai/SampleMind-AI---Beta/tests/unit

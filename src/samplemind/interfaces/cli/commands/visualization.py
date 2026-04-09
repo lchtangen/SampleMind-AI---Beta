@@ -11,11 +11,9 @@ Usage:
     samplemind viz:compare <file1> <file2>  # Compare spectrograms
 """
 
-import typer
-from typing import Optional
 from pathlib import Path
-from rich.console import Console
-from rich.table import Table
+
+import typer
 
 from . import utils
 
@@ -31,7 +29,7 @@ console = utils.console
 @utils.with_error_handling
 def viz_waveform(
     file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
     size: str = typer.Option("1920x1080", "--size", help="Image size (WIDTHxHEIGHT)"),
     color: str = typer.Option("blue", "--color", help="Color scheme"),
 ) -> None:
@@ -43,7 +41,7 @@ def viz_waveform(
         with utils.ProgressTracker(f"Generating waveform ({size})"):
             pass
 
-        console.print(f"[green]✓ Waveform generated[/green]")
+        console.print("[green]✓ Waveform generated[/green]")
         console.print(f"[cyan]Output:[/cyan] {output_file.name}")
 
     except Exception as e:
@@ -55,7 +53,7 @@ def viz_waveform(
 @utils.with_error_handling
 def viz_spectrogram(
     file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
     cmap: str = typer.Option("viridis", "--cmap", help="Colormap"),
 ) -> None:
     """Generate spectrogram visualization"""
@@ -66,7 +64,7 @@ def viz_spectrogram(
         with utils.ProgressTracker("Generating spectrogram"):
             pass
 
-        console.print(f"[green]✓ Spectrogram generated[/green]")
+        console.print("[green]✓ Spectrogram generated[/green]")
         console.print(f"[cyan]Output:[/cyan] {output_file.name}")
 
     except Exception as e:
@@ -78,7 +76,7 @@ def viz_spectrogram(
 @utils.with_error_handling
 def viz_chromagram(
     file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Generate chromagram (chroma over time)"""
     try:
@@ -88,7 +86,7 @@ def viz_chromagram(
         with utils.ProgressTracker("Generating chromagram"):
             pass
 
-        console.print(f"[green]✓ Chromagram generated[/green]")
+        console.print("[green]✓ Chromagram generated[/green]")
         console.print(f"[cyan]Output:[/cyan] {output_file.name}")
 
     except Exception as e:
@@ -100,7 +98,7 @@ def viz_chromagram(
 @utils.with_error_handling
 def viz_mfcc(
     file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Generate MFCC visualization"""
     try:
@@ -108,7 +106,7 @@ def viz_mfcc(
         with utils.ProgressTracker("Generating MFCC plot"):
             pass
 
-        console.print(f"[green]✓ MFCC visualization generated[/green]")
+        console.print("[green]✓ MFCC visualization generated[/green]")
         console.print(f"[cyan]Output:[/cyan] {output_file.name}")
 
     except Exception as e:
@@ -120,7 +118,7 @@ def viz_mfcc(
 @utils.with_error_handling
 def viz_tempogram(
     file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Generate tempogram (tempo over time)"""
     try:
@@ -130,7 +128,7 @@ def viz_tempogram(
         with utils.ProgressTracker("Generating tempogram"):
             pass
 
-        console.print(f"[green]✓ Tempogram generated[/green]")
+        console.print("[green]✓ Tempogram generated[/green]")
         console.print(f"[cyan]Output:[/cyan] {output_file.name}")
 
     except Exception as e:
@@ -142,7 +140,7 @@ def viz_tempogram(
 @utils.with_error_handling
 def viz_frequency(
     file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
     scale: str = typer.Option("log", "--scale", help="Frequency scale (linear|log)"),
 ) -> None:
     """Generate frequency response curve"""
@@ -153,7 +151,7 @@ def viz_frequency(
         with utils.ProgressTracker("Generating frequency response"):
             pass
 
-        console.print(f"[green]✓ Frequency plot generated[/green]")
+        console.print("[green]✓ Frequency plot generated[/green]")
         console.print(f"[cyan]Output:[/cyan] {output_file.name}")
 
     except Exception as e:
@@ -165,7 +163,7 @@ def viz_frequency(
 @utils.with_error_handling
 def viz_phase(
     file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Generate phase visualization"""
     try:
@@ -173,7 +171,7 @@ def viz_phase(
         with utils.ProgressTracker("Generating phase plot"):
             pass
 
-        console.print(f"[green]✓ Phase visualization generated[/green]")
+        console.print("[green]✓ Phase visualization generated[/green]")
         console.print(f"[cyan]Output:[/cyan] {output_file.name}")
 
     except Exception as e:
@@ -185,7 +183,7 @@ def viz_phase(
 @utils.with_error_handling
 def viz_stereo(
     file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Generate stereo field visualization"""
     try:
@@ -195,7 +193,7 @@ def viz_stereo(
         with utils.ProgressTracker("Generating stereo plot"):
             pass
 
-        console.print(f"[green]✓ Stereo visualization generated[/green]")
+        console.print("[green]✓ Stereo visualization generated[/green]")
         console.print(f"[cyan]Output:[/cyan] {output_file.name}")
 
     except Exception as e:
@@ -235,7 +233,7 @@ def viz_export(
 def viz_compare(
     file1: Path = typer.Argument(...),
     file2: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Compare spectrograms of two files"""
     try:
@@ -243,7 +241,7 @@ def viz_compare(
         with utils.ProgressTracker("Comparing spectrograms"):
             pass
 
-        console.print(f"[green]✓ Comparison generated[/green]")
+        console.print("[green]✓ Comparison generated[/green]")
         console.print(f"[cyan]Output:[/cyan] {output_file.name}")
 
     except Exception as e:
@@ -255,7 +253,7 @@ def viz_compare(
 @utils.with_error_handling
 def viz_compare_batch(
     folder: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Compare all samples in folder"""
     try:
@@ -264,7 +262,7 @@ def viz_compare_batch(
         with utils.ProgressTracker(f"Comparing {len(files)} files"):
             pass
 
-        console.print(f"[green]✓ Batch comparison complete[/green]")
+        console.print("[green]✓ Batch comparison complete[/green]")
         console.print(f"[cyan]Output folder:[/cyan] {output_dir}")
 
     except Exception as e:
@@ -282,12 +280,12 @@ def viz_heatmap(
 ) -> None:
     """Generate sample BPM/key/genre heatmap"""
     try:
-        files = utils.get_audio_files(folder)
+        utils.get_audio_files(folder)
         output_file = folder / f"heatmap_{metric}.png"
         with utils.ProgressTracker(f"Generating {metric} heatmap"):
             pass
 
-        console.print(f"[green]✓ Heatmap generated[/green]")
+        console.print("[green]✓ Heatmap generated[/green]")
         console.print(f"[cyan]Output:[/cyan] {output_file.name}")
 
     except Exception as e:
@@ -307,7 +305,7 @@ def viz_timeline(
         with utils.ProgressTracker(f"Generating timeline for {len(files)} files"):
             pass
 
-        console.print(f"[green]✓ Timeline generated[/green]")
+        console.print("[green]✓ Timeline generated[/green]")
         console.print(f"[cyan]Output:[/cyan] {output_file.name}")
 
     except Exception as e:

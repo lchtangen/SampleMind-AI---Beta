@@ -8,14 +8,13 @@ of the distributed audio processing pipeline.
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from enum import StrEnum
+from typing import Any
 
 import psutil
-from loguru import logger
 
 
-class MetricType(str, Enum):
+class MetricType(StrEnum):
     """Types of metrics that can be collected."""
 
     COUNTER = "counter"  # A cumulative metric that increases monotonically
@@ -31,11 +30,11 @@ class Metric:
     name: str
     metric_type: MetricType
     description: str = ""
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
     value: Any = None
     timestamp: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert the metric to a dictionary."""
         return {
             "name": self.name,
@@ -54,7 +53,7 @@ class SystemMetricsCollector:
     def __init__(self) -> None:
         self.process = psutil.Process()
 
-    def collect(self) -> List[Metric]:
+    def collect(self) -> list[Metric]:
         """Collect system metrics."""
         metrics = []
 
@@ -156,7 +155,7 @@ class AudioProcessingMetrics:
             self._metrics[key] = []
         self._metrics[key].append(duration_seconds)
 
-    def get_metrics(self) -> List[Metric]:
+    def get_metrics(self) -> list[Metric]:
         """Get all collected metrics."""
         metrics = []
 
@@ -214,7 +213,7 @@ class Monitor:
         self.audio_metrics = AudioProcessingMetrics()
         self.start_time = time.time()
 
-    def collect_metrics(self) -> List[Metric]:
+    def collect_metrics(self) -> list[Metric]:
         """Collect all metrics from all collectors."""
         metrics = []
 
@@ -240,7 +239,7 @@ class Monitor:
 
         return metrics
 
-    def get_metrics_dict(self) -> Dict[str, Any]:
+    def get_metrics_dict(self) -> dict[str, Any]:
         """Get all metrics as a dictionary."""
         return {
             "service": self.service_name,

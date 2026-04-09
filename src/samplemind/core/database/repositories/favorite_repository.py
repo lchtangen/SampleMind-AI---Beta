@@ -1,7 +1,5 @@
 """Favorites repository"""
 
-from typing import Optional, List
-from datetime import datetime
 from samplemind.core.database.mongo import Favorite
 
 
@@ -13,8 +11,8 @@ class FavoriteRepository:
         favorite_id: str,
         analysis_id: str,
         file_name: str,
-        user_id: Optional[str] = None,
-        notes: Optional[str] = None,
+        user_id: str | None = None,
+        notes: str | None = None,
         rating: int = 0,
     ) -> Favorite:
         """Create new favorite"""
@@ -30,19 +28,19 @@ class FavoriteRepository:
         return favorite
 
     @staticmethod
-    async def get_by_id(favorite_id: str) -> Optional[Favorite]:
+    async def get_by_id(favorite_id: str) -> Favorite | None:
         """Get favorite by ID"""
         return await Favorite.find_one(Favorite.favorite_id == favorite_id)
 
     @staticmethod
-    async def get_by_analysis_id(analysis_id: str) -> Optional[Favorite]:
+    async def get_by_analysis_id(analysis_id: str) -> Favorite | None:
         """Get favorite by analysis ID"""
         return await Favorite.find_one(Favorite.analysis_id == analysis_id)
 
     @staticmethod
     async def get_by_user(
         user_id: str, skip: int = 0, limit: int = 50
-    ) -> List[Favorite]:
+    ) -> list[Favorite]:
         """Get all favorites for a user"""
         return (
             await Favorite.find(Favorite.user_id == user_id)
@@ -61,7 +59,7 @@ class FavoriteRepository:
         return False
 
     @staticmethod
-    async def update_rating(favorite_id: str, rating: int) -> Optional[Favorite]:
+    async def update_rating(favorite_id: str, rating: int) -> Favorite | None:
         """Update rating (0-5)"""
         if not 0 <= rating <= 5:
             raise ValueError("Rating must be between 0 and 5")
@@ -74,9 +72,7 @@ class FavoriteRepository:
         return None
 
     @staticmethod
-    async def update_notes(
-        favorite_id: str, notes: Optional[str]
-    ) -> Optional[Favorite]:
+    async def update_notes(favorite_id: str, notes: str | None) -> Favorite | None:
         """Update notes"""
         favorite = await Favorite.find_one(Favorite.favorite_id == favorite_id)
         if favorite:
@@ -86,7 +82,7 @@ class FavoriteRepository:
         return None
 
     @staticmethod
-    async def get_by_rating(user_id: str, min_rating: int = 0) -> List[Favorite]:
+    async def get_by_rating(user_id: str, min_rating: int = 0) -> list[Favorite]:
         """Get favorites with minimum rating"""
         return (
             await Favorite.find(
@@ -97,7 +93,7 @@ class FavoriteRepository:
         )
 
     @staticmethod
-    async def get_recent(user_id: str, limit: int = 10) -> List[Favorite]:
+    async def get_recent(user_id: str, limit: int = 10) -> list[Favorite]:
         """Get recently added favorites"""
         return (
             await Favorite.find(Favorite.user_id == user_id)

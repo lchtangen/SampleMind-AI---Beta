@@ -10,18 +10,17 @@ Tests cover:
 - Output directory creation
 """
 
+from unittest.mock import MagicMock, patch
+
 import pytest
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
 from typer.testing import CliRunner
 
 from samplemind.core.processing.stem_separation import (
+    QUALITY_PRESETS,
+    StemQuality,
     StemSeparationEngine,
     StemSeparationResult,
-    StemQuality,
-    QUALITY_PRESETS,
 )
-
 
 pytestmark = [pytest.mark.unit, pytest.mark.cli]
 
@@ -126,7 +125,7 @@ class TestStemsSeparateCommand:
                 command=["demucs", str(audio_file)],
             )
 
-            result = runner.invoke(
+            runner.invoke(
                 app,
                 [
                     "stems:separate",
@@ -160,7 +159,7 @@ class TestStemsSeparateCommand:
                 command=[],
             )
 
-            result = runner.invoke(
+            runner.invoke(
                 app,
                 [
                     "stems:separate",
@@ -235,7 +234,7 @@ class TestSingleStemCommands:
                 command=[],
             )
 
-            result = runner.invoke(app, ["stems:vocals", str(audio_file)])
+            runner.invoke(app, ["stems:vocals", str(audio_file)])
 
         mock_engine.separate.assert_called_once()
         call_kwargs = mock_engine.separate.call_args.kwargs
@@ -277,8 +276,9 @@ class TestStemsBatchCommand:
         self, typer_runner, test_audio_samples, temp_directory
     ):
         """Test stems:batch with folder containing audio files"""
-        from samplemind.interfaces.cli.typer_app import app
         import shutil
+
+        from samplemind.interfaces.cli.typer_app import app
 
         runner = CliRunner()
 
@@ -305,7 +305,7 @@ class TestStemsBatchCommand:
                 command=[],
             )
 
-            result = runner.invoke(
+            runner.invoke(
                 app,
                 [
                     "stems:batch",

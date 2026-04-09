@@ -1,28 +1,24 @@
 #!/usr/bin/env python3
 """Stem Separation Commands - AI-powered audio stem extraction"""
 
-import asyncio
 import time
 from pathlib import Path
-from typing import Optional, List
 
 import typer
-from rich.console import Console
 from rich.progress import (
+    BarColumn,
     Progress,
     SpinnerColumn,
-    BarColumn,
     TextColumn,
     TimeRemainingColumn,
 )
 from rich.table import Table
-from rich.panel import Panel
 
 from samplemind.core.processing.stem_separation import (
-    StemSeparationEngine,
     StemQuality,
-    StemSeparationResult,
+    StemSeparationEngine,
 )
+
 from . import utils
 
 app = typer.Typer(
@@ -35,11 +31,11 @@ console = utils.console
 @app.command("separate")
 @utils.with_error_handling
 def separate_stems(
-    file: Optional[Path] = typer.Argument(None, help="Audio file to separate"),
+    file: Path | None = typer.Argument(None, help="Audio file to separate"),
     quality: str = typer.Option(
         "standard", "--quality", "-q", help="Quality preset: fast, standard, high"
     ),
-    output: Optional[Path] = typer.Option(
+    output: Path | None = typer.Option(
         None, "--output", "-o", help="Output directory for stems"
     ),
     format_type: str = typer.Option(
@@ -75,7 +71,7 @@ def separate_stems(
 
         # Create engine
         console.print()
-        console.print(f"[bold cyan]🎼 Stem Separation[/bold cyan]")
+        console.print("[bold cyan]🎼 Stem Separation[/bold cyan]")
         console.print(f"[cyan]File: {file.name}[/cyan]")
         console.print(f"[cyan]Quality: {quality_lower}[/cyan]\n")
 
@@ -154,11 +150,11 @@ def separate_stems(
 @utils.with_error_handling
 @utils.async_command
 async def batch_separate(
-    folder: Optional[Path] = typer.Argument(None, help="Folder containing audio files"),
+    folder: Path | None = typer.Argument(None, help="Folder containing audio files"),
     quality: str = typer.Option(
         "standard", "--quality", "-q", help="Quality preset: fast, standard, high"
     ),
-    output: Optional[Path] = typer.Option(
+    output: Path | None = typer.Option(
         None, "--output", "-o", help="Base output directory"
     ),
     extensions: str = typer.Option(
@@ -189,7 +185,7 @@ async def batch_separate(
 
         # Find audio files
         ext_list = [ext.strip().lower() for ext in extensions.split(",")]
-        audio_files = []
+        audio_files: list[Path] = []
         for ext in ext_list:
             audio_files.extend(folder.glob(f"*.{ext}"))
 
@@ -198,7 +194,7 @@ async def batch_separate(
             raise typer.Exit(1)
 
         console.print()
-        console.print(f"[bold cyan]🎼 Batch Stem Separation[/bold cyan]")
+        console.print("[bold cyan]🎼 Batch Stem Separation[/bold cyan]")
         console.print(f"[cyan]Folder: {folder}[/cyan]")
         console.print(f"[cyan]Files: {len(audio_files)}[/cyan]")
         console.print(f"[cyan]Quality: {quality}[/cyan]\n")
@@ -206,7 +202,7 @@ async def batch_separate(
         # Create engine
         quality_lower = quality.lower()
         if quality_lower not in ["fast", "standard", "high"]:
-            console.print(f"[red]✗ Invalid quality. Use: fast, standard, high[/red]")
+            console.print("[red]✗ Invalid quality. Use: fast, standard, high[/red]")
             raise typer.Exit(1)
 
         quality_enum = StemQuality[quality_lower.upper()]
@@ -217,7 +213,6 @@ async def batch_separate(
         # Process with progress
         start_time = time.time()
         results = []
-        processed_count = [0]  # Use list to allow mutation in nested function
 
         def progress_callback(current: int, total: int) -> None:
             """Progress callback for stem separation.
@@ -282,7 +277,7 @@ async def batch_separate(
 @app.command("list")
 @utils.with_error_handling
 def list_stems(
-    file: Optional[Path] = typer.Argument(
+    file: Path | None = typer.Argument(
         None, help="Separated stem directory or list stems from previous separation"
     ),
 ) -> None:
@@ -328,7 +323,7 @@ def extract_stem(
     stem_type: str = typer.Argument(
         ..., help="Stem type to extract: vocals, drums, bass, other"
     ),
-    file: Optional[Path] = typer.Argument(None, help="Already-separated stem file"),
+    file: Path | None = typer.Argument(None, help="Already-separated stem file"),
 ) -> None:
     """
     Extract a specific stem from an already-separated file.

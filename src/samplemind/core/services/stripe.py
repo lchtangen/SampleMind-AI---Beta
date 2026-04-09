@@ -44,13 +44,13 @@ from __future__ import annotations
 import logging
 import os
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 # ── Tier limits ───────────────────────────────────────────────────────────────
 
-TIER_LIMITS: Dict[str, Dict[str, Any]] = {
+TIER_LIMITS: dict[str, dict[str, Any]] = {
     "free": {
         "analyses_per_day": 5,
         "storage_gb": 0,
@@ -59,14 +59,14 @@ TIER_LIMITS: Dict[str, Dict[str, Any]] = {
         "price_monthly_usd": 0,
     },
     "pro": {
-        "analyses_per_day": -1,       # unlimited
+        "analyses_per_day": -1,  # unlimited
         "storage_gb": 10,
         "ai_coaching": True,
         "priority_queue": False,
         "price_monthly_usd": 9,
     },
     "team": {
-        "analyses_per_day": -1,       # unlimited
+        "analyses_per_day": -1,  # unlimited
         "storage_gb": 100,
         "ai_coaching": True,
         "priority_queue": True,
@@ -107,8 +107,8 @@ class StripeService:
 
     def __init__(
         self,
-        secret_key: Optional[str] = None,
-        webhook_secret: Optional[str] = None,
+        secret_key: str | None = None,
+        webhook_secret: str | None = None,
     ) -> None:
         self.secret_key = secret_key or os.getenv("STRIPE_SECRET_KEY", "")
         self.webhook_secret = webhook_secret or os.getenv("STRIPE_WEBHOOK_SECRET", "")
@@ -151,9 +151,7 @@ class StripeService:
 
     # ── Customer management ───────────────────────────────────────────────────
 
-    def get_or_create_customer(
-        self, user_id: str, email: str, name: str = ""
-    ) -> str:
+    def get_or_create_customer(self, user_id: str, email: str, name: str = "") -> str:
         """
         Get or create a Stripe Customer for the given user.
 
@@ -201,7 +199,7 @@ class StripeService:
         success_url: str,
         cancel_url: str,
         name: str = "",
-    ) -> Optional[CheckoutSession]:
+    ) -> CheckoutSession | None:
         """
         Create a Stripe Checkout Session for a plan upgrade.
 
@@ -226,8 +224,9 @@ class StripeService:
             return None
 
         try:
-            import stripe
             import asyncio
+
+            import stripe
 
             stripe.api_key = self.secret_key
 
@@ -271,9 +270,7 @@ class StripeService:
 
     # ── Webhook handling ──────────────────────────────────────────────────────
 
-    def handle_webhook(
-        self, payload: bytes, signature: str
-    ) -> Optional[Dict[str, Any]]:
+    def handle_webhook(self, payload: bytes, signature: str) -> dict[str, Any] | None:
         """
         Verify and parse a Stripe webhook event.
 
@@ -305,8 +302,8 @@ class StripeService:
             return None
 
     def extract_subscription_update(
-        self, event: Dict[str, Any]
-    ) -> Optional[Dict[str, str]]:
+        self, event: dict[str, Any]
+    ) -> dict[str, str] | None:
         """
         Extract user_id and new plan from a subscription webhook event.
 

@@ -12,15 +12,14 @@ Provides:
 """
 
 import logging
-import asyncio
-from pathlib import Path
-from typing import Optional, List, Dict, Any
 from datetime import datetime
+from pathlib import Path
+from typing import Any
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
+import uvicorn
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import uvicorn
 
 # Configure logging
 logging.basicConfig(
@@ -81,7 +80,7 @@ class MIDIGenerationResult(BaseModel):
     midi_file_path: str
     notes_count: int
     duration_seconds: float
-    notes: List[Dict[str, Any]]
+    notes: list[dict[str, Any]]
 
 
 class HealthStatus(BaseModel):
@@ -91,7 +90,7 @@ class HealthStatus(BaseModel):
     version: str
     timestamp: str
     backend_ready: bool
-    services: Dict[str, bool]
+    services: dict[str, bool]
 
 
 # ============================================================================
@@ -128,9 +127,9 @@ async def initialize_components():
     global audio_engine, midi_generator, db_manager
 
     try:
-        from samplemind.core.engine.audio_engine import AudioEngine, AnalysisLevel
-        from samplemind.core.processing.midi_generator import MIDIGenerator
         from samplemind.core.database.chroma import ChromaDBManager
+        from samplemind.core.engine.audio_engine import AudioEngine
+        from samplemind.core.processing.midi_generator import MIDIGenerator
 
         logger.info("Initializing SampleMind components...")
 
@@ -248,7 +247,7 @@ async def analyze_audio(request: AnalysisRequest):
 
 
 @app.post("/api/analyze/batch")
-async def analyze_batch(files: List[UploadFile] = File(...)):
+async def analyze_batch(files: list[UploadFile] = File(...)):
     """Batch analyze multiple audio files"""
     if audio_engine is None:
         raise HTTPException(status_code=503, detail="Audio engine not initialized")
@@ -500,7 +499,7 @@ async def get_library_stats():
 
 
 @app.post("/api/library/add")
-async def add_samples_to_library(files: List[UploadFile] = File(...)):
+async def add_samples_to_library(files: list[UploadFile] = File(...)):
     """Add audio files to library"""
     if db_manager is None:
         raise HTTPException(status_code=503, detail="Database not initialized")

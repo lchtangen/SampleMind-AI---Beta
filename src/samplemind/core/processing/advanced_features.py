@@ -9,11 +9,10 @@ Extracts:
 """
 
 import logging
-import numpy as np
-from typing import Dict, Optional, Tuple
 from dataclasses import dataclass
+
 import librosa
-from scipy import signal
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +38,7 @@ class AdvancedAudioFeatures:
     timbral_warmth: float  # 0-1
     timbral_sharpness: float  # 0-1
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary"""
         return {
             "temporal_centroid": float(self.temporal_centroid),
@@ -93,7 +92,7 @@ class AdvancedFeatureExtractor:
             timbral_sharpness=sharpness,
         )
 
-    def _extract_temporal_features(self, audio: np.ndarray) -> Tuple[float, float]:
+    def _extract_temporal_features(self, audio: np.ndarray) -> tuple[float, float]:
         """
         Extract temporal centroid and variance.
 
@@ -123,7 +122,7 @@ class AdvancedFeatureExtractor:
 
         return float(centroid), float(np.sqrt(variance))
 
-    def _extract_spectral_features(self, audio: np.ndarray) -> Tuple[float, np.ndarray]:
+    def _extract_spectral_features(self, audio: np.ndarray) -> tuple[float, np.ndarray]:
         """
         Extract spectral flux and stability.
 
@@ -186,7 +185,7 @@ class AdvancedFeatureExtractor:
 
     def _extract_timbral_features(
         self, audio: np.ndarray
-    ) -> Tuple[float, float, float]:
+    ) -> tuple[float, float, float]:
         """
         Extract timbral features: brightness, warmth, sharpness.
 
@@ -211,7 +210,7 @@ class AdvancedFeatureExtractor:
         low_freq_energy = np.mean(S_db[:low_freq_end, :])
 
         # Normalize to 0-1
-        total_energy = np.mean(S_db)
+        np.mean(S_db)
         brightness = (high_freq_energy - np.min(S_db)) / (
             np.max(S_db) - np.min(S_db) + 1e-10
         )
@@ -229,7 +228,7 @@ class AdvancedFeatureExtractor:
 
         return float(brightness), float(warmth), float(sharpness)
 
-    def get_timbral_profile(self, features: AdvancedAudioFeatures) -> Dict[str, str]:
+    def get_timbral_profile(self, features: AdvancedAudioFeatures) -> dict[str, str]:
         """
         Generate descriptive timbral profile.
 
@@ -299,7 +298,7 @@ class AdvancedFeatureExtractor:
 
 
 # Global instance
-_extractor_instance: Optional[AdvancedFeatureExtractor] = None
+_extractor_instance: AdvancedFeatureExtractor | None = None
 
 
 def init_extractor(sample_rate: int = 44100) -> AdvancedFeatureExtractor:

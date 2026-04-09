@@ -11,11 +11,10 @@ Provides real-time integration with FL Studio 20+:
 
 import json
 import logging
-from pathlib import Path
-from typing import Dict, Any, Optional, List
-from dataclasses import dataclass, asdict
-import asyncio
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -25,17 +24,17 @@ class FLStudioMetadata:
     """FL Studio sample metadata"""
 
     file_path: str
-    bpm: Optional[float] = None
-    key: Optional[str] = None
-    genre: Optional[str] = None
-    mood: Optional[str] = None
-    energy: Optional[float] = None
-    duration: Optional[float] = None
-    sample_rate: Optional[int] = None
+    bpm: float | None = None
+    key: str | None = None
+    genre: str | None = None
+    mood: str | None = None
+    energy: float | None = None
+    duration: float | None = None
+    sample_rate: int | None = None
     channels: int = 2
     bit_depth: int = 24
     timestamp: str = None
-    ai_tags: List[str] = None
+    ai_tags: list[str] = None
     analysis_level: str = "STANDARD"
 
     def __post_init__(self) -> None:
@@ -44,7 +43,7 @@ class FLStudioMetadata:
         if self.ai_tags is None:
             self.ai_tags = []
 
-    def to_fl_format(self) -> Dict[str, Any]:
+    def to_fl_format(self) -> dict[str, Any]:
         """Convert to FL Studio compatible format"""
         return {
             "filepath": self.file_path,
@@ -75,9 +74,9 @@ class FLStudioPlugin:
         self.is_active = False
         self.project_bpm = 120.0
         self.project_key = "C"
-        self.loaded_samples: Dict[str, FLStudioMetadata] = {}
-        self.analysis_queue: List[str] = []
-        self.suggestions_cache: Dict[str, List[str]] = {}
+        self.loaded_samples: dict[str, FLStudioMetadata] = {}
+        self.analysis_queue: list[str] = []
+        self.suggestions_cache: dict[str, list[str]] = {}
         logger.info(f"FLStudioPlugin {self.VERSION} initialized")
 
     def on_init(self) -> None:
@@ -132,7 +131,7 @@ class FLStudioPlugin:
         except Exception as e:
             logger.error(f"Error analyzing dropped file: {e}")
 
-    def _analyze_sample(self, file_path: str) -> Optional[FLStudioMetadata]:
+    def _analyze_sample(self, file_path: str) -> FLStudioMetadata | None:
         """Analyze audio sample with SampleMind engine"""
         try:
             from samplemind.core.engine import AudioEngine
@@ -190,7 +189,7 @@ class FLStudioPlugin:
         except Exception as e:
             logger.error(f"Error displaying metadata: {e}")
 
-    def _get_ai_suggestions(self, metadata: FLStudioMetadata) -> List[str]:
+    def _get_ai_suggestions(self, metadata: FLStudioMetadata) -> list[str]:
         """Get AI-powered sample suggestions"""
         try:
             from samplemind.core.database import ChromaDB
@@ -243,7 +242,7 @@ class FLStudioPlugin:
         except Exception as e:
             logger.error(f"Error scanning project samples: {e}")
 
-    def _save_sample_metadata(self, file_path: str, metadata: Dict[str, Any]) -> None:
+    def _save_sample_metadata(self, file_path: str, metadata: dict[str, Any]) -> None:
         """Save metadata for persistence across sessions"""
         try:
             meta_dir = Path.home() / ".samplemind" / "fl_studio" / "metadata"
@@ -264,13 +263,13 @@ class FLStudioPlugin:
         except Exception as e:
             logger.error(f"Error saving metadata: {e}")
 
-    def get_loaded_samples(self) -> Dict[str, Dict[str, Any]]:
+    def get_loaded_samples(self) -> dict[str, dict[str, Any]]:
         """Get all loaded samples and their metadata"""
         return {
             path: asdict(metadata) for path, metadata in self.loaded_samples.items()
         }
 
-    def get_plugin_info(self) -> Dict[str, Any]:
+    def get_plugin_info(self) -> dict[str, Any]:
         """Get plugin information for FL Studio"""
         return {
             "name": self.NAME,
@@ -283,7 +282,7 @@ class FLStudioPlugin:
 
 
 # Global plugin instance
-_plugin_instance: Optional[FLStudioPlugin] = None
+_plugin_instance: FLStudioPlugin | None = None
 
 
 def get_plugin() -> FLStudioPlugin:

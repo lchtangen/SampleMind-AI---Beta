@@ -1,0 +1,6 @@
+pyproject.toml Summary:
+Project: samplemind-ai
+Version: 0.3.0
+Python: >=3.12
+Dependencies: 67 total
+Dev Dependencies: 17 total

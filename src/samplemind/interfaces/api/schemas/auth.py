@@ -3,10 +3,10 @@ Authentication Schemas
 Pydantic models for authentication requests and responses
 """
 
-from datetime import datetime
-from typing import Optional
-from pydantic import BaseModel, EmailStr, Field, field_validator
 import re
+from datetime import datetime
+
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
 class UserRegisterRequest(BaseModel):
@@ -93,7 +93,7 @@ class UserResponse(BaseModel):
     is_active: bool
     is_verified: bool
     created_at: datetime
-    last_login: Optional[datetime] = None
+    last_login: datetime | None = None
     total_analyses: int = 0
     total_uploads: int = 0
 
@@ -106,7 +106,7 @@ class UserResponse(BaseModel):
 class UserProfileUpdate(BaseModel):
     """Update user profile"""
 
-    username: Optional[str] = Field(None, min_length=3, max_length=50)
+    username: str | None = Field(None, min_length=3, max_length=50)
 
     @field_validator("username")
     @classmethod

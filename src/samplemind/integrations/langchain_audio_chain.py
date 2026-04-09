@@ -16,7 +16,7 @@ Node responsibilities:
 
 import json
 import logging
-from typing import Any, Dict, List, Optional, TypedDict
+from typing import Any, TypedDict
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +25,8 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 try:
-    from langgraph.graph import StateGraph, END
     from langgraph.checkpoint.redis import RedisSaver
+    from langgraph.graph import END, StateGraph
 
     LANGGRAPH_AVAILABLE = True
 except ImportError:
@@ -36,10 +36,7 @@ except ImportError:
     )
 
 try:
-    from langchain_core.messages import (
-        HumanMessage as _HumanMessage,
-        AIMessage as _AIMessage,
-    )  # noqa: F401
+    from langchain_core.messages import HumanMessage as _HumanMessage  # noqa: F401
 
     LANGCHAIN_CORE_AVAILABLE = True
 except ImportError:
@@ -58,21 +55,21 @@ class AudioGraphState(TypedDict, total=False):
     """Shared state dictionary passed between graph nodes."""
 
     # Input
-    audio_features: Dict[str, Any]
-    audio_path: Optional[str]
+    audio_features: dict[str, Any]
+    audio_path: str | None
 
     # Intermediate / output
     analysis_text: str
     genre: str
-    sub_genres: List[str]
+    sub_genres: list[str]
     mood: str
-    semantic_tags: List[str]
-    embedding: List[float]
-    similar_samples: List[Dict[str, Any]]
+    semantic_tags: list[str]
+    embedding: list[float]
+    similar_samples: list[dict[str, Any]]
 
     # Metadata
-    errors: List[str]
-    node_trace: List[str]
+    errors: list[str]
+    node_trace: list[str]
 
 
 # ---------------------------------------------------------------------------
@@ -87,11 +84,12 @@ async def _node_analyze(state: AudioGraphState) -> AudioGraphState:
     Falls back to a feature-dict summary if Anthropic is unavailable.
     """
     try:
-        from samplemind.integrations.anthropic_integration import (
-            AnthropicMusicProducer,
-            AnthropicAnalysisType,
-        )
         import os
+
+        from samplemind.integrations.anthropic_integration import (
+            AnthropicAnalysisType,
+            AnthropicMusicProducer,
+        )
 
         api_key = os.getenv("ANTHROPIC_API_KEY")
         if api_key:
@@ -125,14 +123,15 @@ async def _node_classify(state: AudioGraphState) -> AudioGraphState:
     Use Google Gemini to classify genre and mood from the analysis text.
     """
     genre = ""
-    sub_genres: List[str] = []
+    sub_genres: list[str] = []
     mood = ""
     try:
+        import os
+
         from samplemind.integrations.google_ai_integration import (
             GoogleAIMusicProducer,
             MusicAnalysisType,
         )
-        import os
 
         api_key = os.getenv("GOOGLE_AI_API_KEY")
         if api_key:
@@ -167,10 +166,11 @@ async def _node_tag(state: AudioGraphState) -> AudioGraphState:
     Generate semantic tags from genre, mood, and analysis text.
     Uses OpenAI GPT-4o-mini for speed and cost efficiency.
     """
-    semantic_tags: List[str] = []
+    semantic_tags: list[str] = []
     try:
-        from openai import AsyncOpenAI
         import os
+
+        from openai import AsyncOpenAI
 
         api_key = os.getenv("OPENAI_API_KEY")
         if api_key:
@@ -220,7 +220,7 @@ async def _node_embed(state: AudioGraphState) -> AudioGraphState:
     Generate a CLAP embedding via NeuralFeatureExtractor.
     Falls back to a zero vector if the neural engine is unavailable.
     """
-    embedding: List[float] = []
+    embedding: list[float] = []
     audio_path = state.get("audio_path")
     try:
         from samplemind.core.engine.neural_engine import NeuralFeatureExtractor
@@ -254,7 +254,7 @@ async def _node_search(state: AudioGraphState) -> AudioGraphState:
     Node 5 — search
     Run vector similarity search in ChromaDB using the produced embedding.
     """
-    similar_samples: List[Dict[str, Any]] = []
+    similar_samples: list[dict[str, Any]] = []
     embedding = state.get("embedding", [])
     try:
         if embedding:
@@ -293,7 +293,7 @@ class AudioLangGraph:
 
     def __init__(
         self,
-        redis_url: Optional[str] = None,
+        redis_url: str | None = None,
         enable_checkpointing: bool = True,
     ) -> None:
         if not LANGGRAPH_AVAILABLE:
@@ -338,9 +338,9 @@ class AudioLangGraph:
 
     async def run(
         self,
-        audio_features: Dict[str, Any],
-        audio_path: Optional[str] = None,
-        thread_id: Optional[str] = None,
+        audio_features: dict[str, Any],
+        audio_path: str | None = None,
+        thread_id: str | None = None,
     ) -> AudioGraphState:
         """
         Execute the full analyse→classify→tag→embed→search pipeline.

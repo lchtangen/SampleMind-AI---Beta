@@ -40,7 +40,7 @@ class WaveformWidget(Widget):
     """
 
     playback_position: reactive[float] = reactive(0.0)
-    _waveform_data: "np.ndarray | None" = None
+    _waveform_data: np.ndarray | None = None
     _waveform_sr: int = 44100
 
     def compose(self) -> ComposeResult:
@@ -54,7 +54,7 @@ class WaveformWidget(Widget):
                 id="waveform_fallback",
             )
 
-    def update_waveform(self, y: "np.ndarray", sr: int) -> None:
+    def update_waveform(self, y: np.ndarray, sr: int) -> None:
         if not _PLOTEXT_AVAILABLE:
             return
         try:

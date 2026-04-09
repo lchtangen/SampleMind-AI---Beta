@@ -18,9 +18,9 @@ Phase 10 Additions:
 - CLI commands for DAW interaction
 """
 
-from .base import DAWBridge, DAWType, DAWProject, DAWChannel
-from .fl_studio_plugin import FLStudioPlugin
 from .ableton_integration import AbletonControlSurface
+from .base import DAWBridge, DAWChannel, DAWProject, DAWType
+from .fl_studio_plugin import FLStudioPlugin
 from .logic_pro_integration import LogicProAUPlugin
 from .vst3_plugin import VST3Plugin
 

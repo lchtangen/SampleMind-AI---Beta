@@ -1,23 +1,17 @@
 #!/usr/bin/env python3
 """Audio Effects Commands - Apply professional audio effects and presets"""
 
+from enum import StrEnum
 from pathlib import Path
-from typing import Optional, List
-from enum import Enum
 
 import typer
-from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
+from rich.table import Table
 
 from samplemind.core.processing.audio_effects import (
     AudioEffectsProcessor,
-    EffectType,
-    EQSettings,
-    CompressionSettings,
-    DistortionSettings,
-    ReverbSettings,
 )
+
 from . import utils
 
 app = typer.Typer(
@@ -26,7 +20,7 @@ app = typer.Typer(
 console = utils.console
 
 
-class EffectPreset(str, Enum):
+class EffectPreset(StrEnum):
     """Built-in audio effect presets"""
 
     VOCAL = "vocal"
@@ -60,9 +54,7 @@ def apply_preset(
         "-t",
         help="Preset type: vocal, drums, bass, master, vintage",
     ),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output file path"
-    ),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file path"),
 ) -> None:
     """
     Apply a built-in audio effects preset.
@@ -84,7 +76,7 @@ def apply_preset(
         output_file = Path(output_file).expanduser().resolve()
 
         console.print()
-        console.print(f"[bold cyan]🎛️  Apply Effects Preset[/bold cyan]")
+        console.print("[bold cyan]🎛️  Apply Effects Preset[/bold cyan]")
         console.print(f"[cyan]Input: {file.name}[/cyan]")
         console.print(f"[cyan]Preset: {preset.value.upper()}[/cyan]")
         console.print(f"[cyan]{PRESET_DESCRIPTIONS[preset]}[/cyan]")
@@ -97,7 +89,7 @@ def apply_preset(
             output_file.parent.mkdir(parents=True, exist_ok=True)
             processor.save_audio(processed, output_file, sr)
 
-        console.print(f"[green]✓ Preset applied successfully![/green]")
+        console.print("[green]✓ Preset applied successfully![/green]")
         console.print(f"[cyan]Output: {output_file.name}[/cyan]")
         console.print()
 
@@ -113,9 +105,7 @@ def apply_preset(
 @utils.with_error_handling
 def apply_vocal_preset(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output file path"
-    ),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file path"),
 ) -> None:
     """Apply vocal enhancement preset (presence boost + reverb)"""
     try:
@@ -134,7 +124,7 @@ def apply_vocal_preset(
             output_file.parent.mkdir(parents=True, exist_ok=True)
             processor.save_audio(processed, output_file, sr)
 
-        console.print(f"[green]✓ Vocal preset applied![/green]")
+        console.print("[green]✓ Vocal preset applied![/green]")
         console.print(f"[cyan]Output: {output_file.name}[/cyan]")
 
     except Exception as e:
@@ -146,9 +136,7 @@ def apply_vocal_preset(
 @utils.with_error_handling
 def apply_drums_preset(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output file path"
-    ),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file path"),
 ) -> None:
     """Apply drum processing preset (compression + saturation)"""
     try:
@@ -167,7 +155,7 @@ def apply_drums_preset(
             output_file.parent.mkdir(parents=True, exist_ok=True)
             processor.save_audio(processed, output_file, sr)
 
-        console.print(f"[green]✓ Drum preset applied![/green]")
+        console.print("[green]✓ Drum preset applied![/green]")
         console.print(f"[cyan]Output: {output_file.name}[/cyan]")
 
     except Exception as e:
@@ -179,9 +167,7 @@ def apply_drums_preset(
 @utils.with_error_handling
 def apply_bass_preset(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output file path"
-    ),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file path"),
 ) -> None:
     """Apply bass enhancement preset (sub-boost + limiting)"""
     try:
@@ -200,7 +186,7 @@ def apply_bass_preset(
             output_file.parent.mkdir(parents=True, exist_ok=True)
             processor.save_audio(processed, output_file, sr)
 
-        console.print(f"[green]✓ Bass preset applied![/green]")
+        console.print("[green]✓ Bass preset applied![/green]")
         console.print(f"[cyan]Output: {output_file.name}[/cyan]")
 
     except Exception as e:
@@ -212,9 +198,7 @@ def apply_bass_preset(
 @utils.with_error_handling
 def apply_master_preset(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output file path"
-    ),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file path"),
 ) -> None:
     """Apply master bus preset (gentle compression + limiting)"""
     try:
@@ -233,7 +217,7 @@ def apply_master_preset(
             output_file.parent.mkdir(parents=True, exist_ok=True)
             processor.save_audio(processed, output_file, sr)
 
-        console.print(f"[green]✓ Master preset applied![/green]")
+        console.print("[green]✓ Master preset applied![/green]")
         console.print(f"[cyan]Output: {output_file.name}[/cyan]")
 
     except Exception as e:
@@ -245,9 +229,7 @@ def apply_master_preset(
 @utils.with_error_handling
 def apply_vintage_preset(
     file: Path = typer.Argument(..., help="Audio file to process"),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output file path"
-    ),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file path"),
 ) -> None:
     """Apply vintage/warm preset (saturation + soft compression)"""
     try:
@@ -266,7 +248,7 @@ def apply_vintage_preset(
             output_file.parent.mkdir(parents=True, exist_ok=True)
             processor.save_audio(processed, output_file, sr)
 
-        console.print(f"[green]✓ Vintage preset applied![/green]")
+        console.print("[green]✓ Vintage preset applied![/green]")
         console.print(f"[cyan]Output: {output_file.name}[/cyan]")
 
     except Exception as e:
@@ -289,9 +271,7 @@ def apply_eq_effect(
         "-g",
         help="10-band EQ gains in dB (comma-separated, e.g. '3,0,-2,0,0,0,0,0,0,0')",
     ),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output file path"
-    ),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file path"),
 ) -> None:
     """
     Apply 10-band parametric EQ.
@@ -318,14 +298,14 @@ def apply_eq_effect(
                 raise typer.Exit(1)
         except ValueError:
             console.print(
-                f"[red]✗ Invalid gain values. Use comma-separated floats, e.g.: 3,0,-2,0,0,0,0,0,0,0[/red]"
+                "[red]✗ Invalid gain values. Use comma-separated floats, e.g.: 3,0,-2,0,0,0,0,0,0,0[/red]"
             )
             raise typer.Exit(1)
 
         output_file = output or file.with_stem(file.stem + "_eq")
 
         console.print()
-        console.print(f"[bold cyan]🎛️  10-Band Parametric EQ[/bold cyan]")
+        console.print("[bold cyan]🎛️  10-Band Parametric EQ[/bold cyan]")
         console.print(f"[cyan]Input: {file.name}[/cyan]")
         console.print()
 
@@ -336,7 +316,7 @@ def apply_eq_effect(
         eq_table.add_column("Frequency", justify="right", style="yellow")
         eq_table.add_column("Gain (dB)", justify="right", style="green")
 
-        for band, freq, gain in zip(range(1, 11), bands, gains_list):
+        for band, freq, gain in zip(range(1, 11), bands, gains_list, strict=False):
             gain_str = f"+{gain:.1f}" if gain > 0 else f"{gain:.1f}"
             eq_table.add_row(f"#{band}", f"{freq} Hz", gain_str)
 
@@ -351,7 +331,7 @@ def apply_eq_effect(
             output_file.parent.mkdir(parents=True, exist_ok=True)
             processor.save_audio(processed, output_file, sr)
 
-        console.print(f"[green]✓ EQ applied successfully![/green]")
+        console.print("[green]✓ EQ applied successfully![/green]")
         console.print(f"[cyan]Output: {output_file.name}[/cyan]")
 
     except Exception as e:
@@ -370,9 +350,7 @@ def apply_compression_effect(
     attack: float = typer.Option(10.0, "--attack", "-a", help="Attack time in ms"),
     release: float = typer.Option(100.0, "--release", "-l", help="Release time in ms"),
     makeup: float = typer.Option(0.0, "--makeup", "-m", help="Makeup gain in dB"),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output file path"
-    ),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file path"),
 ) -> None:
     """
     Apply dynamic compression.
@@ -391,7 +369,7 @@ def apply_compression_effect(
         output_file = output or file.with_stem(file.stem + "_compressed")
 
         console.print()
-        console.print(f"[bold cyan]🎛️  Dynamic Compression[/bold cyan]")
+        console.print("[bold cyan]🎛️  Dynamic Compression[/bold cyan]")
         console.print(f"[cyan]Input: {file.name}[/cyan]")
         console.print()
 
@@ -420,7 +398,7 @@ def apply_compression_effect(
             output_file.parent.mkdir(parents=True, exist_ok=True)
             processor.save_audio(processed, output_file, sr)
 
-        console.print(f"[green]✓ Compression applied![/green]")
+        console.print("[green]✓ Compression applied![/green]")
         console.print(f"[cyan]Output: {output_file.name}[/cyan]")
 
     except Exception as e:
@@ -436,9 +414,7 @@ def apply_limiting_effect(
         -3.0, "--threshold", "-t", help="Limiting threshold in dB"
     ),
     release: float = typer.Option(50.0, "--release", "-r", help="Release time in ms"),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output file path"
-    ),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file path"),
 ) -> None:
     """
     Apply hard limiter (infinite ratio compression).
@@ -458,7 +434,7 @@ def apply_limiting_effect(
         output_file = output or file.with_stem(file.stem + "_limited")
 
         console.print()
-        console.print(f"[bold cyan]🎛️  Hard Limiter[/bold cyan]")
+        console.print("[bold cyan]🎛️  Hard Limiter[/bold cyan]")
         console.print(f"[cyan]Input: {file.name}[/cyan]")
         console.print(f"[cyan]Threshold: {threshold} dB[/cyan]")
         console.print()
@@ -473,7 +449,7 @@ def apply_limiting_effect(
             output_file.parent.mkdir(parents=True, exist_ok=True)
             processor.save_audio(processed, output_file, sr)
 
-        console.print(f"[green]✓ Limiter applied![/green]")
+        console.print("[green]✓ Limiter applied![/green]")
         console.print(f"[cyan]Output: {output_file.name}[/cyan]")
 
     except Exception as e:
@@ -492,9 +468,7 @@ def apply_distortion_effect(
         0.5, "--tone", "-t", help="Tone shaping (0-1, 0=warm, 1=bright)"
     ),
     output_gain: float = typer.Option(0.0, "--gain", "-g", help="Output gain in dB"),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output file path"
-    ),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file path"),
 ) -> None:
     """
     Apply soft clipping distortion.
@@ -513,7 +487,7 @@ def apply_distortion_effect(
         output_file = output or file.with_stem(file.stem + "_distorted")
 
         console.print()
-        console.print(f"[bold cyan]🎛️  Soft Clipping Distortion[/bold cyan]")
+        console.print("[bold cyan]🎛️  Soft Clipping Distortion[/bold cyan]")
         console.print(f"[cyan]Input: {file.name}[/cyan]")
         console.print()
 
@@ -535,7 +509,7 @@ def apply_distortion_effect(
             output_file.parent.mkdir(parents=True, exist_ok=True)
             processor.save_audio(processed, output_file, sr)
 
-        console.print(f"[green]✓ Distortion applied![/green]")
+        console.print("[green]✓ Distortion applied![/green]")
         console.print(f"[cyan]Output: {output_file.name}[/cyan]")
 
     except Exception as e:
@@ -551,9 +525,7 @@ def apply_reverb_effect(
     damping: float = typer.Option(0.5, "--damping", "-d", help="Damping (0-1)"),
     width: float = typer.Option(1.0, "--width", "-w", help="Stereo width (0-1)"),
     mix: float = typer.Option(0.3, "--mix", "-m", help="Dry/wet mix (0-1, 1=all wet)"),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output file path"
-    ),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file path"),
 ) -> None:
     """
     Apply reverb effect.
@@ -572,7 +544,7 @@ def apply_reverb_effect(
         output_file = output or file.with_stem(file.stem + "_reverb")
 
         console.print()
-        console.print(f"[bold cyan]🎛️  Reverb Effect[/bold cyan]")
+        console.print("[bold cyan]🎛️  Reverb Effect[/bold cyan]")
         console.print(f"[cyan]Input: {file.name}[/cyan]")
         console.print()
 
@@ -595,7 +567,7 @@ def apply_reverb_effect(
             output_file.parent.mkdir(parents=True, exist_ok=True)
             processor.save_audio(processed, output_file, sr)
 
-        console.print(f"[green]✓ Reverb applied![/green]")
+        console.print("[green]✓ Reverb applied![/green]")
         console.print(f"[cyan]Output: {output_file.name}[/cyan]")
 
     except Exception as e:

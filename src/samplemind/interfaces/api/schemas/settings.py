@@ -3,8 +3,9 @@ Settings and User Preferences Schemas
 """
 
 from datetime import datetime
-from typing import Optional, Dict, List, Any
-from pydantic import BaseModel, Field, EmailStr
+from typing import Any
+
+from pydantic import BaseModel, Field
 
 
 class APIKeyBase(BaseModel):
@@ -17,7 +18,7 @@ class APIKeyBase(BaseModel):
 class APIKeyCreate(APIKeyBase):
     """Create API key request"""
 
-    permissions: List[str] = Field(default=["read"], description="API key permissions")
+    permissions: list[str] = Field(default=["read"], description="API key permissions")
 
 
 class APIKeyResponse(APIKeyBase):
@@ -26,9 +27,9 @@ class APIKeyResponse(APIKeyBase):
     key_id: str = Field(..., description="Unique API key ID")
     provider: str
     created_at: datetime
-    last_used: Optional[datetime] = None
+    last_used: datetime | None = None
     is_active: bool = True
-    permissions: List[str]
+    permissions: list[str]
 
     class Config:
         """Pydantic configuration for ORM mode compatibility."""
@@ -55,7 +56,7 @@ class AnalysisPreferences(BaseModel):
     include_ai_analysis: bool = Field(
         default=True, description="Include AI-powered analysis"
     )
-    preferred_ai_provider: Optional[str] = Field(
+    preferred_ai_provider: str | None = Field(
         default=None, description="Preferred AI provider"
     )
     extract_all_features: bool = Field(
@@ -124,7 +125,7 @@ class UserPreferences(BaseModel):
         default_factory=NotificationPreferences
     )
     cloud_sync: CloudSyncSettings = Field(default_factory=CloudSyncSettings)
-    custom: Dict[str, Any] = Field(
+    custom: dict[str, Any] = Field(
         default_factory=dict, description="Custom preferences"
     )
 
@@ -135,8 +136,8 @@ class UserSettingsResponse(BaseModel):
     user_id: str
     username: str
     email: str
-    avatar_url: Optional[str] = None
-    bio: Optional[str] = None
+    avatar_url: str | None = None
+    bio: str | None = None
     preferences: UserPreferences = Field(default_factory=UserPreferences)
     api_keys_count: int = 0
     storage_used_mb: float = 0
@@ -154,18 +155,18 @@ class UserSettingsResponse(BaseModel):
 class UserSettingsUpdate(BaseModel):
     """Update user settings"""
 
-    username: Optional[str] = Field(None, min_length=3, max_length=50)
-    avatar_url: Optional[str] = None
-    bio: Optional[str] = Field(None, max_length=500)
-    preferences: Optional[UserPreferences] = None
+    username: str | None = Field(None, min_length=3, max_length=50)
+    avatar_url: str | None = None
+    bio: str | None = Field(None, max_length=500)
+    preferences: UserPreferences | None = None
 
 
 class UserProfileUpdate(BaseModel):
     """Update user profile"""
 
-    username: Optional[str] = Field(None, min_length=3, max_length=50)
-    avatar_url: Optional[str] = None
-    bio: Optional[str] = Field(None, max_length=500)
+    username: str | None = Field(None, min_length=3, max_length=50)
+    avatar_url: str | None = None
+    bio: str | None = Field(None, max_length=500)
 
 
 class PrivacySettings(BaseModel):
@@ -205,11 +206,11 @@ class StorageStatsResponse(BaseModel):
     storage_percent_used: float
     total_files: int
     total_analyses: int
-    last_cleanup: Optional[datetime] = None
+    last_cleanup: datetime | None = None
 
 
 class ApiKeysListResponse(BaseModel):
     """List of API keys"""
 
-    keys: List[APIKeyResponse]
+    keys: list[APIKeyResponse]
     total: int

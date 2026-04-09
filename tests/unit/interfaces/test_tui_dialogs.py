@@ -10,15 +10,14 @@ Tests cover:
 - Dialog CSS styling
 """
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
 from samplemind.interfaces.tui.widgets.dialogs import (
+    ConfirmDialog,
     ErrorDialog,
     InfoDialog,
-    ConfirmDialog,
-    WarningDialog,
     LoadingDialog,
+    WarningDialog,
 )
 
 

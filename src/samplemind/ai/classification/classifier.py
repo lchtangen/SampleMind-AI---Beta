@@ -10,8 +10,7 @@ import importlib.util
 import logging
 import time
 from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -35,7 +34,7 @@ class ClassificationResult:
     tags: list = field(default_factory=list)  # Suggested tags
     processing_time: float = 0.0  # Classification time in seconds
     model_used: str = "rule-based"  # rule-based or tensorflow
-    all_predictions: Dict[str, Dict[str, float]] = field(default_factory=dict)
+    all_predictions: dict[str, dict[str, float]] = field(default_factory=dict)
 
 
 class AIClassifier:
@@ -55,7 +54,7 @@ class AIClassifier:
         self.use_gpu = use_gpu
         self.model = None
         self.class_names = None
-        self._cache: Dict[str, ClassificationResult] = {}
+        self._cache: dict[str, ClassificationResult] = {}
         self.cache_size = cache_size
         self.tensorflow_available = self._check_tensorflow()
 
@@ -146,7 +145,6 @@ class AIClassifier:
     ) -> ClassificationResult:
         """ML-based classification using TensorFlow/YAMNet."""
         try:
-            import tensorflow as tf
             import tensorflow_hub as hub
 
             if self.model is None:
@@ -171,7 +169,7 @@ class AIClassifier:
     def _classify_instrument(
         self,
         features: AudioFeatures,
-    ) -> Tuple[str, float]:
+    ) -> tuple[str, float]:
         """Classify primary instrument using spectral analysis."""
         # Extract scalar values from feature arrays
         centroid = self._get_feature_mean(features.spectral_centroid)
@@ -207,28 +205,19 @@ class AIClassifier:
 
         return "synth", 0.40
 
-    def _get_instrument_scores(self, features: AudioFeatures) -> Dict[str, float]:
+    def _get_instrument_scores(self, features: AudioFeatures) -> dict[str, float]:
         """Get confidence scores for all instruments."""
         primary, conf = self._classify_instrument(features)
-        scores = {
-            inst: 0.1
-            for inst in [
-                "kick",
-                "snare",
-                "hihat",
-                "bass",
-                "vocal",
-                "synth",
-                "percussion",
-            ]
-        }
+        scores = dict.fromkeys(
+            ["kick", "snare", "hihat", "bass", "vocal", "synth", "percussion"], 0.1
+        )
         scores[primary] = conf
         return scores
 
     def _classify_genre(
         self,
         features: AudioFeatures,
-    ) -> Tuple[str, float]:
+    ) -> tuple[str, float]:
         """Classify genre using BPM and spectral characteristics."""
         bpm = features.tempo
 
@@ -256,7 +245,7 @@ class AIClassifier:
 
         return "electronic", 0.4
 
-    def _get_genre_scores(self, features: AudioFeatures) -> Dict[str, float]:
+    def _get_genre_scores(self, features: AudioFeatures) -> dict[str, float]:
         primary, conf = self._classify_genre(features)
         # In reality, multiple genres can have high scores
         return {primary: conf}
@@ -264,7 +253,7 @@ class AIClassifier:
     def _classify_mood(
         self,
         features: AudioFeatures,
-    ) -> Tuple[str, float]:
+    ) -> tuple[str, float]:
         """Classify mood using energy and key."""
         energy = self._get_feature_mean(features.rms_energy) or 0.0
         scale = features.mode.lower() if features.mode else "unknown"
@@ -283,7 +272,7 @@ class AIClassifier:
 
         return "neutral", 0.5
 
-    def _get_mood_scores(self, features: AudioFeatures) -> Dict[str, float]:
+    def _get_mood_scores(self, features: AudioFeatures) -> dict[str, float]:
         primary, conf = self._classify_mood(features)
         return {primary: conf}
 
@@ -319,7 +308,7 @@ class AIClassifier:
     def _generate_tags(self, instrument, genre, mood, quality, tempo) -> list:
         return [t for t in [instrument, genre, mood, tempo] if t != "unknown"]
 
-    def _get_feature_mean(self, feature_array: Any) -> Optional[float]:
+    def _get_feature_mean(self, feature_array: Any) -> float | None:
         """Helper to safely get mean of feature array."""
         if feature_array is None:
             return None
@@ -363,7 +352,7 @@ class AIClassifier:
         """Clear the classification cache."""
         self._cache.clear()
 
-    def get_cache_stats(self) -> Dict[str, Any]:
+    def get_cache_stats(self) -> dict[str, Any]:
         """Get cache statistics."""
         return {
             "cache_size": len(self._cache),

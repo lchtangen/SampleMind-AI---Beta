@@ -6,7 +6,7 @@ from textual import on
 from textual.app import ComposeResult
 from textual.message import Message
 from textual.widget import Widget
-from textual.widgets import ListItem, ListView, Label
+from textual.widgets import Label, ListItem, ListView
 
 MENU_OPTIONS: list[tuple[str, str]] = [
     ("🎵  Analyze Audio", "analyze"),

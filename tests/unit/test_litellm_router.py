@@ -116,7 +116,9 @@ async def test_chat_completion_uses_router_when_available():
     fake_router = MagicMock()
     fake_router.acompletion = AsyncMock(return_value=fake_response)
 
-    with patch("samplemind.integrations.litellm_router.get_router", return_value=fake_router):
+    with patch(
+        "samplemind.integrations.litellm_router.get_router", return_value=fake_router
+    ):
         with patch.dict("sys.modules", {"litellm": MagicMock()}):
             from samplemind.integrations.litellm_router import chat_completion
 
@@ -138,9 +140,12 @@ async def test_chat_completion_falls_back_when_router_none():
     with patch("samplemind.integrations.litellm_router.get_router", return_value=None):
         with patch.dict("sys.modules", {"litellm": fake_litellm}):
             import samplemind.integrations.litellm_router as reloaded
+
             # Patch directly on the module
             reloaded._router = None
-            with patch.object(reloaded, "_get_fallback_list", return_value=[{"model": MODEL_PRIMARY}]):
+            with patch.object(
+                reloaded, "_get_fallback_list", return_value=[{"model": MODEL_PRIMARY}]
+            ):
                 await reloaded.chat_completion(
                     messages=[{"role": "user", "content": "test"}]
                 )
@@ -177,7 +182,9 @@ async def test_prefer_fast_routes_to_fast_model_name():
     fake_router = MagicMock()
     fake_router.acompletion = AsyncMock(return_value=fake_response)
 
-    with patch("samplemind.integrations.litellm_router.get_router", return_value=fake_router):
+    with patch(
+        "samplemind.integrations.litellm_router.get_router", return_value=fake_router
+    ):
         with patch.dict("sys.modules", {"litellm": MagicMock()}):
             from samplemind.integrations.litellm_router import chat_completion
 
@@ -187,4 +194,7 @@ async def test_prefer_fast_routes_to_fast_model_name():
             )
 
     call_kwargs = fake_router.acompletion.call_args
-    assert call_kwargs.kwargs.get("model") == "fast" or call_kwargs[1].get("model") == "fast"
+    assert (
+        call_kwargs.kwargs.get("model") == "fast"
+        or call_kwargs[1].get("model") == "fast"
+    )

@@ -4,10 +4,11 @@ Track operations and support undo/redo functionality
 """
 
 import logging
-from typing import List, Optional, Any, Callable, Dict
-from dataclasses import dataclass, field
-from enum import Enum
+from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -35,11 +36,11 @@ class HistoryEntry:
     operation_type: OperationType
     timestamp: str
     description: str
-    data: Dict[str, Any]
-    undo_action: Optional[Callable] = None
-    redo_action: Optional[Callable] = None
+    data: dict[str, Any]
+    undo_action: Callable | None = None
+    redo_action: Callable | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary (for export)"""
         return {
             "operation_type": self.operation_type.value,
@@ -60,7 +61,7 @@ class HistoryManager:
             max_history: Maximum history entries to keep
         """
         self.max_history = max_history
-        self.history: List[HistoryEntry] = []
+        self.history: list[HistoryEntry] = []
         self.current_index = -1
         self.stats = {
             "total_operations": 0,
@@ -72,9 +73,9 @@ class HistoryManager:
         self,
         operation_type: OperationType,
         description: str,
-        data: Dict[str, Any],
-        undo_action: Optional[Callable] = None,
-        redo_action: Optional[Callable] = None,
+        data: dict[str, Any],
+        undo_action: Callable | None = None,
+        redo_action: Callable | None = None,
     ) -> None:
         """
         Add operation to history
@@ -170,41 +171,41 @@ class HistoryManager:
         """Check if redo is available"""
         return self.current_index < len(self.history) - 1
 
-    def get_undo_description(self) -> Optional[str]:
+    def get_undo_description(self) -> str | None:
         """Get description of next undo operation"""
         if self.current_index >= 0:
             return self.history[self.current_index].description
         return None
 
-    def get_redo_description(self) -> Optional[str]:
+    def get_redo_description(self) -> str | None:
         """Get description of next redo operation"""
         if self.current_index < len(self.history) - 1:
             return self.history[self.current_index + 1].description
         return None
 
-    def get_history(self, limit: int = 50) -> List[HistoryEntry]:
+    def get_history(self, limit: int = 50) -> list[HistoryEntry]:
         """Get recent history entries"""
         start_idx = max(0, len(self.history) - limit)
         return self.history[start_idx:]
 
     def get_history_by_type(
         self, operation_type: OperationType, limit: int = 20
-    ) -> List[HistoryEntry]:
+    ) -> list[HistoryEntry]:
         """Get history entries of specific type"""
         entries = [e for e in self.history if e.operation_type == operation_type]
         return entries[-limit:] if limit else entries
 
-    def get_current_state(self) -> Optional[HistoryEntry]:
+    def get_current_state(self) -> HistoryEntry | None:
         """Get current state in history"""
         if self.current_index >= 0:
             return self.history[self.current_index]
         return None
 
-    def export_history(self) -> List[Dict[str, Any]]:
+    def export_history(self) -> list[dict[str, Any]]:
         """Export history as list of dictionaries"""
         return [entry.to_dict() for entry in self.history]
 
-    def import_history(self, data: List[Dict[str, Any]]) -> None:
+    def import_history(self, data: list[dict[str, Any]]) -> None:
         """Import history from exported data"""
         self.history = []
         for item in data:
@@ -227,7 +228,7 @@ class HistoryManager:
         self.current_index = -1
         logger.info("History cleared")
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get history statistics"""
         return {
             "total_entries": len(self.history),
@@ -240,7 +241,7 @@ class HistoryManager:
             "operation_types": self._count_operation_types(),
         }
 
-    def _count_operation_types(self) -> Dict[str, int]:
+    def _count_operation_types(self) -> dict[str, int]:
         """Count operations by type"""
         counts = {}
         for entry in self.history:
@@ -268,7 +269,7 @@ class HistoryManager:
 
 
 # Global singleton instance
-_history_manager: Optional[HistoryManager] = None
+_history_manager: HistoryManager | None = None
 
 
 def get_history_manager() -> HistoryManager:

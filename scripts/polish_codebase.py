@@ -14,13 +14,13 @@ This script performs:
 
 import ast
 import sys
-from pathlib import Path
-from typing import List, Dict, Tuple, Set
 from dataclasses import dataclass
+from pathlib import Path
+
 from rich.console import Console
-from rich.table import Table
-from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.panel import Panel
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
 
 console = Console()
 
@@ -42,14 +42,14 @@ class CodeAnalyzer:
 
     def __init__(self, src_dir: Path):
         self.src_dir = src_dir
-        self.issues: List[CodeIssue] = []
+        self.issues: list[CodeIssue] = []
 
-    def analyze_file(self, file_path: Path) -> List[CodeIssue]:
+    def analyze_file(self, file_path: Path) -> list[CodeIssue]:
         """Analyze a single Python file"""
         issues = []
 
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
                 tree = ast.parse(content, filename=str(file_path))
 
@@ -80,7 +80,7 @@ class CodeAnalyzer:
 
     def _check_function(
         self, node: ast.FunctionDef, file_path: Path
-    ) -> List[CodeIssue]:
+    ) -> list[CodeIssue]:
         """Check function for quality issues"""
         issues = []
 
@@ -136,7 +136,7 @@ class CodeAnalyzer:
 
         return issues
 
-    def _check_class(self, node: ast.ClassDef, file_path: Path) -> List[CodeIssue]:
+    def _check_class(self, node: ast.ClassDef, file_path: Path) -> list[CodeIssue]:
         """Check class for quality issues"""
         issues = []
 
@@ -155,7 +155,7 @@ class CodeAnalyzer:
 
         return issues
 
-    def analyze_directory(self) -> List[CodeIssue]:
+    def analyze_directory(self) -> list[CodeIssue]:
         """Analyze all Python files in directory"""
         all_issues = []
 
@@ -181,7 +181,7 @@ class CodeAnalyzer:
         return all_issues
 
 
-def generate_report(issues: List[CodeIssue]) -> None:
+def generate_report(issues: list[CodeIssue]) -> None:
     """Generate comprehensive quality report"""
 
     # Summary statistics
@@ -245,7 +245,7 @@ def generate_report(issues: List[CodeIssue]) -> None:
         console.print("[green]✅ No critical issues found![/green]")
 
 
-def generate_fix_suggestions(issues: List[CodeIssue]) -> None:
+def generate_fix_suggestions(issues: list[CodeIssue]) -> None:
     """Generate actionable fix suggestions"""
     console.print("\n[bold]🔧 Recommended Fixes:[/bold]\n")
 

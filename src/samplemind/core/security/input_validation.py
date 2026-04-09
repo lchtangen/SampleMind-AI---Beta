@@ -3,9 +3,10 @@ Input Validation and SQL Injection Prevention
 """
 
 import re
-from typing import Optional, Any, List
-from pydantic import BaseModel, validator, Field
+from typing import Any
+
 from fastapi import HTTPException, status
+from pydantic import BaseModel, Field, validator
 
 
 class ValidationError(HTTPException):
@@ -237,7 +238,7 @@ class QueryBuilder:
         return where_clause, parameters
 
     @staticmethod
-    def build_safe_search(search_term: str, fields: List[str]) -> tuple[str, list]:
+    def build_safe_search(search_term: str, fields: list[str]) -> tuple[str, list]:
         """
         Build safe search query
 

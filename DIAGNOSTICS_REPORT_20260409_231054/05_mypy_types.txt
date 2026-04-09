@@ -1,0 +1,103 @@
+Running mypy type checker...
+src/samplemind/interfaces/cli/commands/utils.py:252: error: No return value expected  [return-value]
+src/samplemind/interfaces/cli/commands/utils.py:260: error: Incompatible return value type (got "_Wrapped[[VarArg(Any), KwArg(Any)], T, [VarArg(Any), KwArg(Any)], None]", expected "Callable[..., T]")  [return-value]
+src/samplemind/interfaces/cli/commands/utils.py:260: note: "_Wrapped[[VarArg(Any), KwArg(Any)], T, [VarArg(Any), KwArg(Any)], None].__call__" has type "def __call__(self, *args: Any, **kwargs: Any) -> None"
+src/samplemind/interfaces/cli/commands/utils.py:273: error: No return value expected  [return-value]
+src/samplemind/interfaces/cli/commands/utils.py:275: error: Incompatible return value type (got "_Wrapped[[VarArg(Any), KwArg(Any)], T, [VarArg(Any), KwArg(Any)], None]", expected "Callable[..., T]")  [return-value]
+src/samplemind/interfaces/cli/commands/utils.py:275: note: "_Wrapped[[VarArg(Any), KwArg(Any)], T, [VarArg(Any), KwArg(Any)], None].__call__" has type "def __call__(self, *args: Any, **kwargs: Any) -> None"
+src/samplemind/interfaces/cli/commands/utils.py:401: error: "create_progress_bar" does not return a value (it only ever returns None)  [func-returns-value]
+src/samplemind/interfaces/cli/commands/utils.py:413: error: Value of type "Coroutine[Any, Any, dict[str, Any]]" is not indexable  [index]
+src/samplemind/interfaces/cli/commands/utils.py:413: note: Maybe you forgot to use "await"?
+src/samplemind/core/processing/audio_pipeline.py:76: error: Need type annotation for "history" (hint: "history: list[<type>] = ...")  [var-annotated]
+src/samplemind/core/processing/audio_pipeline.py:98: error: Incompatible types in assignment (expression has type "AudioMetadata", variable has type "None")  [assignment]
+src/samplemind/core/processing/audio_pipeline.py:301: error: Argument 1 to "resample" of "AudioPipeline" has incompatible type "float | None"; expected "int | None"  [arg-type]
+src/samplemind/core/generation/generation_manager.py:124: error: Incompatible types in assignment (expression has type "NeuralFeatureExtractor", variable has type "None")  [assignment]
+src/samplemind/core/generation/generation_manager.py:137: error: Incompatible types in assignment (expression has type "StemSeparationEngine", variable has type "None")  [assignment]
+src/samplemind/core/generation/generation_manager.py:210: error: Module "src.samplemind.core.similarity.similarity_db" has no attribute "SimilarityDB"  [attr-defined]
+src/samplemind/core/generation/generation_manager.py:320: error: Incompatible types in assignment (expression has type "list[object]", variable has type "list[dict[str, Any]]")  [assignment]
+src/samplemind/core/generation/generation_manager.py:351: error: Unsupported target for indexed assignment ("Collection[str]")  [index]
+src/samplemind/core/engine/distributed_processor.py:72: error: No return value expected  [return-value]
+src/samplemind/core/engine/distributed_processor.py:108: error: "None" has no attribute "dashboard_link"  [attr-defined]
+src/samplemind/core/engine/distributed_processor.py:333: error: "AdvancedFeatureExtractor" has no attribute "_extract_chroma_features"; maybe "extract_tonal_features", "extract_spectral_features", or "extract_mfcc_features"?  [attr-defined]
+src/samplemind/core/engine/distributed_processor.py:486: error: "None" has no attribute "process_audio_files"  [attr-defined]
+src/samplemind/core/analysis/harmonic_analyzer.py:196: error: Unexpected keyword argument "y" for "analyze" of "MusicTheoryAnalyzer"  [call-arg]
+src/samplemind/core/analysis/harmonic_analyzer.py:196: note: "analyze" defined in "src.samplemind.core.analysis.music_theory"
+src/samplemind/core/analysis/harmonic_analyzer.py:196: error: Unexpected keyword argument "sr" for "analyze" of "MusicTheoryAnalyzer"  [call-arg]
+src/samplemind/core/analysis/harmonic_analyzer.py:275: error: Unpacking a string is disallowed  [str-unpack]
+src/samplemind/core/analysis/harmonic_analyzer.py:277: error: Argument 2 to "roll" has incompatible type "str"; expected "SupportsIndex | Sequence[SupportsIndex]"  [arg-type]
+src/samplemind/core/analysis/harmonic_analyzer.py:286: error: Incompatible types in assignment (expression has type "str", variable has type "int")  [assignment]
+src/samplemind/core/engine/cloud_processor.py:104: error: No return value expected  [return-value]
+src/samplemind/core/engine/cloud_processor.py:137: error: "None" has no attribute "dashboard_link"  [attr-defined]
+src/samplemind/core/engine/cloud_processor.py:182: error: "None" has no attribute "scale"  [attr-defined]
+src/samplemind/core/engine/cloud_processor.py:185: error: "None" has no attribute "dashboard_link"  [attr-defined]
+src/samplemind/core/engine/cloud_processor.py:252: error: "None" has no attribute "process_files"  [attr-defined]
+src/samplemind/interfaces/cli/commands/stems.py:192: error: Need type annotation for "audio_files" (hint: "audio_files: list[<type>] = ...")  [var-annotated]
+src/samplemind/interfaces/cli/commands/similarity.py:75: error: Need type annotation for "filters" (hint: "filters: dict[<type>, <type>] = ...")  [var-annotated]
+src/samplemind/interfaces/cli/commands/daw.py:232: error: Incompatible types in assignment (expression has type "TextIOWrapper[_WrappedBuffer]", variable has type "Path")  [assignment]
+src/samplemind/interfaces/cli/commands/daw.py:233: error: Argument 2 to "dump" has incompatible type "Path"; expected "SupportsWrite[str]"  [arg-type]
+src/samplemind/interfaces/cli/commands/audio.py:435: error: Argument "model" to "StemSeparationEngine" has incompatible type "object"; expected "str"  [arg-type]
+src/samplemind/interfaces/cli/commands/audio.py:437: error: Argument "shifts" to "StemSeparationEngine" has incompatible type "object"; expected "int"  [arg-type]
+src/samplemind/interfaces/cli/commands/audio.py:438: error: Argument "overlap" to "StemSeparationEngine" has incompatible type "object"; expected "float"  [arg-type]
+src/samplemind/interfaces/cli/commands/audio.py:503: error: Argument "model" to "StemSeparationEngine" has incompatible type "object"; expected "str"  [arg-type]
+src/samplemind/interfaces/cli/commands/audio.py:505: error: Argument "shifts" to "StemSeparationEngine" has incompatible type "object"; expected "int"  [arg-type]
+src/samplemind/interfaces/cli/commands/audio.py:506: error: Argument "overlap" to "StemSeparationEngine" has incompatible type "object"; expected "float"  [arg-type]
+src/samplemind/interfaces/cli/commands/audio.py:668: error: Argument "model" to "StemSeparationEngine" has incompatible type "object"; expected "str"  [arg-type]
+src/samplemind/interfaces/cli/commands/audio.py:670: error: Argument "shifts" to "StemSeparationEngine" has incompatible type "object"; expected "int"  [arg-type]
+src/samplemind/interfaces/cli/commands/audio.py:671: error: Argument "overlap" to "StemSeparationEngine" has incompatible type "object"; expected "float"  [arg-type]
+src/samplemind/interfaces/api/routes/workspaces.py:92: error: No return value expected  [return-value]
+src/samplemind/interfaces/api/routes/workspaces.py:153: error: No return value expected  [return-value]
+src/samplemind/interfaces/api/routes/workspaces.py:197: error: No return value expected  [return-value]
+src/samplemind/interfaces/api/routes/workspaces.py:247: error: Incompatible types in assignment (expression has type "str", target has type "datetime")  [assignment]
+src/samplemind/interfaces/api/routes/workspaces.py:249: error: Incompatible types in assignment (expression has type "str", target has type "datetime")  [assignment]
+src/samplemind/interfaces/api/routes/workspaces.py:263: error: No return value expected  [return-value]
+src/samplemind/interfaces/api/routes/workspaces.py:317: error: No return value expected  [return-value]
+src/samplemind/interfaces/api/routes/workspaces.py:371: error: No return value expected  [return-value]
+src/samplemind/interfaces/api/routes/workspaces.py:388: error: No return value expected  [return-value]
+src/samplemind/interfaces/api/routes/workspaces.py:452: error: No return value expected  [return-value]
+src/samplemind/interfaces/api/routes/tasks.py:149: note: By default the bodies of untyped functions are not checked, consider using --check-untyped-defs  [annotation-unchecked]
+src/samplemind/interfaces/api/routes/sync.py:230: error: No return value expected  [return-value]
+src/samplemind/interfaces/api/routes/sync.py:282: error: Need type annotation for "changes" (hint: "changes: list[<type>] = ...")  [var-annotated]
+src/samplemind/interfaces/api/routes/sync.py:284: error: No return value expected  [return-value]
+src/samplemind/interfaces/api/routes/similarity.py:95: error: Argument "query_file" to "SimilaritySearchResponse" has incompatible type "str | None"; expected "str"  [arg-type]
+src/samplemind/interfaces/api/routes/collections.py:59: error: No return value expected  [return-value]
+src/samplemind/interfaces/api/routes/collections.py:76: error: No return value expected  [return-value]
+src/samplemind/interfaces/api/routes/batch.py:113: error: Incompatible default for parameter "background_tasks" (default has type "None", parameter has type "BackgroundTasks")  [assignment]
+src/samplemind/interfaces/api/routes/batch.py:113: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+src/samplemind/interfaces/api/routes/batch.py:113: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+src/samplemind/interfaces/api/routes/batch.py:129: error: Unsupported operand types for / ("Path" and "None")  [operator]
+src/samplemind/interfaces/api/routes/batch.py:129: note: Right operand is of type "str | None"
+src/samplemind/interfaces/api/routes/audio.py:68: error: Incompatible default for parameter "background_tasks" (default has type "None", parameter has type "BackgroundTasks")  [assignment]
+src/samplemind/interfaces/api/routes/audio.py:68: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+src/samplemind/interfaces/api/routes/audio.py:68: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+src/samplemind/interfaces/api/routes/audio.py:80: error: Item "None" of "str | None" has no attribute "lower"  [union-attr]
+src/samplemind/interfaces/api/routes/audio.py:143: error: Incompatible default for parameter "background_tasks" (default has type "None", parameter has type "BackgroundTasks")  [assignment]
+src/samplemind/interfaces/api/routes/audio.py:143: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+src/samplemind/interfaces/api/routes/audio.py:143: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+src/samplemind/interfaces/api/routes/audio.py:217: error: Incompatible default for parameter "background_tasks" (default has type "None", parameter has type "BackgroundTasks")  [assignment]
+src/samplemind/interfaces/api/routes/audio.py:217: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+src/samplemind/interfaces/api/routes/audio.py:217: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+src/samplemind/interfaces/api/routes/audio.py:376: error: Name "time" is not defined  [name-defined]
+src/samplemind/interfaces/api/routes/audio.py:390: error: Name "time" is not defined  [name-defined]
+src/samplemind/interfaces/api/routes/audio.py:408: error: Name "time" is not defined  [name-defined]
+src/samplemind/interfaces/api/routes/audio.py:445: error: Name "time" is not defined  [name-defined]
+src/samplemind/interfaces/api/routes/audio.py:473: error: Name "time" is not defined  [name-defined]
+src/samplemind/interfaces/api/routes/audio.py:485: error: Name "time" is not defined  [name-defined]
+src/samplemind/interfaces/api/routes/audio.py:561: error: Name "get_audio_duration" is not defined  [name-defined]
+src/samplemind/interfaces/api/routes/audio.py:569: error: No return value expected  [return-value]
+src/samplemind/core/security/xss_protection.py:11: error: Library stubs not installed for "bleach"  [import-untyped]
+src/samplemind/core/security/xss_protection.py:11: note: Hint: "python3 -m pip install types-bleach"
+src/samplemind/core/security/xss_protection.py:11: note: (or run "mypy --install-types" to install all missing stub packages)
+src/samplemind/core/security/xss_protection.py:11: note: See https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
+src/samplemind/core/auth/permissions.py:32: error: Name "Any" is not defined  [name-defined]
+src/samplemind/core/auth/permissions.py:32: note: Did you forget to import it from "typing"? (Suggestion: "from typing import Any")
+src/samplemind/core/auth/permissions.py:53: error: Name "Any" is not defined  [name-defined]
+src/samplemind/core/auth/permissions.py:53: note: Did you forget to import it from "typing"? (Suggestion: "from typing import Any")
+src/samplemind/core/auth/permissions.py:80: error: Name "Any" is not defined  [name-defined]
+src/samplemind/core/auth/permissions.py:80: note: Did you forget to import it from "typing"? (Suggestion: "from typing import Any")
+src/samplemind/core/auth/permissions.py:99: error: Name "Any" is not defined  [name-defined]
+src/samplemind/core/auth/permissions.py:99: note: Did you forget to import it from "typing"? (Suggestion: "from typing import Any")
+src/samplemind/core/auth/permissions.py:128: error: Name "Any" is not defined  [name-defined]
+src/samplemind/core/auth/permissions.py:128: note: Did you forget to import it from "typing"? (Suggestion: "from typing import Any")
+Found 579 errors in 93 files (checked 322 source files)
+
+(Type checking may have timed out after 60s - check detailed log)

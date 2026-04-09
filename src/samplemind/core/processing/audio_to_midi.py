@@ -3,7 +3,7 @@ import logging
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .exceptions import OptionalDependencyError
 
@@ -18,7 +18,7 @@ class MidiNoteEvent:
     end_time: float
     midi_pitch: int
     amplitude: float
-    pitch_bends: Optional[List[int]]
+    pitch_bends: list[int] | None
 
 
 @dataclass
@@ -26,8 +26,8 @@ class AudioToMIDIResult:
     """Container for MIDI conversion output."""
 
     midi_path: Path
-    note_events: List[MidiNoteEvent]
-    metadata: Dict[str, Any]
+    note_events: list[MidiNoteEvent]
+    metadata: dict[str, Any]
 
 
 class AudioToMIDIConverter:
@@ -58,10 +58,10 @@ class AudioToMIDIConverter:
     def convert(
         self,
         audio_path: Path,
-        output_directory: Optional[Path] = None,
-        midi_filename: Optional[str] = None,
-        minimum_frequency: Optional[float] = None,
-        maximum_frequency: Optional[float] = None,
+        output_directory: Path | None = None,
+        midi_filename: str | None = None,
+        minimum_frequency: float | None = None,
+        maximum_frequency: float | None = None,
     ) -> AudioToMIDIResult:
         """Convert an audio file into a MIDI representation."""
 
@@ -109,7 +109,7 @@ class AudioToMIDIConverter:
             for event in note_events
         ]
 
-        metadata: Dict[str, Any] = {
+        metadata: dict[str, Any] = {
             "onset_threshold": self.onset_threshold,
             "frame_threshold": self.frame_threshold,
             "minimum_note_length": self.minimum_note_length,

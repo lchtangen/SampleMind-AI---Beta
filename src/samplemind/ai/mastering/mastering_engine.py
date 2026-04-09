@@ -2,7 +2,6 @@
 
 import logging
 from pathlib import Path
-from typing import Dict, Optional
 
 import numpy as np
 
@@ -28,9 +27,9 @@ class MasteringEngine:
         self,
         audio_path: Path,
         target_lufs: float = -14.0,
-        genre: Optional[str] = None,
-        reference_path: Optional[Path] = None,
-        output_path: Optional[Path] = None,
+        genre: str | None = None,
+        reference_path: Path | None = None,
+        output_path: Path | None = None,
     ) -> Path:
         """Automatically master audio file.
 
@@ -193,7 +192,7 @@ class MasteringEngine:
 
 
 # Genre-specific mastering presets
-GENRE_PRESETS: Dict[str, MasteringProfile] = {
+GENRE_PRESETS: dict[str, MasteringProfile] = {
     "techno": MasteringProfile(
         target_lufs=-11.0,  # Loud for club playback
         dynamic_range=8.0,  # Moderately compressed

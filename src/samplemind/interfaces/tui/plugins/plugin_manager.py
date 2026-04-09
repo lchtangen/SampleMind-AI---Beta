@@ -3,13 +3,13 @@ Plugin Manager for SampleMind TUI
 Handles plugin discovery, loading, and lifecycle management
 """
 
+import importlib.util
 import logging
 import sys
-import importlib.util
-from typing import Optional, Dict, List, Any
 from pathlib import Path
+from typing import Any
 
-from .plugin_base import TUIPlugin, PluginMetadata, get_hook_system
+from .plugin_base import TUIPlugin, get_hook_system
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class PluginManager:
     """Manages plugin discovery and lifecycle"""
 
-    def __init__(self, plugin_dir: Optional[str] = None) -> None:
+    def __init__(self, plugin_dir: str | None = None) -> None:
         """
         Initialize plugin manager
 
@@ -29,11 +29,11 @@ class PluginManager:
             plugin_dir = str(Path(__file__).parent / "plugins")
 
         self.plugin_dir = Path(plugin_dir)
-        self.plugins: Dict[str, TUIPlugin] = {}
-        self.loaded_modules: Dict[str, Any] = {}
+        self.plugins: dict[str, TUIPlugin] = {}
+        self.loaded_modules: dict[str, Any] = {}
         self.hook_system = get_hook_system()
 
-    def discover_plugins(self) -> List[str]:
+    def discover_plugins(self) -> list[str]:
         """
         Discover available plugins
 
@@ -57,7 +57,7 @@ class PluginManager:
         return discovered
 
     def load_plugin(
-        self, plugin_name: str, config: Optional[Dict[str, Any]] = None
+        self, plugin_name: str, config: dict[str, Any] | None = None
     ) -> bool:
         """
         Load a plugin
@@ -153,7 +153,7 @@ class PluginManager:
             return False
 
     def reload_plugin(
-        self, plugin_name: str, config: Optional[Dict[str, Any]] = None
+        self, plugin_name: str, config: dict[str, Any] | None = None
     ) -> bool:
         """
         Reload a plugin
@@ -168,15 +168,15 @@ class PluginManager:
         self.unload_plugin(plugin_name)
         return self.load_plugin(plugin_name, config)
 
-    def get_plugin(self, plugin_name: str) -> Optional[TUIPlugin]:
+    def get_plugin(self, plugin_name: str) -> TUIPlugin | None:
         """Get loaded plugin by name"""
         return self.plugins.get(plugin_name)
 
-    def get_all_plugins(self) -> Dict[str, TUIPlugin]:
+    def get_all_plugins(self) -> dict[str, TUIPlugin]:
         """Get all loaded plugins"""
         return self.plugins.copy()
 
-    def get_enabled_plugins(self) -> Dict[str, TUIPlugin]:
+    def get_enabled_plugins(self) -> dict[str, TUIPlugin]:
         """Get enabled plugins"""
         return {name: p for name, p in self.plugins.items() if p.enabled}
 
@@ -196,7 +196,7 @@ class PluginManager:
         self.plugins[plugin_name].enabled = False
         return True
 
-    def call_plugin_hook(self, hook_name: str, *args, **kwargs) -> List[Any]:
+    def call_plugin_hook(self, hook_name: str, *args, **kwargs) -> list[Any]:
         """
         Call plugin hook
 
@@ -239,7 +239,7 @@ class PluginManager:
 
         self.hook_system.register_hook(hook_name, plugin_hook_callback)
 
-    def get_plugin_status(self) -> Dict[str, Dict[str, Any]]:
+    def get_plugin_status(self) -> dict[str, dict[str, Any]]:
         """Get status of all plugins"""
         status = {}
         for name, plugin in self.plugins.items():
@@ -253,7 +253,7 @@ class PluginManager:
 
         return status
 
-    def _find_plugin_file(self, plugin_name: str) -> Optional[Path]:
+    def _find_plugin_file(self, plugin_name: str) -> Path | None:
         """Find plugin file"""
         # Try .py file
         py_file = self.plugin_dir / f"{plugin_name}.py"
@@ -267,9 +267,7 @@ class PluginManager:
 
         return None
 
-    def _load_module_from_file(
-        self, module_name: str, file_path: Path
-    ) -> Optional[Any]:
+    def _load_module_from_file(self, module_name: str, file_path: Path) -> Any | None:
         """Load Python module from file"""
         try:
             spec = importlib.util.spec_from_file_location(module_name, file_path)
@@ -287,7 +285,7 @@ class PluginManager:
             logger.error(f"Error loading module {module_name}: {e}")
             return None
 
-    def _find_plugin_class(self, module: Any) -> Optional[type]:
+    def _find_plugin_class(self, module: Any) -> type | None:
         """Find TUIPlugin subclass in module"""
         for attr_name in dir(module):
             attr = getattr(module, attr_name)
@@ -302,10 +300,10 @@ class PluginManager:
 
 
 # Global plugin manager instance
-_plugin_manager: Optional[PluginManager] = None
+_plugin_manager: PluginManager | None = None
 
 
-def get_plugin_manager(plugin_dir: Optional[str] = None) -> PluginManager:
+def get_plugin_manager(plugin_dir: str | None = None) -> PluginManager:
     """Get or create plugin manager singleton"""
     global _plugin_manager
     if _plugin_manager is None:

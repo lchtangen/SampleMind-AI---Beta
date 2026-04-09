@@ -1,0 +1,41 @@
+Running ruff check...
+1220	UP006	[*] non-pep585-annotation
+ 912	UP045	[*] non-pep604-annotation-optional
+ 426	F401 	[-] unused-import
+ 379	B008 	[ ] function-call-in-default-argument
+ 345	UP035	[-] deprecated-import
+ 327	I001 	[*] unsorted-imports
+ 295	B904 	[ ] raise-without-from-inside-except
+ 169	F541 	[*] f-string-missing-placeholders
+ 136	     	[ ] invalid-syntax
+ 112	W293 	[ ] blank-line-with-whitespace
+  82	F841 	[-] unused-variable
+  39	W291 	[ ] trailing-whitespace
+  38	F821 	[ ] undefined-name
+  26	B007 	[ ] unused-loop-control-variable
+  26	UP007	[*] non-pep604-annotation-union
+  21	E722 	[ ] bare-except
+  20	UP042	[ ] replace-str-enum
+  18	E402 	[ ] module-import-not-at-top-of-file
+  16	UP015	[*] redundant-open-modes
+  15	B033 	[*] duplicate-value
+  12	UP037	[*] quoted-annotation
+  11	B905 	[ ] zip-without-explicit-strict
+   7	E712 	[ ] true-false-comparison
+   5	F811 	[-] redefined-while-unused
+   5	UP017	[*] datetime-timezone-utc
+   4	C401 	[ ] unnecessary-generator-set
+   3	B006 	[ ] mutable-argument-default
+   3	E741 	[ ] ambiguous-variable-name
+   2	B017 	[ ] assert-raises-exception
+   2	C414 	[ ] unnecessary-double-cast-or-process
+   2	UP047	[ ] non-pep695-generic-function
+   1	C416 	[ ] unnecessary-comprehension
+   1	C420 	[*] unnecessary-dict-comprehension-for-iterable
+   1	E711 	[ ] none-comparison
+   1	E713 	[*] not-in-test
+   1	F402 	[ ] import-shadowed-by-loop-var
+   1	F823 	[ ] undefined-local
+   1	UP011	[*] lru-cache-without-parameters
+Found 4685 errors.
+[*] 3150 fixable with the `--fix` option (226 hidden fixes can be enabled with the `--unsafe-fixes` option).

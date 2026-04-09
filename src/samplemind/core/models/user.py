@@ -3,8 +3,9 @@ User data models with role support
 """
 
 from datetime import datetime
-from typing import Optional, List
+
 from pydantic import BaseModel, EmailStr, Field
+
 from ..auth.rbac import UserRole
 
 
@@ -30,11 +31,11 @@ class UserCreate(BaseModel):
 class UserUpdate(BaseModel):
     """User update model"""
 
-    email: Optional[EmailStr] = None
-    username: Optional[str] = None
-    role: Optional[UserRole] = None
-    is_active: Optional[bool] = None
-    is_verified: Optional[bool] = None
+    email: EmailStr | None = None
+    username: str | None = None
+    role: UserRole | None = None
+    is_active: bool | None = None
+    is_verified: bool | None = None
 
 
 class UserInDB(UserBase):
@@ -44,7 +45,7 @@ class UserInDB(UserBase):
     hashed_password: str
     created_at: datetime
     updated_at: datetime
-    last_login: Optional[datetime] = None
+    last_login: datetime | None = None
 
     # Usage tracking
     total_uploads: int = 0
@@ -53,7 +54,7 @@ class UserInDB(UserBase):
     api_calls_this_month: int = 0
 
     # Billing
-    stripe_customer_id: Optional[str] = None
+    stripe_customer_id: str | None = None
     tier: str = "free"  # "free" | "pro" | "team"
 
     # Metadata
@@ -95,13 +96,13 @@ class UserRoleUpdate(BaseModel):
 
     user_id: str
     new_role: UserRole
-    reason: Optional[str] = None
+    reason: str | None = None
 
 
 class UserList(BaseModel):
     """Paginated user list"""
 
-    users: List[UserPublic]
+    users: list[UserPublic]
     total: int
     page: int
     page_size: int

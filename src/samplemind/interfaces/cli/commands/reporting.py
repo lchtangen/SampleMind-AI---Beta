@@ -12,12 +12,10 @@ Usage:
     samplemind export:pdf <file>           # Export report to PDF
 """
 
-import typer
-from typing import Optional
 from pathlib import Path
-from rich.console import Console
+
+import typer
 from rich.table import Table
-from rich.panel import Panel
 
 from . import utils
 
@@ -35,7 +33,7 @@ def report_library(
     folder: Path = typer.Argument(
         Path.home() / "SampleMind" / "Library", help="Library folder"
     ),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Generate library statistics report"""
     try:
@@ -54,7 +52,7 @@ def report_library(
             "Average Size",
             f"{total_size * 1e9 / len(files) / 1e6:.1f} MB" if files else "N/A",
         )
-        table.add_row("Audio Formats", str(len(set(f.suffix.lower() for f in files))))
+        table.add_row("Audio Formats", str(len({f.suffix.lower() for f in files})))
         table.add_row("Collections", "5")
         table.add_row("Archived Samples", str(len(files) // 10))
 
@@ -72,7 +70,7 @@ def report_library(
 @utils.with_error_handling
 def report_analysis(
     file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
     format: str = typer.Option("table", "--format", "-f"),
 ) -> None:
     """Generate detailed analysis report"""
@@ -110,7 +108,7 @@ def report_analysis(
 @utils.with_error_handling
 def report_batch(
     folder: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Generate batch processing report"""
     try:
@@ -146,11 +144,11 @@ def report_batch(
 @utils.with_error_handling
 def report_quality(
     folder: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Generate quality assessment report"""
     try:
-        files = utils.get_audio_files(folder)
+        utils.get_audio_files(folder)
 
         console.print("[bold cyan]📊 Quality Assessment Report[/bold cyan]\n")
 
@@ -184,16 +182,16 @@ def report_export_all(
 ) -> None:
     """Export all reports at once"""
     try:
-        files = utils.get_audio_files(folder)
+        utils.get_audio_files(folder)
 
-        with utils.ProgressTracker(f"Exporting all reports"):
+        with utils.ProgressTracker("Exporting all reports"):
             pass
 
-        console.print(f"[green]✓ All reports exported[/green]")
+        console.print("[green]✓ All reports exported[/green]")
         console.print(f"[cyan]Output folder:[/cyan] {output}")
-        console.print(f"  [cyan]•[/cyan] library_stats.json")
-        console.print(f"  [cyan]•[/cyan] batch_report.csv")
-        console.print(f"  [cyan]•[/cyan] quality_assessment.pdf")
+        console.print("  [cyan]•[/cyan] library_stats.json")
+        console.print("  [cyan]•[/cyan] batch_report.csv")
+        console.print("  [cyan]•[/cyan] quality_assessment.pdf")
 
     except Exception as e:
         utils.handle_error(e, "report:export-all")
@@ -209,7 +207,7 @@ def report_export_all(
 @utils.with_error_handling
 def export_json(
     file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
     pretty: bool = typer.Option(True, "--pretty/--compact"),
 ) -> None:
     """Export analysis to JSON"""
@@ -232,7 +230,7 @@ def export_json(
 @utils.with_error_handling
 def export_csv(
     file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Export analysis to CSV"""
     try:
@@ -254,7 +252,7 @@ def export_csv(
 @utils.with_error_handling
 def export_yaml(
     file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Export analysis to YAML"""
     try:
@@ -276,7 +274,7 @@ def export_yaml(
 @utils.with_error_handling
 def export_pdf(
     file: Path = typer.Argument(...),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
     include_visualizations: bool = typer.Option(True, "--with-viz/--no-viz"),
 ) -> None:
     """Export analysis report to PDF"""
@@ -285,10 +283,10 @@ def export_pdf(
             file.stem + "_report"
         )
 
-        with utils.ProgressTracker(f"Generating PDF report"):
+        with utils.ProgressTracker("Generating PDF report"):
             pass
 
-        console.print(f"[green]✓ PDF report generated[/green]")
+        console.print("[green]✓ PDF report generated[/green]")
         console.print(f"[cyan]Output:[/cyan] {output_file.name}")
 
     except Exception as e:
@@ -301,7 +299,7 @@ def export_pdf(
 def export_batch(
     folder: Path = typer.Argument(...),
     format: str = typer.Option("json", "--format", "-f", help="Export format"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
 ) -> None:
     """Batch export all files to format"""
     try:

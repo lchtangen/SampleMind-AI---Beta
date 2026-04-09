@@ -1,15 +1,16 @@
 """Tests for the Neural Audio Generation Manager (Phase 4.3)"""
 
 import asyncio
-import pytest
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+
+import pytest
 
 from samplemind.core.generation.generation_manager import (
     GenerationManager,
+    GenerationMode,
     GenerationRequest,
     GenerationResult,
-    GenerationMode,
     GenerationStatus,
 )
 

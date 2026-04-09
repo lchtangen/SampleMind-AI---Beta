@@ -3,6 +3,7 @@ Legacy repository tests targeting deprecated Beanie helpers.
 """
 
 import os
+
 import pytest
 
 if not os.getenv("RUN_DB_TESTS"):
@@ -10,12 +11,12 @@ if not os.getenv("RUN_DB_TESTS"):
         "Set RUN_DB_TESTS=1 to enable legacy repository tests", allow_module_level=True
     )
 
-from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, patch
+
 from bson import ObjectId
 
-from samplemind.core.database.repositories.audio_repository import AudioRepository
 from samplemind.core.database.repositories.analysis_repository import AnalysisRepository
+from samplemind.core.database.repositories.audio_repository import AudioRepository
 from samplemind.core.database.repositories.user_repository import UserRepository
 
 

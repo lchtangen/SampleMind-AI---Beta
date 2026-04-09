@@ -1,6 +1,6 @@
 import numpy as np
-import pytest
-from samplemind.core.processing.realtime_spectral import RealtimeSpectral, SpectralFrame
+
+from samplemind.core.processing.realtime_spectral import RealtimeSpectral
 
 
 def test_realtime_spectral_sine_wave():

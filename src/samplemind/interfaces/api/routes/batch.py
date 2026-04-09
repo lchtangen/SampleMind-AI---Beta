@@ -3,20 +3,18 @@ Batch Audio Analysis API
 Analyze multiple audio files in parallel with progress tracking
 """
 
-import asyncio
 import uuid
-from datetime import datetime
-from pathlib import Path
-from typing import List, Dict, Any, Optional
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, field
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
-from fastapi import APIRouter, UploadFile, File, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, File, HTTPException, UploadFile
 from pydantic import BaseModel
 
 from samplemind.core.engine.audio_engine import AudioEngine
-from samplemind.integrations.ai_manager import SampleMindAIManager, AnalysisType
-
+from samplemind.integrations.ai_manager import AnalysisType, SampleMindAIManager
 
 router = APIRouter(prefix="/batch", tags=["Batch Processing"])
 
@@ -39,13 +37,13 @@ class BatchJobStatus(BaseModel):
     processed_files: int
     progress_percent: float
     started_at: datetime
-    completed_at: Optional[datetime] = None
-    results: List[Dict[str, Any]] = []
-    errors: List[Dict[str, str]] = []
+    completed_at: datetime | None = None
+    results: list[dict[str, Any]] = []
+    errors: list[dict[str, str]] = []
 
 
 # In-memory job storage (use Redis in production)
-active_jobs: Dict[str, BatchJobStatus] = {}
+active_jobs: dict[str, BatchJobStatus] = {}
 
 
 @dataclass
@@ -59,7 +57,7 @@ class BatchProcessor:
     async def process_batch(
         self,
         job_id: str,
-        file_paths: List[Path],
+        file_paths: list[Path],
         analysis_type: AnalysisType = AnalysisType.COMPREHENSIVE_ANALYSIS,
     ) -> None:
         """Process batch of audio files"""
@@ -92,7 +90,7 @@ class BatchProcessor:
             job.status = "failed"
             job.errors.append({"error": str(e)})
 
-    def _process_single(self, file_path: Path) -> Dict[str, Any]:
+    def _process_single(self, file_path: Path) -> dict[str, Any]:
         """Process single audio file"""
         features = self.audio_engine.analyze_audio(file_path)
         return {
@@ -106,12 +104,12 @@ class BatchProcessor:
 processor = BatchProcessor()
 
 
-@router.post("/analyze", response_model=Dict[str, str])
+@router.post("/analyze", response_model=dict[str, str])
 async def create_batch_analysis(
-    files: List[UploadFile] = File(...),
+    files: list[UploadFile] = File(...),
     request: BatchAnalysisRequest = BatchAnalysisRequest(),
     background_tasks: BackgroundTasks = None,
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """
     Create batch analysis job for multiple audio files
 
@@ -164,7 +162,7 @@ async def get_batch_status(job_id: str) -> BatchJobStatus:
 
 
 @router.get("/results/{job_id}")
-async def get_batch_results(job_id: str) -> Dict[str, Any]:
+async def get_batch_results(job_id: str) -> dict[str, Any]:
     """Get results of completed batch analysis"""
     if job_id not in active_jobs:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -187,7 +185,7 @@ async def get_batch_results(job_id: str) -> Dict[str, Any]:
 
 
 @router.delete("/jobs/{job_id}")
-async def cancel_batch_job(job_id: str) -> Dict[str, str]:
+async def cancel_batch_job(job_id: str) -> dict[str, str]:
     """Cancel and delete batch analysis job"""
     if job_id not in active_jobs:
         raise HTTPException(status_code=404, detail="Job not found")

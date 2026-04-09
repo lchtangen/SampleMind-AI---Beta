@@ -6,13 +6,15 @@ Supports filtering by metadata (tempo, key, genre) and batch operations.
 """
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Callable
+from typing import Any
+
 import chromadb
 from chromadb.config import Settings
 
-from .embedding_engine import AudioEmbeddingEngine, AudioEmbedding, EMBEDDING_DIM
+from .embedding_engine import EMBEDDING_DIM, AudioEmbeddingEngine
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +29,7 @@ class SimilarityResult:
     file_id: str
     file_path: str
     similarity: float  # 0.0 to 1.0
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
     @property
     def percentage(self) -> float:
@@ -48,7 +50,7 @@ class SimilarityDatabase:
 
     def __init__(
         self,
-        persist_directory: Optional[str] = None,
+        persist_directory: str | None = None,
         collection_name: str = DEFAULT_COLLECTION_NAME,
     ):
         """
@@ -102,7 +104,7 @@ class SimilarityDatabase:
     def index_file(
         self,
         file_path: Path,
-        additional_metadata: Optional[Dict[str, Any]] = None,
+        additional_metadata: dict[str, Any] | None = None,
     ) -> str:
         """
         Index a single audio file.
@@ -151,9 +153,9 @@ class SimilarityDatabase:
     def index_library(
         self,
         folder: Path,
-        extensions: List[str] = None,
+        extensions: list[str] = None,
         recursive: bool = True,
-        progress_callback: Optional[Callable[[int, int, str], None]] = None,
+        progress_callback: Callable[[int, int, str], None] | None = None,
     ) -> int:
         """
         Index all audio files in a folder.
@@ -204,8 +206,8 @@ class SimilarityDatabase:
         query_file: Path,
         n_results: int = 10,
         min_similarity: float = 0.0,
-        filters: Optional[Dict[str, Any]] = None,
-    ) -> List[SimilarityResult]:
+        filters: dict[str, Any] | None = None,
+    ) -> list[SimilarityResult]:
         """
         Find similar samples to a query file.
 
@@ -266,7 +268,7 @@ class SimilarityDatabase:
         file_id: str,
         n_results: int = 10,
         min_similarity: float = 0.0,
-    ) -> List[SimilarityResult]:
+    ) -> list[SimilarityResult]:
         """
         Find similar samples to an already-indexed file.
 
@@ -355,7 +357,7 @@ class SimilarityDatabase:
             logger.warning(f"Failed to remove file {file_id}: {e}")
             return False
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get database statistics"""
         return {
             "collection_name": self.collection_name,
@@ -374,7 +376,7 @@ class SimilarityDatabase:
         logger.info("Cleared similarity database")
 
     @staticmethod
-    def _clean_metadata(metadata: Dict[str, Any]) -> Dict[str, Any]:
+    def _clean_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
         """Clean metadata for ChromaDB (only str, int, float, bool allowed)"""
         clean = {}
         for key, value in metadata.items():
@@ -389,7 +391,7 @@ class SimilarityDatabase:
         return clean
 
     @staticmethod
-    def _build_where_clause(filters: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def _build_where_clause(filters: dict[str, Any]) -> dict[str, Any] | None:
         """Build ChromaDB where clause from filters"""
         if not filters:
             return None

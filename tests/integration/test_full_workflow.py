@@ -4,16 +4,17 @@ Integration Test: Full Workflow
 Tests complete end-to-end workflow for beta validation
 """
 
-import pytest
 import asyncio
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
+
+import pytest
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
-from samplemind.core.engine.audio_engine import AudioEngine, AnalysisLevel
+from samplemind.core.engine.audio_engine import AnalysisLevel, AudioEngine
 from samplemind.integrations.ai_manager import SampleMindAIManager
 
 
@@ -69,7 +70,7 @@ class TestFullWorkflow:
 
         assert len(results) == len(files)
 
-        for file_path, result in results.items():
+        for _file_path, result in results.items():
             assert result is not None
             assert result.tempo > 0
 

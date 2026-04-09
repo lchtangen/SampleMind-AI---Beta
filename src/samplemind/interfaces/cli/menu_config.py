@@ -6,10 +6,8 @@ Manages menu state, user preferences, and persistent configuration.
 """
 
 import json
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Dict, Any, Optional
-from dataclasses import dataclass, field, asdict
-from enum import Enum
 
 from samplemind.interfaces.cli.modern_menu import MenuTheme
 
@@ -27,7 +25,7 @@ class MenuPreferences:
     last_menu_path: str = "main"
     verbose_mode: bool = False
     use_legacy_menu: bool = False  # Option to use old numbered menu
-    custom_shortcuts: Dict[str, str] = field(default_factory=dict)
+    custom_shortcuts: dict[str, str] = field(default_factory=dict)
     preferred_ai_provider: str = "gemini"
     auto_refresh_library: bool = True
     show_help_tips: bool = True
@@ -49,7 +47,7 @@ class MenuConfigManager:
         """Load preferences from file or create defaults"""
         if self.PREFERENCES_FILE.exists():
             try:
-                with open(self.PREFERENCES_FILE, "r") as f:
+                with open(self.PREFERENCES_FILE) as f:
                     data = json.load(f)
                     # Convert theme string back to enum
                     if "theme" in data:
@@ -100,7 +98,7 @@ class MenuConfigManager:
         self.preferences.custom_shortcuts[action] = keys
         self.save_preferences()
 
-    def get_custom_shortcut(self, action: str) -> Optional[str]:
+    def get_custom_shortcut(self, action: str) -> str | None:
         """Get a custom keyboard shortcut"""
         return self.preferences.custom_shortcuts.get(action)
 
@@ -138,7 +136,7 @@ class MenuConfigManager:
     def import_preferences(self, file_path: Path) -> bool:
         """Import preferences from a file"""
         try:
-            with open(file_path, "r") as f:
+            with open(file_path) as f:
                 data = json.load(f)
                 if "theme" in data:
                     data["theme"] = MenuTheme(data["theme"])
@@ -167,7 +165,7 @@ class MenuStateManager:
         self.current_menu = menu_name
         self.selected_index = 0
 
-    def pop_menu(self) -> Optional[str]:
+    def pop_menu(self) -> str | None:
         """Pop menu from stack"""
         if self.menu_stack:
             self.current_menu = self.menu_stack.pop()

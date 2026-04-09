@@ -12,13 +12,10 @@ Produces tags in 5 categories:
 """
 
 import logging
-from typing import List, Dict, Optional, Set
-from dataclasses import dataclass
 
 from samplemind.core.tagging.tag_vocabulary import (
     TagConfidence,
     get_vocabulary,
-    ENERGY_LEVELS,
 )
 
 logger = logging.getLogger(__name__)
@@ -38,10 +35,10 @@ class AITagger:
 
     def tag_from_features(
         self,
-        features: Dict,
-        ai_analysis: Optional[Dict] = None,
+        features: dict,
+        ai_analysis: dict | None = None,
         use_ai: bool = True,
-    ) -> List[TagConfidence]:
+    ) -> list[TagConfidence]:
         """
         Generate tags from audio features and optional AI analysis
 
@@ -87,7 +84,7 @@ class AITagger:
     # RULE-BASED TAGGING METHODS
     # ========================================================================
 
-    def _tag_from_tempo(self, tempo: float) -> List[TagConfidence]:
+    def _tag_from_tempo(self, tempo: float) -> list[TagConfidence]:
         """Infer mood/energy from tempo"""
         tags = []
 
@@ -123,8 +120,8 @@ class AITagger:
         return tags
 
     def _tag_from_key_mode(
-        self, key: Optional[str], mode: Optional[str]
-    ) -> List[TagConfidence]:
+        self, key: str | None, mode: str | None
+    ) -> list[TagConfidence]:
         """Infer mood from key and mode"""
         tags = []
 
@@ -140,7 +137,7 @@ class AITagger:
 
         return tags
 
-    def _tag_from_energy(self, features: Dict) -> List[TagConfidence]:
+    def _tag_from_energy(self, features: dict) -> list[TagConfidence]:
         """Infer energy level from RMS energy and dynamics"""
         tags = []
 
@@ -168,7 +165,7 @@ class AITagger:
 
         return tags
 
-    def _tag_from_spectral(self, features: Dict) -> List[TagConfidence]:
+    def _tag_from_spectral(self, features: dict) -> list[TagConfidence]:
         """Infer tonal characteristics from spectral features"""
         tags = []
 
@@ -197,7 +194,7 @@ class AITagger:
 
         return tags
 
-    def _tag_from_rhythm(self, features: Dict) -> List[TagConfidence]:
+    def _tag_from_rhythm(self, features: dict) -> list[TagConfidence]:
         """Infer rhythmic characteristics"""
         tags = []
 
@@ -225,7 +222,7 @@ class AITagger:
     # AI-BASED TAGGING
     # ========================================================================
 
-    def _tag_from_ai_analysis(self, ai_analysis: Dict) -> List[TagConfidence]:
+    def _tag_from_ai_analysis(self, ai_analysis: dict) -> list[TagConfidence]:
         """Extract tags from AI analysis results"""
         tags = []
 
@@ -266,8 +263,8 @@ class AITagger:
     # ========================================================================
 
     def organize_by_category(
-        self, tags: List[TagConfidence]
-    ) -> Dict[str, List[TagConfidence]]:
+        self, tags: list[TagConfidence]
+    ) -> dict[str, list[TagConfidence]]:
         """Organize tags by category"""
         organized = {
             "genre": [],
@@ -288,13 +285,13 @@ class AITagger:
 
     def get_high_confidence_tags(
         self,
-        tags: List[TagConfidence],
+        tags: list[TagConfidence],
         threshold: float = 0.7,
-    ) -> List[TagConfidence]:
+    ) -> list[TagConfidence]:
         """Filter tags by confidence threshold"""
         return [t for t in tags if t.confidence >= threshold]
 
-    def to_simple_dict(self, tags: List[TagConfidence]) -> Dict[str, List[str]]:
+    def to_simple_dict(self, tags: list[TagConfidence]) -> dict[str, list[str]]:
         """Convert tags to simple dictionary format"""
         organized = self.organize_by_category(tags)
         return {
@@ -302,7 +299,7 @@ class AITagger:
             for category, tag_list in organized.items()
         }
 
-    def to_detailed_dict(self, tags: List[TagConfidence]) -> Dict[str, List[Dict]]:
+    def to_detailed_dict(self, tags: list[TagConfidence]) -> dict[str, list[dict]]:
         """Convert tags to detailed format with confidence scores"""
         organized = self.organize_by_category(tags)
         return {
@@ -322,7 +319,7 @@ class AITagger:
 # GLOBAL INSTANCE
 # ============================================================================
 
-_tagger: Optional[AITagger] = None
+_tagger: AITagger | None = None
 
 
 def get_tagger() -> AITagger:

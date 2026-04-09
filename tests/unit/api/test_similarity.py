@@ -2,13 +2,12 @@
 Tests for Similarity Search API
 """
 
-import pytest
-from pathlib import Path
-from fastapi.testclient import TestClient
 from unittest.mock import Mock, patch
 
-from samplemind.interfaces.api.routes.similarity import router
 from fastapi import FastAPI
+from fastapi.testclient import TestClient
+
+from samplemind.interfaces.api.routes.similarity import router
 
 app = FastAPI()
 app.include_router(router)

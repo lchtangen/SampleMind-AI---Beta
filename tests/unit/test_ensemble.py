@@ -28,13 +28,19 @@ def _mock_model(classes: list[str], pred_idx: int, confidence: float = 0.8):
     model = MagicMock()
     proba = np.zeros(len(classes), dtype=float)
     proba[pred_idx] = confidence
-    proba += (1.0 - confidence) / max(len(classes) - 1, 1) * (1 - np.eye(len(classes))[pred_idx])
+    proba += (
+        (1.0 - confidence)
+        / max(len(classes) - 1, 1)
+        * (1 - np.eye(len(classes))[pred_idx])
+    )
     proba /= proba.sum()
     model.predict_proba.return_value = proba.reshape(1, -1)
     return model
 
 
-def _fitted_clf(task: str = "energy", classes: list[str] | None = None) -> EnsembleClassifier:
+def _fitted_clf(
+    task: str = "energy", classes: list[str] | None = None
+) -> EnsembleClassifier:
     """Return an EnsembleClassifier pre-seeded with mocked models (no actual fitting)."""
     classes = classes or ["low", "mid", "high"]
     clf = EnsembleClassifier.__new__(EnsembleClassifier)
@@ -203,6 +209,7 @@ def test_log_uncertain_writes_jsonl(tmp_path):
     lines = log_file.read_text().strip().splitlines()
     assert len(lines) >= 1
     import json
+
     record = json.loads(lines[0])
     assert record["task"] == "energy"
     assert record["predicted_label"] == "low"

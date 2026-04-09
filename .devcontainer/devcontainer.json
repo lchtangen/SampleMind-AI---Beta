@@ -1,0 +1,20 @@
+{
+  "name": "SampleMind AI Dev (Python 3.12)",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {"version": "22"},
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "postCreateCommand": "pip install -e '.[dev]' 2>/dev/null || pip install -r requirements.txt",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python", "ms-python.mypy-type-checker", "charliermarsh.ruff"],
+      "settings": {
+        "editor.formatOnSave": true,
+        "[python]": {"editor.defaultFormatter": "charliermarsh.ruff"}
+      }
+    }
+  },
+  "forwardPorts": [8000, 8080, 11434],
+  "remoteUser": "vscode"
+}

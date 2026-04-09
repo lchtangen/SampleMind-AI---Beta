@@ -10,20 +10,19 @@ Provides consistent functionality across all 200+ commands:
 - Caching and performance
 """
 
-import json
-import csv
 import asyncio
-from typing import Any, Dict, List, Optional, Callable, TypeVar
-from pathlib import Path
-from functools import wraps
+import csv
+import json
+from collections.abc import Callable
 from dataclasses import asdict
+from functools import wraps
+from pathlib import Path
+from typing import Any, TypeVar
 
-from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
-from rich.table import Table
-from rich.syntax import Syntax
-from rich.panel import Panel
 import typer
+from rich.console import Console
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
+from rich.table import Table
 
 # ============================================================================
 # GLOBAL CONSOLE
@@ -43,7 +42,7 @@ def format_json(data: Any, pretty: bool = True) -> str:
     return json.dumps(data, default=str)
 
 
-def format_csv(data: List[Dict], output_file: Optional[Path] = None) -> str:
+def format_csv(data: list[dict], output_file: Path | None = None) -> str:
     """Format data as CSV"""
     if not data:
         return ""
@@ -66,8 +65,8 @@ def format_csv(data: List[Dict], output_file: Optional[Path] = None) -> str:
 
 def format_table(
     title: str,
-    data: List[Dict],
-    columns: Optional[List[str]] = None,
+    data: list[dict],
+    columns: list[str] | None = None,
 ) -> Table:
     """Format data as a Rich table"""
     table = Table(title=title, show_header=True, header_style="bold cyan")
@@ -105,7 +104,7 @@ def output_result(
     data: Any,
     format: str = "table",
     title: str = "Result",
-    output_file: Optional[Path] = None,
+    output_file: Path | None = None,
     quiet: bool = False,
 ) -> None:
     """Handle output in specified format"""
@@ -229,7 +228,7 @@ def handle_error(error: Exception, context: str = "") -> None:
 T = TypeVar("T")
 
 
-def async_command(func: Callable[..., T]) -> Callable[..., T]:
+def async_command[T](func: Callable[..., T]) -> Callable[..., T]:
     """Decorator to handle async commands"""
 
     @wraps(func)
@@ -242,7 +241,7 @@ def async_command(func: Callable[..., T]) -> Callable[..., T]:
     return wrapper
 
 
-def with_error_handling(func: Callable[..., T]) -> Callable[..., T]:
+def with_error_handling[T](func: Callable[..., T]) -> Callable[..., T]:
     """Decorator to add error handling to commands"""
 
     @wraps(func)
@@ -299,7 +298,7 @@ async def get_ai_manager():
 async def analyze_file_async(
     file_path: Path,
     analysis_level: str = "STANDARD",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Analyze a single file asynchronously"""
     try:
         if not file_path.exists():
@@ -333,7 +332,7 @@ async def analyze_file_async(
 # ============================================================================
 
 
-def get_audio_files(directory: Path) -> List[Path]:
+def get_audio_files(directory: Path) -> list[Path]:
     """Get all audio files in directory"""
     supported_formats = {".wav", ".mp3", ".flac", ".aiff", ".m4a", ".ogg"}
 
@@ -387,18 +386,18 @@ def format_frequency(hz: float) -> str:
 
 
 async def batch_analyze_files(
-    files: List[Path],
+    files: list[Path],
     analysis_level: str = "STANDARD",
     max_workers: int = 4,
     show_progress: bool = True,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Analyze multiple files concurrently"""
     import concurrent.futures
 
     results = []
 
     if show_progress:
-        task_id = create_progress_bar(len(files), "Analyzing files")
+        create_progress_bar(len(files), "Analyzing files")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = [

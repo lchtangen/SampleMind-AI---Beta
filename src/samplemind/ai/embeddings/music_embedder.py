@@ -12,7 +12,7 @@ Model: ``m-a-p/music2vec-v1`` (768-dim, trained on FMA + music4all)
 import hashlib
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 
@@ -84,7 +84,7 @@ class MusicEmbedder:
         self.device = "cpu"
         self._processor: Any = None
         self._model: Any = None
-        self._cache: Dict[str, np.ndarray] = {}
+        self._cache: dict[str, np.ndarray] = {}
         self._chroma: Any = None  # lazy-loaded on first chroma call
 
         if not self.use_mock:
@@ -163,15 +163,15 @@ class MusicEmbedder:
             self._cache[cache_key] = emb
         return emb
 
-    def embed_batch(self, paths: List[str | Path]) -> List[np.ndarray]:
+    def embed_batch(self, paths: list[str | Path]) -> list[np.ndarray]:
         """Embed a list of audio files."""
         return [self.embed(p) for p in paths]
 
     def store_in_chroma(
         self,
         audio_path: str | Path,
-        metadata: Optional[Dict[str, Any]] = None,
-        doc_id: Optional[str] = None,
+        metadata: dict[str, Any] | None = None,
+        doc_id: str | None = None,
     ) -> bool:
         """
         Compute embedding and persist it in ChromaDB.
@@ -209,7 +209,7 @@ class MusicEmbedder:
         self,
         audio_path: str | Path,
         top_k: int = 5,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Find the most similar samples in ChromaDB for a given audio file.
 
@@ -231,7 +231,7 @@ class MusicEmbedder:
                 n_results=top_k,
                 include=["metadatas", "distances"],
             )
-            output: List[Dict[str, Any]] = []
+            output: list[dict[str, Any]] = []
             for i, doc_id in enumerate(results.get("ids", [[]])[0]):
                 output.append(
                     {

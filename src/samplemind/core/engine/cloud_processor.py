@@ -9,18 +9,17 @@ import os
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
-import dask.bag as db
 from dask.distributed import Client
 from loguru import logger
 
 from .distributed_processor import DistributedAudioProcessor
 
 
-class CloudProvider(str, Enum):
+class CloudProvider(StrEnum):
     """Supported cloud providers."""
 
     AWS = "aws"
@@ -40,11 +39,11 @@ class CloudConfig:
     worker_cpu: int = 2
     worker_memory: str = "4GB"
     use_spot: bool = True
-    spot_price: Optional[float] = None
+    spot_price: float | None = None
     docker_image: str = "samplemind/audio-processor:latest"
-    environment: Dict[str, str] = field(default_factory=dict)
-    volumes: Dict[str, str] = field(default_factory=dict)
-    tags: Dict[str, str] = field(default_factory=dict)
+    environment: dict[str, str] = field(default_factory=dict)
+    volumes: dict[str, str] = field(default_factory=dict)
+    tags: dict[str, str] = field(default_factory=dict)
 
 
 class CloudProcessor(ABC):
@@ -68,11 +67,11 @@ class CloudProcessor(ABC):
 
     def process_files(
         self,
-        file_paths: List[Union[str, Path]],
+        file_paths: list[str | Path],
         feature_type: str = "all",
         level: str = "standard",
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Process audio files using the cloud cluster.
 
@@ -220,11 +219,11 @@ def create_cloud_processor(config: CloudConfig) -> CloudProcessor:
 
 
 def process_in_cloud(
-    file_paths: List[Union[str, Path]],
-    provider: Union[str, CloudProvider],
-    output_file: Optional[str] = None,
+    file_paths: list[str | Path],
+    provider: str | CloudProvider,
+    output_file: str | None = None,
     **kwargs,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Process audio files in the cloud.
 

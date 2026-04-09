@@ -19,25 +19,27 @@ Total: 215+ commands - COMPLETE ✅
 __version__ = "2.1.0-beta"
 
 # Import all command groups
-from . import analyze
-from . import library
-from . import ai
-from . import metadata
-from . import audio
-from . import visualization
-from . import reporting
-from . import similarity  # Phase 10: Sample Similarity Engine
-from . import theory  # Phase 10: Music Theory Analysis
-from . import daw  # Phase 10: DAW Integration
-from . import tagging  # Phase 10: AI-powered Sample Tagging
-from . import mastering  # Phase 10: Professional Mastering Assistant
-from . import layering  # Phase 10: Sample Layering & Phase Analysis
-from . import groove  # Phase 10: Groove Template Extraction
-from . import recent  # Phase 10: Quick Access to Recent Files
-from . import stems  # Phase 13: AI Stem Separation
-from . import midi  # Phase 13: MIDI Extraction
-from . import pack  # Phase 13: Sample Pack Creator
-from . import effects  # Phase 13: Audio Effects & Presets
+from . import (
+    ai,
+    analyze,
+    audio,
+    daw,  # Phase 10: DAW Integration
+    effects,  # Phase 13: Audio Effects & Presets
+    groove,  # Phase 10: Groove Template Extraction
+    layering,  # Phase 10: Sample Layering & Phase Analysis
+    library,
+    mastering,  # Phase 10: Professional Mastering Assistant
+    metadata,
+    midi,  # Phase 13: MIDI Extraction
+    pack,  # Phase 13: Sample Pack Creator
+    recent,  # Phase 10: Quick Access to Recent Files
+    reporting,
+    similarity,  # Phase 10: Sample Similarity Engine
+    stems,  # Phase 13: AI Stem Separation
+    tagging,  # Phase 10: AI-powered Sample Tagging
+    theory,  # Phase 10: Music Theory Analysis
+    visualization,
+)
 
 __all__ = [
     "analyze",  # 40 commands ✅

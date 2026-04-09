@@ -1,11 +1,12 @@
 """Unit tests for stem separation module."""
 
-import pytest
-import numpy as np
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
-import tempfile
 import importlib.util
+import tempfile
+from pathlib import Path
+from unittest.mock import Mock, patch
+
+import numpy as np
+import pytest
 
 from samplemind.core.processing.stem_separation import (
     StemSeparationEngine,
@@ -116,7 +117,7 @@ class TestStemSeparationEngine:
                 for stem in ["vocals", "drums", "bass", "other"]:
                     (track_dir / f"{stem}.wav").touch()
 
-                engine = StemSeparationEngine(model="mdx_extra")
+                StemSeparationEngine(model="mdx_extra")
 
                 with patch(
                     "samplemind.core.processing.stem_separation.Path"
@@ -237,7 +238,7 @@ class TestStemSeparationIntegration:
         """Test actual stem separation if demucs available (integration test)"""
         # Skip if demucs not available
         try:
-            import demucs
+            import demucs  # noqa: F401
         except ImportError:
             pytest.skip("Demucs not installed")
 
@@ -268,7 +269,7 @@ class TestStemSeparationIntegration:
                 assert len(result.stems) > 0
 
                 # Verify stem files exist and have content
-                for stem_name, stem_path in result.stems.items():
+                for _stem_name, stem_path in result.stems.items():
                     assert stem_path.exists()
                     assert stem_path.stat().st_size > 0
 

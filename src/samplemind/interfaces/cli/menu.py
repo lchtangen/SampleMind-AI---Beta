@@ -413,7 +413,7 @@ class SampleMindCLI:
         preview_table.add_column("File", style="cyan")
         preview_table.add_column("Size", style="dim")
 
-        for i, file_path in enumerate(file_paths[:10]):  # Show first 10 files
+        for _i, file_path in enumerate(file_paths[:10]):  # Show first 10 files
             size = file_path.stat().st_size / (1024 * 1024)
             preview_table.add_row(file_path.name, f"{size:.1f} MB")
 
@@ -468,7 +468,7 @@ class SampleMindCLI:
                     f"🔄 Processing {len(file_paths)} files...", total=len(file_paths)
                 )
 
-                for i, file_path in enumerate(file_paths):
+                for _i, file_path in enumerate(file_paths):
                     try:
                         progress.update(
                             main_task, description=f"Processing: {file_path.name}"
@@ -615,7 +615,7 @@ class SampleMindCLI:
                 total=len(files_to_process),
             )
 
-            for i, file_path in enumerate(files_to_process):
+            for _i, file_path in enumerate(files_to_process):
                 try:
                     progress.update(
                         main_task, description=f"Processing: {file_path.name}"
@@ -699,7 +699,7 @@ class SampleMindCLI:
 
         # Get stats from all components
         engine_stats = self.audio_engine.get_performance_stats()
-        loader_stats = self.audio_loader.get_loading_stats()
+        self.audio_loader.get_loading_stats()
         ai_stats = self.ai_manager.get_global_stats()
         provider_status = self.ai_manager.get_provider_status()
 
@@ -1178,7 +1178,7 @@ class SampleMindCLI:
 
                 try:
                     # Test quick analysis
-                    result = await self.ai_manager.analyze_music(
+                    await self.ai_manager.analyze_music(
                         sample_features,
                         AnalysisType.QUICK_ANALYSIS,
                         preferred_provider=AIProvider(provider.upper()),
@@ -1692,7 +1692,9 @@ class SampleMindCLI:
             # Show mixer settings
             if preset["mixer_settings"]:
                 mixer_settings = preset["mixer_settings"]
-                console.print("\n[bold magenta]🎚️ Mixer Recommendations:[/bold magenta]")
+                console.print(
+                    "\n[bold magenta]🎚️ Mixer Recommendations:[/bold magenta]"
+                )
 
                 if "eq" in mixer_settings:
                     eq = mixer_settings["eq"]

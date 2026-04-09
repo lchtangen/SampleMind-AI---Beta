@@ -2,16 +2,17 @@
 Unit tests for authentication system
 """
 
-import pytest
 from datetime import datetime, timedelta
+
+import pytest
 
 from samplemind.core.auth.jwt_handler import (
     configure_jwt,
     create_access_token,
     create_refresh_token,
-    verify_token,
     decode_token,
     get_token_expiration,
+    verify_token,
 )
 from samplemind.core.auth.password import hash_password, verify_password
 

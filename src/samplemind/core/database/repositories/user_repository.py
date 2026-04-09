@@ -1,7 +1,7 @@
 """User repository"""
 
-from typing import Optional, Any
 from datetime import datetime
+
 from samplemind.core.database.mongo import User
 
 
@@ -16,7 +16,7 @@ class UserRepository:
         hashed_password: str,
         is_active: bool = True,
         is_verified: bool = False,
-        created_at: Optional[datetime] = None,
+        created_at: datetime | None = None,
     ) -> User:
         """Create new user"""
         user = User(
@@ -32,27 +32,27 @@ class UserRepository:
         return user
 
     @staticmethod
-    async def get_by_id(user_id: str) -> Optional[User]:
+    async def get_by_id(user_id: str) -> User | None:
         """Get user by ID"""
         return await User.find_one(User.user_id == user_id)
 
     @staticmethod
-    async def get_by_user_id(user_id: str) -> Optional[User]:
+    async def get_by_user_id(user_id: str) -> User | None:
         """Get user by user ID (alias for get_by_id)"""
         return await User.find_one(User.user_id == user_id)
 
     @staticmethod
-    async def get_by_email(email: str) -> Optional[User]:
+    async def get_by_email(email: str) -> User | None:
         """Get user by email"""
         return await User.find_one(User.email == email)
 
     @staticmethod
-    async def get_by_username(username: str) -> Optional[User]:
+    async def get_by_username(username: str) -> User | None:
         """Get user by username"""
         return await User.find_one(User.username == username)
 
     @staticmethod
-    async def update(user_id: str, **kwargs) -> Optional[User]:
+    async def update(user_id: str, **kwargs) -> User | None:
         """Update user fields"""
         user = await User.find_one(User.user_id == user_id)
         if user:
@@ -66,7 +66,7 @@ class UserRepository:
         return user
 
     @staticmethod
-    async def update_last_login(user_id: str) -> Optional[User]:
+    async def update_last_login(user_id: str) -> User | None:
         """Update user last login timestamp"""
         user = await User.find_one(User.user_id == user_id)
         if user:
@@ -78,7 +78,7 @@ class UserRepository:
     @staticmethod
     async def increment_usage(
         user_id: str, analyses: int = 0, uploads: int = 0
-    ) -> Optional[User]:
+    ) -> User | None:
         """Increment user usage counters"""
         user = await User.find_one(User.user_id == user_id)
         if user:

@@ -8,7 +8,7 @@ samples that are harmonically or spectrally similar to the input.
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from samplemind.ai.agents.state import AudioAnalysisState
 
@@ -20,15 +20,15 @@ def recommendation_agent(state: AudioAnalysisState) -> AudioAnalysisState:
     Node: Find similar samples via vector similarity search.
     """
     file_path = state.get("file_path", "")
-    features = state.get("audio_features", {})
+    state.get("audio_features", {})
 
-    updates: Dict[str, Any] = {
+    updates: dict[str, Any] = {
         "current_stage": "recommendations",
         "progress_pct": 82,
         "messages": state.get("messages", []) + ["🔍 Finding similar samples…"],
     }
 
-    similar: List[Dict[str, Any]] = []
+    similar: list[dict[str, Any]] = []
 
     try:
         from samplemind.core.similarity.similarity import AudioEmbeddingEngine

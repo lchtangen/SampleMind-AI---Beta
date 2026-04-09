@@ -9,23 +9,17 @@ Commands:
   debug:trace      - Enable debug tracing
 """
 
+import json
 import os
 import sys
-import json
 from pathlib import Path
-from typing import Optional
+
 import typer
 from rich.console import Console
-from rich.table import Table
 from rich.syntax import Syntax
 
-from samplemind.utils.logging_config import logger
 from samplemind.utils.error_handler import handle_errors
-from samplemind.exceptions import (
-    FileNotFoundError as SampleMindFileNotFoundError,
-    CorruptedAudioError,
-)
-
+from samplemind.utils.logging_config import logger
 
 console = Console()
 app = typer.Typer(help="🔧 Debug and diagnostics tools")
@@ -60,7 +54,7 @@ async def show_environment_info() -> None:
 
     # SampleMind Info
     console.print("\n[bold cyan]SampleMind AI:[/bold cyan]")
-    console.print(f"  Version: 2.1.0-beta")
+    console.print("  Version: 2.1.0-beta")
     console.print(f"  Location: {Path(__file__).parent.parent.parent}")
 
     # Environment Variables
@@ -123,7 +117,7 @@ async def diagnose_audio_file(
 
         file_type = magic.from_file(str(file))
         console.print(f"[cyan]🎵 Format: {file_type}[/cyan]")
-    except:
+    except Exception:
         # Fallback to extension-based detection
         extension = file.suffix.lower()
         console.print(f"[cyan]🎵 Extension: {extension}[/cyan]")
@@ -141,7 +135,7 @@ async def diagnose_audio_file(
         y_full, sr_full = librosa.load(str(file), sr=None)
         duration = librosa.get_duration(y=y_full, sr=sr_full)
 
-        console.print(f"[green]✅ Readable by librosa[/green]")
+        console.print("[green]✅ Readable by librosa[/green]")
         console.print(f"   Sample rate: {sr} Hz")
         console.print(f"   Duration: {duration:.2f} seconds")
         console.print(f"   Channels: {len(y.shape)}")
@@ -156,7 +150,7 @@ async def diagnose_audio_file(
         console.print("[cyan]📖 Attempting to read with soundfile...[/cyan]")
 
         with sf.SoundFile(str(file)) as f:
-            console.print(f"[green]✅ Readable by soundfile[/green]")
+            console.print("[green]✅ Readable by soundfile[/green]")
             console.print(f"   Channels: {f.channels}")
             console.print(f"   Sample rate: {f.samplerate} Hz")
             console.print(f"   Frames: {f.frames}")
@@ -169,12 +163,12 @@ async def diagnose_audio_file(
     try:
         console.print("[cyan]🔬 Attempting audio analysis...[/cyan]")
 
-        from samplemind.core.engine.audio_engine import AudioEngine, AnalysisLevel
+        from samplemind.core.engine.audio_engine import AnalysisLevel, AudioEngine
 
         engine = AudioEngine()
         features = engine.analyze_audio(str(file), AnalysisLevel.BASIC)
 
-        console.print(f"[green]✅ Basic analysis successful[/green]")
+        console.print("[green]✅ Basic analysis successful[/green]")
         console.print(f"   Tempo: {features.tempo:.1f} BPM")
         console.print(f"   Key: {features.key} {features.mode}")
         console.print(f"   RMS Energy: {features.rms_energy[0]:.3f}")
@@ -257,13 +251,11 @@ async def run_diagnostics() -> None:
 
     try:
         from samplemind.core.engine.audio_engine import AudioEngine
-        from samplemind.integrations.ai_manager import SampleMindAIManager
-        from samplemind.core.database.mongo import MongoDB
 
         console.print("[green]✅ PASS[/green]")
         tests_passed += 1
     except Exception as e:
-        console.print(f"[red]❌ FAIL[/red]")
+        console.print("[red]❌ FAIL[/red]")
         console.print(f"[dim]  Error: {e}[/dim]")
         tests_failed += 1
 
@@ -274,11 +266,11 @@ async def run_diagnostics() -> None:
     try:
         from samplemind.core.engine.audio_engine import AudioEngine
 
-        engine = AudioEngine()
+        AudioEngine()
         console.print("[green]✅ PASS[/green]")
         tests_passed += 1
     except Exception as e:
-        console.print(f"[red]❌ FAIL[/red]")
+        console.print("[red]❌ FAIL[/red]")
         console.print(f"[dim]  Error: {e}[/dim]")
         tests_failed += 1
 
@@ -291,7 +283,7 @@ async def run_diagnostics() -> None:
         console.print("[green]✅ PASS[/green]")
         tests_passed += 1
     except Exception as e:
-        console.print(f"[red]❌ FAIL[/red]")
+        console.print("[red]❌ FAIL[/red]")
         console.print(f"[dim]  Error: {e}[/dim]")
         tests_failed += 1
 
@@ -307,12 +299,12 @@ async def run_diagnostics() -> None:
         else:
             console.print("[yellow]⚠️  WARN[/yellow]")
             console.print("[dim]  GOOGLE_API_KEY not set (optional)[/dim]")
-    except Exception as e:
-        console.print(f"[red]❌ FAIL[/red]")
+    except Exception:
+        console.print("[red]❌ FAIL[/red]")
         tests_failed += 1
 
     # Summary
-    console.print(f"\n[bold]Summary:[/bold]")
+    console.print("\n[bold]Summary:[/bold]")
     console.print(f"[green]Passed:[/green] {tests_passed}")
     console.print(f"[red]Failed:[/red] {tests_failed}")
 

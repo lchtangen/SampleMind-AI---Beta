@@ -29,7 +29,6 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -38,7 +37,7 @@ logger = logging.getLogger(__name__)
 # ── GM Instrument table (program 0-127) ───────────────────────────────────────
 # Format: (program_number, name, family)
 
-GM_INSTRUMENTS: List[Tuple[int, str, str]] = [
+GM_INSTRUMENTS: list[tuple[int, str, str]] = [
     # Piano (0-7)
     (0, "Acoustic Grand Piano", "Piano"),
     (1, "Bright Acoustic Piano", "Piano"),
@@ -186,10 +185,10 @@ GM_INSTRUMENTS: List[Tuple[int, str, str]] = [
 ]
 
 # Build lookup tables
-_GM_BY_PROGRAM: Dict[int, Tuple[str, str]] = {
+_GM_BY_PROGRAM: dict[int, tuple[str, str]] = {
     prog: (name, family) for prog, name, family in GM_INSTRUMENTS
 }
-_CLAP_PROMPTS: List[str] = [
+_CLAP_PROMPTS: list[str] = [
     f"a {name} instrument sound" for _, name, _ in GM_INSTRUMENTS
 ]
 
@@ -197,11 +196,14 @@ _CLAP_PROMPTS: List[str] = [
 # Each family entry: (centroid_lo, centroid_hi, rms_lo, rms_hi, zcr_lo, zcr_hi)
 # None means "any value accepted"
 
-_FAMILY_HEURISTICS: List[Tuple[str, Dict]] = [
+_FAMILY_HEURISTICS: list[tuple[str, dict]] = [
     ("Percussion", {"is_percussive": True}),
     ("Bass", {"centroid_hi": 1500, "rms_lo": 0.05}),
     ("Synth Lead", {"centroid_lo": 2000, "zcr_lo": 0.08}),
-    ("Synth Pad", {"centroid_lo": 1000, "centroid_hi": 4000, "rms_hi": 0.10, "zcr_hi": 0.06}),
+    (
+        "Synth Pad",
+        {"centroid_lo": 1000, "centroid_hi": 4000, "rms_hi": 0.10, "zcr_hi": 0.06},
+    ),
     ("Piano", {"centroid_lo": 1200, "centroid_hi": 4000, "zcr_lo": 0.05}),
     ("Guitar", {"centroid_lo": 1500, "centroid_hi": 5000, "zcr_lo": 0.07}),
     ("Strings", {"centroid_lo": 1000, "centroid_hi": 6000, "rms_lo": 0.03}),
@@ -218,10 +220,10 @@ class InstrumentResult:
     """128-class GM instrument detection result."""
 
     # Ordered by confidence
-    instruments: List[str] = field(default_factory=list)
-    families: List[str] = field(default_factory=list)
-    midi_programs: List[int] = field(default_factory=list)
-    scores: Dict[str, float] = field(default_factory=dict)
+    instruments: list[str] = field(default_factory=list)
+    families: list[str] = field(default_factory=list)
+    midi_programs: list[int] = field(default_factory=list)
+    scores: dict[str, float] = field(default_factory=dict)
 
     # Top-1 convenience
     primary_instrument: str = "Unknown"
@@ -258,7 +260,7 @@ class InstrumentDetector:
         family_scores = self._heuristic_families(y, sr)
 
         # CLAP fine-grained (optional)
-        clap_scores: Dict[int, float] = {}
+        clap_scores: dict[int, float] = {}
         if self.use_clap:
             clap_scores = self._clap_instrument_scores(y, sr)
 
@@ -289,7 +291,9 @@ class InstrumentDetector:
 
         return result
 
-    def detect_file(self, file_path: str | Path, sample_rate: int = 22050) -> InstrumentResult:
+    def detect_file(
+        self, file_path: str | Path, sample_rate: int = 22050
+    ) -> InstrumentResult:
         """Load and detect instrument from an audio file."""
         try:
             import librosa
@@ -303,7 +307,7 @@ class InstrumentDetector:
     # ── Heuristic ─────────────────────────────────────────────────────────────
 
     @staticmethod
-    def _heuristic_families(y: np.ndarray, sr: int) -> Dict[str, float]:
+    def _heuristic_families(y: np.ndarray, sr: int) -> dict[str, float]:
         """
         Estimate instrument family scores from spectral features.
         Returns dict of family → score (0–1).
@@ -325,7 +329,7 @@ class InstrumentDetector:
             logger.warning("Heuristic feature extraction failed: %s", exc)
             return {"Synth Pad": 0.5}
 
-        scores: Dict[str, float] = {}
+        scores: dict[str, float] = {}
 
         if is_percussive:
             scores["Percussion"] = 0.9
@@ -354,7 +358,7 @@ class InstrumentDetector:
         max_s = max(scores.values()) if scores else 1.0
         return {f: s / max(max_s, 1e-9) for f, s in scores.items()}
 
-    def _clap_instrument_scores(self, y: np.ndarray, sr: int) -> Dict[int, float]:
+    def _clap_instrument_scores(self, y: np.ndarray, sr: int) -> dict[int, float]:
         """
         Score GM programs using CLAP audio-text similarity.
 
@@ -368,8 +372,8 @@ class InstrumentDetector:
 
         try:
             processor, model = self._clap
-            import torch
             import librosa
+            import torch
 
             y_48k = librosa.resample(y, orig_sr=sr, target_sr=48000)
 
@@ -389,29 +393,33 @@ class InstrumentDetector:
             text_emb = text_emb / text_emb.norm(dim=-1, keepdim=True)
             sims = (audio_emb @ text_emb.T).squeeze(0).tolist()
 
-            return {prog: float(sims[i]) for i, (prog, _, _) in enumerate(GM_INSTRUMENTS)}
+            return {
+                prog: float(sims[i]) for i, (prog, _, _) in enumerate(GM_INSTRUMENTS)
+            }
 
         except Exception as exc:
             logger.warning("CLAP instrument detection failed: %s", exc)
             return {}
 
     @staticmethod
-    def _family_to_instrument_scores(family_scores: Dict[str, float]) -> Dict[int, float]:
+    def _family_to_instrument_scores(
+        family_scores: dict[str, float],
+    ) -> dict[int, float]:
         """Convert family confidence to per-program scores for the representative instrument."""
-        instrument_scores: Dict[int, float] = {}
+        instrument_scores: dict[int, float] = {}
         # Map family name → representative GM programs
-        family_representatives: Dict[str, List[int]] = {
-            "Percussion": [116, 117, 118],        # Taiko, Melodic Tom, Synth Drum
+        family_representatives: dict[str, list[int]] = {
+            "Percussion": [116, 117, 118],  # Taiko, Melodic Tom, Synth Drum
             "Percussive": [112, 113, 114],
-            "Bass": [32, 33, 38, 39],             # Acoustic, Electric, Synth Bass
-            "Synth Lead": [80, 81, 82],            # square, saw, calliope
-            "Synth Pad": [88, 89, 90],             # new age, warm, polysynth
-            "Piano": [0, 4, 5],                    # Grand, Elec Piano 1+2
-            "Guitar": [24, 25, 29, 30],            # Acoustic, Overdriven, Distortion
-            "Strings": [40, 48, 50],               # Violin, String Ens, SynthStrings
+            "Bass": [32, 33, 38, 39],  # Acoustic, Electric, Synth Bass
+            "Synth Lead": [80, 81, 82],  # square, saw, calliope
+            "Synth Pad": [88, 89, 90],  # new age, warm, polysynth
+            "Piano": [0, 4, 5],  # Grand, Elec Piano 1+2
+            "Guitar": [24, 25, 29, 30],  # Acoustic, Overdriven, Distortion
+            "Strings": [40, 48, 50],  # Violin, String Ens, SynthStrings
             "Ensemble": [48, 49, 52],
-            "Brass": [56, 60, 61],                 # Trumpet, French Horn, Brass Section
-            "Reed": [64, 65, 66],                  # Sax family
+            "Brass": [56, 60, 61],  # Trumpet, French Horn, Brass Section
+            "Reed": [64, 65, 66],  # Sax family
         }
         for family, score in family_scores.items():
             for prog in family_representatives.get(family, []):
@@ -420,12 +428,12 @@ class InstrumentDetector:
 
     @staticmethod
     def _blend_scores(
-        clap_scores: Dict[int, float],
-        family_scores: Dict[str, float],
-    ) -> Dict[int, float]:
+        clap_scores: dict[int, float],
+        family_scores: dict[str, float],
+    ) -> dict[int, float]:
         """Blend CLAP program scores with heuristic family scores."""
         # Build a family boost mask from heuristic family scores
-        family_representatives: Dict[str, List[int]] = {
+        family_representatives: dict[str, list[int]] = {
             "Percussion": list(range(112, 120)),
             "Percussive": list(range(112, 120)),
             "Bass": list(range(32, 40)),
@@ -438,18 +446,19 @@ class InstrumentDetector:
             "Brass": list(range(56, 64)),
             "Reed": list(range(64, 72)),
         }
-        heuristic_prog_scores: Dict[int, float] = {}
+        heuristic_prog_scores: dict[int, float] = {}
         for family, fam_score in family_scores.items():
             for prog in family_representatives.get(family, []):
-                heuristic_prog_scores[prog] = max(heuristic_prog_scores.get(prog, 0.0), fam_score)
+                heuristic_prog_scores[prog] = max(
+                    heuristic_prog_scores.get(prog, 0.0), fam_score
+                )
 
-        blended: Dict[int, float] = {}
+        blended: dict[int, float] = {}
         all_progs = set(clap_scores) | set(heuristic_prog_scores)
         for prog in all_progs:
-            blended[prog] = (
-                0.65 * clap_scores.get(prog, 0.0)
-                + 0.35 * heuristic_prog_scores.get(prog, 0.0)
-            )
+            blended[prog] = 0.65 * clap_scores.get(
+                prog, 0.0
+            ) + 0.35 * heuristic_prog_scores.get(prog, 0.0)
         return blended
 
 

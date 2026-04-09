@@ -8,7 +8,7 @@ Entry point:
     from samplemind.ai.agents import run_analysis_pipeline, AudioAnalysisState
 """
 
-from samplemind.ai.agents.graph import run_analysis_pipeline, build_graph
+from samplemind.ai.agents.graph import build_graph, run_analysis_pipeline
 from samplemind.ai.agents.state import AudioAnalysisState
 
 __all__ = ["run_analysis_pipeline", "build_graph", "AudioAnalysisState"]

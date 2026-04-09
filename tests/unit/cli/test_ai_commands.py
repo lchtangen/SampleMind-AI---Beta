@@ -9,9 +9,9 @@ Tests cover:
 - API key validation
 """
 
+from unittest.mock import patch
+
 import pytest
-import os
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typer.testing import CliRunner
 
 pytestmark = [pytest.mark.unit, pytest.mark.cli]
@@ -360,7 +360,7 @@ class TestAIErrorHandling:
         ) as mock_validate:
             mock_validate.return_value = False
 
-            result = runner.invoke(
+            runner.invoke(
                 app, ["ai:key", "--provider", "gemini", "--key", "invalid_key"]
             )
 

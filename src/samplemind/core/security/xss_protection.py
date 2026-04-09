@@ -5,10 +5,11 @@ Sanitizes user input to prevent XSS attacks
 
 import html
 import re
-from typing import Optional, Dict, Any
-from pydantic import BaseModel, validator
-from fastapi import Response
+from typing import Any
+
 import bleach
+from fastapi import Response
+from pydantic import BaseModel, validator
 
 
 class XSSProtection:
@@ -182,7 +183,7 @@ class XSSProtection:
         return False
 
     @staticmethod
-    def sanitize_url(url: str) -> Optional[str]:
+    def sanitize_url(url: str) -> str | None:
         """
         Sanitize URL to prevent javascript: and data: URIs
 
@@ -284,7 +285,6 @@ class SafeURL(BaseModel):
 # FastAPI middleware for automatic XSS protection
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import Response as StarletteResponse
 
 
 class XSSProtectionMiddleware(BaseHTTPMiddleware):
@@ -334,10 +334,10 @@ async def get_data():
         "user_name": "<script>alert('xss')</script>John",
         "bio": "I love <b>coding</b>!"
     }
-    
+
     # Sanitize before sending
     safe_data = XSSProtection.sanitize_for_json(data)
-    
+
     return safe_data
 
 # Output:

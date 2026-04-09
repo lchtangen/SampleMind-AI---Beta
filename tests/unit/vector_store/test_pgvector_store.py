@@ -3,10 +3,11 @@ Unit tests for PgVectorStore
 """
 
 import os
-import pytest
-import numpy as np
 from datetime import datetime
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import numpy as np
+import pytest
 
 vector_module = pytest.importorskip(
     "samplemind.core.vector_store.pgvector_store",

@@ -27,7 +27,6 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -42,15 +41,17 @@ class R2StorageProvider:
 
     def __init__(
         self,
-        account_id: Optional[str] = None,
-        access_key_id: Optional[str] = None,
-        secret_access_key: Optional[str] = None,
-        bucket: Optional[str] = None,
-        public_url: Optional[str] = None,
+        account_id: str | None = None,
+        access_key_id: str | None = None,
+        secret_access_key: str | None = None,
+        bucket: str | None = None,
+        public_url: str | None = None,
     ) -> None:
         self.account_id = account_id or os.getenv("R2_ACCOUNT_ID", "")
         self.access_key_id = access_key_id or os.getenv("R2_ACCESS_KEY_ID", "")
-        self.secret_access_key = secret_access_key or os.getenv("R2_SECRET_ACCESS_KEY", "")
+        self.secret_access_key = secret_access_key or os.getenv(
+            "R2_SECRET_ACCESS_KEY", ""
+        )
         self.bucket = bucket or os.getenv("R2_BUCKET", "samplemind-audio")
         self.public_url = (public_url or os.getenv("R2_PUBLIC_URL", "")).rstrip("/")
         self._client: object | None = None
@@ -91,7 +92,7 @@ class R2StorageProvider:
         self,
         local_path: str,
         object_key: str,
-        content_type: Optional[str] = None,
+        content_type: str | None = None,
         public: bool = False,
     ) -> str:
         """

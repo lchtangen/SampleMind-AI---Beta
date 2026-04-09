@@ -10,20 +10,19 @@ Professional audio processing tools:
 """
 
 import logging
-import numpy as np
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 import librosa
+import numpy as np
 import soundfile as sf
 from scipy import signal
 
 logger = logging.getLogger(__name__)
 
 
-class EffectType(str, Enum):
+class EffectType(StrEnum):
     """Supported audio effects"""
 
     EQ = "eq"
@@ -40,9 +39,9 @@ class EffectType(str, Enum):
 class EQSettings:
     """10-band parametric EQ settings"""
 
-    frequencies: List[float] = None  # Hz
-    gains: List[float] = None  # dB
-    q_factors: List[float] = None  # Resonance factor
+    frequencies: list[float] = None  # Hz
+    gains: list[float] = None  # dB
+    q_factors: list[float] = None  # Resonance factor
 
     def __post_init__(self):
         if self.frequencies is None:
@@ -88,13 +87,13 @@ class ReverbSettings:
 class EffectChain:
     """Container for multiple effects"""
 
-    effects: List[Tuple[EffectType, Dict]] = None
+    effects: list[tuple[EffectType, dict]] = None
 
     def __post_init__(self):
         if self.effects is None:
             self.effects = []
 
-    def add_effect(self, effect_type: EffectType, settings: Dict):
+    def add_effect(self, effect_type: EffectType, settings: dict):
         """Add an effect to the chain"""
         self.effects.append((effect_type, settings))
 
@@ -124,7 +123,7 @@ class AudioEffectsProcessor:
         self.sample_rate = sample_rate
         logger.info(f"Audio Effects Processor initialized (SR: {sample_rate}Hz)")
 
-    def load_audio(self, file_path: Path) -> Tuple[np.ndarray, int]:
+    def load_audio(self, file_path: Path) -> tuple[np.ndarray, int]:
         """Load audio file"""
         audio, sr = librosa.load(str(file_path), sr=self.sample_rate, mono=False)
         logger.info(f"Loaded audio: {audio.shape}, SR: {sr}")
@@ -144,9 +143,9 @@ class AudioEffectsProcessor:
     def apply_eq(
         self,
         audio: np.ndarray,
-        frequencies: Optional[List[float]] = None,
-        gains: Optional[List[float]] = None,
-        q_factors: Optional[List[float]] = None,
+        frequencies: list[float] | None = None,
+        gains: list[float] | None = None,
+        q_factors: list[float] | None = None,
     ) -> np.ndarray:
         """
         Apply 10-band parametric EQ to audio.
@@ -166,7 +165,7 @@ class AudioEffectsProcessor:
 
         # Apply each band
         for freq, gain_db, q in zip(
-            settings.frequencies, settings.gains, settings.q_factors
+            settings.frequencies, settings.gains, settings.q_factors, strict=False
         ):
             if abs(gain_db) > 0.01:  # Skip if no gain
                 output = self._apply_peaking_filter(output, freq, gain_db, q)

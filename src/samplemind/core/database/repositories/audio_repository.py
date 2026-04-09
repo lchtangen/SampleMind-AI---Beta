@@ -1,7 +1,5 @@
 """Audio file repository"""
 
-from typing import Optional, List
-from datetime import datetime
 from samplemind.core.database.mongo import AudioFile
 
 
@@ -18,9 +16,9 @@ class AudioRepository:
         sample_rate: int,
         channels: int,
         format: str,
-        user_id: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        metadata: Optional[dict] = None,
+        user_id: str | None = None,
+        tags: list[str] | None = None,
+        metadata: dict | None = None,
     ) -> AudioFile:
         """Create new audio file record"""
         audio_file = AudioFile(
@@ -40,14 +38,14 @@ class AudioRepository:
         return audio_file
 
     @staticmethod
-    async def get_by_id(file_id: str) -> Optional[AudioFile]:
+    async def get_by_id(file_id: str) -> AudioFile | None:
         """Get audio file by ID"""
         return await AudioFile.find_one(AudioFile.file_id == file_id)
 
     @staticmethod
     async def get_by_user(
         user_id: str, skip: int = 0, limit: int = 50
-    ) -> List[AudioFile]:
+    ) -> list[AudioFile]:
         """Get all audio files for a user"""
         return (
             await AudioFile.find(AudioFile.user_id == user_id)
@@ -57,12 +55,12 @@ class AudioRepository:
         )
 
     @staticmethod
-    async def list_all(skip: int = 0, limit: int = 50) -> List[AudioFile]:
+    async def list_all(skip: int = 0, limit: int = 50) -> list[AudioFile]:
         """List all audio files with pagination"""
         return await AudioFile.find_all().skip(skip).limit(limit).to_list()
 
     @staticmethod
-    async def update(file_id: str, **kwargs) -> Optional[AudioFile]:
+    async def update(file_id: str, **kwargs) -> AudioFile | None:
         """Update audio file"""
         audio_file = await AudioFile.find_one(AudioFile.file_id == file_id)
         if audio_file:
@@ -87,8 +85,8 @@ class AudioRepository:
 
     @staticmethod
     async def search_by_tags(
-        tags: List[str], skip: int = 0, limit: int = 50
-    ) -> List[AudioFile]:
+        tags: list[str], skip: int = 0, limit: int = 50
+    ) -> list[AudioFile]:
         """Search audio files by tags"""
         return (
             await AudioFile.find(AudioFile.tags.in_(tags))

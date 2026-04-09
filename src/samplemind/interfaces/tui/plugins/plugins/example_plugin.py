@@ -4,12 +4,12 @@ Demonstrates basic plugin structure and hooks
 """
 
 import logging
-from typing import Dict, Any
+from typing import Any
 
 from samplemind.interfaces.tui.plugins.plugin_base import (
-    TUIPlugin,
-    PluginMetadata,
     PluginHook,
+    PluginMetadata,
+    TUIPlugin,
 )
 
 logger = logging.getLogger(__name__)
@@ -36,7 +36,7 @@ class ExamplePlugin(TUIPlugin):
         self.analysis_count = 0
         self.settings_changes = 0
 
-    def initialize(self, config: Dict[str, Any]) -> bool:
+    def initialize(self, config: dict[str, Any]) -> bool:
         """Initialize the plugin"""
         logger.info(f"Initializing {self.metadata.name}")
         self.config = config
@@ -79,7 +79,7 @@ class ExamplePlugin(TUIPlugin):
             f"Setting: {setting_name} = {new_value}"
         )
 
-    def get_config_schema(self) -> Dict[str, Any]:
+    def get_config_schema(self) -> dict[str, Any]:
         """Get configuration schema"""
         return {
             "enabled": {"type": "boolean", "default": True},
@@ -90,7 +90,7 @@ class ExamplePlugin(TUIPlugin):
             },
         }
 
-    def validate_config(self, config: Dict[str, Any]) -> bool:
+    def validate_config(self, config: dict[str, Any]) -> bool:
         """Validate configuration"""
         if "log_level" in config:
             valid_levels = ["debug", "info", "warning", "error"]

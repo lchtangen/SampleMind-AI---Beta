@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -8,10 +8,10 @@ class CollectionBase(BaseModel):
     """Base schema for Collection"""
 
     name: str = Field(..., min_length=1, max_length=255)
-    description: Optional[str] = None
+    description: str | None = None
     is_public: bool = False
-    tags: List[str] = []
-    metadata: Dict[str, Any] = {}
+    tags: list[str] = []
+    metadata: dict[str, Any] = {}
 
 
 class CollectionCreate(CollectionBase):
@@ -23,11 +23,11 @@ class CollectionCreate(CollectionBase):
 class CollectionUpdate(BaseModel):
     """Schema for updating a collection"""
 
-    name: Optional[str] = Field(None, min_length=1, max_length=255)
-    description: Optional[str] = None
-    is_public: Optional[bool] = None
-    tags: Optional[List[str]] = None
-    metadata: Optional[Dict[str, Any]] = None
+    name: str | None = Field(None, min_length=1, max_length=255)
+    description: str | None = None
+    is_public: bool | None = None
+    tags: list[str] | None = None
+    metadata: dict[str, Any] | None = None
 
 
 class CollectionResponse(CollectionBase):

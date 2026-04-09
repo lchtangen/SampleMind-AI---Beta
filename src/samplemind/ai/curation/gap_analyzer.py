@@ -21,15 +21,19 @@ from __future__ import annotations
 
 import logging
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
 # Target distribution targets (what a "complete" library looks like)
 TARGET_ENERGY_DIST = {"low": 0.25, "mid": 0.45, "high": 0.30}
 TARGET_MOOD_DIST = {
-    "dark": 0.20, "chill": 0.18, "aggressive": 0.15,
-    "euphoric": 0.15, "melancholic": 0.12, "neutral": 0.20,
+    "dark": 0.20,
+    "chill": 0.18,
+    "aggressive": 0.15,
+    "euphoric": 0.15,
+    "melancholic": 0.12,
+    "neutral": 0.20,
 }
 COMMON_KEYS = ["C", "Cm", "Am", "Dm", "Fm", "Gm", "Bb", "Eb", "F", "G", "D"]
 COMMON_BPM_RANGES = [(60, 90), (90, 120), (120, 140), (140, 160), (160, 200)]
@@ -38,23 +42,25 @@ COMMON_BPM_RANGES = [(60, 90), (90, 120), (120, 140), (140, 160), (160, 200)]
 @dataclass
 class Gap:
     """A single identified gap in the library."""
-    dimension: str          # "energy", "mood", "key", "bpm_range"
-    value: str              # The missing value (e.g. "low", "Fm", "140-160")
-    current_pct: float      # Current coverage percentage
-    target_pct: float       # Ideal coverage percentage
-    deficit: float          # target_pct - current_pct
-    severity: str           # "critical" | "moderate" | "minor"
-    suggestion: str         # Recommended sample type to add
+
+    dimension: str  # "energy", "mood", "key", "bpm_range"
+    value: str  # The missing value (e.g. "low", "Fm", "140-160")
+    current_pct: float  # Current coverage percentage
+    target_pct: float  # Ideal coverage percentage
+    deficit: float  # target_pct - current_pct
+    severity: str  # "critical" | "moderate" | "minor"
+    suggestion: str  # Recommended sample type to add
 
 
 @dataclass
 class GapReport:
     """Full gap analysis report."""
+
     total_samples: int
     gaps: list[Gap]
     summary: str
     suggestions: list[str]  # 5 specific pack/sample suggestions
-    coverage_score: float   # 0–100 overall coverage score
+    coverage_score: float  # 0–100 overall coverage score
     model_used: str = "rules"
 
 
@@ -99,15 +105,17 @@ class GapAnalyzer:
             actual = energy_counts.get(level, 0) / n
             deficit = target - actual
             if deficit > 0.05:
-                gaps.append(Gap(
-                    dimension="energy",
-                    value=level,
-                    current_pct=round(actual * 100, 1),
-                    target_pct=round(target * 100, 1),
-                    deficit=round(deficit * 100, 1),
-                    severity=_severity(deficit),
-                    suggestion=f"Add more {level}-energy samples (loops, one-shots)",
-                ))
+                gaps.append(
+                    Gap(
+                        dimension="energy",
+                        value=level,
+                        current_pct=round(actual * 100, 1),
+                        target_pct=round(target * 100, 1),
+                        deficit=round(deficit * 100, 1),
+                        severity=_severity(deficit),
+                        suggestion=f"Add more {level}-energy samples (loops, one-shots)",
+                    )
+                )
 
         # Mood distribution analysis
         all_moods: list[str] = []
@@ -120,29 +128,35 @@ class GapAnalyzer:
             actual = mood_counts.get(mood, 0) / max(len(all_moods), 1)
             deficit = target - actual
             if deficit > 0.05:
-                gaps.append(Gap(
-                    dimension="mood",
-                    value=mood,
-                    current_pct=round(actual * 100, 1),
-                    target_pct=round(target * 100, 1),
-                    deficit=round(deficit * 100, 1),
-                    severity=_severity(deficit),
-                    suggestion=f"Add more {mood} mood samples",
-                ))
+                gaps.append(
+                    Gap(
+                        dimension="mood",
+                        value=mood,
+                        current_pct=round(actual * 100, 1),
+                        target_pct=round(target * 100, 1),
+                        deficit=round(deficit * 100, 1),
+                        severity=_severity(deficit),
+                        suggestion=f"Add more {mood} mood samples",
+                    )
+                )
 
         # Key coverage analysis
-        keys_present = {(s.get("key") or "").strip() for s in sample_library if s.get("key")}
+        keys_present = {
+            (s.get("key") or "").strip() for s in sample_library if s.get("key")
+        }
         for key in COMMON_KEYS:
             if key not in keys_present:
-                gaps.append(Gap(
-                    dimension="key",
-                    value=key,
-                    current_pct=0.0,
-                    target_pct=5.0,
-                    deficit=5.0,
-                    severity="minor",
-                    suggestion=f"Add samples in key {key} for harmonic diversity",
-                ))
+                gaps.append(
+                    Gap(
+                        dimension="key",
+                        value=key,
+                        current_pct=0.0,
+                        target_pct=5.0,
+                        deficit=5.0,
+                        severity="minor",
+                        suggestion=f"Add samples in key {key} for harmonic diversity",
+                    )
+                )
 
         # BPM range coverage
         bpms = [s.get("bpm") for s in sample_library if s.get("bpm")]
@@ -150,15 +164,17 @@ class GapAnalyzer:
             count = sum(1 for b in bpms if lo <= b < hi)
             pct = count / max(len(bpms), 1) * 100
             if pct < 10.0:
-                gaps.append(Gap(
-                    dimension="bpm_range",
-                    value=f"{lo}–{hi}",
-                    current_pct=round(pct, 1),
-                    target_pct=15.0,
-                    deficit=round(15.0 - pct, 1),
-                    severity=_severity((15.0 - pct) / 100),
-                    suggestion=f"Add samples at {lo}–{hi} BPM",
-                ))
+                gaps.append(
+                    Gap(
+                        dimension="bpm_range",
+                        value=f"{lo}–{hi}",
+                        current_pct=round(pct, 1),
+                        target_pct=15.0,
+                        deficit=round(15.0 - pct, 1),
+                        severity=_severity((15.0 - pct) / 100),
+                        suggestion=f"Add samples at {lo}–{hi} BPM",
+                    )
+                )
 
         # Sort by severity
         severity_order = {"critical": 0, "moderate": 1, "minor": 2}
@@ -173,7 +189,9 @@ class GapAnalyzer:
         top_gaps = gaps[:5]
         suggestions = [g.suggestion for g in top_gaps]
         if not suggestions:
-            suggestions = ["Library coverage looks good! Add more variety to expand options."]
+            suggestions = [
+                "Library coverage looks good! Add more variety to expand options."
+            ]
 
         # Generate summary with LiteLLM
         summary, model_used = await self._generate_summary(
@@ -223,7 +241,10 @@ class GapAnalyzer:
                 max_tokens=120,
                 temperature=0.6,
             )
-            return response.choices[0].message.content.strip(), response.model or "litellm"
+            return (
+                response.choices[0].message.content.strip(),
+                response.model or "litellm",
+            )
 
         except Exception as exc:
             logger.debug("LiteLLM gap summary failed: %s", exc)

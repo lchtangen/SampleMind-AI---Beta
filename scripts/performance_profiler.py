@@ -7,15 +7,15 @@ Usage:
     python scripts/performance_profiler.py --output docs/PERFORMANCE_ANALYSIS.md
 """
 
-import sys
-import time
-import cProfile
-import pstats
-import io
-from pathlib import Path
-import tempfile
 import argparse
-from typing import Any, Dict, List, Tuple
+import cProfile
+import io
+import pstats
+import sys
+import tempfile
+import time
+from pathlib import Path
+from typing import Any
 
 import numpy as np
 import soundfile as sf
@@ -23,10 +23,12 @@ import soundfile as sf
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from samplemind.core.engine.audio_engine import AudioEngine, AnalysisLevel
+from samplemind.core.database.chroma import (
+    init_chromadb,
+    query_similar,
+)
+from samplemind.core.engine.audio_engine import AnalysisLevel, AudioEngine
 from samplemind.core.engine.neural_engine import NeuralFeatureExtractor
-from samplemind.core.database.chroma import init_chromadb, get_collection
-from samplemind.core.database.chroma import add_embedding, query_similar
 
 
 class PerformanceProfiler:
@@ -34,13 +36,13 @@ class PerformanceProfiler:
 
     def __init__(self, output_file: str = None):
         self.output_file = output_file
-        self.results: Dict[str, Any] = {}
-        self.profiling_data: List[Tuple[str, pstats.Stats]] = []
+        self.results: dict[str, Any] = {}
+        self.profiling_data: list[tuple[str, pstats.Stats]] = []
         self.temp_dir = tempfile.mkdtemp()
 
     def create_test_audio(
         self, duration: int = 2, sr: int = 44100
-    ) -> Tuple[np.ndarray, int]:
+    ) -> tuple[np.ndarray, int]:
         """Create synthetic test audio"""
         t = np.linspace(0, duration, sr * duration)
         # Electronic sound with multiple frequencies
@@ -51,7 +53,7 @@ class PerformanceProfiler:
         ).astype(np.float32)
         return audio, sr
 
-    def profile_audio_analysis(self) -> Dict[str, float]:
+    def profile_audio_analysis(self) -> dict[str, float]:
         """Profile audio analysis at different levels"""
         print("📊 Profiling Audio Analysis Pipeline...")
 
@@ -74,7 +76,7 @@ class PerformanceProfiler:
             start = time.time()
             profiler.enable()
 
-            features = engine.analyze_audio(audio_path, level=level)
+            engine.analyze_audio(audio_path, level=level)
 
             profiler.disable()
             elapsed = time.time() - start
@@ -91,7 +93,7 @@ class PerformanceProfiler:
 
         return results
 
-    def profile_neural_embedding(self) -> Dict[str, float]:
+    def profile_neural_embedding(self) -> dict[str, float]:
         """Profile neural embedding generation"""
         print("\n🧠 Profiling Neural Embedding Generation...")
 
@@ -109,7 +111,7 @@ class PerformanceProfiler:
         start = time.time()
         profiler.enable()
 
-        embedding = extractor.generate_embedding(audio_path)
+        extractor.generate_embedding(audio_path)
 
         profiler.disable()
         elapsed = time.time() - start
@@ -128,7 +130,7 @@ class PerformanceProfiler:
         start = time.time()
         profiler.enable()
 
-        text_embedding = extractor.generate_text_embedding("electronic drum loop")
+        extractor.generate_text_embedding("electronic drum loop")
 
         profiler.disable()
         elapsed = time.time() - start
@@ -144,7 +146,7 @@ class PerformanceProfiler:
 
         return results
 
-    def profile_semantic_search(self) -> Dict[str, float]:
+    def profile_semantic_search(self) -> dict[str, float]:
         """Profile semantic search operations"""
         print("\n🔍 Profiling Semantic Search...")
 
@@ -196,9 +198,9 @@ class PerformanceProfiler:
             profiler.enable()
 
             try:
-                result = asyncio.run(query())
-            except:
-                result = None
+                asyncio.run(query())
+            except Exception:
+                pass
 
             profiler.disable()
             elapsed = time.time() - start
@@ -214,7 +216,7 @@ class PerformanceProfiler:
 
         return results
 
-    def profile_batch_processing(self) -> Dict[str, float]:
+    def profile_batch_processing(self) -> dict[str, float]:
         """Profile batch processing of multiple files"""
         print("\n📦 Profiling Batch Processing...")
 
@@ -234,7 +236,7 @@ class PerformanceProfiler:
         start = time.time()
         profiler.enable()
 
-        batch_results = engine.batch_analyze(audio_files, level=AnalysisLevel.STANDARD)
+        engine.batch_analyze(audio_files, level=AnalysisLevel.STANDARD)
 
         profiler.disable()
         elapsed = time.time() - start

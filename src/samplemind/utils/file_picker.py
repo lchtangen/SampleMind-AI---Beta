@@ -6,14 +6,13 @@ Supports: macOS (Finder), Linux (Zenity/KDialog/Tkinter), Windows (Tkinter/Nativ
 This module provides native file/folder selection dialogs for all major platforms.
 """
 
-import sys
-import subprocess
+import logging
+import os
 import platform
 import shutil
-import os
+import subprocess
+import sys
 from pathlib import Path
-from typing import Optional, List, Union
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +47,7 @@ class PlatformDetector:
     def has_tkinter() -> bool:
         """Check if tkinter is available"""
         try:
-            import tkinter
+            import tkinter  # noqa: F401
 
             return True
         except ImportError:
@@ -76,9 +75,9 @@ class MacOSFilePicker:
     @staticmethod
     def choose_file(
         title: str = "Choose File",
-        file_types: Optional[List[str]] = None,
-        initial_directory: Optional[Path] = None,
-    ) -> Optional[Path]:
+        file_types: list[str] | None = None,
+        initial_directory: Path | None = None,
+    ) -> Path | None:
         """Open macOS Finder file chooser"""
         applescript_parts = [
             'tell application "System Events"',
@@ -119,8 +118,8 @@ class MacOSFilePicker:
 
     @staticmethod
     def choose_folder(
-        title: str = "Choose Folder", initial_directory: Optional[Path] = None
-    ) -> Optional[Path]:
+        title: str = "Choose Folder", initial_directory: Path | None = None
+    ) -> Path | None:
         """Open macOS Finder folder chooser"""
         applescript_parts = [
             'tell application "System Events"',
@@ -162,9 +161,9 @@ class LinuxFilePicker:
     @staticmethod
     def choose_file_zenity(
         title: str = "Choose File",
-        file_filter: Optional[str] = None,
-        initial_directory: Optional[Path] = None,
-    ) -> Optional[Path]:
+        file_filter: str | None = None,
+        initial_directory: Path | None = None,
+    ) -> Path | None:
         """Use Zenity (GNOME/GTK) file chooser"""
         cmd = ["zenity", "--file-selection", f"--title={title}"]
 
@@ -185,8 +184,8 @@ class LinuxFilePicker:
 
     @staticmethod
     def choose_folder_zenity(
-        title: str = "Choose Folder", initial_directory: Optional[Path] = None
-    ) -> Optional[Path]:
+        title: str = "Choose Folder", initial_directory: Path | None = None
+    ) -> Path | None:
         """Use Zenity folder chooser"""
         cmd = ["zenity", "--file-selection", "--directory", f"--title={title}"]
 
@@ -205,9 +204,9 @@ class LinuxFilePicker:
     @staticmethod
     def choose_file_kdialog(
         title: str = "Choose File",
-        file_filter: Optional[str] = None,
-        initial_directory: Optional[Path] = None,
-    ) -> Optional[Path]:
+        file_filter: str | None = None,
+        initial_directory: Path | None = None,
+    ) -> Path | None:
         """Use KDialog (KDE/Plasma) file chooser"""
         cmd = ["kdialog", "--getopenfilename"]
 
@@ -232,8 +231,8 @@ class LinuxFilePicker:
 
     @staticmethod
     def choose_folder_kdialog(
-        title: str = "Choose Folder", initial_directory: Optional[Path] = None
-    ) -> Optional[Path]:
+        title: str = "Choose Folder", initial_directory: Path | None = None
+    ) -> Path | None:
         """Use KDialog folder chooser"""
         cmd = ["kdialog", "--getexistingdirectory"]
 
@@ -260,9 +259,9 @@ class TkinterFilePicker:
     @staticmethod
     def choose_file(
         title: str = "Choose File",
-        file_types: Optional[List[tuple]] = None,
-        initial_directory: Optional[Path] = None,
-    ) -> Optional[Path]:
+        file_types: list[tuple] | None = None,
+        initial_directory: Path | None = None,
+    ) -> Path | None:
         """Use Tkinter file chooser"""
         try:
             import tkinter as tk
@@ -292,8 +291,8 @@ class TkinterFilePicker:
 
     @staticmethod
     def choose_folder(
-        title: str = "Choose Folder", initial_directory: Optional[Path] = None
-    ) -> Optional[Path]:
+        title: str = "Choose Folder", initial_directory: Path | None = None
+    ) -> Path | None:
         """Use Tkinter folder chooser"""
         try:
             import tkinter as tk
@@ -333,8 +332,8 @@ class CrossPlatformFilePicker:
         self.detector = PlatformDetector()
 
     def choose_file_or_folder(
-        self, initial_directory: Optional[Union[str, Path]] = None
-    ) -> Optional[Path]:
+        self, initial_directory: str | Path | None = None
+    ) -> Path | None:
         """
         Let user choose whether to select a FILE or FOLDER, then open appropriate dialog.
         Works on ALL platforms: Linux, macOS, Windows
@@ -457,9 +456,9 @@ class CrossPlatformFilePicker:
     def choose_file(
         self,
         title: str = "Choose File",
-        file_types: Optional[List[str]] = None,
-        initial_directory: Optional[Union[str, Path]] = None,
-    ) -> Optional[Path]:
+        file_types: list[str] | None = None,
+        initial_directory: str | Path | None = None,
+    ) -> Path | None:
         """
         Universal file chooser - works on all platforms.
         Uses ONLY the best available method (no fallbacks that open multiple dialogs)
@@ -517,8 +516,8 @@ class CrossPlatformFilePicker:
     def choose_folder(
         self,
         title: str = "Choose Folder",
-        initial_directory: Optional[Union[str, Path]] = None,
-    ) -> Optional[Path]:
+        initial_directory: str | Path | None = None,
+    ) -> Path | None:
         """
         Universal folder chooser - works on all platforms.
         Uses ONLY the best available method (no fallbacks that open multiple dialogs)
@@ -556,7 +555,7 @@ class CrossPlatformFilePicker:
         # Unknown OS - text input
         return self._text_input_folder(title)
 
-    def _text_input_file(self, prompt: str) -> Optional[Path]:
+    def _text_input_file(self, prompt: str) -> Path | None:
         """Fallback text input for file"""
         try:
             path_str = input(f"{prompt} - Enter file path: ").strip()
@@ -568,7 +567,7 @@ class CrossPlatformFilePicker:
             pass
         return None
 
-    def _text_input_folder(self, prompt: str) -> Optional[Path]:
+    def _text_input_folder(self, prompt: str) -> Path | None:
         """Fallback text input for folder"""
         try:
             path_str = input(f"{prompt} - Enter folder path: ").strip()
@@ -607,9 +606,7 @@ def get_file_picker() -> CrossPlatformFilePicker:
 
 
 # Convenience functions for easy use in CLI/API
-def select_file_or_folder(
-    initial_directory: Optional[Union[str, Path]] = None
-) -> Optional[Path]:
+def select_file_or_folder(initial_directory: str | Path | None = None) -> Path | None:
     """
     Let user choose between file or folder, then select it.
     Perfect for beta release - gives users the choice!
@@ -621,8 +618,8 @@ def select_file_or_folder(
 
 def select_audio_file(
     title: str = "Choose Audio File",
-    initial_directory: Optional[Union[str, Path]] = None,
-) -> Optional[Path]:
+    initial_directory: str | Path | None = None,
+) -> Path | None:
     """Select an audio file using the best available method (Zenity on Ubuntu)"""
     picker = get_file_picker()
     return picker.choose_file(
@@ -634,16 +631,16 @@ def select_audio_file(
 
 def select_directory(
     title: str = "Choose Directory",
-    initial_directory: Optional[Union[str, Path]] = None,
-) -> Optional[Path]:
+    initial_directory: str | Path | None = None,
+) -> Path | None:
     """Select a directory using the best available method (Zenity on Ubuntu)"""
     picker = get_file_picker()
     return picker.choose_folder(title=title, initial_directory=initial_directory)
 
 
 def select_any_file(
-    title: str = "Choose File", initial_directory: Optional[Union[str, Path]] = None
-) -> Optional[Path]:
+    title: str = "Choose File", initial_directory: str | Path | None = None
+) -> Path | None:
     """Select any file using the best available method (Zenity on Ubuntu)"""
     picker = get_file_picker()
     return picker.choose_file(

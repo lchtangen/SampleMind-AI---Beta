@@ -6,10 +6,9 @@ Handles file operations across different storage providers (Local, Cloud, etc.)
 import abc
 import asyncio
 import logging
-import os
 import shutil
 from pathlib import Path
-from typing import BinaryIO, List, Optional, TypedDict, Union
+from typing import BinaryIO, TypedDict
 
 logger = logging.getLogger(__name__)
 
@@ -19,20 +18,20 @@ class FileMetadata(TypedDict):
 
     size: int
     mtime: float
-    hash: Optional[str] = None
+    hash: str | None = None
 
 
 class StorageProvider(abc.ABC):
     """Abstract base class for storage providers"""
 
     @abc.abstractmethod
-    async def get_metadata(self, remote_path: str) -> Optional[FileMetadata]:
+    async def get_metadata(self, remote_path: str) -> FileMetadata | None:
         """Get metadata for a file (size, mtime, hash). Returns None if not found."""
         pass
 
     @abc.abstractmethod
     async def upload_file(
-        self, content: Union[BinaryIO, bytes, Path], remote_path: str
+        self, content: BinaryIO | bytes | Path, remote_path: str
     ) -> str:
         """Upload file to storage"""
         pass
@@ -43,7 +42,7 @@ class StorageProvider(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def list_files(self, prefix: str = "") -> List[str]:
+    async def list_files(self, prefix: str = "") -> list[str]:
         """List files in storage"""
         pass
 
@@ -60,7 +59,7 @@ class LocalStorageProvider(StorageProvider):
         self.root_dir = Path(root_dir).resolve()
         self.root_dir.mkdir(parents=True, exist_ok=True)
 
-    async def get_metadata(self, remote_path: str) -> Optional[FileMetadata]:
+    async def get_metadata(self, remote_path: str) -> FileMetadata | None:
         target_path = self.root_dir / remote_path
         if not target_path.exists() or not target_path.is_file():
             return None
@@ -73,7 +72,7 @@ class LocalStorageProvider(StorageProvider):
         )
 
     async def upload_file(
-        self, content: Union[BinaryIO, bytes, Path], remote_path: str
+        self, content: BinaryIO | bytes | Path, remote_path: str
     ) -> str:
         dest_path = self.root_dir / remote_path
         dest_path.parent.mkdir(parents=True, exist_ok=True)
@@ -100,7 +99,7 @@ class LocalStorageProvider(StorageProvider):
         shutil.copy2(src_path, local_path)
         return True
 
-    async def list_files(self, prefix: str = "") -> List[str]:
+    async def list_files(self, prefix: str = "") -> list[str]:
         files = []
         search_dir = self.root_dir / prefix
         if not search_dir.exists():
@@ -128,12 +127,12 @@ class MockS3StorageProvider(StorageProvider):
         self.region = region
         logger.info(f"Initialized Mock S3 Provider: {bucket_name}")
 
-    async def get_metadata(self, remote_path: str) -> Optional[FileMetadata]:
+    async def get_metadata(self, remote_path: str) -> FileMetadata | None:
         # In a real mock, this would check an internal dict
         return None
 
     async def upload_file(
-        self, content: Union[BinaryIO, bytes, Path], remote_path: str
+        self, content: BinaryIO | bytes | Path, remote_path: str
     ) -> str:
         logger.info(f"[MOCK] Uploading to S3://{self.bucket}/{remote_path}")
         return f"s3://{self.bucket}/{remote_path}"
@@ -142,7 +141,7 @@ class MockS3StorageProvider(StorageProvider):
         logger.info(f"[MOCK] Downloading from S3://{self.bucket}/{remote_path}")
         return True
 
-    async def list_files(self, prefix: str = "") -> List[str]:
+    async def list_files(self, prefix: str = "") -> list[str]:
         return []
 
     async def delete_file(self, remote_path: str) -> bool:
@@ -170,7 +169,7 @@ class S3StorageProvider(StorageProvider):
         self.ClientError = ClientError
         logger.info(f"Initialized S3 Provider: {bucket_name} ({region})")
 
-    async def get_metadata(self, remote_path: str) -> Optional[FileMetadata]:
+    async def get_metadata(self, remote_path: str) -> FileMetadata | None:
         try:
             response = await asyncio.to_thread(
                 self.s3_client.head_object, Bucket=self.bucket_name, Key=remote_path
@@ -186,7 +185,7 @@ class S3StorageProvider(StorageProvider):
             return None
 
     async def upload_file(
-        self, content: Union[BinaryIO, bytes, Path], remote_path: str
+        self, content: BinaryIO | bytes | Path, remote_path: str
     ) -> str:
         try:
             if isinstance(content, Path) or isinstance(content, str):
@@ -233,7 +232,7 @@ class S3StorageProvider(StorageProvider):
             logger.error(f"S3 Download Error: {e}")
             return False
 
-    async def list_files(self, prefix: str = "") -> List[str]:
+    async def list_files(self, prefix: str = "") -> list[str]:
         try:
             paginator = self.s3_client.get_paginator("list_objects_v2")
             files = []

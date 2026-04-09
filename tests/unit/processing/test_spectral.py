@@ -1,13 +1,13 @@
 """Unit tests for real-time spectral analyzer."""
 
-import pytest
 import numpy as np
+import pytest
 
 from samplemind.core.processing.realtime_spectral import (
-    RealtimeSpectral,
-    PitchDetector,
-    SpectrumAnalyzer,
     FrequencyScale,
+    PitchDetector,
+    RealtimeSpectral,
+    SpectrumAnalyzer,
 )
 
 
@@ -173,8 +173,8 @@ class TestSpectrumAnalyzer:
     def test_global_instance(self):
         """Test global analyzer instance"""
         from samplemind.core.processing.realtime_spectral import (
-            init_spectral,
             get_spectral,
+            init_spectral,
         )
 
         spectral1 = init_spectral()

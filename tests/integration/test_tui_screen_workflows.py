@@ -9,15 +9,14 @@ Tests cover end-to-end user workflows:
 - Results display
 """
 
-import asyncio
 import os
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from samplemind.core.engine.audio_engine import AudioFeatures, AnalysisLevel
+from samplemind.core.engine.audio_engine import AnalysisLevel
 
 
 class MockAudioFeatures:

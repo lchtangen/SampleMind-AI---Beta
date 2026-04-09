@@ -120,7 +120,7 @@ class PerformanceScreen(Screen):
         except ImportError:
             metrics = [("psutil", "Not installed", "-", "[yellow]UNAVAILABLE[/]")]
             self.app.call_from_thread(self._update_table, metrics)
-        except Exception as exc:
+        except Exception:
             self.app.call_from_thread(
                 lambda: self.notify(f"Metrics error: {exc}", severity="warning")
             )

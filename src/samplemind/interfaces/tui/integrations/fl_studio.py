@@ -5,9 +5,9 @@ Generate FL Studio presets and project exports from analysis
 
 import json
 import logging
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +22,9 @@ class FLStudioPreset:
     mode: str
     sample_name: str
     analysis_id: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         return {
             "name": self.name,
@@ -42,8 +42,8 @@ class FLStudioIntegration:
 
     def __init__(self) -> None:
         """Initialize FL Studio integration"""
-        self.presets: Dict[str, FLStudioPreset] = {}
-        self.export_path: Optional[Path] = None
+        self.presets: dict[str, FLStudioPreset] = {}
+        self.export_path: Path | None = None
 
     def create_sampler_preset(
         self,
@@ -53,7 +53,7 @@ class FLStudioIntegration:
         key: str,
         mode: str,
         analysis_id: str,
-        features: Optional[Dict[str, Any]] = None,
+        features: dict[str, Any] | None = None,
     ) -> FLStudioPreset:
         """
         Create FL Studio Sampler preset from audio analysis
@@ -98,8 +98,8 @@ class FLStudioIntegration:
         return preset
 
     def create_channel_rack_config(
-        self, presets: List[FLStudioPreset]
-    ) -> Dict[str, Any]:
+        self, presets: list[FLStudioPreset]
+    ) -> dict[str, Any]:
         """
         Create FL Studio Channel Rack configuration
 
@@ -137,10 +137,10 @@ class FLStudioIntegration:
 
     def create_playlist_arrangement(
         self,
-        presets: List[FLStudioPreset],
+        presets: list[FLStudioPreset],
         bpm: float = 120,
         time_signature: tuple = (4, 4),
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Create FL Studio Playlist arrangement
 
@@ -179,7 +179,7 @@ class FLStudioIntegration:
             "arrangement": self._create_arrangement_order(patterns),
         }
 
-    def generate_midi_export(self, preset: FLStudioPreset) -> Dict[str, Any]:
+    def generate_midi_export(self, preset: FLStudioPreset) -> dict[str, Any]:
         """
         Generate MIDI data from preset (audio-to-MIDI conversion info)
 
@@ -209,10 +209,10 @@ class FLStudioIntegration:
 
     def export_project_template(
         self,
-        presets: List[FLStudioPreset],
+        presets: list[FLStudioPreset],
         project_name: str,
         bpm: float = 120,
-        output_dir: Optional[str] = None,
+        output_dir: str | None = None,
     ) -> Path:
         """
         Export complete FL Studio project template
@@ -279,9 +279,9 @@ class FLStudioIntegration:
     def suggest_compatible_samples(
         self,
         current_preset: FLStudioPreset,
-        available_presets: List[FLStudioPreset],
+        available_presets: list[FLStudioPreset],
         max_suggestions: int = 5,
-    ) -> List[FLStudioPreset]:
+    ) -> list[FLStudioPreset]:
         """
         Suggest compatible samples for the current preset
 
@@ -336,7 +336,7 @@ class FLStudioIntegration:
         return "C" not in key or "♯" in key or "♭" in key
 
     @staticmethod
-    def _generate_notes_from_preset(preset: FLStudioPreset) -> List[Dict]:
+    def _generate_notes_from_preset(preset: FLStudioPreset) -> list[dict]:
         """Generate MIDI note sequence from preset"""
         # Simple note generation based on key
         notes = [
@@ -348,7 +348,7 @@ class FLStudioIntegration:
         return notes
 
     @staticmethod
-    def _create_arrangement_order(patterns: List[Dict]) -> List[int]:
+    def _create_arrangement_order(patterns: list[dict]) -> list[int]:
         """Create arrangement order for patterns"""
         return list(range(1, len(patterns) + 1))
 
@@ -361,7 +361,7 @@ class FLStudioIntegration:
 
 
 # Global singleton instance
-_fl_studio_integration: Optional[FLStudioIntegration] = None
+_fl_studio_integration: FLStudioIntegration | None = None
 
 
 def get_fl_studio_integration() -> FLStudioIntegration:

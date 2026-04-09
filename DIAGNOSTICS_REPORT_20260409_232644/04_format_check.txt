@@ -1,0 +1,11 @@
+Checking black formatting...
+All done! ✨ 🍰 ✨
+409 files would be left unchanged.
+
+Checking isort import sorting...
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/interfaces/cli/commands/__init__.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/src/samplemind/interfaces/api/main.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/tests/audio/test_audio_conversion.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/tests/audio/test_audio_processor.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/tests/audio/test_audio_processor_integration.py Imports are incorrectly sorted and/or formatted.
+ERROR: /home/lchtangen/projects/ai/SampleMind-AI---Beta/tests/integration/test_batch_processing.py Imports are incorrectly sorted and/or formatted.

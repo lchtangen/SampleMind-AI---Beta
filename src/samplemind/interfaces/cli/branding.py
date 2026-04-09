@@ -14,14 +14,12 @@ Features:
 """
 
 import random
-from pathlib import Path
-from typing import Optional
 
+from rich.align import Align
 from rich.console import Console
 from rich.panel import Panel
-from rich.text import Text
-from rich.align import Align
 from rich.table import Table
+from rich.text import Text
 
 console = Console()
 
@@ -326,7 +324,7 @@ def print_feature_highlights() -> None:
 
 
 def print_command_suggestions(
-    last_command: Optional[str] = None, context: Optional[str] = None
+    last_command: str | None = None, context: str | None = None
 ) -> None:
     """
     Print contextual command suggestions

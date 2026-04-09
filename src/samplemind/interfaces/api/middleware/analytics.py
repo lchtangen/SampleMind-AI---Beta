@@ -4,9 +4,9 @@ Analytics middleware for FastAPI
 Automatically tracks API requests and performance
 """
 
-import time
 import logging
-from typing import Callable
+import time
+from collections.abc import Callable
 
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware

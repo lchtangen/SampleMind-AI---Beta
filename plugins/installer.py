@@ -6,17 +6,14 @@ Supports: FL Studio, Ableton Live
 Platforms: Windows, macOS, Linux
 """
 
+import argparse
 import os
-import sys
 import platform
 import shutil
-import json
-import subprocess
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+import sys
 from dataclasses import dataclass
 from enum import Enum
-import argparse
+from pathlib import Path
 
 
 class Platform(Enum):
@@ -61,7 +58,7 @@ class DAWDetector:
 
     def __init__(self):
         self.platform = self._detect_platform()
-        self.installed_daws: Dict[DAW, Path] = {}
+        self.installed_daws: dict[DAW, Path] = {}
         self.detect_daws()
 
     @staticmethod
@@ -88,7 +85,6 @@ class DAWDetector:
 
     def _detect_windows(self) -> None:
         """Detect DAWs on Windows"""
-        import winreg
 
         # FL Studio detection
         fl_paths = [
@@ -165,11 +161,11 @@ class DAWDetector:
         """Check if a DAW is installed"""
         return daw in self.installed_daws
 
-    def get_daw_path(self, daw: DAW) -> Optional[Path]:
+    def get_daw_path(self, daw: DAW) -> Path | None:
         """Get installation path of a DAW"""
         return self.installed_daws.get(daw)
 
-    def list_installed_daws(self) -> List[Tuple[DAW, Path]]:
+    def list_installed_daws(self) -> list[tuple[DAW, Path]]:
         """List all installed DAWs"""
         return list(self.installed_daws.items())
 
@@ -180,9 +176,9 @@ class PluginInstaller:
     def __init__(self, detector: DAWDetector):
         self.detector = detector
         self.plugins_dir = Path(__file__).parent
-        self.installation_log: List[str] = []
+        self.installation_log: list[str] = []
 
-    def get_fl_studio_plugin_paths(self) -> Dict[Platform, Path]:
+    def get_fl_studio_plugin_paths(self) -> dict[Platform, Path]:
         """Get FL Studio plugin installation paths"""
         return {
             Platform.WINDOWS: Path(
@@ -200,7 +196,7 @@ class PluginInstaller:
             ),
         }
 
-    def get_ableton_plugin_paths(self) -> Dict[Platform, Path]:
+    def get_ableton_plugin_paths(self) -> dict[Platform, Path]:
         """Get Ableton Live plugin installation paths"""
         return {
             Platform.WINDOWS: Path(
@@ -220,7 +216,7 @@ class PluginInstaller:
             ),
         }
 
-    def get_plugin_source_path(self, daw: DAW, platform: Platform) -> Optional[Path]:
+    def get_plugin_source_path(self, daw: DAW, platform: Platform) -> Path | None:
         """Get the source plugin file path"""
         if daw == DAW.FL_STUDIO:
             if platform == Platform.WINDOWS:
@@ -264,15 +260,15 @@ class PluginInstaller:
         dest_dir = platform_paths.get(self.detector.platform)
 
         if not dest_dir:
-            self.log(f"❌ Unsupported platform for FL Studio plugin")
+            self.log("❌ Unsupported platform for FL Studio plugin")
             return False
 
         source_path = self.get_plugin_source_path(DAW.FL_STUDIO, self.detector.platform)
 
         if not source_path or not source_path.exists():
             self.log(f"❌ Plugin source not found: {source_path}")
-            self.log(f"   Hint: Run 'cd plugins/fl_studio && mkdir build && cd build'")
-            self.log(f"   Then run cmake and make to compile the plugin")
+            self.log("   Hint: Run 'cd plugins/fl_studio && mkdir build && cd build'")
+            self.log("   Then run cmake and make to compile the plugin")
             return False
 
         try:
@@ -291,12 +287,12 @@ class PluginInstaller:
                 self.log(f"✓ Installation verified ({size_mb:.2f} MB)")
                 return True
             else:
-                self.log(f"❌ Installation verification failed")
+                self.log("❌ Installation verification failed")
                 return False
 
         except PermissionError:
             self.log(
-                f"❌ Permission denied. Try running with administrator/sudo privileges"
+                "❌ Permission denied. Try running with administrator/sudo privileges"
             )
             return False
         except Exception as e:
@@ -313,7 +309,7 @@ class PluginInstaller:
         dest_dir = platform_paths.get(self.detector.platform)
 
         if not dest_dir:
-            self.log(f"❌ Unsupported platform for Ableton Live plugin")
+            self.log("❌ Unsupported platform for Ableton Live plugin")
             return False
 
         try:
@@ -347,15 +343,15 @@ class PluginInstaller:
 
             # Verify at least one file was copied
             if dest_dir.exists() and list(dest_dir.glob("*")):
-                self.log(f"✓ Ableton Live plugin installation verified")
+                self.log("✓ Ableton Live plugin installation verified")
                 return True
             else:
-                self.log(f"❌ Ableton Live plugin installation failed")
+                self.log("❌ Ableton Live plugin installation failed")
                 return False
 
         except PermissionError:
             self.log(
-                f"❌ Permission denied. Try running with administrator/sudo privileges"
+                "❌ Permission denied. Try running with administrator/sudo privileges"
             )
             return False
         except Exception as e:
@@ -368,7 +364,7 @@ class PluginInstaller:
         dest_dir = platform_paths.get(self.detector.platform)
 
         if not dest_dir:
-            self.log(f"❌ Unsupported platform")
+            self.log("❌ Unsupported platform")
             return False
 
         plugin_file = dest_dir / "SampleMind_FL_Studio.dll"
@@ -387,7 +383,7 @@ class PluginInstaller:
                 return False
 
         except PermissionError:
-            self.log(f"❌ Permission denied")
+            self.log("❌ Permission denied")
             return False
         except Exception as e:
             self.log(f"❌ Uninstall failed: {e}")
@@ -399,7 +395,7 @@ class PluginInstaller:
         dest_dir = platform_paths.get(self.detector.platform)
 
         if not dest_dir:
-            self.log(f"❌ Unsupported platform")
+            self.log("❌ Unsupported platform")
             return False
 
         try:
@@ -409,21 +405,21 @@ class PluginInstaller:
             amxd_file = dest_dir / "SampleMind.amxd"
             if amxd_file.exists():
                 amxd_file.unlink()
-                self.log(f"✓ Removed SampleMind.amxd")
+                self.log("✓ Removed SampleMind.amxd")
                 files_removed += 1
 
             # Remove communication.js
             js_file = dest_dir / "communication.js"
             if js_file.exists():
                 js_file.unlink()
-                self.log(f"✓ Removed communication.js")
+                self.log("✓ Removed communication.js")
                 files_removed += 1
 
             # Remove MIDI mapper
             midi_file = dest_dir / "midi_mapper.maxpat"
             if midi_file.exists():
                 midi_file.unlink()
-                self.log(f"✓ Removed midi_mapper.maxpat")
+                self.log("✓ Removed midi_mapper.maxpat")
                 files_removed += 1
 
             if files_removed > 0:
@@ -432,17 +428,17 @@ class PluginInstaller:
                 )
                 return True
             else:
-                self.log(f"⚠ No plugin files found to remove")
+                self.log("⚠ No plugin files found to remove")
                 return False
 
         except PermissionError:
-            self.log(f"❌ Permission denied")
+            self.log("❌ Permission denied")
             return False
         except Exception as e:
             self.log(f"❌ Uninstall failed: {e}")
             return False
 
-    def verify_installations(self) -> Dict[DAW, bool]:
+    def verify_installations(self) -> dict[DAW, bool]:
         """Verify installed plugins are working"""
         results = {}
 
@@ -490,7 +486,7 @@ class PluginInstaller:
         self.installation_log.append(message)
         print(message)
 
-    def get_log(self) -> List[str]:
+    def get_log(self) -> list[str]:
         """Get full installation log"""
         return self.installation_log
 

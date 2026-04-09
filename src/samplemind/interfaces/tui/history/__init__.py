@@ -1,8 +1,8 @@
 """TUI History module - Undo/redo and operation history tracking"""
 
 from samplemind.interfaces.tui.history.history_manager import (
-    HistoryManager,
     HistoryEntry,
+    HistoryManager,
     OperationType,
     get_history_manager,
 )

@@ -3,10 +3,11 @@ JWT Token Handler
 Creates, validates, and decodes JWT tokens for authentication
 """
 
-from datetime import datetime, timedelta
-from typing import Optional, Dict, Any
-from jose import JWTError, jwt
 import logging
+from datetime import datetime, timedelta
+from typing import Any
+
+from jose import JWTError, jwt
 
 logger = logging.getLogger(__name__)
 
@@ -36,8 +37,8 @@ def configure_jwt(
 def create_access_token(
     user_id: str,
     email: str,
-    additional_claims: Optional[Dict[str, Any]] = None,
-    expires_delta: Optional[timedelta] = None,
+    additional_claims: dict[str, Any] | None = None,
+    expires_delta: timedelta | None = None,
 ) -> str:
     """
     Create a new JWT access token
@@ -77,9 +78,7 @@ def create_access_token(
     return encoded_jwt
 
 
-def create_refresh_token(
-    user_id: str, expires_delta: Optional[timedelta] = None
-) -> str:
+def create_refresh_token(user_id: str, expires_delta: timedelta | None = None) -> str:
     """
     Create a new JWT refresh token
 
@@ -110,7 +109,7 @@ def create_refresh_token(
     return encoded_jwt
 
 
-def decode_token(token: str) -> Optional[Dict[str, Any]]:
+def decode_token(token: str) -> dict[str, Any] | None:
     """
     Decode JWT token without verification
 
@@ -133,7 +132,7 @@ def decode_token(token: str) -> Optional[Dict[str, Any]]:
         return None
 
 
-def verify_token(token: str, token_type: str = "access") -> Optional[str]:
+def verify_token(token: str, token_type: str = "access") -> str | None:
     """
     Verify JWT token and return user_id if valid
 
@@ -183,7 +182,7 @@ def verify_token(token: str, token_type: str = "access") -> Optional[str]:
         return None
 
 
-def get_token_expiration(token: str) -> Optional[datetime]:
+def get_token_expiration(token: str) -> datetime | None:
     """
     Get expiration datetime from token
 

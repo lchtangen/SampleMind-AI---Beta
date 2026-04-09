@@ -114,9 +114,30 @@ def test_missing_bpm_neutral():
 
 
 SAMPLE_LIBRARY = [
-    {"path": "/a.wav", "filename": "a.wav", "bpm": 130.0, "key": "1A", "energy": "low", "duration_s": 30.0},
-    {"path": "/b.wav", "filename": "b.wav", "bpm": 140.0, "key": "2A", "energy": "mid", "duration_s": 30.0},
-    {"path": "/c.wav", "filename": "c.wav", "bpm": 150.0, "key": "3A", "energy": "high", "duration_s": 30.0},
+    {
+        "path": "/a.wav",
+        "filename": "a.wav",
+        "bpm": 130.0,
+        "key": "1A",
+        "energy": "low",
+        "duration_s": 30.0,
+    },
+    {
+        "path": "/b.wav",
+        "filename": "b.wav",
+        "bpm": 140.0,
+        "key": "2A",
+        "energy": "mid",
+        "duration_s": 30.0,
+    },
+    {
+        "path": "/c.wav",
+        "filename": "c.wav",
+        "bpm": 150.0,
+        "key": "3A",
+        "energy": "high",
+        "duration_s": 30.0,
+    },
 ]
 
 
@@ -126,7 +147,11 @@ async def test_generate_returns_playlist_object():
 
     with patch(
         "samplemind.integrations.litellm_router.chat_completion",
-        new=AsyncMock(return_value=MagicMock(choices=[MagicMock(message=MagicMock(content="Great vibes."))])),
+        new=AsyncMock(
+            return_value=MagicMock(
+                choices=[MagicMock(message=MagicMock(content="Great vibes."))]
+            )
+        ),
     ):
         playlist = await gen.generate(
             mood="dark",
@@ -167,7 +192,9 @@ async def test_generate_build_arc_energy_order():
 
     with patch(
         "samplemind.integrations.litellm_router.chat_completion",
-        new=AsyncMock(return_value=MagicMock(choices=[MagicMock(message=MagicMock(content="OK"))])),
+        new=AsyncMock(
+            return_value=MagicMock(choices=[MagicMock(message=MagicMock(content="OK"))])
+        ),
     ):
         playlist = await gen.generate(
             mood="dark",

@@ -2,8 +2,8 @@
 
 from samplemind.interfaces.tui.playback.audio_player import (
     AudioPlayer,
-    PlaybackState,
     LoopMode,
+    PlaybackState,
     PlaybackStats,
     get_audio_player,
 )

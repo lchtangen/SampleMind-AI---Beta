@@ -14,7 +14,7 @@ Follows the lazy-load + mock-fallback pattern from neural_engine.py.
 import hashlib
 import logging
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 import numpy as np
 
@@ -158,7 +158,7 @@ class BEATsEncoder:
             self._cache[cache_key] = emb
         return emb
 
-    def encode_batch(self, paths: List[str | Path]) -> List[np.ndarray]:
+    def encode_batch(self, paths: list[str | Path]) -> list[np.ndarray]:
         """Encode multiple files, returning a list of 768-dim arrays."""
         return [self.encode(p) for p in paths]
 

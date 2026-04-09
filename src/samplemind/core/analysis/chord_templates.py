@@ -10,7 +10,6 @@ References:
 - Fujishima, T. (1999). Realtime Chord Recognition of Musical Sound
 """
 
-from typing import Dict, List, Tuple
 import numpy as np
 
 # Note names in order of pitch class (C=0, C#=1, ..., B=11)
@@ -30,7 +29,7 @@ NOTE_TO_PC.update(
 )
 
 
-def _create_template(intervals: List[int]) -> np.ndarray:
+def _create_template(intervals: list[int]) -> np.ndarray:
     """
     Create a 12-dimensional chord template from intervals.
 
@@ -75,7 +74,7 @@ CHORD_INTERVALS = {
 }
 
 # Generate chord templates for all chord types
-CHORD_TEMPLATES: Dict[str, np.ndarray] = {
+CHORD_TEMPLATES: dict[str, np.ndarray] = {
     name: _create_template(intervals) for name, intervals in CHORD_INTERVALS.items()
 }
 
@@ -242,7 +241,7 @@ def get_roman_numeral(
 def detect_key_from_chroma(
     chroma: np.ndarray,
     mode: str = None,
-) -> Tuple[int, str, float]:
+) -> tuple[int, str, float]:
     """
     Detect key from chroma features using Krumhansl-Kessler profiles.
 

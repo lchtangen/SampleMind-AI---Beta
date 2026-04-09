@@ -4,23 +4,22 @@ Unit tests for SampleMind AI Plugin Installer
 Tests: DAWDetector, PluginInstaller, cross-platform compatibility
 """
 
-import pytest
-import platform
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
 import sys
-import os
+from pathlib import Path
+from unittest.mock import Mock, patch
+
+import pytest
 
 # Add plugins directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "plugins"))
 
 from installer import (
-    Platform,
     DAW,
     DAWDetector,
-    PluginInstaller,
-    PluginInfo,
     InstallationPath,
+    Platform,
+    PluginInfo,
+    PluginInstaller,
 )
 
 

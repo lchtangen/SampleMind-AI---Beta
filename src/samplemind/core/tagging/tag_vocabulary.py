@@ -14,7 +14,6 @@ Categories:
 """
 
 from dataclasses import dataclass
-from typing import List, Set, Dict, Optional
 
 # ============================================================================
 # TAG CATEGORIES
@@ -58,7 +57,6 @@ GENRES = {
     "east-coast",
     "west-coast",
     "crunk",
-    "grime",
     "uk-rap",
     # Pop & Mainstream
     "pop",
@@ -72,9 +70,7 @@ GENRES = {
     "emo",
     "rock",
     # Rock & Metal
-    "rock",
     "alternative-rock",
-    "indie-rock",
     "hard-rock",
     "classic-rock",
     "punk",
@@ -114,7 +110,6 @@ GENRES = {
     "noise",
     "glitch",
     "abstract",
-    "ambient",
     "generative",
     "soundscape",
     "dark-ambient",
@@ -194,9 +189,7 @@ MOODS = {
     "affectionate",
     # Exotic & Unusual
     "exotic",
-    "mysterious",
     "magical",
-    "whimsical",
     "surreal",
     "abstract",
     "cosmic",
@@ -227,7 +220,6 @@ INSTRUMENTS = {
     "bongo",
     "tabla",
     "djembe",
-    "timpani",
     "xylophone",
     # Bass
     "bass",
@@ -245,7 +237,6 @@ INSTRUMENTS = {
     "synthesizer",
     "synth-lead",
     "synth-pad",
-    "synth-bass",
     "digital-synth",
     "analog-synth",
     "modular-synth",
@@ -266,7 +257,6 @@ INSTRUMENTS = {
     "harpsichord",
     "mellotron",
     "string-machine",
-    "synthesizer",
     "clavinet",
     # Strings
     "strings",
@@ -312,7 +302,6 @@ INSTRUMENTS = {
     "chorus",
     "acapella",
     # Acoustic & Other
-    "acoustic-guitar",
     "electric-guitar",
     "guitar",
     "acoustic",
@@ -380,17 +369,13 @@ DESCRIPTORS = {
     "vintage",
     "modern",
     "compressed",
-    "dynamic",
     "saturated",
-    "clean",
     "distorted",
     "filtered",
-    "resonant",
     "processed",
     "raw",
     "polished",
     "rough",
-    "smooth",
     "quantized",
     "humanized",
     # Spatial & Ambient
@@ -415,7 +400,6 @@ DESCRIPTORS = {
     "accelerating",
     "decelerating",
     "pulsing",
-    "static",
     "evolving",
     "looping",
     "one-shot",
@@ -483,7 +467,7 @@ class TagVocabulary:
         self.descriptors = set(DESCRIPTORS)
 
     @property
-    def all_tags(self) -> Set[str]:
+    def all_tags(self) -> set[str]:
         """Get all valid tags"""
         return (
             self.genres
@@ -493,7 +477,7 @@ class TagVocabulary:
             | self.descriptors
         )
 
-    def get_category(self, tag: str) -> Optional[str]:
+    def get_category(self, tag: str) -> str | None:
         """Get category for a tag"""
         tag_lower = tag.lower().replace("_", "-")
 
@@ -515,8 +499,8 @@ class TagVocabulary:
         return tag.lower().replace("_", "-") in self.all_tags
 
     def suggest_similar(
-        self, tag: str, category: Optional[str] = None, limit: int = 5
-    ) -> List[str]:
+        self, tag: str, category: str | None = None, limit: int = 5
+    ) -> list[str]:
         """Suggest similar tags (using string similarity)"""
         tag_lower = tag.lower()
         candidates = []
@@ -534,7 +518,7 @@ class TagVocabulary:
         candidates.sort(key=lambda x: x[1], reverse=True)
         return [tag for tag, _ in candidates[:limit]]
 
-    def get_tags_by_category(self, category: str) -> Set[str]:
+    def get_tags_by_category(self, category: str) -> set[str]:
         """Get all tags in a category"""
         if category == "genre":
             return self.genres
@@ -548,7 +532,7 @@ class TagVocabulary:
             return self.descriptors
         return set()
 
-    def stats(self) -> Dict[str, int]:
+    def stats(self) -> dict[str, int]:
         """Get vocabulary statistics"""
         return {
             "genres": len(self.genres),
@@ -564,7 +548,7 @@ class TagVocabulary:
 # GLOBAL VOCABULARY INSTANCE
 # ============================================================================
 
-_vocabulary: Optional[TagVocabulary] = None
+_vocabulary: TagVocabulary | None = None
 
 
 def get_vocabulary() -> TagVocabulary:

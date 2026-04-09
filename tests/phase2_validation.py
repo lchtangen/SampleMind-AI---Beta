@@ -11,9 +11,8 @@ Tests core Phase 2 functionality without requiring full test dependencies:
 ✓ Cache functionality
 """
 
-import sys
 import os
-import asyncio
+import sys
 import tempfile
 from pathlib import Path
 
@@ -49,9 +48,9 @@ print_section("1. MODULE IMPORTS")
 
 try:
     from samplemind.interfaces.tui.audio_engine_bridge import (
-        TUIAudioEngine,
         AudioCache,
         SessionStats,
+        TUIAudioEngine,
         get_tui_engine,
     )
 
@@ -62,11 +61,11 @@ except Exception as e:
 
 try:
     from samplemind.interfaces.tui.widgets.dialogs import (
+        ConfirmDialog,
         ErrorDialog,
         InfoDialog,
-        ConfirmDialog,
-        WarningDialog,
         LoadingDialog,
+        WarningDialog,
     )
 
     print_test("Import dialog widgets", True)
@@ -75,7 +74,6 @@ except Exception as e:
     sys.exit(1)
 
 try:
-    from samplemind.interfaces.tui.screens.analyze_screen import AnalyzeScreen
 
     print_test("Import AnalyzeScreen", True)
 except Exception as e:
@@ -83,7 +81,6 @@ except Exception as e:
     sys.exit(1)
 
 try:
-    from samplemind.interfaces.tui.screens.batch_screen import BatchScreen
 
     print_test("Import BatchScreen", True)
 except Exception as e:
@@ -91,7 +88,6 @@ except Exception as e:
     sys.exit(1)
 
 try:
-    from samplemind.interfaces.tui.screens.results_screen import ResultsScreen
 
     print_test("Import ResultsScreen", True)
 except Exception as e:
@@ -327,8 +323,7 @@ for filename, should_be_valid in test_files:
 # Final summary
 print_section("PHASE 2 VALIDATION SUMMARY")
 
-print(
-    f"""
+print(f"""
 {BOLD}Phase 2.1: Core AudioEngine Integration{RESET}
   ✓ TUIAudioEngine bridge created
   ✓ SessionStats tracking implemented
@@ -360,8 +355,7 @@ print(
 
 {BOLD}{GREEN}All Phase 2 components validated successfully!{RESET}
 {BOLD}{GREEN}Ready for cross-platform testing and deployment.{RESET}
-"""
-)
+""")
 
 print(f"\n{BOLD}Next Steps:{RESET}")
 print("1. Run: source .venv/bin/activate && python -m pytest tests/unit/interfaces/")

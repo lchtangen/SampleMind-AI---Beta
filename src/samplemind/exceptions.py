@@ -26,8 +26,8 @@ Exception Hierarchy:
         └── CacheLimitError
 """
 
-from typing import Optional, Dict, Any
 from pathlib import Path
+from typing import Any
 
 
 class SampleMindError(Exception):
@@ -45,9 +45,9 @@ class SampleMindError(Exception):
     def __init__(
         self,
         message: str,
-        user_message: Optional[str] = None,
-        suggestion: Optional[str] = None,
-        error_code: Optional[str] = None,
+        user_message: str | None = None,
+        suggestion: str | None = None,
+        error_code: str | None = None,
         **context,
     ):
         super().__init__(message)
@@ -57,7 +57,7 @@ class SampleMindError(Exception):
         self.error_code = error_code or self.__class__.__name__
         self.context = context
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert exception to dictionary for JSON output."""
         return {
             "error_code": self.error_code,
@@ -112,7 +112,7 @@ class UnsupportedFormatError(AudioFileError):
 class CorruptedAudioError(AudioFileError):
     """Audio file is corrupted."""
 
-    def __init__(self, file_path: Path, reason: Optional[str] = None) -> None:
+    def __init__(self, file_path: Path, reason: str | None = None) -> None:
         super().__init__(
             message=f"Corrupted audio file: {file_path}"
             + (f" ({reason})" if reason else ""),
@@ -179,7 +179,7 @@ class APIKeyMissingError(AIServiceError):
 class RateLimitError(AIServiceError):
     """API rate limit exceeded."""
 
-    def __init__(self, provider: str, retry_after: Optional[int] = None) -> None:
+    def __init__(self, provider: str, retry_after: int | None = None) -> None:
         super().__init__(
             message=f"Rate limit exceeded for {provider}",
             user_message=f"Too many requests to {provider} API",
@@ -193,7 +193,7 @@ class RateLimitError(AIServiceError):
 class NetworkError(AIServiceError):
     """Network connectivity error."""
 
-    def __init__(self, provider: str, reason: Optional[str] = None) -> None:
+    def __init__(self, provider: str, reason: str | None = None) -> None:
         super().__init__(
             message=f"Network error connecting to {provider}: {reason or 'Connection failed'}",
             user_message="Could not connect to AI service",
@@ -301,7 +301,7 @@ class CacheLimitError(CacheError):
 class ConfigurationError(SampleMindError):
     """Configuration-related error."""
 
-    def __init__(self, message: str, config_key: Optional[str] = None) -> None:
+    def __init__(self, message: str, config_key: str | None = None) -> None:
         super().__init__(
             message=message,
             user_message="Configuration error",
@@ -345,7 +345,7 @@ class MissingConfigurationError(ConfigurationError):
 class ValidationError(SampleMindError):
     """Input validation error."""
 
-    def __init__(self, message: str, field: Optional[str] = None) -> None:
+    def __init__(self, message: str, field: str | None = None) -> None:
         super().__init__(
             message=message,
             user_message="Invalid input",
@@ -423,7 +423,7 @@ class ProcessTimeoutError(ResourceError):
     def __init__(self, operation: str, timeout_seconds: int) -> None:
         super().__init__(
             message=f"Operation timed out after {timeout_seconds}s: {operation}",
-            user_message=f"Operation took too long and was cancelled",
+            user_message="Operation took too long and was cancelled",
             suggestion=f"Try again or use a shorter timeout: samplemind config:set timeout {timeout_seconds * 2}",
             error_code="PROCESS_TIMEOUT",
             operation=operation,

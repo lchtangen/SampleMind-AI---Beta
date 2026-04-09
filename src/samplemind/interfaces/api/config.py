@@ -2,10 +2,8 @@
 Configuration management for SampleMind AI Backend
 """
 
-import os
 from functools import lru_cache
 from pathlib import Path
-from typing import List
 
 from pydantic_settings import BaseSettings
 
@@ -24,7 +22,7 @@ class Settings(BaseSettings):
     MAX_WORKERS: int = 4
 
     # CORS
-    CORS_ORIGINS: List[str] = [
+    CORS_ORIGINS: list[str] = [
         "http://localhost:3000",
         "http://localhost:8080",
         "http://127.0.0.1:3000",
@@ -40,7 +38,7 @@ class Settings(BaseSettings):
 
     # File handling
     MAX_UPLOAD_SIZE_MB: int = 100
-    ALLOWED_AUDIO_FORMATS: List[str] = [
+    ALLOWED_AUDIO_FORMATS: list[str] = [
         "audio/wav",
         "audio/x-wav",
         "audio/mpeg",
@@ -50,7 +48,7 @@ class Settings(BaseSettings):
         "audio/x-aiff",
         "audio/ogg",
     ]
-    ALLOWED_EXTENSIONS: List[str] = [".wav", ".mp3", ".flac", ".aiff", ".ogg"]
+    ALLOWED_EXTENSIONS: list[str] = [".wav", ".mp3", ".flac", ".aiff", ".ogg"]
 
     # Audio processing
     CACHE_SIZE: int = 100
@@ -100,7 +98,7 @@ class Settings(BaseSettings):
         extra = "ignore"
 
 
-@lru_cache()
+@lru_cache
 def get_settings() -> Settings:
     """Get cached settings instance"""
     return Settings()

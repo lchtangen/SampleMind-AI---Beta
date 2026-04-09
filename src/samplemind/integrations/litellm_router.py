@@ -32,37 +32,49 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any, AsyncIterator
+from collections.abc import AsyncIterator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 # ── Model constants ───────────────────────────────────────────────────────────
 
-MODEL_PRIMARY = "claude-sonnet-4-6"                # Anthropic — best quality
-MODEL_FAST = "gemini/gemini-2.5-flash"             # Google — fast/cheap
-MODEL_AGENTS = "gpt-4o"                            # OpenAI — tool use / agents
+MODEL_PRIMARY = "claude-sonnet-4-6"  # Anthropic — best quality
+MODEL_FAST = "gemini/gemini-2.5-flash"  # Google — fast/cheap
+MODEL_AGENTS = "gpt-4o"  # OpenAI — tool use / agents
 MODEL_OFFLINE = f"ollama/{os.getenv('OLLAMA_MODEL', 'qwen2.5-coder:7b')}"
 
 
-def _get_fallback_list(prefer_fast: bool = False, agents_mode: bool = False) -> list[dict]:
+def _get_fallback_list(
+    prefer_fast: bool = False, agents_mode: bool = False
+) -> list[dict]:
     """Build LiteLLM fallback model list."""
     if agents_mode:
         return [
             {"model": MODEL_AGENTS},
             {"model": MODEL_PRIMARY},
-            {"model": MODEL_OFFLINE, "api_base": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")},
+            {
+                "model": MODEL_OFFLINE,
+                "api_base": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+            },
         ]
     if prefer_fast:
         return [
             {"model": MODEL_FAST},
             {"model": MODEL_PRIMARY},
-            {"model": MODEL_OFFLINE, "api_base": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")},
+            {
+                "model": MODEL_OFFLINE,
+                "api_base": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+            },
         ]
     return [
         {"model": MODEL_PRIMARY},
         {"model": MODEL_FAST},
         {"model": MODEL_AGENTS},
-        {"model": MODEL_OFFLINE, "api_base": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")},
+        {
+            "model": MODEL_OFFLINE,
+            "api_base": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+        },
     ]
 
 
@@ -89,34 +101,53 @@ def get_router() -> Any:
         model_list = []
 
         if os.getenv("ANTHROPIC_API_KEY"):
-            model_list.append({
-                "model_name": "primary",
-                "litellm_params": {"model": MODEL_PRIMARY, "api_key": os.getenv("ANTHROPIC_API_KEY")},
-            })
+            model_list.append(
+                {
+                    "model_name": "primary",
+                    "litellm_params": {
+                        "model": MODEL_PRIMARY,
+                        "api_key": os.getenv("ANTHROPIC_API_KEY"),
+                    },
+                }
+            )
 
         if os.getenv("GEMINI_API_KEY"):
-            model_list.append({
-                "model_name": "fast",
-                "litellm_params": {"model": MODEL_FAST, "api_key": os.getenv("GEMINI_API_KEY")},
-            })
+            model_list.append(
+                {
+                    "model_name": "fast",
+                    "litellm_params": {
+                        "model": MODEL_FAST,
+                        "api_key": os.getenv("GEMINI_API_KEY"),
+                    },
+                }
+            )
 
         if os.getenv("OPENAI_API_KEY"):
-            model_list.append({
-                "model_name": "agents",
-                "litellm_params": {"model": MODEL_AGENTS, "api_key": os.getenv("OPENAI_API_KEY")},
-            })
+            model_list.append(
+                {
+                    "model_name": "agents",
+                    "litellm_params": {
+                        "model": MODEL_AGENTS,
+                        "api_key": os.getenv("OPENAI_API_KEY"),
+                    },
+                }
+            )
 
         # Always add Ollama (offline fallback — no key needed)
-        model_list.append({
-            "model_name": "offline",
-            "litellm_params": {
-                "model": MODEL_OFFLINE,
-                "api_base": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
-            },
-        })
+        model_list.append(
+            {
+                "model_name": "offline",
+                "litellm_params": {
+                    "model": MODEL_OFFLINE,
+                    "api_base": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+                },
+            }
+        )
 
         if not model_list:
-            logger.warning("No AI provider API keys configured — LiteLLM router disabled")
+            logger.warning(
+                "No AI provider API keys configured — LiteLLM router disabled"
+            )
             return None
 
         _router = Router(
@@ -181,7 +212,9 @@ async def chat_completion(
 
         router = get_router()
         if router:
-            model_name = "fast" if prefer_fast else ("agents" if agents_mode else "primary")
+            model_name = (
+                "fast" if prefer_fast else ("agents" if agents_mode else "primary")
+            )
             return await router.acompletion(
                 model=model_name,
                 messages=messages,

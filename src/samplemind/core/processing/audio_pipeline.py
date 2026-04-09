@@ -10,15 +10,14 @@ This module provides a comprehensive audio preprocessing pipeline that handles:
 - Audio segmentation and framing
 """
 
-import os
-import numpy as np
-import soundfile as sf
-import librosa
-from pathlib import Path
-from typing import Union, Tuple, Optional, Dict, Any
+import logging
 from dataclasses import dataclass
 from enum import Enum
-import logging
+from pathlib import Path
+
+import librosa
+import numpy as np
+import soundfile as sf
 from scipy import signal
 
 from ..engine.audio_engine import AudioProcessor
@@ -47,9 +46,9 @@ class AudioMetadata:
     channels: int
     duration: float
     format: str
-    bit_depth: Optional[int] = None
-    bitrate: Optional[int] = None
-    codec: Optional[str] = None
+    bit_depth: int | None = None
+    bitrate: int | None = None
+    codec: str | None = None
 
 
 class AudioPipeline:
@@ -73,9 +72,9 @@ class AudioPipeline:
         self.y = None
         self.sr = None
         self.metadata = None
-        self.history = []
+        self.history: list[str] = []
 
-    def load(self, input_path: Union[str, Path]) -> "AudioPipeline":
+    def load(self, input_path: str | Path) -> "AudioPipeline":
         """
         Load an audio file from disk.
 
@@ -110,7 +109,7 @@ class AudioPipeline:
             logger.error(f"Error loading audio file {input_path}: {str(e)}")
             raise
 
-    def resample(self, target_sr: Optional[int] = None) -> "AudioPipeline":
+    def resample(self, target_sr: int | None = None) -> "AudioPipeline":
         """
         Resample audio to target sample rate.
 
@@ -263,7 +262,7 @@ class AudioPipeline:
         self.history.append(f"Trimmed silence (threshold: {top_db}dB)")
         return self
 
-    def process(self, input_path: Union[str, Path], **kwargs) -> "AudioPipeline":
+    def process(self, input_path: str | Path, **kwargs) -> "AudioPipeline":
         """
         Process audio with default pipeline steps.
 
@@ -320,9 +319,7 @@ class AudioPipeline:
 
         return self
 
-    def save(
-        self, output_path: Union[str, Path], format: Optional[AudioFormat] = None
-    ) -> None:
+    def save(self, output_path: str | Path, format: AudioFormat | None = None) -> None:
         """
         Save processed audio to disk.
 
@@ -367,7 +364,7 @@ class AudioPipeline:
         """
         return self.history.copy()
 
-    def get_audio_data(self) -> Tuple[np.ndarray, int]:
+    def get_audio_data(self) -> tuple[np.ndarray, int]:
         """
         Get the processed audio data and sample rate.
 

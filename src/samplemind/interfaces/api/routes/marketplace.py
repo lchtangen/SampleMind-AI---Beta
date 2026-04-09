@@ -25,9 +25,9 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Optional
+from datetime import UTC
 
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, Header, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
@@ -57,7 +57,7 @@ class PublishRequest(BaseModel):
     tags: list[str] = []
     price_usd: float  # e.g. 9.99
     smpack_r2_key: str  # R2 object key of the already-uploaded .smpack file
-    preview_r2_key: Optional[str] = None
+    preview_r2_key: str | None = None
     sample_count: int = 0
     bpm_range: list[int] = []
     key_signatures: list[str] = []
@@ -80,7 +80,7 @@ class PackListing(BaseModel):
     sample_count: int
     bpm_range: list[int]
     key_signatures: list[str]
-    preview_url: Optional[str]
+    preview_url: str | None
     created_at: str
 
 
@@ -100,7 +100,7 @@ class PurchaseRecord(BaseModel):
     purchase_id: str
     listing_id: str
     pack_name: str
-    download_url: Optional[str]  # None until payment confirmed
+    download_url: str | None  # None until payment confirmed
     purchased_at: str
     status: str  # pending | completed | expired
 
@@ -148,7 +148,7 @@ async def publish_pack(body: PublishRequest) -> PublishResponse:
     This creates a Stripe Product + Price and registers the listing.
     """
     import uuid
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     connect = _get_connect_service()
     r2 = _get_r2()
@@ -169,7 +169,11 @@ async def publish_pack(body: PublishRequest) -> PublishResponse:
         raise HTTPException(status_code=500, detail=f"Stripe error: {exc}")
 
     listing_id = str(uuid.uuid4())
-    preview_url = r2.get_public_url(body.preview_r2_key) if body.preview_r2_key and r2.available else None
+    preview_url = (
+        r2.get_public_url(body.preview_r2_key)
+        if body.preview_r2_key and r2.available
+        else None
+    )
 
     listing = {
         "listing_id": listing_id,
@@ -185,7 +189,7 @@ async def publish_pack(body: PublishRequest) -> PublishResponse:
         "smpack_r2_key": body.smpack_r2_key,
         "stripe_product_id": product_id,
         "stripe_price_id": price_id,
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
     }
     _listings[listing_id] = listing
 
@@ -200,9 +204,9 @@ async def publish_pack(body: PublishRequest) -> PublishResponse:
 
 @router.get("/listings", response_model=list[PackListing])
 async def list_packs(
-    tag: Optional[str] = None,
-    min_bpm: Optional[int] = None,
-    max_bpm: Optional[int] = None,
+    tag: str | None = None,
+    min_bpm: int | None = None,
+    max_bpm: int | None = None,
     limit: int = 50,
     offset: int = 0,
 ) -> list[PackListing]:
@@ -210,16 +214,32 @@ async def list_packs(
     results = list(_listings.values())
 
     if tag:
-        results = [r for r in results if tag.lower() in [t.lower() for t in r.get("tags", [])]]
+        results = [
+            r for r in results if tag.lower() in [t.lower() for t in r.get("tags", [])]
+        ]
 
     if min_bpm is not None:
-        results = [r for r in results if r.get("bpm_range") and r["bpm_range"][0] >= min_bpm]
+        results = [
+            r for r in results if r.get("bpm_range") and r["bpm_range"][0] >= min_bpm
+        ]
 
     if max_bpm is not None:
-        results = [r for r in results if r.get("bpm_range") and r["bpm_range"][-1] <= max_bpm]
+        results = [
+            r for r in results if r.get("bpm_range") and r["bpm_range"][-1] <= max_bpm
+        ]
 
-    results = results[offset: offset + limit]
-    return [PackListing(**{k: v for k, v in r.items() if k != "smpack_r2_key" and k not in ("stripe_product_id", "stripe_price_id")}) for r in results]
+    results = results[offset : offset + limit]
+    return [
+        PackListing(
+            **{
+                k: v
+                for k, v in r.items()
+                if k != "smpack_r2_key"
+                and k not in ("stripe_product_id", "stripe_price_id")
+            }
+        )
+        for r in results
+    ]
 
 
 @router.get("/listings/{listing_id}", response_model=PackListing)
@@ -228,7 +248,13 @@ async def get_listing(listing_id: str) -> PackListing:
     listing = _listings.get(listing_id)
     if not listing:
         raise HTTPException(status_code=404, detail="Listing not found")
-    return PackListing(**{k: v for k, v in listing.items() if k not in ("smpack_r2_key", "stripe_product_id", "stripe_price_id")})
+    return PackListing(
+        **{
+            k: v
+            for k, v in listing.items()
+            if k not in ("smpack_r2_key", "stripe_product_id", "stripe_price_id")
+        }
+    )
 
 
 @router.post("/purchase", response_model=PurchaseResponse)
@@ -252,7 +278,9 @@ async def purchase_pack(body: PurchaseRequest) -> PurchaseResponse:
             success_url=body.success_url,
             cancel_url=body.cancel_url,
         )
-        return PurchaseResponse(checkout_session_id=session_id, checkout_url=checkout_url)
+        return PurchaseResponse(
+            checkout_session_id=session_id, checkout_url=checkout_url
+        )
     except Exception as exc:
         logger.error("Checkout creation failed: %s", exc)
         raise HTTPException(status_code=500, detail=str(exc))
@@ -273,7 +301,13 @@ async def get_purchases(user_id: str) -> list[PurchaseRecord]:
 async def get_my_packs(user_id: str) -> list[PackListing]:
     """List all packs published by a creator."""
     return [
-        PackListing(**{k: v for k, v in r.items() if k not in ("smpack_r2_key", "stripe_product_id", "stripe_price_id")})
+        PackListing(
+            **{
+                k: v
+                for k, v in r.items()
+                if k not in ("smpack_r2_key", "stripe_product_id", "stripe_price_id")
+            }
+        )
         for r in _listings.values()
         if r.get("creator_id") == user_id
     ]
@@ -301,7 +335,7 @@ async def fulfill_pack_purchase(
     stripe_session_id: str,
     buyer_user_id: str,
     listing_id: str,
-) -> Optional[str]:
+) -> str | None:
     """
     Called from the Stripe webhook handler after payment confirmation.
 
@@ -311,7 +345,7 @@ async def fulfill_pack_purchase(
         download_url if successful, None on error.
     """
     import uuid
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     listing = _listings.get(listing_id)
     if not listing:
@@ -321,7 +355,9 @@ async def fulfill_pack_purchase(
     r2 = _get_r2()
     download_url = None
     if r2.available:
-        download_url = r2.get_presigned_url(listing["smpack_r2_key"], expires_in=86400)  # 24h
+        download_url = r2.get_presigned_url(
+            listing["smpack_r2_key"], expires_in=86400
+        )  # 24h
 
     purchase_id = str(uuid.uuid4())
     _purchases[purchase_id] = {
@@ -331,11 +367,13 @@ async def fulfill_pack_purchase(
         "buyer_user_id": buyer_user_id,
         "stripe_session_id": stripe_session_id,
         "download_url": download_url,
-        "purchased_at": datetime.now(timezone.utc).isoformat(),
+        "purchased_at": datetime.now(UTC).isoformat(),
         "status": "completed" if download_url else "pending",
     }
 
-    logger.info("✓ Purchase fulfilled: user=%s pack=%s", buyer_user_id, listing["pack_name"])
+    logger.info(
+        "✓ Purchase fulfilled: user=%s pack=%s", buyer_user_id, listing["pack_name"]
+    )
     return download_url
 
 
@@ -344,9 +382,11 @@ async def fulfill_pack_purchase(
 
 def _get_connect_service():
     from samplemind.core.services.stripe_connect import StripeConnectService
+
     return StripeConnectService()
 
 
 def _get_r2():
     from samplemind.services.storage.r2_provider import get_r2
+
     return get_r2()

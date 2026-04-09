@@ -29,7 +29,6 @@ import logging
 import math
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -37,23 +36,43 @@ logger = logging.getLogger(__name__)
 
 # ── Mood label map (Russell quadrant → labels) ────────────────────────────────
 
-_MOOD_LABELS: Dict[str, List[str]] = {
+_MOOD_LABELS: dict[str, list[str]] = {
     "high_valence_high_arousal": [
-        "Euphoric", "Joyful", "Energetic", "Uplifting", "Excited", "Triumphant",
+        "Euphoric",
+        "Joyful",
+        "Energetic",
+        "Uplifting",
+        "Excited",
+        "Triumphant",
     ],
     "high_valence_low_arousal": [
-        "Peaceful", "Relaxed", "Content", "Dreamy", "Serene", "Nostalgic",
+        "Peaceful",
+        "Relaxed",
+        "Content",
+        "Dreamy",
+        "Serene",
+        "Nostalgic",
     ],
     "low_valence_high_arousal": [
-        "Tense", "Aggressive", "Anxious", "Intense", "Dark", "Menacing",
+        "Tense",
+        "Aggressive",
+        "Anxious",
+        "Intense",
+        "Dark",
+        "Menacing",
     ],
     "low_valence_low_arousal": [
-        "Melancholic", "Sad", "Gloomy", "Somber", "Haunting", "Brooding",
+        "Melancholic",
+        "Sad",
+        "Gloomy",
+        "Somber",
+        "Haunting",
+        "Brooding",
     ],
 }
 
 # Mood → sub-genre affinity hints (useful for production decisions)
-MOOD_PRODUCTION_HINTS: Dict[str, str] = {
+MOOD_PRODUCTION_HINTS: dict[str, str] = {
     "Euphoric": "Big room drops, festival leads, supersaw stacks",
     "Joyful": "Catchy hooks, bright pads, upbeat chord progressions",
     "Energetic": "Driving kicks, layered percussion, high-energy fills",
@@ -93,7 +112,7 @@ class MoodResult:
     arousal: float = 0.0
 
     # Quadrant labels (ordered by confidence)
-    moods: List[str] = field(default_factory=list)
+    moods: list[str] = field(default_factory=list)
     primary_mood: str = "Unknown"
     confidence: float = 0.0
 
@@ -149,7 +168,7 @@ class MoodDetector:
         labels = _MOOD_LABELS.get(quadrant, ["Unknown"])
 
         # Confidence: distance from center (0,0) → max at (±1, ±1)
-        dist = math.sqrt(valence ** 2 + arousal ** 2) / math.sqrt(2)
+        dist = math.sqrt(valence**2 + arousal**2) / math.sqrt(2)
         result.confidence = round(min(dist, 1.0), 4)
 
         # Score labels by proximity
@@ -159,7 +178,9 @@ class MoodDetector:
 
         return result
 
-    def detect_file(self, file_path: str | Path, sample_rate: int = 22050) -> MoodResult:
+    def detect_file(
+        self, file_path: str | Path, sample_rate: int = 22050
+    ) -> MoodResult:
         """Load and detect mood from an audio file."""
         try:
             import librosa
@@ -173,7 +194,7 @@ class MoodDetector:
     # ── Heuristic ─────────────────────────────────────────────────────────────
 
     @staticmethod
-    def _heuristic_valence_arousal(y: np.ndarray, sr: int) -> Tuple[float, float]:
+    def _heuristic_valence_arousal(y: np.ndarray, sr: int) -> tuple[float, float]:
         """
         Estimate valence and arousal from spectral + rhythmic features.
 
@@ -236,7 +257,7 @@ class MoodDetector:
 
     def _clap_valence_arousal(
         self, y: np.ndarray, sr: int
-    ) -> Tuple[Optional[float], Optional[float]]:
+    ) -> tuple[float | None, float | None]:
         """
         Estimate valence/arousal via CLAP text-audio similarity.
 
@@ -250,24 +271,22 @@ class MoodDetector:
 
         try:
             processor, model = self._clap
-            import torch
             import librosa
+            import torch
 
             y_48k = librosa.resample(y, orig_sr=sr, target_sr=48000)
 
             prompts = [
-                "happy joyful uplifting music",    # +valence
-                "sad dark melancholic music",       # -valence
+                "happy joyful uplifting music",  # +valence
+                "sad dark melancholic music",  # -valence
                 "energetic aggressive intense music",  # +arousal
-                "calm peaceful relaxing music",        # -arousal
+                "calm peaceful relaxing music",  # -arousal
             ]
 
             audio_inputs = processor(
                 audios=[y_48k], sampling_rate=48000, return_tensors="pt", padding=True
             )
-            text_inputs = processor(
-                text=prompts, return_tensors="pt", padding=True
-            )
+            text_inputs = processor(text=prompts, return_tensors="pt", padding=True)
 
             with torch.no_grad():
                 audio_emb = model.get_audio_features(**audio_inputs)

@@ -2,13 +2,13 @@
 Integration tests for the AudioProcessor class with effects and noise reduction.
 """
 
-import os
-import pytest
-import numpy as np
-import soundfile as sf
 from pathlib import Path
-from samplemind.audio.processor import AudioProcessor, AudioFormat
+
+import numpy as np
+import pytest
+import soundfile as sf
 from samplemind.audio.effects import EffectType
+from samplemind.audio.processor import AudioFormat, AudioProcessor
 
 # Test audio files directory
 TEST_AUDIO_DIR = Path(__file__).parent.parent.parent / "test_audio_samples"

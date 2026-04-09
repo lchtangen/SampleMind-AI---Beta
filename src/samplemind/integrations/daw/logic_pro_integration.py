@@ -12,11 +12,10 @@ This module provides the Python logic layer.
 """
 
 import logging
-import json
-from pathlib import Path
-from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -46,13 +45,13 @@ class LogicProSampleInfo:
     file_path: str
     category: LogicProBrowserCategory
     subcategory: str
-    bpm: Optional[float] = None
-    key: Optional[str] = None
-    genre: Optional[str] = None
-    mood: Optional[str] = None
+    bpm: float | None = None
+    key: str | None = None
+    genre: str | None = None
+    mood: str | None = None
     color_tag: str = "None"  # Logic Pro color coding
     compatibility_rating: float = 0.0  # 0-100%
-    tags: List[str] = None
+    tags: list[str] = None
 
     def __post_init__(self) -> None:
         if self.tags is None:
@@ -76,10 +75,10 @@ class LogicProAUPlugin:
     def __init__(self) -> None:
         """Initialize Logic Pro AU plugin"""
         self.is_loaded = False
-        self.sample_library: Dict[str, LogicProSampleInfo] = {}
+        self.sample_library: dict[str, LogicProSampleInfo] = {}
         self.current_project_bpm = 120.0
         self.current_project_key = "C"
-        self.browser_categories: Dict[str, List[str]] = {}
+        self.browser_categories: dict[str, list[str]] = {}
         self.parameters = {
             self.PARAM_ANALYSIS_MODE: 1,  # Standard
             self.PARAM_AUTO_TAG: 1.0,  # Enabled
@@ -173,7 +172,7 @@ class LogicProAUPlugin:
         except Exception as e:
             logger.debug(f"Error adding sample: {e}")
 
-    def _analyze_sample(self, file_path: Path) -> Optional[LogicProSampleInfo]:
+    def _analyze_sample(self, file_path: Path) -> LogicProSampleInfo | None:
         """Analyze audio sample"""
         try:
             from samplemind.core.engine.audio_engine import AnalysisLevel, AudioEngine
@@ -182,7 +181,7 @@ class LogicProAUPlugin:
             features = engine.analyze_file(str(file_path), level=AnalysisLevel.QUICK)
 
             # Build a flat result dict for downstream helpers
-            result: Dict[str, Any] = {
+            result: dict[str, Any] = {
                 "bpm": features.bpm,
                 "key": features.key,
                 "genre": "",
@@ -218,7 +217,7 @@ class LogicProAUPlugin:
             logger.debug(f"Error analyzing sample: {e}")
             return None
 
-    def _determine_category(self, analysis: Dict[str, Any]) -> LogicProBrowserCategory:
+    def _determine_category(self, analysis: dict[str, Any]) -> LogicProBrowserCategory:
         """Determine browser category from analysis"""
         genre = analysis.get("genre", "").lower()
         mood = analysis.get("mood", "").lower()
@@ -243,7 +242,7 @@ class LogicProAUPlugin:
         else:
             return LogicProBrowserCategory.ELECTRONIC
 
-    def _calculate_compatibility(self, analysis: Dict[str, Any]) -> float:
+    def _calculate_compatibility(self, analysis: dict[str, Any]) -> float:
         """Calculate compatibility with current project (0-100%)"""
         compatibility = 50.0  # Base score
 
@@ -278,7 +277,7 @@ class LogicProAUPlugin:
         else:
             return "Red"  # Poor match
 
-    def get_browser_contents(self, category: str) -> List[Dict[str, Any]]:
+    def get_browser_contents(self, category: str) -> list[dict[str, Any]]:
         """Get browser contents for category"""
         try:
             if category not in self.browser_categories:
@@ -358,7 +357,7 @@ class LogicProAUPlugin:
         self.current_project_key = key
         logger.debug(f"Project key set: {key}")
 
-    def get_plugin_info(self) -> Dict[str, Any]:
+    def get_plugin_info(self) -> dict[str, Any]:
         """Get plugin information"""
         return {
             "name": self.NAME,
@@ -372,7 +371,7 @@ class LogicProAUPlugin:
 
 
 # Global instance
-_au_plugin: Optional[LogicProAUPlugin] = None
+_au_plugin: LogicProAUPlugin | None = None
 
 
 def get_au_plugin() -> LogicProAUPlugin:

@@ -155,13 +155,107 @@ export const getCurationGaps = (): Promise<GapReportResponse> =>
   apiFetch("/api/v1/ai/curate/gaps");
 
 // ---------------------------------------------------------------------------
-// Agent tasks  (POST /api/v1/tasks/analyze-agent)
+// Agent tasks  (POST /api/v1/tasks/analyze-agent + WebSocket progress)
 // ---------------------------------------------------------------------------
 
+export interface AgentAnalysisRequest {
+  file_path: string;
+  analysis_level?: "basic" | "standard" | "detailed" | "professional";
+}
+
+export interface AgentTaskResponse {
+  task_id: string;
+  status: string;
+  file_path: string;
+}
+
+export interface AgentProgressUpdate {
+  task_id: string;
+  stage: string;
+  pct: number;
+  message?: string;
+}
+
 export const queueAnalysisAgent = (
-  filePath: string
-): Promise<TaskQueueResponse> =>
+  request: AgentAnalysisRequest
+): Promise<AgentTaskResponse> =>
   apiFetch("/api/v1/tasks/analyze-agent", {
     method: "POST",
-    body: JSON.stringify({ file_path: filePath }),
+    body: JSON.stringify(request),
+  });
+
+export const getTaskStatus = (
+  taskId: string
+): Promise<TaskQueueResponse> =>
+  apiFetch(`/api/v1/tasks/${taskId}`);
+
+/**
+ * Open WebSocket for real-time agent task progress
+ * @example
+ * ```typescript
+ * const ws = openAgentProgressWebSocket("task-123", (update) => {
+ *   console.log(`Progress: ${update.pct}% - ${update.stage}`);
+ * });
+ * ```
+ */
+export const openAgentProgressWebSocket = (
+  taskId: string,
+  onUpdate: (update: AgentProgressUpdate) => void,
+  onError?: (error: Error) => void
+): WebSocket => {
+  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  const wsUrl = `${protocol}//${new URL(baseUrl).host}/ws/agent/${taskId}`;
+
+  const ws = new WebSocket(wsUrl);
+
+  ws.onmessage = (event) => {
+    try {
+      const update = JSON.parse(event.data) as AgentProgressUpdate;
+      onUpdate(update);
+    } catch (err) {
+      console.error("Failed to parse WebSocket message:", err);
+    }
+  };
+
+  ws.onerror = (event) => {
+    const error = new Error(`WebSocket error: ${event.type}`);
+    onError?.(error);
+  };
+
+  return ws;
+};
+
+// ---------------------------------------------------------------------------
+// Playlist & Curation (POST /api/v1/ai/curate/playlist)
+// ---------------------------------------------------------------------------
+
+export interface PlaylistRequest {
+  mood?: string;
+  energy_arc?: "build" | "plateau" | "decline" | "mixed";
+  duration_minutes?: number;
+  genre?: string;
+  bpm_range?: [number, number];
+}
+
+export interface PlaylistSample {
+  id: string;
+  filename: string;
+  bpm: number;
+  energy: number;
+  position_in_arc: number;
+}
+
+export interface PlaylistResponse {
+  samples: PlaylistSample[];
+  total_duration_ms: number;
+  average_energy: number;
+}
+
+export const generatePlaylist = (
+  request: PlaylistRequest
+): Promise<PlaylistResponse> =>
+  apiFetch("/api/v1/ai/curate/playlist", {
+    method: "POST",
+    body: JSON.stringify(request),
   });

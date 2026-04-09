@@ -1,10 +1,10 @@
 """TUI Monitoring module - Performance monitoring and metrics"""
 
 from samplemind.interfaces.tui.monitoring.performance_monitor import (
-    PerformanceMonitor,
-    PerformanceMetric,
-    PerformanceStats,
     MetricType,
+    PerformanceMetric,
+    PerformanceMonitor,
+    PerformanceStats,
     get_performance_monitor,
 )
 

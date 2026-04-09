@@ -3,7 +3,7 @@
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 import numpy as np
 
@@ -22,7 +22,7 @@ class MasteringProfile:
     peak_limit: float  # Peak ceiling (typically -0.3 to -0.1)
     low_end_boost: float  # Bass boost amount (dB)
     high_end_boost: float  # Treble boost amount (dB)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class ReferenceAnalyzer:
@@ -46,7 +46,7 @@ class ReferenceAnalyzer:
         """
         try:
             import librosa
-            import soundfile as sf
+            import soundfile as sf  # noqa: F401
         except ImportError:
             logger.error("librosa or soundfile not available")
             raise

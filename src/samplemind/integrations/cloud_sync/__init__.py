@@ -2,10 +2,10 @@
 
 from .sync_manager import (
     CloudSyncManager,
-    SyncEvent,
-    SyncAction,
-    OfflineQueue,
     ConflictResolver,
+    OfflineQueue,
+    SyncAction,
+    SyncEvent,
 )
 
 __all__ = [

@@ -1,7 +1,7 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, HTTPException, Request
 
 from samplemind.core.database.repositories.collection_repository import (
     CollectionRepository,
@@ -48,7 +48,7 @@ def is_db_available() -> bool:
     return get_app_state("mongodb") or False
 
 
-@router.get("/", response_model=List[CollectionResponse])
+@router.get("/", response_model=list[CollectionResponse])
 async def list_collections(request: Request, skip: int = 0, limit: int = 100) -> None:
     """List all collections"""
     if is_db_available():
@@ -197,7 +197,7 @@ async def delete_collection(collection_id: str):
     raise HTTPException(status_code=404, detail="Collection not found")
 
 
-@router.get("/{collection_id}/items", response_model=List[Dict[str, Any]])
+@router.get("/{collection_id}/items", response_model=list[dict[str, Any]])
 async def get_collection_items(collection_id: str):
     """Get items in a collection"""
     if is_db_available():

@@ -42,12 +42,10 @@ import asyncio
 import logging
 import os
 import re
-import struct
 import time
 import wave
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -60,11 +58,12 @@ MUSICGEN_OUTPUT_DIR = Path(
 @dataclass
 class GenerationResult:
     """Result from a MusicGen generation call."""
+
     file_path: str
     prompt: str
     duration_s: float
-    bpm: Optional[int]
-    key: Optional[str]
+    bpm: int | None
+    key: str | None
     model_used: str
     generation_time_s: float
     is_mock: bool = False
@@ -80,7 +79,7 @@ class MusicGenService:
     - Model loading fails for any reason
     """
 
-    def __init__(self, model_size: Optional[str] = None) -> None:
+    def __init__(self, model_size: str | None = None) -> None:
         self.model_size = model_size or MUSICGEN_MODEL
         self._model = None
         self._model_loaded = False
@@ -94,7 +93,6 @@ class MusicGenService:
         self._model_loaded = True
         try:
             from audiocraft.models import MusicGen  # type: ignore
-            import torch
 
             model_name = f"facebook/musicgen-{self.model_size}"
             logger.info("Loading MusicGen model: %s", model_name)
@@ -108,7 +106,9 @@ class MusicGenService:
                 "Install: pip install audiocraft"
             )
         except Exception as exc:
-            logger.warning("MusicGen model load failed (%s) — mock mode: %s", self.model_size, exc)
+            logger.warning(
+                "MusicGen model load failed (%s) — mock mode: %s", self.model_size, exc
+            )
 
         self._model = None
         return False
@@ -119,11 +119,11 @@ class MusicGenService:
         self,
         prompt: str,
         duration_s: float = 4.0,
-        bpm: Optional[int] = None,
-        key: Optional[str] = None,
+        bpm: int | None = None,
+        key: str | None = None,
         temperature: float = 1.0,
         top_k: int = 250,
-        output_filename: Optional[str] = None,
+        output_filename: str | None = None,
     ) -> GenerationResult:
         """
         Generate an audio sample from a text prompt.
@@ -173,7 +173,10 @@ class MusicGenService:
         elapsed = time.perf_counter() - start
         logger.info(
             "%s generated %.1fs of audio in %.2fs: %s",
-            model_used, duration_s, elapsed, file_path,
+            model_used,
+            duration_s,
+            elapsed,
+            file_path,
         )
 
         return GenerationResult(
@@ -193,7 +196,7 @@ class MusicGenService:
         duration_s: float,
         temperature: float,
         top_k: int,
-        output_filename: Optional[str],
+        output_filename: str | None,
     ) -> str:
         """Blocking real generation — called from executor."""
         import torch
@@ -218,6 +221,7 @@ class MusicGenService:
 
         try:
             import soundfile as sf
+
             if audio_array.ndim == 2:
                 # (channels, samples) → (samples, channels)
                 audio_array = audio_array.T
@@ -232,20 +236,26 @@ class MusicGenService:
         self,
         prompts: list[str],
         duration_s: float = 4.0,
-        bpm: Optional[int] = None,
-        key: Optional[str] = None,
+        bpm: int | None = None,
+        key: str | None = None,
     ) -> list[GenerationResult]:
         """Generate multiple samples sequentially (GPU memory safety)."""
         results = []
         for prompt in prompts:
-            result = await self.generate(prompt, duration_s=duration_s, bpm=bpm, key=key)
+            result = await self.generate(
+                prompt, duration_s=duration_s, bpm=bpm, key=key
+            )
             results.append(result)
         return results
 
     @staticmethod
     def list_generated(limit: int = 50) -> list[dict]:
         """List recently generated files."""
-        files = sorted(MUSICGEN_OUTPUT_DIR.glob("*.wav"), key=lambda p: p.stat().st_mtime, reverse=True)
+        files = sorted(
+            MUSICGEN_OUTPUT_DIR.glob("*.wav"),
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )
         return [
             {
                 "filename": f.name,
@@ -260,7 +270,7 @@ class MusicGenService:
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 
-def _build_prompt(base: str, bpm: Optional[int], key: Optional[str]) -> str:
+def _build_prompt(base: str, bpm: int | None, key: str | None) -> str:
     """Enrich a generation prompt with BPM/key metadata."""
     parts = [base.strip()]
     if bpm:
@@ -281,7 +291,7 @@ def _generate_mock_wav(
     prompt: str,
     duration_s: float,
     output_dir: Path,
-    filename: Optional[str] = None,
+    filename: str | None = None,
 ) -> str:
     """Generate a silent WAV file as a mock placeholder."""
     slug = _slugify(prompt)[:60]
@@ -303,6 +313,7 @@ def _generate_mock_wav(
 def _write_wav_from_numpy(path: str, array, sample_rate: int) -> None:
     """Write a numpy float array to WAV without soundfile dependency."""
     import numpy as np
+
     if array.ndim == 2:
         array = array[:, 0]  # take first channel
     # Clip and convert to int16

@@ -11,18 +11,14 @@ Usage:
 """
 
 from pathlib import Path
-from typing import Optional
-import asyncio
 
 import typer
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
 
-from samplemind.core.processing.mastering_analyzer import MasteringAnalyzer
-from samplemind.core.processing.loudness_analyzer import PLATFORM_TARGETS
 from samplemind.core.history.recent_files import add_recent_file
+from samplemind.core.processing.loudness_analyzer import PLATFORM_TARGETS
+from samplemind.core.processing.mastering_analyzer import MasteringAnalyzer
 
 from . import utils
 
@@ -43,7 +39,7 @@ console = utils.console
 @utils.with_error_handling
 @utils.async_command
 async def analyze_mastering(
-    file: Optional[Path] = typer.Argument(None, help="Audio file to analyze"),
+    file: Path | None = typer.Argument(None, help="Audio file to analyze"),
     platform: str = typer.Option("spotify", "--platform", "-p", help="Target platform"),
     interactive: bool = typer.Option(
         False, "--interactive", "-i", help="Launch file picker"
@@ -100,7 +96,7 @@ async def analyze_mastering(
 
         # Display header
         console.print()
-        console.print(f"[bold cyan]🎚️  Mastering Analysis[/bold cyan]")
+        console.print("[bold cyan]🎚️  Mastering Analysis[/bold cyan]")
         console.print(
             f"[dim]File: {file.name} | Platform: {analysis.target_platform.title()}[/dim]\n"
         )
@@ -359,7 +355,7 @@ async def compare_files(
     console.print()
     console.print("[yellow]⏳ Loudness comparison coming soon![/yellow]")
     console.print()
-    console.print(f"Will compare:")
+    console.print("Will compare:")
     console.print(f"  • {file1.name}")
     console.print(f"  • {file2.name}")
 

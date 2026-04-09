@@ -4,8 +4,8 @@ Run with: locust -f tests/load/locustfile.py --host=http://localhost:8000
 """
 
 import random
-import json
-from locust import HttpUser, task, between, SequentialTaskSet
+
+from locust import HttpUser, SequentialTaskSet, between, task
 
 
 class UserAuthenticationTasks(SequentialTaskSet):

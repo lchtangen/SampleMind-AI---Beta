@@ -8,13 +8,11 @@ Provides real-time integration with Ableton Live 11+ via Control Surface API:
 - Smart sample loading with metadata
 """
 
-import logging
 import json
-from pathlib import Path
-from typing import Dict, Any, Optional, List
+import logging
 from dataclasses import dataclass
-from threading import Thread
-import time
+from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -24,13 +22,13 @@ class AbletonSampleMetadata:
     """Ableton sample metadata"""
 
     file_path: str
-    bpm: Optional[float] = None
-    key: Optional[str] = None
-    genre: Optional[str] = None
-    mood: Optional[str] = None
-    energy: Optional[float] = None
+    bpm: float | None = None
+    key: str | None = None
+    genre: str | None = None
+    mood: str | None = None
+    energy: float | None = None
     compatible_with_project: bool = False
-    suggested_track_type: Optional[str] = None
+    suggested_track_type: str | None = None
     notes: str = ""
 
 
@@ -47,8 +45,8 @@ class AbletonControlSurface:
         self.project_bpm = 120.0
         self.project_key = "C"
         self.selected_track = None
-        self.sample_metadata_cache: Dict[str, AbletonSampleMetadata] = {}
-        self.suggestions_list: List[str] = []
+        self.sample_metadata_cache: dict[str, AbletonSampleMetadata] = {}
+        self.suggestions_list: list[str] = []
         logger.info(f"AbletonControlSurface {self.VERSION} initialized")
 
     def connect(self, song) -> None:
@@ -138,7 +136,7 @@ class AbletonControlSurface:
         except Exception as e:
             logger.error(f"Error displaying clip metadata: {e}")
 
-    def _get_clip_file_path(self, clip) -> Optional[str]:
+    def _get_clip_file_path(self, clip) -> str | None:
         """Get file path from clip"""
         try:
             # Try to get from clip properties
@@ -157,7 +155,7 @@ class AbletonControlSurface:
             logger.debug(f"Could not get clip file path: {e}")
             return None
 
-    def _analyze_clip_file(self, file_path: str) -> Optional[AbletonSampleMetadata]:
+    def _analyze_clip_file(self, file_path: str) -> AbletonSampleMetadata | None:
         """Analyze audio file"""
         try:
             from samplemind.core.engine import AudioEngine
@@ -194,7 +192,7 @@ class AbletonControlSurface:
             logger.error(f"Error analyzing clip: {e}")
             return None
 
-    def _check_compatibility(self, analysis_result: Dict[str, Any]) -> bool:
+    def _check_compatibility(self, analysis_result: dict[str, Any]) -> bool:
         """Check if sample is compatible with project"""
         sample_bpm = analysis_result.get("bpm", self.project_bpm)
 
@@ -207,7 +205,7 @@ class AbletonControlSurface:
 
         return bpm_match and key_match
 
-    def _suggest_track_type(self, analysis_result: Dict[str, Any]) -> Optional[str]:
+    def _suggest_track_type(self, analysis_result: dict[str, Any]) -> str | None:
         """Suggest track type based on analysis"""
         genre = analysis_result.get("genre", "").lower()
         mood = analysis_result.get("mood", "").lower()
@@ -225,7 +223,7 @@ class AbletonControlSurface:
             return "Audio Track"
 
     def _display_in_browser(
-        self, clip_name: str, metadata: Optional[AbletonSampleMetadata]
+        self, clip_name: str, metadata: AbletonSampleMetadata | None
     ) -> None:
         """Display metadata in browser"""
         try:
@@ -285,7 +283,7 @@ Suggested: {metadata.suggested_track_type}
         except Exception as e:
             logger.error(f"Error saving metadata for browser: {e}")
 
-    def get_suggestions(self) -> List[Dict[str, Any]]:
+    def get_suggestions(self) -> list[dict[str, Any]]:
         """Get AI-powered suggestions for current track"""
         try:
             suggestions = []
@@ -301,7 +299,7 @@ Suggested: {metadata.suggested_track_type}
             logger.error(f"Error getting suggestions: {e}")
             return []
 
-    def _get_similar_samples(self) -> List[Dict[str, Any]]:
+    def _get_similar_samples(self) -> list[dict[str, Any]]:
         """Get similar samples from library"""
         try:
             from samplemind.core.database import ChromaDB
@@ -337,7 +335,7 @@ Suggested: {metadata.suggested_track_type}
             logger.debug(f"Could not get similar samples: {e}")
             return []
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get control surface status"""
         return {
             "name": self.NAME,
@@ -350,7 +348,7 @@ Suggested: {metadata.suggested_track_type}
 
 
 # Global instance
-_control_surface: Optional[AbletonControlSurface] = None
+_control_surface: AbletonControlSurface | None = None
 
 
 def get_control_surface() -> AbletonControlSurface:

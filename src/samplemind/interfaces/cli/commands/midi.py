@@ -3,17 +3,16 @@
 
 import time
 from pathlib import Path
-from typing import Optional
 
 import typer
-from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeRemainingColumn
 from rich.table import Table
 
 from samplemind.core.processing.midi_generator import (
-    MIDIGenerator,
     MIDIExtractionType,
+    MIDIGenerator,
 )
+
 from . import utils
 
 app = typer.Typer(
@@ -26,11 +25,11 @@ console = utils.console
 @app.command("extract")
 @utils.with_error_handling
 def extract_midi(
-    file: Optional[Path] = typer.Argument(None, help="Audio file to extract MIDI from"),
+    file: Path | None = typer.Argument(None, help="Audio file to extract MIDI from"),
     extraction_type: str = typer.Option(
         "melody", "--type", "-t", help="Extraction type: melody, harmony, rhythm"
     ),
-    output: Optional[Path] = typer.Option(
+    output: Path | None = typer.Option(
         None, "--output", "-o", help="Output MIDI file path"
     ),
     format_type: str = typer.Option(
@@ -70,7 +69,7 @@ def extract_midi(
 
         # Display header
         console.print()
-        console.print(f"[bold cyan]🎼 MIDI Extraction[/bold cyan]")
+        console.print("[bold cyan]🎼 MIDI Extraction[/bold cyan]")
         console.print(f"[cyan]File: {file.name}[/cyan]")
         console.print(f"[cyan]Type: {extraction_lower}[/cyan]\n")
 
@@ -112,7 +111,7 @@ def extract_midi(
                 generator.save_midi(result.midi_file, output_path)
                 console.print(f"[green]✓ MIDI saved to {output_path}[/green]")
         else:
-            console.print(f"[dim]Use --output to save as MIDI file[/dim]")
+            console.print("[dim]Use --output to save as MIDI file[/dim]")
 
         # JSON output
         if format_type == "json":
@@ -129,10 +128,8 @@ def extract_midi(
 @app.command("melody")
 @utils.with_error_handling
 def extract_melody_shortcut(
-    file: Optional[Path] = typer.Argument(None, help="Audio file"),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output MIDI file"
-    ),
+    file: Path | None = typer.Argument(None, help="Audio file"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output MIDI file"),
 ) -> None:
     """Extract melody from audio (shortcut for --type melody)"""
     extract_midi(file, extraction_type="melody", output=output)
@@ -141,10 +138,8 @@ def extract_melody_shortcut(
 @app.command("chords")
 @utils.with_error_handling
 def extract_chords_shortcut(
-    file: Optional[Path] = typer.Argument(None, help="Audio file"),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output MIDI file"
-    ),
+    file: Path | None = typer.Argument(None, help="Audio file"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output MIDI file"),
 ) -> None:
     """Extract chords from audio (shortcut for --type harmony)"""
     extract_midi(file, extraction_type="harmony", output=output)
@@ -153,10 +148,8 @@ def extract_chords_shortcut(
 @app.command("drums")
 @utils.with_error_handling
 def extract_drums_shortcut(
-    file: Optional[Path] = typer.Argument(None, help="Audio file"),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output MIDI file"
-    ),
+    file: Path | None = typer.Argument(None, help="Audio file"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output MIDI file"),
 ) -> None:
     """Extract drum pattern from audio (shortcut for --type rhythm)"""
     extract_midi(file, extraction_type="rhythm", output=output)
@@ -165,11 +158,11 @@ def extract_drums_shortcut(
 @app.command("batch")
 @utils.with_error_handling
 def batch_extract_midi(
-    folder: Optional[Path] = typer.Argument(None, help="Folder with audio files"),
+    folder: Path | None = typer.Argument(None, help="Folder with audio files"),
     extraction_type: str = typer.Option(
         "melody", "--type", "-t", help="Extraction type: melody, harmony, rhythm"
     ),
-    output_folder: Optional[Path] = typer.Option(
+    output_folder: Path | None = typer.Option(
         None, "--output", "-o", help="Output folder for MIDI files"
     ),
 ) -> None:
@@ -203,7 +196,7 @@ def batch_extract_midi(
             raise typer.Exit(1)
 
         console.print()
-        console.print(f"[bold cyan]🎼 Batch MIDI Extraction[/bold cyan]")
+        console.print("[bold cyan]🎼 Batch MIDI Extraction[/bold cyan]")
         console.print(f"[cyan]Folder: {folder}[/cyan]")
         console.print(f"[cyan]Files: {len(audio_files)}[/cyan]")
         console.print(f"[cyan]Type: {extraction_type}[/cyan]\n")
@@ -223,7 +216,8 @@ def batch_extract_midi(
         generator = MIDIGenerator(sample_rate=22050)
 
         success_count = 0
-        from rich.progress import Progress as RichProgress, BarColumn
+        from rich.progress import BarColumn
+        from rich.progress import Progress as RichProgress
 
         with RichProgress(
             SpinnerColumn(),
@@ -366,7 +360,6 @@ def _display_rhythm_results(result) -> None:
 
 def _output_json_result(result, elapsed: float, extraction_type: str) -> None:
     """Output results as JSON"""
-    import json
 
     output_data = {
         "status": "success",

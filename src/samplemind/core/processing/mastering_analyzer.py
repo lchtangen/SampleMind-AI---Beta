@@ -13,14 +13,14 @@ Produces mastering-ready analysis reports.
 """
 
 import logging
-from typing import Dict, List, Optional
 from dataclasses import dataclass
+
 import numpy as np
 
 from samplemind.core.processing.loudness_analyzer import (
-    LoudnessAnalyzer,
-    LoudnessAnalysis,
     PLATFORM_TARGETS,
+    LoudnessAnalysis,
+    LoudnessAnalyzer,
 )
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ class MasteringAnalysis:
     platform_target: float
 
     # Spectral analysis
-    spectral_balance: Dict[str, float]  # sub, bass, mids, highs
+    spectral_balance: dict[str, float]  # sub, bass, mids, highs
     estimated_brightness: float  # 0-1
 
     # Stereo analysis
@@ -143,7 +143,7 @@ class MasteringAnalyzer:
         self,
         audio: np.ndarray,
         sample_rate: int,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """Analyze spectral balance across frequency ranges"""
         # Use FFT to analyze frequency content
         if audio.ndim > 1:
@@ -191,7 +191,7 @@ class MasteringAnalyzer:
             "highs": highs_db - reference,
         }
 
-    def _estimate_brightness(self, spectral_balance: Dict[str, float]) -> float:
+    def _estimate_brightness(self, spectral_balance: dict[str, float]) -> float:
         """Estimate brightness from spectral balance (0-1)"""
         highs = spectral_balance.get("highs", 0)
         # Normalize: -12dB = 0.0 (dark), +12dB = 1.0 (bright)
@@ -251,7 +251,7 @@ class MasteringAnalyzer:
     # RECOMMENDATIONS
     # ========================================================================
 
-    def get_recommendations(self, analysis: MasteringAnalysis) -> List[str]:
+    def get_recommendations(self, analysis: MasteringAnalysis) -> list[str]:
         """
         Generate actionable mastering recommendations
 
@@ -347,7 +347,7 @@ class MasteringAnalyzer:
         self,
         analysis: MasteringAnalysis,
         reference_loudness: float = -14.0,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """Compare to reference metrics"""
         return {
             "loudness_difference": analysis.loudness.integrated_loudness

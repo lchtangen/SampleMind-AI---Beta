@@ -10,10 +10,8 @@ Implements multi-level caching strategy for:
 import hashlib
 import json
 import logging
-from typing import Any, Dict, List, Optional, Tuple
 from pathlib import Path
-import asyncio
-from functools import lru_cache
+from typing import Any
 
 import numpy as np
 
@@ -46,13 +44,13 @@ class SemanticCache:
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
         # In-memory embedding cache (file_hash -> embedding)
-        self.embeddings_cache: Dict[str, List[float]] = {}
+        self.embeddings_cache: dict[str, list[float]] = {}
 
         # Query result cache (query_hash -> (results, timestamp))
-        self.query_cache: Dict[str, Tuple[List[Dict], float]] = {}
+        self.query_cache: dict[str, tuple[list[dict], float]] = {}
 
         # Access tracking for LRU eviction
-        self.access_count: Dict[str, int] = {}
+        self.access_count: dict[str, int] = {}
 
         # Statistics
         self.embedding_hits = 0
@@ -87,7 +85,7 @@ class SemanticCache:
         self,
         query_text: str,
         n_results: int = 5,
-        metadata_filter: Optional[Dict] = None,
+        metadata_filter: dict | None = None,
     ) -> str:
         """
         Generate deterministic hash for semantic query.
@@ -108,7 +106,7 @@ class SemanticCache:
         key_str = json.dumps(key_data, sort_keys=True)
         return hashlib.sha256(key_str.encode()).hexdigest()
 
-    async def get_embedding(self, audio_path: str) -> Optional[List[float]]:
+    async def get_embedding(self, audio_path: str) -> list[float] | None:
         """
         Get cached embedding for audio file.
 
@@ -143,7 +141,7 @@ class SemanticCache:
         self.embedding_misses += 1
         return None
 
-    async def set_embedding(self, audio_path: str, embedding: List[float]) -> bool:
+    async def set_embedding(self, audio_path: str, embedding: list[float]) -> bool:
         """
         Cache embedding for audio file.
 
@@ -180,9 +178,9 @@ class SemanticCache:
         self,
         query_text: str,
         n_results: int = 5,
-        metadata_filter: Optional[Dict] = None,
+        metadata_filter: dict | None = None,
         ttl: int = 3600,
-    ) -> Optional[List[Dict]]:
+    ) -> list[dict] | None:
         """
         Get cached semantic search results.
 
@@ -219,9 +217,9 @@ class SemanticCache:
     async def set_query_result(
         self,
         query_text: str,
-        results: List[Dict],
+        results: list[dict],
         n_results: int = 5,
-        metadata_filter: Optional[Dict] = None,
+        metadata_filter: dict | None = None,
     ) -> bool:
         """
         Cache semantic search results.
@@ -261,7 +259,7 @@ class SemanticCache:
 
         logger.debug(f"Evicted embedding cache entry: {min_key}")
 
-    def get_hit_ratio(self) -> Dict[str, float]:
+    def get_hit_ratio(self) -> dict[str, float]:
         """Get cache hit ratios."""
         embedding_total = self.embedding_hits + self.embedding_misses
         query_total = self.query_hits + self.query_misses
@@ -281,7 +279,7 @@ class SemanticCache:
             ),
         }
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get cache statistics."""
         return {
             "embedding_hits": self.embedding_hits,
@@ -308,7 +306,7 @@ class SemanticCache:
 
 
 # Global semantic cache instance
-_semantic_cache: Optional[SemanticCache] = None
+_semantic_cache: SemanticCache | None = None
 
 
 def init_semantic_cache(**kwargs) -> SemanticCache:
@@ -329,7 +327,7 @@ def get_semantic_cache() -> SemanticCache:
 # Cached wrappers for neural and semantic operations
 
 
-async def cached_embedding(neural_extractor, audio_path: str) -> List[float]:
+async def cached_embedding(neural_extractor, audio_path: str) -> list[float]:
     """
     Generate embedding with caching.
 
@@ -360,9 +358,9 @@ async def cached_query(
     chroma_collection,
     query_text: str,
     n_results: int = 5,
-    metadata_filter: Optional[Dict] = None,
+    metadata_filter: dict | None = None,
     ttl: int = 3600,
-) -> List[Dict]:
+) -> list[dict]:
     """
     Perform semantic search with caching.
 

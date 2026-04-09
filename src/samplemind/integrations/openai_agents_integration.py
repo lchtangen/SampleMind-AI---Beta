@@ -15,7 +15,7 @@ Agent responsibilities:
 import json
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class AgentPipelineResult:
 
     # AudioAnalysisAgent output
     genre: str = ""
-    sub_genres: List[str] = field(default_factory=list)
+    sub_genres: list[str] = field(default_factory=list)
     mood: str = ""
     bpm: float = 0.0
     key: str = ""
@@ -50,9 +50,9 @@ class AgentPipelineResult:
     production_notes: str = ""
 
     # TaggingAgent output
-    semantic_tags: List[str] = field(default_factory=list)
-    mood_tags: List[str] = field(default_factory=list)
-    instrument_tags: List[str] = field(default_factory=list)
+    semantic_tags: list[str] = field(default_factory=list)
+    mood_tags: list[str] = field(default_factory=list)
+    instrument_tags: list[str] = field(default_factory=list)
 
     # OrganizationAgent output
     suggested_folder: str = ""
@@ -156,7 +156,7 @@ class AudioAgentPipeline:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         model: str = "gpt-4o",
         enable_tracing: bool = True,
     ) -> None:
@@ -215,7 +215,7 @@ class AudioAgentPipeline:
 
     async def run(
         self,
-        audio_features: Dict[str, Any],
+        audio_features: dict[str, Any],
         sample_name: str = "sample",
     ) -> AgentPipelineResult:
         """

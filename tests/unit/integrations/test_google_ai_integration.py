@@ -10,20 +10,20 @@ Key changes from old tests:
 """
 
 import json
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-from pathlib import Path
 import sys
+from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "src"))
 
 from samplemind.integrations.google_ai_integration import (
-    GoogleAIMusicProducer,
-    MusicAnalysisType,
     AdvancedMusicAnalysis,
     GeminiModel,
+    GoogleAIMusicProducer,
+    MusicAnalysisType,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -163,7 +163,7 @@ class TestGoogleAIMusicProducerInit:
         """v3.0 uses genai.Client(), NOT genai.configure()"""
         with patch("google.genai.Client") as mock_client_cls:
             mock_client_cls.return_value = MagicMock()
-            prod = GoogleAIMusicProducer(api_key="my-key")
+            GoogleAIMusicProducer(api_key="my-key")
             mock_client_cls.assert_called_once_with(api_key="my-key")
 
     def test_no_genai_configure_called(self):

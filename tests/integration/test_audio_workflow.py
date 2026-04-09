@@ -2,10 +2,10 @@
 Integration tests for complete audio processing workflow
 """
 
-import pytest
 import asyncio
 import os
-from pathlib import Path
+
+import pytest
 from httpx import AsyncClient
 
 from src.samplemind.interfaces.api.main import app
@@ -63,7 +63,7 @@ class TestAudioUploadWorkflow:
 
             # Step 4: Poll task status
             max_attempts = 30
-            for attempt in range(max_attempts):
+            for _attempt in range(max_attempts):
                 status_response = await client.get(
                     f"/api/v1/tasks/{task_id}", headers=headers
                 )
@@ -132,7 +132,7 @@ class TestBatchProcessing:
 
             # Poll batch status
             max_attempts = 60
-            for attempt in range(max_attempts):
+            for _attempt in range(max_attempts):
                 status_response = await client.get(
                     f"/api/v1/batch/status/{batch_id}", headers=headers
                 )
@@ -157,7 +157,6 @@ class TestWebSocketUpdates:
 
     async def test_websocket_task_updates(self):
         """Test receiving task updates via WebSocket"""
-        from websockets import connect
 
         # This is a simplified test - full WebSocket testing requires running server
         # In real scenario, would connect to ws://localhost:8000/api/v1/ws/client_123

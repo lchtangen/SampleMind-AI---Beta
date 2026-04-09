@@ -7,29 +7,23 @@ import logging
 import secrets
 import uuid
 from datetime import datetime
-from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from samplemind.core.auth import get_current_active_user
+from samplemind.core.database.repositories import APIKeyRepository, UserRepository
 from samplemind.interfaces.api.schemas.settings import (
     APIKeyCreate,
     APIKeyResponse,
+    ApiKeysListResponse,
     APIKeyWithSecret,
+    MessageResponse,
+    PreferencesResponse,
+    StorageStatsResponse,
+    UserPreferences,
     UserSettingsResponse,
     UserSettingsUpdate,
-    PreferencesResponse,
-    UserPreferences,
-    AnalysisPreferences,
-    UIPreferences,
-    NotificationPreferences,
-    CloudSyncSettings,
-    PrivacySettings,
-    StorageStatsResponse,
-    ApiKeysListResponse,
-    MessageResponse,
 )
-from samplemind.core.auth import get_current_active_user
-from samplemind.core.database.repositories import UserRepository, APIKeyRepository
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/settings", tags=["Settings"])
@@ -217,7 +211,7 @@ async def update_preferences(
             "updated_at": datetime.utcnow(),
         }
 
-        updated_user = await UserRepository.update(current_user.user_id, **update_data)
+        await UserRepository.update(current_user.user_id, **update_data)
 
         logger.info(f"✅ Preferences updated for user: {current_user.user_id}")
 

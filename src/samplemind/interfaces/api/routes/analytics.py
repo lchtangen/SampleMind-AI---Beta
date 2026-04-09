@@ -20,7 +20,7 @@ from __future__ import annotations
 import logging
 from collections import Counter
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
@@ -66,7 +66,9 @@ async def bpm_histogram(bins: int = 20) -> JSONResponse:
         import numpy as np
 
         counts, edges = np.histogram(bpms, bins=bins, range=(30, 250))
-        bin_labels = [f"{int(edges[i])}-{int(edges[i+1])}" for i in range(len(edges) - 1)]
+        bin_labels = [
+            f"{int(edges[i])}-{int(edges[i+1])}" for i in range(len(edges) - 1)
+        ]
 
         chart = {
             "data": [
@@ -160,7 +162,9 @@ async def genre_breakdown(top_n: int = 20) -> JSONResponse:
             genre_counter[genre] += 1
 
     if not genre_counter:
-        return JSONResponse({"data": [], "layout": {"title": "No genre data available"}})
+        return JSONResponse(
+            {"data": [], "layout": {"title": "No genre data available"}}
+        )
 
     top = genre_counter.most_common(top_n)
     labels = [g for g, _ in top]
@@ -192,16 +196,21 @@ async def energy_breakdown() -> JSONResponse:
     Energy level distribution as a pie chart.
     """
     samples = _get_samples_from_index()
-    energy_counts = Counter(
-        (s.get("energy") or "unknown").lower() for s in samples
-    )
+    energy_counts = Counter((s.get("energy") or "unknown").lower() for s in samples)
 
     if not energy_counts:
-        return JSONResponse({"data": [], "layout": {"title": "No energy data available"}})
+        return JSONResponse(
+            {"data": [], "layout": {"title": "No energy data available"}}
+        )
 
     labels = list(energy_counts.keys())
     values = list(energy_counts.values())
-    colors = {"low": "#60a5fa", "mid": "#34d399", "high": "#f87171", "unknown": "#94a3b8"}
+    colors = {
+        "low": "#60a5fa",
+        "mid": "#34d399",
+        "high": "#f87171",
+        "unknown": "#94a3b8",
+    }
 
     chart = {
         "data": [
@@ -232,11 +241,13 @@ async def library_summary() -> JSONResponse:
     n = len(samples)
 
     if n == 0:
-        return JSONResponse({
-            "total_samples": 0,
-            "indexed": False,
-            "message": "Run `samplemind index rebuild` to index your library.",
-        })
+        return JSONResponse(
+            {
+                "total_samples": 0,
+                "indexed": False,
+                "message": "Run `samplemind index rebuild` to index your library.",
+            }
+        )
 
     bpms = [s["bpm"] for s in samples if s.get("bpm")]
     energy_counts = Counter((s.get("energy") or "unknown").lower() for s in samples)
@@ -250,21 +261,23 @@ async def library_summary() -> JSONResponse:
     key_counter = Counter(keys)
     top_keys = [k for k, _ in key_counter.most_common(5)]
 
-    return JSONResponse({
-        "total_samples": n,
-        "indexed": True,
-        "bpm": {
-            "min": min(bpms) if bpms else None,
-            "max": max(bpms) if bpms else None,
-            "avg": round(sum(bpms) / len(bpms), 1) if bpms else None,
-        },
-        "energy_distribution": {
-            "low": energy_counts.get("low", 0),
-            "mid": energy_counts.get("mid", 0),
-            "high": energy_counts.get("high", 0),
-        },
-        "top_genres": top_genres,
-        "top_keys": top_keys,
-        "unique_keys": len(key_counter),
-        "unique_genres": len(genre_counter),
-    })
+    return JSONResponse(
+        {
+            "total_samples": n,
+            "indexed": True,
+            "bpm": {
+                "min": min(bpms) if bpms else None,
+                "max": max(bpms) if bpms else None,
+                "avg": round(sum(bpms) / len(bpms), 1) if bpms else None,
+            },
+            "energy_distribution": {
+                "low": energy_counts.get("low", 0),
+                "mid": energy_counts.get("mid", 0),
+                "high": energy_counts.get("high", 0),
+            },
+            "top_genres": top_genres,
+            "top_keys": top_keys,
+            "unique_keys": len(key_counter),
+            "unique_genres": len(genre_counter),
+        }
+    )

@@ -3,12 +3,13 @@ Database Query Optimizer
 Automatic query optimization and performance tuning
 """
 
-from typing import Any, Dict, List, Optional
-from sqlalchemy import text, inspect
-from sqlalchemy.ext.asyncio import AsyncSession
 import logging
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any
+
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ class QueryPlan:
     rows_estimated: int
     rows_actual: int
     uses_index: bool
-    recommendations: List[str]
+    recommendations: list[str]
 
 
 class QueryOptimizer:
@@ -77,7 +78,7 @@ class QueryOptimizer:
             recommendations=recommendations,
         )
 
-    def _uses_index(self, plan: Dict[str, Any]) -> bool:
+    def _uses_index(self, plan: dict[str, Any]) -> bool:
         """Check if query uses index scan"""
         node_type = plan.get("Node Type", "")
         if "Index" in node_type:
@@ -90,7 +91,7 @@ class QueryOptimizer:
 
         return False
 
-    def _generate_recommendations(self, plan: Dict[str, Any], query: str) -> List[str]:
+    def _generate_recommendations(self, plan: dict[str, Any], query: str) -> list[str]:
         """Generate optimization recommendations"""
         recommendations = []
 
@@ -122,7 +123,7 @@ class QueryOptimizer:
 
         return recommendations
 
-    async def suggest_indexes(self, table_name: str) -> List[str]:
+    async def suggest_indexes(self, table_name: str) -> list[str]:
         """
         Suggest indexes based on query patterns
 
@@ -135,9 +136,8 @@ class QueryOptimizer:
         suggestions = []
 
         # Get table statistics
-        stats_query = text(
-            """
-            SELECT 
+        stats_query = text("""
+            SELECT
                 schemaname,
                 tablename,
                 attname as column_name,
@@ -146,8 +146,7 @@ class QueryOptimizer:
             FROM pg_stats
             WHERE tablename = :table_name
             ORDER BY abs(correlation) DESC
-        """
-        )
+        """)
 
         result = await self.session.execute(stats_query, {"table_name": table_name})
         stats = result.fetchall()
@@ -162,7 +161,7 @@ class QueryOptimizer:
 
         return suggestions
 
-    async def optimize_table(self, table_name: str) -> Dict[str, Any]:
+    async def optimize_table(self, table_name: str) -> dict[str, Any]:
         """
         Optimize table (VACUUM ANALYZE)
 
@@ -183,11 +182,10 @@ class QueryOptimizer:
             "stats": stats,
         }
 
-    async def get_table_stats(self, table_name: str) -> Dict[str, Any]:
+    async def get_table_stats(self, table_name: str) -> dict[str, Any]:
         """Get table statistics"""
-        query = text(
-            """
-            SELECT 
+        query = text("""
+            SELECT
                 schemaname,
                 tablename,
                 pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as total_size,
@@ -197,8 +195,7 @@ class QueryOptimizer:
                 last_analyze
             FROM pg_stat_user_tables
             WHERE tablename = :table_name
-        """
-        )
+        """)
 
         result = await self.session.execute(query, {"table_name": table_name})
         row = result.fetchone()
@@ -215,14 +212,13 @@ class QueryOptimizer:
 
         return {}
 
-    async def get_slow_queries(self, limit: int = 10) -> List[Dict[str, Any]]:
+    async def get_slow_queries(self, limit: int = 10) -> list[dict[str, Any]]:
         """
         Get slowest queries from pg_stat_statements
         Requires pg_stat_statements extension
         """
-        query = text(
-            """
-            SELECT 
+        query = text("""
+            SELECT
                 query,
                 calls,
                 total_exec_time / calls as avg_time_ms,
@@ -232,8 +228,7 @@ class QueryOptimizer:
             WHERE query NOT LIKE '%pg_stat_statements%'
             ORDER BY total_exec_time DESC
             LIMIT :limit
-        """
-        )
+        """)
 
         try:
             result = await self.session.execute(query, {"limit": limit})
@@ -251,14 +246,13 @@ class QueryOptimizer:
             logger.warning(f"pg_stat_statements not available: {e}")
             return []
 
-    async def get_missing_indexes(self) -> List[Dict[str, Any]]:
+    async def get_missing_indexes(self) -> list[dict[str, Any]]:
         """
         Find tables that might benefit from indexes
         Based on sequential scan statistics
         """
-        query = text(
-            """
-            SELECT 
+        query = text("""
+            SELECT
                 schemaname,
                 tablename,
                 seq_scan,
@@ -270,8 +264,7 @@ class QueryOptimizer:
               AND idx_scan < seq_scan
             ORDER BY seq_tup_read DESC
             LIMIT 20
-        """
-        )
+        """)
 
         result = await self.session.execute(query)
 
@@ -286,11 +279,10 @@ class QueryOptimizer:
             for row in result.fetchall()
         ]
 
-    async def get_index_usage(self) -> List[Dict[str, Any]]:
+    async def get_index_usage(self) -> list[dict[str, Any]]:
         """Get index usage statistics"""
-        query = text(
-            """
-            SELECT 
+        query = text("""
+            SELECT
                 schemaname,
                 tablename,
                 indexrelname,
@@ -300,8 +292,7 @@ class QueryOptimizer:
                 pg_size_pretty(pg_relation_size(indexrelid)) as index_size
             FROM pg_stat_user_indexes
             ORDER BY idx_scan DESC
-        """
-        )
+        """)
 
         result = await self.session.execute(query)
 
@@ -318,26 +309,24 @@ class QueryOptimizer:
             for row in result.fetchall()
         ]
 
-    async def get_bloat_report(self) -> List[Dict[str, Any]]:
+    async def get_bloat_report(self) -> list[dict[str, Any]]:
         """Get table bloat report"""
-        query = text(
-            """
-            SELECT 
+        query = text("""
+            SELECT
                 schemaname,
                 tablename,
                 pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as total_size,
                 n_dead_tup,
                 n_live_tup,
-                CASE 
-                    WHEN n_live_tup > 0 
+                CASE
+                    WHEN n_live_tup > 0
                     THEN round(100.0 * n_dead_tup / n_live_tup, 2)
                     ELSE 0
                 END as dead_tuple_percent
             FROM pg_stat_user_tables
             WHERE n_dead_tup > 1000
             ORDER BY n_dead_tup DESC
-        """
-        )
+        """)
 
         result = await self.session.execute(query)
 
@@ -386,12 +375,12 @@ def optimized_query(cache_plan: bool = True) -> Any:
 async def optimize_database():
     from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
     from src.samplemind.core.config import settings
-    
+
     engine = create_async_engine(settings.database_url_async)
-    
+
     async with AsyncSession(engine) as session:
         optimizer = QueryOptimizer(session)
-        
+
         # Analyze a query
         query = "SELECT * FROM users WHERE email = 'test@example.com'"
         plan = await optimizer.analyze_query(query)
@@ -399,17 +388,17 @@ async def optimize_database():
         print(f"Uses index: {plan.uses_index}")
         for rec in plan.recommendations:
             print(f"- {rec}")
-        
+
         # Get slow queries
         slow_queries = await optimizer.get_slow_queries()
         for q in slow_queries:
             print(f"{q['query']}: {q['avg_time_ms']:.2f}ms")
-        
+
         # Find missing indexes
         missing_indexes = await optimizer.get_missing_indexes()
         for m in missing_indexes:
             print(f"{m['table']}: {m['recommendation']}")
-        
+
         # Optimize table
         await optimizer.optimize_table('users')
 """

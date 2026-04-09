@@ -13,7 +13,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -64,10 +64,10 @@ class DetectedNote:
 class MidiConversionResult:
     """Output from MidiConverter."""
 
-    notes: List[DetectedNote] = field(default_factory=list)
-    midi_path: Optional[Path] = None
+    notes: list[DetectedNote] = field(default_factory=list)
+    midi_path: Path | None = None
     source_path: str = ""
-    model_output_path: Optional[Path] = None
+    model_output_path: Path | None = None
     processing_time: float = 0.0
     mock: bool = False
 
@@ -76,7 +76,7 @@ class MidiConversionResult:
         return len(self.notes)
 
     @property
-    def pitch_range(self) -> Tuple[int, int]:
+    def pitch_range(self) -> tuple[int, int]:
         if not self.notes:
             return (0, 0)
         pitches = [n.pitch_midi for n in self.notes]
@@ -116,8 +116,8 @@ class MidiConverter:
     def __init__(
         self,
         minimum_note_length: float = 0.058,
-        minimum_frequency: Optional[float] = None,
-        maximum_frequency: Optional[float] = None,
+        minimum_frequency: float | None = None,
+        maximum_frequency: float | None = None,
         onset_threshold: float = 0.5,
         frame_threshold: float = 0.3,
         melodia_trick: bool = True,
@@ -156,8 +156,8 @@ class MidiConverter:
     async def convert(
         self,
         audio_path: str | Path,
-        output_dir: Optional[str | Path] = None,
-        midi_filename: Optional[str] = None,
+        output_dir: str | Path | None = None,
+        midi_filename: str | None = None,
     ) -> MidiConversionResult:
         """
         Transcribe pitched audio into MIDI notes.
@@ -198,7 +198,7 @@ class MidiConverter:
     def convert_sync(
         self,
         audio_path: str | Path,
-        output_dir: Optional[str | Path] = None,
+        output_dir: str | Path | None = None,
     ) -> MidiConversionResult:
         """Synchronous wrapper around :meth:`convert`."""
         import asyncio
@@ -212,8 +212,8 @@ class MidiConverter:
     def _run_conversion(
         self,
         audio_path: Path,
-        out_dir: Optional[Path],
-        midi_filename: Optional[str],
+        out_dir: Path | None,
+        midi_filename: str | None,
     ) -> MidiConversionResult:
         """CPU-bound basic-pitch inference — runs in thread pool."""
         model_output, midi_data, note_events = _predict(
@@ -227,7 +227,7 @@ class MidiConverter:
         )
 
         # Convert note events to DetectedNote objects
-        notes: List[DetectedNote] = []
+        notes: list[DetectedNote] = []
         for event in note_events:
             # basic-pitch note events: (start_time, end_time, pitch_midi, amplitude, confidence)
             if isinstance(event, (list, tuple)) and len(event) >= 3:
@@ -241,7 +241,7 @@ class MidiConverter:
                     )
                 )
 
-        midi_path: Optional[Path] = None
+        midi_path: Path | None = None
         if out_dir is not None and midi_data is not None:
             out_dir.mkdir(parents=True, exist_ok=True)
             fname = midi_filename or f"{audio_path.stem}.mid"

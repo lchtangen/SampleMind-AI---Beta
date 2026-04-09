@@ -58,9 +58,8 @@ import re
 import shutil
 import tempfile
 import zipfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +84,7 @@ class PackBuilder:
     def _load_index(self):
         try:
             from samplemind.core.search.faiss_index import get_index
+
             return get_index()
         except Exception:
             return None
@@ -139,7 +139,7 @@ class PackBuilder:
             "tags": tags or [],
             "bpm_range": [min(bpms), max(bpms)] if bpms else [],
             "key_signatures": keys,
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
             "author": author,
             "sample_count": len(sample_entries),
             "samples": sample_entries,
@@ -216,7 +216,6 @@ class PackBuilder:
             return
         try:
             import soundfile as sf
-            import numpy as np
 
             data, sr = sf.read(first_path, always_2d=True)
             preview_samples = min(len(data), sr * 30)
@@ -263,7 +262,9 @@ class PackBuilder:
                     with zf.open(member) as src, open(target, "wb") as dst:
                         shutil.copyfileobj(src, dst)
                     extracted.append(str(target))
-        logger.info("Extracted %d files from %s → %s", len(extracted), smpack_path, output_dir)
+        logger.info(
+            "Extracted %d files from %s → %s", len(extracted), smpack_path, output_dir
+        )
         return extracted
 
     @staticmethod
@@ -313,7 +314,7 @@ def _slugify(text: str) -> str:
     return slug.strip("-")
 
 
-def _bpm_from_filename(filename: str) -> Optional[int]:
+def _bpm_from_filename(filename: str) -> int | None:
     """Extract BPM from filename patterns like 'kick_140bpm.wav' or 'snare-130.wav'."""
     patterns = [
         r"(\d{2,3})\s*bpm",
@@ -331,11 +332,13 @@ def _bpm_from_filename(filename: str) -> Optional[int]:
     return None
 
 
-async def _get_duration(path: str) -> Optional[float]:
+async def _get_duration(path: str) -> float | None:
     """Get audio duration in seconds using soundfile (non-blocking)."""
+
     def _read():
         try:
             import soundfile as sf
+
             info = sf.info(path)
             return info.duration
         except Exception:
