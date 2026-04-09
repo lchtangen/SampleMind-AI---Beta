@@ -17,24 +17,20 @@
     "typecheck": "turbo run typecheck",
     "clean": "turbo run clean && rm -rf node_modules",
     "pre-commit": "lint-staged",
-    "postinstall": "prisma generate",
-    
+
     "web:dev": "turbo run dev --filter=@samplemind-ai/web",
     "web:build": "turbo run build --filter=@samplemind-ai/web",
     "web:start": "turbo run start --filter=@samplemind-ai/web",
     "web:lint": "turbo run lint --filter=@samplemind-ai/web",
-    
+
     "audio:dev": "turbo run dev --filter=@samplemind-ai/audio-engine",
     "audio:build": "turbo run build --filter=@samplemind-ai/audio-engine",
     "audio:test": "turbo run test --filter=@samplemind-ai/audio-engine",
-    
-    "api:dev": "cd backend && uvicorn main:app --reload",
-    "api:start": "cd backend && uvicorn main:app --host 0.0.0.0 --port 8000",
-    "api:test": "cd backend && pytest",
-    
-    "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:studio": "prisma studio",
+
+    "api:dev": "uvicorn samplemind.server.main:app --reload",
+    "api:start": "uvicorn samplemind.server.main:app --host 0.0.0.0 --port 8000",
+    "api:test": "pytest tests/ -v",
+
     "samplemind": "pnpm --filter @samplemind-ai/cli dev"
   },
   "lint-staged": {
@@ -59,12 +55,10 @@
     "husky": "^8.0.0",
     "lint-staged": "^15.0.0",
     "prettier": "^3.0.0",
-    "prisma": "^5.7.0",
     "turbo": "^1.10.0",
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@prisma/client": "^5.7.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.546.0",
     "next-themes": "^0.4.6",
@@ -101,7 +95,4 @@
     "url": "https://github.com/lchtangen/SampleMind-AI---Beta/issues"
   },
   "homepage": "https://github.com/lchtangen/SampleMind-AI---Beta#readme",
-  "prisma": {
-    "schema": "./prisma/schema.prisma"
-  }
 }

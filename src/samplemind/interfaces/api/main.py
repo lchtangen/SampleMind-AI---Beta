@@ -24,6 +24,7 @@ from .routes import (
     audio,
     auth,
     batch,
+    billing,
     collections,
     health,
     search,
@@ -51,6 +52,14 @@ from .dependencies import set_app_state
 async def lifespan(app: FastAPI) -> AsyncGenerator:
     """Application lifespan management"""
     logger.info("🚀 Starting SampleMind AI Backend...")
+
+    # Initialize OpenTelemetry tracing early (before any external connections)
+    try:
+        from samplemind.core.monitoring.tracing import setup_tracing
+
+        setup_tracing(service_name="samplemind-api", service_version="3.0.0")
+    except Exception as _tracing_exc:
+        logger.warning("Tracing setup skipped: %s", _tracing_exc)
 
     settings = get_settings()
 
@@ -316,6 +325,7 @@ def create_application() -> FastAPI:
     app.include_router(batch.router, prefix="/api/v1/batch", tags=["batch"])
     app.include_router(collections.router, prefix="/api/v1", tags=["collections"])
     app.include_router(websocket.router, prefix="/api/v1", tags=["websocket"])
+    app.include_router(billing.router, prefix="/api/v1", tags=["billing"])
 
     @app.get("/", include_in_schema=False)
     async def root():

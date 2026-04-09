@@ -6,7 +6,7 @@ based on a starting "seed" sample.
 """
 
 import logging
-import random
+import math
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -176,22 +176,70 @@ class ChainRecommender:
         creativity: float,
     ) -> SampleNode | None:
         """
-        Score candidates and pick one.
-        Currently uses simple randomization weighed by 'creativity'.
-        Future: Use spectral/key analysis.
+        Score candidates and pick the best match for the slot.
+
+        Scoring factors (deterministic):
+        1. Keyword proximity — how many of the slot's required keywords appear
+           in the filename (normalized 0–1).
+        2. Frequency range hint — filenames with high/low/mid frequency
+           descriptors are matched against the slot's target range.
+        3. Creativity factor — blends top score with a diversity bonus to
+           surface non-obvious but still contextually appropriate picks.
         """
         if not candidates:
             return None
 
-        # Placeholder for complex scoring
-        # TODO: Implement spectral distance, BPM matching
+        scored: list[tuple[float, Path]] = []
+        slot_keywords = set(slot.required_keywords)
+        freq_lo, freq_hi = slot.frequency_range
+        slot_center = (freq_lo + freq_hi) / 2
 
-        # For now, pick random
-        chosen = random.choice(candidates)
+        # Frequency descriptor hints in filenames → approximate center frequency
+        _FREQ_HINTS: dict[str, float] = {
+            "sub": 60,
+            "bass": 120,
+            "low": 200,
+            "mid": 1000,
+            "upper": 4000,
+            "high": 8000,
+            "air": 12000,
+            "bright": 10000,
+        }
 
-        # Create node
+        for candidate in candidates:
+            name_lower = candidate.stem.lower()
+
+            # 1. Keyword match score (0–1)
+            matching_kw = sum(1 for kw in slot_keywords if kw in name_lower)
+            keyword_score = matching_kw / max(len(slot_keywords), 1)
+
+            # 2. Frequency proximity score (0–1)
+            # Estimate file's frequency focus from name descriptors
+            detected_centers = [
+                freq for hint, freq in _FREQ_HINTS.items() if hint in name_lower
+            ]
+            if detected_centers:
+                file_center = sum(detected_centers) / len(detected_centers)
+                # Normalise distance on a log scale (octaves)
+                octave_distance = abs(
+                    math.log2(max(file_center, 1)) - math.log2(max(slot_center, 1))
+                )
+                freq_score = max(0.0, 1.0 - octave_distance / 4.0)
+            else:
+                freq_score = 0.5  # neutral when no hint found
+
+            # 3. Composite score with creativity blending
+            # Low creativity → weight toward keyword match
+            # High creativity → give more weight to freq diversity
+            base_score = (1 - creativity) * keyword_score + creativity * freq_score
+            scored.append((base_score, candidate))
+
+        # Sort descending by score; pick the top candidate
+        scored.sort(key=lambda x: x[0], reverse=True)
+        best_score, chosen = scored[0]
+
         return SampleNode(
             file_path=chosen,
             slot_name=slot.name,
-            compatibility_score=random.random(),  # Placeholder
+            compatibility_score=round(best_score, 4),
         )

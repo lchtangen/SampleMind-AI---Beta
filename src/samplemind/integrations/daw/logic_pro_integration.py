@@ -63,7 +63,7 @@ class LogicProAUPlugin:
     """Logic Pro Audio Unit Plugin Logic Layer"""
 
     NAME = "SampleMind AI"
-    VERSION = "2.1.0-beta"
+    VERSION = "3.0.0"
     BUNDLE_ID = "com.samplemind.logic-pro-au"
     MANUFACTURER_ID = "SMnd"
 
@@ -176,14 +176,22 @@ class LogicProAUPlugin:
     def _analyze_sample(self, file_path: Path) -> Optional[LogicProSampleInfo]:
         """Analyze audio sample"""
         try:
-            from samplemind.core.engine import AudioEngine
+            from samplemind.core.engine.audio_engine import AnalysisLevel, AudioEngine
 
             engine = AudioEngine()
-            result = engine.analyze_audio(str(file_path), analysis_level="QUICK")
+            features = engine.analyze_file(str(file_path), level=AnalysisLevel.QUICK)
 
-            # Determine category from genre/mood
+            # Build a flat result dict for downstream helpers
+            result: Dict[str, Any] = {
+                "bpm": features.bpm,
+                "key": features.key,
+                "genre": "",
+                "mood": "",
+                "tags": [],
+            }
+
+            # Determine category from features
             category = self._determine_category(result)
-            subcategory = result.get("mood", "Other")
 
             # Calculate compatibility with current project
             compatibility = self._calculate_compatibility(result)
@@ -194,9 +202,9 @@ class LogicProAUPlugin:
             info = LogicProSampleInfo(
                 file_path=str(file_path),
                 category=category,
-                subcategory=subcategory,
-                bpm=result.get("bpm"),
-                key=result.get("key"),
+                subcategory=result.get("mood", "Other") or "Other",
+                bpm=features.bpm,
+                key=features.key,
                 genre=result.get("genre"),
                 mood=result.get("mood"),
                 color_tag=color_tag,

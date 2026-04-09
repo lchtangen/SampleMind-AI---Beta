@@ -39,7 +39,7 @@ class DAWBridgeServer:
         await self.send_message(
             BridgeMessage(
                 action="handshake",
-                payload={"server": "SampleMind v6", "status": "ready"},
+                payload={"server": "SampleMind v3.0", "status": "ready"},
             ),
             websocket,
         )

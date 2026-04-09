@@ -492,24 +492,118 @@ class CloudSyncManager:
             raise
 
     async def _upload_event(self, event: SyncEvent):
-        """Upload event to cloud storage"""
+        """
+        Upload a sync event to S3 as a JSON object.
+
+        Key format: sync/{user_id}/{collection}/{timestamp}_{event_id}.json
+        """
         if not self.s3:
             return
 
+        import json as _json
+
+        key = (
+            f"sync/{event.user_id}/{event.collection}/"
+            f"{event.timestamp.strftime('%Y%m%d%H%M%S')}_{event.event_id}.json"
+        )
+        payload = _json.dumps(
+            {
+                "event_id": event.event_id,
+                "user_id": event.user_id,
+                "collection": event.collection,
+                "document_id": event.document_id,
+                "action": event.action,
+                "data": event.data,
+                "timestamp": event.timestamp.isoformat(),
+                "device_id": event.device_id,
+                "version": event.version,
+            }
+        ).encode()
+
         try:
-            # Implement S3 upload
-            # This is a placeholder
-            logger.debug(f"Uploading event to cloud: {event.event_id}")
+            # Run blocking boto3 call in thread pool to avoid blocking event loop
+            import asyncio
+
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(
+                None,
+                lambda: self.s3.put_object(
+                    Body=payload,
+                    ContentType="application/json",
+                    Key=key,
+                ),
+            )
+            logger.debug("Event uploaded to S3: %s → %s", event.event_id, key)
         except Exception as e:
-            logger.error(f"Failed to upload event: {str(e)}")
+            logger.error("Failed to upload event %s to S3: %s", event.event_id, e)
             raise
 
     async def _fetch_remote_changes(
         self, user_id: str, since: Optional[datetime] = None
     ) -> List[SyncEvent]:
-        """Fetch remote changes from cloud storage"""
-        # Placeholder implementation
-        return []
+        """
+        Fetch sync events from S3 created after `since`.
+
+        Lists objects under sync/{user_id}/ and filters by LastModified.
+        Returns deserialized SyncEvent objects.
+        """
+        if not self.s3:
+            return []
+
+        import json as _json
+        import asyncio
+
+        prefix = f"sync/{user_id}/"
+        changes: List[SyncEvent] = []
+
+        try:
+            loop = asyncio.get_running_loop()
+
+            # List objects (blocking → thread pool)
+            response = await loop.run_in_executor(
+                None,
+                lambda: self.s3.list_objects_v2(Prefix=prefix),
+            )
+            objects = response.get("Contents", [])
+
+            for obj in objects:
+                # Filter by modification time if `since` is provided
+                last_modified = obj.get("LastModified")
+                if since and last_modified:
+                    # boto3 returns timezone-aware datetimes; normalize
+                    lm_naive = last_modified.replace(tzinfo=None)
+                    if lm_naive <= since:
+                        continue
+
+                # Download and parse event
+                try:
+                    get_resp = await loop.run_in_executor(
+                        None,
+                        lambda k=obj["Key"]: self.s3.get_object(Key=k),
+                    )
+                    body = _json.loads(get_resp["Body"].read())
+                    changes.append(
+                        SyncEvent(
+                            event_id=body["event_id"],
+                            user_id=body["user_id"],
+                            collection=body["collection"],
+                            document_id=body["document_id"],
+                            action=body["action"],
+                            data=body["data"],
+                            timestamp=datetime.fromisoformat(body["timestamp"]),
+                            device_id=body["device_id"],
+                            version=body["version"],
+                        )
+                    )
+                except Exception as e:
+                    logger.warning(
+                        "Skipping malformed remote event %s: %s", obj["Key"], e
+                    )
+
+        except Exception as e:
+            logger.error("Failed to fetch remote changes for %s: %s", user_id, e)
+
+        return changes
 
     async def _get_last_sync_time(self, user_id: str) -> Optional[datetime]:
         """Get last sync timestamp from database"""

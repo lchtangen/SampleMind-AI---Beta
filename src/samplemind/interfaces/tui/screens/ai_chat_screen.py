@@ -11,9 +11,10 @@ from textual.widgets import Button, Footer, Header, Input, Label, RichLog, Selec
 
 _MODEL_OPTIONS = [
     ("auto", "Auto (best available)"),
-    ("claude-3-7-sonnet-20250219", "Claude 3.7 Sonnet"),
+    ("claude-sonnet-4-6", "Claude Sonnet 4.6 (Primary)"),
+    ("claude-opus-4-6", "Claude Opus 4.6 (Deep)"),
     ("gpt-4o", "GPT-4o"),
-    ("gemini-2.0-flash", "Gemini 2.0 Flash"),
+    ("gemini-2.5-flash", "Gemini 2.5 Flash"),
     ("qwen2.5:7b-instruct", "Qwen 2.5 7B (Offline)"),
 ]
 

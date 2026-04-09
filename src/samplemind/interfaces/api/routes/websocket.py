@@ -111,3 +111,82 @@ async def progress_websocket(websocket: WebSocket, job_id: str):
     except Exception as e:
         logger.error(f"WebSocket error for {job_id}: {e}")
         manager.disconnect(job_id)
+
+
+@router.websocket("/ws/agents/{session_id}")
+async def agent_pipeline_websocket(websocket: WebSocket, session_id: str):
+    """
+    WebSocket endpoint for streaming LangGraph agent pipeline progress.
+
+    Client sends: {"file_path": "/path/to/sample.wav", "depth": "standard"}
+    Server streams: partial AudioAnalysisState updates as each agent completes.
+
+    Final message has type="done" and contains the full final_report.
+    """
+    await manager.connect(session_id, websocket)
+    try:
+        # Wait for the client to send the file path
+        raw = await websocket.receive_text()
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError:
+            await websocket.send_json({"type": "error", "message": "Invalid JSON payload"})
+            return
+
+        file_path = payload.get("file_path", "")
+        depth = payload.get("depth", "standard")
+
+        if not file_path:
+            await websocket.send_json(
+                {"type": "error", "message": "file_path is required"}
+            )
+            return
+
+        await websocket.send_json(
+            {"type": "start", "session_id": session_id, "file_path": file_path}
+        )
+
+        # Stream agent state updates
+        try:
+            from samplemind.ai.agents.graph import stream_analysis_pipeline
+
+            async for partial_state in stream_analysis_pipeline(
+                file_path=file_path,
+                session_id=session_id,
+                analysis_depth=depth,
+            ):
+                event = {
+                    "type": "progress",
+                    "stage": partial_state.get("current_stage", ""),
+                    "pct": partial_state.get("progress_pct", 0),
+                    "messages": partial_state.get("messages", []),
+                    "errors": partial_state.get("errors", []),
+                }
+                await websocket.send_json(event)
+
+                # Send done when aggregator finishes
+                if partial_state.get("current_stage") == "done":
+                    await websocket.send_json(
+                        {
+                            "type": "done",
+                            "session_id": session_id,
+                            "final_report": partial_state.get("final_report", {}),
+                        }
+                    )
+                    break
+
+        except ImportError:
+            await websocket.send_json(
+                {
+                    "type": "error",
+                    "message": "LangGraph not installed. Run: pip install langgraph",
+                }
+            )
+        except Exception as exc:
+            logger.error("Agent pipeline error for session %s: %s", session_id, exc)
+            await websocket.send_json({"type": "error", "message": str(exc)})
+
+    except WebSocketDisconnect:
+        logger.info("Agent WebSocket client %s disconnected", session_id)
+    finally:
+        manager.disconnect(session_id)

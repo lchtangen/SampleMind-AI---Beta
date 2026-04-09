@@ -19,6 +19,7 @@ from typing import Union, Tuple, Optional, Dict, Any
 from dataclasses import dataclass
 from enum import Enum
 import logging
+from scipy import signal
 
 from ..engine.audio_engine import AudioProcessor
 
@@ -209,7 +210,7 @@ class AudioPipeline:
             self.y = AudioProcessor.apply_high_pass_filter(self.y, self.sr, low_cut)
             self.history.append(f"Applied high-pass filter at {low_cut}Hz")
 
-        # Apply low-pass filter (placeholder - would use a proper low-pass filter)
+        # Apply low-pass filter using scipy Butterworth filter
         if high_cut < self.sr / 2 and high_cut > 0:
             nyquist = 0.5 * self.sr
             normalized_cutoff = high_cut / nyquist

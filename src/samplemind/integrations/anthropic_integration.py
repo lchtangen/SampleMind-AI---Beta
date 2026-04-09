@@ -3,8 +3,8 @@
 SampleMind AI — Anthropic (Claude) Integration
 Primary AI provider for production coaching and creative suggestions
 
-This module provides Claude 3.7 Sonnet integration optimized for:
-- Production coaching and technique analysis (with extended thinking)
+This module provides claude-sonnet-4-6 integration optimized for:
+- Production coaching and technique analysis
 - Creative arrangement suggestions
 - FL Studio optimization recommendations
 - Deep music theory explanations
@@ -32,15 +32,17 @@ logger = logging.getLogger(__name__)
 
 
 class ClaudeModel(Enum):
-    """Available Claude models — v3.0"""
+    """Available Claude models — v3.0 (2026-04)"""
 
-    CLAUDE_3_7_SONNET = "claude-3-7-sonnet-20250219"  # PRIMARY — extended thinking
-    CLAUDE_3_5_SONNET = "claude-3-5-sonnet-20241022"  # previous primary
-    CLAUDE_3_5_HAIKU = "claude-3-5-haiku-20241022"  # fast/cheap secondary
-    CLAUDE_3_OPUS = "claude-3-opus-20240229"  # legacy
-    CLAUDE_3_HAIKU = "claude-3-haiku-20240307"  # legacy
-    CLAUDE_OPUS_4_5 = "claude-opus-4-5"  # Opus 4.5 — largest
-    CLAUDE_SONNET_4_5 = "claude-sonnet-4-5-20251219"  # Sonnet 4.5
+    # Current generation (PRIMARY)
+    CLAUDE_SONNET_4_6 = "claude-sonnet-4-6"          # PRIMARY — latest, best overall
+    CLAUDE_OPUS_4_6 = "claude-opus-4-6"              # Most capable, highest cost
+    CLAUDE_HAIKU_4_5 = "claude-haiku-4-5-20251001"   # Fastest, lowest cost
+
+    # Previous generation (fallback)
+    CLAUDE_3_7_SONNET = "claude-3-7-sonnet-20250219"  # extended thinking
+    CLAUDE_3_5_SONNET = "claude-3-5-sonnet-20241022"  # legacy fallback
+    CLAUDE_3_5_HAIKU = "claude-3-5-haiku-20241022"    # legacy fast
 
 
 class AnthropicAnalysisType(Enum):
@@ -84,7 +86,7 @@ class AnthropicMusicAnalysis:
     chord_progressions: List[str] = field(default_factory=list)
 
     # Metadata
-    model_used: ClaudeModel = ClaudeModel.CLAUDE_3_7_SONNET
+    model_used: ClaudeModel = ClaudeModel.CLAUDE_SONNET_4_6
     tokens_used: int = 0
     processing_time: float = 0.0
     timestamp: float = field(default_factory=time.time)
@@ -105,7 +107,7 @@ class AnthropicMusicProducer:
     def __init__(
         self,
         api_key: Optional[str] = None,
-        default_model: ClaudeModel = ClaudeModel.CLAUDE_3_7_SONNET,
+        default_model: ClaudeModel = ClaudeModel.CLAUDE_SONNET_4_6,
         max_tokens: int = 8096,
         temperature: float = 1.0,
     ):

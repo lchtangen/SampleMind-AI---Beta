@@ -259,15 +259,52 @@ class DatabaseBackup:
         self, database_url: str, base_backup_file: Path
     ) -> Path:
         """
-        Create incremental backup (WAL archiving)
-        Requires PostgreSQL WAL archiving to be enabled
+        Create incremental backup via WAL archiving.
+
+        WAL-based incremental backups require PostgreSQL to be configured with:
+            archive_mode = on
+            archive_command = 'cp %p /path/to/wal_archive/%f'
+
+        If WAL archiving is not configured, this method falls back to a full
+        pg_dump backup and logs an advisory warning.
+
+        Returns:
+            Path to the backup file (full dump if WAL not available)
         """
-        # This is a placeholder - full WAL archiving implementation
-        # would require PostgreSQL configuration and archive_command setup
-        raise NotImplementedError(
-            "Incremental backups require WAL archiving configuration. "
-            "See: https://www.postgresql.org/docs/current/continuous-archiving.html"
+        # Check for WAL archive directory via env or convention
+        wal_archive_dir = Path("/var/lib/postgresql/wal_archive")
+        if not wal_archive_dir.exists():
+            logger.warning(
+                "WAL archive directory not found at %s. "
+                "Falling back to full backup. To enable incremental backups, "
+                "configure PostgreSQL with archive_mode=on and archive_command. "
+                "See: https://www.postgresql.org/docs/current/continuous-archiving.html",
+                wal_archive_dir,
+            )
+            return await self.create_backup(database_url)
+
+        # WAL archiving is available — copy new WAL segments since base backup
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        incremental_dir = self.config.backup_dir / f"wal_incremental_{timestamp}"
+        incremental_dir.mkdir(parents=True, exist_ok=True)
+
+        wal_files = sorted(wal_archive_dir.glob("*"))
+        copied = 0
+        for wal_file in wal_files:
+            dest = incremental_dir / wal_file.name
+            if not dest.exists():
+                shutil.copy2(wal_file, dest)
+                copied += 1
+
+        logger.info(
+            "WAL incremental backup created: %s (%d segments)", incremental_dir, copied
         )
+        # Return a marker file path representing the incremental set
+        marker = incremental_dir / "INCREMENTAL.marker"
+        marker.write_text(
+            f"base={base_backup_file}\nwal_segments={copied}\ncreated={timestamp}\n"
+        )
+        return marker
 
     async def verify_backup(self, backup_file: Path) -> bool:
         """

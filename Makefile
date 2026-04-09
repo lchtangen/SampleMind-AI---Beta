@@ -1,7 +1,8 @@
 # SampleMind AI — Development Automation
 .PHONY: help setup setup-dev install install-dev sync dev test lint format typecheck \
         security quality clean build setup-db install-models upgrade \
-        test-unit test-integration test-cov test-fast polish polish-fix
+        test-unit test-integration test-cov test-fast polish polish-fix \
+        plugins plugins-ableton plugins-fl-studio
 
 UV = uv
 PYTHON = uv run python
@@ -95,9 +96,9 @@ lint: ## Run ruff + mypy
 	$(RUFF) check .
 	$(MYPY) src/
 
-format: ## Format code with black + isort
-	$(BLACK) .
-	$(UV) run isort .
+format: ## Format code with ruff
+	$(RUFF) format .
+	$(RUFF) check --fix .
 
 security: ## Run bandit security scan
 	$(UV) run bandit -r src/ -ll
@@ -108,12 +109,31 @@ polish: ## Analyse code quality
 	$(PYTHON) scripts/polish_codebase.py
 
 polish-fix: ## Auto-fix code quality issues
-	$(BLACK) src/ tests/
-	$(UV) run isort src/ tests/
+	$(RUFF) format src/ tests/
 	$(RUFF) check --fix src/ tests/
 
 typecheck: ## Run mypy type checking
 	$(MYPY) src/
+
+# ── DAW Plugins ───────────────────────────────────────────────────────────────
+
+plugins: plugins-ableton plugins-fl-studio ## Build all DAW plugins
+
+plugins-ableton: ## Start Ableton Live backend API server (Max for Live companion)
+	@echo "🎛️  Starting Ableton Live backend on :8002..."
+	$(UV) run uvicorn plugins.ableton.python_backend:app --host 0.0.0.0 --port 8002 --reload
+
+plugins-fl-studio: ## Build FL Studio C++ wrapper (requires CMake + compiler)
+	@echo "🎛️  Building FL Studio C++ plugin wrapper..."
+	@if [ -d "plugins/fl_studio/cpp" ]; then \
+		mkdir -p plugins/fl_studio/cpp/build && \
+		cmake -B plugins/fl_studio/cpp/build -S plugins/fl_studio/cpp \
+		      -DCMAKE_BUILD_TYPE=Release && \
+		cmake --build plugins/fl_studio/cpp/build --config Release; \
+		echo "✅ FL Studio plugin built: plugins/fl_studio/cpp/build/"; \
+	else \
+		echo "⚠️  plugins/fl_studio/cpp/ not found — skipping C++ build"; \
+	fi
 
 # ── Build & Deploy ────────────────────────────────────────────────────────────
 

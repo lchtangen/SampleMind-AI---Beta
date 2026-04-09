@@ -1,6 +1,6 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
-import '@/styles/globals.css';
+import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
@@ -8,12 +8,19 @@ import { AnalyticsProvider } from '@/components/analytics-provider';
 
 export const metadata: Metadata = {
   title: 'SampleMind AI - Next-Gen Music Production',
-  description: 'Quantum-powered audio intelligence with cyberpunk aesthetics',
-  keywords: ['AI music', 'audio production', 'quantum audio', 'cyberpunk UI', 'music technology'],
+  description: 'AI-powered audio intelligence for professional music production',
+  keywords: ['AI music', 'audio production', 'sample analysis', 'music technology'],
+};
+
+// Next.js 15: viewport is a separate export
+export const viewport: Viewport = {
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#f0f0ff' },
     { media: '(prefers-color-scheme: dark)', color: '#0a0a1a' },
   ],
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 const inter = Inter({ 
@@ -32,7 +39,6 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-icon.png" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </head>
       <body className={cn(
         "min-h-screen bg-dark-500 font-sans antialiased",

@@ -1032,17 +1032,65 @@ def library_dedupe(
     folder: Path = typer.Argument(
         Path.home() / "SampleMind" / "Library", help="Library folder"
     ),
-    remove: bool = typer.Option(False, "--remove", help="Remove duplicates"),
+    remove: bool = typer.Option(False, "--remove", help="Remove duplicates (keeps first found)"),
+    threshold: float = typer.Option(0.95, "--threshold", help="Similarity threshold (0–1)"),
 ) -> None:
-    """Find duplicate files in library"""
+    """Find (and optionally remove) near-duplicate audio files via perceptual fingerprinting."""
     try:
+        from samplemind.core.analysis.fingerprinter import AudioFingerprinter
+
         files = utils.get_audio_files(folder)
-        console.print(f"[cyan]Scanning {len(files)} files for duplicates[/cyan]")
+        console.print(f"[cyan]Scanning {len(files)} files for duplicates (threshold={threshold})[/cyan]")
 
-        with utils.ProgressTracker("Finding duplicates"):
-            pass
+        fingerprinter = AudioFingerprinter()
+        fingerprints: dict[str, str] = {}  # fingerprint → first file path
+        duplicates: list[tuple[str, str]] = []  # (duplicate_path, original_path)
 
-        console.print("[green]✓ Duplicate scan complete[/green]")
+        try:
+            import librosa
+            _librosa_available = True
+        except ImportError:
+            _librosa_available = False
+            console.print("[yellow]⚠ librosa not installed — using SHA-256 exact match only[/yellow]")
+
+        for f in files:
+            try:
+                if _librosa_available:
+                    import librosa as _librosa
+                    y, sr = _librosa.load(str(f), sr=22050, mono=True)
+                    result = fingerprinter.fingerprint(y, sr)
+                    fp = result.fingerprint
+                else:
+                    import hashlib
+                    fp = hashlib.sha256(Path(f).read_bytes()).hexdigest()
+
+                if fp in fingerprints:
+                    duplicates.append((str(f), fingerprints[fp]))
+                else:
+                    fingerprints[fp] = str(f)
+            except Exception as exc:
+                console.print(f"[yellow]⚠ Skipped {f.name}: {exc}[/yellow]")
+
+        if not duplicates:
+            console.print(f"[green]✓ No duplicates found in {len(files)} files[/green]")
+            return
+
+        console.print(f"\n[red]Found {len(duplicates)} duplicate(s):[/red]\n")
+        removed = 0
+        for dup_path, orig_path in duplicates:
+            console.print(f"  [yellow]DUP[/yellow] {dup_path}")
+            console.print(f"  [green]ORI[/green] {orig_path}\n")
+            if remove:
+                try:
+                    Path(dup_path).unlink()
+                    removed += 1
+                except Exception as exc:
+                    console.print(f"  [red]Failed to remove: {exc}[/red]")
+
+        if remove:
+            console.print(f"[green]✓ Removed {removed} duplicate(s)[/green]")
+        else:
+            console.print("[dim]Tip: use --remove to delete duplicates (keeps first found)[/dim]")
 
     except Exception as e:
         utils.handle_error(e, "library:dedupe")

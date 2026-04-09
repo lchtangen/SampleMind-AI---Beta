@@ -50,6 +50,11 @@ class UserInDB(UserBase):
     total_uploads: int = 0
     storage_used_mb: float = 0.0
     api_calls_today: int = 0
+    api_calls_this_month: int = 0
+
+    # Billing
+    stripe_customer_id: Optional[str] = None
+    tier: str = "free"  # "free" | "pro" | "team"
 
     # Metadata
     metadata: dict = Field(default_factory=dict)

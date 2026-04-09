@@ -41,14 +41,11 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Run Black
-        run: uv run black --check src/
-
-      - name: Run isort
-        run: uv run isort --check-only src/
-
-      - name: Run ruff
+      - name: Run ruff (lint)
         run: uv run ruff check src/
+
+      - name: Run ruff (format check)
+        run: uv run ruff format --check src/
 
       - name: Run mypy
         run: uv run mypy src/ --ignore-missing-imports
@@ -99,13 +96,24 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Run pytest
+      - name: Smoke-test server entrypoint
+        env:
+          TESTING: "true"
+        run: uv run python -c "from samplemind.server.main import app; assert callable(app)"
+
+      - name: Run pytest (with coverage gate)
         env:
           MONGODB_URL: mongodb://localhost:27017/test
           REDIS_URL: redis://localhost:6379/0
           SECRET_KEY: test-secret-key-for-ci
-          TESTING: true
-        run: uv run pytest tests/ -v --cov=src/samplemind --cov-report=xml --cov-report=term
+          TESTING: "true"
+        run: |
+          uv run pytest tests/ -v \
+            --cov=src/samplemind \
+            --cov-report=xml \
+            --cov-report=term \
+            --cov-fail-under=80 \
+            -x
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
