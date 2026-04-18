@@ -132,7 +132,6 @@ build
 
 # AI Assistant Configurations (keep private)
 .amazonq/
-.claude/
 .mcp/
 
 # Frontend build dirs
