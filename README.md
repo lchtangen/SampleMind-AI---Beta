@@ -1,394 +1,524 @@
-# 🎵 SampleMind AI
+<div align="center">
 
-> **AI-Powered Music Production Platform**
-> Advanced audio analysis, intelligent sample organization, and creative assistance powered by Anthropic Claude, Google Gemini, OpenAI, and local AI models.
+```
+ ╔═══════════════════════════════════════════════════════════════╗
+ ║  ███████╗ █████╗ ███╗   ███╗██████╗ ██╗     ███████╗        ║
+ ║  ██╔════╝██╔══██╗████╗ ████║██╔══██╗██║     ██╔════╝        ║
+ ║  ███████╗███████║██╔████╔██║██████╔╝██║     █████╗          ║
+ ║  ╚════██║██╔══██║██║╚██╔╝██║██╔═══╝ ██║     ██╔══╝          ║
+ ║  ███████║██║  ██║██║ ╚═╝ ██║██║     ███████╗███████╗        ║
+ ║  ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝     ╚══════╝╚══════╝        ║
+ ║  ███╗   ███╗██╗███╗   ██╗██████╗      █████╗ ██╗            ║
+ ║  ████╗ ████║██║████╗  ██║██╔══██╗    ██╔══██╗██║            ║
+ ║  ██╔████╔██║██║██╔██╗ ██║██║  ██║    ███████║██║            ║
+ ║  ██║╚██╔╝██║██║██║╚██╗██║██║  ██║    ██╔══██║██║            ║
+ ║  ██║ ╚═╝ ██║██║██║ ╚████║██████╔╝    ██║  ██║██║            ║
+ ║  ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═════╝     ╚═╝  ╚═╝╚═╝            ║
+ ╚═══════════════════════════════════════════════════════════════╝
+```
 
-[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Version](https://img.shields.io/badge/version-3.0.0--beta-orange.svg)](CHANGELOG.md)
-[![Phase 16](https://img.shields.io/badge/phase-16%20active-blueviolet.svg)](docs/v3/CHECKLIST.md)
-[![Tests](https://img.shields.io/badge/tests-120%2B-brightgreen.svg)](tests/)
-[![Coverage](https://img.shields.io/codecov/c/github/lchtangen/SampleMind-AI---Beta?label=coverage)](https://codecov.io/gh/lchtangen/SampleMind-AI---Beta)
-[![Backend CI](https://github.com/lchtangen/SampleMind-AI---Beta/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/lchtangen/SampleMind-AI---Beta/actions/workflows/backend-ci.yml)
-[![Frontend CI](https://github.com/lchtangen/SampleMind-AI---Beta/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/lchtangen/SampleMind-AI---Beta/actions/workflows/frontend-ci.yml)
-[![AI Providers](https://img.shields.io/badge/AI_providers-4%20(Claude%20%7C%20Gemini%20%7C%20GPT--4o%20%7C%20Ollama)-blue.svg)](docs/active/models/AI_PROVIDER_UPGRADE_LOG.md)
+**`[ NEURAL AUDIO INTELLIGENCE — PHASE 16 ACTIVE ]`**
 
-> **⚡ Phase 16 — Web UI + Agent Pipeline + Production Hardening: Steps 1-10 complete
-> All AI provider SDKs upgraded (Claude 3.7 Sonnet, Gemini 2.0 Flash, GPT-4o, Ollama). Next: Textual ^0.87 TUI migration + Next.js 15 web UI.
+*The next-generation AI music production platform. Analyze. Create. Dominate.*
 
 ---
 
-## 🚀 Quick Start
+[![Python](https://img.shields.io/badge/PYTHON-3.12+-00d4ff?style=for-the-badge&logo=python&logoColor=white&labelColor=0a0a1a)](https://python.org)
+[![Version](https://img.shields.io/badge/VERSION-3.0.0--BETA-ff00ff?style=for-the-badge&labelColor=0a0a1a)](CHANGELOG.md)
+[![Phase](https://img.shields.io/badge/PHASE-16%20ACTIVE-00ff9f?style=for-the-badge&labelColor=0a0a1a)](docs/v3/CHECKLIST.md)
+[![License](https://img.shields.io/badge/LICENSE-MIT-ff6b35?style=for-the-badge&labelColor=0a0a1a)](LICENSE)
 
-### Installation (5 Minutes)
+[![Backend CI](https://github.com/lchtangen/SampleMind-AI---Beta/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/lchtangen/SampleMind-AI---Beta/actions/workflows/backend-ci.yml)
+[![Frontend CI](https://github.com/lchtangen/SampleMind-AI---Beta/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/lchtangen/SampleMind-AI---Beta/actions/workflows/frontend-ci.yml)
+[![Tests](https://img.shields.io/badge/TESTS-120%2B%20PASSING-00ff9f?style=flat-square&labelColor=0a0a1a)](tests/)
+[![Coverage](https://img.shields.io/codecov/c/github/lchtangen/SampleMind-AI---Beta?style=flat-square&label=COVERAGE&labelColor=0a0a1a)](https://codecov.io/gh/lchtangen/SampleMind-AI---Beta)
+[![Code Style](https://img.shields.io/badge/CODE_STYLE-RUFF%20%2B%20BLACK-ff00ff?style=flat-square&labelColor=0a0a1a)](https://github.com/astral-sh/ruff)
 
-**Linux / macOS:**
-```bash
-./scripts/setup/quick_start.sh
+</div>
+
+---
+
+<div align="center">
+
+## `◈ NEURAL CORE SYSTEMS ◈`
+
+</div>
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  AUDIO ENGINE          ████████████████████  ONLINE            │
+│  AI PROVIDER MESH      ████████████████████  4 NODES ACTIVE    │
+│  FAISS VECTOR INDEX    ████████████████████  512-DIM CLAP      │
+│  LANGGRAPH PIPELINE    ████████████████████  7 NODES           │
+│  REST API              ████████████████████  12 ROUTERS        │
+│  NEXT.JS WEB UI        ███████████████░░░░░  PHASE 16          │
+│  AGENT MEMORY          ████████████████████  FAISS-BACKED      │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-**Windows:**
-```powershell
-.\scripts\setup\windows_setup.ps1
-```
+SampleMind AI is a **CLI-first, offline-capable music production intelligence platform** — combining neural audio analysis, multi-provider AI routing, semantic vector search, stem separation, MIDI transcription, smart playlist curation, and a sample pack marketplace into one unified system.
 
-**Manual Setup:**
+Built for **producers, beatmakers, audio engineers, and sound designers** who demand precision, speed, and creative intelligence.
+
+---
+
+## `◈ QUICK BOOT SEQUENCE ◈`
+
 ```bash
-# 1. Create virtual environment
-python3 -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+# ── CLONE ──────────────────────────────────────────────────────
+git clone https://github.com/lchtangen/SampleMind-AI---Beta.git
+cd SampleMind-AI---Beta
 
-# 2. Install dependencies
-pip install -e .
+# ── INITIALIZE VIRTUAL ENVIRONMENT ────────────────────────────
+python3 -m venv .venv && source .venv/bin/activate
 
-# 3. Set up API keys (optional - choose one or more)
-export GOOGLE_API_KEY="your_gemini_key_here"
-export ANTHROPIC_API_KEY="your_claude_key_here"
-export OPENAI_API_KEY="your_openai_key_here"
+# ── INSTALL NEURAL CORE ────────────────────────────────────────
+pip install -e ".[dev]"
 
-# 4. Start the CLI
+# ── INJECT API KEYS (choose one or all) ───────────────────────
+export ANTHROPIC_API_KEY="sk-ant-..."   # Claude sonnet-4-6
+export GOOGLE_API_KEY="AIza..."          # Gemini 2.5 Flash
+export OPENAI_API_KEY="sk-..."           # GPT-4o
+# Ollama runs locally — no key needed (localhost:11434)
+
+# ── LAUNCH ─────────────────────────────────────────────────────
 python main.py
 ```
 
-📖 **Detailed Setup:** See [docs/04-TECHNICAL-IMPLEMENTATION/guides/START_HERE.md](docs/04-TECHNICAL-IMPLEMENTATION/guides/START_HERE.md)
+> **Linux/macOS one-liner:** `./scripts/setup/quick_start.sh`
+> **Windows:** `.\scripts\setup\windows_setup.ps1`
 
 ---
 
-## 🎯 What is SampleMind AI?
+## `◈ INTERFACES ◈`
 
-SampleMind AI is a **hybrid AI-powered music production assistant** that combines cutting-edge audio analysis with intelligent AI insights to help producers, beatmakers, and audio engineers work smarter and faster.
+<div align="center">
 
-### 🎵 Core Audio Analysis
+| INTERFACE | STATUS | DESCRIPTION |
+|:---------:|:------:|:------------|
+| `CLI` | **◉ ONLINE** | 200+ commands · Rich/Typer · 12 themes · ~2255 lines |
+| `TUI` | **◉ ONLINE** | Textual ^0.87 · 13 screens · 60 FPS · mouse support |
+| `REST API` | **◉ ONLINE** | FastAPI ^0.115 · 12 routers · async · Swagger docs |
+| `Web UI` | **◈ PHASE 16** | Next.js 15 · React 19 · Tailwind · Framer Motion |
+| `Desktop` | **◈ SCAFFOLD** | Tauri v2 · Svelte 5 · native binary |
 
-- **🎼 Tempo & Key Detection** - Accurate BPM and musical key identification
-- **📊 Spectral Analysis** - Deep feature extraction (centroid, bandwidth, rolloff, MFCC)
-- **🎚️ Harmonic/Percussive Separation** - Isolate melodic and rhythmic elements
-- **🥁 Rhythm Analysis** - Beat tracking, onset detection, and groove extraction
-- **⚡ Performance Optimized** - Multi-level caching with SHA-256 file hashing
-
-### 🤖 AI-Powered Insights
-
-- **💬 Music Analysis** - Genre classification, mood detection, production suggestions
-- **🎹 Creative Assistance** - AI-powered production coaching and arrangement ideas
-- **📁 Intelligent Organization** - Automatic sample categorization and tagging
-- **🔍 Similarity Search** - Find similar samples using vector embeddings
-- **🎚️ DAW Integration** - FL Studio, Ableton Live, Logic Pro support (planned)
-
-### 🌐 Multi-Platform Support
-
-Works seamlessly on **Linux, macOS, and Windows** with platform-specific optimizations.
-
----
-
-## 📚 Documentation
-
-All documentation is systematically organized in the `docs/` directory:
-
-- **[📋 Documentation Index](./docs/00-INDEX/README.md)** - Central navigation hub
-- **[📊 Phase Status Dashboard](./docs/00-INDEX/PHASE_STATUS_DASHBOARD.md)** - Real-time project status
-- **[🎯 Phase Navigation Guide](./docs/00-INDEX/PHASE_NAVIGATION_GUIDE.md)** - Fast access by phase and feature
-- **[📖 Phase Documentation](./docs/01-PHASES/)** - Phases 1-10 (all complete)
-- **[🗺️ Roadmaps](./docs/02-ROADMAPS/)** - Strategic planning and future features
-- **[💼 Business Strategy](./docs/03-BUSINESS-STRATEGY/)** - Business plans and go-to-market strategy
-- **[⚙️ Technical Implementation](./docs/04-TECHNICAL-IMPLEMENTATION/)** - Developer guides, API docs, architecture
-
-### Essential Docs
-
-- [**Getting Started Guide**](docs/04-TECHNICAL-IMPLEMENTATION/guides/START_HERE.md) - Complete setup walkthrough
-- [**Contributing**](CONTRIBUTING.md) - How to contribute to the project
-- [**Code of Conduct**](CODE_OF_CONDUCT.md) - Community guidelines
-- [**Changelog**](CHANGELOG.md) - Version history and updates
-
----
-
-## 🖥️ Choose Your Interface
-
-| Interface | Status | Best For | Features |
-|-----------|--------|----------|----------|
-| **CLI (Primary)** | ✅ **Recommended** | All users | 200+ commands, modern menu, 12 themes, fast startup |
-| **TUI (Advanced)** | ✅ Available | Power users | 13 screens, mouse support, real-time visualizations |
-| **REST API** | ✅ Available | Integrations | FastAPI-powered async web service |
-| **Web UI** | 🚀 Phase 15 | Future | Next.js 15 + React 19 (in progress) |
-
-### 🎨 Optional Premium TUI (Textual Framework)
-
-For advanced users, SampleMind includes a modern terminal UI with:
-
-- ✨ **Smooth 60 FPS animations** with GPU acceleration
-- 🖱️ **Full mouse support** and intuitive keyboard shortcuts
-- 🎯 **Real-time status updates** and progress tracking
-- 🎨 **Beautiful CSS-like styling**
-- ⚡ **Ultra-fast startup** (<150ms) and minimal memory footprint
+</div>
 
 ```bash
+# ── CLI (primary interface) ────────────────────────────────────
+python main.py
+
+# ── TUI (terminal UI — 13 screens, mouse support) ─────────────
 python -m samplemind.interfaces.tui.main
+
+# ── REST API (FastAPI with Swagger at /docs) ──────────────────
+uvicorn samplemind.interfaces.api.main:app --reload --port 8000
+
+# ── WEB UI (Next.js 15 dev server) ────────────────────────────
+cd apps/web && npm run dev
 ```
 
-📖 **Learn more:** [Textual Migration Guide](docs/04-TECHNICAL-IMPLEMENTATION/guides/TEXTUAL_MIGRATION.md)
+---
+
+## `◈ AI PROVIDER MESH ◈`
+
+```
+ ┌──────────────────────────────────────────────────────────────┐
+ │                    LiteLLM Router                            │
+ │  ┌────────────┐  ┌────────────┐  ┌────────────┐  ┌───────┐ │
+ │  │  CLAUDE    │→ │  GEMINI    │→ │   GPT-4o   │→ │OLLAMA │ │
+ │  │sonnet-4-6  │  │2.5-flash   │  │  agents    │  │ local │ │
+ │  │ primary    │  │ fast/stream│  │  tool use  │  │<100ms │ │
+ │  └────────────┘  └────────────┘  └────────────┘  └───────┘ │
+ │         Primary ──────────────────────────────► Fallback    │
+ └──────────────────────────────────────────────────────────────┘
+```
+
+| PROVIDER | MODEL | ROLE | LATENCY |
+|----------|-------|------|---------|
+| **Anthropic** | `claude-sonnet-4-6` | Primary analysis · tool_use | ~3–5s |
+| **Google** | `gemini-2.5-flash` | Streaming · fast queries | ~1–2s |
+| **OpenAI** | `gpt-4o` | Agent workflows · tool calls | ~2–4s |
+| **Ollama** | `qwen2.5-coder:7b` | Offline · no key needed | **<100ms** |
+
+```python
+# ── LiteLLM Router Pattern ────────────────────────────────────
+from samplemind.integrations.litellm_router import chat_completion
+
+response = await chat_completion(
+    messages=[{"role": "user", "content": "Analyze this 808 kick at 140 BPM"}],
+    prefer_fast=True,   # → gemini-2.5-flash
+)
+# Auto-falls back: Claude → Gemini → GPT-4o → Ollama
+```
 
 ---
 
-## 🚀 Features
+## `◈ FEATURE MODULES ◈`
 
-### Hybrid AI Architecture
+<details>
+<summary><b>🔊 Audio Intelligence Engine</b></summary>
 
-| Provider | Model | Priority | Specialization | Response Time |
-|----------|-------|----------|----------------|---------------|
-| **Local AI** (Ollama) | qwen2.5:7b-instruct | 0 (Instant) | Offline inference, ultra-fast | <100ms |
-| **Anthropic Claude** | Claude 3.7 Sonnet | 1 (Primary) | Deep analysis, extended thinking | ~3-5s |
-| **Google Gemini** | Gemini 2.0 Flash | 2 (Fast) | Streaming, multimodal queries | ~1-2s |
-| **OpenAI GPT** | GPT-4o | 3 (Agents) | Agent workflows, tool use | ~2-5s |
+```
+ ANALYSIS LEVELS:
+ ┌─────────────┬────────────────────────────────────────┬──────────┐
+ │ BASIC       │ BPM · Key · Duration                   │  <0.5s   │
+ │ STANDARD    │ + MFCC · Chroma · Spectral             │  <1.0s   │
+ │ DETAILED    │ + Harmonic/Percussive sep              │  <2.0s   │
+ │ PROFESSIONAL│ + AI analysis · CLAP embeddings        │  <5.0s   │
+ └─────────────┴────────────────────────────────────────┴──────────┘
+```
 
-> **Phase 15 target models:** `claude-3-7-sonnet-20250219`, `gemini-2.0-flash`, `gpt-4o` — see [`docs/active/models/AI_PROVIDER_UPGRADE_LOG.md`](docs/active/models/AI_PROVIDER_UPGRADE_LOG.md)
+- **BPM & Key Detection** — librosa-powered, sub-second analysis
+- **6-Stem Source Separation** — Demucs `htdemucs_6s` (vocals, drums, bass, guitar, piano, other)
+- **CLAP Embeddings** — `laion/clap-htsat-unfused` 512-dim semantic audio vectors
+- **MIDI Transcription** — `basic-pitch` neural network, offline
+- **Real-time Effects** — 10 professional pedalboard chains (Spotify SDK)
+- **Audio Streaming** — chunk-based processing for large files
 
-### Audio Processing Pipeline
+</details>
 
-- **Comprehensive Feature Extraction** - Tempo, key, mode, chroma, spectral features, MFCC
-- **Harmonic/Percussive Separation** - Melodic and rhythmic component isolation
-- **Rhythm Analysis** - Beat tracking, onset detection, groove patterns
-- **Robust Edge Case Handling** - Reliable performance with silence, impulses, short clips
+<details>
+<summary><b>🧠 AI Agent Pipeline (LangGraph)</b></summary>
+
+```
+ AGENT GRAPH:
+                    ┌──────────────┐
+                    │  router_node │ ← AgentMemory (FAISS)
+                    └──────┬───────┘
+            ┌──────────────┼──────────────┐
+            ▼              ▼              ▼
+    ┌──────────────┐ ┌──────────┐ ┌──────────────┐
+    │analysis_agent│ │tagging   │ │mixing_agent  │
+    │(Claude tool  │ │_agent    │ │(suggestions) │
+    │  use)        │ │(CLAP+ML) │ │              │
+    └──────┬───────┘ └────┬─────┘ └──────┬───────┘
+           └──────────────┼──────────────┘
+                          ▼
+                  ┌──────────────────┐
+                  │ aggregator_node  │ → stores to AgentMemory
+                  └──────────────────┘
+```
+
+- **7-node LangGraph StateGraph** — `build_graph()` in `ai/agents/graph.py`
+- **Agent Memory** — FAISS-backed vector store for conversation persistence
+- **Tool Use** — Claude native tool_use for FAISS search, playlist gen, library stats
+- **Celery Tasks** — async agent execution via Redis broker
+
+</details>
+
+<details>
+<summary><b>🔍 Semantic Search (FAISS + CLAP)</b></summary>
+
+```python
+from samplemind.core.search.faiss_index import get_index
+
+index = get_index(auto_load=True)
+
+# Search by text description
+results = index.search_text("dark cinematic 808 sub bass", top_k=20)
+
+# Search by audio file
+results = index.search_audio("reference_kick.wav", top_k=10)
+```
+
+- **FAISS IndexFlatIP** — cosine similarity over 512-dim CLAP embeddings
+- **Text + Audio query** — natural language or audio reference
+- **Sub-millisecond search** — across 10,000+ samples
+
+</details>
+
+<details>
+<summary><b>🎛️ New Phase 16 Feature Modules</b></summary>
+
+| MODULE | ENDPOINT | DESCRIPTION |
+|--------|----------|-------------|
+| **Audio Copilot** | `POST /api/v1/copilot/chat` | SSE streaming chat with tool_use |
+| **Remix Studio** | `POST /api/v1/remix/separate` | Demucs stems + AI mix suggestions |
+| **Sonic Graph** | `GET /api/v1/graph/sonic-map` | FAISS pairwise similarity force graph |
+| **Mix Reference** | `POST /api/v1/reference/compare` | LUFS + frequency comparison + AI recs |
+| **Auto Packs** | `POST /api/v1/autopacks/generate` | AI-curated themed sample packs |
+| **Trend Engine** | `GET /api/v1/trends/analysis` | BPM/key/genre forecasts + gap detection |
+
+</details>
+
+<details>
+<summary><b>🎵 Sample Pack Marketplace</b></summary>
+
+- **Stripe Connect** — Express marketplace for creators
+- **Pack Builder** — `.smpack` ZIP format with manifest spec
+- **R2 Storage** — Cloudflare R2 (S3-compatible) via boto3
+- **Publish & Purchase** — Full billing flow at `/api/v1/marketplace/`
+
+</details>
 
 ---
 
-## 🏗️ Project Structure
+## `◈ ARCHITECTURE OVERVIEW ◈`
 
 ```
 SampleMind-AI---Beta/
-├── src/samplemind/         # Main application code
-│   ├── core/               # Audio processing engine + loader + ChromaDB
-│   ├── integrations/       # AI provider manager + DAW integrations
-│   ├── interfaces/         # CLI (primary), TUI (13 screens), API (FastAPI)
-│   ├── server/             # FastAPI server entrypoint
-│   ├── services/           # Business logic services
-│   ├── ai/                 # AI utilities and helpers
-│   └── utils/              # Cross-cutting utilities
-├── plugins/                # DAW plugins
-│   ├── fl_studio_plugin.py # FL Studio Python wrapper
-│   ├── fl_studio/cpp/      # C++ native plugin (JUCE, 486 lines)
-│   ├── ableton/            # Ableton REST backend + JS bridge
-│   └── installer.py        # Cross-DAW installer
-├── tests/                  # Test suite (~30% coverage)
-│   ├── unit/               # 81 unit tests (13 subdirectories)
-│   ├── integration/        # Integration tests
-│   └── fixtures/           # Test audio files
-├── docs/                   # Documentation hub
-│   ├── active/             # V3 migration working documents
-│   ├── 00-INDEX/           # Phase index + status dashboard
-│   ├── 01-PHASES/          # Phase documentation (1-15)
-│   ├── 02-ROADMAPS/        # CURRENT_STATUS.md, V3_MIGRATION_CHECKLIST.md
-│   └── 04-TECHNICAL-IMPLEMENTATION/ # Guides, reference, technical docs
-├── apps/                   # Web applications (Next.js 15 — Phase 15)
-├── scripts/                # Setup and utility scripts
-├── config/                 # Configuration files
-└── completions/            # Shell completions (bash, zsh, fish)
+│
+├── src/samplemind/
+│   ├── interfaces/
+│   │   ├── cli/menu.py              # 2255-line Typer/Rich CLI
+│   │   ├── tui/                     # Textual ^0.87 — 13 screens
+│   │   └── api/
+│   │       ├── main.py              # FastAPI app factory (18 routers)
+│   │       └── routes/              # ai · audio · analytics · search
+│   │                                # copilot · remix · graph · reference
+│   │                                # autopacks · trends · marketplace · auth
+│   ├── core/
+│   │   ├── engine/audio_engine.py   # LibROSA analysis engine
+│   │   ├── search/faiss_index.py    # FAISS + CLAP semantic search
+│   │   ├── database/                # Tortoise ORM models + ChromaDB
+│   │   ├── packs/pack_builder.py    # .smpack builder
+│   │   └── tasks/                   # Celery task queue
+│   ├── ai/
+│   │   ├── agents/graph.py          # LangGraph 7-node pipeline
+│   │   ├── classification/          # Ensemble (SVM+XGBoost+KNN)
+│   │   ├── curation/                # Playlist gen + gap analyzer
+│   │   ├── generation/              # AudioCraft + style transfer
+│   │   └── transcription/           # faster-whisper local STT
+│   ├── integrations/
+│   │   ├── litellm_router.py        # Claude→Gemini→GPT→Ollama
+│   │   ├── supabase_client.py       # Auth + JWT
+│   │   └── realtime_sync.py         # Multi-device library sync
+│   └── services/
+│       └── storage/r2_provider.py   # Cloudflare R2
+│
+├── apps/web/                         # Next.js 15 (108 TS files)
+│   ├── src/app/                      # Pages: dashboard · library · upload
+│   │                                 #        copilot · remix · sonic-graph
+│   │                                 #        reference · autopacks · trends
+│   ├── src/components/               # AIChatWindow · AdvancedWaveform
+│   ├── src/hooks/                    # useCopilotChat · useWebSocket
+│   └── src/lib/                      # api-client · feature-endpoints
+│
+├── app/                              # Tauri v2 + Svelte 5 desktop
+├── plugins/                          # FL Studio (JUCE C++) + Ableton
+└── tests/unit/                       # 120+ tests
 ```
 
 ---
 
-## 🛠️ Technology Stack
+## `◈ TECHNOLOGY STACK ◈`
 
-### Core Technologies
+<div align="center">
 
-- **Python 3.11+** - Modern async/await support
-- **Poetry** - Dependency management and packaging
-- **FastAPI** - High-performance async web framework
-- **Pydantic** - Data validation and settings management
+**BACKEND**
 
-### Audio Processing
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)
+![Celery](https://img.shields.io/badge/Celery-Redis_broker-37814A?style=flat-square&logo=celery&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-cache+pubsub-DC382D?style=flat-square&logo=redis&logoColor=white)
 
-- **librosa ^0.11.0** — Audio analysis and feature extraction
-- **soundfile ^0.12.1** — Audio file I/O (WAV, FLAC, OGG, MP3, AAC)
-- **scipy ^1.14.0** — Signal processing algorithms
-- **numpy >=2.0.0** — Numerical computations
-- **numba >=0.59.0** — JIT compilation for performance
-- **demucs ^4.0.0** — 6-stem source separation (htdemucs_6s)
-- **pedalboard ^0.9.0** — Spotify professional audio effects
-- **basic-pitch ^0.4.0** — MIDI transcription from audio
+**AI / ML**
 
-### AI/ML Stack
+![Claude](https://img.shields.io/badge/Claude-sonnet--4--6-CC785C?style=flat-square&logo=anthropic&logoColor=white)
+![Gemini](https://img.shields.io/badge/Gemini-2.5_Flash-4285F4?style=flat-square&logo=google&logoColor=white)
+![GPT](https://img.shields.io/badge/GPT-4o-412991?style=flat-square&logo=openai&logoColor=white)
+![Ollama](https://img.shields.io/badge/Ollama-qwen2.5_7b-000000?style=flat-square&logoColor=white)
+![LangGraph](https://img.shields.io/badge/LangGraph-agent_pipeline-1C3C3C?style=flat-square&logoColor=white)
+![FAISS](https://img.shields.io/badge/FAISS-512dim_CLAP-0066CC?style=flat-square&logoColor=white)
 
-- **Anthropic Claude 3.7 Sonnet** — Primary deep analysis + extended thinking (`anthropic ^0.40.0`)
-- **Google Gemini 2.0 Flash** — Fast streaming + multimodal (`google-genai ^0.8.0`)
-- **OpenAI GPT-4o** — Agent workflows + Agents SDK (`openai ^1.58.0`)
-- **Ollama ^0.3.0** — Local AI models: qwen2.5:7b-instruct, phi3:mini, gemma2:2b (offline, <100ms)
-- **PyTorch ^2.5.0** — Deep learning framework
-- **sentence-transformers** — Semantic embedding generation
+**AUDIO**
 
-### Databases
+![librosa](https://img.shields.io/badge/librosa-analysis-FF6B6B?style=flat-square&logoColor=white)
+![Demucs](https://img.shields.io/badge/Demucs-6stem_sep-9B59B6?style=flat-square&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.5-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)
+![pedalboard](https://img.shields.io/badge/pedalboard-Spotify_FX-1DB954?style=flat-square&logoColor=white)
 
-- **MongoDB + Motor** - Async document database
-- **Redis** - Caching and pub/sub messaging
-- **ChromaDB** - Vector database for similarity search
+**FRONTEND**
 
-### Development & Quality
+![Next.js](https://img.shields.io/badge/Next.js-15-000000?style=flat-square&logo=nextdotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Tailwind](https://img.shields.io/badge/Tailwind-v4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![Tauri](https://img.shields.io/badge/Tauri-v2_desktop-FFC131?style=flat-square&logo=tauri&logoColor=black)
 
-- **pytest ^8.0.0** - Testing framework (120+ passing tests)
-- **ruff ^0.4.0** - Fast Python linter
-- **black** - Code formatter
-- **mypy** - Static type checking
-- **pre-commit** - Git hooks for code quality
+**STORAGE**
+
+![SQLite](https://img.shields.io/badge/SQLite-Tortoise_ORM-003B57?style=flat-square&logo=sqlite&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-auth+sync-3ECF8E?style=flat-square&logo=supabase&logoColor=white)
+![R2](https://img.shields.io/badge/Cloudflare_R2-S3_storage-F38020?style=flat-square&logo=cloudflare&logoColor=white)
+![Stripe](https://img.shields.io/badge/Stripe-Connect-635BFF?style=flat-square&logo=stripe&logoColor=white)
+
+</div>
 
 ---
 
-## 🎮 Usage Examples
-
-### CLI Interface
+## `◈ DEVELOPMENT COMMANDS ◈`
 
 ```bash
-# Start interactive menu
-python main.py
+# ── ENVIRONMENT ────────────────────────────────────────────────
+make setup              # Full environment initialization
+make setup-db           # Initialize SQLite + Redis
+make install-models     # Pull Ollama models locally
 
-# Analyze audio file
-samplemind analyze track.wav --detailed
+# ── DEVELOPMENT ────────────────────────────────────────────────
+make dev                # Start FastAPI + Celery + Redis
+python main.py          # CLI interactive menu
+python -m samplemind.interfaces.tui.main  # TUI (13 screens)
+cd apps/web && npm run dev               # Next.js web UI
 
-# Find similar samples
-samplemind find-similar mysample.wav --limit 10
+# ── QUALITY ────────────────────────────────────────────────────
+make quality            # ruff + mypy + bandit (run before commit)
+make test               # pytest tests/unit/ -v --tb=short
+make format             # ruff format .
+make lint               # ruff check .
+make type-check         # mypy .
 
-# Get creative suggestions
-samplemind creative track.wav --style "electronic"
+# ── API EXAMPLES ───────────────────────────────────────────────
+# Analyze audio
+curl -X POST http://localhost:8000/api/v1/audio/analyze \
+  -F "file=@track.wav" -F "level=detailed"
 
-# Change theme
-samplemind config theme cyberpunk
+# Semantic search
+curl "http://localhost:8000/api/v1/ai/faiss?q=dark+808+trap&top_k=10"
+
+# Stream AI copilot chat
+curl -X POST http://localhost:8000/api/v1/copilot/chat \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"Find dark trap kicks above 140 BPM"}]}'
 ```
 
-### Python Library
+---
+
+## `◈ USAGE PATTERNS ◈`
 
 ```python
-from samplemind.core.engine import AudioEngine
-from samplemind.integrations import SampleMindAIManager
+# ── SEMANTIC AUDIO SEARCH ─────────────────────────────────────
+from samplemind.core.search.faiss_index import get_index
 
-# Initialize components
-engine = AudioEngine()
-ai_manager = SampleMindAIManager()
+index = get_index(auto_load=True)
+results = index.search_text("aggressive 808 sub bass 140 BPM", top_k=20)
+for r in results:
+    print(f"{r.filename}  score={r.score:.3f}  BPM={r.metadata.get('bpm')}")
 
-# Analyze audio file
-features = engine.analyze_audio("track.wav")
 
-# Get AI insights
-analysis = await ai_manager.analyze_music(
-    features.to_dict(),
-    analysis_type="comprehensive"
+# ── AI STREAMING CHAT ─────────────────────────────────────────
+from samplemind.integrations.litellm_router import chat_completion
+
+response = await chat_completion(
+    messages=[{"role": "user", "content": "What samples match a dark trap vibe?"}],
+    prefer_fast=True,
 )
+print(response.choices[0].message.content)
 
-print(f"BPM: {features.tempo}")
-print(f"Key: {features.key}")
-print(f"AI Insights: {analysis.summary}")
+
+# ── SAMPLE ANALYSIS (ORM) ─────────────────────────────────────
+from samplemind.core.database.tortoise_models import TortoiseSample
+
+heavy_kicks = await TortoiseSample.filter(
+    bpm__gte=130, bpm__lte=160
+).order_by("-bpm").limit(50).all()
+
+
+# ── AGENT PIPELINE ────────────────────────────────────────────
+from samplemind.ai.agents.graph import build_graph
+
+graph = build_graph()
+result = await graph.ainvoke({
+    "file_path": "kick_808.wav",
+    "analysis_level": "PROFESSIONAL",
+    "user_request": "Analyze and tag this sample"
+})
+print(result["final_output"])
 ```
 
-### REST API
+---
 
-```bash
-# Start API server
-make dev
+## `◈ BUILD STATUS ◈`
 
-# Analyze audio via API
-curl -X POST "http://localhost:8000/api/v1/audio/analyze" \
-  -F "file=@track.wav" \
-  -F "level=detailed"
+```
+PHASE COMPLETION  ──────────────────────────────────────
+  P0  Core Infrastructure    ████████████████████  90%
+  P1  Audio Engine           ████████████████████ 100%
+  P2  Web Frontend           ████████████████░░░░  79%
+  P3  Agent Pipeline         ████████████████████ 100%
+  P4  Advanced Features      ███████████████░░░░░  75%
+  P5  Production             ██████░░░░░░░░░░░░░░  33%
+─────────────────────────────────────────────────────────
+  OVERALL                    ████████████████░░░░  82%
+  94 / 115 checklist items complete
 ```
 
----
+<div align="center">
 
-## 📊 Development Status
+| SYSTEM | STATUS | DETAIL |
+|--------|:------:|--------|
+| Audio Engine | `◉ STABLE` | librosa BPM/key/MFCC/chroma/spectral |
+| LiteLLM Router | `◉ ACTIVE` | Claude→Gemini→GPT→Ollama fallback chain |
+| FAISS Search | `◉ ACTIVE` | 512-dim CLAP, text+audio queries |
+| LangGraph Agents | `◉ ACTIVE` | 7-node pipeline + FAISS memory |
+| FastAPI (18 routers) | `◉ ACTIVE` | REST + WebSocket + SSE streaming |
+| Celery Workers | `◉ ACTIVE` | Redis broker, audio + agent tasks |
+| Ensemble Classifier | `◉ ACTIVE` | SVM+XGBoost+KNN soft-voting |
+| Stem Separation | `◉ ACTIVE` | Demucs htdemucs_6s (6 stems) |
+| MIDI Transcription | `◉ ACTIVE` | basic-pitch neural network |
+| Stripe Marketplace | `◉ ACTIVE` | Connect Express publish+purchase |
+| Next.js Web UI | `◈ PHASE 16` | 108 TS files, 8 pages live |
+| Tauri Desktop | `◈ SCAFFOLD` | v2 + Svelte 5 |
+| Rate Limiting | `◈ PENDING` | slowapi dep present, not wired |
 
-| Component | Status | Notes |
-|-----------|--------|-------|
-| Audio Engine | ✅ Stable | librosa ^0.11.0: BPM, key, MFCC, chroma, spectral |
-| AI Manager | ✅ Updated | Multi-provider routing: Claude, Gemini, GPT-4o, Ollama — v3.0 routing |
-| Anthropic Claude Integration | ✅ Updated | SDK ^0.40.0, Claude 3.7 Sonnet default, extended thinking |
-| Google Gemini Integration | ✅ Updated | google-genai ^0.8.0, Gemini 2.0 Flash, new Client API |
-| OpenAI Integration | ✅ Updated | SDK ^1.58.0, GPT-4o default, gpt-5 removed |
-| Ollama Integration | ✅ New | Offline provider — qwen2.5:7b, phi3:mini, gemma2:2b, <100ms |
-| CLI Interface | ✅ Active | ~2255 lines, 20+ commands, 12 themes, Rich/Typer |
-| TUI Interface | ✅ Beta | Textual ^0.44 — 13 screens (upgrade to ^0.87 in Phase 15 P4) |
-| REST API | ✅ Scaffolded | FastAPI at `src/samplemind/interfaces/api/` + `server/` |
-| DAW Plugins | ✅ Working | FL Studio (Python + C++ JUCE), Ableton (REST + JS) |
-| Stem Separation | ✅ Dependency added | demucs ^4.0.0 in pyproject.toml — integration in progress |
-| MIDI Transcription | ✅ Re-enabled | basic-pitch ^0.4.0 re-enabled in pyproject.toml |
-| Audio Effects | ✅ Dependency added | pedalboard ^0.9.0 in pyproject.toml — integration in progress |
-| Web Frontend | 🚀 Phase 15 P5 | Next.js 15 + React 19 — scaffolding next |
-
-**Overall Test Suite:** 120+ tests | ~30% coverage | Target: 80% in Phase 15
+</div>
 
 ---
 
-## 💡 Quick Commands
-
-| Task | Command |
-|------|---------|
-| Setup environment | `make setup` |
-| Start development server | `make dev` |
-| Run CLI | `python main.py` |
-| Run TUI (advanced) | `python -m samplemind.interfaces.tui.main` |
-| Run tests | `make test` |
-| Format code | `make format` |
-| Lint code | `make lint` |
-| Type check | `make type-check` |
-| Install AI models | `make install-models` |
-| Start databases | `make setup-db` |
-
----
-
-## 🤝 Contributing
-
-We welcome contributions from the community! Whether you're fixing bugs, adding features, or improving documentation, your help is appreciated.
-
-### Getting Started
+## `◈ CONTRIBUTING ◈`
 
 ```bash
-# Clone and setup
+# ── SETUP ──────────────────────────────────────────────────────
 git clone https://github.com/lchtangen/SampleMind-AI---Beta.git
 cd SampleMind-AI---Beta
-make setup
+python3 -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
 
-# Run tests
-make test
+# ── VALIDATE ───────────────────────────────────────────────────
+make quality     # must pass before opening a PR
+make test        # pytest tests/unit/ -v --tb=short
 
-# Code quality checks
-make quality
-
-# Start development server
-make dev
+# ── SUBMIT ─────────────────────────────────────────────────────
+git checkout -b feat/your-feature
+git commit -m "feat: your change"
+git push origin feat/your-feature
+# → open Pull Request
 ```
 
-### Resources
+**Rules:**
+- Never re-implement existing modules — check `CLAUDE.md` first
+- All new functions need type annotations (mypy strict)
+- All async I/O must use `async def` or `ThreadPoolExecutor`
+- Never call `SampleMindAIManager` — use `litellm_router.chat_completion()`
 
-- [**Contributing Guidelines**](CONTRIBUTING.md) - How to contribute
-- [**Code of Conduct**](CODE_OF_CONDUCT.md) - Community standards
-- [**Development Guide**](docs/04-TECHNICAL-IMPLEMENTATION/guides/DEVELOPMENT.md) - Developer setup
-
----
-
-## 📝 License
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+📋 [CONTRIBUTING.md](CONTRIBUTING.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) · [CLAUDE.md](CLAUDE.md)
 
 ---
 
-## 🔗 Links & Resources
+## `◈ LINKS ◈`
 
-- **[Documentation Hub](docs/)** - Complete documentation
-- **[Changelog](CHANGELOG.md)** — Full version history
-- **[Roadmap](docs/02-ROADMAPS/)** — Future development plans
-- **[Phase 15 Migration Plan](docs/02-ROADMAPS/V3_MIGRATION_CHECKLIST.md)** — v3.0 upgrade checklist
-- **[Current Status](docs/02-ROADMAPS/CURRENT_STATUS.md)** — Real-time project state
+<div align="center">
 
----
+[![Changelog](https://img.shields.io/badge/CHANGELOG-view_history-00d4ff?style=for-the-badge&labelColor=0a0a1a)](CHANGELOG.md)
+[![Checklist](https://img.shields.io/badge/CHECKLIST-phase_16-ff00ff?style=for-the-badge&labelColor=0a0a1a)](docs/v3/CHECKLIST.md)
+[![Roadmap](https://img.shields.io/badge/ROADMAP-v3-00ff9f?style=for-the-badge&labelColor=0a0a1a)](docs/v3/ROADMAP.md)
+[![License](https://img.shields.io/badge/MIT_LICENSE-read-ff6b35?style=for-the-badge&labelColor=0a0a1a)](LICENSE)
 
-## 🌟 Project Highlights
-
-- ✅ **Phases 1-14 Complete** — Solid foundation with full CLI, TUI, DAW plugins, analytics
-- ✅ **Phase 15 P0+P1 Done** — All AI SDKs upgraded, Ollama offline provider added, routing overhauled
-- 🎯 **20+ CLI Commands** — Comprehensive command-line interface with 12 themes
-- 🤖 **4 AI Providers** — Claude 3.7 Sonnet (primary), Gemini 2.0 Flash, GPT-4o, Ollama (<100ms offline)
-- 🖥️ **13 TUI Screens** — Full-featured terminal UI with Textual
-- 🎹 **DAW Integration** — FL Studio (Python + C++ JUCE) + Ableton Live
-- 🎛️ **Audio Suite** — demucs stem separation, pedalboard effects, basic-pitch MIDI transcription
-- 🌐 **Cross-Platform** — Linux, macOS, Windows support
+</div>
 
 ---
 
-**Built with ❤️ for music producers, beatmakers, and audio engineers**
+<div align="center">
 
-*Empowering creativity through intelligent audio analysis*
+```
+╔═══════════════════════════════════════════════════════════════╗
+║  SAMPLEMIND AI  //  BUILT FOR PRODUCERS  //  PHASE 16 ACTIVE  ║
+║  Python 3.12  ·  FastAPI  ·  Next.js 15  ·  Claude sonnet-4-6 ║
+║  "Where neural intelligence meets musical intuition"           ║
+╚═══════════════════════════════════════════════════════════════╝
+```
+
+*MIT License · © 2026 lchtangen · [github.com/lchtangen/SampleMind-AI---Beta](https://github.com/lchtangen/SampleMind-AI---Beta)*
+
+</div>
