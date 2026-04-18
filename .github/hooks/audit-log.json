@@ -1,11 +1,25 @@
 {
   "version": 1,
   "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "echo '🎵 SampleMind AI — Copilot Agent Session'\necho ''\necho \"📁 $(pwd)\"\nif [ -f .venv/bin/python ]; then echo \"🐍 Python: $(.venv/bin/python --version 2>/dev/null)\"; fi\nif [ -f apps/web/package.json ]; then echo \"📦 Node: $(node --version 2>/dev/null || echo 'not installed')\"; fi\necho '📋 Commands: pytest tests/unit/ -v | ruff check src/ | mypy src/'",
+        "timeoutSec": 10
+      }
+    ],
     "postToolUse": [
       {
         "type": "command",
         "bash": "echo \"[$(date -Is)] Tool used\" >> /tmp/samplemind-agent-audit.log",
         "timeoutSec": 5
+      }
+    ],
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "if echo \"$COPILOT_TOOL_ARGS\" | grep -q 'git commit'; then\n  echo '🔍 Pre-commit: checking Python...'\n  command -v ruff >/dev/null 2>&1 && ruff check src/ --fix 2>/dev/null || true\n  command -v ruff >/dev/null 2>&1 && ruff format src/ 2>/dev/null || true\n  echo '✅ Pre-commit checks done'\nfi",
+        "timeoutSec": 30
       }
     ]
   }

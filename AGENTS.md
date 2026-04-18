@@ -93,3 +93,18 @@ docs/v3/                 # Active roadmap + checklist
 - Always run `ruff check src/ && mypy src/` before committing
 - Update `docs/v3/CHECKLIST.md` when completing checklist items
 - Do not remove or modify unrelated tests
+
+## Customization Stack
+
+### Copilot (VS Code + CLI + Cloud Agent)
+- `.github/copilot-instructions.md` — repository-wide instructions
+- `.github/instructions/*.instructions.md` — 21 path-specific instruction files
+- `.github/agents/*.agent.md` — 12 custom agent profiles (CLI-compatible)
+- `.github/skills/*/SKILL.md` — 25 agent skills
+- `.github/hooks/*.json` — lifecycle hooks (session start, pre/post tool use)
+
+### Claude Code
+- `.claude/settings.json` — permissions, sandbox, hooks, environment
+- `.claude/commands/*.md` — 8 slash commands (/quality, /test, /lint, /analyze, /status, /security, /dev, /build)
+- `.claude/skills/*/SKILL.md` — 26 skills mirroring .github/skills + Claude-specific
+- `.claude/agents/*.md` — 12 subagent profiles

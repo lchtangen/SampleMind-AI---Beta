@@ -215,16 +215,21 @@ docs/v3/                                       # CHECKLIST.md, STATUS.md, ROADMA
 
 ## Customization Index
 
-This repository uses the full GitHub Copilot customization stack:
+This repository uses the full GitHub Copilot + Claude Code customization stack:
 
 | Type | Location | Count | Purpose |
 |------|----------|-------|---------|
 | **Repository-wide instructions** | `.github/copilot-instructions.md` | 1 | This file — global context |
 | **Path-specific instructions** | `.github/instructions/*.instructions.md` | 21 | Per-language/domain rules |
-| **Custom agents** | `.github/agents/*.md` | 12 | Specialist agent profiles |
-| **Agent skills** | `.github/skills/*/SKILL.md` | 25 | Task-specific capabilities |
-| **Hooks** | `.github/hooks/*.json` | 1 | Lifecycle automation |
+| **Custom agents (Copilot CLI)** | `.github/agents/*.agent.md` | 12 | Specialist agent profiles |
+| **Agent skills (Copilot)** | `.github/skills/*/SKILL.md` | 25 | Task-specific capabilities |
+| **Hooks (Copilot)** | `.github/hooks/*.json` | 1 | Session start, pre/post tool use |
 | **Agent instructions** | `AGENTS.md` | 1 | Standard agent format |
 | **Claude instructions** | `CLAUDE.md` | 1 | Claude-specific context |
+| **Claude settings** | `.claude/settings.json` | 1 | Permissions, sandbox, hooks |
+| **Claude commands** | `.claude/commands/*.md` | 8 | Slash commands (/quality, /test, etc.) |
+| **Claude skills** | `.claude/skills/*/SKILL.md` | 26 | Claude-specific skills |
+| **Claude agents** | `.claude/agents/*.md` | 12 | Subagent profiles |
+| **Setup workflow** | `.github/workflows/copilot-setup-steps.yml` | 1 | Cloud agent env setup |
 
 Trust these instructions. Only search the codebase if information here is incomplete or found to be incorrect.

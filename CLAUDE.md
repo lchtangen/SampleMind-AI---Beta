@@ -38,10 +38,16 @@ Track: `docs/v3/CHECKLIST.md` | Overall: ~82% (94/115 items)
 ## Copilot Customization
 - `.github/copilot-instructions.md` — repository-wide Copilot instructions
 - `.github/instructions/` — 21 path-specific instruction files
-- `.github/agents/` — 12 custom agent profiles
+- `.github/agents/` — 12 custom agent profiles (`.agent.md` format)
 - `.github/skills/` — 25 agent skills with SKILL.md files
-- `.github/hooks/` — agent lifecycle hooks
+- `.github/hooks/` — agent lifecycle hooks (session start, pre/post tool use)
 - `AGENTS.md` — standard agent instructions (root)
+
+## Claude Code
+- `.claude/settings.json` — permissions, sandbox, hooks, env
+- `.claude/commands/` — 8 slash commands (quality, test, lint, analyze, status, security, dev, build)
+- `.claude/skills/` — 26 Claude-specific skills with SKILL.md files
+- `.claude/agents/` — 12 subagent profiles
 
 ## Setup
 ```bash
