@@ -1,4 +1,23 @@
 #!/bin/bash
+# ══════════════════════════════════════════════════════════════════════════════
+# SampleMind AI — Quick-Start Server Launcher
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# Starts BOTH the backend (FastAPI/uvicorn) and frontend (Next.js/pnpm dev)
+# as background processes and traps Ctrl+C to stop them together.
+#
+# Servers started:
+#   1. Backend API  — http://localhost:8000  (docs at /api/docs)
+#   2. Frontend     — http://localhost:3000
+#
+# Usage:
+#   ./scripts/START_SERVERS.sh
+#
+# Press Ctrl+C to shut down both servers.
+#
+# NOTE: The backend expects a virtualenv at ``backend/venv`` and the
+# frontend expects pnpm to be installed globally.
+# ══════════════════════════════════════════════════════════════════════════════
 
 # 🚀 SampleMind AI - Quick Start Script
 # Starts both backend and frontend servers

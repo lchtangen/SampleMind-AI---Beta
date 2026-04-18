@@ -1,11 +1,33 @@
 """
 Tortoise ORM Models — SampleMind v0.3.0
+=========================================
 
-New async-first ORM layer for Phase 11–16 features.
-Runs alongside existing Beanie/MongoDB layer for backward compatibility.
+Async-first relational models for Phases 11–16.  Runs on **SQLite** in
+development and **PostgreSQL** in production.  Migrations are managed by
+**aerich** (``aerich upgrade``).
 
-Database: SQLite (dev) / PostgreSQL (prod)
-Migrations: aerich (run: aerich upgrade)
+Coexistence:
+  These models run alongside the legacy Beanie/MongoDB layer.  New features
+  should use Tortoise; MongoDB will be phased out once migration is complete.
+
+Models:
+  ``TortoiseUser``            — user account (auth, billing, quotas).
+  ``TortoiseLibrary``         — named sample collection owned by a user.
+  ``TortoiseSample``          — audio sample with features, FAISS pointer, R2 key.
+  ``TortoiseAnalysisResult``  — persisted analysis output for a sample.
+  ``TortoisePack``            — sample pack (.smpack) for the marketplace.
+  ``TortoisePlaylist``        — AI-curated playlist (Phase 12 curation engine).
+
+Configuration:
+  The ``TORTOISE_ORM`` dict at the bottom of this file is consumed by both
+  ``aerich`` and ``init_tortoise()`` at FastAPI startup.
+
+Usage::
+
+    from samplemind.core.database.tortoise_models import TortoiseSample, init_tortoise
+
+    await init_tortoise()
+    sample = await TortoiseSample.create(filename="kick.wav", bpm=140.0, key="Am")
 """
 
 from __future__ import annotations
@@ -16,10 +38,12 @@ from tortoise import fields
 from tortoise.models import Model
 
 # ── Core domain models ────────────────────────────────────────────────────────
+# Each model maps 1:1 to a ``*_v3`` table (the "v3" suffix avoids collisions
+# with legacy MongoDB-era tables).
 
 
 class TortoiseUser(Model):
-    """User account — mirrors UserInDB Pydantic schema."""
+    """User account — mirrors the UserInDB Pydantic schema used by FastAPI auth."""
 
     id = fields.CharField(max_length=100, pk=True)
     email = fields.CharField(max_length=255, unique=True, index=True)
@@ -52,14 +76,18 @@ class TortoiseUser(Model):
 
     class Meta:
         table = "users_v3"
-        indexes = [("role", "is_active"), ("tier",)]
+        indexes = [("role", "is_active"), ("tier",)]  # compound indexes for common filters
 
     def __str__(self) -> str:
         return f"User({self.id}, {self.email})"
 
 
 class TortoiseLibrary(Model):
-    """Sample library — a named folder/collection owned by a user."""
+    """Sample library — a named folder/collection owned by a user.
+
+    ``sample_count`` and ``total_size_mb`` are denormalized for dashboard
+    queries; they must be updated when samples are added/removed.
+    """
 
     id = fields.CharField(max_length=100, pk=True)
     user: fields.ForeignKeyRelation[TortoiseUser] = fields.ForeignKeyField(
@@ -92,7 +120,8 @@ class TortoiseSample(Model):
     Audio sample with extracted features.
 
     Central table for Phase 11 (FAISS search) and Phase 12 (AI curation).
-    The `embedding_id` links to the FAISS index for similarity search.
+    The ``embedding_id`` links to the FAISS index for similarity search.
+    ``r2_key`` / ``r2_public_url`` link to Cloudflare R2 cloud storage (Phase 13).
     """
 
     id = fields.CharField(max_length=100, pk=True)
@@ -121,12 +150,12 @@ class TortoiseSample(Model):
     spectral_centroid = fields.FloatField(null=True)
     zero_crossing_rate = fields.FloatField(null=True)
 
-    # AI classification (from Phase 17/18 classifiers)
-    genre_labels = fields.JSONField(default=list)  # ["trap", "dark", "hip-hop"]
-    mood_labels = fields.JSONField(default=list)  # ["dark", "aggressive"]
-    instrument_labels = fields.JSONField(default=list)  # ["kick", "808"]
-    valence = fields.FloatField(null=True)  # Russell circumplex: -1 to 1
-    arousal = fields.FloatField(null=True)  # Russell circumplex: -1 to 1
+    # AI classification (from ensemble, mood_detector, instrument_detector)
+    genre_labels = fields.JSONField(default=list)  # e.g. ["trap", "dark", "hip-hop"]
+    mood_labels = fields.JSONField(default=list)  # e.g. ["dark", "aggressive"]
+    instrument_labels = fields.JSONField(default=list)  # e.g. ["kick", "808"]
+    valence = fields.FloatField(null=True)  # Russell circumplex x-axis: -1..1
+    arousal = fields.FloatField(null=True)  # Russell circumplex y-axis: -1..1
 
     # Fingerprint (from AudioFingerprinter)
     fingerprint_hash = fields.CharField(max_length=64, null=True, index=True)
@@ -151,18 +180,21 @@ class TortoiseSample(Model):
     class Meta:
         table = "samples_v3"
         indexes = [
-            ("user_id", "created_at"),
-            ("library_id", "bpm"),
-            ("key", "energy"),
-            ("fingerprint_hash",),
+            ("user_id", "created_at"),  # "my recent uploads" queries
+            ("library_id", "bpm"),  # library browsing filtered by BPM
+            ("key", "energy"),  # curation engine key+energy lookups
+            ("fingerprint_hash",),  # duplicate detection
         ]
 
     def __str__(self) -> str:
         return f"Sample({self.filename}, bpm={self.bpm}, key={self.key})"
 
 
+# ── Analysis results ──────────────────────────────────────────────────────────
+
+
 class TortoiseAnalysisResult(Model):
-    """Analysis output for a sample."""
+    """Persisted analysis output — one row per (sample, analysis_type) pair."""
 
     id = fields.CharField(max_length=100, pk=True)
     sample: fields.ForeignKeyRelation[TortoiseSample] = fields.ForeignKeyField(
@@ -182,6 +214,9 @@ class TortoiseAnalysisResult(Model):
 
     class Meta:
         table = "analysis_results_v3"
+
+
+# ── Marketplace models ────────────────────────────────────────────────────────
 
 
 class TortoisePack(Model):
@@ -232,6 +267,9 @@ class TortoisePack(Model):
         return f"Pack({self.name} v{self.version})"
 
 
+# ── AI curation models ────────────────────────────────────────────────────────
+
+
 class TortoisePlaylist(Model):
     """AI-curated playlist — output of Phase 12 curation engine."""
 
@@ -259,7 +297,10 @@ class TortoisePlaylist(Model):
         table = "playlists_v3"
 
 
-# ── Tortoise ORM config (used by aerich + init_tortoise()) ────────────────────
+# ── Tortoise ORM config ───────────────────────────────────────────────────────
+# Used by:
+#   - aerich CLI for migration generation (``aerich.ini`` points here)
+#   - ``init_tortoise()`` at FastAPI lifespan startup
 
 TORTOISE_ORM = {
     "connections": {
@@ -275,6 +316,9 @@ TORTOISE_ORM = {
         },
     },
 }
+
+
+# ── Lifecycle helpers ─────────────────────────────────────────────────────────
 
 
 async def init_tortoise(db_url: str | None = None) -> None:

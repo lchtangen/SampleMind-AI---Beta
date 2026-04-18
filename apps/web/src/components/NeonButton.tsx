@@ -1,6 +1,24 @@
+/**
+ * @fileoverview Neon-styled button component from the SampleMind design system.
+ *
+ * Renders a `<button>` with a glowing box-shadow, glassmorphism backdrop, and
+ * a subtle lift-on-hover animation. Four neon colour presets and three size
+ * presets are available.
+ *
+ * @module components/NeonButton
+ */
+
 import React from 'react'
 import clsx from 'clsx'
 
+/**
+ * Props accepted by {@link NeonButton}.
+ *
+ * Extends all standard `<button>` HTML attributes (e.g. `onClick`, `disabled`).
+ *
+ * @property color - Neon glow colour: `"blue"` (default), `"purple"`, `"cyan"`, or `"magenta"`.
+ * @property size  - Button sizing preset: `"sm"`, `"md"` (default), or `"lg"`.
+ */
 type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   color?: 'blue' | 'purple' | 'cyan' | 'magenta'
   size?: 'sm' | 'md' | 'lg'
@@ -19,6 +37,16 @@ const sizeMap: Record<NonNullable<Props['size']>, string> = {
   lg: 'px-5 py-3 text-lg',
 }
 
+/**
+ * A neon-glowing button with hover lift and focus ring.
+ *
+ * @example
+ * ```tsx
+ * <NeonButton color="cyan" size="lg" onClick={handleClick}>
+ *   Start Analysis
+ * </NeonButton>
+ * ```
+ */
 export default function NeonButton({ color = 'blue', size = 'md', className, children, ...rest }: Props) {
   return (
     <button

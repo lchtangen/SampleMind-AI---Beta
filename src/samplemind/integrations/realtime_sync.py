@@ -1,28 +1,37 @@
 """
 Realtime Sync — SampleMind Phase 13
+=====================================
 
-Multi-device library sync using Supabase Realtime channels.
-Propagates sample add/delete/update events across devices in real-time.
+Multi-device library synchronization via **Supabase Realtime** broadcast
+channels.  When a sample is added, deleted, or updated on one device, the
+change is immediately pushed to every other connected device.
 
-Conflict resolution: last-write-wins based on server timestamp.
+Conflict resolution:
+  **Last-write-wins** based on ``server_timestamp``.  Since all sync
+  operations are idempotent (``get_or_create``, field-level ``update``),
+  replaying the same event twice is safe.
 
-Architecture:
-  - Supabase Realtime broadcasts change events on channel "library:{user_id}"
-  - Each device subscribes and applies changes to local Tortoise DB
-  - Sync operations are idempotent (safe to replay)
+Architecture::
+
+    Device A  ──push──▶  Supabase channel "library:{user_id}"  ──broadcast──▶  Device B
+                                                                ──broadcast──▶  Device C
+    Each device subscribes on ``start()`` and applies incoming ``SyncEvent``s
+    to its local Tortoise ORM database.
+
+Supported event types:
+  ``sample_added``   — create a new ``TortoiseSample`` if it doesn't exist.
+  ``sample_deleted`` — delete the sample row.
+  ``sample_updated`` — update metadata fields (BPM, key, tags, etc.).
+  ``library_reset``  — (reserved) full re-sync trigger.
 
 Usage::
 
     from samplemind.integrations.realtime_sync import RealtimeSync
 
     sync = RealtimeSync(user_id="user_123")
-    await sync.start()  # starts background subscription
-
-    # Push a local change to cloud
-    await sync.push_sample_added(sample_id="abc", metadata={...})
-
-    # Stop subscription
-    await sync.stop()
+    await sync.start()                                # background subscription
+    await sync.push_sample_added("abc", metadata={…}) # broadcast to peers
+    await sync.stop()                                 # unsubscribe
 """
 
 from __future__ import annotations
@@ -37,8 +46,10 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 SyncEventType = (
-    str  # "sample_added" | "sample_deleted" | "sample_updated" | "library_reset"
+    str  # One of: "sample_added" | "sample_deleted" | "sample_updated" | "library_reset"
 )
+
+# ── Data types ────────────────────────────────────────────────────────────────
 
 
 @dataclass
@@ -50,6 +61,9 @@ class SyncEvent:
     sample_id: str | None
     metadata: dict
     server_timestamp: str | None
+
+
+# ── Sync engine ───────────────────────────────────────────────────────────────
 
 
 class RealtimeSync:
@@ -165,7 +179,7 @@ class RealtimeSync:
     # ── Event handler ─────────────────────────────────────────────────────────
 
     def _handle_event(self, payload: dict) -> None:
-        """Process incoming Realtime event (called from Supabase SDK callback)."""
+        """Process incoming Realtime event (called from Supabase SDK callback thread)."""
         try:
             event = SyncEvent(
                 event_type=payload.get("event_type", "unknown"),
@@ -174,7 +188,7 @@ class RealtimeSync:
                 metadata=payload.get("metadata", {}),
                 server_timestamp=payload.get("server_timestamp"),
             )
-            # Skip own broadcasts
+            # Skip own broadcasts to avoid echo loops
             if event.user_id == self.user_id:
                 return
 
@@ -183,7 +197,7 @@ class RealtimeSync:
             logger.error("Realtime event handle error: %s", exc)
 
     async def _apply_event(self, event: SyncEvent) -> None:
-        """Apply a sync event to the local Tortoise database."""
+        """Apply a sync event to the local Tortoise database (idempotent)."""
         try:
             from samplemind.core.database.tortoise_models import TortoiseSample
 
@@ -232,16 +246,17 @@ class RealtimeSync:
         except Exception as exc:
             logger.error("Failed to apply sync event %s: %s", event.event_type, exc)
 
-    # ── Pull (initial sync) ───────────────────────────────────────────────────
+    # ── Pull (initial sync / cold start) ────────────────────────────────────
 
     async def pull_library_state(self) -> int:
         """
-        Pull the current library state from Supabase and sync to local DB.
+        Pull the current library state from Supabase cloud and upsert into local DB.
 
-        Used on first launch or after a long offline period.
+        Designed for first launch or recovery after a long offline period.
+        Uses ``get_or_create`` so replaying is always safe.
 
         Returns:
-            Number of samples synced.
+            Number of *newly created* samples.
         """
         if not self._client:
             return 0
@@ -283,9 +298,9 @@ class RealtimeSync:
 
     async def push_library_state(self) -> int:
         """
-        Push all local TortoiseSamples to Supabase.
+        Push all local TortoiseSamples to Supabase (upsert).
 
-        Used for initial cloud backup or recovery.
+        Used for initial cloud backup or disaster recovery.
 
         Returns:
             Number of samples pushed.

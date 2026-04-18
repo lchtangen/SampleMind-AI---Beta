@@ -4,6 +4,39 @@ Unit tests for samplemind.ai.audio (P4-010, P4-011)
 Tests BEATsEncoder fallback behavior and LoopExtender crossfade logic.
 All heavy deps (torch, transformers, librosa, soundfile) are mocked so
 tests run without GPU or actual audio files.
+
+Modules under test:
+    samplemind.ai.audio.beats_encoder
+        — BEATsEncoder, _mfcc_embed, EMBEDDING_DIM
+    samplemind.ai.audio.loop_extender
+        — LoopExtender, _crossfade, _detect_loop_bars, DEFAULT_CROSSFADE_S
+
+Key test scenarios:
+    BEATsEncoder — _mfcc_embed
+        - Returns a unit-normed float32 vector of EMBEDDING_DIM.
+        - Returns zero vector when librosa.load raises.
+        - Falls back gracefully when librosa is not installed.
+    BEATsEncoder — encode (MFCC fallback path)
+        - Returns zero vector for a missing file.
+        - Returns unit-normed vector for an existing file via MFCC fallback.
+        - ``backend`` property returns "mfcc" when _use_beats is False.
+        - ``dim`` property equals EMBEDDING_DIM.
+        - Falls back to MFCC when transformers model load fails.
+    BEATsEncoder — encode_batch
+        - Returns stacked array (N, EMBEDDING_DIM).
+    LoopExtender — _crossfade
+        - Zero crossfade samples → simple concatenation.
+        - Non-zero crossfade → smooth transition (boundary ≈ 0.5).
+        - Segments shorter than crossfade → safe concatenation.
+    LoopExtender — _detect_loop_bars
+        - Falls back to (4, 2.0) when librosa is unavailable.
+        - Uses librosa beat tracking when available.
+    LoopExtender — extend
+        - FileNotFoundError for missing file.
+        - ImportError when librosa/soundfile are missing.
+        - Produces output file with expected path and calls soundfile.write.
+        - Default output path includes "extended" and bar count in stem.
+        - Respects crossfade_s attribute (default vs. custom).
 """
 
 from __future__ import annotations

@@ -1,3 +1,21 @@
+/**
+ * @fileoverview Landing / home page for the SampleMind AI web application.
+ *
+ * Renders the public-facing marketing page with:
+ * - A **ThemeToggle** widget (light / dark / system) stored in `localStorage`.
+ * - A hero section that adapts based on authentication state:
+ *   - Authenticated users see a "Go to Dashboard" CTA.
+ *   - Guests see a {@link LoginForm} and "Start Recording" button.
+ * - An AI chat overlay powered by the dynamically-imported
+ *   {@link AIChatWindow} (SSR disabled to avoid Web API issues).
+ * - A feature grid highlighting AI composition, smart mixing, and mastering.
+ *
+ * This is a **client component** (`'use client'`) because it relies on
+ * browser-only APIs (localStorage, matchMedia) and React hooks.
+ *
+ * @module app/page
+ */
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -8,13 +26,22 @@ import LoginForm from '@/components/LoginForm';
 import { useRouter } from 'next/navigation';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
-// Dynamically import the AIChatWindow component with no SSR
+/** Dynamically import the AIChatWindow component with SSR disabled. */
 const AIChatWindow = dynamic(
   () => import('@/components/AIChatWindow'),
   { ssr: false }
 );
 
-// Theme toggle component
+/**
+ * Theme toggle widget supporting light, dark, and system-preference modes.
+ *
+ * Persists the user's choice to `localStorage` under the key `"theme"` and
+ * applies / removes the `light` or `dark` class on `<html>`.
+ *
+ * Renders a pill-shaped button group with sun / moon / laptop icons.
+ * Displays a skeleton placeholder until the component has mounted
+ * (avoids hydration mismatch with SSR).
+ */
 function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
@@ -80,6 +107,19 @@ function ThemeToggle() {
   );
 }
 
+/**
+ * Home page component — the default route (`/`).
+ *
+ * Manages two top-level UI states:
+ * 1. **Landing view** — hero, login form, feature grid.
+ * 2. **Chat view** — full-screen {@link AIChatWindow} overlay toggled by the
+ *    "Talk to AI Assistant" button.
+ *
+ * While Supabase auth is loading, a translucent spinner overlay is displayed
+ * for up to 4 seconds before the content is revealed regardless.
+ *
+ * @returns The rendered home page.
+ */
 export default function Home() {
   const [showChat, setShowChat] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

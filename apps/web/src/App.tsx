@@ -1,3 +1,22 @@
+/**
+ * @fileoverview Root application component for the SampleMind AI desktop / SPA
+ * entry-point (used outside the Next.js `app/` directory, e.g. Tauri or Vite).
+ *
+ * Bootstraps the {@link NeurologicAudioEngine}, wires up playback event
+ * listeners, and renders the main workspace layout:
+ *
+ * - **TopBar** — app-level navigation + sidebar toggle.
+ * - **Sidebar** — collapsible navigation drawer (animated via framer-motion).
+ * - **AudioVisualizer** — real-time waveform / spectrum display.
+ * - **AudioControls** — play/pause, seek, and volume controls.
+ * - **Toaster** — dark-themed toast notifications (sonner).
+ *
+ * A loading splash screen is shown until the audio engine's `initialize()`
+ * promise resolves.
+ *
+ * @module App
+ */
+
 import React, { useEffect, useState } from 'react';
 import { Toaster } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,9 +28,16 @@ import { NeurologicAudioEngine } from '@samplemind-ai/audio-engine';
 import { useAudioEngine } from './hooks/useAudioEngine';
 import { cn } from './lib/utils';
 
-// Initialize audio engine
+/** Singleton audio engine instance shared across the component tree. */
 const audioEngine = new NeurologicAudioEngine();
 
+/**
+ * Root App component — initialises the audio engine and renders the full
+ * desktop workspace layout with sidebar, visualiser, and transport controls.
+ *
+ * @returns The top-level application shell, or a loading splash while the
+ *          audio engine is initialising.
+ */
 export default function App() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);

@@ -1,7 +1,14 @@
-# SampleMind AI v3.0 — Full-stack Docker Compose (P0-019)
+# ══════════════════════════════════════════════════════════════════════════════
+# SampleMind AI v3.0 — Full-stack Docker Compose (Production-grade) (P0-019)
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# This is the PRODUCTION / staging compose file.  It adds healthchecks,
+# the Celery worker, and the Next.js frontend on top of the base stack.
 #
 # Services: backend (FastAPI), frontend (Next.js), mongodb, redis, celery-worker
-# Monitoring: prometheus, grafana
+# Optional profiles:
+#   --profile ollama      — include local LLM inference
+#   --profile monitoring  — include Prometheus + Grafana
 #
 # Quick start:
 #   cp .env.example .env         # fill in SECRET_KEY, API keys, etc.
@@ -11,13 +18,16 @@
 # Access:
 #   FastAPI:   http://localhost:8000      (API + docs at /api/docs)
 #   Next.js:   http://localhost:3000
-#   Grafana:   http://localhost:3001
+#   Grafana:   http://localhost:3001      (only with --profile monitoring)
+# ══════════════════════════════════════════════════════════════════════════════
 
 name: samplemind-v3
 
 services:
 
   # ── Backend (FastAPI + uvicorn) ─────────────────────────────────────────────
+  # The main API server. Uses multi-stage Dockerfile (production target).
+  # Healthcheck hits /api/v1/health every 30 s. Depends on mongodb + redis.
   backend:
     build:
       context: .
@@ -54,7 +64,9 @@ services:
       retries: 3
       start_period: 20s
 
-  # ── Frontend (Next.js) ──────────────────────────────────────────────────────
+  # ── Frontend (Next.js 15) ────────────────────────────────────────────────────
+  # Builds the Next.js app from apps/web/ using a separate Dockerfile.frontend.
+  # Waits for the backend to be healthy before starting.
   frontend:
     build:
       context: ./apps/web
@@ -75,6 +87,9 @@ services:
     restart: unless-stopped
 
   # ── Celery Worker ───────────────────────────────────────────────────────────
+  # Asynchronous task worker for heavy audio processing and AI analysis.
+  # Listens on three queues: default, ai_analysis, audio_processing.
+  # Concurrency is kept low (2) to avoid GPU/memory contention.
   celery-worker:
     build:
       context: .
@@ -106,6 +121,8 @@ services:
     restart: unless-stopped
 
   # ── MongoDB 7.0 ──────────────────────────────────────────────────────────────
+  # Document store for sample metadata, library records, and user data.
+  # Healthcheck pings the server every 10 s to gate dependent services.
   mongodb:
     image: mongo:7.0
     container_name: samplemind-mongodb
@@ -126,6 +143,8 @@ services:
       start_period: 10s
 
   # ── Redis 7.2 ────────────────────────────────────────────────────────────────
+  # Used for: session cache, Celery task broker/result backend, and real-time
+  # agent progress pub/sub.  AOF persistence + 1 GB LRU eviction policy.
   redis:
     image: redis:7.2-alpine
     container_name: samplemind-redis
@@ -144,6 +163,8 @@ services:
       retries: 5
 
   # ── Ollama (offline LLM) ────────────────────────────────────────────────────
+  # Local LLM inference (qwen2.5-coder:7b). Opt-in via --profile ollama.
+  # Model weights are persisted in the ollama_models volume.
   ollama:
     image: ollama/ollama:latest
     container_name: samplemind-ollama
@@ -160,6 +181,8 @@ services:
       - ollama     # opt-in: docker compose --profile ollama up
 
   # ── ChromaDB ─────────────────────────────────────────────────────────────────
+  # Vector database storing CLAP audio embeddings for semantic search.
+  # Exposed on host :8002 (container :8000).
   chromadb:
     image: chromadb/chroma:latest
     container_name: samplemind-chroma
@@ -172,6 +195,8 @@ services:
     restart: unless-stopped
 
   # ── Prometheus ───────────────────────────────────────────────────────────────
+  # Metrics collector. Scrapes /metrics from the backend. Data retained for 15 d.
+  # Opt-in via --profile monitoring.
   prometheus:
     image: prom/prometheus:latest
     container_name: samplemind-prometheus
@@ -191,6 +216,8 @@ services:
       - monitoring
 
   # ── Grafana ──────────────────────────────────────────────────────────────────
+  # Dashboard UI for Prometheus metrics. Exposed on host :3001 to avoid
+  # conflict with the Next.js frontend on :3000. Opt-in via --profile monitoring.
   grafana:
     image: grafana/grafana:latest
     container_name: samplemind-grafana
@@ -220,6 +247,8 @@ networks:
 
 
 # ── Named volumes ─────────────────────────────────────────────────────────────
+# Explicit names prevent docker-compose from prefixing with the project name,
+# making it easier to reference volumes from backup scripts and other tools.
 volumes:
   mongo_data:
     name: samplemind_mongo_data

@@ -3,6 +3,29 @@ Unit tests for samplemind.ai.classification.ensemble
 
 Uses mock sklearn models so no real training data is needed.
 All tests run without GPU, CLAP, or audio files.
+
+Module under test:
+    samplemind.ai.classification.ensemble
+        — EnsembleClassifier (SVM + XGBoost + KNN soft-voting),
+          PredictionResult, UNCERTAINTY_THRESHOLD
+
+Key test scenarios:
+    predict_one — basic
+        - Returns a PredictionResult with label, confidence, probabilities,
+          and per-model votes.
+        - Probabilities sum to 1.0; confidence is in [0, 1].
+    Uncertainty threshold
+        - ``is_uncertain`` flag and ``_log_uncertain`` call when confidence
+          drops below UNCERTAINTY_THRESHOLD.
+        - Certain predictions do NOT trigger the uncertain logger.
+    Untrained task
+        - Raises ValueError("not trained") for a task with no fitted models.
+    predict_batch
+        - Returns a list of PredictionResult matching the input batch size.
+    Fit + predict integration
+        - Smoke test: fit with real sklearn stubs, then predict.
+    Active-learning log
+        - ``_log_uncertain`` writes JSONL records to disk.
 """
 
 from __future__ import annotations

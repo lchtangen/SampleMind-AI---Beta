@@ -1,9 +1,14 @@
 """
 Supabase Client — SampleMind Phase 13
+=======================================
 
-Provides Supabase auth and database integration as the canonical cloud backend.
-Sits alongside existing MongoDB layer — new features use Supabase, legacy code
-uses MongoDB until migration is complete.
+Provides **Supabase Auth** and user-sync integration as the canonical cloud
+backend for authentication, replacing legacy email/password flows.
+
+Coexistence:
+  Supabase sits alongside the existing MongoDB layer.  New auth features use
+  Supabase; the MongoDB user collection will be phased out once migration
+  completes.
 
 Configuration (env vars):
     SUPABASE_URL          — Supabase project URL (https://xxx.supabase.co)
@@ -11,20 +16,18 @@ Configuration (env vars):
     SUPABASE_SERVICE_KEY  — Supabase service role key (server-side only)
 
 Auth flow:
-    1. User calls sign_in_with_email() → returns Session with JWT access token
-    2. FastAPI middleware validates the JWT with verify_token()
-    3. User record is synced to TortoiseUser on first login
+    1. User calls ``sign_in_with_email()`` → returns ``SupabaseSession`` with JWT.
+    2. FastAPI middleware validates the JWT with ``verify_token()``.
+    3. ``sync_supabase_user()`` ensures a ``TortoiseUser`` row exists for the
+       Supabase UUID, creating it on first login.
 
 Usage::
 
     from samplemind.integrations.supabase_client import get_supabase, SupabaseAuth
 
-    # Sign in
     auth = SupabaseAuth()
     session = await auth.sign_in_with_email("user@example.com", "password")
-
-    # Verify JWT from Authorization header
-    user_id = await auth.verify_token(token)
+    user_id = await auth.verify_token(session.access_token)
 """
 
 from __future__ import annotations
@@ -34,6 +37,9 @@ import os
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
+
+
+# ── Data types ────────────────────────────────────────────────────────────────
 
 
 @dataclass
@@ -233,6 +239,8 @@ class SupabaseAuth:
 
 
 # ── Tortoise sync helper ──────────────────────────────────────────────────────
+# Called after first Supabase login to ensure the relational TortoiseUser
+# table contains a row for the authenticated user.
 
 
 async def sync_supabase_user(supabase_user_id: str, email: str) -> str:
@@ -249,7 +257,7 @@ async def sync_supabase_user(supabase_user_id: str, email: str) -> str:
 
         from samplemind.core.database.tortoise_models import TortoiseUser
 
-        # Derive a stable internal ID from Supabase UUID
+        # Derive a stable internal ID from Supabase UUID (deterministic hash)
         internal_id = hashlib.sha256(supabase_user_id.encode()).hexdigest()[:20]
 
         user = await TortoiseUser.get_or_none(supabase_user_id=supabase_user_id)

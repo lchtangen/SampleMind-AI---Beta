@@ -1,6 +1,39 @@
 """
-Application Configuration
-Loads all environment variables and provides type-safe settings
+Application Configuration — SampleMind AI
+==========================================
+
+Central settings module powered by **pydantic-settings**.  Every setting is read
+from environment variables (or a ``.env`` file) and exposed through the module-level
+``settings`` singleton.
+
+Loading order:
+  1. Field defaults defined in the ``Settings`` class below.
+  2. ``.env`` file in the project root (if present).
+  3. Real environment variables (highest priority — override everything).
+
+Sections:
+  - Application:       app name, version, debug, log level, CORS origins.
+  - Security & Auth:   JWT, session, bcrypt, rate limiting.
+  - OAuth2 Providers:  Google / GitHub / Spotify client credentials.
+  - Database:          PostgreSQL, Redis, MongoDB, ChromaDB connection strings.
+  - Cloud Storage:     GCS, S3, CDN settings.
+  - AI/ML Providers:   Gemini, OpenAI, Anthropic, Ollama, Hugging Face API keys.
+  - Celery:            Broker, backend, concurrency, time limits.
+  - Email:             SMTP transport + verification settings.
+  - Monitoring:        Sentry DSN, Prometheus endpoint.
+  - Stripe Billing:    Publishable/secret keys, webhook secret, price IDs.
+  - Analytics:         GA, Mixpanel, PostHog.
+  - Feature Flags:     Runtime feature toggles.
+  - WebSocket:         Port, max connections.
+  - Audio Processing:  Max size, duration, sample rate, bit depth.
+  - Backup & Legal:    Retention, GDPR, cookies.
+
+Usage::
+
+    from samplemind.core.config import settings
+
+    if settings.is_production:
+        sentry_sdk.init(dsn=settings.sentry_dsn)
 """
 
 import secrets
@@ -10,7 +43,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    """Application settings loaded from environment variables"""
+    """Pydantic-settings model — fields are populated from env vars / .env file."""
 
     # ========================================================================
     # APPLICATION SETTINGS
@@ -303,7 +336,7 @@ class Settings(BaseSettings):
     cookie_consent_required: bool = Field(default=True, env="COOKIE_CONSENT_REQUIRED")
 
     # ========================================================================
-    # VALIDATORS
+    # VALIDATORS — enforce production-safety invariants
     # ========================================================================
 
     @field_validator("environment")
@@ -327,7 +360,7 @@ class Settings(BaseSettings):
         return v
 
     # ========================================================================
-    # HELPER METHODS
+    # HELPER METHODS — derived / computed properties
     # ========================================================================
 
     @property
@@ -376,20 +409,24 @@ class Settings(BaseSettings):
         return configs.get(provider, {})
 
     class Config:
-        """Pydantic configuration for Settings model"""
+        """pydantic-settings meta: read .env file, case-insensitive lookups."""
 
         env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = False
 
 
-# Global settings instance
+# ── Module-level singleton ────────────────────────────────────────────────────
+# Import ``settings`` directly — one instance is shared across the process.
+
 settings = Settings()
 
 
-# Configuration display (safe for logging)
+# ── Safe summary (secrets redacted) ──────────────────────────────────────────
+
+
 def get_config_summary() -> dict:
-    """Get configuration summary (hides secrets)"""
+    """Return a summary dict suitable for logging (no secrets included)."""
     return {
         "app_name": settings.app_name,
         "app_version": settings.app_version,

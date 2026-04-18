@@ -186,4 +186,33 @@
   .transition-smooth {
     @apply transition-all duration-300 ease-in-out;
   }
+
+  /* ── Grid pattern background ────────────────────────────────────────── */
+  .grid-pattern {
+    background-image:
+      linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  /* ── Animated dashed border (for drag-drop zones) ───────────────────── */
+  .border-dashed-animated {
+    background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%2300F1FF40' stroke-width='2' stroke-dasharray='8%2c 8' stroke-dashoffset='0' stroke-linecap='round'/%3e%3c/svg%3e");
+    animation: dashRotate 12s linear infinite;
+  }
+
+  @keyframes dashRotate {
+    to { background-position: 100% 100%; }
+  }
+
+  /* ── Gradient text shorthand ────────────────────────────────────────── */
+  .text-gradient-cyan {
+    @apply bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent;
+  }
+  .text-gradient-purple {
+    @apply bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent;
+  }
+  .text-gradient-spark {
+    @apply bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent;
+  }
 }

@@ -1,7 +1,26 @@
 #!/usr/bin/env python3
 """
-Performance Benchmark for SampleMind AI
-Measures analysis speed, memory usage, and throughput
+SampleMind AI — Performance Benchmark Suite
+=============================================
+
+Measures audio-analysis speed, memory usage, throughput, and cache
+effectiveness of the AudioEngine.
+
+Benchmarks included:
+    1. **Analysis speed** — Time to analyse N files over multiple iterations.
+    2. **Parallel scaling** — Throughput with 1 / 2 / 4 / 8 workers.
+    3. **Cache perf** — Cold-cache vs warm-cache speedup factor.
+
+Usage:
+    python scripts/benchmark.py
+
+Prerequisites:
+    • WAV fixtures must exist under ``tests/fixtures/``.
+    • ``psutil`` must be installed (included in project deps).
+
+Output:
+    A summary table printed to stdout with avg time, throughput (files/s),
+    standard deviation, and peak memory delta per benchmark.
 """
 
 import statistics

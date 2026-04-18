@@ -1,10 +1,28 @@
 #!/usr/bin/env python3
 """
-SampleMind AI - Performance Profiler
-Comprehensive profiling of audio analysis, semantic search, and batch processing
+SampleMind AI — Performance Profiler
+======================================
+
+Comprehensive profiling of audio analysis, neural embedding generation,
+semantic search, and batch processing.  Uses ``cProfile`` + ``pstats``
+to identify bottlenecks and generates a Markdown performance report.
+
+Profiling areas:
+    1. **Audio analysis** — BASIC / STANDARD / DETAILED levels via AudioEngine.
+    2. **Neural embeddings** — CLAP model inference for audio and text.
+    3. **Semantic search** — ChromaDB add + query similar latency.
+    4. **Batch processing** — Multi-file analysis throughput.
 
 Usage:
+    python scripts/performance_profiler.py
     python scripts/performance_profiler.py --output docs/PERFORMANCE_ANALYSIS.md
+
+Interpreting results:
+    The generated report includes a table where each operation is marked:
+        🟢 OK        — under 1 s
+        🟡 SLOW      — 1–3 s
+        🔴 VERY SLOW — over 3 s
+    Focus optimisation efforts on 🔴 items first.
 """
 
 import argparse

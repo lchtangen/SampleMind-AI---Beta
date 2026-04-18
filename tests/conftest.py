@@ -1,7 +1,50 @@
 #!/usr/bin/env python3
 """
-Pytest configuration and fixtures for SampleMind AI testing
-Provides comprehensive test fixtures for audio processing, AI integration, and database testing
+Pytest configuration and fixtures for SampleMind AI testing.
+
+Provides comprehensive test fixtures for audio processing, AI integration,
+and database testing.  Imported automatically by pytest for every test
+session in the ``tests/`` tree.
+
+Sections:
+    Scope Configuration
+        pytest_configure — ensures fixture/temp/report directories exist.
+        pytest_unconfigure — removes the temp directory after the session.
+    Test Data Fixtures
+        test_audio_samples (session) — synthetic WAV files: 120 BPM C major,
+            140 BPM A minor, white noise.
+        sample_audio_features — pre-built AudioFeatures object.
+        sample_features_dict  — feature dictionary for AI provider tests.
+    Audio Engine Fixtures
+        audio_engine / async_audio_engine — configured AudioEngine instances
+            (max_workers=2, cache_size=10).
+    AI Integration Fixtures
+        mock_openai_producer — fully mocked OpenAIMusicProducer (no API key).
+        real_openai_producer — real OpenAI connection (skipped without key).
+    Database Fixtures
+        test_mongodb  — mocked MongoDB collections (insert, find, update,
+            delete).
+        test_redis    — mocked Redis (get, set, delete, exists, flushdb).
+        test_chromadb — mocked ChromaDB collection (add, query, get).
+    File System Fixtures
+        temp_directory   — auto-cleaned temporary directory.
+        test_config_file — JSON config file in temp_directory.
+    Environment Fixtures
+        clean_environment — injects test env vars, restores originals
+            after the test.
+    Performance Testing Fixtures
+        performance_timer — Timer helper with sync/async timing and stats.
+    API Testing Fixtures
+        api_client        — httpx AsyncClient backed by the FastAPI app.
+        sample_user_data  — dict with email/username/password for auth tests.
+    CLI Testing Fixtures
+        typer_runner      — Typer CliRunner.
+        cli_app           — the Typer app instance.
+        mock_cli_context  — temp-dir-based work/cache/config/logs dirs.
+        sample_cli_config — dict with version, audio_engine, ai_providers,
+            output settings.
+    Markers
+        Global filterwarnings for DeprecationWarning and UserWarning.
 """
 
 import asyncio

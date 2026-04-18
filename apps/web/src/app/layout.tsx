@@ -1,3 +1,19 @@
+/**
+ * @fileoverview Root layout for the SampleMind AI Next.js 15 web application.
+ *
+ * This server component wraps every page with:
+ * - **Inter** Google Font (variable `--font-sans`, swap display)
+ * - **QueryProvider** — React Query cache for data fetching
+ * - **AnalyticsProvider** — client-side analytics instrumentation
+ * - **ThemeProvider** — dark-mode by default via `next-themes`
+ * - **Toaster** — global toast notification overlay (sonner)
+ *
+ * It also renders a fixed animated background (grid pattern + radial gradient)
+ * and exports Next.js 15 {@link metadata} and {@link viewport} objects.
+ *
+ * @module app/layout
+ */
+
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
@@ -7,13 +23,17 @@ import { cn } from '@/lib/utils';
 import { AnalyticsProvider } from '@/components/analytics-provider';
 import QueryProvider from '@/components/providers/QueryProvider';
 
+/** Next.js page metadata — title, description, and keywords for SEO. */
 export const metadata: Metadata = {
   title: 'SampleMind AI - Next-Gen Music Production',
   description: 'AI-powered audio intelligence for professional music production',
   keywords: ['AI music', 'audio production', 'sample analysis', 'music technology'],
 };
 
-// Next.js 15: viewport is a separate export
+/**
+ * Next.js 15 viewport configuration — separate from metadata.
+ * Sets responsive theme-color for light/dark and locks scale to 1×.
+ */
 export const viewport: Viewport = {
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#f0f0ff' },
@@ -30,6 +50,16 @@ const inter = Inter({
   display: 'swap',
 });
 
+/**
+ * Root layout component rendered on every route.
+ *
+ * Provider hierarchy (outermost → innermost):
+ * `QueryProvider` → `AnalyticsProvider` → `ThemeProvider` → page content + `Toaster`
+ *
+ * @param props - Standard Next.js layout props.
+ * @param props.children - The nested page / layout rendered inside the providers.
+ * @returns The full HTML document shell.
+ */
 export default function RootLayout({
   children,
 }: {

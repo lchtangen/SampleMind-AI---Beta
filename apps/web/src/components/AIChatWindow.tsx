@@ -1,5 +1,26 @@
+/**
+ * @fileoverview Full-screen AI chat window component for the SampleMind AI web app.
+ *
+ * Renders a macOS-style window chrome (close / minimize / maximize buttons)
+ * wrapping a scrollable message list and a text input form.
+ *
+ * **State management:**
+ * - `messages` — array of {@link Message} objects (user + AI bubbles).
+ * - `inputValue` — controlled text input bound to the form field.
+ *
+ * The component auto-scrolls to the latest message via a sentinel `<div>`
+ * ref at the bottom of the message list.
+ *
+ * > **Note:** AI responses are currently *simulated* with a 1-second timeout.
+ * > Replace the `setTimeout` in `handleSendMessage` with a real call to
+ * > `apiFetch("/api/v1/ai/chat", ...)` when the backend endpoint is ready.
+ *
+ * @module components/AIChatWindow
+ */
+
 import { useState, useRef, useEffect } from 'react';
 
+/** Shape of a single chat message displayed in the message list. */
 interface Message {
   id: string;
   content: string;
@@ -7,6 +28,15 @@ interface Message {
   timestamp: Date;
 }
 
+/**
+ * AI Chat Window — full-screen conversational interface.
+ *
+ * Initialises with a greeting message from the AI assistant and allows the
+ * user to send free-text queries. Messages are rendered in chat-bubble style
+ * with distinct styling for user vs. AI bubbles.
+ *
+ * @returns The rendered chat window element.
+ */
 export default function AIChatWindow() {
   const [messages, setMessages] = useState<Message[]>([
     {

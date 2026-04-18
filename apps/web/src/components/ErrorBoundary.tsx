@@ -1,17 +1,47 @@
+/**
+ * @fileoverview React Error Boundary for the SampleMind AI web application.
+ *
+ * Wraps its children in a class-based error boundary (the only way to catch
+ * render-phase errors in React). When an unhandled error propagates, the
+ * boundary replaces the failing subtree with a styled fallback UI containing
+ * the error message and a "Reload Page" button.
+ *
+ * Used at the top of the provider hierarchy in {@link Providers} to prevent a
+ * single component crash from white-screening the entire app.
+ *
+ * @module components/ErrorBoundary
+ */
+
 'use client';
 
 import React, { Component, ReactNode } from 'react';
 import { AlertCircle } from 'lucide-react';
 
+/** Props for the {@link ErrorBoundary} component. */
 interface Props {
+  /** The component subtree to protect with the error boundary. */
   children: ReactNode;
 }
 
+/** Internal state tracking whether an error has been caught. */
 interface State {
   hasError: boolean;
   error?: Error;
 }
 
+/**
+ * Class-based React Error Boundary.
+ *
+ * Catches JavaScript errors anywhere in its child component tree, logs them,
+ * and displays a graceful fallback UI instead of crashing the whole page.
+ *
+ * @example
+ * ```tsx
+ * <ErrorBoundary>
+ *   <MyWidget />
+ * </ErrorBoundary>
+ * ```
+ */
 export default class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);

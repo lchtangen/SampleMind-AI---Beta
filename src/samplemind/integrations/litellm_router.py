@@ -1,14 +1,27 @@
 """
 LiteLLM Router — SampleMind v0.3.0
+====================================
 
-Unified multi-provider AI router using LiteLLM as the orchestration layer.
-Provides automatic fallback: Claude (primary) → Gemini (fast) → GPT-4o → Ollama (offline).
+Unified multi-provider AI router using **LiteLLM** as the orchestration layer.
+Provides automatic fallback across four providers so the platform works whether
+the user has cloud API keys, a local GPU, or neither.
+
+Fallback chain (default order):
+  1. **Claude** (``claude-sonnet-4-6``) — highest quality analysis.
+  2. **Gemini Flash** (``gemini-2.5-flash``) — fastest / cheapest.
+  3. **GPT-4o** — best for agent tool-use workflows.
+  4. **Ollama** (``qwen2.5-coder:7b``) — offline, no API key needed.
+
+Modes:
+  ``prefer_fast=True``  — Gemini → Claude → Ollama.
+  ``agents_mode=True``  — GPT-4o → Claude → Ollama.
+  default               — Claude → Gemini → GPT-4o → Ollama.
 
 Usage::
 
-    from samplemind.integrations.litellm_router import get_router, chat_completion
+    from samplemind.integrations.litellm_router import chat_completion
 
-    # Simple completion
+    # Simple completion (uses Claude by default)
     response = await chat_completion(
         messages=[{"role": "user", "content": "Analyze this sample: ..."}],
         prefer_fast=True,   # Uses Gemini flash
@@ -48,7 +61,7 @@ MODEL_OFFLINE = f"ollama/{os.getenv('OLLAMA_MODEL', 'qwen2.5-coder:7b')}"
 def _get_fallback_list(
     prefer_fast: bool = False, agents_mode: bool = False
 ) -> list[dict]:
-    """Build LiteLLM fallback model list."""
+    """Build an ordered fallback model list for direct litellm.acompletion calls."""
     if agents_mode:
         return [
             {"model": MODEL_AGENTS},
@@ -79,6 +92,8 @@ def _get_fallback_list(
 
 
 # ── Router singleton ──────────────────────────────────────────────────────────
+# Created lazily on first call; registers every provider whose API key is set
+# and always adds Ollama (no key required).
 
 _router: Any = None
 
@@ -177,6 +192,8 @@ def get_router() -> Any:
 
 
 # ── Convenience functions ─────────────────────────────────────────────────────
+# These are the preferred public API.  Import and call directly:
+#     response = await chat_completion(messages=[...], prefer_fast=True)
 
 
 async def chat_completion(
@@ -223,7 +240,7 @@ async def chat_completion(
                 **kwargs,
             )
 
-        # Direct fallback without router
+        # Direct fallback without router (happens when Router init failed)
         fallbacks = _get_fallback_list(prefer_fast=prefer_fast, agents_mode=agents_mode)
         for fb in fallbacks:
             try:
@@ -298,8 +315,11 @@ async def stream_completion(
         raise
 
 
+# ── Introspection ─────────────────────────────────────────────────────────────
+
+
 def get_available_providers() -> list[str]:
-    """Return list of configured provider names based on env vars."""
+    """Return list of configured provider model IDs based on env vars."""
     providers = []
     if os.getenv("ANTHROPIC_API_KEY"):
         providers.append("anthropic/claude-sonnet-4-6")

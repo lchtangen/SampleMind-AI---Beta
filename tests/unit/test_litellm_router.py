@@ -2,6 +2,32 @@
 Unit tests for samplemind.integrations.litellm_router
 
 litellm and external providers are fully mocked so no API keys are needed.
+
+Module under test:
+    samplemind.integrations.litellm_router
+        — chat_completion, get_router, get_available_providers,
+          _get_fallback_list, MODEL_PRIMARY, MODEL_FAST, MODEL_AGENTS,
+          MODEL_OFFLINE
+
+Key test scenarios:
+    _get_fallback_list
+        - Default list starts with MODEL_PRIMARY.
+        - ``prefer_fast=True`` starts with MODEL_FAST.
+        - ``agents_mode=True`` starts with MODEL_AGENTS.
+        - Every variant includes the offline/Ollama model as a fallback.
+    get_available_providers
+        - Always includes Ollama (local, always available).
+        - Includes Anthropic/Claude when ANTHROPIC_API_KEY is set.
+        - Returns only local providers when no cloud API keys are present.
+    get_router
+        - Returns None when litellm is not importable.
+        - Singleton behaviour (same object returned on repeated calls).
+    chat_completion
+        - Delegates to router.acompletion when a router is available.
+        - Falls back to direct litellm.acompletion when router is None.
+        - Raises RuntimeError when all providers fail.
+    prefer_fast / agents_mode routing
+        - ``prefer_fast=True`` routes the call with model="fast".
 """
 
 from __future__ import annotations

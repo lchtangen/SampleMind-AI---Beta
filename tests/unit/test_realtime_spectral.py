@@ -1,3 +1,17 @@
+"""
+Unit tests for samplemind.core.processing.realtime_spectral
+
+Module under test:
+    samplemind.core.processing.realtime_spectral
+        — RealtimeSpectral (FFT-based real-time spectral analyser)
+
+Key test scenarios:
+    - A pure 440 Hz sine wave processed through a 2048-point FFT at
+      44 100 Hz sample rate.  Asserts that:
+        * peak_frequency_hz is within ±25 Hz of 440 Hz (one FFT-bin
+          tolerance at ~21.5 Hz resolution).
+        * pitch_hz, when detected, is within ±5 Hz of 440 Hz.
+"""
 import numpy as np
 
 from samplemind.core.processing.realtime_spectral import RealtimeSpectral

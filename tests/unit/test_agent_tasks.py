@@ -11,6 +11,28 @@ Strategy:
   - Override Celery config to use memory broker + backend so apply() works.
   - Patch _get_redis to return a MagicMock (avoids real Redis calls).
   - build_graph is a local import inside the function body → patch source module.
+
+Module under test:
+    samplemind.core.tasks.agent_tasks
+        — run_analysis_agent (Celery task), _push_progress, _get_redis,
+          PROGRESS_KEY_TEMPLATE, PROGRESS_TTL
+
+Key test scenarios:
+    _get_redis
+        - Returns a redis client or None without raising, even when the
+          ``redis`` package is not installed.
+    _push_progress
+        - Calls rpush + expire with a valid JSON event (stage, pct,
+          message, ts).
+        - No-ops silently when ``r`` is None.
+        - Swallows ConnectionError from rpush.
+    run_analysis_agent (via Celery ``apply()``)
+        - FileNotFoundError for a non-existent audio file.
+        - Publishes progress events to Redis and ends with stage="done",
+          pct=100.
+        - Fails and emits stage="error" when LangGraph pipeline raises.
+        - Fails gracefully when LangGraph is not importable (ImportError).
+        - Returns a dict (final_report) on successful completion.
 """
 
 from __future__ import annotations

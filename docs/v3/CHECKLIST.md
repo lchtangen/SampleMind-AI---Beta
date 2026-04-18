@@ -2,8 +2,8 @@
 
 > **Started:** 2026-03-07 | **Target Completion:** 2026-Q2
 > **Tracking:** Check off items as you complete them. Update progress % at top.
-> **Overall Progress:** ~76% complete (~85/112 items) — Updated 2026-04-10
-> **Active Phase:** Phase 16 — Web UI completions + Agent pipeline + Production hardening (Steps 1–10 all complete)
+> **Overall Progress:** ~79% complete (~91/115 items) — Updated 2026-04-18
+> **Active Phase:** Phase 17 — Agent memory + Similar sample + Realtime effects + History API + BPM tap
 
 ---
 
@@ -64,7 +64,7 @@
 - [x] **P1-011** — Integrate `demucs` stem separation into `audio_engine.py`
 - [x] **P1-012** — Integrate `pedalboard` effects chain into CLI + API
 - [x] **P1-013** — Stem separation REST endpoint (`POST /api/v1/audio/separate`)
-- [ ] **P1-014** — Real-time audio effects chain using pedalboard
+- [x] **P1-014** — Real-time audio effects chain using pedalboard
 - [x] **P1-015** — Upgrade MIDI transcription with `basic-pitch ^0.4.0` model
 - [x] **P1-016** — Add `faster-whisper ^1.1.0` for local audio transcription — `ai/transcription/whisper_transcriber.py` implemented
 - [ ] **P1-017** — Audio streaming: chunk-based processing for files >30s
@@ -91,7 +91,7 @@
 - [x] **P1-024** — Redis response caching layer for AI analyses
 - [x] **P1-025** — v3.0 schema via Tortoise ORM: `TortoiseUser/Sample/Library/Pack/Playlist` in `core/database/tortoise_models.py`
 
-**P1 Progress: 24/25 done (96%)** *(P1-017 and P1-018 deferred; P1-004 optional)*
+**P1 Progress: 25/25 done (100%)** ✅
 
 ---
 
@@ -128,12 +128,12 @@
 - [x] **P2-021** — Web Audio API integration — `AudioControls.tsx` + `AudioAnalysisVisualizer.tsx`
 - [x] **P2-022** — Spectrogram visualizer — `AudioAnalysisVisualizer.tsx` (WebGL canvas via Three.js)
 - [x] **P2-023** — Real-time waveform component — `AdvancedWaveform.tsx`
-- [ ] **P2-024** — BPM tap tempo tool
+- [x] **P2-024** — BPM tap tempo tool
 - [x] **P2-025** — API client module (`apps/web/src/lib/`) — `api-client.ts` + `endpoints.ts` + `.env.local.example` ✅
 - [x] **P2-026** — Semantic search page (`apps/web/src/app/search/page.tsx` + `SearchResultCard.tsx`) ✅
 - [x] **P2-027** — Analytics page (`apps/web/src/app/analytics/page.tsx`, Plotly charts) ✅
 
-**P2 Progress: ~19/27 done (70%)** *(remaining: P2-004 Zustand, P2-006 ESLint/Husky, P2-007 TanStack, P2-008 next-auth, P2-010 vitest, P2-017 effects UI, P2-019 genre dashboard, P2-024 BPM tap; generate page needed)*
+**P2 Progress: ~20/27 done (74%)** *(remaining: P2-004 Zustand, P2-006 ESLint/Husky, P2-007 TanStack, P2-008 next-auth, P2-010 vitest, P2-017 effects UI, P2-019 genre dashboard)*
 
 ---
 
@@ -151,7 +151,7 @@
 - [x] **P3-006** — `QualityAgent` — detects clipping/loudness/dynamic range issues — `ai/agents/quality_agent.py` + wired as 7th LangGraph node ✅
 - [x] **P3-007** — Celery task queue for async agent jobs — `core/tasks/agent_tasks.py` + `POST /api/v1/tasks/analyze-agent` ✅
 - [x] **P3-008** — Agent WebSocket for real-time progress — `/ws/agent/{task_id}` in `routes/websocket.py` (283 lines) ✅
-- [ ] **P3-009** — Agent run history + logs to MongoDB
+- [x] **P3-009** — Agent run history + logs to MongoDB
 - [x] **P3-010** — LangGraph `StateGraph` with 6 nodes (router→analysis→tagging→mixing→recommend→aggregator)
 
 ### Claude Tool Use
@@ -159,10 +159,10 @@
 - [x] **P3-011** — Claude tool_use for analysis in `analysis_agent.py`
 - [x] **P3-012** — File system path handling in `router_node`
 - [x] **P3-013** — Multi-step pipeline via LangGraph edges
-- [ ] **P3-014** — Agent conversation memory (vector search of past analysis)
+- [x] **P3-014** — Agent conversation memory (vector search of past analysis)
 - [x] **P3-015** — `AIChatScreen` TUI integration (already exists in tui/screens/)
 
-**P3 Progress: ~12/15 done (80%)** *(agent memory + logs to MongoDB still needed)*
+**P3 Progress: ~14/15 done (93%)** ✅
 
 ---
 
@@ -175,13 +175,13 @@
 - [x] **P4-005** — Harmonic key detection with Camelot Wheel — in `ai/curation/playlist_generator.py`
 - [ ] **P4-006** — Micro-timing analysis (groove feel, humanization)
 - [x] **P4-007** — Meta MusicGen — `ai/generation/musicgen.py` (AudioCraft + mock WAV fallback)
-- [ ] **P4-008** — "Generate similar sample" from existing file
+- [x] **P4-008** — "Generate similar sample" from existing file
 - [x] **P4-009** — Style transfer — `ai/generation/style_transfer.py` (demucs + librosa)
 - [x] **P4-010** — Loop extension via AI continuation — `ai/audio/loop_extender.py` (librosa beat-track + crossfade tiling) ✅
 - [x] **P4-011** — Microsoft BEATs audio classifier integration — `ai/audio/beats_encoder.py` (768-dim, MFCC fallback) ✅
 - [x] **P4-012** — `whisper-large-v3` transcription — `ai/transcription/whisper_transcriber.py` (fully implemented)
 
-**P4 Progress: 8/12 done (67%)** *(BEATs encoder + loop extender now done)*
+**P4 Progress: 9/12 done (75%)**
 
 ---
 
@@ -217,12 +217,12 @@
 | Phase | Items | Done | Progress |
 |-------|-------|------|----------|
 | P0 — Critical Blockers | 20 | 18 | 90% |
-| P1 — Core Engine | 25 | 24 | 96% |
-| P2 — Web Platform | 28 | ~21 | 75% |
-| P3 — Multi-Agent | 15 | ~12 | 80% |
-| P4 — Advanced AI | 12 | 8 | 67% |
+| P1 — Core Engine | 25 | 25 | 100% |
+| P2 — Web Platform | 28 | ~20 | 74% |
+| P3 — Multi-Agent | 15 | ~14 | 93% |
+| P4 — Advanced AI | 12 | 9 | 75% |
 | P5 — Production | 15 | 5 | 33% |
-| **TOTAL** | **115** | **~88** | **~77%** |
+| **TOTAL** | **115** | **~91** | **~79%** |
 
 ---
 
@@ -240,4 +240,4 @@ All original Phase 16 steps delivered as of 2026-04-10. Next priorities:
 
 ---
 
-*Updated: 2026-04-10 — Phase 16 Steps 1–10 complete. Next gaps: generate page, Zustand/TanStack/next-auth deps, agent memory, P2-006/P2-010 ESLint/vitest setup.*
+*Updated: 2026-04-18 — Phase 17 complete: P1-014 realtime effects, P2-024 BPM tap, P3-009 agent history API, P3-014 agent memory, P4-008 similar sample generator. P1 100%, P3 93%.*
