@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "echo \"[$(date -Is)] Tool used\" >> /tmp/samplemind-agent-audit.log",
+        "timeoutSec": 5
+      }
+    ]
+  }
+}

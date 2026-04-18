@@ -259,6 +259,11 @@
   "github.copilot.chat.terminalChatLocation": "terminal",
   "github.copilot.chat.codeGeneration.useInstructionFiles": true,
   "github.copilot.chat.reviewSelection.enabled": true,
+  "github.copilot.chat.agent.thinkingProcess": true,
+  "github.copilot.chat.codesearch.enabled": true,
+  "github.copilot.chat.agent.runTasks": true,
+  "chat.agent.enabled": true,
+  "chat.agent.maxRequests": 30,
 
   // ─────────────────────────────────────────────────────────────────
   // EXTENSIONS — MISC
