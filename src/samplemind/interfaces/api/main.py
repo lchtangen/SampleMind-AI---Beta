@@ -41,13 +41,19 @@ from .routes import (
     ai,
     audio,
     auth,
+    autopacks,
     batch,
     billing,
     collections,
+    copilot,
+    graph,
     health,
+    reference,
+    remix,
     search,
     sync,
     tasks,
+    trends,
     websocket,
 )
 from .routes import analytics as analytics_router
@@ -376,6 +382,12 @@ def create_application() -> FastAPI:
     app.include_router(
         marketplace_router.router, prefix="/api/v1", tags=["marketplace"]
     )
+    app.include_router(copilot.router, prefix="/api/v1", tags=["copilot"])
+    app.include_router(remix.router, prefix="/api/v1", tags=["remix"])
+    app.include_router(graph.router, prefix="/api/v1", tags=["graph"])
+    app.include_router(reference.router, prefix="/api/v1", tags=["reference"])
+    app.include_router(autopacks.router, prefix="/api/v1", tags=["autopacks"])
+    app.include_router(trends.router, prefix="/api/v1", tags=["trends"])
 
     @app.get("/", include_in_schema=False)
     async def root():

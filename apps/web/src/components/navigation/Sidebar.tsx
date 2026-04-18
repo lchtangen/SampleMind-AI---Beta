@@ -1,22 +1,27 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '../../lib/utils';
-import { 
-  LayoutDashboard, 
-  Music, 
-  Settings, 
-  Folder, 
-  Zap, 
-  Sparkles, 
-  BrainCircuit, 
+import {
+  LayoutDashboard,
+  Music,
+  Settings,
+  Folder,
+  Sparkles,
+  BrainCircuit,
   BarChart2,
-  PlusCircle
+  PlusCircle,
+  Bot,
+  Scissors,
+  Network,
+  Radar,
+  Package,
+  Activity,
 } from 'lucide-react';
 import { Button } from '../ui/button';
 
 export const Sidebar = () => {
   const location = useLocation();
-  
+
   const navItems = [
     {
       name: 'Dashboard',
@@ -33,6 +38,14 @@ export const Sidebar = () => {
       icon: Folder,
       path: '/projects',
     },
+    // AI Feature Pages
+    { name: 'Copilot', icon: Bot, path: '/copilot' },
+    { name: 'Remix Studio', icon: Scissors, path: '/remix' },
+    { name: 'Sonic Graph', icon: Network, path: '/sonic-graph' },
+    { name: 'Mix Reference', icon: Radar, path: '/reference' },
+    { name: 'Auto Packs', icon: Package, path: '/autopacks' },
+    { name: 'Trends', icon: Activity, path: '/trends' },
+    // Existing tools
     {
       name: 'AI Tools',
       icon: Sparkles,
@@ -61,7 +74,7 @@ export const Sidebar = () => {
           </span>
         </div>
       </div>
-      
+
       {/* Navigation */}
       <nav className="flex-1 px-3 space-y-1">
         {navItems.map((item) => {
@@ -73,13 +86,13 @@ export const Sidebar = () => {
               className={cn(
                 'flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-colors',
                 'group relative overflow-hidden',
-                isActive 
-                  ? 'bg-cyber-primary/10 text-cyber-highlight' 
+                isActive
+                  ? 'bg-cyber-primary/10 text-cyber-highlight'
                   : 'text-cyber-primary/80 hover:bg-cyber-primary/5 hover:text-cyber-highlight',
                 'transition-all duration-200',
                 'before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1',
-                isActive 
-                  ? 'before:bg-cyber-primary before:opacity-100' 
+                isActive
+                  ? 'before:bg-cyber-primary before:opacity-100'
                   : 'before:bg-cyber-primary/0 before:opacity-0',
                 'before:transition-all before:duration-300',
                 'hover:before:opacity-100',
@@ -88,14 +101,14 @@ export const Sidebar = () => {
                 'after:transition-opacity after:duration-200',
               )}
             >
-              <item.icon 
+              <item.icon
                 className={cn(
                   'h-5 w-5 mr-3',
                   isActive ? 'text-cyber-primary' : 'text-cyber-primary/70'
-                )} 
+                )}
               />
               <span>{item.name}</span>
-              
+
               {/* Glow effect on hover */}
               <span className={cn(
                 'absolute inset-0 rounded-md',
@@ -108,10 +121,10 @@ export const Sidebar = () => {
           );
         })}
       </nav>
-      
+
       {/* Create New Button */}
       <div className="p-4 mt-auto">
-        <Button 
+        <Button
           className={cn(
             'w-full bg-cyber-primary/10 hover:bg-cyber-primary/20',
             'text-cyber-primary hover:text-cyber-highlight',
@@ -123,7 +136,7 @@ export const Sidebar = () => {
         >
           <PlusCircle className="h-4 w-4 mr-2" />
           <span>New Project</span>
-          
+
           {/* Animated background */}
           <span className={cn(
             'absolute inset-0 bg-gradient-to-r from-cyber-primary/10 to-cyber-secondary/10',
@@ -133,7 +146,7 @@ export const Sidebar = () => {
           )} />
         </Button>
       </div>
-      
+
       {/* User Profile */}
       <div className="p-4 border-t border-cyber-primary/10">
         <div className="flex items-center space-x-3">
