@@ -1,0 +1,87 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Sync with Remote (git pull + deps)",
+      "type": "shell",
+      "command": "make sync-repo",
+      "group": "build",
+      "problemMatcher": [],
+      "detail": "Pull latest changes from remote and sync dependencies"
+    },
+    {
+      "label": "Sync with Agent Branch",
+      "type": "shell",
+      "command": "bash scripts/sync-agent.sh",
+      "group": "build",
+      "problemMatcher": [],
+      "detail": "One-shot sync: git fetch + pull + dependency sync"
+    },
+    {
+      "label": "Sync with Agent Branch (Watch Mode)",
+      "type": "shell",
+      "command": "bash scripts/sync-agent.sh --watch",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": [],
+      "detail": "Continuously poll remote for changes every 30 seconds"
+    },
+    {
+      "label": "Start FastAPI Dev Server",
+      "type": "shell",
+      "command": "make dev",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": [],
+      "detail": "Start uvicorn development server on port 8000"
+    },
+    {
+      "label": "Run Unit Tests",
+      "type": "shell",
+      "command": "make test-unit",
+      "group": "test",
+      "problemMatcher": [],
+      "detail": "Run pytest unit tests"
+    },
+    {
+      "label": "Run All Tests",
+      "type": "shell",
+      "command": "make test",
+      "group": "test",
+      "problemMatcher": [],
+      "detail": "Run full test suite"
+    },
+    {
+      "label": "Lint & Type Check",
+      "type": "shell",
+      "command": "make lint",
+      "group": "build",
+      "problemMatcher": [],
+      "detail": "Run ruff + mypy"
+    },
+    {
+      "label": "Format Code",
+      "type": "shell",
+      "command": "make format",
+      "group": "build",
+      "problemMatcher": [],
+      "detail": "Auto-format with ruff"
+    },
+    {
+      "label": "Quality Check (lint + security)",
+      "type": "shell",
+      "command": "make quality",
+      "group": "build",
+      "problemMatcher": [],
+      "detail": "Run all quality checks: ruff + mypy + bandit"
+    },
+    {
+      "label": "Open in WSL (Remote)",
+      "type": "shell",
+      "command": "bash scripts/open-in-wsl.sh",
+      "group": "build",
+      "problemMatcher": [],
+      "detail": "Ensure WSL environment is set up and open in VS Code Remote"
+    }
+  ]
+}

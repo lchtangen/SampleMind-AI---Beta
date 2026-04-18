@@ -1,8 +1,9 @@
 # SampleMind AI — Development Automation
-.PHONY: help setup setup-dev install install-dev sync dev test lint format typecheck \
+.PHONY: help setup setup-dev install install-dev sync sync-repo sync-watch \
+        dev test lint format typecheck \
         security quality clean build setup-db install-models upgrade \
         test-unit test-integration test-cov test-fast polish polish-fix \
-        plugins plugins-ableton plugins-fl-studio
+        plugins plugins-ableton plugins-fl-studio open-wsl
 
 UV = uv
 PYTHON = uv run python
@@ -25,6 +26,15 @@ setup-dev: setup install-models setup-db ## Full dev setup (deps + models + data
 
 sync: ## Sync dependencies from lockfile (fast, no resolution)
 	$(UV) sync
+
+sync-repo: ## Pull latest changes from remote + sync all dependencies
+	@bash scripts/sync-agent.sh
+
+sync-watch: ## Continuously poll remote for changes every 30s
+	@bash scripts/sync-agent.sh --watch
+
+open-wsl: ## Open project in VS Code WSL Remote
+	@bash scripts/open-in-wsl.sh
 
 install: ## Install production dependencies only
 	$(UV) sync --no-dev

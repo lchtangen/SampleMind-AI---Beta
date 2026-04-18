@@ -34,7 +34,11 @@ htmlcov/
 .hypothesis/
 
 # IDEs and Editors
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/extensions.json
+!.vscode/launch.json
 .idea/
 *.swp
 *.swo

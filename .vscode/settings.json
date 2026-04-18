@@ -230,10 +230,23 @@
   "git.confirmSync": false,
   "git.enableSmartCommit": true,
   "git.autofetch": true,
-  "git.autofetchPeriod": 180,
+  "git.autofetchPeriod": 30,
   "git.branchProtection": ["main"],
   "gitlens.hovers.currentLine.over": "line",
   "gitlens.codeLens.enabled": false,
+
+  // ─────────────────────────────────────────────────────────────────
+  // WSL REMOTE — Extensions to install on remote side
+  // ─────────────────────────────────────────────────────────────────
+  "remote.WSL.fileWatcher.polling": false,
+  "remote.autoForwardPorts": true,
+  "remote.autoForwardPortsSource": "process",
+  "remote.extensionKind": {
+    "ms-python.python": ["workspace"],
+    "ms-python.vscode-pylance": ["workspace"],
+    "charliermarsh.ruff": ["workspace"],
+    "dbaeumer.vscode-eslint": ["workspace"]
+  },
 
   // ─────────────────────────────────────────────────────────────────
   // WORKBENCH

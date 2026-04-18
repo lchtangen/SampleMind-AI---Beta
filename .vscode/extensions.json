@@ -1,0 +1,37 @@
+{
+  "recommendations": [
+    // WSL Remote Development
+    "ms-vscode-remote.remote-wsl",
+    "ms-vscode-remote.remote-containers",
+    "ms-vscode-remote.vscode-remote-extensionpack",
+
+    // Python
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-python.mypy-type-checker",
+    "ms-python.black-formatter",
+    "charliermarsh.ruff",
+
+    // TypeScript / JavaScript
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+
+    // Git
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+
+    // Docker
+    "ms-azuretools.vscode-docker",
+
+    // Utilities
+    "usernamehw.errorlens",
+    "tamasfe.even-better-toml",
+    "redhat.vscode-yaml",
+
+    // GitHub Copilot
+    "GitHub.copilot",
+    "GitHub.copilot-chat"
+  ],
+  "unwantedRecommendations": []
+}
