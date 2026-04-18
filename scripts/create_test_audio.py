@@ -1,3 +1,19 @@
+"""
+SampleMind AI — Test Audio File Generator
+===========================================
+
+Creates a short synthetic WAV file for use in unit and integration tests.
+
+Output:
+    ``test_audio.wav`` in the current working directory — a 1-second,
+    44.1 kHz, 16-bit mono WAV containing a pure 440 Hz sine wave (A4 note).
+
+Usage:
+    python scripts/create_test_audio.py
+
+Dependencies:
+    numpy, scipy (both are project dependencies).
+"""
 
 from pathlib import Path
 

@@ -1,5 +1,19 @@
 """
-Nox configuration for SampleMind AI.
+SampleMind AI — Nox session definitions.
+==========================================
+
+Nox is used as an isolated test/lint/format runner so that every check runs
+inside its own environment.  All sessions delegate to ``uv`` for speed.
+
+Available sessions:
+    unit         — Fast unit tests, fail-on-first, no coverage.
+    integration  — Integration tests (requires running MongoDB/Redis/etc.).
+    lint         — Read-only ruff + black + isort checks.
+    format       — Auto-format: black + isort + ruff --fix.
+    type         — mypy static type checking against src/.
+    security     — bandit (code) + safety (deps) security scan.
+    cov          — Full test suite with branch coverage (HTML + XML).
+    all          — Complete quality gate: lint → type → security → unit → integration.
 
 Run a session:  uv run nox -s unit
 List sessions:  uv run nox -l

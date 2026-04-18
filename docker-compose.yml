@@ -1,13 +1,32 @@
 version: '3.8'
 
-# SampleMind AI v3.0 — Docker Compose Stack
-# Services: FastAPI (8000), ChromaDB (8002), Ollama (11434), MongoDB (27017), Redis (6379)
-# Monitoring: Prometheus (9090), Grafana (3000)
+# ══════════════════════════════════════════════════════════════════════════════
+# SampleMind AI v3.0 — Docker Compose Stack (Development)
+# ══════════════════════════════════════════════════════════════════════════════
 #
-# Quick start: docker-compose up -d
-# API server entrypoint: samplemind.server.main:app (src/samplemind/server/)
+# This is the DEVELOPMENT compose file. It starts the full local stack:
+#   • samplemind-api  — FastAPI backend       (http://localhost:8000)
+#   • chromadb        — Vector database       (http://localhost:8002)
+#   • ollama          — Local LLM inference   (http://localhost:11434)
+#   • mongodb         — Document database     (mongodb://localhost:27017)
+#   • redis           — Cache + Celery broker (redis://localhost:6379)
+#   • prometheus      — Metrics collection    (http://localhost:9090)
+#   • grafana         — Metrics dashboards    (http://localhost:3000)
+#
+# Quick start:
+#   docker-compose up -d
+#
+# Start only databases (for local dev server):
+#   docker-compose up -d mongodb redis chromadb
+#
+# View logs:
+#   docker-compose logs -f samplemind-api
+# ══════════════════════════════════════════════════════════════════════════════
 
 services:
+  # ── samplemind-api ─────────────────────────────────────────────────────────
+  # Main FastAPI application. Builds from local Dockerfile and mounts source
+  # code so changes are picked up by uvicorn --reload inside the container.
   samplemind-api:
     build:
       context: .
@@ -34,6 +53,9 @@ services:
       - samplemind-network
     restart: unless-stopped
 
+  # ── chromadb ─────────────────────────────────────────────────────────────────
+  # ChromaDB vector database for storing and querying audio embeddings.
+  # Exposed on host port 8002 (maps to container port 8000).
   chromadb:
     image: chromadb/chroma:latest
     container_name: samplemind-chroma
@@ -45,6 +67,9 @@ services:
       - samplemind-network
     restart: unless-stopped
 
+  # ── ollama ───────────────────────────────────────────────────────────────────
+  # Ollama local LLM server for offline inference (qwen2.5-coder:7b, phi3, etc.).
+  # Model files are persisted in the ollama_models volume.
   ollama:
     image: ollama/ollama:latest
     container_name: samplemind-ollama
@@ -58,6 +83,9 @@ services:
       - samplemind-network
     restart: unless-stopped
 
+  # ── mongodb ──────────────────────────────────────────────────────────────────
+  # MongoDB 7.0 — primary document store for sample metadata, user data, and
+  # library records. Data persisted in mongodb_data volume.
   mongodb:
     image: mongo:7.0
     container_name: samplemind-mongodb
@@ -71,6 +99,9 @@ services:
       - samplemind-network
     restart: unless-stopped
 
+  # ── redis ────────────────────────────────────────────────────────────────────
+  # Redis 7.2 — used for session caching, Celery task broker, and pub/sub for
+  # agent progress streaming. AOF persistence enabled, 1 GB memory cap.
   redis:
     image: redis:7.2-alpine
     container_name: samplemind-redis
@@ -83,7 +114,9 @@ services:
       - samplemind-network
     restart: unless-stopped
 
-  # Monitoring Stack
+  # ── Monitoring Stack ────────────────────────────────────────────────────────
+  # Prometheus scrapes /metrics from the backend for request latency, error
+  # rates, and audio processing throughput.
   prometheus:
     image: prom/prometheus:latest
     container_name: samplemind-prometheus
@@ -104,6 +137,9 @@ services:
     # depends_on:
     #   - postgres
 
+  # ── grafana ──────────────────────────────────────────────────────────────────
+  # Grafana dashboards for visualising Prometheus metrics. Default login is
+  # admin / <GRAFANA_ADMIN_PASSWORD from .env>.  Sign-up is disabled.
   grafana:
     image: grafana/grafana:latest
     container_name: samplemind-grafana
@@ -123,14 +159,19 @@ services:
       - prometheus
 
 
+# ── Networks ──────────────────────────────────────────────────────────────────
+# All services share one bridge network so they can resolve each other by
+# container name (e.g. the API reaches MongoDB at "mongodb:27017").
 networks:
   samplemind-network:
     driver: bridge
 
+# ── Volumes ───────────────────────────────────────────────────────────────────
+# Named volumes persist data across container restarts.
 volumes:
-  mongodb_data:
-  redis_data:
-  ollama_models:
-  prometheus_data:
-  grafana_data:
-  chroma_data:
+  mongodb_data:      # MongoDB data directory
+  redis_data:        # Redis AOF + RDB persistence
+  ollama_models:     # Downloaded LLM model weights
+  prometheus_data:   # Prometheus TSDB metrics storage
+  grafana_data:      # Grafana dashboards and config DB
+  chroma_data:       # ChromaDB vector embedding storage

@@ -1,13 +1,26 @@
 #!/usr/bin/env python3
 """
 SampleMind AI — Main Entry Point
-Professional AI-powered music production suite
+=================================
+Professional AI-powered music production suite.
+
+This script is the primary CLI entry point for SampleMind AI.  It handles:
+    1. Argument parsing (analyze, batch, scan, status, setup helpers)
+    2. Quick one-shot commands (``python main.py analyze song.wav``)
+    3. Falling through to the interactive Rich/Typer CLI menu when no
+       command is given.
+
+The interactive menu lives in ``src/samplemind/interfaces/cli/menu.py``
+and provides the full feature set (library management, AI analysis, search,
+curation, etc.).
 
 Usage:
     python main.py                    # Interactive CLI menu
     python main.py --help            # Show help
     python main.py analyze <file>    # Quick analysis
     python main.py batch <directory> # Batch processing
+    python main.py --setup-openai   # Run OpenAI API setup wizard
+    python main.py --setup-google   # Run Google AI API setup wizard
 """
 
 import argparse

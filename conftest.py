@@ -1,12 +1,19 @@
 """
-Root conftest — stubs broken/optional heavy dependencies BEFORE any
-test-directory conftest.py is imported.
+Root-level pytest conftest — loaded BEFORE any test-directory conftest.py.
 
-This prevents ImportError cascade from:
-  • google-genai  — not installed in base CI
-  • faiss-cpu     — optional ML dep
-  • transformers  — optional ML dep
-  • auto_tagger   — uses `callable | None` (invalid on Python 3.13)
+Purpose:
+    Stub out heavy or optional dependencies that are not installed in every
+    environment (e.g. CI runners without GPU libraries) so that ``import``
+    chains don't blow up with ``ImportError`` before tests even start.
+
+Stubs registered here:
+    • google.genai        — Google GenAI SDK (used by google_ai_integration.py)
+    • faiss               — Facebook AI Similarity Search (optional ML dep)
+    • transformers        — Hugging Face Transformers (optional ML dep)
+    • samplemind.ai.classification.auto_tagger — uses ``callable | None``
+      union syntax that is invalid at runtime on Python 3.13
+
+If you add a new optional heavy dependency, register it here with ``_stub()``.
 """
 
 from __future__ import annotations

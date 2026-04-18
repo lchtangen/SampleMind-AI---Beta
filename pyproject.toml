@@ -1,7 +1,23 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# SampleMind AI — Project Configuration (pyproject.toml)
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# Central configuration for the Python package, dependencies, and all dev-tool
+# settings (ruff, black, isort, mypy, pytest, coverage).
+#
+# Build system: Hatchling (PEP 517)
+# Package manager: uv (lockfile: uv.lock)
+# Install:  uv sync              (all deps)
+#           uv sync --no-dev     (production only)
+#           uv pip install -e .  (editable, pip-compatible)
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── Build system ─────────────────────────────────────────────────────────────
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+# ── Project metadata (PEP 621) ───────────────────────────────────────────────
 [project]
 name = "samplemind-ai"
 version = "0.3.0"
@@ -24,6 +40,8 @@ classifiers = [
   "Operating System :: OS Independent",
 ]
 
+# ── Runtime dependencies ─────────────────────────────────────────────────────
+# All packages required at runtime.  Grouped by domain for readability.
 dependencies = [
   # ── Web framework ────────────────────────────────────────────────────────
   "fastapi>=0.115.0",
@@ -115,23 +133,33 @@ dependencies = [
   "plotly>=5.22.0",
 ]
 
+# ── Optional dependencies ────────────────────────────────────────────────────
+# Extras that require special Python versions or GPU hardware.
 [project.optional-dependencies]
 # basic-pitch requires tensorflow<2.15.1 which has no Python 3.12 wheels.
 # Install manually with Python 3.11 or use: uv pip install basic-pitch --python 3.11
 midi = ["basic-pitch>=0.4.0"]
 
+# ── CLI entry points ─────────────────────────────────────────────────────────
+# After `pip install -e .` (or `uv sync`), these commands are on $PATH.
 [project.scripts]
 samplemind = "samplemind.interfaces.cli.menu:main"
 smai = "samplemind.interfaces.cli.menu:main"
 
+# ── Project links ────────────────────────────────────────────────────────────
 [project.urls]
 Homepage = "https://samplemind.ai"
 Repository = "https://github.com/lchtangen/SampleMind-AI---Beta"
 Documentation = "https://docs.samplemind.ai"
 
+# ── Hatch build config ───────────────────────────────────────────────────────
+# Tell Hatchling where the package source lives.
 [tool.hatch.build.targets.wheel]
 packages = ["src/samplemind"]
 
+# ── Development dependency group ─────────────────────────────────────────────
+# Installed with `uv sync` (included by default).  Test runners, linters,
+# formatters, type checkers, and security scanners.
 [dependency-groups]
 dev = [
   "pytest>=8.1.1",
@@ -153,6 +181,8 @@ dev = [
   "pre-commit>=3.7.0",
 ]
 
+# ── uv configuration ─────────────────────────────────────────────────────────
+# Custom index for CPU-only PyTorch wheels to avoid downloading GPU binaries.
 [tool.uv]
 constraint-dependencies = []
 
@@ -167,18 +197,24 @@ name = "pytorch-cpu"
 url = "https://download.pytorch.org/whl/cpu"
 explicit = true
 
+# ── Black (code formatter) ───────────────────────────────────────────────────
 [tool.black]
 line-length = 88
 target-version = ["py312"]
 
+# ── isort (import sorter) ────────────────────────────────────────────────────
 [tool.isort]
 profile = "black"
 line_length = 88
 
+# ── Ruff (linter + formatter, replaces flake8/pylint) ────────────────────────
 [tool.ruff]
 target-version = "py312"
 line-length = 88
 
+# ── Ruff lint rule selection ──────────────────────────────────────────────────
+# E/W = pycodestyle, F = pyflakes, I = isort, B = bugbear, C4 = comprehensions,
+# UP = pyupgrade.  Ignored rules have explanatory comments inline.
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "B", "C4", "UP"]
 ignore = [
@@ -196,6 +232,9 @@ ignore = [
     "F823",    # Undefined local (edge cases in conditionals)
 ]
 
+# ── Pytest configuration ─────────────────────────────────────────────────────
+# asyncio_mode = "auto" so async test functions don't need @pytest.mark.asyncio.
+# Coverage targets src/samplemind with branch tracking and HTML + XML reports.
 [tool.pytest.ini_options]
 minversion = "8.0"
 testpaths = ["tests"]
@@ -236,11 +275,14 @@ log_cli_level = "INFO"
 log_cli_format = "%(asctime)s [%(levelname)8s] %(name)s: %(message)s"
 log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 
+# ── Coverage.py — run settings ───────────────────────────────────────────────
 [tool.coverage.run]
 source = ["src/samplemind"]
 omit = ["*/tests/*", "*/__main__.py", "*/migrations/*"]
 branch = true
 
+# ── Coverage.py — report settings ────────────────────────────────────────────
+# Lines matching these patterns are excluded from the "missing" count.
 [tool.coverage.report]
 exclude_lines = [
   "pragma: no cover",
@@ -251,6 +293,8 @@ exclude_lines = [
 ]
 show_missing = true
 
+# ── Mypy (static type checker) ───────────────────────────────────────────────
+# ignore_missing_imports = true because many audio/ML libs lack type stubs.
 [tool.mypy]
 python_version = "3.12"
 ignore_missing_imports = true

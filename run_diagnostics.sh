@@ -1,4 +1,33 @@
 #!/bin/bash
+# ══════════════════════════════════════════════════════════════════════════════
+# SampleMind AI — Comprehensive Diagnostics Runner
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# Runs a full project health-check and writes individual report files into a
+# timestamped directory under the project root (DIAGNOSTICS_REPORT_<ts>/).
+#
+# Diagnostics performed (10 steps):
+#   1. System & environment info (Python version, tools, structure)
+#   2. Dependency import check (numpy, scipy, pydantic, …)
+#   3. Ruff linting analysis (with --statistics)
+#   4. Code format check (black + isort)
+#   5. Type checking via mypy (60 s timeout)
+#   6. Test discovery (pytest --collect-only)
+#   7. Unit test execution (120 s timeout)
+#   8. Validation scripts (validate_docs.py, debug_forensics.py)
+#   9. Project structure analysis (file counts)
+#  10. pyproject.toml summary (name, version, dep counts)
+#
+# Usage:
+#   bash run_diagnostics.sh
+#
+# Output:
+#   A DIAGNOSTICS_REPORT_<timestamp>/ directory containing per-step text
+#   files and a combined FULL_DIAGNOSTICS.txt.
+#
+# NOTE: This script assumes it is run from the project root with an active
+# .venv virtualenv.
+# ══════════════════════════════════════════════════════════════════════════════
 set -e
 
 PROJECT_DIR="/home/lchtangen/projects/ai/SampleMind-AI---Beta"

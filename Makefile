@@ -1,9 +1,31 @@
-# SampleMind AI — Development Automation
+# ══════════════════════════════════════════════════════════════════════════════
+# SampleMind AI — Development Automation Makefile
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# Central developer automation for SampleMind AI. All commands use `uv` as the
+# package manager and runner.
+#
+# Usage:
+#   make help          — list every target with a one-line description
+#   make setup         — first-time setup (create venv + install deps)
+#   make dev           — start the FastAPI dev server on :8000
+#   make test          — run the full test suite
+#   make quality       — lint + security scan (CI gate)
+#   make clean         — remove all build / cache artifacts
+#
+# Requirements:
+#   • uv (https://docs.astral.sh/uv/)  — must be on $PATH
+#   • Docker (optional) — only needed for `setup-db` / `build`
+#   • Ollama (optional) — only needed for `install-models`
+#
+# ══════════════════════════════════════════════════════════════════════════════
+
 .PHONY: help setup setup-dev install install-dev sync dev test lint format typecheck \
         security quality clean build setup-db install-models upgrade \
         test-unit test-integration test-cov test-fast polish polish-fix \
         plugins plugins-ableton plugins-fl-studio
 
+# ── Tool aliases (all run through uv so the project venv is always used) ────
 UV = uv
 PYTHON = uv run python
 PYTEST = uv run pytest
@@ -11,11 +33,14 @@ RUFF = uv run ruff
 BLACK = uv run black
 MYPY = uv run mypy
 
+# Print colour-coded help by extracting "target: ## description" lines
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 # ── Environment ──────────────────────────────────────────────────────────────
+# Targets for setting up the local dev environment: install deps, pull AI
+# models, and start database containers.
 
 setup: ## Create venv and install all dependencies (including dev)
 	$(UV) sync
@@ -49,6 +74,7 @@ setup-db: ## Start development databases via Docker
 	@echo "✅ Databases ready!"
 
 # ── Development ───────────────────────────────────────────────────────────────
+# Run the application in various modes: FastAPI server, CLI, or TUI.
 
 dev: ## Start FastAPI development server
 	$(UV) run uvicorn samplemind.server.main:app --reload --host 0.0.0.0 --port 8000
@@ -64,6 +90,8 @@ tui: ## Run the TUI
 	$(UV) run python -m samplemind.interfaces.tui.main
 
 # ── Testing ───────────────────────────────────────────────────────────────────
+# All test targets use pytest. Coverage goes to htmlcov/. Parallel targets
+# use pytest-xdist (-n auto). test-watch re-runs on file save via ptw.
 
 test: ## Run all tests
 	$(PYTEST) tests/ -v
@@ -91,6 +119,8 @@ test-watch: ## Auto-rerun unit tests on file changes (dev inner loop)
 	$(UV) run ptw tests/unit/ src/ -- -x --tb=short --no-cov -q
 
 # ── Code Quality ──────────────────────────────────────────────────────────────
+# Linting (ruff), formatting (ruff format), type-checking (mypy), and security
+# scanning (bandit). `make quality` is the CI gate — must pass before merge.
 
 lint: ## Run ruff + mypy
 	$(RUFF) check .
@@ -116,6 +146,9 @@ typecheck: ## Run mypy type checking
 	$(MYPY) src/
 
 # ── DAW Plugins ───────────────────────────────────────────────────────────────
+# Build and run DAW (Digital Audio Workstation) plugin companions.
+# Ableton: Python/FastAPI companion server for Max for Live.
+# FL Studio: C++ native wrapper (requires CMake + a C++ compiler).
 
 plugins: plugins-ableton plugins-fl-studio ## Build all DAW plugins
 
@@ -136,6 +169,7 @@ plugins-fl-studio: ## Build FL Studio C++ wrapper (requires CMake + compiler)
 	fi
 
 # ── Build & Deploy ────────────────────────────────────────────────────────────
+# Docker image build, Python package build, and artifact cleanup.
 
 build: ## Build Docker image
 	docker build -t samplemind-ai:latest .
