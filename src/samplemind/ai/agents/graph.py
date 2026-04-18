@@ -1,14 +1,16 @@
 """
 SampleMind LangGraph Agent Graph — Phase 16 / v3.0
 
-Orchestrates the multi-agent pipeline (7 nodes):
+Orchestrates the multi-agent pipeline (9 nodes):
 
   Entry → Router → AnalysisAgent
                  → TaggingAgent
                  → MixingAgent
-                 → QualityAgent      ← NEW (P3-006)
+                 → QualityAgent        ← P3-006
                  → RecommendationAgent
                  → PackBuilderAgent
+                 → CategorizerAgent    ← NEW
+                 → MicroTimingAgent    ← NEW
                  → Aggregator → END
 
 Agents run sequentially (each builds on prior results).
@@ -81,6 +83,8 @@ def aggregator_node(state: AudioAnalysisState) -> AudioAnalysisState:
         "quality_flags": state.get("quality_flags", {}),
         "similar_samples": state.get("similar_samples", []),
         "pack_manifest": state.get("pack_manifest", {}),
+        "categorization": state.get("categorization", {}),
+        "micro_timing": state.get("micro_timing", {}),
         "errors": state.get("errors", []),
     }
     return {
@@ -105,6 +109,8 @@ def build_graph():
         from langgraph.graph import END, StateGraph
 
         from samplemind.ai.agents.analysis_agent import analysis_agent
+        from samplemind.ai.agents.categorizer_agent import categorizer_agent
+        from samplemind.ai.agents.micro_timing_agent import micro_timing_agent
         from samplemind.ai.agents.mixing_agent import mixing_agent
         from samplemind.ai.agents.pack_builder_agent import pack_builder_agent
         from samplemind.ai.agents.quality_agent import quality_agent
@@ -113,7 +119,7 @@ def build_graph():
 
         graph = StateGraph(AudioAnalysisState)
 
-        # Register nodes (7-node pipeline)
+        # Register nodes (9-node pipeline)
         graph.add_node("router", router_node)
         graph.add_node("analysis", analysis_agent)
         graph.add_node("tagging", tagging_agent)
@@ -121,6 +127,8 @@ def build_graph():
         graph.add_node("quality", quality_agent)  # P3-006
         graph.add_node("recommendations", recommendation_agent)
         graph.add_node("pack_builder", pack_builder_agent)
+        graph.add_node("categorizer", categorizer_agent)  # NEW
+        graph.add_node("micro_timing", micro_timing_agent)  # NEW
         graph.add_node("aggregator", aggregator_node)
 
         # Linear pipeline edges
@@ -131,7 +139,9 @@ def build_graph():
         graph.add_edge("mixing", "quality")  # quality gate
         graph.add_edge("quality", "recommendations")
         graph.add_edge("recommendations", "pack_builder")
-        graph.add_edge("pack_builder", "aggregator")
+        graph.add_edge("pack_builder", "categorizer")
+        graph.add_edge("categorizer", "micro_timing")
+        graph.add_edge("micro_timing", "aggregator")
         graph.add_edge("aggregator", END)
 
         return graph.compile()

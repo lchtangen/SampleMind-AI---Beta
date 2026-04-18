@@ -39,6 +39,8 @@ class AudioAnalysisState(TypedDict, total=False):
     quality_flags: dict[str, Any] | None  # QualityAgent output (P3-006)
     similar_samples: list[dict[str, Any]] | None  # RecommendationAgent output
     pack_manifest: dict[str, Any] | None  # PackBuilderAgent output
+    categorization: dict[str, Any] | None  # CategorizerAgent output
+    micro_timing: dict[str, Any] | None  # MicroTimingAgent output
 
     # ── Claude tool_use ──────────────────────────────────────────────────────
     tool_calls: list[dict[str, Any]]  # Accumulated tool calls across agents

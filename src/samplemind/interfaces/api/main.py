@@ -52,6 +52,7 @@ from .routes import (
 )
 from .routes import analytics as analytics_router
 from .routes import marketplace as marketplace_router
+from .routes import processing as processing_router
 from .routes import settings as settings_router
 
 # Configure logging
@@ -375,6 +376,9 @@ def create_application() -> FastAPI:
     app.include_router(analytics_router.router, prefix="/api/v1", tags=["analytics"])
     app.include_router(
         marketplace_router.router, prefix="/api/v1", tags=["marketplace"]
+    )
+    app.include_router(
+        processing_router.router, prefix="/api/v1", tags=["processing"]
     )
 
     @app.get("/", include_in_schema=False)
