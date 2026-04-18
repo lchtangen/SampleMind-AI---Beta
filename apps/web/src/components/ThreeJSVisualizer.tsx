@@ -1,9 +1,35 @@
+/**
+ * @fileoverview Placeholder component for a Three.js 3D audio visualiser.
+ *
+ * This component reserves the layout space and renders a descriptive
+ * placeholder UI until the `three` npm package is installed and the full
+ * GPU-accelerated particle system is implemented.
+ *
+ * **Planned features** (see TODO inside `useEffect`):
+ * - WebGL scene with perspective camera
+ * - Audio-reactive particle system driven by an `AnalyserNode`
+ * - Post-processing: bloom / glow pass
+ * - Orbit camera controls
+ * - Adaptive quality based on frame-rate monitoring
+ *
+ * @module components/ThreeJSVisualizer
+ */
+
 "use client"
 
 import React from 'react'
 
-// Placeholder for Three.js 3D audio visualizer
-// Full implementation requires three.js package installation
+/**
+ * Three.js 3D audio visualiser (placeholder).
+ *
+ * Renders a glass-styled container at the specified height with a gradient
+ * orb and descriptive text. Replace the inner `useEffect` body once the
+ * `three` dependency is available.
+ *
+ * @param props
+ * @param props.height - CSS pixel height of the container (default `400`).
+ * @returns A placeholder `<div>` with informational text.
+ */
 export default function ThreeJSVisualizer({ height = 400 }: { height?: number }) {
   const containerRef = React.useRef<HTMLDivElement | null>(null)
 

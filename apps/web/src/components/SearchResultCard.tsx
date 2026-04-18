@@ -1,19 +1,56 @@
+/**
+ * @fileoverview Search result card component for FAISS semantic search results.
+ *
+ * Renders a single search hit as a compact card showing:
+ * - Numeric rank badge
+ * - Filename (truncated, with full path tooltip)
+ * - Colour-coded similarity score progress bar (green ≥ 70 %, yellow ≥ 40 %, red < 40 %)
+ * - Metadata badges — BPM, musical key, energy level, genres, and moods
+ *
+ * Designed to be rendered inside a results list by the search page.
+ *
+ * @module components/SearchResultCard
+ */
+
 "use client";
 
 import { FAISSSearchResult } from "@/lib/endpoints";
 
+/**
+ * Props accepted by {@link SearchResultCard}.
+ *
+ * @property result - A single FAISS search hit containing filename, score, and metadata.
+ * @property rank   - 1-based display rank within the results list.
+ */
 interface Props {
   result: FAISSSearchResult;
   rank: number;
 }
 
-/** Colour-codes the similarity score bar: green ≥ 0.7, yellow ≥ 0.4, red < 0.4 */
+/**
+ * Map a FAISS similarity score (0–1) to a Tailwind background colour class.
+ *
+ * - `≥ 0.7` → green (strong match)
+ * - `≥ 0.4` → yellow (moderate match)
+ * - `< 0.4` → red (weak match)
+ *
+ * @param score - Normalised similarity score between 0 and 1.
+ * @returns A Tailwind CSS `bg-*` class string.
+ */
 function scoreColour(score: number): string {
   if (score >= 0.7) return "bg-green-500";
   if (score >= 0.4) return "bg-yellow-400";
   return "bg-red-400";
 }
 
+/**
+ * Renders a single FAISS search result as a card with rank, score bar, and metadata.
+ *
+ * @param props
+ * @param props.result - The {@link FAISSSearchResult} to display.
+ * @param props.rank   - 1-based position in the search results list.
+ * @returns A styled card element.
+ */
 export default function SearchResultCard({ result, rank }: Props) {
   const pct = Math.round(result.score * 100);
   const bpm = result.metadata?.bpm;
@@ -75,6 +112,7 @@ export default function SearchResultCard({ result, rank }: Props) {
 // Internal Badge helper
 // ---------------------------------------------------------------------------
 
+/** Allowed colour presets for metadata badges. */
 type BadgeColour = "purple" | "blue" | "orange" | "teal" | "pink";
 
 const COLOUR_MAP: Record<BadgeColour, string> = {
@@ -85,6 +123,12 @@ const COLOUR_MAP: Record<BadgeColour, string> = {
   pink: "bg-pink-500/20 text-pink-300",
 };
 
+/**
+ * Small pill badge used to display metadata values (BPM, key, genre, etc.).
+ *
+ * @param props.label  - Text displayed inside the badge.
+ * @param props.colour - Visual colour preset mapped via {@link COLOUR_MAP}.
+ */
 function Badge({ label, colour }: { label: string; colour: BadgeColour }) {
   return (
     <span

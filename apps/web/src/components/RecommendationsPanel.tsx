@@ -1,3 +1,21 @@
+/**
+ * @fileoverview AI-powered recommendations panel for the SampleMind AI dashboard.
+ *
+ * Displays a context-aware grid of suggested audio samples fetched via the
+ * {@link useRecommendations} hook. The user can fine-tune results by adjusting
+ * tempo (BPM), musical key, and mood tags through an inline form.
+ *
+ * **Key behaviours:**
+ * - **Mode toggle** — switch between `"fusion"` (AI + rule hybrid) and
+ *   `"rules"` (deterministic rule-only) recommendation strategies.
+ * - **Real-time updates** — listens on a WebSocket (via {@link useWebSocket})
+ *   for `recommendations_update` messages and applies them live.
+ * - **User actions** — each suggestion card offers Preview, Use Sample, and
+ *   Dismiss buttons that feed back into the recommendation engine.
+ *
+ * @module components/RecommendationsPanel
+ */
+
 'use client';
 
 import { useMemo, useState, useEffect, useCallback } from 'react';
@@ -6,6 +24,7 @@ import { useRecommendations, RecommendationContext, RecommendationMode } from '@
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useWebSocket } from '@/hooks/useWebSocket';
 
+/** All 24 major/minor keys used in the key filter dropdown. */
 const MUSIC_KEYS = [
   'C major', 'C minor',
   'C# major', 'C# minor',
@@ -21,10 +40,26 @@ const MUSIC_KEYS = [
   'B major', 'B minor',
 ];
 
+/**
+ * Props for {@link RecommendationsPanel}.
+ *
+ * @property className - Optional CSS class appended to the outer `<section>`.
+ */
 interface RecommendationsPanelProps {
   className?: string;
 }
 
+/**
+ * AI Recommendations Panel — displays personalised sample suggestions.
+ *
+ * Fetches suggestions from the backend via the `useRecommendations` hook,
+ * renders a preference form, and displays a responsive grid of suggestion
+ * cards. Receives real-time updates over WebSocket for live refresh.
+ *
+ * @param props
+ * @param props.className - Optional CSS class for the outer section element.
+ * @returns The recommendation panel section element.
+ */
 export function RecommendationsPanel({ className }: RecommendationsPanelProps) {
   const {
     context,

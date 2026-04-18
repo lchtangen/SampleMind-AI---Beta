@@ -1,7 +1,28 @@
+/**
+ * @fileoverview Animated waveform visualiser rendered on an HTML `<canvas>`.
+ *
+ * Draws 120 vertical bars with a sine-wave amplitude animation and a
+ * cyan → blue → magenta horizontal gradient. The canvas automatically
+ * resizes to its container via `ResizeObserver` and scales for HiDPI
+ * (`devicePixelRatio`).
+ *
+ * This is a **client component** — requires browser `canvas` and
+ * `requestAnimationFrame` APIs.
+ *
+ * @module components/WaveformCanvas
+ */
+
 "use client"
 
 import React from 'react'
 
+/**
+ * Animated waveform bar visualiser.
+ *
+ * @param props
+ * @param props.height - CSS pixel height of the canvas container (default `120`).
+ * @returns A glass-styled `<div>` wrapping the `<canvas>` element.
+ */
 export default function WaveformCanvas({ height = 120 }: { height?: number }) {
   const ref = React.useRef<HTMLCanvasElement | null>(null)
   const animRef = React.useRef<number | null>(null)

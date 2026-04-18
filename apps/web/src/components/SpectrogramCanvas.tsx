@@ -1,7 +1,31 @@
+/**
+ * @fileoverview Animated spectrogram visualiser rendered on an HTML `<canvas>`.
+ *
+ * Simulates a real-time mel-scale spectrogram by continuously scrolling the
+ * existing image data to the left and painting a new frequency column on the
+ * right edge each frame. Frequency intensity is driven by a sine function
+ * with random noise, mapped to a viridis-like RGB colour palette.
+ *
+ * The canvas auto-scales for HiDPI displays and responds to container resizes
+ * via `ResizeObserver`.
+ *
+ * This is a **client component** — requires browser `canvas` and
+ * `requestAnimationFrame` APIs.
+ *
+ * @module components/SpectrogramCanvas
+ */
+
 "use client"
 
 import React from 'react'
 
+/**
+ * Simulated spectrogram visualiser with scrolling frequency columns.
+ *
+ * @param props
+ * @param props.height - CSS pixel height of the canvas container (default `200`).
+ * @returns A glass-styled `<div>` wrapping the `<canvas>` element.
+ */
 export default function SpectrogramCanvas({ height = 200 }: { height?: number }) {
   const ref = React.useRef<HTMLCanvasElement | null>(null)
   const animRef = React.useRef<number | null>(null)
