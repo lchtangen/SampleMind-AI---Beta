@@ -43,6 +43,9 @@ logger = logging.getLogger(__name__)
 def router_node(state: AudioAnalysisState) -> AudioAnalysisState:
     """
     Validate input and set default pipeline configuration.
+
+    Also injects conversation memory from AgentMemory (P3-014) so
+    downstream agents have access to relevant past analyses.
     """
     file_path = state.get("file_path", "")
     errors = list(state.get("errors", []))
@@ -55,12 +58,46 @@ def router_node(state: AudioAnalysisState) -> AudioAnalysisState:
         errors.append(f"router: file not found: {file_path}")
         return {"errors": errors, "current_stage": "error", "progress_pct": 0}
 
+    # P3-014: Inject conversation memory if available
+    conversation_history: list[dict] = []
+    try:
+        import asyncio
+
+        from samplemind.ai.agents.memory import AgentMemory
+
+        memory = AgentMemory()
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+
+        if loop and loop.is_running():
+            # Already in an async context — schedule via new thread
+            import concurrent.futures
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                future = pool.submit(
+                    asyncio.run,
+                    memory.get_conversation_context(file_path, top_k=3),
+                )
+                conversation_history = future.result(timeout=5)
+        else:
+            conversation_history = asyncio.run(
+                memory.get_conversation_context(file_path, top_k=3)
+            )
+        logger.info(
+            "Injected %d memory entries into pipeline", len(conversation_history)
+        )
+    except Exception as exc:
+        logger.debug("Agent memory unavailable: %s", exc)
+
     return {
         "current_stage": "routing",
         "progress_pct": 5,
         "messages": [f"📂 Processing: {Path(file_path).name}"],
         "analysis_depth": state.get("analysis_depth", "standard"),
         "requested_agents": state.get("requested_agents", []),
+        "conversation_history": conversation_history,
         "tool_calls": [],
         "tool_results": [],
         "errors": errors,
@@ -73,6 +110,9 @@ def router_node(state: AudioAnalysisState) -> AudioAnalysisState:
 def aggregator_node(state: AudioAnalysisState) -> AudioAnalysisState:
     """
     Combine all agent outputs into a unified final_report.
+
+    Also stores the completed analysis in AgentMemory (P3-014) for
+    future retrieval by subsequent pipeline runs.
     """
     final_report = {
         "file": state.get("file_path", ""),
@@ -87,6 +127,31 @@ def aggregator_node(state: AudioAnalysisState) -> AudioAnalysisState:
         "micro_timing": state.get("micro_timing", {}),
         "errors": state.get("errors", []),
     }
+
+    # P3-014: Store completed analysis in agent memory
+    try:
+        import asyncio
+
+        from samplemind.ai.agents.memory import AgentMemory
+
+        memory = AgentMemory()
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+
+        if loop and loop.is_running():
+            import concurrent.futures
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                future = pool.submit(asyncio.run, memory.store(dict(state)))
+                future.result(timeout=5)
+        else:
+            asyncio.run(memory.store(dict(state)))
+        logger.info("Stored pipeline result in agent memory")
+    except Exception as exc:
+        logger.debug("Could not store in agent memory: %s", exc)
+
     return {
         "final_report": final_report,
         "current_stage": "done",

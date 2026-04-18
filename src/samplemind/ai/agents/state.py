@@ -51,6 +51,9 @@ class AudioAnalysisState(TypedDict, total=False):
     progress_pct: int  # 0–100
     messages: list[str]  # User-facing progress messages
 
+    # ── Conversation memory (P3-014) ────────────────────────────────────────
+    conversation_history: list[dict[str, Any]]  # Past analysis context
+
     # ── Final aggregated output ──────────────────────────────────────────────
     final_report: dict[str, Any] | None
     errors: list[str]  # Non-fatal errors accumulated

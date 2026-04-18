@@ -290,3 +290,95 @@ async def submit_agent_analysis(request: AgentAnalysisRequest) -> AgentTaskRespo
         raise HTTPException(
             status_code=500, detail=f"Failed to queue task: {exc}"
         ) from exc
+
+
+# ---------------------------------------------------------------------------
+# P3-009: Agent Run History API
+# ---------------------------------------------------------------------------
+
+
+class AgentRunSummary(BaseModel):
+    """Summary of a single agent pipeline run."""
+
+    memory_id: str
+    file_path: str
+    timestamp: float
+    summary: str
+    bpm: float | None = None
+    key: str | None = None
+    genre: str | None = None
+    mood: str | None = None
+    tags: list[str] = []
+    quality_flags: list[str] = []
+    analysis_depth: str = "standard"
+
+
+class AgentHistoryResponse(BaseModel):
+    """Paginated response of agent run history."""
+
+    total: int
+    offset: int
+    limit: int
+    runs: list[AgentRunSummary]
+
+
+@router.get(
+    "/agent/history",
+    response_model=AgentHistoryResponse,
+    tags=["Tasks", "Agents"],
+)
+async def get_agent_history(
+    limit: int = 20,
+    offset: int = 0,
+) -> AgentHistoryResponse:
+    """
+    Retrieve past agent pipeline runs from AgentMemory (P3-009).
+
+    Returns a paginated list of past analysis summaries, sorted by
+    most recent first.
+
+    Query parameters:
+        limit: Max results (default 20, max 100).
+        offset: Pagination offset.
+    """
+    limit = min(max(1, limit), 100)
+    offset = max(0, offset)
+
+    try:
+        from samplemind.ai.agents.memory import AgentMemory
+
+        memory = AgentMemory()
+        memory._ensure_loaded()
+        entries = memory._entries
+
+        # Sort newest first
+        sorted_entries = sorted(entries, key=lambda e: e.timestamp, reverse=True)
+        total = len(sorted_entries)
+        page = sorted_entries[offset : offset + limit]
+
+        runs = [
+            AgentRunSummary(
+                memory_id=e.memory_id,
+                file_path=e.file_path,
+                timestamp=e.timestamp,
+                summary=e.summary,
+                bpm=e.bpm,
+                key=e.key,
+                genre=e.genre,
+                mood=e.mood,
+                tags=e.tags,
+                quality_flags=e.quality_flags,
+                analysis_depth=e.analysis_depth,
+            )
+            for e in page
+        ]
+
+        return AgentHistoryResponse(
+            total=total,
+            offset=offset,
+            limit=limit,
+            runs=runs,
+        )
+    except Exception as exc:
+        logger.warning("Failed to retrieve agent history: %s", exc)
+        return AgentHistoryResponse(total=0, offset=offset, limit=limit, runs=[])
