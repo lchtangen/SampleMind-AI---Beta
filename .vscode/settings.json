@@ -230,8 +230,10 @@
   "git.confirmSync": false,
   "git.enableSmartCommit": true,
   "git.autofetch": true,
-  "git.autofetchPeriod": 180,
+  "git.autofetchPeriod": 30,
   "git.branchProtection": ["main"],
+  "git.pullBeforeCheckout": true,
+  "git.fetchOnPull": true,
   "gitlens.hovers.currentLine.over": "line",
   "gitlens.codeLens.enabled": false,
 

@@ -48,8 +48,14 @@ setup: ## Create venv and install all dependencies (including dev)
 
 setup-dev: setup install-models setup-db ## Full dev setup (deps + models + databases)
 
-sync: ## Sync dependencies from lockfile (fast, no resolution)
+sync: ## Sync git + dependencies (pull agent changes + uv sync)
+	@git fetch --all --prune
+	@git pull --rebase origin $$(git branch --show-current) 2>/dev/null || echo "⚠️ Pull skipped (may need manual resolve)"
 	$(UV) sync
+	@echo "✅ Synced with remote and dependencies updated."
+
+sync-watch: ## Auto-sync with agent every 30s (Ctrl+C to stop)
+	@bash scripts/sync-agent.sh --watch
 
 install: ## Install production dependencies only
 	$(UV) sync --no-dev

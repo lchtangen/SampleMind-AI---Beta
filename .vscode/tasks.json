@@ -1,0 +1,62 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "🔄 Sync with Agent Branch",
+      "type": "shell",
+      "command": "git fetch --all && git pull --rebase origin $(git branch --show-current) && echo '✅ Synced!'",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🔄 Full Sync (fetch + pull + deps)",
+      "type": "shell",
+      "command": "bash scripts/sync-agent.sh",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🧪 Run Tests",
+      "type": "shell",
+      "command": "pytest tests/unit/ -v --tb=short",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🔍 Quality Gate",
+      "type": "shell",
+      "command": "ruff check src/ && ruff format --check src/ && mypy src/ && pytest tests/unit/ -v --tb=short",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🎨 Format Code",
+      "type": "shell",
+      "command": "ruff format src/ && ruff check src/ --fix",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

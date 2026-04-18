@@ -33,8 +33,8 @@ htmlcov/
 .tox/
 .hypothesis/
 
-# IDEs and Editors
-.vscode/
+# IDEs and Editors — .vscode/ is tracked (shared team settings)
+# .vscode/  ← intentionally tracked for settings.json + tasks.json
 .idea/
 *.swp
 *.swo

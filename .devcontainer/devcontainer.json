@@ -7,6 +7,7 @@
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
   "postCreateCommand": "pip install -e '.[dev]' 2>/dev/null || pip install -r requirements.txt && cd apps/web && npm install --legacy-peer-deps 2>/dev/null || true",
+  "postStartCommand": "git fetch --all --prune && git pull --rebase origin $(git branch --show-current) 2>/dev/null || true",
   "customizations": {
     "vscode": {
       "extensions": [
