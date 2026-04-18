@@ -3,6 +3,32 @@ Unit tests for samplemind.core.search.faiss_index
 
 All heavy deps (faiss, transformers, librosa) are mocked so the tests run
 in any CI environment without GPU or audio-file fixtures.
+
+Module under test:
+    samplemind.core.search.faiss_index
+        — FAISSIndex, CLAPEmbedder, IndexEntry, SearchResult,
+          _normalize, get_index, EMBEDDING_DIM
+
+Key test scenarios:
+    _normalize
+        - Unit-normalises a non-zero vector.
+        - Returns a zero vector unchanged (no division-by-zero).
+    CLAPEmbedder fallback
+        - ``_text_hash_embed`` returns a unit vector of EMBEDDING_DIM.
+        - ``_mfcc_embed`` returns zero-padded vector when the audio file
+          is missing.
+    FAISSIndex.add
+        - Adding one entry increments ``size`` and records metadata
+          (filename, bpm).
+        - Adding multiple entries.
+    FAISSIndex.search_text
+        - Returns a list of SearchResult with scores in [0, 1].
+        - Returns an empty list when the index is empty / None.
+    FAISSIndex.save / load
+        - ``save`` writes a valid ``metadata.json`` with correct content.
+        - ``load`` returns False when index files are missing.
+    get_index singleton
+        - Returns a FAISSIndex instance and honours the singleton pattern.
 """
 
 from __future__ import annotations

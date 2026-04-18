@@ -3,6 +3,27 @@ Unit tests for samplemind.core.packs.pack_builder
 
 Tests manifest schema validation, ZIP creation, and PackBuilder.build()
 without requiring real audio files (audio files are stubbed or skipped).
+
+Module under test:
+    samplemind.core.packs.pack_builder
+        — PackBuilder, PackBuildError, _slugify, SMPACK_VERSION
+
+Key test scenarios:
+    _slugify
+        - Lowercases text, strips special characters, collapses spaces.
+    Manifest schema
+        - Valid manifest contains all required keys (smpack_version, name,
+          version, samples, created_at).
+        - smpack_version is a string; samples is a list; bpm_range has two
+          ordered elements.
+    PackBuilder.build — ZIP structure
+        - Produces a ``.smpack`` file on disk.
+        - Archive contains a valid ``manifest.json`` matching the expected
+          schema (version, name, sample count).
+        - Raises PackBuildError when sample_paths is empty.
+    PackBuilder.read_manifest
+        - Round-trip: writes a manifest into a ZIP, reads it back correctly.
+        - Raises PackBuildError / FileNotFoundError for a missing archive.
 """
 
 from __future__ import annotations

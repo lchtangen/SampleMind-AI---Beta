@@ -1,13 +1,39 @@
 """
 Unit tests for Cache Coordinator (L1/L2/L3 unified access).
 
+Module under test:
+    samplemind.core.cache.cache_coordinator
+        — CacheCoordinator, get_cache_coordinator
+
 Tests:
-- Multi-layer fallthrough (L1 → L2 → compute)
-- Write-through strategy (L1 + L2 simultaneous)
-- L2 → L1 promotion on cache hits
-- TTL determination by key prefix
-- Pattern-based invalidation
-- Statistics aggregation
+    TestCacheCoordinatorRead
+        - Multi-layer fallthrough (L1 → L2 → compute).
+        - L2 → L1 promotion on cache hits.
+        - Compute function populates L1 on miss.
+        - L2 errors fall back to compute gracefully.
+        - Custom TTL passed through to compute.
+    TestCacheCoordinatorWrite
+        - Write-through strategy (L1 + L2 simultaneous).
+        - TTL determination by key prefix (search, feature, analysis,
+          clap, unknown).
+        - Custom TTL override, promote_to_l1 flag, L2 error isolation.
+        - S3 archival for long-lived data; skip for short-lived data.
+    TestCacheCoordinatorInvalidation
+        - Specific key invalidation (L1 + L2).
+        - Full cache clear.
+        - Pattern-based invalidation (glob-style, e.g. ``feature:*``).
+        - L2 delete error does not break L1 invalidation.
+    TestCacheCoordinatorStatistics
+        - Statistics aggregation across L1/L2/L3.
+        - ``_should_archive`` decision logic.
+        - Glob pattern matching helper.
+    TestCacheCoordinatorIntegration
+        - Audio analysis caching workflow.
+        - Search with compute fallback (miss → compute → hit).
+        - Invalidation-on-update pattern (``*:sample1``).
+        - Concurrent reads with L2 promotion.
+    TestCacheCoordinatorSingleton
+        - get_cache_coordinator returns same instance on repeated calls.
 """
 
 import pytest

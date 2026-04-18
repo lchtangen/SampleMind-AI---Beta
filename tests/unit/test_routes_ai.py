@@ -7,6 +7,30 @@ so the tests run in any CI environment without GPU or audio fixtures.
 Note: PlaylistGenerator, get_index, GapAnalyzer are imported INSIDE function
 bodies in routes/ai.py, so they must be patched at their source modules,
 not in the routes.ai namespace.
+
+Module under test:
+    samplemind.interfaces.api.routes.ai  (FastAPI router)
+
+Endpoints tested:
+    GET  /ai/providers
+        - Returns empty list when ai_manager is absent from app state.
+        - Returns provider list with status ("available"/"unavailable")
+          when ai_manager is present.
+    POST /ai/curate/playlist
+        - Returns PlaylistResponse (mood, energy_arc, narrative) on
+          success.
+        - Returns 500 when the generator raises RuntimeError.
+        - Respects default values (mood=dark, energy_arc=build,
+          duration=30).
+    GET  /ai/curate/gaps
+        - Returns 0-gap response with a rebuild suggestion when the FAISS
+          index is empty.
+        - Returns gap report (total_samples, coverage_score) when the
+          index has entries.
+        - Returns 500 when GapAnalyzer raises.
+    POST /ai/curate/energy-arc
+        - Returns empty ordered list for unknown sample IDs.
+        - Orders known sample IDs by energy arc.
 """
 
 from __future__ import annotations

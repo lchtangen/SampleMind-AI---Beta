@@ -1,12 +1,31 @@
 """
 Unit tests for L1 in-memory LRU cache.
 
+Module under test:
+    samplemind.core.cache.lru_cache
+        — L1LRUCache, L1CacheEntry, get_l1_cache
+
 Tests:
-- Basic get/set operations
-- TTL expiration
-- LRU eviction (max entries and memory)
-- Statistics tracking
-- Cache invalidation
+    TestL1CacheEntry
+        - Entry creation with correct metadata.
+        - TTL-based expiration detection (expired vs. not-yet-expired).
+    TestL1LRUCache
+        - Basic get/set operations and hit/miss counters.
+        - TTL expiration (entry disappears after sleep).
+        - LRU eviction by entry count and by memory limit.
+        - Access-promotion: recently accessed entries survive eviction.
+        - Explicit delete, clear, has (including expired keys).
+        - Statistics (entries, hits, misses, hit_rate).
+        - Custom per-entry TTL overrides.
+        - Singleton pattern via get_l1_cache (same instance, config
+          honoured only on first call).
+    TestL1CacheIntegration
+        - Realistic caching patterns: audio features, search results,
+          hot/cold data access, and cache invalidation after sample
+          updates.
+    TestL1CachePerformance
+        - get() latency < 1 ms per call (1 000-iteration benchmark).
+        - Throughput > 50 000 ops/sec (1 000 set + 1 000 get).
 """
 
 import pytest

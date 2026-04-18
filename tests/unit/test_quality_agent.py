@@ -3,6 +3,28 @@ Unit tests for samplemind.ai.agents.quality_agent (P3-006)
 
 Covers: _run_quality_check backend selection, warning generation,
 quality_agent() node integration.
+
+Module under test:
+    samplemind.ai.agents.quality_agent
+        — _run_quality_check, quality_agent (LangGraph node function)
+
+Key test scenarios:
+    _run_quality_check — backend selection
+        - Uses pyloudnorm when available (returns method="pyloudnorm").
+        - Falls back to ffmpeg when pyloudnorm raises ImportError.
+        - Returns method="unavailable" stub when both backends fail.
+    Warning generation
+        - Clipping detected → "clipping" warning.
+        - High LUFS (> −5) → "loudness" / "lufs" warning.
+        - Low dynamic range (< 3 dB) → "dynamic range" warning.
+        - Ideal signal → empty warnings list.
+    quality_agent() node
+        - Sets current_stage="quality" and progress_pct=65.
+        - Skips gracefully for missing or empty file paths.
+        - Populates quality_flags from a successful check and appends a
+          message.
+        - Catches RuntimeError from _run_quality_check and records the
+          error.
 """
 
 from __future__ import annotations

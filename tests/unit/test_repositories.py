@@ -1,5 +1,31 @@
 """
 Legacy repository tests targeting deprecated Beanie helpers.
+
+These tests are gated behind the ``RUN_DB_TESTS=1`` environment variable
+and are skipped by default because they depend on Beanie/MongoDB models
+that have been superseded by Tortoise ORM in the current stack.
+
+Modules under test:
+    samplemind.core.database.repositories.audio_repository
+        — AudioRepository (CRUD: create, find_many, update, delete)
+    samplemind.core.database.repositories.analysis_repository
+        — AnalysisRepository (create, find_one)
+    samplemind.core.database.repositories.user_repository
+        — UserRepository (create, find_one by username/email, update)
+    src.samplemind.core.database.redis_client
+        — RedisClient (set, get, delete)
+    src.samplemind.core.database.chroma
+        — ChromaDBClient (add_embedding, query_similar)
+
+Key test scenarios:
+    TestAudioRepository  — create, find by user_id, update metadata, delete.
+    TestAnalysisRepository — create analysis, find by audio file ID.
+    TestUserRepository   — create user, find by username/email, update stats.
+    TestRedisOperations  — mocked set/get/delete with TTL.
+    TestChromaDBOperations — mocked 128-dim embedding add and similarity query.
+
+All repository interactions are mocked with AsyncMock/MagicMock so no
+live database connections are required.
 """
 
 import os

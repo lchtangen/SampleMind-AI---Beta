@@ -1,5 +1,26 @@
 """
-Unit tests for authentication system
+Unit tests for the SampleMind authentication system.
+
+Modules under test:
+    samplemind.core.auth.jwt_handler
+        — create_access_token, create_refresh_token, decode_token,
+          verify_token, get_token_expiration, configure_jwt
+    samplemind.core.auth.password
+        — hash_password, verify_password
+
+Key test scenarios:
+    TestPasswordHashing
+        - bcrypt hashing produces a ``$2b$`` hash distinct from plaintext.
+        - Correct and incorrect password verification.
+        - Unique salts: same password hashed twice yields different digests.
+    TestJWTTokens
+        - Access tokens carry user_id, email, additional claims, and type=access.
+        - Refresh tokens encode type=refresh.
+        - verify_token returns user_id for valid tokens, None for invalid/expired.
+        - get_token_expiration returns a future datetime.
+
+All tests use a deterministic JWT config (autouse fixture) so no external
+secrets or services are required.
 """
 
 from datetime import datetime, timedelta

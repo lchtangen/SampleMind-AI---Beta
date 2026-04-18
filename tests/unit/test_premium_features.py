@@ -2,11 +2,46 @@
 """
 Unit Tests for Phase 10+ Premium Features
 
+Modules under test:
+    samplemind.core.tagging.tag_vocabulary
+        — TagConfidence, get_vocabulary
+    samplemind.core.tagging.ai_tagger
+        — get_tagger (rule-based AI tagger)
+    samplemind.core.processing.loudness_analyzer
+        — LoudnessAnalyzer, LoudnessAnalysis, get_platform_target
+    samplemind.core.processing.mastering_analyzer
+        — MasteringAnalyzer (spectral balance, stereo width, phase
+          correlation, mastering grade)
+    samplemind.core.processing.layering_analyzer
+        — LayeringAnalyzer (compatibility score, phase correlation,
+          loudness balance)
+    samplemind.core.processing.groove_extractor
+        — GrooveExtractor, GrooveTemplate (swing, shuffle, timing
+          deviation, velocity pattern)
+    samplemind.core.history.recent_files
+        — RecentFilesManager (add, get_all, stats)
+
 Tests for:
-- AI-Powered Sample Tagging
-- Professional Mastering Analysis
-- Intelligent Sample Layering
-- Groove Template Extraction
+    - AI-Powered Sample Tagging
+        Tag vocabulary validation, category detection, stats; tagger
+        init, tagging from features, category organisation, high-
+        confidence filtering.
+    - Professional Mastering Analysis
+        Loudness analysis (LUFS, true peak, loudness range), platform
+        targets (Spotify/YouTube), gain adjustment calculation; full
+        mastering analysis (spectral balance, stereo width, phase
+        correlation), recommendation generation, mastering grade (A–F).
+    - Intelligent Sample Layering
+        Compatibility score (0–10), phase correlation (−1 to 1), phase
+        status classification, loudness difference and ratio.
+    - Groove Template Extraction
+        Groove type classification (straight/swing/shuffle/jdilla/groovy),
+        BPM detection, swing amount, timing deviation, velocity pattern.
+    - Recent Files Tracking
+        Manager init, add file, get all, statistics (total_files,
+        total_size_mb, by_analysis_level).
+    - Integration
+        Tag + analysis pipeline, mastering workflow across platforms.
 """
 
 from pathlib import Path

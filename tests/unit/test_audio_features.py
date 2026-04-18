@@ -1,4 +1,25 @@
-"""Legacy audio feature tests (superseded by tests/unit/core/test_audio_engine.py)."""
+"""Legacy audio feature tests (superseded by tests/unit/core/test_audio_engine.py).
+
+Module under test:
+    samplemind.core.engine.audio_engine
+        — AdvancedFeatureExtractor, AudioProcessor, AudioFeatures
+
+This file is skipped at module level because equivalent coverage now lives in
+tests/unit/core/test_audio_engine.py.  It is kept for reference and as a
+regression safety-net that can be re-enabled with ``pytest --override-ini``.
+
+Key test scenarios (when enabled):
+    - Tempo detection across sample rates, frequencies, and edge cases
+      (silence, impulse signals).
+    - Musical-key detection (all 12 pitch classes + major/minor modes).
+    - Spectral feature extraction (centroid, bandwidth, rolloff, ZCR, RMS)
+      including NaN/Inf validation and silence handling.
+    - MFCC extraction with variable coefficients (5, 13, 20) and edge
+      cases (very short audio, very quiet audio, silence).
+    - Harmonic/percussive source separation (energy-ratio assertions,
+      silence, impulse, NaN/Inf rejection).
+    - AudioFeatures dataclass initialisation and field validation.
+"""
 
 import pytest
 

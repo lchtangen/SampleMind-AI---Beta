@@ -1,12 +1,46 @@
 """
 Unit tests for database optimization (query caching and pool tuning).
 
+Modules under test:
+    samplemind.core.database.db_optimization
+        — ConnectionPoolConfig, DatabaseOptimizationManager,
+          BatchOperationHelper, get_database_optimizer,
+          STRATEGIC_INDEXES, CACHE_PRIORITY_QUERIES
+    samplemind.core.database.query_cache
+        — cached_query, QueryCacheManager, _build_cache_key,
+          get_query_cache_manager
+
 Tests:
-- Query cache decorators
-- Cache invalidation by model
-- Connection pool configuration
-- Index definitions and migrations
-- Batch operations helpers
+    TestConnectionPoolConfig
+        - Default and custom pool configuration values.
+        - Conversion to SQLAlchemy kwargs (to_dict).
+    TestDatabaseOptimizationManager
+        - Singleton pattern (get_database_optimizer).
+        - Pool config retrieval.
+        - Index definitions: all models, single model, metadata validation.
+        - Migration SQL generation for SQLite and PostgreSQL dialects.
+        - Query optimization hints (recent_samples, by_genre, by_bpm_and_key).
+        - Pool stats query for PostgreSQL.
+    TestStrategicIndexes
+        - Sample, user, and library indexes are defined with required
+          metadata (name, columns, unique, description).
+    TestCacheQueryDecorator
+        - Decorator can be applied and stores ``_cache_prefix``.
+        - Cache key building from positional and keyword arguments.
+        - Different arguments produce different keys.
+    TestQueryCacheManager
+        - Manager initialisation sets a coordinator.
+        - Invalidation rules exist for TortoiseSample and TortoiseLibrary.
+        - ``invalidate_on_model_update`` and ``get_cache_stats`` run
+          without error.
+    TestBatchOperationHelper
+        - bulk_create_samples and bulk_update_samples function signatures.
+    TestCachePriorityQueries
+        - Important queries have defined cache priorities (TTL + reason).
+    TestDatabaseOptimizationIntegration
+        - Full workflow: pool config → migration SQL → query hints.
+    TestDatabaseOptimizationSingleton
+        - Optimizer and query-cache-manager singleton patterns.
 """
 
 import pytest

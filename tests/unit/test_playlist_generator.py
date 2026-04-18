@@ -3,6 +3,32 @@ Unit tests for samplemind.ai.curation.playlist_generator
 
 Tests rule-based helpers (_arc_energy_sequence, _harmonic_score, _bpm_score)
 and PlaylistGenerator.generate() with mocked FAISS and LiteLLM.
+
+Module under test:
+    samplemind.ai.curation.playlist_generator
+        — PlaylistGenerator, GeneratedPlaylist, _arc_energy_sequence,
+          _harmonic_score, _bpm_score, CAMELOT_NEIGHBORS, ENERGY_ORDER
+
+Key test scenarios:
+    _arc_energy_sequence
+        - "build" arc starts low, ends high.
+        - "drop" arc starts high, ends low.
+        - "plateau" arc is all "mid".
+        - "tension" arc length matches requested slot count.
+        - Unknown arc name defaults to plateau.
+        - Sequence length equals ``n`` for well-defined inputs (n ≥ 6).
+    _harmonic_score
+        - Same Camelot key → 1.0; adjacent Camelot neighbour → 0.85;
+          distant key → 0.3; missing key → 0.5 (neutral).
+    _bpm_score
+        - Matching BPM → 1.0; small diff → 0.85; large diff → 0.3;
+          missing BPM → 0.5.
+    PlaylistGenerator.generate
+        - Returns a GeneratedPlaylist with correct mood and arc.
+        - Empty library → empty playlist with 0 duration.
+        - "build" arc orders samples low → high energy.
+        - Graceful fallback when LiteLLM is unavailable (rules-only
+          narrative).
 """
 
 from __future__ import annotations
