@@ -1,3 +1,33 @@
+"""
+Sample Library Organizer — SampleMind AI
+=========================================
+
+Moves or copies audio files into a structured directory tree based on their
+analysis metadata (genre, BPM, key, instrument type, etc.).
+
+The target path is controlled by a **pattern string** — e.g.
+``{genre}/{bpm}/{key}/{filename}`` — which is expanded with the sample's
+metadata values.  Missing metadata fields fall back to safe defaults like
+``"Uncategorized"`` or ``"Unknown_BPM"``.
+
+Features:
+  - ``dry_run`` mode previews changes without touching the filesystem.
+  - Automatic collision handling (``file.wav`` → ``file_1.wav``).
+  - Supports ``move`` and ``copy`` strategies.
+
+Usage::
+
+    from samplemind.services.organizer import OrganizationEngine
+
+    engine = OrganizationEngine(dry_run=False)
+    result = await engine.organize_file(
+        file_path=Path("kick.wav"),
+        metadata={"genre": "Trap", "bpm": 140, "key": "Am"},
+        pattern="{genre}/{bpm}/{key}/{filename}",
+    )
+    print(result.destination)  # e.g. Trap/140/Am/kick.wav
+"""
+
 import logging
 import shutil
 from dataclasses import dataclass
@@ -5,10 +35,12 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+# ── Data types ────────────────────────────────────────────────────────────────
+
 
 @dataclass
 class OrganizationResult:
-    """Result of a file organization operation"""
+    """Outcome of a single file organization operation."""
 
     source: Path
     destination: Path
@@ -17,9 +49,14 @@ class OrganizationResult:
     action: str = "move"  # move, copy, skip
 
 
+# ── Organization engine ───────────────────────────────────────────────────────
+
+
 class OrganizationEngine:
     """
-    Engine for organizing audio files based on metadata and patterns.
+    Organizes audio files into a metadata-driven directory hierarchy.
+
+    Set ``dry_run=True`` to preview the file moves without writing anything.
     """
 
     def __init__(self, dry_run: bool = False) -> None:
@@ -86,7 +123,10 @@ class OrganizationEngine:
         self, metadata: dict, pattern: str, original_filename: str
     ) -> Path:
         """
-        Generate the destination path based on metadata and pattern.
+        Expand the pattern template with metadata values.
+
+        Unsupported characters (``/``, ``\\``) are replaced with ``_`` to keep
+        generated path segments filesystem-safe.
         """
         # Prepare context data with defaults for missing fields
         context = {
@@ -118,8 +158,9 @@ class OrganizationEngine:
 
     def _handle_collision(self, destination: Path) -> Path:
         """
-        Handle file name collisions by appending a counter.
-        Example: file.wav -> file_1.wav
+        Avoid overwriting existing files by appending a counter suffix.
+
+        ``file.wav`` → ``file_1.wav`` → ``file_2.wav`` → …
         """
         if not destination.exists():
             return destination

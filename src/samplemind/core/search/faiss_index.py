@@ -1,19 +1,23 @@
 """
 FAISS Semantic Index — SampleMind Phase 11
+============================================
 
-CLAP-powered audio + text embedding index for fast approximate nearest-neighbor
-search across sample libraries.
+CLAP-powered audio + text embedding index for **fast approximate nearest-neighbor
+search** across sample libraries.
 
 Architecture:
-  - Embeddings: laion/clap-htsat-unfused (512-dim shared audio+text space)
-  - Index type: IndexFlatIP (exact inner product — best for cosine after L2-norm)
-  - Persistence: ~/.samplemind/faiss/index.bin + metadata.json
-  - Capacity: 1M samples (memory ~2 GB at 512-dim float32)
+  - **Embeddings**: ``laion/clap-htsat-unfused`` produces 512-dim vectors in a
+    shared audio + text space, so text queries ("dark trap kick") match
+    acoustically similar samples without explicit tagging.
+  - **Index type**: ``IndexFlatIP`` — exact inner product. After L2-normalisation
+    the inner product equals cosine similarity.
+  - **Persistence**: ``~/.samplemind/faiss/index.bin`` + ``metadata.json``.
+  - **Capacity**: ~1 M samples at ≈ 2 GB RAM (512-dim float32).
 
 Fallback:
-  When the CLAP model is unavailable (no GPU, slow CPU), embeddings are
-  computed from librosa MFCCs (20-dim, padded to 512). Quality is lower
-  but the index still functions.
+  When the CLAP model is unavailable (no GPU, missing ``transformers``),
+  embeddings are computed from librosa MFCCs (20-dim, zero-padded to 512).
+  Search quality is lower but the index still functions.
 
 Usage::
 
@@ -23,10 +27,7 @@ Usage::
     idx.build(audio_paths=["/path/to/kick.wav", "/path/to/snare.wav"])
     idx.save()
 
-    # Text query
     results = idx.search_text("dark aggressive trap kick", top_k=10)
-    # Audio query
-    results = idx.search_audio("/path/to/query.wav", top_k=10)
     for r in results:
         print(r.path, r.score)
 """
@@ -173,7 +174,7 @@ class CLAPEmbedder:
     # ── Fallback implementations ──────────────────────────────────────────────
 
     def _mfcc_embed(self, audio_path: str) -> np.ndarray:
-        """20-dim MFCC mean + std, zero-padded to EMBEDDING_DIM."""
+        """Fallback: 20-dim MFCC mean + std, zero-padded to EMBEDDING_DIM (512)."""
         try:
             import librosa
 
@@ -190,7 +191,7 @@ class CLAPEmbedder:
         return _normalize(vec)
 
     def _text_hash_embed(self, text: str) -> np.ndarray:
-        """Deterministic keyword hash vector (poor quality, last resort)."""
+        """Deterministic keyword-hash vector — very low quality, last resort when CLAP is unavailable."""
         vec = np.zeros(EMBEDDING_DIM, dtype=np.float32)
         for _i, ch in enumerate(text.lower()):
             vec[hash(ch) % EMBEDDING_DIM] += 1.0
@@ -198,6 +199,7 @@ class CLAPEmbedder:
 
 
 def _normalize(v: np.ndarray) -> np.ndarray:
+    """L2-normalize a vector so inner product equals cosine similarity."""
     norm = np.linalg.norm(v)
     return v / norm if norm > 1e-8 else v
 
@@ -361,6 +363,7 @@ class FAISSIndex:
         return self._search_embedding(embedding, top_k=top_k)
 
     def _search_embedding(self, emb: np.ndarray, top_k: int) -> list[SearchResult]:
+        """Core search: query the FAISS index and map IDs back to metadata entries."""
         if self._index is None or not self._entries:
             return []
 

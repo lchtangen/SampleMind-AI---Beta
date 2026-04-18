@@ -1,33 +1,66 @@
 """
-SampleMind AI - Custom Exception Hierarchy
+SampleMind AI — Custom Exception Hierarchy
+============================================
 
-Provides structured error handling with user-friendly messages and actionable suggestions.
+Provides structured error handling with **user-friendly messages** and
+**actionable suggestions** so CLI and API consumers can display helpful output.
 
-Exception Hierarchy:
+Every exception carries:
+  - ``message``      — technical detail for logging.
+  - ``user_message`` — human-readable summary for display.
+  - ``suggestion``   — actionable fix the user can try.
+  - ``error_code``   — machine-readable code (e.g. ``FILE_NOT_FOUND``).
+  - ``context``      — arbitrary kwargs for debugging / JSON serialization.
+
+Hierarchy::
+
   SampleMindError (base)
-    ├── AudioFileError
+    ├── AudioFileError          — file I/O and decoding problems
     │   ├── FileNotFoundError
     │   ├── UnsupportedFormatError
     │   ├── CorruptedAudioError
+    │   ├── EmptyAudioFileError
     │   └── AudioProcessingError
-    ├── AIServiceError
+    ├── AIServiceError          — cloud / local AI provider failures
     │   ├── APIKeyMissingError
     │   ├── RateLimitError
     │   ├── NetworkError
     │   ├── AuthenticationError
     │   └── APIError
-    ├── DatabaseError
-    ├── CacheError
-    ├── ConfigurationError
-    ├── ValidationError
-    └── ResourceError
-        ├── DiskFullError
-        ├── OutOfMemoryError
-        └── CacheLimitError
+    ├── DatabaseError           — Tortoise ORM / MongoDB failures
+    │   └── DatabaseConnectionError
+    ├── CacheError              — Redis / in-process cache failures
+    │   └── CacheLimitError
+    ├── ConfigurationError      — invalid or missing settings
+    │   ├── InvalidConfigurationError
+    │   └── MissingConfigurationError
+    ├── ValidationError         — user-input validation failures
+    │   ├── InvalidFormatError
+    │   └── InvalidRangeError
+    ├── ResourceError           — system resource exhaustion
+    │   ├── DiskFullError
+    │   ├── OutOfMemoryError
+    │   └── ProcessTimeoutError
+    └── UserInterruptedError    — Ctrl+C cancellation
+
+Usage — raise in service code, catch in CLI/API layer::
+
+    from samplemind.exceptions import AudioFileError, UnsupportedFormatError
+
+    try:
+        engine.analyze(path)
+    except AudioFileError as exc:
+        console.print(exc.user_message)
+        console.print(exc.suggestion)
 """
 
 from pathlib import Path
 from typing import Any
+
+
+# ============================================================================
+# Base Exception
+# ============================================================================
 
 
 class SampleMindError(Exception):
@@ -72,7 +105,7 @@ class SampleMindError(Exception):
 
 
 # ============================================================================
-# Audio File Errors
+# Audio File Errors — raised during file loading, decoding, or analysis
 # ============================================================================
 
 
@@ -153,7 +186,7 @@ class AudioProcessingError(AudioFileError):
 
 
 # ============================================================================
-# AI Service Errors
+# AI Service Errors — raised when cloud/local AI providers fail
 # ============================================================================
 
 
@@ -233,7 +266,7 @@ class APIError(AIServiceError):
 
 
 # ============================================================================
-# Database Errors
+# Database Errors — raised for Tortoise ORM / MongoDB failures
 # ============================================================================
 
 
@@ -263,7 +296,7 @@ class DatabaseConnectionError(DatabaseError):
 
 
 # ============================================================================
-# Cache Errors
+# Cache Errors — raised for Redis / in-process cache failures
 # ============================================================================
 
 
@@ -294,7 +327,7 @@ class CacheLimitError(CacheError):
 
 
 # ============================================================================
-# Configuration Errors
+# Configuration Errors — raised when settings are invalid or missing
 # ============================================================================
 
 
@@ -338,7 +371,7 @@ class MissingConfigurationError(ConfigurationError):
 
 
 # ============================================================================
-# Validation Errors
+# Validation Errors — raised for user-input validation failures
 # ============================================================================
 
 
@@ -380,7 +413,7 @@ class InvalidRangeError(ValidationError):
 
 
 # ============================================================================
-# Resource Errors
+# Resource Errors — raised when system resources (disk, memory, time) run out
 # ============================================================================
 
 
@@ -432,7 +465,7 @@ class ProcessTimeoutError(ResourceError):
 
 
 # ============================================================================
-# User Interruption Errors
+# User Interruption — Ctrl+C during a long-running operation
 # ============================================================================
 
 
@@ -450,7 +483,7 @@ class UserInterruptedError(SampleMindError):
 
 
 # ============================================================================
-# Helper Functions
+# Helper Functions — programmatic introspection of caught exceptions
 # ============================================================================
 
 

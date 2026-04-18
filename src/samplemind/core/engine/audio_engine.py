@@ -1,17 +1,34 @@
 #!/usr/bin/env python3
 """
-SampleMind AI v6 - Core Audio Engine
-The heart of the AI music production platform
+SampleMind AI — Core Audio Engine
+===================================
 
-This module provides comprehensive audio analysis capabilities including:
-- Real-time audio processing and analysis
-- Feature extraction (tempo, pitch, rhythm, spectral features)
-- Audio similarity comparison
-- Music information retrieval
-- Format conversion and normalization
-- Real-time visualization and monitoring
+The primary audio analysis module, backed by **LibROSA**, **SciPy**, and
+**soundfile**.  This is where raw audio files are turned into structured
+feature sets consumed by the rest of the platform (AI classifiers, FAISS
+indexer, curation engine, TUI dashboards, etc.).
 
-Designed specifically for professional music production and FL Studio integration.
+Analysis levels (each includes everything from the level above):
+
+  ``BASIC``          — BPM, key, duration, sample rate.  <0.5 s
+  ``STANDARD``       — + MFCC, chroma, spectral centroid/bandwidth.  <1 s
+  ``DETAILED``       — + harmonic/percussive separation, groove template.  <2 s
+  ``PROFESSIONAL``   — + AI embeddings (neural engine), similarity vectors.  <5 s
+
+Key classes:
+
+  ``AudioEngine``              — high-level façade; use ``analyze()`` or ``analyze_async()``.
+  ``AudioFeatures``            — dataclass holding every extracted feature.
+  ``AdvancedFeatureExtractor`` — lower-level extraction (tonal, rhythmic, spectral, MFCC).
+  ``AudioProcessor``           — utility filters (normalize, high-pass, HPSS).
+
+Usage::
+
+    from samplemind.core.engine.audio_engine import AudioEngine, AnalysisLevel
+
+    engine = AudioEngine()
+    features = await engine.analyze_async("kick.wav", level=AnalysisLevel.STANDARD)
+    print(features.tempo, features.key)
 """
 
 import asyncio
@@ -31,6 +48,10 @@ import soundfile as sf
 from scipy import signal
 from scipy.spatial.distance import cosine
 
+# ── Optional neural engine import ─────────────────────────────────────────────
+# NeuralFeatureExtractor adds GPU-accelerated embeddings when available.
+# Falls back gracefully — the rest of the engine still works without it.
+
 try:
     from .neural_engine import NeuralFeatureExtractor
 except ImportError:
@@ -46,8 +67,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+# ── Enumerations ──────────────────────────────────────────────────────────────
+
+
 class AudioFormat(Enum):
-    """Supported audio formats"""
+    """Supported audio file formats for loading."""
 
     WAV = "wav"
     MP3 = "mp3"
@@ -58,7 +82,7 @@ class AudioFormat(Enum):
 
 
 class AnalysisLevel(Enum):
-    """Audio analysis complexity levels"""
+    """Controls how deep the analysis goes — higher = slower but richer data."""
 
     BASIC = "basic"
     STANDARD = "standard"
@@ -66,9 +90,17 @@ class AnalysisLevel(Enum):
     PROFESSIONAL = "professional"
 
 
+# ── Feature dataclass ─────────────────────────────────────────────────────────
+
+
 @dataclass
 class AudioFeatures:
-    """Comprehensive audio feature representation"""
+    """
+    Comprehensive audio feature representation.
+
+    Populated by ``AudioEngine.analyze()`` — fields are filled progressively
+    depending on the requested ``AnalysisLevel``.
+    """
 
     # Basic properties
     duration: float
@@ -230,8 +262,11 @@ class AudioFeatures:
             return False
 
 
+# ── Audio processor utilities ─────────────────────────────────────────────────
+
+
 class AudioProcessor:
-    """Advanced audio processing utilities"""
+    """Static DSP utilities used during pre-processing and separation."""
 
     @staticmethod
     def normalize_audio(y: np.ndarray, target_lufs: float = -23.0) -> np.ndarray:
@@ -337,6 +372,9 @@ class AudioProcessor:
 
         except Exception as e:
             raise RuntimeError(f"HPSS separation failed: {str(e)}")
+
+
+# ── Advanced feature extractor ────────────────────────────────────────────────
 
 
 class AdvancedFeatureExtractor:
@@ -642,7 +680,8 @@ class AdvancedFeatureExtractor:
 
     def _estimate_key_mode(self, chroma_mean: np.ndarray) -> tuple[str, str]:
         """
-        Estimate musical key and mode from chroma features.
+        Estimate musical key and mode from chroma features using
+        Krumhansl-Kessler key profiles (correlation-based key detection).
 
         Args:
             chroma_mean: Mean chroma features (12-dimensional vector)
@@ -733,12 +772,17 @@ class AdvancedFeatureExtractor:
         ]
 
 
+# ── Main engine façade ────────────────────────────────────────────────────────
+
+
 class AudioEngine:
     """
-    Main SampleMind AI Audio Engine
+    Main SampleMind AI Audio Engine — the primary entry point for analysis.
 
-    Provides comprehensive audio analysis capabilities for professional music production.
-    Designed to integrate seamlessly with FL Studio and other DAWs.
+    Orchestrates ``AdvancedFeatureExtractor``, ``AudioProcessor``, and
+    (optionally) ``NeuralFeatureExtractor`` behind a simple ``analyze()``
+    interface.  Internally uses a ``ThreadPoolExecutor`` to keep I/O-bound
+    librosa work off the asyncio event loop.
     """
 
     def __init__(self, max_workers: int = 4, cache_size: int = 1000) -> None:

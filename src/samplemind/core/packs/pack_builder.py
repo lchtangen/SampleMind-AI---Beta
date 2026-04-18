@@ -1,13 +1,18 @@
 """
 .smpack Format + Pack Builder — SampleMind Phase 15
+=====================================================
 
-.smpack is a ZIP archive containing:
-  manifest.json  — pack metadata (name, version, tags, samples[])
-  audio/         — audio files (copied from local library)
-  preview.wav    — optional short preview (first 30s of first sample)
+The ``.smpack`` format is a ZIP archive that bundles audio samples with
+structured metadata for the SampleMind marketplace.
 
-Spec:
-  manifest.json schema:
+Archive layout::
+
+    manifest.json   — pack metadata (name, version, tags, per-sample features)
+    audio/          — audio files (copied from local library)
+    preview.wav     — optional 30-second preview clip (first sample)
+
+``manifest.json`` schema (v1.0)::
+
     {
       "smpack_version": "1.0",
       "name": "Dark Trap Vol 1",
@@ -18,19 +23,13 @@ Spec:
       "key_signatures": ["Am", "Dm"],
       "created_at": "2026-04-09T00:00:00Z",
       "author": "user@example.com",
-      "samples": [
-        {
-          "filename": "kick_140.wav",
-          "path": "audio/kick_140.wav",
-          "bpm": 140,
-          "key": "Am",
-          "energy": "high",
-          "genre_labels": ["trap"],
-          "mood_labels": ["dark"],
-          "duration_s": 2.4
-        }
-      ]
+      "samples": [ { "filename": "kick_140.wav", ... } ]
     }
+
+Metadata sources:
+  1. FAISS index (best — has BPM, key, energy, genre/mood from CLAP).
+  2. Filename heuristics (fallback — regex patterns like ``kick_140bpm.wav``).
+  3. soundfile (duration only).
 
 Usage::
 
@@ -43,9 +42,6 @@ Usage::
         tags=["trap", "dark"],
         output_dir="./packs/",
     )
-    # → "./packs/dark-trap-vol-1.smpack"
-
-    # Read back
     manifest = PackBuilder.read_manifest(pack_path)
 """
 
@@ -82,6 +78,7 @@ class PackBuilder:
         self._index = self._load_index()
 
     def _load_index(self):
+        """Try to load the FAISS index singleton for metadata lookups."""
         try:
             from samplemind.core.search.faiss_index import get_index
 
@@ -176,7 +173,7 @@ class PackBuilder:
         return str(output_path)
 
     async def _build_sample_entry(self, path: str, include_audio: bool) -> dict:
-        """Build a manifest sample entry from a file path."""
+        """Build a manifest sample entry, pulling metadata from FAISS or filename heuristics."""
         p = Path(path)
         entry: dict = {
             "filename": p.name,
@@ -304,10 +301,11 @@ class PackBuilder:
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
+# Pure-function utilities used by PackBuilder — no side effects.
 
 
 def _slugify(text: str) -> str:
-    """Convert display name to filesystem-safe slug."""
+    """Convert a display name to a filesystem-safe slug (``"Dark Trap Vol 1"`` → ``"dark-trap-vol-1"``)."""
     slug = text.lower()
     slug = re.sub(r"[^\w\s-]", "", slug)
     slug = re.sub(r"[\s_-]+", "-", slug)
@@ -315,7 +313,10 @@ def _slugify(text: str) -> str:
 
 
 def _bpm_from_filename(filename: str) -> int | None:
-    """Extract BPM from filename patterns like 'kick_140bpm.wav' or 'snare-130.wav'."""
+    """Extract BPM from common filename patterns (e.g. ``kick_140bpm.wav``, ``snare-130.wav``).
+
+    Only returns values in the plausible 60–220 BPM range.
+    """
     patterns = [
         r"(\d{2,3})\s*bpm",
         r"_(\d{2,3})_",

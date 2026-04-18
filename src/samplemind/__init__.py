@@ -1,33 +1,26 @@
 #!/usr/bin/env python3
 """
-SampleMind AI — Professional Music Production Suite
-The ultimate AI-powered music analysis and production platform
+SampleMind AI — Root Package
+=============================
 
-This package provides comprehensive audio analysis, AI-powered insights,
-and professional music production tools through a beautiful CLI interface.
+Top-level package for the SampleMind AI music production platform.
 
-Main Components:
-- Core Audio Engine: Advanced audio processing with LibROSA
-- AI Manager: Unified interface for Claude, Gemini, GPT-4o, and Ollama
-- Audio Loader: Professional-grade audio file loading
-- CLI Interface: Beautiful interactive terminal interface
+This ``__init__.py`` exposes:
+  1. **Version metadata** — ``__version__``, ``__codename__``, ``__author__``, etc.
+  2. **Lazy imports** via a custom ``__getattr__`` so that heavy dependencies
+     (torch, librosa, faiss) are only loaded when the caller actually accesses
+     ``AudioEngine``, ``AdvancedAudioLoader``, or other core classes.
 
-Usage:
-    from samplemind.core.engine import AudioEngine
-    from samplemind.integrations.ai_manager import SampleMindAIManager
-    from samplemind.interfaces.cli.menu import SampleMindCLI
+Quick start::
+
+    import samplemind
+    print(samplemind.__version__)        # "2.1.0-beta"
+    engine = samplemind.AudioEngine()    # lazy-imported on first access
 """
 
 from typing import Any
 
-"""
-SampleMind AI Beta v2.0 Phoenix
-================================
-AI-Powered Music Production Platform
-
-Version: Beta 2.0 (Phoenix)
-Codename: Phoenix
-"""
+# ── Package metadata ──────────────────────────────────────────────────────────
 
 __version__ = "2.1.0-beta"
 __codename__ = "Phoenix"
@@ -37,9 +30,13 @@ __author__ = "SampleMind AI Team"
 __description__ = "Professional AI-powered music production suite"
 
 
-# Lazy imports - import on demand to avoid loading heavy dependencies at startup
+# ── Lazy imports ──────────────────────────────────────────────────────────────
+# Each branch below defers the heavy import until the attribute is first used.
+# This keeps ``import samplemind`` near-instant even when torch/librosa are installed.
+
+
 def __getattr__(name: str) -> Any:
-    """Lazy load modules on demand"""
+    """Resolve package-level names on first access (PEP 562 lazy imports)."""
     if name == "AudioEngine":
         from .core.engine.audio_engine import AudioEngine
 
@@ -79,7 +76,9 @@ def __getattr__(name: str) -> Any:
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 
-# Make key classes available at package level
+# ── Public API ────────────────────────────────────────────────────────────────
+# Everything listed here is importable from the package root.
+
 __all__ = [
     # Core classes
     "AudioEngine",
@@ -99,13 +98,16 @@ __all__ = [
 ]
 
 
+# ── Convenience helpers ───────────────────────────────────────────────────────
+
+
 def get_version() -> str:
-    """Get SampleMind AI version"""
+    """Return the current SampleMind AI version string."""
     return __version__
 
 
 def get_info() -> dict:
-    """Get package information"""
+    """Return a dict of basic package metadata (name, version, description, author)."""
     return {
         "name": "SampleMind AI",
         "version": __version__,

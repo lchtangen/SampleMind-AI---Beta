@@ -1,25 +1,31 @@
 """
 Cloudflare R2 Storage Provider — SampleMind Phase 13
+======================================================
 
-R2 is S3-compatible, so we use boto3 with a custom endpoint URL.
-Extends the existing StorageProvider ABC with CDN public URL support.
+R2 is Cloudflare's S3-compatible object store.  This module wraps **boto3** with
+a custom endpoint URL (``https://{account_id}.r2.cloudflarestorage.com``) to
+provide async upload / download / delete / list operations for audio files
+and ``.smpack`` archives.
+
+URL generation:
+  - If ``R2_PUBLIC_URL`` is set (custom domain), ``get_public_url()`` returns a
+    permanent CDN URL.
+  - Otherwise it falls back to a 24-hour pre-signed URL.
 
 Configuration (env vars):
     R2_ACCOUNT_ID         — Cloudflare account ID
     R2_ACCESS_KEY_ID      — R2 API token access key
     R2_SECRET_ACCESS_KEY  — R2 API token secret
-    R2_BUCKET             — R2 bucket name (e.g. samplemind-audio)
-    R2_PUBLIC_URL         — Optional: custom domain / public bucket URL
-                            (e.g. https://audio.samplemind.ai)
+    R2_BUCKET             — Bucket name (default: ``samplemind-audio``)
+    R2_PUBLIC_URL         — Optional custom domain (e.g. https://audio.samplemind.ai)
 
 Usage::
 
-    from samplemind.services.storage.r2_provider import R2StorageProvider
+    from samplemind.services.storage.r2_provider import get_r2
 
-    provider = R2StorageProvider()
-    key = await provider.upload_file("/path/to/kick.wav", "audio/kick.wav")
-    url = provider.get_public_url(key)
-    await provider.download_file(key, "/tmp/kick.wav")
+    r2 = get_r2()
+    key = await r2.upload_file("/local/kick.wav", "audio/kick.wav")
+    url = r2.get_public_url(key)
 """
 
 from __future__ import annotations
@@ -263,7 +269,11 @@ class R2StorageProvider:
             return False
 
 
+# ── MIME type helper ──────────────────────────────────────────────────────────
+
+
 def _guess_content_type(path: str) -> str:
+    """Map file extension to a MIME Content-Type for R2 upload metadata."""
     ext = Path(path).suffix.lower()
     types = {
         ".wav": "audio/wav",
