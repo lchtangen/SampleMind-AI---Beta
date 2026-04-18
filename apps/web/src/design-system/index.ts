@@ -26,9 +26,10 @@ export * from './tokens/typography';
 
 // Effects
 export * from './effects/glass';
-export * from './effects/glow';
+export { glowEffects, textGlow, glassGlow } from './effects/glow';
+export type { GlowColor, GlowSize } from './effects/glow';
 
-// Animations
+// Animations (glowPulse comes from presets, not effects/glow)
 export * from './animations/presets';
 export * from './animations/config';
 
